@@ -164,6 +164,19 @@ export default function VideoEditor() {
     if (hwProfile?.isMobile) setShowMobileSidebar(false);
   };
 
+  const addStickerToTimeline = (icon: string, name: string) => {
+    let track = tracks.find(t => t.name.toLowerCase().includes('sticker') || t.name.toLowerCase().includes('overlay'));
+    if (!track) {
+       track = { id: Math.random().toString(36).substr(2, 9), type: 'video', name: 'Stickers' };
+       setTracks(prev => sortTracks([...prev, track as TimelineTrack]));
+    }
+    const svgUri = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 100 100"><text x="50" y="50" font-size="80" text-anchor="middle" dominant-baseline="central">${icon}</text></svg>`;
+    const newItem: TimelineItem = { id: Math.random().toString(36).substr(2, 9), trackId: track!.id, url: svgUri, name: name, startTime: currentTime, duration: 5, sourceOffset: 0, mediaType: 'image', x: 50, y: 50, width: 100, height: 100 };
+    setTimelineItems(prev => [...prev, newItem]);
+    setSelectedItemId(newItem.id);
+    if (hwProfile?.isMobile) setShowMobileSidebar(false);
+  };
+
   const togglePlay = () => setIsPlaying(!isPlaying);
 
   const toggleTrackProperty = (trackId: string, prop: 'isHidden' | 'isMuted' | 'isLocked') => {
@@ -687,10 +700,7 @@ export default function VideoEditor() {
                 ].map((sticker, idx) => (
                   <button 
                     key={idx}
-                    onClick={() => {
-                      const svgUri = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 100 100"><text x="50" y="50" font-size="80" text-anchor="middle" dominant-baseline="central">${sticker.icon}</text></svg>`;
-                      addToTimeline({ id: `stk_${idx}`, name: sticker.name, url: svgUri, type: 'image' });
-                    }}
+                    onClick={() => addStickerToTimeline(sticker.icon, sticker.name)}
                     disabled={isRendering} 
                     className="aspect-square bg-[#1a1a1a] border border-[#262626] rounded-lg flex items-center justify-center hover:border-blue-500 hover:bg-[#262626] transition-colors text-4xl"
                   >
