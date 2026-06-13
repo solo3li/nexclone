@@ -2,360 +2,141 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   const [billingCycle, setBillingCycle] = useState("month");
-  const [currency, setCurrency] = useState("USD");
-
-  const toggleBilling = (cycle: string) => setBillingCycle(cycle);
-
-  const toggleCurrency = () => {
-    setCurrency(currency === "USD" ? "EGP" : "USD");
-  };
 
   return (
-    <>
-      <div className="hero-section">
-        <div className="hero-content">
-          <div className="hero-text">
-            <h1 className="hero-title">NEX MEDIA AI</h1>
-            <p className="hero-subtitle">AI-powered creativity, made easy</p>
+    <div className="space-y-8 animate-fade-in pb-20">
+      
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+        <div>
+          <h1 className="text-3xl font-extrabold text-gray-800 tracking-tight">Welcome back, Sarah! 👋</h1>
+          <p className="text-gray-500 mt-1">Here is what&apos;s happening with your projects today.</p>
+        </div>
+        <div className="flex space-x-4">
+          <button className="clay-btn w-12 h-12 flex items-center justify-center text-gray-600">
+            <i className="fas fa-bell"></i>
+          </button>
+          <button className="clay-btn-primary px-6 py-3 font-bold text-sm">
+            <i className="fas fa-plus mr-2"></i> New Project
+          </button>
+        </div>
+      </div>
 
-            <div className="hero-mobile-visual">
-              <div className="visual-container">
-                <img className="hero-gif" src="/static/home/img/home11.gif" alt="AI Animation" />
-                <img className="hero-robot" src="/static/home/img/robot.png" alt="AI Robot" />
-              </div>
-            </div>
-
-            <button onClick={() => window.location.href='#second'} className="cta-button">
-              <span>Try for Free</span>
-              <i className="fas fa-arrow-right"></i>
-            </button>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="clay-card-blue p-6 flex items-center space-x-4">
+          <div className="w-14 h-14 rounded-full bg-blue-500 bg-opacity-20 flex items-center justify-center text-blue-600 text-xl">
+            <i className="fas fa-bolt"></i>
           </div>
+          <div>
+            <p className="text-blue-800 text-sm font-bold opacity-80">Total Generations</p>
+            <h3 className="text-3xl font-extrabold text-blue-900 mt-1">12,340</h3>
+          </div>
+        </div>
 
-          <div className="hero-visual desktop">
-            <div className="visual-container">
-              <img className="hero-gif" src="/static/home/img/home11.gif" alt="AI Animation" />
-              <img className="hero-robot" src="/static/home/img/robot.png" alt="AI Robot" />
-            </div>
+        <div className="clay-card-peach p-6 flex items-center space-x-4">
+          <div className="w-14 h-14 rounded-full bg-orange-500 bg-opacity-20 flex items-center justify-center text-orange-600 text-xl">
+            <i className="fas fa-coins"></i>
+          </div>
+          <div>
+            <p className="text-orange-800 text-sm font-bold opacity-80">Credits Remaining</p>
+            <h3 className="text-3xl font-extrabold text-orange-900 mt-1">4,120</h3>
+          </div>
+        </div>
+
+        <div className="clay-card-green p-6 flex items-center space-x-4">
+          <div className="w-14 h-14 rounded-full bg-green-500 bg-opacity-20 flex items-center justify-center text-green-600 text-xl">
+            <i className="fas fa-clock"></i>
+          </div>
+          <div>
+            <p className="text-green-800 text-sm font-bold opacity-80">Time Saved</p>
+            <h3 className="text-3xl font-extrabold text-green-900 mt-1">45 hrs</h3>
           </div>
         </div>
       </div>
 
-      <div id="second" className="products-section">
-        <div className="container">
-          <div className="section-header">
-            <h2>Our Products</h2>
-            <p>Discover our AI-powered tools designed to enhance your creativity</p>
-          </div>
-
-          <div className="products-grid">
-            <a href="/voice-to-text/" className="product-card">
-              <div className="card-image">
-                <img src="/static/home/img/convertTxt.png" alt="Voice to Text" />
-                <div className="card-overlay">
-                  <i className="fas fa-microphone"></i>
-                </div>
-              </div>
-              <div className="card-content">
-                <h3>Voice to Text</h3>
-                <p>Convert speech to text with high accuracy</p>
-              </div>
-            </a>
-
-            <a href="/text-to-voice/" className="product-card">
-              <div className="card-image">
-                <img src="/static/home/img/convertSpeech.png" alt="Text to Voice" />
-                <div className="card-overlay">
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* Tools Section */}
+        <div className="lg:col-span-2 space-y-6">
+          <h2 className="text-xl font-bold text-gray-700 ml-2">Quick Tools</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            
+            <Link href="/text-to-voice" className="block group">
+              <div className="clay-card p-6 h-full flex flex-col items-start transition-transform group-hover:-translate-y-2">
+                <div className="w-12 h-12 rounded-2xl clay-btn flex items-center justify-center text-blue-500 text-xl mb-4">
                   <i className="fas fa-volume-up"></i>
                 </div>
-              </div>
-              <div className="card-content">
-                <h3>Text to Speech</h3>
-                <p>Convert text to natural-sounding speech</p>
-              </div>
-            </a>
-
-            <div className="product-card product-card--maintenance">
-              <div className="maintenance-badge">
-                <i className="fas fa-tools"></i>
-                <span>Under Maintenance</span>
-              </div>
-              <div className="card-image">
-                <img src="/static/home/img/unnamed.png" alt="Make My Trip" />
-                <div className="card-overlay">
-                  <i className="fas fa-plane"></i>
+                <h3 className="text-lg font-bold text-gray-800 mb-2">Text to Speech</h3>
+                <p className="text-gray-500 text-sm mb-4">Convert your written text into lifelike spoken audio in seconds.</p>
+                <div className="mt-auto text-blue-600 text-sm font-bold flex items-center">
+                  Try it now <i className="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
                 </div>
               </div>
-              <div className="card-content">
-                <h3>Make My Trip</h3>
-                <p>AI-powered travel planning assistant</p>
-              </div>
-            </div>
+            </Link>
 
-            <div className="product-card product-card--maintenance">
-              <div className="maintenance-badge">
-                <i className="fas fa-tools"></i>
-                <span>Under Maintenance</span>
-              </div>
-              <div className="card-image">
-                <img src="/static/home/img/videoCaption.jpeg" alt="Video Caption" />
-                <div className="card-overlay">
-                  <i className="fas fa-video"></i>
+            <Link href="/voice-to-text" className="block group">
+              <div className="clay-card p-6 h-full flex flex-col items-start transition-transform group-hover:-translate-y-2">
+                <div className="w-12 h-12 rounded-2xl clay-btn flex items-center justify-center text-pink-500 text-xl mb-4">
+                  <i className="fas fa-microphone"></i>
+                </div>
+                <h3 className="text-lg font-bold text-gray-800 mb-2">Voice to Text</h3>
+                <p className="text-gray-500 text-sm mb-4">Transcribe your audio files or live recordings with high accuracy.</p>
+                <div className="mt-auto text-pink-600 text-sm font-bold flex items-center">
+                  Try it now <i className="fas fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
                 </div>
               </div>
-              <div className="card-content">
-                <h3>Video Caption</h3>
-                <p>Add captions and translations to videos</p>
-              </div>
-            </div>
+            </Link>
 
-            <div className="product-card product-card--maintenance">
-              <div className="maintenance-badge">
-                <i className="fas fa-tools"></i>
-                <span>Under Maintenance</span>
-              </div>
-              <div className="card-image">
-                <img src="/static/home/img/removeImg.png" alt="Video Background Removal" />
-                <div className="card-overlay">
-                  <i className="fas fa-film"></i>
-                </div>
-              </div>
-              <div className="card-content">
-                <h3>Video Background</h3>
-                <p>Remove background from videos seamlessly</p>
-              </div>
-            </div>
           </div>
         </div>
-      </div>
 
-      <div id="container-sub" className="pricing-section">
-        <div className="container">
-          <div className="pricing-header">
-            <h2>Choose Your Plan</h2>
-            <p>Select the perfect plan for your needs</p>
-
-            <div className="pricing-controls">
-              <div className="billing-toggle">
-                <div className="toggle-background" id="btns" style={{ left: billingCycle === 'month' ? '0' : '50%' }}></div>
-                <button
-                  type="button"
-                  className={`toggle-btn ${billingCycle === 'month' ? 'active' : ''}`}
-                  onClick={() => toggleBilling('month')}
+        {/* Pricing/Upgrade Section */}
+        <div className="space-y-6" id="pricing">
+          <h2 className="text-xl font-bold text-gray-700 ml-2">Subscription</h2>
+          
+          <div className="clay-card-pink p-8 text-center relative overflow-hidden">
+            <div className="absolute -top-10 -right-10 text-pink-200 opacity-50" style={{fontSize: '120px'}}>
+              <i className="fas fa-crown"></i>
+            </div>
+            
+            <h3 className="text-2xl font-extrabold text-pink-900 mb-2 relative z-10">Pro Plan</h3>
+            <p className="text-pink-800 text-sm mb-6 relative z-10">Unlock unlimited generations and premium voices.</p>
+            
+            <div className="flex justify-center mb-6 relative z-10">
+              <div className="clay-btn p-1 flex rounded-full">
+                <button 
+                  className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${billingCycle === 'month' ? 'bg-pink-500 text-white shadow-lg' : 'text-gray-500'}`}
+                  onClick={() => setBillingCycle('month')}
                 >
                   Monthly
                 </button>
-                <button
-                  type="button"
-                  className={`toggle-btn ${billingCycle === 'year' ? 'active' : ''}`}
-                  onClick={() => toggleBilling('year')}
+                <button 
+                  className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${billingCycle === 'year' ? 'bg-pink-500 text-white shadow-lg' : 'text-gray-500'}`}
+                  onClick={() => setBillingCycle('year')}
                 >
                   Yearly
                 </button>
               </div>
-
-              <div className="currency-toggle">
-                <button className="currency-btn" onClick={toggleCurrency}>
-                  Switch to {currency === "USD" ? "EGP" : "USD"}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="pricing-cards">
-            <div className="pricing-card premium">
-              <div className="card-header">
-                <div className="recommended-badge">
-                  <i className="fas fa-star"></i>
-                  <span>Recommended</span>
-                  <i className="fas fa-star"></i>
-                </div>
-
-                <div className="plan-info">
-                  <div className="plan-details">
-                    <h3>ProPlus Plan</h3>
-                    <p>For professionals</p>
-                  </div>
-                  <div className="pricing-info">
-                    <span className="price">
-                      {currency === "USD" ? (billingCycle === 'month' ? "$19.99" : "$199.99") : (billingCycle === 'month' ? "EGP 950" : "EGP 9500")}
-                    </span>
-                    <span className="duration">{billingCycle === 'month' ? "Monthly" : "Yearly"}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="plan-features">
-                 <ul>
-                    <li><i className="fas fa-check"></i> Unlimited generations</li>
-                    <li><i className="fas fa-check"></i> Priority support</li>
-                    <li><i className="fas fa-check"></i> Early access to new features</li>
-                 </ul>
-              </div>
             </div>
 
-            <div className="pricing-card basic">
-              <div className="card-header">
-                <div className="plan-info">
-                  <div className="plan-details">
-                    <h3>Pro Plan</h3>
-                    <p>For teams</p>
-                  </div>
-                  <div className="pricing-info">
-                    <span className="price">
-                      {currency === "USD" ? (billingCycle === 'month' ? "$14.99" : "$149.99") : (billingCycle === 'month' ? "EGP 700" : "EGP 7000")}
-                    </span>
-                    <span className="duration">{billingCycle === 'month' ? "Monthly" : "Yearly"}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="plan-features">
-                 <ul>
-                    <li><i className="fas fa-check"></i> 1000 generations</li>
-                    <li><i className="fas fa-check"></i> Standard support</li>
-                 </ul>
-              </div>
+            <div className="mb-6 relative z-10">
+              <span className="text-4xl font-extrabold text-pink-900">${billingCycle === 'month' ? '29' : '290'}</span>
+              <span className="text-pink-700 text-sm">/{billingCycle === 'month' ? 'mo' : 'yr'}</span>
             </div>
 
-            <div className="pricing-card basic">
-              <div className="card-header">
-                <div className="plan-info">
-                  <div className="plan-details">
-                    <h3>Text to Voice</h3>
-                    <p>For content creators</p>
-                  </div>
-                  <div className="pricing-info">
-                    <span className="price">
-                      {currency === "USD" ? (billingCycle === 'month' ? "$6.00" : "$60.00") : (billingCycle === 'month' ? "EGP 300" : "EGP 3000")}
-                    </span>
-                    <span className="duration">{billingCycle === 'month' ? "Monthly" : "Yearly"}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="plan-features">
-                 <ul>
-                    <li><i className="fas fa-check"></i> Advanced TTS features</li>
-                    <li><i className="fas fa-check"></i> 50 voices included</li>
-                 </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="fourth" className="contact-section">
-        <div className="container">
-          <div className="contact-content">
-            <div className="contact-info">
-              <div className="section-header">
-                <h2>Connect With Us</h2>
-                <p>
-                  For any questions or assistance you need, please don't hesitate to contact our support team. We're here to
-                  help!
-                </p>
-              </div>
-
-              <div className="contact-grid">
-                <div className="contact-item">
-                  <div className="contact-icon">
-                    <i className="fas fa-envelope"></i>
-                  </div>
-                  <div className="contact-details">
-                    <h4>Email</h4>
-                    <p>support@nexmediaai.com</p>
-                  </div>
-                </div>
-
-                <div className="contact-item">
-                  <div className="contact-icon">
-                    <i className="fab fa-telegram"></i>
-                  </div>
-                  <div className="contact-details">
-                    <h4>Telegram</h4>
-                    <a href="https://t.me/neaxai" target="_blank">
-                      @neaxai
-                    </a>
-                  </div>
-                </div>
-
-                <div className="contact-item">
-                  <div className="contact-icon">
-                    <i className="fas fa-map-marker-alt"></i>
-                  </div>
-                  <div className="contact-details">
-                    <h4>Location</h4>
-                    <p>Cairo, Egypt</p>
-                  </div>
-                </div>
-
-                <div className="contact-item">
-                  <div className="contact-icon">
-                    <i className="fas fa-phone"></i>
-                  </div>
-                  <div className="contact-details">
-                    <h4>Phone</h4>
-                    <p>+20 1553593868</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="social-links">
-                <a href="https://www.facebook.com/share/1FkcDUXsG3/" className="social-link" target="_blank">
-                  <i className="fab fa-facebook-f"></i>
-                </a>
-                <a href="https://www.tiktok.com/@nex.media.ai?_t=ZS-8zisE1KnRdS&_r=1" className="social-link" target="_blank">
-                  <i className="fab fa-tiktok"></i>
-                </a>
-                <a href="https://t.me/neaxai" className="social-link" target="_blank">
-                  <i className="fab fa-telegram-plane"></i>
-                </a>
-              </div>
-            </div>
-
-            <div className="contact-form-section">
-              <div className="contact-form">
-                <h3>Send us a Message</h3>
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    alert("Message sent!");
-                  }}
-                >
-                  <div className="form-group">
-                    <label htmlFor="contact-email">Email Address</label>
-                    <input type="email" id="contact-email" name="email" placeholder="your@email.com" required />
-                  </div>
-
-                  <div className="form-group">
-                    <label htmlFor="contact-message">Your Message</label>
-                    <textarea
-                      id="contact-message"
-                      name="message"
-                      placeholder="Tell us how we can help you..."
-                      required
-                    ></textarea>
-                  </div>
-
-                  <button type="submit" className="submit-btn">
-                    <span>Send Message</span>
-                    <i className="fas fa-paper-plane"></i>
-                  </button>
-                </form>
-              </div>
-            </div>
+            <button className="clay-btn-primary w-full py-3 font-bold shadow-pink-500/50 relative z-10">
+              Upgrade Now
+            </button>
           </div>
         </div>
 
-        <footer className="footer">
-          <div className="footer-content">
-            <div className="footer-links">
-              <a href="/terms">Terms & Conditions</a>
-              <span>&copy; 2026 NEX MEDIA AI. All rights reserved.</span>
-            </div>
-          </div>
-        </footer>
       </div>
-    </>
+    </div>
   );
 }

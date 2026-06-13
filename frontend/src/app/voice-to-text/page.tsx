@@ -1,100 +1,142 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 export default function VoiceToText() {
   const [isRecording, setIsRecording] = useState(false);
-  const [transcription, setTranscription] = useState("");
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [file, setFile] = useState<File | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleRecord = () => {
-    setIsRecording(!isRecording);
-    if (!isRecording) {
-      setTranscription("Listening...");
-      setTimeout(() => {
-        setTranscription("This is a simulated transcription of your voice in the NexMedia AI dashboard.");
-        setIsRecording(false);
-      }, 3000);
+  const startRecording = () => {
+    setIsRecording(true);
+    setRecordingTime(0);
+    timerRef.current = setInterval(() => {
+      setRecordingTime((prev) => prev + 1);
+    }, 1000);
+  };
+
+  const stopRecording = () => {
+    setIsRecording(false);
+    if (timerRef.current) clearInterval(timerRef.current);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
     }
   };
 
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, "0");
+    const s = (seconds % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  };
+
   return (
-    <div className="container" style={{ paddingTop: '100px', minHeight: '100vh' }}>
-      <div className="section-header">
-        <h2>Voice to Text</h2>
-        <p>Convert your audio into highly accurate text instantly.</p>
+    <div className="max-w-4xl mx-auto space-y-8 pb-20 animate-fade-in">
+      
+      <div className="mb-8">
+        <h1 className="text-3xl font-extrabold text-gray-800 tracking-tight">Voice to Text 🎙️</h1>
+        <p className="text-gray-500 mt-2">Transcribe audio into highly accurate text using advanced AI.</p>
       </div>
 
-      <div style={{
-        background: 'rgba(255, 255, 255, 0.03)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
-        borderRadius: '20px',
-        padding: '40px',
-        maxWidth: '800px',
-        margin: '0 auto',
-        backdropFilter: 'blur(10px)'
-      }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         
-        <div style={{
-          border: '2px dashed rgba(26, 219, 138, 0.3)',
-          borderRadius: '15px',
-          padding: '50px',
-          textAlign: 'center',
-          marginBottom: '30px',
-          transition: 'all 0.3s ease',
-          cursor: 'pointer'
-        }}
-        onMouseOver={(e) => e.currentTarget.style.borderColor = 'var(--accent-color)'}
-        onMouseOut={(e) => e.currentTarget.style.borderColor = 'rgba(26, 219, 138, 0.3)'}
-        >
-          <i className="fas fa-cloud-upload-alt" style={{ fontSize: '48px', color: 'var(--accent-color)', marginBottom: '15px' }}></i>
-          <h3 style={{ color: 'white', marginBottom: '10px' }}>Upload Audio File</h3>
-          <p style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Drag and drop your audio file here or click to browse</p>
-          <p style={{ color: 'rgba(255, 255, 255, 0.4)', fontSize: '12px', marginTop: '10px' }}>Supported formats: MP3, WAV, M4A (Max 50MB)</p>
-        </div>
-
-        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-          <span style={{ color: 'rgba(255, 255, 255, 0.5)' }}>— OR —</span>
-        </div>
-
-        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-          <button 
-            onClick={handleRecord}
-            style={{
-              background: isRecording ? 'rgba(255, 59, 48, 0.2)' : 'rgba(26, 219, 138, 0.1)',
-              color: isRecording ? '#ff3b30' : 'var(--accent-color)',
-              border: `1px solid ${isRecording ? '#ff3b30' : 'var(--accent-color)'}`,
-              padding: '15px 40px',
-              borderRadius: '30px',
-              fontSize: '16px',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '10px',
-              transition: 'all 0.3s ease'
-            }}
+        {/* Upload Section */}
+        <div className="clay-card p-8 flex flex-col items-center justify-center text-center border-2 border-dashed border-gray-300">
+          <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 text-3xl mb-6">
+            <i className="fas fa-cloud-upload-alt"></i>
+          </div>
+          <h3 className="text-xl font-bold text-gray-700 mb-2">Upload Audio File</h3>
+          <p className="text-sm text-gray-500 mb-6">MP3, WAV, M4A up to 50MB</p>
+          
+          <input 
+            type="file" 
+            id="audio-upload" 
+            className="hidden" 
+            accept="audio/*"
+            onChange={handleFileUpload}
+          />
+          <label 
+            htmlFor="audio-upload" 
+            className="clay-btn-primary px-8 py-3 cursor-pointer font-bold inline-block"
           >
-            <i className={`fas fa-microphone ${isRecording ? 'fa-pulse' : ''}`}></i>
-            {isRecording ? "Recording... Click to Stop" : "Record from Microphone"}
+            Select File
+          </label>
+          
+          {file && (
+            <div className="mt-6 p-4 bg-white rounded-xl shadow-sm text-sm text-gray-600 font-medium flex items-center">
+              <i className="fas fa-file-audio text-blue-500 mr-2"></i>
+              {file.name}
+            </div>
+          )}
+        </div>
+
+        {/* Record Section */}
+        <div className="clay-card p-8 flex flex-col items-center justify-center text-center">
+          <div className="mb-8 relative">
+            {isRecording && (
+              <div className="absolute -inset-4 bg-red-100 rounded-full animate-ping opacity-75"></div>
+            )}
+            <button 
+              onClick={isRecording ? stopRecording : startRecording}
+              className={`relative z-10 w-24 h-24 rounded-full flex items-center justify-center text-3xl transition-all shadow-lg
+                ${isRecording ? 'bg-red-500 text-white shadow-red-500/50' : 'clay-btn text-red-500 hover:text-red-600'}`}
+            >
+              <i className={`fas ${isRecording ? 'fa-stop' : 'fa-microphone'}`}></i>
+            </button>
+          </div>
+          
+          <h3 className="text-xl font-bold text-gray-700 mb-2">
+            {isRecording ? "Recording..." : "Record Live Audio"}
+          </h3>
+          <p className="text-2xl font-mono text-gray-600 font-bold tracking-widest">
+            {formatTime(recordingTime)}
+          </p>
+        </div>
+
+      </div>
+
+      {/* Settings Section */}
+      <div className="clay-card p-8">
+        <h3 className="text-lg font-bold text-gray-700 mb-6">Transcription Settings</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <label className="text-sm font-bold text-gray-600">Audio Language</label>
+            <div className="relative">
+              <select className="clay-input w-full appearance-none">
+                <option>Auto-Detect</option>
+                <option>English</option>
+                <option>Arabic</option>
+                <option>Spanish</option>
+                <option>French</option>
+              </select>
+              <i className="fas fa-chevron-down absolute right-4 top-4 text-gray-400 pointer-events-none"></i>
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <label className="text-sm font-bold text-gray-600">Model Output</label>
+            <div className="relative">
+              <select className="clay-input w-full appearance-none">
+                <option>Standard Text</option>
+                <option>Subtitles (SRT)</option>
+                <option>Subtitles (VTT)</option>
+              </select>
+              <i className="fas fa-chevron-down absolute right-4 top-4 text-gray-400 pointer-events-none"></i>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8 flex justify-end">
+          <button className="clay-btn-primary px-10 py-3 font-bold text-lg flex items-center shadow-blue-500/50">
+            <i className="fas fa-magic mr-2"></i> Start Transcription
           </button>
         </div>
-
-        {transcription && (
-          <div style={{
-            background: 'rgba(0, 0, 0, 0.3)',
-            borderRadius: '10px',
-            padding: '20px',
-            marginTop: '30px'
-          }}>
-            <h4 style={{ color: 'var(--accent-color)', marginBottom: '15px', display: 'flex', justifyContent: 'space-between' }}>
-              Transcription Result
-              <button style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }} title="Copy to clipboard">
-                <i className="fas fa-copy"></i>
-              </button>
-            </h4>
-            <p style={{ color: 'white', lineHeight: '1.6' }}>{transcription}</p>
-          </div>
-        )}
       </div>
+
     </div>
   );
 }

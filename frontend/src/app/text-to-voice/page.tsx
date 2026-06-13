@@ -5,144 +5,144 @@ import { useState } from "react";
 export default function TextToVoice() {
   const [text, setText] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [showPlayer, setShowPlayer] = useState(false);
 
   const handleGenerate = () => {
-    if (!text) return;
     setIsGenerating(true);
-    setAudioUrl(null);
+    setShowPlayer(false);
+    
+    // Simulate generation delay
     setTimeout(() => {
-      // Mock audio url Generation
-      setAudioUrl("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
       setIsGenerating(false);
+      setShowPlayer(true);
     }, 2000);
   };
 
   return (
-    <div className="container" style={{ paddingTop: '100px', minHeight: '100vh' }}>
-      <div className="section-header">
-        <h2>Text to Speech</h2>
-        <p>Turn your text into lifelike speech in seconds.</p>
+    <div className="max-w-5xl mx-auto space-y-8 pb-20 animate-fade-in">
+      
+      <div className="mb-8">
+        <h1 className="text-3xl font-extrabold text-gray-800 tracking-tight">Text to Speech 🗣️</h1>
+        <p className="text-gray-500 mt-2">Generate ultra-realistic human voices from text.</p>
       </div>
 
-      <div style={{
-        background: 'rgba(255, 255, 255, 0.03)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
-        borderRadius: '20px',
-        padding: '40px',
-        maxWidth: '800px',
-        margin: '0 auto',
-        backdropFilter: 'blur(10px)'
-      }}>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-          <div>
-            <label style={{ color: 'rgba(255,255,255,0.7)', display: 'block', marginBottom: '8px' }}>Language</label>
-            <select style={{
-              width: '100%',
-              padding: '12px',
-              background: 'rgba(0,0,0,0.5)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '8px',
-              color: 'white',
-              outline: 'none'
-            }}>
-              <option value="en">English (US)</option>
-              <option value="ar">Arabic</option>
-              <option value="fr">French</option>
-            </select>
-          </div>
-          <div>
-            <label style={{ color: 'rgba(255,255,255,0.7)', display: 'block', marginBottom: '8px' }}>Voice Model</label>
-            <select style={{
-              width: '100%',
-              padding: '12px',
-              background: 'rgba(0,0,0,0.5)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '8px',
-              color: 'white',
-              outline: 'none'
-            }}>
-              <option value="alloy">Alloy (Neutral)</option>
-              <option value="echo">Echo (Warm)</option>
-              <option value="fable">Fable (Expressive)</option>
-              <option value="onyx">Onyx (Deep)</option>
-              <option value="nova">Nova (Energetic)</option>
-            </select>
-          </div>
-        </div>
+        {/* Left Column: Settings */}
+        <div className="lg:col-span-1 space-y-6">
+          <div className="clay-card p-6 space-y-6">
+            <h3 className="text-lg font-bold text-gray-700">Voice Settings</h3>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-gray-600">Language</label>
+              <div className="relative">
+                <select className="clay-input w-full appearance-none">
+                  <option>English (US)</option>
+                  <option>English (UK)</option>
+                  <option>Arabic</option>
+                  <option>Spanish</option>
+                  <option>French</option>
+                </select>
+                <i className="fas fa-chevron-down absolute right-4 top-4 text-gray-400 pointer-events-none"></i>
+              </div>
+            </div>
 
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ color: 'rgba(255,255,255,0.7)', display: 'block', marginBottom: '8px' }}>Your Text</label>
-          <textarea 
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Enter the text you want to convert to speech..."
-            style={{
-              width: '100%',
-              height: '200px',
-              padding: '15px',
-              background: 'rgba(0,0,0,0.5)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '8px',
-              color: 'white',
-              resize: 'none',
-              outline: 'none',
-              fontFamily: 'inherit'
-            }}
-          />
-          <div style={{ textAlign: 'right', color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginTop: '5px' }}>
-            {text.length} / 5000 characters
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-gray-600">Voice Model</label>
+              <div className="relative">
+                <select className="clay-input w-full appearance-none">
+                  <option>Aurora (Female, Calm)</option>
+                  <option>Atlas (Male, Deep)</option>
+                  <option>Nova (Female, Energetic)</option>
+                  <option>Orion (Male, Professional)</option>
+                </select>
+                <i className="fas fa-chevron-down absolute right-4 top-4 text-gray-400 pointer-events-none"></i>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-gray-600 flex justify-between">
+                <span>Speed</span>
+                <span className="text-blue-500">1.0x</span>
+              </label>
+              <input type="range" min="0.5" max="2" step="0.1" defaultValue="1" className="w-full accent-blue-500" />
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-gray-600 flex justify-between">
+                <span>Emotion / Tone</span>
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button className="clay-btn-active text-blue-600 py-2 rounded-xl text-sm font-bold">Neutral</button>
+                <button className="clay-btn py-2 rounded-xl text-sm font-bold text-gray-500">Excited</button>
+                <button className="clay-btn py-2 rounded-xl text-sm font-bold text-gray-500">Sad</button>
+                <button className="clay-btn py-2 rounded-xl text-sm font-bold text-gray-500">Angry</button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <button 
-          onClick={handleGenerate}
-          disabled={!text || isGenerating}
-          style={{
-            width: '100%',
-            background: 'linear-gradient(90deg, var(--primary-color) 0%, var(--accent-color) 100%)',
-            color: 'black',
-            border: 'none',
-            padding: '15px',
-            borderRadius: '8px',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            cursor: (!text || isGenerating) ? 'not-allowed' : 'pointer',
-            opacity: (!text || isGenerating) ? 0.7 : 1,
-            transition: 'opacity 0.3s'
-          }}
-        >
-          {isGenerating ? <><i className="fas fa-spinner fa-spin"></i> Generating...</> : <><i className="fas fa-magic"></i> Generate Audio</>}
-        </button>
+        {/* Right Column: Text Input & Player */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="clay-card p-6 flex flex-col h-full min-h-[400px]">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold text-gray-700">Script</h3>
+              <span className="text-sm text-gray-400 font-bold">{text.length} / 5000 chars</span>
+            </div>
+            
+            <textarea 
+              className="clay-input w-full flex-1 resize-none mb-6 text-gray-700 placeholder-gray-400 leading-relaxed"
+              placeholder="Type or paste your text here..."
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+            ></textarea>
 
-        {audioUrl && (
-          <div style={{
-            background: 'rgba(26, 219, 138, 0.1)',
-            border: '1px solid var(--accent-color)',
-            borderRadius: '10px',
-            padding: '20px',
-            marginTop: '30px',
-            textAlign: 'center'
-          }}>
-            <h4 style={{ color: 'var(--accent-color)', marginBottom: '15px' }}>
-              <i className="fas fa-check-circle"></i> Audio Generated Successfully
-            </h4>
-            <audio controls src={audioUrl} style={{ width: '100%' }}></audio>
-            <div style={{ marginTop: '15px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
-              <button style={{
-                background: 'rgba(255,255,255,0.1)',
-                color: 'white',
-                border: '1px solid rgba(255,255,255,0.2)',
-                padding: '8px 15px',
-                borderRadius: '5px',
-                cursor: 'pointer'
-              }}>
-                <i className="fas fa-download"></i> Download MP3
+            <div className="flex justify-end">
+              <button 
+                onClick={handleGenerate}
+                disabled={isGenerating || text.length === 0}
+                className={`px-8 py-3 font-bold text-lg flex items-center transition-all
+                  ${text.length === 0 ? 'clay-btn text-gray-400 cursor-not-allowed' : 'clay-btn-primary shadow-blue-500/50'}
+                `}
+              >
+                {isGenerating ? (
+                  <><i className="fas fa-spinner fa-spin mr-2"></i> Synthesizing...</>
+                ) : (
+                  <><i className="fas fa-wave-square mr-2"></i> Generate Audio</>
+                )}
               </button>
             </div>
           </div>
-        )}
+
+          {/* Audio Player Result */}
+          {showPlayer && (
+            <div className="clay-card-green p-6 animate-fade-in flex items-center justify-between">
+              <div className="flex items-center space-x-4 flex-1">
+                <button className="w-12 h-12 rounded-full bg-green-500 text-white flex items-center justify-center text-xl shadow-lg shadow-green-500/40">
+                  <i className="fas fa-play ml-1"></i>
+                </button>
+                <div className="flex-1 mr-6">
+                  <div className="h-2 bg-green-200 rounded-full w-full overflow-hidden">
+                    <div className="h-full bg-green-500 w-1/3 rounded-full"></div>
+                  </div>
+                  <div className="flex justify-between text-xs font-bold text-green-700 mt-2">
+                    <span>0:00</span>
+                    <span>1:24</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex space-x-3">
+                <button className="clay-btn w-10 h-10 rounded-full flex items-center justify-center text-gray-600 hover:text-blue-500">
+                  <i className="fas fa-download"></i>
+                </button>
+                <button className="clay-btn w-10 h-10 rounded-full flex items-center justify-center text-gray-600 hover:text-blue-500">
+                  <i className="fas fa-share-alt"></i>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
       </div>
     </div>
   );
