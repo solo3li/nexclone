@@ -198,3 +198,4 @@
 /root/nexmedia/nexclone/NexClone.Backend/bin/Debug/net10.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
 /root/nexmedia/nexclone/NexClone.Backend/bin/Debug/net10.0/Microsoft.IdentityModel.Tokens.dll
 /root/nexmedia/nexclone/NexClone.Backend/bin/Debug/net10.0/System.IdentityModel.Tokens.Jwt.dll
+/root/nexmedia/nexclone/NexClone.Backend/obj/Debug/net10.0/NexClone.Backend.sourcelink.json

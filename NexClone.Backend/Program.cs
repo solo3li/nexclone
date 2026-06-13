@@ -23,8 +23,12 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Setup PostgreSQL Database
+// Setup PostgreSQL Database (Identity)
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Setup Legacy Database (Imported Django Tables)
+builder.Services.AddDbContext<NexClone.Backend.Models.Legacy.LegacyDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Setup Identity
