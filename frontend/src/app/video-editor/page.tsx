@@ -8,7 +8,7 @@ type TrackType = 'video' | 'audio' | 'text' | 'sticker';
 interface TimelineTrack { id: string; type: TrackType; name: string; isHidden?: boolean; isMuted?: boolean; isLocked?: boolean; }
 interface TimelineItem { id: string; trackId: string; mediaId?: string; url?: string; name?: string; text?: string; startTime: number; duration: number; sourceOffset: number; filter?: string; x?: number; y?: number; width?: number; height?: number; fontSize?: number; color?: string; fontFamily?: string; rotation?: number; mediaType?: 'video' | 'audio' | 'image'; opacity?: number; blendMode?: string; volume?: number; }
 type TransformMode = 'none' | 'drag' | 'scale' | 'rotate';
-type HwProfile = { ram: number; cores: number; tier: 'Pro' | 'Standard' | 'Limited'; showModal: boolean; maxRes: string; maxDur: number; isMobile: boolean };
+type HwProfile = { ram: number; cores: number; tier: 'Pro' | 'Standard' | 'Limited'; showModal: boolean; maxRes: string; maxDur: number; isMobile: boolean; gpu: string; cpuBrand: string; screenRes: string; connection: string; canvasPerf: number; };
 
 type ExportResolution = '720p' | '1080p' | '4K';
 type ExportFPS = 24 | 30 | 60;
@@ -108,17 +108,72 @@ export default function VideoEditor() {
 
   useEffect(() => {
     const nav = navigator as any;
-    const ram = nav.deviceMemory || 4; 
+    const ram = nav.deviceMemory || 4;
     const cores = nav.hardwareConcurrency || 2;
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    // --- Real CPU Brand from User Agent ---
+    const ua = navigator.userAgent;
+    let cpuBrand = 'Unknown Processor';
+    if (/Intel/i.test(ua)) cpuBrand = 'Intel';
+    else if (/AMD/i.test(ua)) cpuBrand = 'AMD';
+    else if (/Apple M/i.test(ua) || /AppleWebKit/.test(ua) && /Mac/.test(ua)) cpuBrand = 'Apple Silicon';
+    else if (/ARM/i.test(ua)) cpuBrand = 'ARM';
+    // Try to extract more CPU info
+    const cpuMatch = ua.match(/\(([^)]+)\)/);
+    if (cpuMatch) {
+      const cpuSection = cpuMatch[1];
+      if (/x86_64|x86-64|Win64|WOW64/.test(cpuSection)) cpuBrand += ' x86_64';
+      else if (/aarch64|arm64/.test(cpuSection.toLowerCase())) cpuBrand += ' ARM64';
+    }
+
+    // --- Real GPU from WebGL ---
+    let gpu = 'Unknown GPU';
+    try {
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl') as WebGLRenderingContext | null;
+      if (gl) {
+        const ext = gl.getExtension('WEBGL_debug_renderer_info');
+        if (ext) {
+          gpu = gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) || 'Unknown GPU';
+          // Clean up vendor prefix noise
+          gpu = gpu.replace(/\s*\(.*?ANGLE.*?\)/i, '').replace(/ANGLE \(/, '').replace(/\)$/, '').trim();
+        } else {
+          gpu = gl.getParameter(gl.RENDERER) || 'Unknown GPU';
+        }
+      }
+    } catch (e) { gpu = 'Blocked by browser'; }
+
+    // --- Real Screen Resolution ---
+    const screenRes = `${window.screen.width}x${window.screen.height} @ ${window.devicePixelRatio || 1}x DPR`;
+
+    // --- Network Connection ---
+    let connection = 'Unknown';
+    const conn = (nav as any).connection || (nav as any).mozConnection || (nav as any).webkitConnection;
+    if (conn) {
+      const mbps = conn.downlink ? `${conn.downlink} Mbps` : '';
+      const type = conn.effectiveType || conn.type || '';
+      connection = [type.toUpperCase(), mbps].filter(Boolean).join(' • ') || 'Unknown';
+    }
+
+    // --- Canvas Performance Benchmark ---
+    let canvasPerf = 0;
+    try {
+      const perfCanvas = document.createElement('canvas');
+      perfCanvas.width = 512; perfCanvas.height = 512;
+      const perfCtx = perfCanvas.getContext('2d')!;
+      const t0 = performance.now();
+      for (let i = 0; i < 1000; i++) { perfCtx.fillStyle = `hsl(${i},50%,50%)`; perfCtx.fillRect(i % 512, Math.floor(i / 512), 1, 1); }
+      canvasPerf = Math.round(1000 / (performance.now() - t0));
+    } catch (e) { canvasPerf = 0; }
+
     let tier: 'Pro' | 'Standard' | 'Limited' = 'Standard';
     let maxRes = '1080p';
     let maxDur = 10;
     if (ram >= 8 && cores >= 8 && !isMobile) { tier = 'Pro'; maxRes = '4K Uncompressed'; maxDur = 60; }
     else if (ram <= 4 || cores <= 4 || isMobile) { tier = 'Limited'; maxRes = '720p Mobile Proxy'; maxDur = 3; }
-    setHwProfile({ ram, cores, tier, showModal: true, maxRes, maxDur, isMobile });
-    
-    // Auto-adjust default export config based on hardware
+
+    setHwProfile({ ram, cores, tier, showModal: true, maxRes, maxDur, isMobile, gpu, cpuBrand, screenRes, connection, canvasPerf });
     if (tier === 'Limited') setExportConfig({ resolution: '720p', fps: 30, quality: 'low', format: 'webm' });
   }, []);
 
@@ -1023,21 +1078,76 @@ export default function VideoEditor() {
 
       {/* Profiler Modal */}
       {hwProfile?.showModal && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#0f0f0f] border border-[var(--color-bento-border)] rounded-xl max-w-md w-full p-6 text-center space-y-4">
-            <i className={`fas fa-microchip text-4xl ${hwProfile.tier === 'Pro' ? 'text-green-500' : hwProfile.tier === 'Standard' ? 'text-blue-500' : 'text-orange-500'}`}></i>
-            <h2 className="text-xl font-bold">System Profiler</h2>
-            <div className="text-sm text-[var(--color-bento-muted)] space-y-2">
-              <p>We analyzed your hardware to configure optimal limits.</p>
-              <div className="bg-[#1a1a1a] p-3 rounded text-left font-mono text-[10px] space-y-1 text-white border border-[#262626]">
-                <p>Est. RAM: {hwProfile.ram}GB</p>
-                <p>CPU Cores: {hwProfile.cores}</p>
-                <p>Platform: {hwProfile.isMobile ? 'Mobile/Touch' : 'Desktop'}</p>
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[#0a0a0a] border border-[#2a2a2a] rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden">
+            {/* Header */}
+            <div className={`p-5 flex items-center gap-4 border-b border-[#1a1a1a] ${
+              hwProfile.tier === 'Pro' ? 'bg-gradient-to-r from-green-900/30 to-emerald-900/20' :
+              hwProfile.tier === 'Standard' ? 'bg-gradient-to-r from-blue-900/30 to-indigo-900/20' :
+              'bg-gradient-to-r from-orange-900/30 to-amber-900/20'
+            }`}>
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                hwProfile.tier === 'Pro' ? 'bg-green-500/20 text-green-400' :
+                hwProfile.tier === 'Standard' ? 'bg-blue-500/20 text-blue-400' :
+                'bg-orange-500/20 text-orange-400'
+              }`}><i className="fas fa-microchip text-2xl"></i></div>
+              <div>
+                <h2 className="text-lg font-bold text-white">System Profiler</h2>
+                <p className="text-xs text-gray-400">Hardware scan complete — optimizing render engine</p>
               </div>
-              <p>Performance Tier: <strong className="text-white">{hwProfile.tier}</strong></p>
-              <p>Max Resolution: <strong className="text-white">{hwProfile.maxRes}</strong></p>
+              <div className="ml-auto">
+                <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                  hwProfile.tier === 'Pro' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
+                  hwProfile.tier === 'Standard' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                  'bg-orange-500/20 text-orange-400 border border-orange-500/30'
+                }`}>{hwProfile.tier} Tier</span>
+              </div>
             </div>
-            <button onClick={() => setHwProfile({ ...hwProfile, showModal: false })} className="w-full bento-btn-accent py-3 font-bold mt-4">Acknowledge</button>
+
+            {/* Specs Grid */}
+            <div className="p-5 grid grid-cols-2 gap-3">
+              {[
+                { icon: 'fa-cpu', label: 'Processor', value: hwProfile.cpuBrand, sub: `${hwProfile.cores} Logical Cores` },
+                { icon: 'fa-memory', label: 'System RAM', value: `${hwProfile.ram} GB`, sub: hwProfile.ram >= 16 ? 'Excellent' : hwProfile.ram >= 8 ? 'Good' : 'Limited' },
+                { icon: 'fa-display', label: 'GPU / Renderer', value: hwProfile.gpu.length > 28 ? hwProfile.gpu.substring(0, 28) + '…' : hwProfile.gpu, sub: 'WebGL Detected' },
+                { icon: 'fa-desktop', label: 'Screen', value: hwProfile.screenRes.split('@')[0].trim(), sub: hwProfile.screenRes.split('@')[1]?.trim() || '' },
+                { icon: 'fa-wifi', label: 'Network', value: hwProfile.connection, sub: 'Active Connection' },
+                { icon: 'fa-gauge-high', label: 'Canvas Perf', value: `${hwProfile.canvasPerf}K ops/s`, sub: hwProfile.canvasPerf > 500 ? 'Excellent' : hwProfile.canvasPerf > 200 ? 'Good' : 'Limited' },
+              ].map(item => (
+                <div key={item.label} className="bg-[#111] border border-[#222] rounded-xl p-3 flex gap-3 items-start">
+                  <div className="w-8 h-8 rounded-lg bg-[#1a1a1a] flex items-center justify-center shrink-0 mt-0.5">
+                    <i className={`fas ${item.icon} text-xs text-gray-400`}></i>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-0.5">{item.label}</p>
+                    <p className="text-sm font-bold text-white leading-tight truncate">{item.value}</p>
+                    <p className="text-[10px] text-gray-500">{item.sub}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Render Config Summary */}
+            <div className="mx-5 mb-4 bg-[#111] border border-[#222] rounded-xl p-3 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <i className="fas fa-film text-blue-400 text-sm"></i>
+                <span className="text-xs text-gray-400">Optimal Render Config:</span>
+              </div>
+              <div className="flex gap-3">
+                <span className="text-xs font-bold text-white bg-blue-500/10 border border-blue-500/20 px-2 py-1 rounded">{hwProfile.maxRes}</span>
+                <span className="text-xs font-bold text-white bg-purple-500/10 border border-purple-500/20 px-2 py-1 rounded">Max {hwProfile.maxDur}min</span>
+              </div>
+            </div>
+
+            {/* CTA */}
+            <div className="px-5 pb-5">
+              <button
+                onClick={() => setHwProfile({ ...hwProfile, showModal: false })}
+                className="w-full py-3 rounded-xl font-bold text-sm transition-all bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg"
+              >
+                Launch Editor
+              </button>
+            </div>
           </div>
         </div>
       )}
