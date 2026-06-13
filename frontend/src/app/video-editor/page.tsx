@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, MouseEvent as ReactMouseEvent, PointerEven
 import Link from "next/link";
 
 interface LocalMedia { id: string; name: string; url: string; type: string; }
-type TrackType = 'video' | 'audio' | 'text';
+type TrackType = 'video' | 'audio' | 'text' | 'sticker';
 interface TimelineTrack { id: string; type: TrackType; name: string; isHidden?: boolean; isMuted?: boolean; isLocked?: boolean; }
 interface TimelineItem { id: string; trackId: string; mediaId?: string; url?: string; name?: string; text?: string; startTime: number; duration: number; sourceOffset: number; filter?: string; x?: number; y?: number; width?: number; height?: number; fontSize?: number; color?: string; fontFamily?: string; rotation?: number; mediaType?: 'video' | 'audio' | 'image'; opacity?: number; blendMode?: string; volume?: number; }
 type TransformMode = 'none' | 'drag' | 'scale' | 'rotate';
@@ -32,8 +32,8 @@ export default function VideoEditor() {
 
   const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([]);
     const sortTracks = (tList: TimelineTrack[]) => [...tList].sort((a, b) => {
-    const aIsVisual = a.type === 'video' || a.type === 'text';
-    const bIsVisual = b.type === 'video' || b.type === 'text';
+    const aIsVisual = a.type === 'video' || a.type === 'text' || a.type === 'sticker';
+    const bIsVisual = b.type === 'video' || b.type === 'text' || b.type === 'sticker';
     if (aIsVisual && !bIsVisual) return -1;
     if (!aIsVisual && bIsVisual) return 1;
     return 0;
@@ -165,9 +165,9 @@ export default function VideoEditor() {
   };
 
   const addStickerToTimeline = (icon: string, name: string) => {
-    let track = tracks.find(t => t.name.toLowerCase().includes('sticker') || t.name.toLowerCase().includes('overlay'));
+    let track = tracks.find(t => t.type === 'sticker');
     if (!track) {
-       track = { id: Math.random().toString(36).substr(2, 9), type: 'video', name: 'Stickers' };
+       track = { id: Math.random().toString(36).substr(2, 9), type: 'sticker', name: 'Stickers' };
        setTracks(prev => sortTracks([...prev, track as TimelineTrack]));
     }
     const svgUri = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 100 100"><text x="50" y="50" font-size="80" text-anchor="middle" dominant-baseline="central">${icon}</text></svg>`;
@@ -231,7 +231,7 @@ export default function VideoEditor() {
   const activeVisualItems = activeItems
     .filter(i => {
       const t = tracks.find(t => t.id === i.trackId);
-      return t?.type === 'video' && !t.isHidden;
+      return (t?.type === 'video' || t?.type === 'sticker') && !t.isHidden;
     })
     .sort((a, b) => {
       const aIndex = tracks.findIndex(t => t.id === a.trackId);
@@ -918,13 +918,12 @@ export default function VideoEditor() {
             {tracks.map(track => (
               <div key={track.id} className="shrink-0 flex items-center justify-between px-2 border-b border-[#262626] group bg-[#111] hover:bg-[#1a1a1a]" style={{ height: hwProfile?.isMobile ? 40 : 48 }}>
                 <div className="flex items-center w-full min-w-0">
-                  <div className="w-6 h-6 rounded bg-[#222] flex items-center justify-center mr-2 shrink-0 border border-[#333]">
-                     {track.type === 'video' ? <i className="fas fa-video text-blue-400 text-[10px]"></i> : track.type === 'audio' ? <i className="fas fa-music text-green-400 text-[10px]"></i> : <i className="fas fa-font text-purple-400 text-[10px]"></i>}
-                  </div>
+                  <div className={`w-1.5 h-full absolute left-0 ${track.type === 'video' ? 'bg-blue-500' : track.type === 'text' ? 'bg-purple-500' : track.type === 'sticker' ? 'bg-yellow-500' : 'bg-green-500'}`}></div>
+                  <i className={`fas ${track.type === 'video' ? 'fa-video' : track.type === 'text' ? 'fa-font' : track.type === 'sticker' ? 'fa-star' : 'fa-music'} w-4 text-[10px] text-[var(--color-bento-muted)]`}></i>
                   <input type="text" value={track.name} onChange={(e) => renameTrack(track.id, e.target.value)} className="bg-transparent text-[10px] font-bold text-gray-400 w-full outline-none focus:text-white truncate" />
                 </div>
                 <div className="flex space-x-1 shrink-0 ml-2">
-                  {(track.type === 'video' || track.type === 'text') && (
+                  {(track.type === 'video' || track.type === 'text' || track.type === 'sticker') && (
                     <button onClick={() => toggleTrackProperty(track.id, 'isHidden')} className={`w-5 h-5 rounded flex items-center justify-center text-[10px] transition-colors ${track.isHidden ? 'bg-red-500/20 text-red-400' : 'hover:bg-[#262626] text-gray-500 hover:text-white'}`} title="Toggle Visibility"><i className={`fas ${track.isHidden ? 'fa-eye-slash' : 'fa-eye'}`}></i></button>
                   )}
                   {track.type === 'audio' && (
