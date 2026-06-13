@@ -5,7 +5,7 @@ import Link from "next/link";
 
 interface LocalMedia { id: string; name: string; url: string; type: string; }
 type TrackType = 'video' | 'audio' | 'text';
-interface TimelineTrack { id: string; type: TrackType; name: string; }
+interface TimelineTrack { id: string; type: TrackType; name: string; isHidden?: boolean; isMuted?: boolean; isLocked?: boolean; }
 interface TimelineItem { id: string; trackId: string; mediaId?: string; url?: string; name?: string; text?: string; startTime: number; duration: number; sourceOffset: number; filter?: string; x?: number; y?: number; width?: number; height?: number; fontSize?: number; color?: string; fontFamily?: string; rotation?: number; mediaType?: 'video' | 'audio' | 'image'; }
 type TransformMode = 'none' | 'drag' | 'scale' | 'rotate';
 type HwProfile = { ram: number; cores: number; tier: 'Pro' | 'Standard' | 'Limited'; showModal: boolean; maxRes: string; maxDur: number; isMobile: boolean };
@@ -15,6 +15,11 @@ type ExportFPS = 24 | 30 | 60;
 type ExportQuality = 'low' | 'medium' | 'high';
 type ExportFormat = 'webm' | 'mp4';
 
+<style>{`
+.stripes-bg {
+  background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(0,0,0,0.3) 5px, rgba(0,0,0,0.3) 10px);
+}
+`}</style>
 export default function VideoEditor() {
   const [activeAssetTab, setActiveAssetTab] = useState("media");
   const [activePropertyTab, setActivePropertyTab] = useState("color");
@@ -26,6 +31,13 @@ export default function VideoEditor() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([]);
+    const sortTracks = (tList: TimelineTrack[]) => [...tList].sort((a, b) => {
+    const aIsVisual = a.type === 'video' || a.type === 'text';
+    const bIsVisual = b.type === 'video' || b.type === 'text';
+    if (aIsVisual && !bIsVisual) return -1;
+    if (!aIsVisual && bIsVisual) return 1;
+    return 0;
+  });
   const [tracks, setTracks] = useState<TimelineTrack[]>([
     { id: 'V2', type: 'video', name: 'Overlay' },
     { id: 'V1', type: 'video', name: 'Video 1' },
@@ -121,7 +133,7 @@ export default function VideoEditor() {
     let track = tracks.find(t => t.type === targetType);
     if (!track) {
        track = { id: Math.random().toString(36).substr(2, 9), type: targetType, name: `${targetType === 'audio' ? 'Audio' : 'Video'} Track` };
-       setTracks(prev => [...prev, track as TimelineTrack]);
+       setTracks(prev => sortTracks([...prev, track as TimelineTrack]));
     }
     const trackItems = timelineItems.filter(i => i.trackId === track!.id);
     let start = 0;
@@ -153,6 +165,13 @@ export default function VideoEditor() {
 
   const togglePlay = () => setIsPlaying(!isPlaying);
 
+  const toggleTrackProperty = (trackId: string, prop: 'isHidden' | 'isMuted' | 'isLocked') => {
+    setTracks(prev => prev.map(t => t.id === trackId ? { ...t, [prop]: !t[prop] } : t));
+  };
+  const renameTrack = (trackId: string, newName: string) => {
+    setTracks(prev => prev.map(t => t.id === trackId ? { ...t, name: newName } : t));
+  };
+
   useEffect(() => {
     if (isPlaying) {
       playheadIntervalRef.current = setInterval(() => setCurrentTime(prev => prev + 0.05), 50);
@@ -169,7 +188,9 @@ export default function VideoEditor() {
     timelineItems.forEach(item => {
       if (item.mediaType === 'video' || item.mediaType === 'audio') {
         const el = document.getElementById(`player-${item.id}`) as HTMLMediaElement;
+        const track = tracks.find(t => t.id === item.trackId);
         if (el) {
+          el.muted = item.mediaType === 'video' || (track?.isMuted ?? false);
           const isActive = activeItems.some(active => active.id === item.id);
           if (isActive) {
             const expectedTime = (currentTime - item.startTime) + item.sourceOffset;
@@ -186,11 +207,17 @@ export default function VideoEditor() {
 
   // --- CANVAS RENDERING ENGINE ---
   const activeItems = timelineItems.filter(i => currentTime >= i.startTime && currentTime < i.startTime + i.duration);
-  const activeTextItems = activeItems.filter(i => tracks.find(t => t.id === i.trackId)?.type === 'text');
+  const activeTextItems = activeItems.filter(i => {
+    const t = tracks.find(t => t.id === i.trackId);
+    return t?.type === 'text' && !t.isHidden;
+  });
   
   // Sort visual items by track index so lower tracks are drawn first (background)
   const activeVisualItems = activeItems
-    .filter(i => tracks.find(t => t.id === i.trackId)?.type === 'video')
+    .filter(i => {
+      const t = tracks.find(t => t.id === i.trackId);
+      return t?.type === 'video' && !t.isHidden;
+    })
     .sort((a, b) => {
       const aIndex = tracks.findIndex(t => t.id === a.trackId);
       const bIndex = tracks.findIndex(t => t.id === b.trackId);
@@ -724,16 +751,28 @@ export default function VideoEditor() {
         </div>
 
         <div className="flex-1 flex overflow-hidden relative">
-          <div className="w-16 md:w-32 bg-[#0a0a0a] border-r border-[var(--color-bento-border)] z-30 flex flex-col shrink-0">
+          <div className="w-24 md:w-48 bg-[#0a0a0a] border-r border-[var(--color-bento-border)] z-30 flex flex-col shrink-0">
             <div className="h-6 bg-[#141414] shrink-0 border-b border-[#262626]"></div>
             {tracks.map(track => (
-              <div key={track.id} className="h-10 md:h-16 shrink-0 flex items-center justify-center md:justify-start md:px-4 text-[10px] font-bold border-b border-[#262626]">
-                {track.type === 'video' ? <i className="fas fa-video md:mr-3 text-blue-400"></i> : track.type === 'audio' ? <i className="fas fa-music md:mr-3 text-green-400"></i> : <i className="fas fa-font md:mr-3 text-purple-400"></i>}
-                <span className="hidden md:inline text-gray-300 truncate w-16">{track.name}</span>
+              <div key={track.id} className="h-10 md:h-16 shrink-0 flex flex-col md:flex-row items-center justify-center md:justify-start md:px-2 border-b border-[#262626] group bg-[#111] hover:bg-[#1a1a1a]">
+                <div className="flex items-center w-full mb-1 md:mb-0">
+                  {track.type === 'video' ? <i className="fas fa-video mx-2 text-blue-400 text-[10px]"></i> : track.type === 'audio' ? <i className="fas fa-music mx-2 text-green-400 text-[10px]"></i> : <i className="fas fa-font mx-2 text-purple-400 text-[10px]"></i>}
+                  <input type="text" value={track.name} onChange={(e) => renameTrack(track.id, e.target.value)} className="hidden md:block bg-transparent text-[10px] font-bold text-gray-300 w-full outline-none focus:text-white" />
+                </div>
+                <div className="flex space-x-1 md:space-x-2 md:ml-auto px-1">
+                  {(track.type === 'video' || track.type === 'text') && (
+                    <button onClick={() => toggleTrackProperty(track.id, 'isHidden')} className={`text-[10px] ${track.isHidden ? 'text-red-400' : 'text-gray-500 hover:text-white'}`} title="Toggle Visibility"><i className={`fas ${track.isHidden ? 'fa-eye-slash' : 'fa-eye'}`}></i></button>
+                  )}
+                  {track.type === 'audio' && (
+                    <button onClick={() => toggleTrackProperty(track.id, 'isMuted')} className={`text-[10px] ${track.isMuted ? 'text-red-400' : 'text-gray-500 hover:text-white'}`} title="Mute Track"><i className={`fas ${track.isMuted ? 'fa-volume-mute' : 'fa-volume-up'}`}></i></button>
+                  )}
+                  <button onClick={() => toggleTrackProperty(track.id, 'isLocked')} className={`text-[10px] ${track.isLocked ? 'text-red-400' : 'text-gray-500 hover:text-white'}`} title="Lock Track"><i className={`fas ${track.isLocked ? 'fa-lock' : 'fa-unlock'}`}></i></button>
+                </div>
               </div>
             ))}
-            <div className="p-2 shrink-0">
-              <button onClick={() => setTracks([...tracks, { id: Math.random().toString(36).substr(2, 9), type: 'video', name: 'New Track' }])} className="w-full text-[10px] bg-[#262626] hover:bg-[#3f3f46] text-white py-1 rounded">+</button>
+            <div className="p-2 shrink-0 flex flex-col space-y-1">
+              <button onClick={() => setTracks(sortTracks([...tracks, { id: Math.random().toString(36).substr(2, 9), type: 'video', name: 'Video ' + (tracks.filter(t=>t.type==='video').length + 1) }]))} className="w-full text-[10px] bg-[#262626] hover:bg-blue-600/30 hover:text-blue-400 text-gray-400 transition-colors py-1 rounded">+ Video Track</button>
+              <button onClick={() => setTracks(sortTracks([...tracks, { id: Math.random().toString(36).substr(2, 9), type: 'audio', name: 'Audio ' + (tracks.filter(t=>t.type==='audio').length + 1) }]))} className="w-full text-[10px] bg-[#262626] hover:bg-green-600/30 hover:text-green-400 text-gray-400 transition-colors py-1 rounded">+ Audio Track</button>
             </div>
           </div>
 
@@ -746,7 +785,7 @@ export default function VideoEditor() {
                   if (track.type === 'text') colorClass = 'bg-purple-600/80 border-purple-400';
                   
                   return (
-                    <div key={clip.id} onPointerDown={(e) => handleTimelinePointerDown(e, clip)} className={`absolute h-8 ${hwProfile?.isMobile ? 'h-8' : (track.type === 'text' ? 'h-10' : 'h-14')} ${colorClass} rounded border pointer-events-auto flex items-center justify-center md:justify-start px-2 overflow-hidden shadow-sm touch-none ${selectedItemId === clip.id ? 'border-white ring-2 ring-white/50 z-20' : 'z-10'} ${timelineDrag.itemId === clip.id ? 'opacity-50 scale-105' : 'opacity-100'}`} style={{ left: clip.startTime * timelineZoom, width: Math.max(10, clip.duration * timelineZoom), top: hwProfile?.isMobile ? 4 : 4 }}>
+                    <div key={clip.id} onPointerDown={(e) => handleTimelinePointerDown(e, clip)} className={`absolute h-8 ${hwProfile?.isMobile ? 'h-8' : (track.type === 'text' ? 'h-10' : 'h-14')} ${colorClass} rounded border pointer-events-auto flex items-center justify-center md:justify-start px-2 overflow-hidden shadow-sm touch-none ${selectedItemId === clip.id ? 'border-white ring-2 ring-white/50 z-20' : 'z-10'} ${timelineDrag.itemId === clip.id ? 'opacity-50 scale-105' : 'opacity-100'} ${track.isLocked ? 'stripes-bg grayscale cursor-not-allowed' : ''}`} style={{ left: clip.startTime * timelineZoom, width: Math.max(10, clip.duration * timelineZoom), top: hwProfile?.isMobile ? 4 : 4 }}>
                       <span className="text-[10px] font-bold text-white truncate">{clip.text ? `"${clip.text}"` : (clip.name || 'Media')}</span>
                     </div>
                   );
