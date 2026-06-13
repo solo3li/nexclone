@@ -228,10 +228,43 @@ export default function VideoEditor() {
       return bIndex - aIndex;
     });
 
-  // We need a stable reference to isRendering inside the loop to lock resolution
   const isRenderingRef = useRef(isRendering);
   const exportConfigRef = useRef(exportConfig);
   useEffect(() => { isRenderingRef.current = isRendering; exportConfigRef.current = exportConfig; }, [isRendering, exportConfig]);
+
+  const getClipDOMStyle = (clip: TimelineItem) => {
+      if (clip.trackId === 'T1') return { width: 'auto', height: 'auto' };
+      
+      let elW = 1920; let elH = 1080;
+      if (clip.mediaType === 'image' && clip.url && imageCacheRef.current[clip.url]) {
+         elW = imageCacheRef.current[clip.url].naturalWidth || elW;
+         elH = imageCacheRef.current[clip.url].naturalHeight || elH;
+      } else if (clip.mediaType === 'video') {
+         const v = document.getElementById(`player-${clip.id}`) as HTMLVideoElement;
+         if (v && v.videoWidth) { elW = v.videoWidth; elH = v.videoHeight; }
+      }
+      
+      const canvasW = canvasRef.current?.width || 1920;
+      const canvasH = canvasRef.current?.height || 1080;
+      
+      let baseW = elW;
+      let baseH = elH;
+      
+      if (baseW > canvasW || baseH > canvasH || (clip.trackId === 'V1' && clip.mediaType === 'video' && clip.width === undefined)) {
+          const fitScale = Math.min(canvasW / baseW, canvasH / baseH);
+          baseW *= fitScale;
+          baseH *= fitScale;
+      }
+      
+      const scaleModifier = (clip.width ?? 100) / 100;
+      const drawW = baseW * scaleModifier;
+      const drawH = baseH * scaleModifier;
+      
+      return { 
+          width: `${(drawW / canvasW) * 100}%`, 
+          height: `${(drawH / canvasH) * 100}%` 
+      };
+  };
 
   const renderCanvas = () => {
     const canvas = canvasRef.current;
@@ -259,18 +292,18 @@ export default function VideoEditor() {
             ctx.translate(pxX, pxY);
             ctx.rotate(((item.rotation || 0) * Math.PI) / 180);
             
-            const scaleModifier = (item.width || 100) / 100;
-            const elRatio = elWidth / elHeight;
-            const canvasRatio = canvas.width / canvas.height;
-            let drawW = canvas.width * scaleModifier;
-            let drawH = canvas.height * scaleModifier;
+            let baseW = elWidth;
+            let baseH = elHeight;
             
-            if (item.trackId === 'V1' && item.width === 100 && item.x === 50 && item.y === 50) {
-               if (elRatio > canvasRatio) { drawH = canvas.width / elRatio; }
-               else { drawW = canvas.height * elRatio; }
-            } else {
-               drawH = drawW / elRatio;
+            if (baseW > canvas.width || baseH > canvas.height || (item.trackId === 'V1' && item.mediaType === 'video' && item.width === undefined)) {
+                const fitScale = Math.min(canvas.width / baseW, canvas.height / baseH);
+                baseW *= fitScale;
+                baseH *= fitScale;
             }
+            
+            const scaleModifier = (item.width || 100) / 100;
+            const drawW = baseW * scaleModifier;
+            const drawH = baseH * scaleModifier;
             
             ctx.globalAlpha = item.opacity !== undefined ? item.opacity / 100 : 1;
             ctx.globalCompositeOperation = (item.blendMode as GlobalCompositeOperation) || 'source-over';
@@ -655,7 +688,7 @@ export default function VideoEditor() {
                   <button 
                     key={idx}
                     onClick={() => {
-                      const svgUri = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">${sticker.icon}</text></svg>`;
+                      const svgUri = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 100 100"><text x="50" y="50" font-size="80" text-anchor="middle" dominant-baseline="central">${sticker.icon}</text></svg>`;
                       addToTimeline({ id: `stk_${idx}`, name: sticker.name, url: svgUri, type: 'image' });
                     }}
                     disabled={isRendering} 
@@ -698,7 +731,7 @@ export default function VideoEditor() {
                   <div 
                     key={clip.id} 
                     className={`absolute inline-block pointer-events-auto select-none touch-none ${isSelected ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-transparent' : ''}`}
-                    style={{ left: `${clip.x || 50}%`, top: `${clip.y || 50}%`, transform: `translate(-50%, -50%) rotate(${clip.rotation || 0}deg)`, cursor: isSelected ? (transformMode === 'drag' ? 'grabbing' : 'grab') : 'pointer', width: clip.trackId === 'T1' ? 'auto' : `${clip.width || 100}%`, height: clip.trackId === 'T1' ? 'auto' : `${clip.height || 100}%` }}
+                    style={{ left: `${clip.x || 50}%`, top: `${clip.y || 50}%`, transform: `translate(-50%, -50%) rotate(${clip.rotation || 0}deg)`, cursor: isSelected ? (transformMode === 'drag' ? 'grabbing' : 'grab') : 'pointer', ...getClipDOMStyle(clip) }}
                     onPointerDown={(e) => { if (!isRendering) startTransform(e, 'drag', clip.id); }}
                   >
                     {clip.trackId === 'T1' && <div style={{ fontSize: `${clip.fontSize}px`, color: 'transparent', fontFamily: clip.fontFamily, whiteSpace: 'nowrap' }}>{clip.text}</div>}
