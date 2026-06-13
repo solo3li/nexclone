@@ -14,7 +14,6 @@ export default function VideoEditor() {
   const [activePropertyTab, setActivePropertyTab] = useState("color");
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   
-  // Hardware Profiler
   const [hwProfile, setHwProfile] = useState<HwProfile | null>(null);
 
   const [localMediaFiles, setLocalMediaFiles] = useState<LocalMedia[]>([]);
@@ -26,46 +25,33 @@ export default function VideoEditor() {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [timelineZoom, setTimelineZoom] = useState(50); 
 
-  // Transform Engine State (Now using Pointer Events)
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const [transformMode, setTransformMode] = useState<TransformMode>('none');
   const [dragState, setDragState] = useState({ startX: 0, startY: 0, initX: 0, initY: 0, initSize: 0, initRot: 0, centerX: 0, centerY: 0 });
 
-  // Custom Timeline Drag Engine for Mobile Touch
   const [timelineDrag, setTimelineDrag] = useState<{ active: boolean, itemId: string | null, startX: number, startY: number, initStartTime: number, initTrack: TrackID | null }>({ active: false, itemId: null, startX: 0, startY: 0, initStartTime: 0, initTrack: null });
   const timelineRef = useRef<HTMLDivElement>(null);
 
   const videoPlayerRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const playheadIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
 
   const selectedItem = timelineItems.find(i => i.id === selectedItemId);
 
-  // 1. Hardware Profiling on Mount
   useEffect(() => {
-    // Note: TypeScript doesn't natively type deviceMemory on Navigator yet
     const nav = navigator as any;
     const ram = nav.deviceMemory || 4; 
     const cores = nav.hardwareConcurrency || 2;
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
     let tier: 'Pro' | 'Standard' | 'Limited' = 'Standard';
     let maxRes = '1080p';
-    let maxDur = 10; // minutes
-    
-    if (ram >= 8 && cores >= 8 && !isMobile) {
-      tier = 'Pro';
-      maxRes = '4K Uncompressed';
-      maxDur = 60;
-    } else if (ram <= 4 || cores <= 4 || isMobile) {
-      tier = 'Limited';
-      maxRes = '720p Mobile Proxy';
-      maxDur = 3;
-    }
-
+    let maxDur = 10;
+    if (ram >= 8 && cores >= 8 && !isMobile) { tier = 'Pro'; maxRes = '4K Uncompressed'; maxDur = 60; }
+    else if (ram <= 4 || cores <= 4 || isMobile) { tier = 'Limited'; maxRes = '720p Mobile Proxy'; maxDur = 3; }
     setHwProfile({ ram, cores, tier, showModal: true, maxRes, maxDur, isMobile });
   }, []);
 
-  // 2. File Handling
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files).map(file => ({ id: Math.random().toString(36).substr(2, 9), name: file.name, url: URL.createObjectURL(file), type: file.type.split('/')[0] }));
@@ -96,7 +82,6 @@ export default function VideoEditor() {
     if (hwProfile?.isMobile) setShowMobileSidebar(false);
   };
 
-  // 3. Playback Sync
   const togglePlay = () => setIsPlaying(!isPlaying);
 
   useEffect(() => {
@@ -118,15 +103,94 @@ export default function VideoEditor() {
     }
   }, [currentTime, timelineItems, isPlaying]);
 
-  // 4. Transform Canvas Engine (POINTER EVENTS)
+  // --- CANVAS RENDERING ENGINE (The core architectural shift) ---
+  const activeTextItems = timelineItems.filter(i => i.trackId === 'T1' && currentTime >= i.startTime && currentTime < i.startTime + i.duration);
+  const activeVideoItem = timelineItems.find(i => i.trackId === 'V1' && currentTime >= i.startTime && currentTime < i.startTime + i.duration);
+
+  const renderCanvas = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    const container = playerContainerRef.current;
+    
+    if (canvas && ctx && container) {
+      // Set resolution matching container
+      const rect = container.getBoundingClientRect();
+      if (canvas.width !== rect.width || canvas.height !== rect.height) {
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+      }
+      
+      // Clear frame
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw Video Layer (V1)
+      if (activeVideoItem && videoPlayerRef.current && videoPlayerRef.current.readyState >= 2) {
+        // Compute "object-fit: contain" math for canvas
+        const videoRatio = videoPlayerRef.current.videoWidth / videoPlayerRef.current.videoHeight;
+        const canvasRatio = canvas.width / canvas.height;
+        let drawW = canvas.width, drawH = canvas.height, drawX = 0, drawY = 0;
+        
+        if (videoRatio > canvasRatio) { drawH = canvas.width / videoRatio; drawY = (canvas.height - drawH) / 2; }
+        else { drawW = canvas.height * videoRatio; drawX = (canvas.width - drawW) / 2; }
+
+        ctx.filter = activeVideoItem.filter || 'none';
+        ctx.drawImage(videoPlayerRef.current, drawX, drawY, drawW, drawH);
+        ctx.filter = 'none'; // reset
+      }
+
+      // Draw Text Layers (T1)
+      activeTextItems.forEach(textItem => {
+        if (!textItem.text) return;
+        ctx.save();
+        
+        const pxX = (textItem.x || 50) * canvas.width / 100;
+        const pxY = (textItem.y || 50) * canvas.height / 100;
+        
+        ctx.translate(pxX, pxY);
+        ctx.rotate(((textItem.rotation || 0) * Math.PI) / 180);
+        
+        // Exact styling to match DOM
+        ctx.font = `bold ${textItem.fontSize || 64}px ${textItem.fontFamily || 'Inter'}`;
+        ctx.fillStyle = textItem.color || '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        if (textItem.filter) ctx.filter = textItem.filter;
+        
+        // Add shadow for visibility
+        ctx.shadowColor = 'rgba(0,0,0,0.8)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetY = 4;
+        
+        ctx.fillText(textItem.text, 0, 0);
+        ctx.restore();
+      });
+    }
+    
+    // Request next frame
+    animationFrameRef.current = requestAnimationFrame(renderCanvas);
+  };
+
+  useEffect(() => {
+    // Start the render loop
+    animationFrameRef.current = requestAnimationFrame(renderCanvas);
+    return () => { if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current); };
+  });
+
+  const exportSnapshot = () => {
+    if (!canvasRef.current) return;
+    const dataUrl = canvasRef.current.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = `exported_frame_${formatTime(currentTime).replace(/:/g, '-')}.png`;
+    a.click();
+  };
+  // -------------------------------------------------------------
+
   const startTransform = (e: PointerEvent, mode: TransformMode, itemId: string) => {
     e.stopPropagation();
     const item = timelineItems.find(i => i.id === itemId);
     if (!item) return;
-    
-    // Capture pointer to allow dragging outside element
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
-    
     setSelectedItemId(itemId);
     setActivePropertyTab("text");
     const rect = playerContainerRef.current?.getBoundingClientRect();
@@ -138,7 +202,6 @@ export default function VideoEditor() {
   };
 
   const handleGlobalPointerMove = (e: PointerEvent) => {
-    // Handle Canvas Transform
     if (transformMode !== 'none' && selectedItemId) {
       const rect = playerContainerRef.current?.getBoundingClientRect();
       if (!rect) return;
@@ -166,14 +229,11 @@ export default function VideoEditor() {
       }));
     }
 
-    // Handle Timeline Custom Drag (Touch Support)
     if (timelineDrag.active && timelineDrag.itemId && timelineRef.current) {
       const dx = e.clientX - timelineDrag.startX;
       const newStartTime = Math.max(0, timelineDrag.initStartTime + (dx / timelineZoom));
-      
       const rect = timelineRef.current.getBoundingClientRect();
       const dropY = e.clientY - rect.top;
-      
       let newTrackId: TrackID | null = null;
       if (dropY >= 24 && dropY < 88) newTrackId = 'V1';
       else if (dropY >= 88 && dropY < 152) newTrackId = 'A1';
@@ -200,7 +260,6 @@ export default function VideoEditor() {
     }
   };
 
-  // 5. Timeline Engine Actions
   const handleTimelinePointerDown = (e: PointerEvent, item: TimelineItem) => {
     e.stopPropagation();
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
@@ -210,7 +269,7 @@ export default function VideoEditor() {
   };
 
   const handleTimelineClick = (e: ReactMouseEvent<HTMLDivElement>) => {
-    if (timelineDrag.active) return; // Prevent seek if just dragged
+    if (timelineDrag.active) return; 
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const time = clickX / timelineZoom;
@@ -252,9 +311,6 @@ export default function VideoEditor() {
     return `${hours}:${minutes}:${seconds}`;
   };
 
-  const activeTextItems = timelineItems.filter(i => i.trackId === 'T1' && currentTime >= i.startTime && currentTime < i.startTime + i.duration);
-  const activeVideoItem = timelineItems.find(i => i.trackId === 'V1' && currentTime >= i.startTime && currentTime < i.startTime + i.duration);
-
   return (
     <div 
       className="h-screen w-full flex flex-col bg-[var(--color-bento-bg)] p-2 md:p-4 md:space-y-4 space-y-2 text-white font-sans overflow-hidden animate-fade-in touch-none"
@@ -271,31 +327,28 @@ export default function VideoEditor() {
           </Link>
           <div className="flex flex-col">
             <h1 className="text-sm font-bold flex items-center">
-              Mobile_Touch_Editor <i className="fas fa-mobile-alt ml-2 text-[10px] text-blue-400"></i>
+              True_Canvas_Engine <i className="fas fa-paint-brush ml-2 text-[10px] text-pink-400"></i>
             </h1>
-            <span className="text-[10px] text-green-400 font-bold hidden md:block">Universal PWA Engine Online</span>
+            <span className="text-[10px] text-green-400 font-bold hidden md:block">Real-time Compositing Active</span>
           </div>
         </div>
         
-        {/* Mobile Sidebar Toggle */}
-        <button 
-          className="md:hidden bento-btn w-10 h-10 flex items-center justify-center"
-          onClick={() => setShowMobileSidebar(!showMobileSidebar)}
-        >
-          <i className="fas fa-bars"></i>
-        </button>
+        {/* Hardware / Export Badges */}
+        <div className="flex items-center space-x-2">
+           <button onClick={exportSnapshot} className="bento-btn-accent px-4 py-1 text-xs flex items-center bg-pink-600 hover:bg-pink-500 shadow-[0_0_15px_rgba(236,72,153,0.5)]"><i className="fas fa-camera mr-2"></i> Export Frame (Snapshot)</button>
+           <button className="md:hidden bento-btn w-10 h-10 flex items-center justify-center" onClick={() => setShowMobileSidebar(!showMobileSidebar)}><i className="fas fa-bars"></i></button>
+        </div>
       </header>
 
-      {/* 2. Main Workspace (Responsive Flex) */}
+      {/* 2. Main Workspace */}
       <div className="flex-1 flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4 min-h-0 relative">
         
-        {/* Left: Asset Library (Hidden on mobile unless toggled) */}
+        {/* Left: Asset Library */}
         <aside className={`w-full md:w-72 bento-card flex flex-col shrink-0 absolute md:relative z-50 md:z-auto bg-[var(--color-bento-bg)] md:bg-transparent h-full md:h-auto transition-transform ${showMobileSidebar ? 'translate-x-0' : '-translate-x-[110%] md:translate-x-0'}`}>
           <div className="flex border-b border-[var(--color-bento-border)] p-2 space-x-1">
             <button onClick={() => setActiveAssetTab("media")} className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${activeAssetTab === "media" ? "bg-[#262626] text-white shadow-sm" : "text-[var(--color-bento-muted)] hover:text-white"}`}>Media</button>
             <button onClick={() => setActiveAssetTab("text")} className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${activeAssetTab === "text" ? "bg-[#262626] text-white shadow-sm" : "text-[var(--color-bento-muted)] hover:text-white"}`}>Text</button>
           </div>
-          
           <div className="flex-1 p-4 overflow-y-auto">
             {activeAssetTab === "media" && (
               <div className="space-y-4">
@@ -325,41 +378,46 @@ export default function VideoEditor() {
               </div>
             )}
           </div>
-          {/* Close Sidebar button for mobile */}
           <button className="md:hidden absolute bottom-4 left-4 right-4 bento-btn-accent py-3 font-bold" onClick={() => setShowMobileSidebar(false)}>Close Library</button>
         </aside>
 
-        {/* Center: Video Player */}
+        {/* Center: True Canvas Compositor Player */}
         <main className="flex-1 bento-card flex flex-col p-2 md:p-4 relative min-w-0">
           <div 
             ref={playerContainerRef}
-            className="flex-1 bg-[#050505] rounded-xl overflow-hidden relative flex items-center justify-center border border-[#262626] shadow-inner touch-none"
+            className="flex-1 bg-[#050505] rounded-xl overflow-hidden relative border border-[#262626] shadow-inner touch-none cursor-crosshair"
             onClick={() => { if(transformMode === 'none') setSelectedItemId(null); }}
           >
-            <div className="w-full h-full relative overflow-hidden flex items-center justify-center bg-black pointer-events-none">
-               <video ref={videoPlayerRef} className="absolute inset-0 w-full h-full object-contain pointer-events-auto" style={{ filter: activeVideoItem?.filter || 'none' }} onClick={(e) => { e.stopPropagation(); togglePlay(); }} muted={true} />
-               {!activeVideoItem && <div className="absolute inset-0 flex flex-col items-center justify-center opacity-20"><i className="fas fa-film text-4xl md:text-6xl mb-4"></i></div>}
-            </div>
+            {/* The Hidden Source Video (Do not remove, needed for canvas to read pixels) */}
+            <video ref={videoPlayerRef} className="hidden opacity-0 pointer-events-none" muted={true} crossOrigin="anonymous" />
+            
+            {/* The Master Output Canvas */}
+            <canvas ref={canvasRef} className="absolute inset-0 w-full h-full bg-black pointer-events-none" />
 
-            {/* Transform Canvas Layer */}
+            {!activeVideoItem && <div className="absolute inset-0 flex flex-col items-center justify-center opacity-20 pointer-events-none"><i className="fas fa-film text-4xl md:text-6xl mb-4"></i></div>}
+
+            {/* Transform Controls Overlay (Invisible bounds, handles only) */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
               {activeTextItems.map(textItem => {
                 const isSelected = selectedItemId === textItem.id;
                 return (
                   <div 
                     key={textItem.id} 
-                    className={`absolute inline-block pointer-events-auto select-none touch-none ${isSelected ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-black/50' : ''}`}
+                    className={`absolute inline-block pointer-events-auto select-none touch-none ${isSelected ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-transparent' : ''}`}
                     style={{ left: `${textItem.x}%`, top: `${textItem.y}%`, transform: `translate(-50%, -50%) rotate(${textItem.rotation}deg)`, cursor: isSelected ? (transformMode === 'drag' ? 'grabbing' : 'grab') : 'pointer' }}
                     onPointerDown={(e) => startTransform(e, 'drag', textItem.id)}
                   >
-                    <div style={{ fontSize: `${textItem.fontSize}px`, color: textItem.color, fontFamily: textItem.fontFamily, filter: textItem.filter || 'none', whiteSpace: 'nowrap', textShadow: '0 4px 8px rgba(0,0,0,0.8)' }}>{textItem.text}</div>
+                    {/* Ghost text to give the bounding box correct dimensions, but color is transparent since Canvas draws the real text */}
+                    <div style={{ fontSize: `${textItem.fontSize}px`, color: 'transparent', fontFamily: textItem.fontFamily, whiteSpace: 'nowrap' }}>{textItem.text}</div>
+                    
                     {isSelected && (
                       <>
-                        <div className="absolute -top-8 md:-top-12 left-1/2 -translate-x-1/2 w-6 h-6 bg-purple-500 rounded-full border-2 border-white flex items-center justify-center" onPointerDown={(e) => startTransform(e, 'rotate', textItem.id)}></div>
-                        <div className="absolute -top-2 -left-2 w-4 h-4 bg-white border-2 border-blue-500" onPointerDown={(e) => startTransform(e, 'scale', textItem.id)}></div>
-                        <div className="absolute -top-2 -right-2 w-4 h-4 bg-white border-2 border-blue-500" onPointerDown={(e) => startTransform(e, 'scale', textItem.id)}></div>
-                        <div className="absolute -bottom-2 -left-2 w-4 h-4 bg-white border-2 border-blue-500" onPointerDown={(e) => startTransform(e, 'scale', textItem.id)}></div>
-                        <div className="absolute -bottom-2 -right-2 w-4 h-4 bg-white border-2 border-blue-500" onPointerDown={(e) => startTransform(e, 'scale', textItem.id)}></div>
+                        <div className="absolute -top-8 md:-top-12 left-1/2 -translate-x-1/2 w-6 h-6 bg-purple-500 rounded-full border-2 border-white flex items-center justify-center shadow-lg" onPointerDown={(e) => startTransform(e, 'rotate', textItem.id)}></div>
+                        <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-0.5 h-6 bg-blue-500 pointer-events-none"></div>
+                        <div className="absolute -top-2 -left-2 w-4 h-4 bg-white border-2 border-blue-500 shadow-sm" onPointerDown={(e) => startTransform(e, 'scale', textItem.id)}></div>
+                        <div className="absolute -top-2 -right-2 w-4 h-4 bg-white border-2 border-blue-500 shadow-sm" onPointerDown={(e) => startTransform(e, 'scale', textItem.id)}></div>
+                        <div className="absolute -bottom-2 -left-2 w-4 h-4 bg-white border-2 border-blue-500 shadow-sm" onPointerDown={(e) => startTransform(e, 'scale', textItem.id)}></div>
+                        <div className="absolute -bottom-2 -right-2 w-4 h-4 bg-white border-2 border-blue-500 shadow-sm" onPointerDown={(e) => startTransform(e, 'scale', textItem.id)}></div>
                       </>
                     )}
                   </div>
@@ -379,7 +437,7 @@ export default function VideoEditor() {
           </div>
         </main>
 
-        {/* Right: Properties Panel (Hidden on mobile if not editing text) */}
+        {/* Right: Properties Panel */}
         <aside className={`w-full md:w-80 bento-card flex-col shrink-0 overflow-hidden ${selectedItem && hwProfile?.isMobile ? 'flex' : (hwProfile?.isMobile ? 'hidden' : 'flex')}`}>
           <div className="flex border-b border-[var(--color-bento-border)] p-2 space-x-1 bg-[#141414]">
             <button onClick={() => setActivePropertyTab("basic")} className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-md ${activePropertyTab === "basic" ? "bg-[#262626] text-white" : "text-[var(--color-bento-muted)]"}`}>Props</button>
@@ -410,7 +468,7 @@ export default function VideoEditor() {
         </aside>
       </div>
 
-      {/* 3. Bottom Timeline Engine (Mobile Touch Enabled) */}
+      {/* 3. Bottom Timeline */}
       <div className="h-48 md:h-72 bento-card shrink-0 flex flex-col relative overflow-hidden select-none touch-none">
         <div className="h-8 md:h-10 border-b border-[var(--color-bento-border)] flex items-center justify-between px-2 md:px-4 bg-[#141414]">
           <div className="flex space-x-2">
@@ -429,8 +487,6 @@ export default function VideoEditor() {
           </div>
 
           <div ref={timelineRef} className="flex-1 bg-[#0f0f0f] relative overflow-x-auto overflow-y-hidden" style={{ backgroundImage: 'linear-gradient(90deg, #1a1a1a 1px, transparent 1px)', backgroundSize: `${timelineZoom}px 100%` }} onClick={(e) => { if (e.target === e.currentTarget) handleTimelineClick(e); }}>
-            
-            {/* V1 Render */}
             <div className="absolute top-[24px] left-0 right-0 h-10 md:h-16 pointer-events-none">
               {timelineItems.filter(i => i.trackId === 'V1').map(clip => (
                 <div key={clip.id} onPointerDown={(e) => handleTimelinePointerDown(e, clip)} className={`absolute h-8 md:h-14 bg-blue-600/80 rounded border pointer-events-auto flex items-center px-2 overflow-hidden shadow-sm touch-none ${selectedItemId === clip.id ? 'border-white ring-2 ring-white/50 z-20' : 'border-blue-400 z-10'} ${timelineDrag.itemId === clip.id ? 'opacity-50 scale-105' : 'opacity-100'}`} style={{ left: clip.startTime * timelineZoom, width: Math.max(10, clip.duration * timelineZoom) }}>
@@ -438,8 +494,14 @@ export default function VideoEditor() {
                 </div>
               ))}
             </div>
+            <div className="absolute top-[64px] md:top-[88px] left-0 right-0 h-10 md:h-16 pointer-events-none">
+              {timelineItems.filter(i => i.trackId === 'T1').map(clip => (
+                <div key={clip.id} onPointerDown={(e) => handleTimelinePointerDown(e, clip)} className={`absolute h-8 md:h-10 bg-purple-600/80 rounded border pointer-events-auto flex items-center justify-center overflow-hidden shadow-sm touch-none ${selectedItemId === clip.id ? 'border-white ring-2 ring-white/50 z-20' : 'border-purple-400 z-10'} ${timelineDrag.itemId === clip.id ? 'opacity-50 scale-105' : 'opacity-100'}`} style={{ left: clip.startTime * timelineZoom, width: Math.max(10, clip.duration * timelineZoom) }}>
+                  <span className="text-[10px] font-bold text-white truncate">"{clip.text}"</span>
+                </div>
+              ))}
+            </div>
 
-            {/* Playhead */}
             <div className="absolute top-0 bottom-0 w-[2px] bg-red-500 z-40 pointer-events-none" style={{ left: currentTime * timelineZoom }}>
                <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[8px] border-transparent border-t-red-500 absolute -top-0 -translate-x-1/2"></div>
             </div>
@@ -467,7 +529,6 @@ export default function VideoEditor() {
           </div>
         </div>
       )}
-
     </div>
   );
 }
