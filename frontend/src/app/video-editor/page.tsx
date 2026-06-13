@@ -58,6 +58,32 @@ export default function VideoEditor() {
     format: 'webm'
   });
 
+  const [copilotPrompt, setCopilotPrompt] = useState("");
+  const [isCopilotRunning, setIsCopilotRunning] = useState(false);
+
+  const runCopilot = async () => {
+    if (!copilotPrompt) return;
+    setIsCopilotRunning(true);
+    try {
+      const res = await fetch("/api/ai-edit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: copilotPrompt, timeline: timelineItems })
+      });
+      const data = await res.json();
+      if (data.timeline) {
+        setTimelineItems(data.timeline);
+        setCopilotPrompt("");
+      } else {
+        alert("Failed to edit timeline: " + (data.error || "Unknown error"));
+      }
+    } catch (e) {
+      alert("Error contacting AI copilot");
+    } finally {
+      setIsCopilotRunning(false);
+    }
+  };
+
   const selectedItem = timelineItems.find(i => i.id === selectedItemId);
 
   useEffect(() => {
@@ -447,8 +473,31 @@ export default function VideoEditor() {
           <div className="flex border-b border-[var(--color-bento-border)] p-2 space-x-1">
             <button onClick={() => setActiveAssetTab("media")} className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${activeAssetTab === "media" ? "bg-[#262626] text-white shadow-sm" : "text-[var(--color-bento-muted)] hover:text-white"}`}>Media</button>
             <button onClick={() => setActiveAssetTab("text")} className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${activeAssetTab === "text" ? "bg-[#262626] text-white shadow-sm" : "text-[var(--color-bento-muted)] hover:text-white"}`}>Text</button>
+            <button onClick={() => setActiveAssetTab("copilot")} className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${activeAssetTab === "copilot" ? "bg-blue-500/20 text-blue-400 shadow-sm border border-blue-500/30" : "text-[var(--color-bento-muted)] hover:text-blue-400"}`}><i className="fas fa-robot mr-1"></i> AI</button>
           </div>
           <div className="flex-1 p-4 overflow-y-auto">
+            {activeAssetTab === "copilot" && (
+              <div className="space-y-4 flex flex-col h-full">
+                <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-xs text-blue-300 leading-relaxed">
+                  <i className="fas fa-sparkles mr-2 text-yellow-400"></i>
+                  <strong>AI Copilot</strong><br/>
+                  Describe what you want me to do with your timeline, and I'll edit it instantly.
+                </div>
+                <textarea 
+                  value={copilotPrompt} 
+                  onChange={(e) => setCopilotPrompt(e.target.value)}
+                  placeholder="E.g., Turn all video clips black and white, or add a text layer that says 'Hello World'..."
+                  className="w-full h-32 bento-input text-xs resize-none"
+                />
+                <button 
+                  onClick={runCopilot} 
+                  disabled={isCopilotRunning || !copilotPrompt}
+                  className="w-full bento-btn-accent py-3 font-bold flex items-center justify-center disabled:opacity-50"
+                >
+                  {isCopilotRunning ? <><i className="fas fa-circle-notch fa-spin mr-2"></i> Thinking...</> : <><i className="fas fa-magic mr-2"></i> Magic Edit</>}
+                </button>
+              </div>
+            )}
             {activeAssetTab === "media" && (
               <div className="space-y-4">
                 <input type="file" multiple accept="video/*,audio/*,image/*" ref={fileInputRef} className="hidden" onChange={handleFileSelect} />
