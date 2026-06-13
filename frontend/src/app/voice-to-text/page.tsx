@@ -34,22 +34,22 @@ export default function VoiceToText() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-20 animate-fade-in">
+    <div className="max-w-4xl mx-auto space-y-8 pb-20">
       
       <div className="mb-8">
-        <h1 className="text-3xl font-extrabold text-gray-800 tracking-tight">Voice to Text 🎙️</h1>
-        <p className="text-gray-500 mt-2">Transcribe audio into highly accurate text using advanced AI.</p>
+        <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">Voice to Text</h1>
+        <p className="text-slate-500 mt-2">Transcribe audio into highly accurate text using advanced AI.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         
         {/* Upload Section */}
-        <div className="clay-card p-8 flex flex-col items-center justify-center text-center border-2 border-dashed border-gray-300">
-          <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 text-3xl mb-6">
+        <div className="clay-card p-8 flex flex-col items-center justify-center text-center">
+          <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 text-2xl mb-6">
             <i className="fas fa-cloud-upload-alt"></i>
           </div>
-          <h3 className="text-xl font-bold text-gray-700 mb-2">Upload Audio File</h3>
-          <p className="text-sm text-gray-500 mb-6">MP3, WAV, M4A up to 50MB</p>
+          <h3 className="text-xl font-bold text-slate-700 mb-2">Upload Audio File</h3>
+          <p className="text-sm text-slate-500 mb-6">MP3, WAV, M4A up to 50MB</p>
           
           <input 
             type="file" 
@@ -66,8 +66,8 @@ export default function VoiceToText() {
           </label>
           
           {file && (
-            <div className="mt-6 p-4 bg-white rounded-xl shadow-sm text-sm text-gray-600 font-medium flex items-center">
-              <i className="fas fa-file-audio text-blue-500 mr-2"></i>
+            <div className="mt-6 p-4 bg-slate-50 rounded-xl border border-slate-100 text-sm text-slate-600 font-medium flex items-center">
+              <i className="fas fa-file-audio text-slate-400 mr-2"></i>
               {file.name}
             </div>
           )}
@@ -76,22 +76,19 @@ export default function VoiceToText() {
         {/* Record Section */}
         <div className="clay-card p-8 flex flex-col items-center justify-center text-center">
           <div className="mb-8 relative">
-            {isRecording && (
-              <div className="absolute -inset-4 bg-red-100 rounded-full animate-ping opacity-75"></div>
-            )}
             <button 
               onClick={isRecording ? stopRecording : startRecording}
-              className={`relative z-10 w-24 h-24 rounded-full flex items-center justify-center text-3xl transition-all shadow-lg
-                ${isRecording ? 'bg-red-500 text-white shadow-red-500/50' : 'clay-btn text-red-500 hover:text-red-600'}`}
+              className={`relative z-10 w-24 h-24 rounded-full flex items-center justify-center text-3xl transition-all
+                ${isRecording ? 'bg-red-500 text-white shadow-lg' : 'clay-btn text-slate-700 hover:text-slate-900'}`}
             >
               <i className={`fas ${isRecording ? 'fa-stop' : 'fa-microphone'}`}></i>
             </button>
           </div>
           
-          <h3 className="text-xl font-bold text-gray-700 mb-2">
+          <h3 className="text-xl font-bold text-slate-700 mb-2">
             {isRecording ? "Recording..." : "Record Live Audio"}
           </h3>
-          <p className="text-2xl font-mono text-gray-600 font-bold tracking-widest">
+          <p className="text-2xl font-mono text-slate-600 font-bold tracking-widest">
             {formatTime(recordingTime)}
           </p>
         </div>
@@ -100,11 +97,11 @@ export default function VoiceToText() {
 
       {/* Settings Section */}
       <div className="clay-card p-8">
-        <h3 className="text-lg font-bold text-gray-700 mb-6">Transcription Settings</h3>
+        <h3 className="text-lg font-bold text-slate-700 mb-6">Transcription Settings</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="text-sm font-bold text-gray-600">Audio Language</label>
+            <label className="text-sm font-bold text-slate-600">Audio Language</label>
             <div className="relative">
               <select className="clay-input w-full appearance-none">
                 <option>Auto-Detect</option>
@@ -113,25 +110,25 @@ export default function VoiceToText() {
                 <option>Spanish</option>
                 <option>French</option>
               </select>
-              <i className="fas fa-chevron-down absolute right-4 top-4 text-gray-400 pointer-events-none"></i>
+              <i className="fas fa-chevron-down absolute right-4 top-4 text-slate-400 pointer-events-none"></i>
             </div>
           </div>
           
           <div className="space-y-2">
-            <label className="text-sm font-bold text-gray-600">Model Output</label>
+            <label className="text-sm font-bold text-slate-600">Model Output</label>
             <div className="relative">
               <select className="clay-input w-full appearance-none">
                 <option>Standard Text</option>
                 <option>Subtitles (SRT)</option>
                 <option>Subtitles (VTT)</option>
               </select>
-              <i className="fas fa-chevron-down absolute right-4 top-4 text-gray-400 pointer-events-none"></i>
+              <i className="fas fa-chevron-down absolute right-4 top-4 text-slate-400 pointer-events-none"></i>
             </div>
           </div>
         </div>
 
         <div className="mt-8 flex justify-end">
-          <button className="clay-btn-primary px-10 py-3 font-bold text-lg flex items-center shadow-blue-500/50">
+          <button className="clay-btn-primary px-10 py-3 font-bold flex items-center">
             <i className="fas fa-magic mr-2"></i> Start Transcription
           </button>
         </div>
