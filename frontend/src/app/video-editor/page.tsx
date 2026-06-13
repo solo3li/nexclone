@@ -4,8 +4,8 @@ import { useState, useRef, useEffect, MouseEvent as ReactMouseEvent, PointerEven
 import Link from "next/link";
 
 interface LocalMedia { id: string; name: string; url: string; type: string; }
-type TrackID = 'V1' | 'A1' | 'T1';
-interface TimelineItem { id: string; trackId: TrackID; mediaId?: string; url?: string; name?: string; text?: string; startTime: number; duration: number; sourceOffset: number; filter?: string; x?: number; y?: number; fontSize?: number; color?: string; fontFamily?: string; rotation?: number; }
+type TrackID = 'V2' | 'V1' | 'A1' | 'T1';
+interface TimelineItem { id: string; trackId: TrackID; mediaId?: string; url?: string; name?: string; text?: string; startTime: number; duration: number; sourceOffset: number; filter?: string; x?: number; y?: number; width?: number; height?: number; fontSize?: number; color?: string; fontFamily?: string; rotation?: number; mediaType?: 'video' | 'audio' | 'image'; }
 type TransformMode = 'none' | 'drag' | 'scale' | 'rotate';
 type HwProfile = { ram: number; cores: number; tier: 'Pro' | 'Standard' | 'Limited'; showModal: boolean; maxRes: string; maxDur: number; isMobile: boolean };
 
@@ -38,6 +38,9 @@ export default function VideoEditor() {
   const timelineRef = useRef<HTMLDivElement>(null);
 
   const videoPlayerRef = useRef<HTMLVideoElement>(null);
+  const videoPlayerV2Ref = useRef<HTMLVideoElement>(null);
+  const audioPlayerA1Ref = useRef<HTMLAudioElement>(null);
+  const imageCacheRef = useRef<{ [url: string]: HTMLImageElement }>({});
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const playheadIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -117,11 +120,13 @@ export default function VideoEditor() {
       const lastItem = trackItems.reduce((prev, current) => (prev.startTime + prev.duration > current.startTime + current.duration) ? prev : current);
       start = lastItem.startTime + lastItem.duration;
     }
-    const newItem: TimelineItem = { id: Math.random().toString(36).substr(2, 9), trackId, mediaId: media.id, url: media.url, name: media.name, startTime: start, duration: 10, sourceOffset: 0 };
+    const newItem: TimelineItem = { id: Math.random().toString(36).substr(2, 9), trackId, mediaId: media.id, url: media.url, name: media.name, startTime: start, duration: 10, sourceOffset: 0, mediaType: media.type as any, x: 50, y: 50, width: 100, height: 100 };
     setTimelineItems(prev => [...prev, newItem]);
-    const el = document.createElement(media.type === 'audio' ? 'audio' : 'video');
+    if (media.type === 'video' || media.type === 'audio') {
+      const el = document.createElement(media.type === 'audio' ? 'audio' : 'video');
     el.src = media.url;
     el.onloadedmetadata = () => setTimelineItems(prev => prev.map(i => i.id === newItem.id ? { ...i, duration: el.duration } : i));
+    }
   };
 
   const addTextToTimeline = () => {
@@ -141,21 +146,34 @@ export default function VideoEditor() {
   }, [isPlaying]);
 
   useEffect(() => {
-    const activeVideo = timelineItems.find(i => i.trackId === 'V1' && currentTime >= i.startTime && currentTime < i.startTime + i.duration);
-    if (videoPlayerRef.current) {
-      if (activeVideo) {
-        if (videoPlayerRef.current.src !== activeVideo.url) videoPlayerRef.current.src = activeVideo.url || '';
-        const expectedTime = (currentTime - activeVideo.startTime) + activeVideo.sourceOffset;
-        if (Math.abs(videoPlayerRef.current.currentTime - expectedTime) > 0.2) videoPlayerRef.current.currentTime = expectedTime;
-        if (isPlaying && videoPlayerRef.current.paused) videoPlayerRef.current.play().catch(() => {});
-        else if (!isPlaying && !videoPlayerRef.current.paused) videoPlayerRef.current.pause();
-      } else { videoPlayerRef.current.pause(); videoPlayerRef.current.src = ""; }
-    }
+    const activeV1 = timelineItems.find(i => i.trackId === 'V1' && currentTime >= i.startTime && currentTime < i.startTime + i.duration);
+    const activeV2 = timelineItems.find(i => i.trackId === 'V2' && currentTime >= i.startTime && currentTime < i.startTime + i.duration);
+    const activeA1 = timelineItems.find(i => i.trackId === 'A1' && currentTime >= i.startTime && currentTime < i.startTime + i.duration);
+    
+    const syncPlayer = (item: TimelineItem | undefined, ref: React.RefObject<HTMLMediaElement | null>) => {
+      if (ref.current) {
+        if (item && (item.mediaType === 'video' || item.mediaType === 'audio')) {
+          if (ref.current.src !== item.url) ref.current.src = item.url || '';
+          const expectedTime = (currentTime - item.startTime) + item.sourceOffset;
+          if (Math.abs(ref.current.currentTime - expectedTime) > 0.2) ref.current.currentTime = expectedTime;
+          if (isPlaying && ref.current.paused) ref.current.play().catch(() => {});
+          else if (!isPlaying && !ref.current.paused) ref.current.pause();
+        } else {
+          ref.current.pause(); ref.current.src = "";
+        }
+      }
+    };
+
+    syncPlayer(activeV1, videoPlayerRef);
+    syncPlayer(activeV2, videoPlayerV2Ref);
+    syncPlayer(activeA1, audioPlayerA1Ref);
   }, [currentTime, timelineItems, isPlaying]);
 
   // --- CANVAS RENDERING ENGINE ---
   const activeTextItems = timelineItems.filter(i => i.trackId === 'T1' && currentTime >= i.startTime && currentTime < i.startTime + i.duration);
-  const activeVideoItem = timelineItems.find(i => i.trackId === 'V1' && currentTime >= i.startTime && currentTime < i.startTime + i.duration);
+  const activeV1 = timelineItems.find(i => i.trackId === 'V1' && currentTime >= i.startTime && currentTime < i.startTime + i.duration);
+  const activeV2 = timelineItems.find(i => i.trackId === 'V2' && currentTime >= i.startTime && currentTime < i.startTime + i.duration);
+  const activeVisualItems = [activeV1, activeV2].filter(Boolean) as TimelineItem[];
 
   // We need a stable reference to isRendering inside the loop to lock resolution
   const isRenderingRef = useRef(isRendering);
@@ -180,17 +198,48 @@ export default function VideoEditor() {
       
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      if (activeVideoItem && videoPlayerRef.current && videoPlayerRef.current.readyState >= 2) {
-        const videoRatio = videoPlayerRef.current.videoWidth / videoPlayerRef.current.videoHeight;
-        const canvasRatio = canvas.width / canvas.height;
-        let drawW = canvas.width, drawH = canvas.height, drawX = 0, drawY = 0;
-        if (videoRatio > canvasRatio) { drawH = canvas.width / videoRatio; drawY = (canvas.height - drawH) / 2; }
-        else { drawW = canvas.height * videoRatio; drawX = (canvas.width - drawW) / 2; }
+      activeVisualItems.forEach(item => {
+         const drawScaledElement = (element: any, elWidth: number, elHeight: number) => {
+            ctx.save();
+            const pxX = (item.x || 50) * canvas.width / 100;
+            const pxY = (item.y || 50) * canvas.height / 100;
+            ctx.translate(pxX, pxY);
+            ctx.rotate(((item.rotation || 0) * Math.PI) / 180);
+            
+            const scaleModifier = (item.width || 100) / 100;
+            const elRatio = elWidth / elHeight;
+            const canvasRatio = canvas.width / canvas.height;
+            let drawW = canvas.width * scaleModifier;
+            let drawH = canvas.height * scaleModifier;
+            
+            if (item.trackId === 'V1' && item.width === 100 && item.x === 50 && item.y === 50) {
+               if (elRatio > canvasRatio) { drawH = canvas.width / elRatio; }
+               else { drawW = canvas.height * elRatio; }
+            } else {
+               drawH = drawW / elRatio;
+            }
+            
+            ctx.filter = item.filter || 'none';
+            ctx.drawImage(element, -drawW / 2, -drawH / 2, drawW, drawH);
+            ctx.restore();
+         };
 
-        ctx.filter = activeVideoItem.filter || 'none';
-        ctx.drawImage(videoPlayerRef.current, drawX, drawY, drawW, drawH);
-        ctx.filter = 'none'; 
-      }
+         if (item.mediaType === 'image' && item.url) {
+            if (!imageCacheRef.current[item.url]) {
+               const img = new Image();
+               img.crossOrigin = "anonymous";
+               img.src = item.url;
+               imageCacheRef.current[item.url] = img;
+            }
+            const img = imageCacheRef.current[item.url];
+            if (img.complete && img.naturalWidth) drawScaledElement(img, img.naturalWidth, img.naturalHeight);
+         } else if (item.mediaType === 'video') {
+            const playerRef = item.trackId === 'V1' ? videoPlayerRef : videoPlayerV2Ref;
+            if (playerRef.current && playerRef.current.readyState >= 2) {
+               drawScaledElement(playerRef.current, playerRef.current.videoWidth, playerRef.current.videoHeight);
+            }
+         }
+      });
 
       activeTextItems.forEach(textItem => {
         if (!textItem.text) return;
@@ -358,9 +407,11 @@ export default function VideoEditor() {
       const rect = timelineRef.current.getBoundingClientRect();
       const dropY = e.clientY - rect.top;
       let newTrackId: TrackID | null = null;
-      if (dropY >= 24 && dropY < 88) newTrackId = 'V1';
-      else if (dropY >= 88 && dropY < 152) newTrackId = 'A1';
-      else if (dropY >= 152) newTrackId = 'T1';
+      // Support V2, V1, A1, T1 heights dynamically (approx heights)
+      if (dropY >= 24 && dropY < 88) newTrackId = 'V2';
+      else if (dropY >= 88 && dropY < 152) newTrackId = 'V1';
+      else if (dropY >= 152 && dropY < 216) newTrackId = 'A1';
+      else if (dropY >= 216) newTrackId = 'T1';
 
       setTimelineItems(prev => prev.map(item => {
         if (item.id === timelineDrag.itemId) {
@@ -420,7 +471,7 @@ export default function VideoEditor() {
 
   const isCompatibleTrack = (item: TimelineItem, track: TrackID) => {
     if (item.text !== undefined && track === 'T1') return true;
-    if (item.mediaId !== undefined && (track === 'V1' || track === 'A1')) return true;
+    if (item.mediaId !== undefined && (track === 'V1' || track === 'V2' || track === 'A1')) return true;
     return false;
   };
 
@@ -537,30 +588,36 @@ export default function VideoEditor() {
             onClick={() => { if(transformMode === 'none' && !isRendering) setSelectedItemId(null); }}
           >
             <video ref={videoPlayerRef} className="hidden opacity-0 pointer-events-none" muted={true} crossOrigin="anonymous" />
+   <video ref={videoPlayerV2Ref} className="hidden opacity-0 pointer-events-none" muted={true} crossOrigin="anonymous" />
+   <audio ref={audioPlayerA1Ref} className="hidden opacity-0 pointer-events-none" crossOrigin="anonymous" />
             <canvas ref={canvasRef} className="absolute inset-0 w-full h-full bg-black pointer-events-none" />
 
-            {!activeVideoItem && <div className="absolute inset-0 flex flex-col items-center justify-center opacity-20 pointer-events-none"><i className="fas fa-film text-4xl md:text-6xl mb-4"></i></div>}
+            {!activeV1 && !activeV2 && <div className="absolute inset-0 flex flex-col items-center justify-center opacity-20 pointer-events-none"><i className="fas fa-film text-4xl md:text-6xl mb-4"></i></div>}
 
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
-              {activeTextItems.map(textItem => {
-                const isSelected = selectedItemId === textItem.id && !isRendering;
+              {[...activeVisualItems, ...activeTextItems].map(clip => {
+                const isSelected = selectedItemId === clip.id && !isRendering;
+                // If V1 is fullscreen, we only want it clickable if selected or if clicking empty space selects it (handled separately)
+                // But let's allow it
+                if (clip.trackId === 'V1' && !isSelected && clip.width === 100 && clip.x === 50 && clip.y === 50) return null; // Let background be background until clicked via timeline
+                
                 return (
                   <div 
-                    key={textItem.id} 
+                    key={clip.id} 
                     className={`absolute inline-block pointer-events-auto select-none touch-none ${isSelected ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-transparent' : ''}`}
-                    style={{ left: `${textItem.x}%`, top: `${textItem.y}%`, transform: `translate(-50%, -50%) rotate(${textItem.rotation}deg)`, cursor: isSelected ? (transformMode === 'drag' ? 'grabbing' : 'grab') : 'pointer' }}
-                    onPointerDown={(e) => { if (!isRendering) startTransform(e, 'drag', textItem.id); }}
+                    style={{ left: `${clip.x || 50}%`, top: `${clip.y || 50}%`, transform: `translate(-50%, -50%) rotate(${clip.rotation || 0}deg)`, cursor: isSelected ? (transformMode === 'drag' ? 'grabbing' : 'grab') : 'pointer', width: clip.trackId === 'T1' ? 'auto' : `${clip.width || 100}%`, height: clip.trackId === 'T1' ? 'auto' : `${clip.height || 100}%` }}
+                    onPointerDown={(e) => { if (!isRendering) startTransform(e, 'drag', clip.id); }}
                   >
-                    <div style={{ fontSize: `${textItem.fontSize}px`, color: 'transparent', fontFamily: textItem.fontFamily, whiteSpace: 'nowrap' }}>{textItem.text}</div>
+                    {clip.trackId === 'T1' && <div style={{ fontSize: `${clip.fontSize}px`, color: 'transparent', fontFamily: clip.fontFamily, whiteSpace: 'nowrap' }}>{clip.text}</div>}
                     
                     {isSelected && (
                       <>
-                        <div className="absolute -top-8 md:-top-12 left-1/2 -translate-x-1/2 w-6 h-6 bg-purple-500 rounded-full border-2 border-white flex items-center justify-center shadow-lg" onPointerDown={(e) => startTransform(e, 'rotate', textItem.id)}></div>
+                        <div className="absolute -top-8 md:-top-12 left-1/2 -translate-x-1/2 w-6 h-6 bg-purple-500 rounded-full border-2 border-white flex items-center justify-center shadow-lg" onPointerDown={(e) => startTransform(e, 'rotate', clip.id)}></div>
                         <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-0.5 h-6 bg-blue-500 pointer-events-none"></div>
-                        <div className="absolute -top-2 -left-2 w-4 h-4 bg-white border-2 border-blue-500 shadow-sm" onPointerDown={(e) => startTransform(e, 'scale', textItem.id)}></div>
-                        <div className="absolute -top-2 -right-2 w-4 h-4 bg-white border-2 border-blue-500 shadow-sm" onPointerDown={(e) => startTransform(e, 'scale', textItem.id)}></div>
-                        <div className="absolute -bottom-2 -left-2 w-4 h-4 bg-white border-2 border-blue-500 shadow-sm" onPointerDown={(e) => startTransform(e, 'scale', textItem.id)}></div>
-                        <div className="absolute -bottom-2 -right-2 w-4 h-4 bg-white border-2 border-blue-500 shadow-sm" onPointerDown={(e) => startTransform(e, 'scale', textItem.id)}></div>
+                        <div className="absolute -top-2 -left-2 w-4 h-4 bg-white border-2 border-blue-500 shadow-sm" onPointerDown={(e) => startTransform(e, 'scale', clip.id)}></div>
+                        <div className="absolute -top-2 -right-2 w-4 h-4 bg-white border-2 border-blue-500 shadow-sm" onPointerDown={(e) => startTransform(e, 'scale', clip.id)}></div>
+                        <div className="absolute -bottom-2 -left-2 w-4 h-4 bg-white border-2 border-blue-500 shadow-sm" onPointerDown={(e) => startTransform(e, 'scale', clip.id)}></div>
+                        <div className="absolute -bottom-2 -right-2 w-4 h-4 bg-white border-2 border-blue-500 shadow-sm" onPointerDown={(e) => startTransform(e, 'scale', clip.id)}></div>
                       </>
                     )}
                   </div>
@@ -640,6 +697,7 @@ export default function VideoEditor() {
         <div className="flex-1 flex overflow-hidden relative">
           <div className="w-16 md:w-32 bg-[#0a0a0a] border-r border-[var(--color-bento-border)] z-30 flex flex-col divide-y divide-[#262626]">
             <div className="h-6 bg-[#141414]"></div>
+            <div className="h-10 md:h-16 flex items-center justify-center md:justify-start md:px-4 text-[10px] font-bold text-indigo-400"><i className="fas fa-layer-group md:mr-3"></i> <span className="hidden md:inline">V2</span></div>
             <div className="h-10 md:h-16 flex items-center justify-center md:justify-start md:px-4 text-[10px] font-bold text-blue-400"><i className="fas fa-video md:mr-3"></i> <span className="hidden md:inline">V1</span></div>
             <div className="h-10 md:h-16 flex items-center justify-center md:justify-start md:px-4 text-[10px] font-bold text-green-400"><i className="fas fa-music md:mr-3"></i> <span className="hidden md:inline">A1</span></div>
             <div className="h-10 flex items-center justify-center md:justify-start md:px-4 text-[10px] font-bold text-purple-400"><i className="fas fa-font md:mr-3"></i> <span className="hidden md:inline">T1</span></div>
@@ -647,13 +705,27 @@ export default function VideoEditor() {
 
           <div ref={timelineRef} className="flex-1 bg-[#0f0f0f] relative overflow-x-auto overflow-y-hidden" style={{ backgroundImage: 'linear-gradient(90deg, #1a1a1a 1px, transparent 1px)', backgroundSize: `${timelineZoom}px 100%` }} onClick={(e) => { if (e.target === e.currentTarget) handleTimelineClick(e); }}>
             <div className="absolute top-[24px] left-0 right-0 h-10 md:h-16 pointer-events-none">
+              {timelineItems.filter(i => i.trackId === 'V2').map(clip => (
+                <div key={clip.id} onPointerDown={(e) => handleTimelinePointerDown(e, clip)} className={`absolute h-8 md:h-14 bg-indigo-600/80 rounded border pointer-events-auto flex items-center px-2 overflow-hidden shadow-sm touch-none ${selectedItemId === clip.id ? 'border-white ring-2 ring-white/50 z-20' : 'border-indigo-400 z-10'} ${timelineDrag.itemId === clip.id ? 'opacity-50 scale-105' : 'opacity-100'}`} style={{ left: clip.startTime * timelineZoom, width: Math.max(10, clip.duration * timelineZoom) }}>
+                  <span className="text-[10px] font-bold text-white truncate">{clip.name || 'Overlay'}</span>
+                </div>
+              ))}
+            </div>
+            <div className="absolute top-[64px] md:top-[88px] left-0 right-0 h-10 md:h-16 pointer-events-none">
               {timelineItems.filter(i => i.trackId === 'V1').map(clip => (
                 <div key={clip.id} onPointerDown={(e) => handleTimelinePointerDown(e, clip)} className={`absolute h-8 md:h-14 bg-blue-600/80 rounded border pointer-events-auto flex items-center px-2 overflow-hidden shadow-sm touch-none ${selectedItemId === clip.id ? 'border-white ring-2 ring-white/50 z-20' : 'border-blue-400 z-10'} ${timelineDrag.itemId === clip.id ? 'opacity-50 scale-105' : 'opacity-100'}`} style={{ left: clip.startTime * timelineZoom, width: Math.max(10, clip.duration * timelineZoom) }}>
                   <span className="text-[10px] font-bold text-white truncate">{clip.name || 'Video'}</span>
                 </div>
               ))}
             </div>
-            <div className="absolute top-[64px] md:top-[88px] left-0 right-0 h-10 md:h-16 pointer-events-none">
+            <div className="absolute top-[104px] md:top-[152px] left-0 right-0 h-10 md:h-16 pointer-events-none">
+              {timelineItems.filter(i => i.trackId === 'A1').map(clip => (
+                <div key={clip.id} onPointerDown={(e) => handleTimelinePointerDown(e, clip)} className={`absolute h-8 md:h-14 bg-green-600/80 rounded border pointer-events-auto flex items-center px-2 overflow-hidden shadow-sm touch-none ${selectedItemId === clip.id ? 'border-white ring-2 ring-white/50 z-20' : 'border-green-400 z-10'} ${timelineDrag.itemId === clip.id ? 'opacity-50 scale-105' : 'opacity-100'}`} style={{ left: clip.startTime * timelineZoom, width: Math.max(10, clip.duration * timelineZoom) }}>
+                  <span className="text-[10px] font-bold text-white truncate">{clip.name || 'Audio'}</span>
+                </div>
+              ))}
+            </div>
+            <div className="absolute top-[144px] md:top-[216px] left-0 right-0 h-10 md:h-16 pointer-events-none">
               {timelineItems.filter(i => i.trackId === 'T1').map(clip => (
                 <div key={clip.id} onPointerDown={(e) => handleTimelinePointerDown(e, clip)} className={`absolute h-8 md:h-10 bg-purple-600/80 rounded border pointer-events-auto flex items-center justify-center overflow-hidden shadow-sm touch-none ${selectedItemId === clip.id ? 'border-white ring-2 ring-white/50 z-20' : 'border-purple-400 z-10'} ${timelineDrag.itemId === clip.id ? 'opacity-50 scale-105' : 'opacity-100'}`} style={{ left: clip.startTime * timelineZoom, width: Math.max(10, clip.duration * timelineZoom) }}>
                   <span className="text-[10px] font-bold text-white truncate">"{clip.text}"</span>
