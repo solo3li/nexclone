@@ -34,22 +34,22 @@ export default function VoiceToText() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-20">
+    <div className="max-w-5xl mx-auto pb-20 animate-fade-in">
       
       <div className="mb-8">
-        <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">Voice to Text</h1>
-        <p className="text-slate-500 mt-2">Transcribe audio into highly accurate text using advanced AI.</p>
+        <h1 className="text-3xl font-extrabold text-white tracking-tight">Voice to Text</h1>
+        <p className="text-[var(--color-bento-muted)] mt-2">Transcribe audio into highly accurate text using advanced AI.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="bento-grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mb-4">
         
-        {/* Upload Section */}
-        <div className="clay-card p-8 flex flex-col items-center justify-center text-center">
-          <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 text-2xl mb-6">
+        {/* Upload Section (span 2) */}
+        <div className="bento-card col-span-1 md:col-span-2 p-8 flex flex-col items-center justify-center text-center border-dashed border-[#3f3f46]">
+          <div className="w-16 h-16 rounded-2xl bg-[#1a1a1a] flex items-center justify-center text-blue-400 text-2xl mb-6 shadow-inner">
             <i className="fas fa-cloud-upload-alt"></i>
           </div>
-          <h3 className="text-xl font-bold text-slate-700 mb-2">Upload Audio File</h3>
-          <p className="text-sm text-slate-500 mb-6">MP3, WAV, M4A up to 50MB</p>
+          <h3 className="text-xl font-bold text-white mb-2">Upload Audio File</h3>
+          <p className="text-sm text-[var(--color-bento-muted)] mb-6">MP3, WAV, M4A up to 50MB</p>
           
           <input 
             type="file" 
@@ -60,35 +60,39 @@ export default function VoiceToText() {
           />
           <label 
             htmlFor="audio-upload" 
-            className="clay-btn-primary px-8 py-3 cursor-pointer font-bold inline-block"
+            className="bento-btn-primary px-8 py-3 cursor-pointer"
           >
             Select File
           </label>
           
           {file && (
-            <div className="mt-6 p-4 bg-slate-50 rounded-xl border border-slate-100 text-sm text-slate-600 font-medium flex items-center">
-              <i className="fas fa-file-audio text-slate-400 mr-2"></i>
+            <div className="mt-6 p-4 bg-[#0a0a0a] rounded-xl border border-[var(--color-bento-border)] text-sm text-[var(--color-bento-text)] font-medium flex items-center">
+              <i className="fas fa-file-audio text-blue-400 mr-2"></i>
               {file.name}
             </div>
           )}
         </div>
 
         {/* Record Section */}
-        <div className="clay-card p-8 flex flex-col items-center justify-center text-center">
-          <div className="mb-8 relative">
+        <div className="bento-card p-8 flex flex-col items-center justify-center text-center relative overflow-hidden">
+          {isRecording && <div className="absolute inset-0 bg-red-500/5 animate-pulse"></div>}
+          
+          <div className="mb-8 relative z-10">
             <button 
               onClick={isRecording ? stopRecording : startRecording}
-              className={`relative z-10 w-24 h-24 rounded-full flex items-center justify-center text-3xl transition-all
-                ${isRecording ? 'bg-red-500 text-white shadow-lg' : 'clay-btn text-slate-700 hover:text-slate-900'}`}
+              className={`w-24 h-24 rounded-full flex items-center justify-center text-3xl transition-all border
+                ${isRecording 
+                  ? 'bg-red-500 border-red-400 text-white shadow-[0_0_30px_rgba(239,68,68,0.5)]' 
+                  : 'bg-[#0a0a0a] border-[#262626] text-white hover:border-[#3f3f46]'}`}
             >
               <i className={`fas ${isRecording ? 'fa-stop' : 'fa-microphone'}`}></i>
             </button>
           </div>
           
-          <h3 className="text-xl font-bold text-slate-700 mb-2">
-            {isRecording ? "Recording..." : "Record Live Audio"}
+          <h3 className="text-lg font-bold text-white mb-2 relative z-10">
+            {isRecording ? "Recording..." : "Record Live"}
           </h3>
-          <p className="text-2xl font-mono text-slate-600 font-bold tracking-widest">
+          <p className="text-2xl font-mono text-[var(--color-bento-muted)] font-bold tracking-widest relative z-10">
             {formatTime(recordingTime)}
           </p>
         </div>
@@ -96,39 +100,39 @@ export default function VoiceToText() {
       </div>
 
       {/* Settings Section */}
-      <div className="clay-card p-8">
-        <h3 className="text-lg font-bold text-slate-700 mb-6">Transcription Settings</h3>
+      <div className="bento-card p-8">
+        <h3 className="text-lg font-bold text-white mb-6">Transcription Settings</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-600">Audio Language</label>
+            <label className="text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider">Audio Language</label>
             <div className="relative">
-              <select className="clay-input w-full appearance-none">
+              <select className="bento-input w-full appearance-none text-sm">
                 <option>Auto-Detect</option>
                 <option>English</option>
                 <option>Arabic</option>
                 <option>Spanish</option>
                 <option>French</option>
               </select>
-              <i className="fas fa-chevron-down absolute right-4 top-4 text-slate-400 pointer-events-none"></i>
+              <i className="fas fa-chevron-down absolute right-4 top-4 text-[var(--color-bento-muted)] pointer-events-none text-xs"></i>
             </div>
           </div>
           
           <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-600">Model Output</label>
+            <label className="text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider">Model Output</label>
             <div className="relative">
-              <select className="clay-input w-full appearance-none">
+              <select className="bento-input w-full appearance-none text-sm">
                 <option>Standard Text</option>
                 <option>Subtitles (SRT)</option>
                 <option>Subtitles (VTT)</option>
               </select>
-              <i className="fas fa-chevron-down absolute right-4 top-4 text-slate-400 pointer-events-none"></i>
+              <i className="fas fa-chevron-down absolute right-4 top-4 text-[var(--color-bento-muted)] pointer-events-none text-xs"></i>
             </div>
           </div>
         </div>
 
         <div className="mt-8 flex justify-end">
-          <button className="clay-btn-primary px-10 py-3 font-bold flex items-center">
+          <button className="bento-btn-accent px-8 py-3 text-sm flex items-center">
             <i className="fas fa-magic mr-2"></i> Start Transcription
           </button>
         </div>

@@ -1,204 +1,149 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 
 export default function Home() {
+  const [billingCycle, setBillingCycle] = useState("month");
+
   return (
-    <div className="max-w-6xl mx-auto pb-20">
+    <div className="max-w-[1400px] mx-auto pb-20 animate-fade-in">
       
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 pt-4 px-4">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
-          <h1 className="text-4xl font-extrabold text-slate-800 tracking-tight">Hello, Sarah!</h1>
-          <p className="text-slate-600 font-medium mt-1">AI SaaS web application dashboard</p>
+          <h1 className="text-3xl font-extrabold text-white tracking-tight">Overview</h1>
+          <p className="text-[var(--color-bento-muted)] mt-1 text-sm">Monitor your AI generation activity and workspace.</p>
         </div>
-        <div className="clay-btn-peach clay-pill px-4 py-2 flex items-center space-x-4 mt-4 md:mt-0 relative">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 rounded-full bg-white/40 flex items-center justify-center font-bold text-slate-800 shadow-sm">
-              S
-            </div>
-            <span className="font-bold text-slate-800 pr-2">Sarah J.</span>
-          </div>
-          <div className="relative cursor-pointer">
-            <i className="fas fa-bell text-slate-700 text-lg"></i>
-            <span className="absolute -top-1 -right-1 bg-red-400 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-[#faccae]">3</span>
-          </div>
+        <div className="flex space-x-3 mt-4 md:mt-0">
+          <button className="bento-btn w-10 h-10 flex items-center justify-center text-white">
+            <i className="fas fa-bell"></i>
+          </button>
+          <button className="bento-btn-primary px-5 py-2 text-sm flex items-center">
+            <i className="fas fa-plus mr-2 text-[10px]"></i> New Project
+          </button>
         </div>
       </div>
 
-      {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 px-4">
+      {/* Bento Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-[minmax(180px,auto)]">
         
-        {/* Left Column (Workspace & Activities) */}
-        <div className="lg:col-span-7 space-y-8">
+        {/* Welcome / Stats Card (Span 2 cols) */}
+        <div className="bento-card col-span-1 md:col-span-2 p-8 flex flex-col justify-between relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500 rounded-full blur-[100px] opacity-10 group-hover:opacity-20 transition-opacity"></div>
           
-          {/* Your Workspace */}
-          <div className="clay-card-peach p-8 pb-10">
-            <h2 className="text-xl font-bold text-slate-800 mb-6">Your Workspace</h2>
+          <div className="relative z-10 mb-8">
+            <h2 className="text-2xl font-bold text-white mb-2">Welcome back, Sarah.</h2>
+            <p className="text-[var(--color-bento-muted)] text-sm max-w-md">Your workspace is running smoothly. You have used 25% of your total credits this month.</p>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4 relative z-10">
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-[var(--color-bento-muted)] font-bold mb-1">Generations</p>
+              <h3 className="text-2xl font-extrabold text-white">12,340</h3>
+            </div>
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-[var(--color-bento-muted)] font-bold mb-1">Credits</p>
+              <h3 className="text-2xl font-extrabold text-white">4,120 <span className="text-[10px] text-green-400 font-normal ml-1">+12%</span></h3>
+            </div>
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-[var(--color-bento-muted)] font-bold mb-1">Time Saved</p>
+              <h3 className="text-2xl font-extrabold text-white">45h</h3>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Tools (Span 1 col) */}
+        <div className="bento-card p-6 flex flex-col relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500 rounded-full blur-[80px] opacity-10"></div>
+          <div className="flex justify-between items-center mb-6 relative z-10">
+            <h3 className="font-bold text-white">AI Tools</h3>
+            <Link href="#" className="text-xs text-[var(--color-bento-muted)] hover:text-white">View All</Link>
+          </div>
+          
+          <div className="space-y-3 flex-1 relative z-10">
+            <Link href="/voice-to-text" className="bento-btn p-3 flex items-center justify-between group">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 rounded-md bg-[#1a1a1a] flex items-center justify-center text-blue-400 group-hover:bg-blue-500/10">
+                  <i className="fas fa-microphone text-xs"></i>
+                </div>
+                <span className="text-sm font-semibold text-white">Voice to Text</span>
+              </div>
+              <i className="fas fa-arrow-right text-[10px] text-[var(--color-bento-muted)] group-hover:text-white transform group-hover:translate-x-1 transition-all"></i>
+            </Link>
             
-            <div className="flex space-x-6 mb-8 justify-center sm:justify-start">
-              <div className="flex flex-col items-center">
-                <Link href="/text-to-voice" className="w-16 h-16 clay-btn-peach clay-pill flex items-center justify-center mb-2 hover:-translate-y-1 transition-transform">
-                  <div className="w-10 h-10 bg-white/40 rounded-full flex items-center justify-center text-orange-600 shadow-sm">
-                    <i className="fas fa-file-alt text-lg"></i>
-                  </div>
-                </Link>
-                <span className="text-sm font-bold text-slate-800">ContentGen</span>
-              </div>
-
-              <div className="flex flex-col items-center">
-                <div className="w-16 h-16 clay-btn-peach clay-pill flex items-center justify-center mb-2 hover:-translate-y-1 transition-transform cursor-pointer">
-                  <div className="w-10 h-10 bg-white/40 rounded-full flex items-center justify-center text-green-600 shadow-sm">
-                    <i className="fas fa-image text-lg"></i>
-                  </div>
+            <Link href="/text-to-voice" className="bento-btn p-3 flex items-center justify-between group">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 rounded-md bg-[#1a1a1a] flex items-center justify-center text-purple-400 group-hover:bg-purple-500/10">
+                  <i className="fas fa-volume-up text-xs"></i>
                 </div>
-                <span className="text-sm font-bold text-slate-800">Image AI</span>
+                <span className="text-sm font-semibold text-white">Text to Speech</span>
               </div>
+              <i className="fas fa-arrow-right text-[10px] text-[var(--color-bento-muted)] group-hover:text-white transform group-hover:translate-x-1 transition-all"></i>
+            </Link>
+          </div>
+        </div>
 
-              <div className="flex flex-col items-center">
-                <Link href="/voice-to-text" className="w-16 h-16 clay-btn-peach clay-pill flex items-center justify-center mb-2 hover:-translate-y-1 transition-transform">
-                  <div className="w-10 h-10 bg-white/40 rounded-full flex items-center justify-center text-blue-600 shadow-sm">
-                    <i className="fas fa-microphone text-lg"></i>
-                  </div>
-                </Link>
-                <span className="text-sm font-bold text-slate-800">Voice AI</span>
+        {/* Chart / Performance (Span 2 cols, row 2) */}
+        <div className="bento-card col-span-1 md:col-span-2 p-6 flex flex-col relative">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="font-bold text-white">Activity Graph</h3>
+            <select className="bg-transparent border border-[var(--color-bento-border)] rounded-md text-xs text-white p-1 outline-none">
+              <option className="bg-[#0a0a0a]">This Week</option>
+              <option className="bg-[#0a0a0a]">This Month</option>
+            </select>
+          </div>
+          <div className="flex-1 w-full flex items-end justify-between px-2 pt-10 relative">
+            {/* Fake grid lines */}
+            <div className="absolute inset-0 flex flex-col justify-between border-b border-l border-[var(--color-bento-border)] ml-6 pb-6">
+              <div className="border-t border-[var(--color-bento-border)] opacity-30 w-full"></div>
+              <div className="border-t border-[var(--color-bento-border)] opacity-30 w-full"></div>
+              <div className="border-t border-[var(--color-bento-border)] opacity-30 w-full"></div>
+            </div>
+            
+            {/* Fake Bars */}
+            <div className="w-[10%] h-[40%] bg-blue-500/20 border-t-2 border-blue-500 rounded-t-sm z-10 mx-1"></div>
+            <div className="w-[10%] h-[70%] bg-blue-500/20 border-t-2 border-blue-500 rounded-t-sm z-10 mx-1"></div>
+            <div className="w-[10%] h-[50%] bg-blue-500/20 border-t-2 border-blue-500 rounded-t-sm z-10 mx-1"></div>
+            <div className="w-[10%] h-[90%] bg-blue-500/80 border-t-2 border-blue-400 rounded-t-sm z-10 mx-1 relative shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+               <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-white text-black text-[10px] font-bold px-2 py-1 rounded">240</div>
+            </div>
+            <div className="w-[10%] h-[60%] bg-blue-500/20 border-t-2 border-blue-500 rounded-t-sm z-10 mx-1"></div>
+            <div className="w-[10%] h-[30%] bg-blue-500/20 border-t-2 border-blue-500 rounded-t-sm z-10 mx-1"></div>
+            <div className="w-[10%] h-[45%] bg-blue-500/20 border-t-2 border-blue-500 rounded-t-sm z-10 mx-1"></div>
+          </div>
+          <div className="flex justify-between w-full pl-6 pr-2 mt-3 text-[10px] font-bold text-[var(--color-bento-muted)]">
+            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+          </div>
+        </div>
+
+        {/* Subscription/Mini Plan (Span 1 col) */}
+        <div className="bento-card p-6 flex flex-col justify-between">
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="font-bold text-white">Pro Plan</h3>
+              <span className="px-2 py-1 bg-green-500/10 text-green-400 text-[10px] font-bold rounded">Active</span>
+            </div>
+            <p className="text-xs text-[var(--color-bento-muted)] mb-6">You are on the Pro plan billed monthly.</p>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <div className="flex justify-between text-[10px] font-bold text-[var(--color-bento-muted)] mb-1">
+                <span>Storage</span>
+                <span className="text-white">45 GB / 100 GB</span>
+              </div>
+              <div className="h-1.5 w-full bg-[#262626] rounded-full overflow-hidden">
+                <div className="h-full bg-white w-[45%]"></div>
               </div>
             </div>
-
-            <div className="grid grid-cols-2 gap-8 mb-8">
-              <div>
-                <div className="flex justify-between text-sm font-bold text-slate-800 mb-2">
-                  <span>75% Credits</span>
-                </div>
-                <div className="h-3 clay-inset-peach w-full relative overflow-hidden">
-                  <div className="absolute top-0 left-0 h-full w-[75%] clay-btn bg-orange-400 clay-pill"></div>
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between text-sm font-bold text-slate-800 mb-2">
-                  <span>45% Space</span>
-                </div>
-                <div className="h-3 clay-inset-peach w-full relative overflow-hidden">
-                  <div className="absolute top-0 left-0 h-full w-[45%] clay-btn bg-green-400 clay-pill"></div>
-                </div>
-              </div>
-            </div>
-
-            <button className="w-full clay-btn py-4 clay-pill font-bold text-slate-800 flex items-center justify-center text-lg hover:-translate-y-1">
-              <i className="fas fa-box-open text-orange-400 mr-3 text-xl"></i> New Project
+            
+            <button className="bento-btn w-full py-2 text-xs font-bold flex items-center justify-center">
+              Manage Billing
             </button>
           </div>
-
-          {/* Recent Activities */}
-          <div className="clay-card p-8">
-            <h2 className="text-xl font-bold text-slate-800 mb-6">Recent Activities</h2>
-            
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 clay-btn clay-pill flex items-center justify-center bg-[#faccae] text-orange-600">
-                    <i className="fas fa-file-alt"></i>
-                  </div>
-                  <span className="font-bold text-slate-800">AI Article Draft</span>
-                </div>
-                <div className="flex items-center space-x-6">
-                  <div className="w-6 h-6 rounded-full bg-green-200 flex items-center justify-center text-green-600 shadow-inner">
-                    <i className="fas fa-check text-[10px]"></i>
-                  </div>
-                  <span className="text-slate-600 font-medium">35 min</span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 clay-btn clay-pill flex items-center justify-center bg-[#a0bfe8] text-blue-600">
-                    <i className="fas fa-search"></i>
-                  </div>
-                  <span className="font-bold text-slate-800">SEO Analysis</span>
-                </div>
-                <div className="flex items-center space-x-6">
-                  <div className="w-6 h-6 rounded-full bg-red-200 flex items-center justify-center text-red-500 shadow-inner">
-                    <i className="fas fa-exclamation text-[10px]"></i>
-                  </div>
-                  <span className="text-slate-600 font-medium">12 min</span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 clay-btn clay-pill flex items-center justify-center bg-[#b2e2cd] text-green-600">
-                    <i className="fas fa-image"></i>
-                  </div>
-                  <span className="font-bold text-slate-800">Image Set</span>
-                </div>
-                <div className="flex items-center space-x-6">
-                  <div className="w-6 h-6 rounded-full bg-blue-200 flex items-center justify-center text-blue-600 shadow-inner">
-                    <i className="fas fa-check text-[10px]"></i>
-                  </div>
-                  <span className="text-slate-600 font-medium">3 min</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
         </div>
 
-        {/* Right Column (Charts) */}
-        <div className="lg:col-span-5 space-y-8">
-          
-          {/* AI Performance */}
-          <div className="clay-card p-8 h-72 relative">
-            <h2 className="text-xl font-bold text-slate-800 mb-6">AI Performance</h2>
-            <div className="absolute bottom-6 left-8 right-8 top-20 flex">
-               {/* Decorative elements representing the 3D charts */}
-               <div className="w-full h-full border-l-2 border-b-2 border-slate-300 relative">
-                 {/* Fake 3D wavy line 1 (Peach) */}
-                 <svg viewBox="0 0 100 50" preserveAspectRatio="none" className="absolute bottom-0 w-full h-[80%] opacity-80" style={{filter: 'drop-shadow(4px 4px 6px rgba(0,0,0,0.15))'}}>
-                    <path d="M0,50 L0,30 Q15,10 30,30 T60,10 T100,20 L100,50 Z" fill="#faccae"/>
-                 </svg>
-                 {/* Fake 3D wavy line 2 (Blue) */}
-                 <svg viewBox="0 0 100 50" preserveAspectRatio="none" className="absolute bottom-0 w-full h-[60%] opacity-90" style={{filter: 'drop-shadow(4px 4px 6px rgba(0,0,0,0.15))'}}>
-                    <path d="M0,50 L0,40 Q15,45 30,25 T60,40 T100,20 L100,50 Z" fill="#9bbce3"/>
-                 </svg>
-               </div>
-            </div>
-            <div className="absolute left-2 top-20 bottom-8 flex flex-col justify-between text-xs font-bold text-slate-500">
-              <span>100</span><span>80</span><span>60</span><span>40</span><span>20</span><span>0</span>
-            </div>
-            <div className="absolute bottom-2 left-10 right-8 flex justify-between text-xs font-bold text-slate-600">
-              <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Day</span>
-            </div>
-          </div>
-
-          {/* Project Breakdown */}
-          <div className="clay-card p-8 h-72 relative">
-            <h2 className="text-xl font-bold text-slate-800 mb-6">Project Breakdown</h2>
-            <div className="absolute inset-0 flex items-center justify-center mt-10">
-              <div className="w-40 h-40 rounded-full border-[20px] border-[#f7f4ef] clay-btn relative" style={{boxShadow: 'inset 6px 6px 12px #dacdc0, inset -6px -6px 12px #ffffff, 6px 6px 12px #dacdc0'}}>
-                 {/* Decorative colorful segments representing the doughnut chart */}
-                 <div className="absolute top-[-20px] left-[-20px] right-[-20px] bottom-[-20px] rounded-full border-[20px] border-t-[#faccae] border-r-[#fcd784] border-b-[#9bbce3] border-l-[#b2e2cd]" style={{filter: 'drop-shadow(2px 4px 6px rgba(0,0,0,0.1))'}}></div>
-              </div>
-            </div>
-            {/* Labels */}
-            <div className="absolute top-16 left-8 text-center">
-              <div className="text-sm font-bold text-slate-600">Content</div>
-              <div className="text-lg font-extrabold text-slate-800">40%</div>
-            </div>
-            <div className="absolute top-24 right-8 text-center">
-              <div className="text-sm font-bold text-slate-600">Design</div>
-              <div className="text-lg font-extrabold text-slate-800">30%</div>
-            </div>
-            <div className="absolute bottom-6 right-10 text-center">
-              <div className="text-sm font-bold text-slate-600">Marketing</div>
-              <div className="text-lg font-extrabold text-slate-800">10%</div>
-            </div>
-            <div className="absolute bottom-6 left-12 text-center">
-              <div className="text-sm font-bold text-slate-600">Voice</div>
-              <div className="text-lg font-extrabold text-slate-800">20%</div>
-            </div>
-          </div>
-
-        </div>
       </div>
     </div>
   );

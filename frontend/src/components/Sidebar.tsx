@@ -8,47 +8,74 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
 
   const links = [
     { href: "/", label: "Dashboard", icon: "fa-home" },
-    { href: "/voice-to-text", label: "AI Tools", icon: "fa-magic" },
-    { href: "/history", label: "Projects", icon: "fa-folder" },
-    { href: "#", label: "Analytics", icon: "fa-chart-pie" },
-    { href: "/profile", label: "Settings", icon: "fa-cog" },
+    { href: "/voice-to-text", label: "Voice AI", icon: "fa-microphone" },
+    { href: "/text-to-voice", label: "Speech AI", icon: "fa-volume-up" },
+    { href: "/history", label: "History", icon: "fa-history" },
+    { href: "#", label: "Settings", icon: "fa-cog" },
   ];
 
   return (
     <div 
-      className={`fixed top-0 left-0 h-screen w-64 pt-6 pb-6 transition-transform duration-300 z-50
+      className={`fixed top-0 left-0 h-screen w-64 border-r border-[var(--color-bento-border)] bg-[var(--color-bento-bg)] transition-transform duration-300 z-50
         ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
     >
-      <div className="clay-sidebar w-full h-full p-6 flex flex-col">
-        {/* Logo */}
-        <div className="flex items-center space-x-3 mb-10 justify-center">
-          <div className="text-xl font-extrabold text-slate-800 flex items-center flex-col">
-            <div className="w-16 h-16 mb-2">
-              <img src="/static/home/img/logo.png" alt="Logo" className="w-full h-full object-contain filter drop-shadow-md" />
+      <div className="w-full h-full p-6 flex flex-col justify-between">
+        
+        <div>
+          {/* Logo */}
+          <div className="flex items-center space-x-3 mb-8">
+            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.2)]">
+               <img src="/static/home/img/logo.png" alt="Logo" className="w-6 h-6 object-contain" />
             </div>
-            <span>NeuroClay</span>
+            <span className="font-extrabold tracking-tight text-xl text-white">NexBento</span>
           </div>
+
+          {/* User Profile Mini Card */}
+          <div className="bento-card p-3 flex items-center space-x-3 mb-8">
+            <div className="w-10 h-10 rounded-full overflow-hidden bg-[#262626]">
+              <img src="/static/img/avatar.jpg" alt="Profile" className="w-full h-full object-cover opacity-80" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold text-sm text-white leading-tight">Sarah J.</h3>
+              <span className="text-[10px] text-[var(--color-bento-muted)] uppercase tracking-wider font-bold">Pro Plan</span>
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <nav className="space-y-2">
+            {links.map((link) => {
+              const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
+              return (
+                <Link 
+                  key={link.label} 
+                  href={link.href}
+                  className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all font-medium text-sm
+                    ${isActive 
+                      ? "bg-white text-black font-bold shadow-[0_4px_12px_rgba(255,255,255,0.1)]" 
+                      : "text-[var(--color-bento-muted)] hover:text-white hover:bg-[#1a1a1a]"}`}
+                >
+                  <i className={`fas ${link.icon} w-5 text-center ${isActive ? "text-black" : "text-[#52525b]"}`}></i>
+                  <span>{link.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
         </div>
 
-        {/* Navigation */}
-        <nav className="space-y-4 flex-1">
-          {links.map((link) => {
-            const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
-            return (
-              <Link 
-                key={link.label} 
-                href={link.href}
-                className={`flex items-center space-x-4 px-4 py-3 clay-pill transition-all
-                  ${isActive ? "clay-btn-peach text-slate-900 font-bold" : "text-slate-700 hover:bg-white/20 font-semibold"}`}
-              >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isActive ? 'bg-white/40' : 'clay-btn bg-clay-card'}`}>
-                  <i className={`fas ${link.icon} text-sm ${isActive ? "text-orange-600" : "text-slate-500"}`}></i>
-                </div>
-                <span>{link.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
+        {/* Bottom */}
+        <div className="space-y-4 pt-6 border-t border-[var(--color-bento-border)]">
+          <Link href="/#pricing" className="bento-btn-primary block w-full text-center py-3 text-sm flex items-center justify-center">
+            <i className="fas fa-bolt mr-2 text-yellow-500"></i> Upgrade
+          </Link>
+          
+          <button className="bento-btn w-full px-4 py-2 text-xs flex items-center justify-between text-[var(--color-bento-muted)] hover:text-white">
+            <div className="flex items-center space-x-2">
+              <i className="fas fa-globe"></i>
+              <span>English</span>
+            </div>
+            <i className="fas fa-chevron-down text-[10px]"></i>
+          </button>
+        </div>
       </div>
     </div>
   );
