@@ -6,7 +6,7 @@ import Link from "next/link";
 interface LocalMedia { id: string; name: string; url: string; type: string; }
 type TrackType = 'video' | 'audio' | 'text';
 interface TimelineTrack { id: string; type: TrackType; name: string; isHidden?: boolean; isMuted?: boolean; isLocked?: boolean; }
-interface TimelineItem { id: string; trackId: string; mediaId?: string; url?: string; name?: string; text?: string; startTime: number; duration: number; sourceOffset: number; filter?: string; x?: number; y?: number; width?: number; height?: number; fontSize?: number; color?: string; fontFamily?: string; rotation?: number; mediaType?: 'video' | 'audio' | 'image'; }
+interface TimelineItem { id: string; trackId: string; mediaId?: string; url?: string; name?: string; text?: string; startTime: number; duration: number; sourceOffset: number; filter?: string; x?: number; y?: number; width?: number; height?: number; fontSize?: number; color?: string; fontFamily?: string; rotation?: number; mediaType?: 'video' | 'audio' | 'image'; opacity?: number; blendMode?: string; volume?: number; }
 type TransformMode = 'none' | 'drag' | 'scale' | 'rotate';
 type HwProfile = { ram: number; cores: number; tier: 'Pro' | 'Standard' | 'Limited'; showModal: boolean; maxRes: string; maxDur: number; isMobile: boolean };
 
@@ -191,6 +191,7 @@ export default function VideoEditor() {
         const track = tracks.find(t => t.id === item.trackId);
         if (el) {
           el.muted = item.mediaType === 'video' || (track?.isMuted ?? false);
+          el.volume = item.volume !== undefined ? item.volume / 100 : 1.0;
           const isActive = activeItems.some(active => active.id === item.id);
           if (isActive) {
             const expectedTime = (currentTime - item.startTime) + item.sourceOffset;
@@ -270,8 +271,12 @@ export default function VideoEditor() {
                drawH = drawW / elRatio;
             }
             
+            ctx.globalAlpha = item.opacity !== undefined ? item.opacity / 100 : 1;
+            ctx.globalCompositeOperation = (item.blendMode as GlobalCompositeOperation) || 'source-over';
             ctx.filter = item.filter || 'none';
             ctx.drawImage(element, -drawW / 2, -drawH / 2, drawW, drawH);
+            ctx.globalAlpha = 1;
+            ctx.globalCompositeOperation = 'source-over';
             ctx.restore();
          };
 
@@ -305,6 +310,8 @@ export default function VideoEditor() {
         const scaleFactor = canvas.width / 1920; 
         const renderFontSize = (textItem.fontSize || 64) * scaleFactor;
         
+        ctx.globalAlpha = textItem.opacity !== undefined ? textItem.opacity / 100 : 1;
+        ctx.globalCompositeOperation = (textItem.blendMode as GlobalCompositeOperation) || 'source-over';
         ctx.font = `bold ${renderFontSize}px ${textItem.fontFamily || 'Inter'}`;
         ctx.fillStyle = textItem.color || '#ffffff';
         ctx.textAlign = 'center';
@@ -314,6 +321,8 @@ export default function VideoEditor() {
         ctx.shadowBlur = 8 * scaleFactor;
         ctx.shadowOffsetY = 4 * scaleFactor;
         ctx.fillText(textItem.text, 0, 0);
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = 'source-over';
         ctx.restore();
       });
     }
@@ -579,6 +588,7 @@ export default function VideoEditor() {
           <div className="flex border-b border-[var(--color-bento-border)] p-2 space-x-1">
             <button onClick={() => setActiveAssetTab("media")} className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${activeAssetTab === "media" ? "bg-[#262626] text-white shadow-sm" : "text-[var(--color-bento-muted)] hover:text-white"}`}>Media</button>
             <button onClick={() => setActiveAssetTab("text")} className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${activeAssetTab === "text" ? "bg-[#262626] text-white shadow-sm" : "text-[var(--color-bento-muted)] hover:text-white"}`}>Text</button>
+            <button onClick={() => setActiveAssetTab("stickers")} className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${activeAssetTab === "stickers" ? "bg-[#262626] text-white shadow-sm" : "text-[var(--color-bento-muted)] hover:text-white"}`}>Stickers</button>
             <button onClick={() => setActiveAssetTab("copilot")} className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${activeAssetTab === "copilot" ? "bg-blue-500/20 text-blue-400 shadow-sm border border-blue-500/30" : "text-[var(--color-bento-muted)] hover:text-blue-400"}`}><i className="fas fa-robot mr-1"></i> AI</button>
           </div>
           <div className="flex-1 p-4 overflow-y-auto">
@@ -629,6 +639,30 @@ export default function VideoEditor() {
                     <div className="w-10 h-10 bg-purple-500/20 text-purple-400 rounded-md flex items-center justify-center mr-3 group-hover:bg-purple-500 group-hover:text-white transition-colors"><i className="fas fa-font text-lg"></i></div>
                     <div className="text-left"><h3 className="text-sm font-bold">Standard Text</h3></div>
                  </button>
+              </div>
+            )}
+            {activeAssetTab === "stickers" && (
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { icon: '🔥', name: 'Fire' },
+                  { icon: '⭐', name: 'Star' },
+                  { icon: '💥', name: 'Boom' },
+                  { icon: '❤️', name: 'Heart' },
+                  { icon: '🚀', name: 'Rocket' },
+                  { icon: '💯', name: '100' }
+                ].map((sticker, idx) => (
+                  <button 
+                    key={idx}
+                    onClick={() => {
+                      const svgUri = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">${sticker.icon}</text></svg>`;
+                      addToTimeline({ id: `stk_${idx}`, name: sticker.name, url: svgUri, type: 'image' });
+                    }}
+                    disabled={isRendering} 
+                    className="aspect-square bg-[#1a1a1a] border border-[#262626] rounded-lg flex items-center justify-center hover:border-blue-500 hover:bg-[#262626] transition-colors text-4xl"
+                  >
+                    {sticker.icon}
+                  </button>
+                ))}
               </div>
             )}
           </div>
@@ -720,22 +754,96 @@ export default function VideoEditor() {
           
           <div className="flex-1 overflow-y-auto p-4 space-y-6">
             {!selectedItem ? <div className="text-center text-[10px] text-[var(--color-bento-muted)] mt-10">Select a clip</div> : (
-              <div className="space-y-4">
+              <div className="space-y-6">
+                
+                {/* Visual Properties (Video, Image, Text) */}
+                {activePropertyTab === "basic" && (selectedItem.mediaType !== 'audio') && (
+                   <div className="space-y-4">
+                      {/* Opacity */}
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-xs font-bold text-[#a1a1aa]"><span>Opacity</span> <span>{selectedItem.opacity ?? 100}%</span></div>
+                        <input type="range" min="0" max="100" value={selectedItem.opacity ?? 100} onChange={(e) => updateSelectedProperty('opacity', Number(e.target.value))} className="w-full h-1 accent-purple-500 bg-[#262626] rounded-lg" />
+                      </div>
+                      
+                      {/* Scale */}
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-xs font-bold text-[#a1a1aa]"><span>Scale</span> <span>{selectedItem.trackId === 'T1' ? selectedItem.fontSize || 64 : selectedItem.width || 100}</span></div>
+                        <input type="range" min="10" max="400" value={selectedItem.trackId === 'T1' ? selectedItem.fontSize || 64 : selectedItem.width || 100} onChange={(e) => {
+                          const val = Number(e.target.value);
+                          if (selectedItem.trackId === 'T1') updateSelectedProperty('fontSize', val);
+                          else { updateSelectedProperty('width', val); updateSelectedProperty('height', val); }
+                        }} className="w-full h-1 accent-blue-500 bg-[#262626] rounded-lg" />
+                      </div>
+
+                      {/* Rotation */}
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-xs font-bold text-[#a1a1aa]"><span>Rotation</span> <span>{Math.round(selectedItem.rotation || 0)}°</span></div>
+                        <input type="range" min="0" max="360" value={selectedItem.rotation || 0} onChange={(e) => updateSelectedProperty('rotation', Number(e.target.value))} className="w-full h-1 accent-green-500 bg-[#262626] rounded-lg" />
+                      </div>
+
+                      {/* Position X/Y */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-[#a1a1aa]">Position X</label>
+                          <input type="number" value={Math.round(selectedItem.x || 50)} onChange={(e) => updateSelectedProperty('x', Number(e.target.value))} className="bento-input text-xs w-full" />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold text-[#a1a1aa]">Position Y</label>
+                          <input type="number" value={Math.round(selectedItem.y || 50)} onChange={(e) => updateSelectedProperty('y', Number(e.target.value))} className="bento-input text-xs w-full" />
+                        </div>
+                      </div>
+
+                      {/* Blend Mode */}
+                      <div className="space-y-1 pt-2 border-t border-[#262626]">
+                        <label className="text-xs font-bold text-[#a1a1aa]">Blend Mode</label>
+                        <select value={selectedItem.blendMode || 'source-over'} onChange={(e) => updateSelectedProperty('blendMode', e.target.value)} className="bento-input text-xs w-full">
+                          <option value="source-over">Normal</option>
+                          <option value="multiply">Multiply</option>
+                          <option value="screen">Screen</option>
+                          <option value="overlay">Overlay</option>
+                          <option value="color-dodge">Color Dodge</option>
+                          <option value="color-burn">Color Burn</option>
+                          <option value="hard-light">Hard Light</option>
+                          <option value="difference">Difference</option>
+                          <option value="exclusion">Exclusion</option>
+                        </select>
+                      </div>
+                   </div>
+                )}
+
+                {/* Audio Properties (Audio, Video) */}
+                {activePropertyTab === "basic" && (selectedItem.mediaType === 'audio' || selectedItem.mediaType === 'video') && (
+                   <div className="space-y-4 pt-2 border-t border-[#262626]">
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-xs font-bold text-[#a1a1aa]"><span>Volume</span> <span>{selectedItem.volume ?? 100}%</span></div>
+                        <input type="range" min="0" max="100" value={selectedItem.volume ?? 100} onChange={(e) => updateSelectedProperty('volume', Number(e.target.value))} className="w-full h-1 accent-green-400 bg-[#262626] rounded-lg" />
+                      </div>
+                   </div>
+                )}
+
+                {/* Text Specific Properties */}
                 {activePropertyTab === "text" && selectedItem.trackId === 'T1' && (
                   <div className="space-y-4">
-                    <textarea className="bento-input w-full text-xs h-16 resize-none font-bold" value={selectedItem.text || ''} onChange={(e) => updateSelectedProperty('text', e.target.value)} />
+                    <textarea className="bento-input w-full text-xs h-24 resize-none font-bold" value={selectedItem.text || ''} onChange={(e) => updateSelectedProperty('text', e.target.value)} placeholder="Type here..." />
                     <div className="grid grid-cols-2 gap-4">
-                      <select className="bento-input text-xs" value={selectedItem.fontFamily} onChange={(e) => updateSelectedProperty('fontFamily', e.target.value)}><option value="Inter">Inter</option><option value="Arial">Arial</option></select>
-                      <input type="color" value={selectedItem.color} onChange={(e) => updateSelectedProperty('color', e.target.value)} className="w-full h-8 rounded border-none bg-transparent" />
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-[#a1a1aa]">Font</label>
+                        <select className="bento-input text-xs w-full" value={selectedItem.fontFamily || 'Inter'} onChange={(e) => updateSelectedProperty('fontFamily', e.target.value)}>
+                          <option value="Inter">Inter</option>
+                          <option value="Arial">Arial</option>
+                          <option value="Times New Roman">Times New Roman</option>
+                          <option value="Courier New">Courier New</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold text-[#a1a1aa]">Color</label>
+                        <input type="color" value={selectedItem.color || '#ffffff'} onChange={(e) => updateSelectedProperty('color', e.target.value)} className="w-full h-8 rounded border-none bg-transparent cursor-pointer" />
+                      </div>
                     </div>
                   </div>
                 )}
-                {activePropertyTab === "basic" && (
-                   <div className="space-y-2">
-                     <p className="text-xs text-[var(--color-bento-muted)]">Edit properties visually on canvas.</p>
-                     <button onClick={() => setSelectedItemId(null)} className="md:hidden w-full bento-btn py-2 text-xs">Done Editing</button>
-                   </div>
-                )}
+                
+                <button onClick={() => setSelectedItemId(null)} className="md:hidden w-full bento-btn py-2 text-xs mt-4">Done Editing</button>
               </div>
             )}
           </div>

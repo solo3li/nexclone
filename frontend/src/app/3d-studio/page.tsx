@@ -6,7 +6,7 @@ import { Canvas, useLoader } from "@react-three/fiber";
 import { OrbitControls, Environment, ContactShadows } from "@react-three/drei";
 import * as THREE from "three";
 
-type GenerationMode = 'image'; // We restrict to image for local Depth AI for now
+type RenderMode = 'mesh' | 'points';
 
 // The 3D Mesh Component
 function DepthMapMesh({ imageUrl, depthUrl }: { imageUrl: string, depthUrl: string }) {
@@ -35,8 +35,56 @@ function DepthMapMesh({ imageUrl, depthUrl }: { imageUrl: string, depthUrl: stri
   );
 }
 
+// The Point Cloud Component
+function DepthPointCloud({ imageUrl, depthUrl }: { imageUrl: string, depthUrl: string }) {
+  const colorMap = useLoader(THREE.TextureLoader, imageUrl);
+  const depthMap = useLoader(THREE.TextureLoader, depthUrl);
+
+  const aspect = colorMap.image.width / colorMap.image.height;
+  const width = aspect > 1 ? 5 : 5 * aspect;
+  const height = aspect > 1 ? 5 / aspect : 5;
+
+  const shaderArgs = {
+    uniforms: {
+      colorTex: { value: colorMap },
+      depthTex: { value: depthMap },
+      displacementScale: { value: 0.5 },
+      displacementBias: { value: -0.25 },
+    },
+    vertexShader: `
+      uniform sampler2D depthTex;
+      uniform float displacementScale;
+      uniform float displacementBias;
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        vec4 depthPixel = texture2D(depthTex, uv);
+        float z = (depthPixel.r + displacementBias) * displacementScale;
+        vec3 newPosition = position + vec3(0.0, 0.0, z);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+        gl_PointSize = 2.0;
+      }
+    `,
+    fragmentShader: `
+      uniform sampler2D colorTex;
+      varying vec2 vUv;
+      void main() {
+        vec4 color = texture2D(colorTex, vUv);
+        gl_FragColor = color;
+      }
+    `,
+  };
+
+  return (
+    <points position={[0, 0, 0]} rotation={[0, 0, 0]}>
+      <planeGeometry args={[width, height, 512, 512]} />
+      <shaderMaterial args={[shaderArgs]} />
+    </points>
+  );
+}
+
 export default function ThreeDStudio() {
-  const [mode, setMode] = useState<GenerationMode>('image');
+  const [renderMode, setRenderMode] = useState<RenderMode>('mesh');
   const [imageRef, setImageRef] = useState<string | null>(null);
   
   const [isGenerating, setIsGenerating] = useState(false);
@@ -137,6 +185,7 @@ export default function ThreeDStudio() {
     workerRef.current?.postMessage({ action: "estimate_depth", image: imageRef });
   };
 
+
   return (
     <div className="h-screen w-full flex flex-col bg-[#050505] p-2 md:p-4 md:space-y-4 space-y-2 text-white font-sans overflow-hidden animate-fade-in">
       
@@ -165,15 +214,12 @@ export default function ThreeDStudio() {
         {/* Left: Input Panel */}
         <aside className="w-full md:w-80 bento-card flex flex-col shrink-0 bg-[#0a0a0a]">
           <div className="p-4 border-b border-[#262626]">
-            <h2 className="text-sm font-bold mb-4 flex items-center"><i className="fas fa-magic text-purple-400 mr-2"></i> Generation Mode</h2>
-            <div className="flex bg-[#141414] rounded-lg p-1 border border-[#262626]">
-              <button className="flex-1 py-2 text-[10px] font-bold uppercase rounded-md transition-all bg-purple-600 shadow-md text-white">Image to 3D</button>
-            </div>
+            <h2 className="text-sm font-bold flex items-center"><i className="fas fa-magic text-purple-400 mr-2"></i> Image to 3D</h2>
           </div>
 
           <div className="flex-1 p-4 overflow-y-auto space-y-6">
             
-            {/* Image Input */}
+            {/* Input Selection */}
             <div className="space-y-2">
               <label className="text-xs font-bold text-[#a1a1aa]">Reference Image</label>
               <input type="file" accept="image/*" ref={fileInputRef} className="hidden" onChange={handleImageUpload} />
@@ -198,8 +244,16 @@ export default function ThreeDStudio() {
               )}
             </div>
 
+
             {/* Advanced Settings */}
             <div className="space-y-3 pt-4 border-t border-[#262626]">
+              <div className="flex flex-col space-y-2">
+                <span className="text-[#a1a1aa] font-bold text-xs">Render Style</span>
+                <div className="flex bg-[#141414] rounded-lg p-1 border border-[#262626]">
+                  <button onClick={() => setRenderMode('mesh')} className={`flex-1 py-1.5 text-[10px] font-bold uppercase rounded-md transition-all ${renderMode === 'mesh' ? 'bg-[#262626] text-white' : 'text-[#a1a1aa]'}`}>Mesh</button>
+                  <button onClick={() => setRenderMode('points')} className={`flex-1 py-1.5 text-[10px] font-bold uppercase rounded-md transition-all ${renderMode === 'points' ? 'bg-[#262626] text-white' : 'text-[#a1a1aa]'}`}>Point Cloud</button>
+                </div>
+              </div>
               <div className="flex justify-between items-center text-xs">
                 <span className="text-[#a1a1aa] font-bold">AI Model</span>
                 <span className="font-mono text-purple-400 text-[9px]">DepthAnything (Small)</span>
@@ -213,17 +267,17 @@ export default function ThreeDStudio() {
           </div>
 
           <div className="p-4 border-t border-[#262626]">
-            <button 
-              onClick={startGeneration}
-              disabled={isGenerating || !imageRef}
-              className="w-full py-4 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 shadow-[0_0_20px_rgba(147,51,234,0.3)] transition-all disabled:opacity-50 disabled:shadow-none flex items-center justify-center group"
-            >
-              {isGenerating ? (
-                <><i className="fas fa-circle-notch fa-spin mr-2"></i> Generating...</>
-              ) : (
-                <><i className="fas fa-cube mr-2 group-hover:rotate-180 transition-transform duration-500"></i> Generate 3D (Local)</>
-              )}
-            </button>
+             <button 
+               onClick={startGeneration}
+               disabled={isGenerating || !imageRef}
+               className="w-full py-4 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 shadow-[0_0_20px_rgba(147,51,234,0.3)] transition-all disabled:opacity-50 disabled:shadow-none flex items-center justify-center group"
+             >
+               {isGenerating ? (
+                 <><i className="fas fa-circle-notch fa-spin mr-2"></i> Generating 3D...</>
+               ) : (
+                 <><i className="fas fa-cube mr-2 group-hover:rotate-180 transition-transform duration-500"></i> Generate 3D (Local)</>
+               )}
+             </button>
           </div>
         </aside>
 
@@ -263,20 +317,30 @@ export default function ThreeDStudio() {
 
             {/* State 3: Generated 3D Mesh */}
             {depthMapUrl && imageRef && !isGenerating && (
-              <div className="absolute inset-0 z-10 cursor-move">
+              <div className="absolute inset-0 z-10 cursor-move bg-[#282828]">
                 <Canvas shadows camera={{ position: [0, 0, 8], fov: 45 }}>
+                  <gridHelper args={[20, 20, '#555555', '#444444']} />
+                  <axesHelper args={[5]} />
+                  
                   <ambientLight intensity={0.5} />
                   <directionalLight position={[10, 10, 5]} intensity={1.5} castShadow />
                   <pointLight position={[-10, -10, -5]} intensity={0.5} />
                   
-                  <DepthMapMesh imageUrl={imageRef} depthUrl={depthMapUrl} />
+                  {renderMode === 'mesh' ? (
+                    <DepthMapMesh imageUrl={imageRef} depthUrl={depthMapUrl} />
+                  ) : (
+                    <DepthPointCloud imageUrl={imageRef} depthUrl={depthMapUrl} />
+                  )}
                   
                   <OrbitControls 
+                    makeDefault
                     enablePan={true} 
                     enableZoom={true} 
                     enableRotate={true}
-                    minDistance={2}
-                    maxDistance={15}
+                    minDistance={1}
+                    maxDistance={20}
+                    enableDamping
+                    dampingFactor={0.05}
                   />
                   <Environment preset="city" />
                 </Canvas>
