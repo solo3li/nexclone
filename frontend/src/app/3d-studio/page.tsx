@@ -55,7 +55,7 @@ export default function ThreeDStudio() {
     });
 
     workerRef.current.onmessage = (event) => {
-      const { status, progress, depthMap, error } = event.data;
+      const { status, progress, depthMap, depthData, width, height, channels, error } = event.data;
 
       if (status === "init") {
         setStatusText("Loading AI Model...");
@@ -71,7 +71,38 @@ export default function ThreeDStudio() {
         setStatusText("Running Depth Estimation...");
         setProgress(100);
       } else if (status === "complete") {
-        setDepthMapUrl(depthMap);
+        if (depthData && width && height) {
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            const rgbaData = new Uint8ClampedArray(width * height * 4);
+            if (channels === 1 || !channels) {
+              for (let i = 0; i < depthData.length; i++) {
+                const val = depthData[i];
+                rgbaData[i * 4] = val;
+                rgbaData[i * 4 + 1] = val;
+                rgbaData[i * 4 + 2] = val;
+                rgbaData[i * 4 + 3] = 255;
+              }
+            } else if (channels === 3) {
+              for (let i = 0; i < (width * height); i++) {
+                rgbaData[i * 4] = depthData[i * 3];
+                rgbaData[i * 4 + 1] = depthData[i * 3 + 1];
+                rgbaData[i * 4 + 2] = depthData[i * 3 + 2];
+                rgbaData[i * 4 + 3] = 255;
+              }
+            } else if (channels === 4) {
+              rgbaData.set(depthData);
+            }
+            const imageData = new ImageData(rgbaData, width, height);
+            ctx.putImageData(imageData, 0, 0);
+            setDepthMapUrl(canvas.toDataURL("image/png"));
+          }
+        } else if (depthMap) {
+          setDepthMapUrl(depthMap);
+        }
         setIsGenerating(false);
         setStatusText("Complete!");
       } else if (status === "error") {

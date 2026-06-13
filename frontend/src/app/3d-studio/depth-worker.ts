@@ -41,7 +41,10 @@ self.addEventListener("message", async (event) => {
       // Output contains the depth image
       self.postMessage({
         status: "complete",
-        depthMap: output.depth.toDataURL(),
+        depthData: output.depth.data,
+        width: output.depth.width,
+        height: output.depth.height,
+        channels: output.depth.channels,
       });
     } catch (error: any) {
       self.postMessage({ status: "error", error: error.message });
