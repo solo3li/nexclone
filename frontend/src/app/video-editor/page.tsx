@@ -468,7 +468,7 @@ export default function VideoEditor() {
       const dropY = e.clientY - rect.top;
       let newTrackId: string | null = null;
       const headerOffset = 24;
-      const rowHeight = hwProfile?.isMobile ? 40 : 64;
+      const rowHeight = hwProfile?.isMobile ? 40 : 48;
       const trackIndex = Math.floor((dropY - headerOffset) / rowHeight);
       if (trackIndex >= 0 && trackIndex < tracks.length) {
          newTrackId = tracks[trackIndex].id;
@@ -753,7 +753,15 @@ export default function VideoEditor() {
           </div>
           
           <div className="flex-1 overflow-y-auto p-4 space-y-6">
-            {!selectedItem ? <div className="text-center text-[10px] text-[var(--color-bento-muted)] mt-10">Select a clip</div> : (
+            {!selectedItem ? (
+              <div className="text-center mt-20 text-[var(--color-bento-muted)] flex flex-col items-center">
+                 <div className="w-16 h-16 rounded-full bg-[#1a1a1a] flex items-center justify-center mb-4 border border-[#262626]">
+                    <i className="fas fa-sliders-h text-2xl opacity-50"></i>
+                 </div>
+                 <p className="text-xs font-bold uppercase tracking-wider text-gray-400">Inspector</p>
+                 <p className="text-[10px] mt-2 leading-relaxed">Select any clip on the timeline<br/>to edit its properties here.</p>
+              </div>
+            ) : (
               <div className="space-y-6">
                 
                 {/* Visual Properties (Video, Image, Text) */}
@@ -861,42 +869,48 @@ export default function VideoEditor() {
         </div>
 
         <div className="flex-1 flex overflow-hidden relative">
-          <div className="w-24 md:w-48 bg-[#0a0a0a] border-r border-[var(--color-bento-border)] z-30 flex flex-col shrink-0">
-            <div className="h-6 bg-[#141414] shrink-0 border-b border-[#262626]"></div>
+          <div className="w-24 md:w-56 bg-[#0a0a0a] border-r border-[var(--color-bento-border)] z-30 flex flex-col shrink-0">
+            <div className="h-6 bg-[#141414] shrink-0 border-b border-[#262626] flex items-center justify-center text-[8px] text-gray-600 font-mono tracking-widest">TRACKS</div>
             {tracks.map(track => (
-              <div key={track.id} className="h-10 md:h-16 shrink-0 flex flex-col md:flex-row items-center justify-center md:justify-start md:px-2 border-b border-[#262626] group bg-[#111] hover:bg-[#1a1a1a]">
-                <div className="flex items-center w-full mb-1 md:mb-0">
-                  {track.type === 'video' ? <i className="fas fa-video mx-2 text-blue-400 text-[10px]"></i> : track.type === 'audio' ? <i className="fas fa-music mx-2 text-green-400 text-[10px]"></i> : <i className="fas fa-font mx-2 text-purple-400 text-[10px]"></i>}
-                  <input type="text" value={track.name} onChange={(e) => renameTrack(track.id, e.target.value)} className="hidden md:block bg-transparent text-[10px] font-bold text-gray-300 w-full outline-none focus:text-white" />
+              <div key={track.id} className="shrink-0 flex items-center justify-between px-2 border-b border-[#262626] group bg-[#111] hover:bg-[#1a1a1a]" style={{ height: hwProfile?.isMobile ? 40 : 48 }}>
+                <div className="flex items-center w-full min-w-0">
+                  <div className="w-6 h-6 rounded bg-[#222] flex items-center justify-center mr-2 shrink-0 border border-[#333]">
+                     {track.type === 'video' ? <i className="fas fa-video text-blue-400 text-[10px]"></i> : track.type === 'audio' ? <i className="fas fa-music text-green-400 text-[10px]"></i> : <i className="fas fa-font text-purple-400 text-[10px]"></i>}
+                  </div>
+                  <input type="text" value={track.name} onChange={(e) => renameTrack(track.id, e.target.value)} className="bg-transparent text-[10px] font-bold text-gray-400 w-full outline-none focus:text-white truncate" />
                 </div>
-                <div className="flex space-x-1 md:space-x-2 md:ml-auto px-1">
+                <div className="flex space-x-1 shrink-0 ml-2">
                   {(track.type === 'video' || track.type === 'text') && (
-                    <button onClick={() => toggleTrackProperty(track.id, 'isHidden')} className={`text-[10px] ${track.isHidden ? 'text-red-400' : 'text-gray-500 hover:text-white'}`} title="Toggle Visibility"><i className={`fas ${track.isHidden ? 'fa-eye-slash' : 'fa-eye'}`}></i></button>
+                    <button onClick={() => toggleTrackProperty(track.id, 'isHidden')} className={`w-5 h-5 rounded flex items-center justify-center text-[10px] transition-colors ${track.isHidden ? 'bg-red-500/20 text-red-400' : 'hover:bg-[#262626] text-gray-500 hover:text-white'}`} title="Toggle Visibility"><i className={`fas ${track.isHidden ? 'fa-eye-slash' : 'fa-eye'}`}></i></button>
                   )}
                   {track.type === 'audio' && (
-                    <button onClick={() => toggleTrackProperty(track.id, 'isMuted')} className={`text-[10px] ${track.isMuted ? 'text-red-400' : 'text-gray-500 hover:text-white'}`} title="Mute Track"><i className={`fas ${track.isMuted ? 'fa-volume-mute' : 'fa-volume-up'}`}></i></button>
+                    <button onClick={() => toggleTrackProperty(track.id, 'isMuted')} className={`w-5 h-5 rounded flex items-center justify-center text-[10px] transition-colors ${track.isMuted ? 'bg-red-500/20 text-red-400' : 'hover:bg-[#262626] text-gray-500 hover:text-white'}`} title="Mute Track"><i className={`fas ${track.isMuted ? 'fa-volume-mute' : 'fa-volume-up'}`}></i></button>
                   )}
-                  <button onClick={() => toggleTrackProperty(track.id, 'isLocked')} className={`text-[10px] ${track.isLocked ? 'text-red-400' : 'text-gray-500 hover:text-white'}`} title="Lock Track"><i className={`fas ${track.isLocked ? 'fa-lock' : 'fa-unlock'}`}></i></button>
+                  <button onClick={() => toggleTrackProperty(track.id, 'isLocked')} className={`w-5 h-5 rounded flex items-center justify-center text-[10px] transition-colors ${track.isLocked ? 'bg-red-500/20 text-red-400' : 'hover:bg-[#262626] text-gray-500 hover:text-white'}`} title="Lock Track"><i className={`fas ${track.isLocked ? 'fa-lock' : 'fa-unlock'}`}></i></button>
                 </div>
               </div>
             ))}
-            <div className="p-2 shrink-0 flex flex-col space-y-1">
-              <button onClick={() => setTracks(sortTracks([...tracks, { id: Math.random().toString(36).substr(2, 9), type: 'video', name: 'Video ' + (tracks.filter(t=>t.type==='video').length + 1) }]))} className="w-full text-[10px] bg-[#262626] hover:bg-blue-600/30 hover:text-blue-400 text-gray-400 transition-colors py-1 rounded">+ Video Track</button>
-              <button onClick={() => setTracks(sortTracks([...tracks, { id: Math.random().toString(36).substr(2, 9), type: 'audio', name: 'Audio ' + (tracks.filter(t=>t.type==='audio').length + 1) }]))} className="w-full text-[10px] bg-[#262626] hover:bg-green-600/30 hover:text-green-400 text-gray-400 transition-colors py-1 rounded">+ Audio Track</button>
+            <div className="p-2 shrink-0 flex flex-col space-y-1 mt-auto border-t border-[#262626] bg-[#0a0a0a]">
+              <button onClick={() => setTracks(sortTracks([...tracks, { id: Math.random().toString(36).substr(2, 9), type: 'video', name: 'Video ' + (tracks.filter(t=>t.type==='video').length + 1) }]))} className="w-full text-[10px] font-bold bg-[#1a1a1a] border border-[#262626] hover:border-blue-500/50 hover:bg-blue-600/10 hover:text-blue-400 text-gray-400 transition-all py-1.5 rounded">+ Video Track</button>
+              <button onClick={() => setTracks(sortTracks([...tracks, { id: Math.random().toString(36).substr(2, 9), type: 'audio', name: 'Audio ' + (tracks.filter(t=>t.type==='audio').length + 1) }]))} className="w-full text-[10px] font-bold bg-[#1a1a1a] border border-[#262626] hover:border-green-500/50 hover:bg-green-600/10 hover:text-green-400 text-gray-400 transition-all py-1.5 rounded">+ Audio Track</button>
             </div>
           </div>
 
           <div ref={timelineRef} className="flex-1 bg-[#0f0f0f] relative overflow-x-auto overflow-y-hidden" style={{ backgroundImage: 'linear-gradient(90deg, #1a1a1a 1px, transparent 1px)', backgroundSize: `${timelineZoom}px 100%` }} onClick={(e) => { if (e.target === e.currentTarget) handleTimelineClick(e); }}>
+            <div className="absolute top-0 left-0 right-0 h-6 bg-[#141414] border-b border-[#262626] pointer-events-none z-20 opacity-80" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent calc(100px - 1px), #333 100px)', backgroundSize: '100px 100%' }}></div>
             {tracks.map((track, i) => (
-              <div key={track.id} className="absolute left-0 right-0 pointer-events-none transition-all" style={{ top: 24 + i * (hwProfile?.isMobile ? 40 : 64), height: hwProfile?.isMobile ? 40 : 64 }}>
+              <div key={track.id} className="absolute left-0 right-0 pointer-events-none transition-all border-b border-[#262626]/50" style={{ top: 24 + i * (hwProfile?.isMobile ? 40 : 48), height: hwProfile?.isMobile ? 40 : 48 }}>
                 {timelineItems.filter(item => item.trackId === track.id).map(clip => {
-                  let colorClass = 'bg-blue-600/80 border-blue-400';
-                  if (track.type === 'audio') colorClass = 'bg-green-600/80 border-green-400';
-                  if (track.type === 'text') colorClass = 'bg-purple-600/80 border-purple-400';
+                  let colorClass = 'bg-[#1e3a8a] border-[#3b82f6] text-blue-100'; // Video (Blue)
+                  if (track.type === 'audio') colorClass = 'bg-[#14532d] border-[#22c55e] text-green-100'; // Audio (Green)
+                  if (track.type === 'text') colorClass = 'bg-[#4c1d95] border-[#8b5cf6] text-purple-100'; // Text (Purple)
                   
                   return (
-                    <div key={clip.id} onPointerDown={(e) => handleTimelinePointerDown(e, clip)} className={`absolute h-8 ${hwProfile?.isMobile ? 'h-8' : (track.type === 'text' ? 'h-10' : 'h-14')} ${colorClass} rounded border pointer-events-auto flex items-center justify-center md:justify-start px-2 overflow-hidden shadow-sm touch-none ${selectedItemId === clip.id ? 'border-white ring-2 ring-white/50 z-20' : 'z-10'} ${timelineDrag.itemId === clip.id ? 'opacity-50 scale-105' : 'opacity-100'} ${track.isLocked ? 'stripes-bg grayscale cursor-not-allowed' : ''}`} style={{ left: clip.startTime * timelineZoom, width: Math.max(10, clip.duration * timelineZoom), top: hwProfile?.isMobile ? 4 : 4 }}>
-                      <span className="text-[10px] font-bold text-white truncate">{clip.text ? `"${clip.text}"` : (clip.name || 'Media')}</span>
+                    <div key={clip.id} onPointerDown={(e) => handleTimelinePointerDown(e, clip)} className={`absolute rounded-md border pointer-events-auto flex items-center px-2 overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.5)] touch-none transition-shadow ${colorClass} ${selectedItemId === clip.id ? 'border-white ring-1 ring-white/50 z-20 scale-[1.02]' : 'z-10'} ${timelineDrag.itemId === clip.id ? 'opacity-50' : 'opacity-100'} ${track.isLocked ? 'stripes-bg grayscale cursor-not-allowed' : ''}`} style={{ left: clip.startTime * timelineZoom, width: Math.max(10, clip.duration * timelineZoom), top: 4, bottom: 4 }}>
+                      {track.type === 'video' && <i className="fas fa-film text-[8px] mr-1 opacity-50 shrink-0"></i>}
+                      {track.type === 'audio' && <i className="fas fa-waveform text-[8px] mr-1 opacity-50 shrink-0"></i>}
+                      {track.type === 'text' && <i className="fas fa-font text-[8px] mr-1 opacity-50 shrink-0"></i>}
+                      <span className="text-[10px] font-bold truncate">{clip.text ? `"${clip.text}"` : (clip.name || 'Media')}</span>
                     </div>
                   );
                 })}
