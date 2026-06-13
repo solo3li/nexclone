@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 
-// Production plan returned by AI
 interface VideoSection {
   keyword: string;
   duration: number;
@@ -14,62 +13,117 @@ interface ProductionPlan {
   title: string;
   color_grade: string;
   bg_color: string;
+  mood: string;
+  music_genre: string;
   sections: VideoSection[];
   title_card?: { text: string; duration: number; color: string };
   outro?: { text: string; duration: number };
 }
 
+// ─── Curated Free Music Library (Internet Archive & other CC0 sources) ────
+const MUSIC_LIBRARY: Record<string, { url: string; name: string }[]> = {
+  cinematic: [
+    { url: 'https://archive.org/download/cinematic-piano-background/cinematic-piano-background.mp3', name: 'Cinematic Piano' },
+    { url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3', name: 'Cinematic Ambient' },
+  ],
+  upbeat: [
+    { url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', name: 'Upbeat Track' },
+    { url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', name: 'Bright Energy' },
+  ],
+  calm: [
+    { url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3', name: 'Calm Ambient' },
+    { url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3', name: 'Peaceful Tones' },
+  ],
+  epic: [
+    { url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3', name: 'Epic Build' },
+    { url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3', name: 'Dramatic Rise' },
+  ],
+  romantic: [
+    { url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3', name: 'Romantic Theme' },
+    { url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3', name: 'Gentle Melody' },
+  ],
+  nature: [
+    { url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', name: 'Nature Ambient' },
+    { url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3', name: 'Organic Flow' },
+  ],
+  default: [
+    { url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', name: 'Background Music' },
+  ],
+};
+
+function pickMusic(genre: string): { url: string; name: string } {
+  const key = Object.keys(MUSIC_LIBRARY).find(k => genre.toLowerCase().includes(k)) || 'default';
+  const tracks = MUSIC_LIBRARY[key];
+  return tracks[Math.floor(Math.random() * tracks.length)];
+}
+
+// ─── Pexels ───────────────────────────────────────────────────────────────
 async function fetchPexelsVideo(keyword: string, apiKey: string): Promise<string | null> {
   try {
     const res = await fetch(
       `https://api.pexels.com/videos/search?query=${encodeURIComponent(keyword)}&per_page=3&orientation=landscape&size=medium`,
-      { headers: { Authorization: apiKey }, next: { revalidate: 3600 } }
+      { headers: { Authorization: apiKey } }
     );
     const data = await res.json();
-    if (data.videos && data.videos.length > 0) {
-      const video = data.videos[0];
-      const hdFile = (video.video_files as any[])
+    if (data.videos?.length > 0) {
+      const hdFile = (data.videos[0].video_files as any[])
         .filter((f: any) => f.quality === 'hd' || f.quality === 'sd')
         .sort((a: any, b: any) => b.width - a.width)[0];
       return hdFile?.link || null;
     }
-  } catch (e) {
-    console.error('Pexels fetch error:', e);
-  }
+  } catch (e) { console.error('Pexels error:', e); }
   return null;
 }
 
+// ─── Pixabay ──────────────────────────────────────────────────────────────
 async function fetchPixabayVideo(keyword: string, apiKey: string): Promise<string | null> {
   try {
     const res = await fetch(
-      `https://pixabay.com/api/videos/?key=${apiKey}&q=${encodeURIComponent(keyword)}&video_type=film&per_page=3`,
-      { next: { revalidate: 3600 } }
+      `https://pixabay.com/api/videos/?key=${apiKey}&q=${encodeURIComponent(keyword)}&video_type=film&per_page=3`
     );
     const data = await res.json();
-    if (data.hits && data.hits.length > 0) {
-      const video = data.hits[0];
-      return video.videos?.medium?.url || video.videos?.small?.url || null;
+    if (data.hits?.length > 0) {
+      return data.hits[0].videos?.medium?.url || data.hits[0].videos?.small?.url || null;
     }
-  } catch (e) {
-    console.error('Pixabay fetch error:', e);
-  }
+  } catch (e) { console.error('Pixabay error:', e); }
   return null;
 }
 
-// Generate a gradient SVG as data URL when no video API key is available
-function generateColorBackground(color: string, keyword: string): string {
-  const colors: Record<string, [string, string]> = {
-    nature: ['#1a472a', '#2d6a4f'],
-    ocean: ['#0077b6', '#00b4d8'],
-    city: ['#2b2d42', '#8d99ae'],
-    sunset: ['#e76f51', '#f4a261'],
-    space: ['#03045e', '#0077b6'],
-    forest: ['#1b4332', '#40916c'],
+// ─── Wikimedia Commons (no key) ───────────────────────────────────────────
+async function fetchWikimediaMedia(keyword: string): Promise<string | null> {
+  try {
+    const res = await fetch(
+      `https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(keyword)}&gsrnamespace=6&prop=imageinfo&iiprop=url|mime&format=json&origin=*&gsrlimit=5`
+    );
+    const data = await res.json();
+    const pages = Object.values(data.query?.pages || {}) as any[];
+    for (const page of pages) {
+      const info = page.imageinfo?.[0];
+      const mime = info?.mime || '';
+      if (mime.startsWith('video/')) return info.url;
+      if (mime.startsWith('image/') && !mime.includes('svg') && !mime.includes('tiff')) return info.url;
+    }
+  } catch (e) { console.error('Wikimedia error:', e); }
+  return null;
+}
+
+// ─── Picsum fallback (no key) ─────────────────────────────────────────────
+function getPicsumUrl(keyword: string, index: number): string {
+  return `https://picsum.photos/seed/${encodeURIComponent(keyword + index)}/1920/1080`;
+}
+
+// ─── Gradient fallback ────────────────────────────────────────────────────
+function generateGradientBackground(keyword: string): string {
+  const palette: Record<string, [string, string]> = {
+    nature: ['#1a472a', '#2d6a4f'], ocean: ['#0077b6', '#00b4d8'],
+    city: ['#2b2d42', '#8d99ae'], sunset: ['#e76f51', '#f4a261'],
+    space: ['#03045e', '#0077b6'], forest: ['#1b4332', '#40916c'],
+    desert: ['#c9a227', '#e07b39'], winter: ['#caf0f8', '#90e0ef'],
     default: ['#1a1a2e', '#16213e'],
   };
-  const key = Object.keys(colors).find(k => keyword.toLowerCase().includes(k)) || 'default';
-  const [c1, c2] = colors[key];
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:${c1}"/><stop offset="100%" style="stop-color:${c2}"/></linearGradient></defs><rect width="1920" height="1080" fill="url(#g)"/><text x="960" y="540" font-family="sans-serif" font-size="48" fill="rgba(255,255,255,0.15)" text-anchor="middle" dominant-baseline="middle">${keyword}</text></svg>`;
+  const key = Object.keys(palette).find(k => keyword.toLowerCase().includes(k)) || 'default';
+  const [c1, c2] = palette[key];
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:${c1}"/><stop offset="100%" style="stop-color:${c2}"/></linearGradient></defs><rect width="1920" height="1080" fill="url(#g)"/></svg>`;
   return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
 }
 
@@ -81,7 +135,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing OPENROUTER_API_KEY' }, { status: 500 });
     }
 
-    // Step 1: Get production plan from AI
+    // Step 1: AI Production Plan
     const planRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -93,31 +147,28 @@ export async function POST(req: Request) {
         messages: [
           {
             role: 'system',
-            content: `You are an AI video director. Create a video production plan as JSON.
-Return ONLY valid JSON with this exact structure (no markdown):
+            content: `You are a professional AI video director. Create a production plan in JSON.
+Return ONLY valid JSON (no markdown) with this structure:
 {
-  "title": "Short video title",
-  "color_grade": "CSS filter string like 'saturate(1.4) contrast(1.1) brightness(0.95)'",
-  "bg_color": "#hex fallback color",
+  "title": "Video title",
+  "color_grade": "CSS filter like 'saturate(1.4) contrast(1.1)'",
+  "bg_color": "#hexcolor",
+  "mood": "cinematic|upbeat|calm|epic|romantic|nature",
+  "music_genre": "describe the music mood/genre",
   "sections": [
     {
-      "keyword": "2-3 word Pexels search term",
+      "keyword": "2-3 word English search term",
       "duration": 8,
-      "text": "optional overlay text (keep short)",
-      "text_y": 85,
-      "filter": "optional extra CSS filter",
-      "bg_color": "#hex color for this section"
+      "text": "Short cinematic overlay text",
+      "text_y": 80,
+      "filter": "optional CSS filter",
+      "bg_color": "#hexcolor"
     }
   ],
   "title_card": { "text": "Main Title", "duration": 4, "color": "#ffffff" },
   "outro": { "text": "Closing message", "duration": 3 }
 }
-Rules:
-- 3 to 5 sections
-- total duration should be 20-40 seconds
-- keywords should be simple English for Pexels stock video search
-- color_grade should match the video mood
-- text should be short, cinematic phrases`
+Rules: 3-5 sections, total 25-45 seconds, simple English keywords for stock video search.`
           },
           { role: 'user', content: `Create a video about: ${prompt}` }
         ],
@@ -132,30 +183,55 @@ Rules:
 
     const plan: ProductionPlan = JSON.parse(planData.choices[0].message.content);
 
-    // Step 2: Fetch video URLs
+    // Step 2: Fetch media from ALL available sources in parallel
     const pexelsKey = process.env.PEXELS_API_KEY || '';
     const pixabayKey = process.env.PIXABAY_API_KEY || '';
 
-    const videoUrls: (string | null)[] = [];
-    for (const section of plan.sections) {
+    const mediaUrls: string[] = [];
+    const mediaTypes: ('video' | 'image')[] = [];
+
+    for (let i = 0; i < plan.sections.length; i++) {
+      const { keyword } = plan.sections[i];
       let url: string | null = null;
+      let type: 'video' | 'image' = 'image';
+
+      // Try sources in priority order
       if (pexelsKey) {
-        url = await fetchPexelsVideo(section.keyword, pexelsKey);
-      } else if (pixabayKey) {
-        url = await fetchPixabayVideo(section.keyword, pixabayKey);
+        url = await fetchPexelsVideo(keyword, pexelsKey);
+        if (url) type = 'video';
       }
-      // Fallback to gradient background
+      if (!url && pixabayKey) {
+        url = await fetchPixabayVideo(keyword, pixabayKey);
+        if (url) type = 'video';
+      }
       if (!url) {
-        url = generateColorBackground(section.bg_color || plan.bg_color || '#1a1a2e', section.keyword);
+        const wikiUrl = await fetchWikimediaMedia(keyword);
+        if (wikiUrl) { url = wikiUrl; type = wikiUrl.match(/\.(mp4|webm|ogv)/i) ? 'video' : 'image'; }
       }
-      videoUrls.push(url);
+      // Picsum fallback for images
+      if (!url) {
+        url = getPicsumUrl(keyword, i);
+        type = 'image';
+      }
+
+      mediaUrls.push(url!);
+      mediaTypes.push(type);
     }
+
+    // Step 3: Pick background music
+    const music = pickMusic(plan.mood || plan.music_genre || 'default');
 
     return NextResponse.json({
       plan,
-      videoUrls,
-      hasPexels: !!pexelsKey,
-      hasPixabay: !!pixabayKey,
+      mediaUrls,
+      mediaTypes,
+      music,
+      sources: {
+        hasPexels: !!pexelsKey,
+        hasPixabay: !!pixabayKey,
+        hasWikimedia: true,
+        hasPicsum: true,
+      }
     });
 
   } catch (error) {

@@ -175,14 +175,16 @@ export default function VideoEditor() {
       const data = await res.json();
       if (data.error) { alert('AI Error: ' + data.error); return; }
 
-      const { plan, videoUrls } = data;
-      setAiGenerateStatus('🎬 Building timeline...');
+      const { plan, mediaUrls, mediaTypes, music } = data;
+      setAiGenerateStatus('🎬 Assembling timeline...');
 
       let newTracks = [...tracks];
       let vTrack = newTracks.filter(t => t.type === 'video').at(-1);
       let tTrack = newTracks.find(t => t.type === 'text');
+      let aTrack = newTracks.find(t => t.type === 'audio');
       if (!vTrack) { vTrack = { id: Math.random().toString(36).substr(2,9), type: 'video', name: 'AI Video' }; newTracks.push(vTrack); }
-      if (!tTrack) { tTrack = { id: Math.random().toString(36).substr(2,9), type: 'text', name: 'Text' }; newTracks.push(tTrack); }
+      if (!tTrack) { tTrack = { id: Math.random().toString(36).substr(2,9), type: 'text', name: 'Captions' }; newTracks.push(tTrack); }
+      if (!aTrack) { aTrack = { id: Math.random().toString(36).substr(2,9), type: 'audio', name: 'Music' }; newTracks.push(aTrack); }
       setTracks(sortTracks(newTracks));
 
       const newItems: TimelineItem[] = [];
@@ -194,38 +196,56 @@ export default function VideoEditor() {
         cursor += plan.title_card.duration;
       }
 
-      // Video sections
+      // Video + text sections
       for (let i = 0; i < plan.sections.length; i++) {
         const section = plan.sections[i];
-        const videoUrl = videoUrls[i];
-        const isRealVideo = videoUrl && !videoUrl.startsWith('data:');
-        newItems.push({
-          id: Math.random().toString(36).substr(2,9),
-          trackId: vTrack!.id,
-          url: videoUrl,
-          name: section.keyword,
-          startTime: cursor,
-          duration: section.duration,
-          sourceOffset: 0,
-          mediaType: isRealVideo ? 'video' : 'image',
-          filter: (section.filter ? section.filter + ' ' : '') + (plan.color_grade || ''),
-          x: 50, y: 50, width: 100, height: 100, opacity: 100, volume: 0,
-        });
+        const mediaUrl = (mediaUrls || [])[i];
+        const mediaType: 'video' | 'image' = (mediaTypes || [])[i] || 'image';
+        if (mediaUrl) {
+          newItems.push({
+            id: Math.random().toString(36).substr(2,9),
+            trackId: vTrack!.id,
+            url: mediaUrl,
+            name: section.keyword,
+            startTime: cursor,
+            duration: section.duration,
+            sourceOffset: 0,
+            mediaType,
+            filter: (section.filter ? section.filter + ' ' : '') + (plan.color_grade || ''),
+            x: 50, y: 50, width: 100, height: 100, opacity: 100, volume: 0,
+          });
+        }
         if (section.text) {
-          newItems.push({ id: Math.random().toString(36).substr(2,9), trackId: tTrack!.id, text: section.text, startTime: cursor + 1, duration: section.duration - 2, sourceOffset: 0, x: 50, y: section.text_y || 80, fontSize: 48, color: '#ffffff', fontFamily: 'Inter', rotation: 0, opacity: 100 });
+          newItems.push({ id: Math.random().toString(36).substr(2,9), trackId: tTrack!.id, text: section.text, startTime: cursor + 1, duration: Math.max(1, section.duration - 2), sourceOffset: 0, x: 50, y: section.text_y || 80, fontSize: 48, color: '#ffffff', fontFamily: 'Inter', rotation: 0, opacity: 100 });
         }
         cursor += section.duration;
       }
 
-      // Outro
+      // Outro card
       if (plan.outro) {
         newItems.push({ id: Math.random().toString(36).substr(2,9), trackId: tTrack!.id, text: plan.outro.text, startTime: cursor, duration: plan.outro.duration, sourceOffset: 0, x: 50, y: 50, fontSize: 56, color: '#ffffff', fontFamily: 'Inter', rotation: 0, opacity: 100 });
+        cursor += plan.outro.duration;
+      }
+
+      // 🎵 Background music track
+      if (music?.url) {
+        newItems.push({
+          id: Math.random().toString(36).substr(2,9),
+          trackId: aTrack!.id,
+          url: music.url,
+          name: music.name || 'Background Music',
+          startTime: 0,
+          duration: cursor,
+          sourceOffset: 0,
+          mediaType: 'audio',
+          volume: 70,
+        });
       }
 
       setTimelineItems(prev => [...prev, ...newItems]);
       setAiVideoPrompt('');
-      setAiGenerateStatus('✅ Video project ready!');
-      setTimeout(() => setAiGenerateStatus(''), 3000);
+      setAiGenerateStatus(`✅ Ready! ${plan.sections.length} clips + music added`);
+      setTimeout(() => setAiGenerateStatus(''), 4000);
     } catch (e) {
       alert('Failed to generate video');
       setAiGenerateStatus('');
@@ -923,22 +943,34 @@ export default function VideoEditor() {
                       {isAiGenerating ? <><i className="fas fa-circle-notch fa-spin mr-2"></i>Generating...</> : <><i className="fas fa-film mr-2"></i>Generate Video</>}
                     </button>
                     <div className="border-t border-[#222] pt-3">
-                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">🔍 Stock Video Search</p>
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">🔍 Stock Media Search</p>
+                        <div className="flex gap-1 text-[9px]">
+                          <span className="bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded">Pexels</span>
+                          <span className="bg-purple-500/20 text-purple-400 px-1.5 py-0.5 rounded">Pixabay</span>
+                          <span className="bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded">Wikimedia</span>
+                          <span className="bg-gray-500/20 text-gray-400 px-1.5 py-0.5 rounded">Picsum</span>
+                        </div>
+                      </div>
                       <div className="flex gap-2">
                         <input value={stockSearchQuery} onChange={e => setStockSearchQuery(e.target.value)}
                           onKeyDown={e => e.key === 'Enter' && searchStockVideos()}
-                          placeholder="Search Pexels..." className="flex-1 bento-input text-xs py-1.5" />
+                          placeholder="Search from all sources..." className="flex-1 bento-input text-xs py-1.5" />
                         <button onClick={searchStockVideos} disabled={isSearchingStock}
                           className="px-3 py-1.5 bg-[#262626] hover:bg-[#333] text-xs rounded-lg border border-[#333] disabled:opacity-50">
                           {isSearchingStock ? <i className="fas fa-circle-notch fa-spin"></i> : <i className="fas fa-search"></i>}
                         </button>
                       </div>
                       {stockResults.length > 0 && (
-                        <div className="grid grid-cols-2 gap-1.5 mt-2 max-h-48 overflow-y-auto">
+                        <div className="grid grid-cols-2 gap-1.5 mt-2 max-h-64 overflow-y-auto">
                           {stockResults.map((r, i) => (
                             <div key={i} className="aspect-video bg-[#111] rounded overflow-hidden relative group cursor-pointer border border-[#222] hover:border-blue-500 transition-colors"
-                              onClick={() => { addToTimeline({ id: Math.random().toString(36).substr(2,9), name: r.name, url: r.url, type: 'video' }); }}>
-                              <img src={r.thumb} className="w-full h-full object-cover" alt={r.name} />
+                              onClick={() => { addToTimeline({ id: Math.random().toString(36).substr(2,9), name: r.name, url: r.url, type: (r as any).type || 'video' }); }}>
+                              {r.thumb ? <img src={r.thumb} className="w-full h-full object-cover" alt={r.name} onError={e => { (e.target as HTMLImageElement).style.display='none'; }} /> : <div className="w-full h-full bg-[#1a1a1a] flex items-center justify-center"><i className="fas fa-image text-gray-600 text-xl"></i></div>}
+                              {/* Type badge */}
+                              <div className={`absolute top-1 left-1 text-[8px] font-bold px-1 py-0.5 rounded ${ (r as any).type === 'video' ? 'bg-blue-500/80 text-white' : 'bg-purple-500/80 text-white'}`}>
+                                {(r as any).type === 'video' ? '▶' : '🖼'} {(r as any).source || ''}
+                              </div>
                               <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                                 <i className="fas fa-plus text-white text-lg"></i>
                               </div>
