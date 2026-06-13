@@ -9,6 +9,11 @@ interface TimelineItem { id: string; trackId: TrackID; mediaId?: string; url?: s
 type TransformMode = 'none' | 'drag' | 'scale' | 'rotate';
 type HwProfile = { ram: number; cores: number; tier: 'Pro' | 'Standard' | 'Limited'; showModal: boolean; maxRes: string; maxDur: number; isMobile: boolean };
 
+type ExportResolution = '720p' | '1080p' | '4K';
+type ExportFPS = 24 | 30 | 60;
+type ExportQuality = 'low' | 'medium' | 'high';
+type ExportFormat = 'webm' | 'mp4';
+
 export default function VideoEditor() {
   const [activeAssetTab, setActiveAssetTab] = useState("media");
   const [activePropertyTab, setActivePropertyTab] = useState("color");
@@ -44,6 +49,15 @@ export default function VideoEditor() {
   const recordedChunksRef = useRef<Blob[]>([]);
   const totalTimelineDurationRef = useRef<number>(0);
 
+  // Advanced Export Settings State
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportConfig, setExportConfig] = useState<{ resolution: ExportResolution, fps: ExportFPS, quality: ExportQuality, format: ExportFormat }>({
+    resolution: '1080p',
+    fps: 30,
+    quality: 'medium',
+    format: 'webm'
+  });
+
   const selectedItem = timelineItems.find(i => i.id === selectedItemId);
 
   useEffect(() => {
@@ -57,6 +71,9 @@ export default function VideoEditor() {
     if (ram >= 8 && cores >= 8 && !isMobile) { tier = 'Pro'; maxRes = '4K Uncompressed'; maxDur = 60; }
     else if (ram <= 4 || cores <= 4 || isMobile) { tier = 'Limited'; maxRes = '720p Mobile Proxy'; maxDur = 3; }
     setHwProfile({ ram, cores, tier, showModal: true, maxRes, maxDur, isMobile });
+    
+    // Auto-adjust default export config based on hardware
+    if (tier === 'Limited') setExportConfig({ resolution: '720p', fps: 30, quality: 'low', format: 'webm' });
   }, []);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -114,14 +131,26 @@ export default function VideoEditor() {
   const activeTextItems = timelineItems.filter(i => i.trackId === 'T1' && currentTime >= i.startTime && currentTime < i.startTime + i.duration);
   const activeVideoItem = timelineItems.find(i => i.trackId === 'V1' && currentTime >= i.startTime && currentTime < i.startTime + i.duration);
 
+  // We need a stable reference to isRendering inside the loop to lock resolution
+  const isRenderingRef = useRef(isRendering);
+  const exportConfigRef = useRef(exportConfig);
+  useEffect(() => { isRenderingRef.current = isRendering; exportConfigRef.current = exportConfig; }, [isRendering, exportConfig]);
+
   const renderCanvas = () => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     const container = playerContainerRef.current;
     
     if (canvas && ctx && container) {
-      const rect = container.getBoundingClientRect();
-      if (canvas.width !== rect.width || canvas.height !== rect.height) { canvas.width = rect.width; canvas.height = rect.height; }
+      // DYNAMIC RESOLUTION FIX: Lock canvas to exact export resolution during render, otherwise use screen size.
+      if (isRenderingRef.current) {
+         if (exportConfigRef.current.resolution === '720p') { canvas.width = 1280; canvas.height = 720; }
+         else if (exportConfigRef.current.resolution === '1080p') { canvas.width = 1920; canvas.height = 1080; }
+         else if (exportConfigRef.current.resolution === '4K') { canvas.width = 3840; canvas.height = 2160; }
+      } else {
+        const rect = container.getBoundingClientRect();
+        if (canvas.width !== rect.width || canvas.height !== rect.height) { canvas.width = rect.width; canvas.height = rect.height; }
+      }
       
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
@@ -144,14 +173,20 @@ export default function VideoEditor() {
         const pxY = (textItem.y || 50) * canvas.height / 100;
         ctx.translate(pxX, pxY);
         ctx.rotate(((textItem.rotation || 0) * Math.PI) / 180);
-        ctx.font = `bold ${textItem.fontSize || 64}px ${textItem.fontFamily || 'Inter'}`;
+        
+        // Scale font size proportionally to canvas width so it looks identical to DOM preview
+        // Assuming DOM preview is based on a standard 1080p wide screen (approx 1920px)
+        const scaleFactor = canvas.width / 1920; 
+        const renderFontSize = (textItem.fontSize || 64) * scaleFactor;
+        
+        ctx.font = `bold ${renderFontSize}px ${textItem.fontFamily || 'Inter'}`;
         ctx.fillStyle = textItem.color || '#ffffff';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         if (textItem.filter) ctx.filter = textItem.filter;
         ctx.shadowColor = 'rgba(0,0,0,0.8)';
-        ctx.shadowBlur = 8;
-        ctx.shadowOffsetY = 4;
+        ctx.shadowBlur = 8 * scaleFactor;
+        ctx.shadowOffsetY = 4 * scaleFactor;
         ctx.fillText(textItem.text, 0, 0);
         ctx.restore();
       });
@@ -177,22 +212,44 @@ export default function VideoEditor() {
   const startVideoRender = () => {
     if (timelineItems.length === 0 || !canvasRef.current) return;
     
-    // 1. Calculate Total Duration
+    setShowExportModal(false);
+    
     const maxEnd = Math.max(...timelineItems.map(i => i.startTime + i.duration));
     if (maxEnd <= 0) return;
     totalTimelineDurationRef.current = maxEnd;
     
-    // 2. Reset State
     setSelectedItemId(null);
     setCurrentTime(0);
     setRenderProgress(0);
     setIsRendering(true);
     recordedChunksRef.current = [];
 
-    // 3. Initialize MediaRecorder (Capture 60fps Canvas Stream)
-    const stream = canvasRef.current.captureStream(60);
-    let options = { mimeType: 'video/webm; codecs=vp9' };
-    if (!MediaRecorder.isTypeSupported(options.mimeType)) options = { mimeType: 'video/webm' };
+    // Capture using configured FPS
+    const stream = canvasRef.current.captureStream(exportConfig.fps);
+    
+    // Calculate Quality (Bitrate)
+    let bitrate = 4000000; // Medium (4Mbps)
+    if (exportConfig.quality === 'low') bitrate = 2000000;
+    if (exportConfig.quality === 'high') bitrate = 8000000;
+    if (exportConfig.resolution === '4K') bitrate *= 2.5; // Bump bitrate for 4K
+    
+    // Format mapping
+    let mimeType = 'video/webm; codecs=vp9';
+    let fileExt = 'webm';
+    
+    if (exportConfig.format === 'mp4') {
+       // Note: mp4 in MediaRecorder isn't universally supported yet, 
+       // but Safari supports 'video/mp4' and Chrome supports it with certain flags.
+       mimeType = 'video/mp4; codecs="avc1.424028, mp4a.40.2"';
+       fileExt = 'mp4';
+    }
+
+    let options = { mimeType, videoBitsPerSecond: bitrate };
+    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+       // Fallback to webm if selected format is not supported by browser
+       options = { mimeType: 'video/webm', videoBitsPerSecond: bitrate };
+       fileExt = 'webm';
+    }
     
     const mediaRecorder = new MediaRecorder(stream, options);
     mediaRecorderRef.current = mediaRecorder;
@@ -200,34 +257,28 @@ export default function VideoEditor() {
     mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunksRef.current.push(e.data); };
     
     mediaRecorder.onstop = () => {
-      const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
+      const blob = new Blob(recordedChunksRef.current, { type: options.mimeType });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `rendered_video_${Date.now()}.webm`;
+      a.download = `rendered_video_${exportConfig.resolution}_${Date.now()}.${fileExt}`;
       a.click();
       URL.revokeObjectURL(url);
       setIsRendering(false);
       setRenderProgress(0);
     };
 
-    // Give the video elements a tiny moment to seek to 0 before starting recording
     setTimeout(() => {
-      mediaRecorder.start(100); // chunk every 100ms
-      setIsPlaying(true); // Auto-play the timeline
+      mediaRecorder.start(100); 
+      setIsPlaying(true); 
     }, 500);
   };
 
-  // Monitor Render Progress
   useEffect(() => {
     if (isRendering) {
       const progress = Math.min(100, (currentTime / totalTimelineDurationRef.current) * 100);
       setRenderProgress(progress);
-
-      if (currentTime >= totalTimelineDurationRef.current) {
-        setIsPlaying(false);
-        mediaRecorderRef.current?.stop();
-      }
+      if (currentTime >= totalTimelineDurationRef.current) { setIsPlaying(false); mediaRecorderRef.current?.stop(); }
     }
   }, [currentTime, isRendering]);
   // ---------------------------------
@@ -383,7 +434,7 @@ export default function VideoEditor() {
         {/* Hardware / Export Badges */}
         <div className="flex items-center space-x-2">
            <button onClick={exportSnapshot} disabled={isRendering} className="hidden md:flex bento-btn-accent px-4 py-1 text-xs items-center bg-[#262626] hover:bg-[#3f3f46] text-white disabled:opacity-50"><i className="fas fa-camera mr-2"></i> Snapshot</button>
-           <button onClick={startVideoRender} disabled={isRendering || timelineItems.length === 0} className="bento-btn-accent px-4 py-1 text-xs flex items-center bg-green-600 hover:bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.5)] disabled:opacity-50 disabled:shadow-none transition-all"><i className="fas fa-file-export mr-2"></i> Export Video</button>
+           <button onClick={() => setShowExportModal(true)} disabled={isRendering || timelineItems.length === 0} className="bento-btn-accent px-4 py-1 text-xs flex items-center bg-green-600 hover:bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.5)] disabled:opacity-50 disabled:shadow-none transition-all"><i className="fas fa-sliders-h mr-2"></i> Deliver</button>
            <button className="md:hidden bento-btn w-10 h-10 flex items-center justify-center" onClick={() => setShowMobileSidebar(!showMobileSidebar)}><i className="fas fa-bars"></i></button>
         </div>
       </header>
@@ -436,18 +487,14 @@ export default function VideoEditor() {
             className="flex-1 bg-[#050505] rounded-xl overflow-hidden relative border border-[#262626] shadow-inner touch-none cursor-crosshair"
             onClick={() => { if(transformMode === 'none' && !isRendering) setSelectedItemId(null); }}
           >
-            {/* The Hidden Source Video */}
             <video ref={videoPlayerRef} className="hidden opacity-0 pointer-events-none" muted={true} crossOrigin="anonymous" />
-            
-            {/* The Master Output Canvas */}
             <canvas ref={canvasRef} className="absolute inset-0 w-full h-full bg-black pointer-events-none" />
 
             {!activeVideoItem && <div className="absolute inset-0 flex flex-col items-center justify-center opacity-20 pointer-events-none"><i className="fas fa-film text-4xl md:text-6xl mb-4"></i></div>}
 
-            {/* Transform Controls Overlay (Invisible bounds, handles only) */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
               {activeTextItems.map(textItem => {
-                const isSelected = selectedItemId === textItem.id && !isRendering; // Hide controls while rendering
+                const isSelected = selectedItemId === textItem.id && !isRendering;
                 return (
                   <div 
                     key={textItem.id} 
@@ -474,14 +521,17 @@ export default function VideoEditor() {
 
             {/* Rendering Overlay */}
             {isRendering && (
-              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center z-50">
-                <i className="fas fa-cog fa-spin text-4xl text-green-400 mb-4 drop-shadow-[0_0_15px_rgba(34,197,94,0.8)]"></i>
-                <h3 className="text-xl font-bold text-white mb-2">Rendering Video...</h3>
-                <div className="w-64 h-2 bg-[#262626] rounded-full overflow-hidden border border-[#3f3f46]">
-                  <div className="h-full bg-green-500 transition-all duration-300" style={{ width: `${renderProgress}%` }}></div>
+              <div className="absolute inset-0 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center z-50">
+                <i className="fas fa-compact-disc fa-spin text-5xl text-blue-400 mb-6 drop-shadow-[0_0_20px_rgba(96,165,250,0.8)]"></i>
+                <h3 className="text-2xl font-bold text-white mb-2">Rendering {exportConfig.resolution}...</h3>
+                <p className="text-sm text-[var(--color-bento-muted)] mb-6">Processing frames at {exportConfig.fps} FPS</p>
+                <div className="w-72 h-3 bg-[#1a1a1a] rounded-full overflow-hidden border border-[#3f3f46] shadow-inner">
+                  <div className="h-full bg-gradient-to-r from-blue-500 to-green-400 transition-all duration-300" style={{ width: `${renderProgress}%` }}></div>
                 </div>
-                <p className="font-mono text-xs text-[var(--color-bento-muted)] mt-2">{renderProgress.toFixed(1)}%</p>
-                <p className="text-[10px] text-red-400 mt-4 animate-pulse">Do not close this tab. Recording real-time stream.</p>
+                <div className="flex justify-between w-72 mt-2 font-mono text-xs font-bold text-white">
+                  <span>{formatTime(currentTime)}</span>
+                  <span className="text-green-400">{renderProgress.toFixed(1)}%</span>
+                </div>
               </div>
             )}
           </div>
@@ -585,10 +635,101 @@ export default function VideoEditor() {
               <p>Performance Tier: <strong className="text-white">{hwProfile.tier}</strong></p>
               <p>Max Resolution: <strong className="text-white">{hwProfile.maxRes}</strong></p>
             </div>
-            <button onClick={() => setHwProfile({ ...hwProfile, showModal: false })} className="w-full bento-btn-accent py-3 font-bold mt-4">Acknowledge & Start Editing</button>
+            <button onClick={() => setHwProfile({ ...hwProfile, showModal: false })} className="w-full bento-btn-accent py-3 font-bold mt-4">Acknowledge</button>
           </div>
         </div>
       )}
+
+      {/* Advanced Export Settings Modal (Deliver Tab) */}
+      {showExportModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-[#0f0f0f] border border-[var(--color-bento-border)] rounded-xl max-w-md w-full p-6 space-y-6 shadow-2xl">
+            <div className="flex justify-between items-center border-b border-[#262626] pb-4">
+              <h2 className="text-xl font-bold flex items-center"><i className="fas fa-sliders-h mr-3 text-blue-400"></i> Render Settings</h2>
+              <button onClick={() => setShowExportModal(false)} className="text-[var(--color-bento-muted)] hover:text-white"><i className="fas fa-times"></i></button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Resolution */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider">Resolution</label>
+                <select 
+                  className="bento-input w-full"
+                  value={exportConfig.resolution}
+                  onChange={(e) => setExportConfig({...exportConfig, resolution: e.target.value as ExportResolution})}
+                >
+                  <option value="720p">1280 × 720 (720p HD)</option>
+                  <option value="1080p">1920 × 1080 (1080p FHD)</option>
+                  <option value="4K">3840 × 2160 (4K UHD)</option>
+                </select>
+                {exportConfig.resolution === '4K' && hwProfile?.tier !== 'Pro' && (
+                  <p className="text-[10px] text-orange-400 mt-1 flex items-start"><i className="fas fa-exclamation-triangle mt-0.5 mr-1"></i> Warning: Rendering 4K on non-Pro hardware may cause browser instability.</p>
+                )}
+              </div>
+
+              {/* Framerate */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider">Framerate (FPS)</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[24, 30, 60].map((fps) => (
+                    <button 
+                      key={fps}
+                      onClick={() => setExportConfig({...exportConfig, fps: fps as ExportFPS})}
+                      className={`py-2 rounded-lg text-sm font-bold transition-all border ${exportConfig.fps === fps ? 'bg-blue-500/20 border-blue-500 text-blue-400' : 'bg-[#1a1a1a] border-[#262626] text-[var(--color-bento-muted)] hover:text-white'}`}
+                    >
+                      {fps}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Quality / Bitrate */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider">Quality (Bitrate)</label>
+                <select 
+                  className="bento-input w-full"
+                  value={exportConfig.quality}
+                  onChange={(e) => setExportConfig({...exportConfig, quality: e.target.value as ExportQuality})}
+                >
+                  <option value="low">Low (Fast render, small file)</option>
+                  <option value="medium">Medium (Standard web delivery)</option>
+                  <option value="high">High (Best quality, large file)</option>
+                </select>
+              </div>
+
+              {/* Format */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider">Format</label>
+                <select 
+                  className="bento-input w-full"
+                  value={exportConfig.format}
+                  onChange={(e) => setExportConfig({...exportConfig, format: e.target.value as ExportFormat})}
+                >
+                  <option value="webm">WebM (VP9) - Best Web Compatibility</option>
+                  <option value="mp4">MP4 (H.264) - Best Universal Compatibility</option>
+                </select>
+                {exportConfig.format === 'mp4' && (
+                  <p className="text-[10px] text-blue-400 mt-1 flex items-start"><i className="fas fa-info-circle mt-0.5 mr-1"></i> If your browser does not support native MP4 recording, it will automatically fallback to WebM.</p>
+                )}
+              </div>
+
+              {/* Format Summary */}
+              <div className="bg-[#1a1a1a] p-3 rounded-lg border border-[#262626] text-xs text-[var(--color-bento-muted)] flex justify-between items-center">
+                <span>Output File:</span>
+                <span className="font-mono text-white bg-[#262626] px-2 py-0.5 rounded">.{exportConfig.format}</span>
+              </div>
+            </div>
+
+            <button 
+              onClick={startVideoRender}
+              className="w-full bento-btn-accent py-4 font-bold text-lg bg-green-600 hover:bg-green-500 shadow-[0_0_20px_rgba(34,197,94,0.4)] transition-all flex justify-center items-center group"
+            >
+              <i className="fas fa-rocket mr-2 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i> Add to Render Queue
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
