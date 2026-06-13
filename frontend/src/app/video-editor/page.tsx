@@ -55,6 +55,7 @@ export default function VideoEditor() {
 
   const [timelineDrag, setTimelineDrag] = useState<{ active: boolean, itemId: string | null, startX: number, startY: number, initStartTime: number, initTrack: string | null }>({ active: false, itemId: null, startX: 0, startY: 0, initStartTime: 0, initTrack: null });
   const timelineRef = useRef<HTMLDivElement>(null);
+  const trackHeadersRef = useRef<HTMLDivElement>(null);
 
     const imageCacheRef = useRef<{ [url: string]: HTMLImageElement }>({});
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -869,8 +870,8 @@ export default function VideoEditor() {
         </div>
 
         <div className="flex-1 flex overflow-hidden relative">
-          <div className="w-24 md:w-56 bg-[#0a0a0a] border-r border-[var(--color-bento-border)] z-30 flex flex-col shrink-0">
-            <div className="h-6 bg-[#141414] shrink-0 border-b border-[#262626] flex items-center justify-center text-[8px] text-gray-600 font-mono tracking-widest">TRACKS</div>
+          <div ref={trackHeadersRef} className="w-24 md:w-56 bg-[#0a0a0a] border-r border-[var(--color-bento-border)] z-30 flex flex-col shrink-0 overflow-y-hidden custom-scrollbar">
+            <div className="h-6 bg-[#141414] shrink-0 border-b border-[#262626] flex items-center justify-center text-[8px] text-gray-600 font-mono tracking-widest sticky top-0 z-40">TRACKS</div>
             {tracks.map(track => (
               <div key={track.id} className="shrink-0 flex items-center justify-between px-2 border-b border-[#262626] group bg-[#111] hover:bg-[#1a1a1a]" style={{ height: hwProfile?.isMobile ? 40 : 48 }}>
                 <div className="flex items-center w-full min-w-0">
@@ -890,14 +891,24 @@ export default function VideoEditor() {
                 </div>
               </div>
             ))}
-            <div className="p-2 shrink-0 flex flex-col space-y-1 mt-auto border-t border-[#262626] bg-[#0a0a0a]">
+            <div className="p-2 shrink-0 flex flex-col space-y-1 mt-auto border-t border-[#262626] bg-[#0a0a0a] sticky bottom-0 z-40">
               <button onClick={() => setTracks(sortTracks([...tracks, { id: Math.random().toString(36).substr(2, 9), type: 'video', name: 'Video ' + (tracks.filter(t=>t.type==='video').length + 1) }]))} className="w-full text-[10px] font-bold bg-[#1a1a1a] border border-[#262626] hover:border-blue-500/50 hover:bg-blue-600/10 hover:text-blue-400 text-gray-400 transition-all py-1.5 rounded">+ Video Track</button>
               <button onClick={() => setTracks(sortTracks([...tracks, { id: Math.random().toString(36).substr(2, 9), type: 'audio', name: 'Audio ' + (tracks.filter(t=>t.type==='audio').length + 1) }]))} className="w-full text-[10px] font-bold bg-[#1a1a1a] border border-[#262626] hover:border-green-500/50 hover:bg-green-600/10 hover:text-green-400 text-gray-400 transition-all py-1.5 rounded">+ Audio Track</button>
             </div>
           </div>
 
-          <div ref={timelineRef} className="flex-1 bg-[#0f0f0f] relative overflow-x-auto overflow-y-hidden" style={{ backgroundImage: 'linear-gradient(90deg, #1a1a1a 1px, transparent 1px)', backgroundSize: `${timelineZoom}px 100%` }} onClick={(e) => { if (e.target === e.currentTarget) handleTimelineClick(e); }}>
-            <div className="absolute top-0 left-0 right-0 h-6 bg-[#141414] border-b border-[#262626] pointer-events-none z-20 opacity-80" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent calc(100px - 1px), #333 100px)', backgroundSize: '100px 100%' }}></div>
+          <div 
+            ref={timelineRef} 
+            className="flex-1 bg-[#0f0f0f] relative overflow-auto custom-scrollbar" 
+            style={{ backgroundImage: 'linear-gradient(90deg, #1a1a1a 1px, transparent 1px)', backgroundSize: `${timelineZoom}px 100%` }} 
+            onClick={(e) => { if (e.target === e.currentTarget) handleTimelineClick(e); }}
+            onScroll={(e) => {
+              if (trackHeadersRef.current) {
+                trackHeadersRef.current.scrollTop = e.currentTarget.scrollTop;
+              }
+            }}
+          >
+            <div className="absolute top-0 left-0 h-6 bg-[#141414] border-b border-[#262626] pointer-events-none z-20 opacity-80 sticky-time-ruler" style={{ width: Math.max(3600 * timelineZoom, timelineRef.current?.scrollWidth || 0), backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent calc(100px - 1px), #333 100px)', backgroundSize: '100px 100%' }}></div>
             {tracks.map((track, i) => (
               <div key={track.id} className="absolute left-0 right-0 pointer-events-none transition-all border-b border-[#262626]/50" style={{ top: 24 + i * (hwProfile?.isMobile ? 40 : 48), height: hwProfile?.isMobile ? 40 : 48 }}>
                 {timelineItems.filter(item => item.trackId === track.id).map(clip => {
@@ -916,9 +927,15 @@ export default function VideoEditor() {
                 })}
               </div>
             ))}
+            
+            {/* Timeline filler to allow horizontal scrolling even when empty */}
+            <div className="absolute top-0 h-[1px] pointer-events-none" style={{ width: Math.max(3600 * timelineZoom, timelineRef.current?.scrollWidth || 0) }}></div>
+            
+            {/* Total height filler to ensure proper vertical scrolling */}
+            <div className="absolute left-0 pointer-events-none" style={{ top: 24 + tracks.length * (hwProfile?.isMobile ? 40 : 48) + 60, width: 1, height: 1 }}></div>
 
-            <div className="absolute top-0 bottom-0 w-[2px] bg-red-500 z-40 pointer-events-none" style={{ left: currentTime * timelineZoom }}>
-               <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[8px] border-transparent border-t-red-500 absolute -top-0 -translate-x-1/2"></div>
+            <div className="absolute top-0 bottom-0 w-[2px] bg-red-500 z-40 pointer-events-none transition-all duration-75" style={{ left: currentTime * timelineZoom }}>
+               <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[8px] border-transparent border-t-red-500 absolute -top-0 -translate-x-1/2 sticky top-0"></div>
             </div>
           </div>
         </div>
