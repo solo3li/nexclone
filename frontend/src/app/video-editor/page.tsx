@@ -488,9 +488,11 @@ export default function VideoEditor() {
 
   const handleTimelinePointerDown = (e: PointerEvent, item: TimelineItem) => {
     e.stopPropagation();
+    const track = tracks.find(t => t.id === item.trackId);
+    if (track?.isLocked) return;
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
     setSelectedItemId(item.id);
-    setActivePropertyTab(item.trackId === 'T1' ? "text" : "basic");
+    setActivePropertyTab(track?.type === 'text' ? "text" : "basic");
     setTimelineDrag({ active: true, itemId: item.id, startX: e.clientX, startY: e.clientY, initStartTime: item.startTime, initTrack: item.trackId });
   };
 
@@ -508,8 +510,8 @@ export default function VideoEditor() {
     if (isRendering) return;
     setTimelineItems(prev => {
       const newItems = [...prev];
-      ['V1', 'A1', 'T1'].forEach(tId => {
-        const itemsInTrack = newItems.filter(i => i.trackId === tId).sort((a, b) => a.startTime - b.startTime);
+      tracks.forEach(track => {
+        const itemsInTrack = newItems.filter(i => i.trackId === track.id).sort((a, b) => a.startTime - b.startTime);
         let currentEnd = 0;
         itemsInTrack.forEach(item => {
           const originalItem = newItems.find(i => i.id === item.id);
