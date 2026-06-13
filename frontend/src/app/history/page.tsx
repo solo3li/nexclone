@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function History() {
   const [activeTab, setActiveTab] = useState("all");
+  const router = useRouter();
 
   const historyData = [
     { id: "GEN-0145", type: "text-to-voice", title: "Blog Post Intro", date: "24 Oct 2024", duration: "1:24", status: "completed", lang: "English", voice: "Aurora" },
@@ -75,8 +77,12 @@ export default function History() {
             </thead>
             <tbody className="divide-y divide-[var(--color-bento-border)]">
               {filteredData.map((item, index) => (
-                <tr key={index} className="hover:bg-[#1a1a1a] transition-colors">
-                  <td className="p-4 font-mono text-xs text-[var(--color-bento-muted)]">{item.id}</td>
+                <tr 
+                  key={index} 
+                  className="hover:bg-[#1a1a1a] transition-colors cursor-pointer group"
+                  onClick={() => router.push(`/history/${item.id}`)}
+                >
+                  <td className="p-4 font-mono text-xs text-[var(--color-bento-muted)] group-hover:text-blue-400 transition-colors">{item.id}</td>
                   <td className="p-4">
                     {item.type === 'text-to-voice' ? (
                       <div className="w-8 h-8 rounded-md bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20">
@@ -114,13 +120,25 @@ export default function History() {
                   </td>
                   <td className="p-4 text-center">
                     <div className="flex justify-center space-x-2">
-                      <button className="bento-btn w-7 h-7 rounded flex items-center justify-center text-[var(--color-bento-muted)] hover:text-white" title="Play/View">
+                      <button 
+                        onClick={(e) => e.stopPropagation()} 
+                        className="bento-btn w-7 h-7 rounded flex items-center justify-center text-[var(--color-bento-muted)] hover:text-white" 
+                        title="Play/View"
+                      >
                         <i className="fas fa-play text-[10px]"></i>
                       </button>
-                      <button className="bento-btn w-7 h-7 rounded flex items-center justify-center text-[var(--color-bento-muted)] hover:text-white" title="Download">
+                      <button 
+                        onClick={(e) => e.stopPropagation()} 
+                        className="bento-btn w-7 h-7 rounded flex items-center justify-center text-[var(--color-bento-muted)] hover:text-white" 
+                        title="Download"
+                      >
                         <i className="fas fa-download text-[10px]"></i>
                       </button>
-                      <button className="bento-btn w-7 h-7 rounded flex items-center justify-center text-[var(--color-bento-muted)] hover:text-red-400" title="Delete">
+                      <button 
+                        onClick={(e) => e.stopPropagation()} 
+                        className="bento-btn w-7 h-7 rounded flex items-center justify-center text-[var(--color-bento-muted)] hover:text-red-400" 
+                        title="Delete"
+                      >
                         <i className="fas fa-trash text-[10px]"></i>
                       </button>
                     </div>

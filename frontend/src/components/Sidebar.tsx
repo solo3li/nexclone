@@ -13,7 +13,7 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
     { href: "/voice-to-text", label: "Voice AI", icon: "fa-microphone" },
     { href: "/text-to-voice", label: "Speech AI", icon: "fa-volume-up" },
     { href: "/history", label: "History", icon: "fa-history" },
-    { href: "#", label: "Settings", icon: "fa-cog" },
+    { href: "/settings", label: "Settings", icon: "fa-cog" },
   ];
 
   return (
