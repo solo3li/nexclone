@@ -1,0 +1,82 @@
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="bx--grid bx--grid--full-width">
+    <div class="bx--row">
+        <div class="bx--col">
+            <h1 class="bx--type-productive-heading-05" style="margin-bottom: 2rem;">Overview Dashboard</h1>
+        </div>
+    </div>
+    
+    <div class="bx--row">
+        <!-- Users Tile -->
+        <div class="bx--col-sm-4 bx--col-md-4 bx--col-lg-4" style="margin-bottom: 1rem;">
+            <div data-tile="clickable" class="bx--tile bx--tile--clickable" tabindex="0">
+                <a href="/Users" class="bx--link" style="text-decoration: none; color: inherit;">
+                    <h3 class="bx--type-productive-heading-03">Total Users</h3>
+                    <p class="bx--type-productive-heading-06" style="margin-top: 1rem; color: #0f62fe;">1,245</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- Subscriptions Tile -->
+        <div class="bx--col-sm-4 bx--col-md-4 bx--col-lg-4" style="margin-bottom: 1rem;">
+            <div data-tile="clickable" class="bx--tile bx--tile--clickable" tabindex="0">
+                <a href="/Subscriptions" class="bx--link" style="text-decoration: none; color: inherit;">
+                    <h3 class="bx--type-productive-heading-03">Active Subscriptions</h3>
+                    <p class="bx--type-productive-heading-06" style="margin-top: 1rem; color: #24a148;">850</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- Revenue Tile -->
+        <div class="bx--col-sm-4 bx--col-md-4 bx--col-lg-4" style="margin-bottom: 1rem;">
+            <div data-tile="clickable" class="bx--tile bx--tile--clickable" tabindex="0">
+                <a href="/Payments" class="bx--link" style="text-decoration: none; color: inherit;">
+                    <h3 class="bx--type-productive-heading-03">Monthly Revenue</h3>
+                    <p class="bx--type-productive-heading-06" style="margin-top: 1rem; color: #da1e28;">$12,450</p>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="bx--row" style="margin-top: 2rem;">
+        <div class="bx--col">
+            <h2 class="bx--type-productive-heading-04" style="margin-bottom: 1rem;">Recent Activity</h2>
+            <!-- Carbon UI Data Table -->
+            <div class="bx--data-table-container">
+                <table class="bx--data-table">
+                    <thead>
+                        <tr>
+                            <th><span class="bx--table-header-label">User</span></th>
+                            <th><span class="bx--table-header-label">Action</span></th>
+                            <th><span class="bx--table-header-label">Date</span></th>
+                            <th><span class="bx--table-header-label">Status</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>john@example.com</td>
+                            <td>Subscribed to Pro Plan</td>
+                            <td>Just now</td>
+                            <td><span class="bx--tag bx--tag--green">Success</span></td>
+                        </tr>
+                        <tr>
+                            <td>ahmed@example.com</td>
+                            <td>Created Account</td>
+                            <td>2 hours ago</td>
+                            <td><span class="bx--tag bx--tag--blue">New</span></td>
+                        </tr>
+                        <tr>
+                            <td>sara@example.com</td>
+                            <td>Payment Failed</td>
+                            <td>5 hours ago</td>
+                            <td><span class="bx--tag bx--tag--red">Error</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

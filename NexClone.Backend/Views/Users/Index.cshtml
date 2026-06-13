@@ -1,0 +1,91 @@
+@model IEnumerable<NexClone.Backend.Models.ApplicationUser>
+
+@{
+    ViewData["Title"] = "Users Management";
+}
+
+<div class="bx--grid bx--grid--full-width">
+    <div class="bx--row">
+        <div class="bx--col">
+            <h1 class="bx--type-productive-heading-05" style="margin-bottom: 2rem;">Users Management</h1>
+        </div>
+    </div>
+    
+    <div class="bx--row">
+        <div class="bx--col">
+            <!-- Carbon UI Data Table -->
+            <div class="bx--data-table-container" data-table>
+                <div class="bx--data-table-header">
+                    <h4 class="bx--data-table-header__title">All Registered Users</h4>
+                    <p class="bx--data-table-header__description">Manage users and their status</p>
+                </div>
+
+                <!-- HTMX refresh button for demonstration -->
+                <section class="bx--table-toolbar">
+                    <div class="bx--toolbar-content">
+                        <button hx-get="/Users" hx-target="#main-content" class="bx--btn bx--btn--primary" type="button">
+                            Refresh Data
+                        </button>
+                    </div>
+                </section>
+
+                <table class="bx--data-table">
+                    <thead>
+                        <tr>
+                            <th><span class="bx--table-header-label">Email</span></th>
+                            <th><span class="bx--table-header-label">Country</span></th>
+                            <th><span class="bx--table-header-label">Verified</span></th>
+                            <th><span class="bx--table-header-label">Role</span></th>
+                            <th><span class="bx--table-header-label">Joined</span></th>
+                            <th><span class="bx--table-header-label">Actions</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 2rem;">
+                                    <p class="bx--type-productive-heading-03">No users found in the database.</p>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var user in Model)
+                            {
+                                <tr>
+                                    <td>@user.Email</td>
+                                    <td>@user.Country</td>
+                                    <td>
+                                        @if (user.IsVerified)
+                                        {
+                                            <span class="bx--tag bx--tag--green">Verified</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="bx--tag bx--tag--gray">Pending</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (user.IsStaff)
+                                        {
+                                            <span class="bx--tag bx--tag--purple">Admin</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="bx--tag bx--tag--blue">User</span>
+                                        }
+                                    </td>
+                                    <td>@user.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                    <td>
+                                        <button class="bx--btn bx--btn--ghost bx--btn--sm">Edit</button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

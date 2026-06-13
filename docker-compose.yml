@@ -1,0 +1,31 @@
+services:
+  # Next.js Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: nexclone-frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - nexclone_network
+    depends_on:
+      - backend
+
+  # ASP.NET Core API & Admin
+  backend:
+    build:
+      context: ./NexClone.Backend
+      dockerfile: Dockerfile
+    container_name: nexclone-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+    networks:
+      - nexclone_network
+
+networks:
+  nexclone_network:
+    driver: bridge
