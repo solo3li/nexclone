@@ -62,9 +62,19 @@ export default function Home() {
           </div>
           
           <div className="space-y-3 flex-1 relative z-10">
+            <Link href="/video-editor" className="bento-btn p-3 flex items-center justify-between group border-blue-500/30">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 rounded-md bg-[#1a1a1a] flex items-center justify-center text-blue-400 group-hover:bg-blue-500/20">
+                  <i className="fas fa-video text-xs"></i>
+                </div>
+                <span className="text-sm font-semibold text-white">Video Studio</span>
+              </div>
+              <span className="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded ml-2">New</span>
+            </Link>
+
             <Link href="/voice-to-text" className="bento-btn p-3 flex items-center justify-between group">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-md bg-[#1a1a1a] flex items-center justify-center text-blue-400 group-hover:bg-blue-500/10">
+                <div className="w-8 h-8 rounded-md bg-[#1a1a1a] flex items-center justify-center text-green-400 group-hover:bg-green-500/10">
                   <i className="fas fa-microphone text-xs"></i>
                 </div>
                 <span className="text-sm font-semibold text-white">Voice to Text</span>
