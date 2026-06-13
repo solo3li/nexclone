@@ -130,24 +130,59 @@ export default function VideoEditor() {
   };
 
   const addToTimeline = (media: LocalMedia) => {
-    let targetType: TrackType = media.type === 'audio' ? 'audio' : 'video';
-    let track = tracks.find(t => t.type === targetType);
-    if (!track) {
-       track = { id: Math.random().toString(36).substr(2, 9), type: targetType, name: `${targetType === 'audio' ? 'Audio' : 'Video'} Track` };
-       setTracks(prev => sortTracks([...prev, track as TimelineTrack]));
-    }
-    const trackItems = timelineItems.filter(i => i.trackId === track!.id);
-    let start = 0;
-    if (trackItems.length > 0) {
-      const lastItem = trackItems.reduce((prev, current) => (prev.startTime + prev.duration > current.startTime + current.duration) ? prev : current);
-      start = lastItem.startTime + lastItem.duration;
-    }
-    const newItem: TimelineItem = { id: Math.random().toString(36).substr(2, 9), trackId: track!.id, mediaId: media.id, url: media.url, name: media.name, startTime: start, duration: 10, sourceOffset: 0, mediaType: media.type as any, x: 50, y: 50, width: 100, height: 100 };
-    setTimelineItems(prev => [...prev, newItem]);
-    if (media.type === 'video' || media.type === 'audio') {
-      const el = document.createElement(media.type === 'audio' ? 'audio' : 'video');
-      el.src = media.url;
-      el.onloadedmetadata = () => setTimelineItems(prev => prev.map(i => i.id === newItem.id ? { ...i, duration: el.duration } : i));
+    let newTracks = [...tracks];
+    
+    if (media.type === 'video') {
+       let vTrack = newTracks.find(t => t.type === 'video');
+       let aTrack = newTracks.find(t => t.type === 'audio');
+       if (!vTrack) {
+          vTrack = { id: Math.random().toString(36).substr(2, 9), type: 'video', name: 'Video Track' };
+          newTracks.push(vTrack);
+       }
+       if (!aTrack) {
+          aTrack = { id: Math.random().toString(36).substr(2, 9), type: 'audio', name: 'Audio Track' };
+          newTracks.push(aTrack);
+       }
+       if (newTracks.length > tracks.length) setTracks(sortTracks(newTracks));
+       
+       const trackItems = timelineItems.filter(i => i.trackId === vTrack!.id);
+       let start = 0;
+       if (trackItems.length > 0) {
+         const lastItem = trackItems.reduce((prev, current) => (prev.startTime + prev.duration > current.startTime + current.duration) ? prev : current);
+         start = lastItem.startTime + lastItem.duration;
+       }
+       
+       const vItem: TimelineItem = { id: Math.random().toString(36).substr(2, 9), trackId: vTrack!.id, mediaId: media.id, url: media.url, name: media.name, startTime: start, duration: 10, sourceOffset: 0, mediaType: 'video', volume: 0, x: 50, y: 50, width: 100, height: 100 };
+       const aItem: TimelineItem = { id: Math.random().toString(36).substr(2, 9), trackId: aTrack!.id, mediaId: media.id, url: media.url, name: `${media.name} (Audio)`, startTime: start, duration: 10, sourceOffset: 0, mediaType: 'audio', volume: 100 };
+       
+       setTimelineItems(prev => [...prev, vItem, aItem]);
+       
+       const el = document.createElement('video');
+       el.src = media.url;
+       el.onloadedmetadata = () => {
+           setTimelineItems(prev => prev.map(i => (i.id === vItem.id || i.id === aItem.id) ? { ...i, duration: el.duration } : i));
+       };
+    } else {
+       let targetType: TrackType = media.type === 'audio' ? 'audio' : 'video';
+       let track = newTracks.find(t => t.type === targetType);
+       if (!track) {
+          track = { id: Math.random().toString(36).substr(2, 9), type: targetType, name: `${targetType === 'audio' ? 'Audio' : 'Video'} Track` };
+          newTracks.push(track);
+          setTracks(sortTracks(newTracks));
+       }
+       const trackItems = timelineItems.filter(i => i.trackId === track!.id);
+       let start = 0;
+       if (trackItems.length > 0) {
+         const lastItem = trackItems.reduce((prev, current) => (prev.startTime + prev.duration > current.startTime + current.duration) ? prev : current);
+         start = lastItem.startTime + lastItem.duration;
+       }
+       const newItem: TimelineItem = { id: Math.random().toString(36).substr(2, 9), trackId: track!.id, mediaId: media.id, url: media.url, name: media.name, startTime: start, duration: 10, sourceOffset: 0, mediaType: media.type as any, x: 50, y: 50, width: 100, height: 100 };
+       setTimelineItems(prev => [...prev, newItem]);
+       if (media.type === 'audio' || media.type === 'video') {
+         const el = document.createElement(media.type === 'audio' ? 'audio' : 'video');
+         el.src = media.url;
+         el.onloadedmetadata = () => setTimelineItems(prev => prev.map(i => i.id === newItem.id ? { ...i, duration: el.duration } : i));
+       }
     }
   };
 
