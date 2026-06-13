@@ -37,6 +37,13 @@ export default function VideoEditor() {
   const playheadIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const animationFrameRef = useRef<number | null>(null);
 
+  // Render Engine State
+  const [isRendering, setIsRendering] = useState(false);
+  const [renderProgress, setRenderProgress] = useState(0);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
+  const totalTimelineDurationRef = useRef<number>(0);
+
   const selectedItem = timelineItems.find(i => i.id === selectedItemId);
 
   useEffect(() => {
@@ -103,7 +110,7 @@ export default function VideoEditor() {
     }
   }, [currentTime, timelineItems, isPlaying]);
 
-  // --- CANVAS RENDERING ENGINE (The core architectural shift) ---
+  // --- CANVAS RENDERING ENGINE ---
   const activeTextItems = timelineItems.filter(i => i.trackId === 'T1' && currentTime >= i.startTime && currentTime < i.startTime + i.duration);
   const activeVideoItem = timelineItems.find(i => i.trackId === 'V1' && currentTime >= i.startTime && currentTime < i.startTime + i.duration);
 
@@ -113,65 +120,46 @@ export default function VideoEditor() {
     const container = playerContainerRef.current;
     
     if (canvas && ctx && container) {
-      // Set resolution matching container
       const rect = container.getBoundingClientRect();
-      if (canvas.width !== rect.width || canvas.height !== rect.height) {
-        canvas.width = rect.width;
-        canvas.height = rect.height;
-      }
+      if (canvas.width !== rect.width || canvas.height !== rect.height) { canvas.width = rect.width; canvas.height = rect.height; }
       
-      // Clear frame
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      // Draw Video Layer (V1)
       if (activeVideoItem && videoPlayerRef.current && videoPlayerRef.current.readyState >= 2) {
-        // Compute "object-fit: contain" math for canvas
         const videoRatio = videoPlayerRef.current.videoWidth / videoPlayerRef.current.videoHeight;
         const canvasRatio = canvas.width / canvas.height;
         let drawW = canvas.width, drawH = canvas.height, drawX = 0, drawY = 0;
-        
         if (videoRatio > canvasRatio) { drawH = canvas.width / videoRatio; drawY = (canvas.height - drawH) / 2; }
         else { drawW = canvas.height * videoRatio; drawX = (canvas.width - drawW) / 2; }
 
         ctx.filter = activeVideoItem.filter || 'none';
         ctx.drawImage(videoPlayerRef.current, drawX, drawY, drawW, drawH);
-        ctx.filter = 'none'; // reset
+        ctx.filter = 'none'; 
       }
 
-      // Draw Text Layers (T1)
       activeTextItems.forEach(textItem => {
         if (!textItem.text) return;
         ctx.save();
-        
         const pxX = (textItem.x || 50) * canvas.width / 100;
         const pxY = (textItem.y || 50) * canvas.height / 100;
-        
         ctx.translate(pxX, pxY);
         ctx.rotate(((textItem.rotation || 0) * Math.PI) / 180);
-        
-        // Exact styling to match DOM
         ctx.font = `bold ${textItem.fontSize || 64}px ${textItem.fontFamily || 'Inter'}`;
         ctx.fillStyle = textItem.color || '#ffffff';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         if (textItem.filter) ctx.filter = textItem.filter;
-        
-        // Add shadow for visibility
         ctx.shadowColor = 'rgba(0,0,0,0.8)';
         ctx.shadowBlur = 8;
         ctx.shadowOffsetY = 4;
-        
         ctx.fillText(textItem.text, 0, 0);
         ctx.restore();
       });
     }
-    
-    // Request next frame
     animationFrameRef.current = requestAnimationFrame(renderCanvas);
   };
 
   useEffect(() => {
-    // Start the render loop
     animationFrameRef.current = requestAnimationFrame(renderCanvas);
     return () => { if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current); };
   });
@@ -184,7 +172,65 @@ export default function VideoEditor() {
     a.download = `exported_frame_${formatTime(currentTime).replace(/:/g, '-')}.png`;
     a.click();
   };
-  // -------------------------------------------------------------
+
+  // --- FINAL VIDEO EXPORT ENGINE ---
+  const startVideoRender = () => {
+    if (timelineItems.length === 0 || !canvasRef.current) return;
+    
+    // 1. Calculate Total Duration
+    const maxEnd = Math.max(...timelineItems.map(i => i.startTime + i.duration));
+    if (maxEnd <= 0) return;
+    totalTimelineDurationRef.current = maxEnd;
+    
+    // 2. Reset State
+    setSelectedItemId(null);
+    setCurrentTime(0);
+    setRenderProgress(0);
+    setIsRendering(true);
+    recordedChunksRef.current = [];
+
+    // 3. Initialize MediaRecorder (Capture 60fps Canvas Stream)
+    const stream = canvasRef.current.captureStream(60);
+    let options = { mimeType: 'video/webm; codecs=vp9' };
+    if (!MediaRecorder.isTypeSupported(options.mimeType)) options = { mimeType: 'video/webm' };
+    
+    const mediaRecorder = new MediaRecorder(stream, options);
+    mediaRecorderRef.current = mediaRecorder;
+
+    mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunksRef.current.push(e.data); };
+    
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(recordedChunksRef.current, { type: 'video/webm' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `rendered_video_${Date.now()}.webm`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setIsRendering(false);
+      setRenderProgress(0);
+    };
+
+    // Give the video elements a tiny moment to seek to 0 before starting recording
+    setTimeout(() => {
+      mediaRecorder.start(100); // chunk every 100ms
+      setIsPlaying(true); // Auto-play the timeline
+    }, 500);
+  };
+
+  // Monitor Render Progress
+  useEffect(() => {
+    if (isRendering) {
+      const progress = Math.min(100, (currentTime / totalTimelineDurationRef.current) * 100);
+      setRenderProgress(progress);
+
+      if (currentTime >= totalTimelineDurationRef.current) {
+        setIsPlaying(false);
+        mediaRecorderRef.current?.stop();
+      }
+    }
+  }, [currentTime, isRendering]);
+  // ---------------------------------
 
   const startTransform = (e: PointerEvent, mode: TransformMode, itemId: string) => {
     e.stopPropagation();
@@ -269,7 +315,7 @@ export default function VideoEditor() {
   };
 
   const handleTimelineClick = (e: ReactMouseEvent<HTMLDivElement>) => {
-    if (timelineDrag.active) return; 
+    if (timelineDrag.active || isRendering) return; 
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const time = clickX / timelineZoom;
@@ -277,9 +323,10 @@ export default function VideoEditor() {
     if (videoPlayerRef.current) videoPlayerRef.current.currentTime = time;
   };
 
-  const deleteItem = () => { if (selectedItemId) { setTimelineItems(prev => prev.filter(i => i.id !== selectedItemId)); setSelectedItemId(null); } };
+  const deleteItem = () => { if (selectedItemId && !isRendering) { setTimelineItems(prev => prev.filter(i => i.id !== selectedItemId)); setSelectedItemId(null); } };
   
   const removeGaps = () => {
+    if (isRendering) return;
     setTimelineItems(prev => {
       const newItems = [...prev];
       ['V1', 'A1', 'T1'].forEach(tId => {
@@ -301,7 +348,7 @@ export default function VideoEditor() {
   };
 
   const updateSelectedProperty = (key: keyof TimelineItem, value: any) => {
-    if (selectedItemId) setTimelineItems(prev => prev.map(i => i.id === selectedItemId ? { ...i, [key]: value } : i));
+    if (selectedItemId && !isRendering) setTimelineItems(prev => prev.map(i => i.id === selectedItemId ? { ...i, [key]: value } : i));
   };
 
   const formatTime = (totalSeconds: number) => {
@@ -327,15 +374,16 @@ export default function VideoEditor() {
           </Link>
           <div className="flex flex-col">
             <h1 className="text-sm font-bold flex items-center">
-              True_Canvas_Engine <i className="fas fa-paint-brush ml-2 text-[10px] text-pink-400"></i>
+              DaVinci_Web_Engine <i className="fas fa-rocket ml-2 text-[10px] text-green-400"></i>
             </h1>
-            <span className="text-[10px] text-green-400 font-bold hidden md:block">Real-time Compositing Active</span>
+            <span className="text-[10px] text-green-400 font-bold hidden md:block">Real-time Video Export Active</span>
           </div>
         </div>
         
         {/* Hardware / Export Badges */}
         <div className="flex items-center space-x-2">
-           <button onClick={exportSnapshot} className="bento-btn-accent px-4 py-1 text-xs flex items-center bg-pink-600 hover:bg-pink-500 shadow-[0_0_15px_rgba(236,72,153,0.5)]"><i className="fas fa-camera mr-2"></i> Export Frame (Snapshot)</button>
+           <button onClick={exportSnapshot} disabled={isRendering} className="hidden md:flex bento-btn-accent px-4 py-1 text-xs items-center bg-[#262626] hover:bg-[#3f3f46] text-white disabled:opacity-50"><i className="fas fa-camera mr-2"></i> Snapshot</button>
+           <button onClick={startVideoRender} disabled={isRendering || timelineItems.length === 0} className="bento-btn-accent px-4 py-1 text-xs flex items-center bg-green-600 hover:bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.5)] disabled:opacity-50 disabled:shadow-none transition-all"><i className="fas fa-file-export mr-2"></i> Export Video</button>
            <button className="md:hidden bento-btn w-10 h-10 flex items-center justify-center" onClick={() => setShowMobileSidebar(!showMobileSidebar)}><i className="fas fa-bars"></i></button>
         </div>
       </header>
@@ -344,7 +392,7 @@ export default function VideoEditor() {
       <div className="flex-1 flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-4 min-h-0 relative">
         
         {/* Left: Asset Library */}
-        <aside className={`w-full md:w-72 bento-card flex flex-col shrink-0 absolute md:relative z-50 md:z-auto bg-[var(--color-bento-bg)] md:bg-transparent h-full md:h-auto transition-transform ${showMobileSidebar ? 'translate-x-0' : '-translate-x-[110%] md:translate-x-0'}`}>
+        <aside className={`w-full md:w-72 bento-card flex flex-col shrink-0 absolute md:relative z-40 md:z-auto bg-[var(--color-bento-bg)] md:bg-transparent h-full md:h-auto transition-transform ${showMobileSidebar ? 'translate-x-0' : '-translate-x-[110%] md:translate-x-0'}`}>
           <div className="flex border-b border-[var(--color-bento-border)] p-2 space-x-1">
             <button onClick={() => setActiveAssetTab("media")} className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${activeAssetTab === "media" ? "bg-[#262626] text-white shadow-sm" : "text-[var(--color-bento-muted)] hover:text-white"}`}>Media</button>
             <button onClick={() => setActiveAssetTab("text")} className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${activeAssetTab === "text" ? "bg-[#262626] text-white shadow-sm" : "text-[var(--color-bento-muted)] hover:text-white"}`}>Text</button>
@@ -353,7 +401,7 @@ export default function VideoEditor() {
             {activeAssetTab === "media" && (
               <div className="space-y-4">
                 <input type="file" multiple accept="video/*,audio/*,image/*" ref={fileInputRef} className="hidden" onChange={handleFileSelect} />
-                <button onClick={() => fileInputRef.current?.click()} className="w-full py-6 border-2 border-dashed border-[#3f3f46] rounded-xl flex flex-col items-center justify-center text-[var(--color-bento-muted)] hover:border-blue-500 hover:text-blue-400 transition-colors bg-[#0a0a0a]">
+                <button onClick={() => fileInputRef.current?.click()} disabled={isRendering} className="w-full py-6 border-2 border-dashed border-[#3f3f46] rounded-xl flex flex-col items-center justify-center text-[var(--color-bento-muted)] hover:border-blue-500 hover:text-blue-400 transition-colors bg-[#0a0a0a] disabled:opacity-50">
                   <i className="fas fa-cloud-upload-alt text-xl mb-2"></i>
                   <span className="text-xs font-bold mb-1">Upload Media</span>
                 </button>
@@ -361,7 +409,7 @@ export default function VideoEditor() {
                   {localMediaFiles.map(media => (
                     <div key={media.id} className="aspect-video bg-[#1a1a1a] rounded-lg border border-[var(--color-bento-border)] relative group overflow-hidden">
                       {media.type === 'video' || media.type === 'image' ? <img src={media.url} className="w-full h-full object-cover" alt={media.name} /> : <div className="w-full h-full flex items-center justify-center bg-[#262626]"><i className="fas fa-music text-green-400"></i></div>}
-                      <button onClick={() => { addToTimeline(media); setShowMobileSidebar(false); }} className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 md:opacity-100 md:bg-transparent flex items-center justify-center transition-opacity">
+                      <button onClick={() => { addToTimeline(media); setShowMobileSidebar(false); }} disabled={isRendering} className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 md:opacity-100 md:bg-transparent flex items-center justify-center transition-opacity disabled:hidden">
                         <div className="w-8 h-8 rounded-full bg-blue-500/80 text-white flex items-center justify-center shadow-lg hover:scale-110"><i className="fas fa-plus"></i></div>
                       </button>
                     </div>
@@ -371,7 +419,7 @@ export default function VideoEditor() {
             )}
             {activeAssetTab === "text" && (
               <div className="space-y-4">
-                 <button onClick={addTextToTimeline} className="w-full p-4 border border-[var(--color-bento-border)] rounded-lg bg-[#1a1a1a] flex items-center hover:border-purple-500 transition-colors group">
+                 <button onClick={addTextToTimeline} disabled={isRendering} className="w-full p-4 border border-[var(--color-bento-border)] rounded-lg bg-[#1a1a1a] flex items-center hover:border-purple-500 transition-colors group disabled:opacity-50">
                     <div className="w-10 h-10 bg-purple-500/20 text-purple-400 rounded-md flex items-center justify-center mr-3 group-hover:bg-purple-500 group-hover:text-white transition-colors"><i className="fas fa-font text-lg"></i></div>
                     <div className="text-left"><h3 className="text-sm font-bold">Standard Text</h3></div>
                  </button>
@@ -386,9 +434,9 @@ export default function VideoEditor() {
           <div 
             ref={playerContainerRef}
             className="flex-1 bg-[#050505] rounded-xl overflow-hidden relative border border-[#262626] shadow-inner touch-none cursor-crosshair"
-            onClick={() => { if(transformMode === 'none') setSelectedItemId(null); }}
+            onClick={() => { if(transformMode === 'none' && !isRendering) setSelectedItemId(null); }}
           >
-            {/* The Hidden Source Video (Do not remove, needed for canvas to read pixels) */}
+            {/* The Hidden Source Video */}
             <video ref={videoPlayerRef} className="hidden opacity-0 pointer-events-none" muted={true} crossOrigin="anonymous" />
             
             {/* The Master Output Canvas */}
@@ -399,15 +447,14 @@ export default function VideoEditor() {
             {/* Transform Controls Overlay (Invisible bounds, handles only) */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
               {activeTextItems.map(textItem => {
-                const isSelected = selectedItemId === textItem.id;
+                const isSelected = selectedItemId === textItem.id && !isRendering; // Hide controls while rendering
                 return (
                   <div 
                     key={textItem.id} 
                     className={`absolute inline-block pointer-events-auto select-none touch-none ${isSelected ? 'ring-2 ring-blue-500 ring-offset-2 ring-offset-transparent' : ''}`}
                     style={{ left: `${textItem.x}%`, top: `${textItem.y}%`, transform: `translate(-50%, -50%) rotate(${textItem.rotation}deg)`, cursor: isSelected ? (transformMode === 'drag' ? 'grabbing' : 'grab') : 'pointer' }}
-                    onPointerDown={(e) => startTransform(e, 'drag', textItem.id)}
+                    onPointerDown={(e) => { if (!isRendering) startTransform(e, 'drag', textItem.id); }}
                   >
-                    {/* Ghost text to give the bounding box correct dimensions, but color is transparent since Canvas draws the real text */}
                     <div style={{ fontSize: `${textItem.fontSize}px`, color: 'transparent', fontFamily: textItem.fontFamily, whiteSpace: 'nowrap' }}>{textItem.text}</div>
                     
                     {isSelected && (
@@ -424,21 +471,34 @@ export default function VideoEditor() {
                 );
               })}
             </div>
+
+            {/* Rendering Overlay */}
+            {isRendering && (
+              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center z-50">
+                <i className="fas fa-cog fa-spin text-4xl text-green-400 mb-4 drop-shadow-[0_0_15px_rgba(34,197,94,0.8)]"></i>
+                <h3 className="text-xl font-bold text-white mb-2">Rendering Video...</h3>
+                <div className="w-64 h-2 bg-[#262626] rounded-full overflow-hidden border border-[#3f3f46]">
+                  <div className="h-full bg-green-500 transition-all duration-300" style={{ width: `${renderProgress}%` }}></div>
+                </div>
+                <p className="font-mono text-xs text-[var(--color-bento-muted)] mt-2">{renderProgress.toFixed(1)}%</p>
+                <p className="text-[10px] text-red-400 mt-4 animate-pulse">Do not close this tab. Recording real-time stream.</p>
+              </div>
+            )}
           </div>
           
           <div className="h-12 md:h-16 shrink-0 mt-2 flex items-center justify-between px-2">
             <div className="font-mono text-xs md:text-sm text-blue-400 font-bold bg-blue-500/10 px-2 py-1 rounded-md border border-blue-500/20">{formatTime(currentTime)}</div>
             <div className="flex items-center space-x-2 md:space-x-4">
-              <button className="text-[var(--color-bento-muted)] hover:text-white" onClick={() => setCurrentTime(prev => Math.max(0, prev - 1))}><i className="fas fa-step-backward"></i></button>
-              <button onClick={togglePlay} className="w-10 h-10 bg-white text-black rounded-full shadow-[0_0_15px_rgba(255,255,255,0.3)]"><i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play ml-1'}`}></i></button>
-              <button className="text-[var(--color-bento-muted)] hover:text-white" onClick={() => setCurrentTime(prev => prev + 1)}><i className="fas fa-step-forward"></i></button>
+              <button disabled={isRendering} className="text-[var(--color-bento-muted)] hover:text-white disabled:opacity-50" onClick={() => setCurrentTime(prev => Math.max(0, prev - 1))}><i className="fas fa-step-backward"></i></button>
+              <button disabled={isRendering} onClick={togglePlay} className="w-10 h-10 bg-white text-black rounded-full shadow-[0_0_15px_rgba(255,255,255,0.3)] disabled:opacity-50 disabled:shadow-none"><i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play ml-1'}`}></i></button>
+              <button disabled={isRendering} className="text-[var(--color-bento-muted)] hover:text-white disabled:opacity-50" onClick={() => setCurrentTime(prev => prev + 1)}><i className="fas fa-step-forward"></i></button>
             </div>
             <div className="w-16"></div>
           </div>
         </main>
 
         {/* Right: Properties Panel */}
-        <aside className={`w-full md:w-80 bento-card flex-col shrink-0 overflow-hidden ${selectedItem && hwProfile?.isMobile ? 'flex' : (hwProfile?.isMobile ? 'hidden' : 'flex')}`}>
+        <aside className={`w-full md:w-80 bento-card flex-col shrink-0 overflow-hidden ${selectedItem && hwProfile?.isMobile && !isRendering ? 'flex' : (hwProfile?.isMobile ? 'hidden' : 'flex')} ${isRendering ? 'opacity-50 pointer-events-none' : ''}`}>
           <div className="flex border-b border-[var(--color-bento-border)] p-2 space-x-1 bg-[#141414]">
             <button onClick={() => setActivePropertyTab("basic")} className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-md ${activePropertyTab === "basic" ? "bg-[#262626] text-white" : "text-[var(--color-bento-muted)]"}`}>Props</button>
             {selectedItem?.trackId === 'T1' && <button onClick={() => setActivePropertyTab("text")} className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-md ${activePropertyTab === "text" ? "bg-[#262626] text-purple-400" : "text-[var(--color-bento-muted)]"}`}>Text</button>}
@@ -469,7 +529,7 @@ export default function VideoEditor() {
       </div>
 
       {/* 3. Bottom Timeline */}
-      <div className="h-48 md:h-72 bento-card shrink-0 flex flex-col relative overflow-hidden select-none touch-none">
+      <div className={`h-48 md:h-72 bento-card shrink-0 flex flex-col relative overflow-hidden select-none touch-none ${isRendering ? 'opacity-50 pointer-events-none' : ''}`}>
         <div className="h-8 md:h-10 border-b border-[var(--color-bento-border)] flex items-center justify-between px-2 md:px-4 bg-[#141414]">
           <div className="flex space-x-2">
             <button onClick={deleteItem} disabled={!selectedItem} className={`w-6 h-6 rounded flex items-center justify-center text-[10px] ${selectedItem ? 'bg-red-500/20 text-red-400' : 'text-[#3f3f46]'}`}><i className="fas fa-trash"></i></button>
