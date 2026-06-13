@@ -32,4 +32,6 @@ public partial class SubscriptionsPayment
     public virtual SubscriptionsPlan? Plan { get; set; }
 
     public virtual SubscriptionsSubscription? Subscription { get; set; }
+
+    public virtual UserAuthUser User { get; set; } = null!;
 }

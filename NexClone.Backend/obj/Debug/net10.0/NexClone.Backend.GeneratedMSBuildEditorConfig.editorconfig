@@ -38,6 +38,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9Qcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[/root/nexmedia/nexclone/NexClone.Backend/Views/Plans/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGxhbnMvSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [/root/nexmedia/nexclone/NexClone.Backend/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL0Vycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
@@ -46,8 +50,20 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[/root/nexmedia/nexclone/NexClone.Backend/Views/Subscriptions/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU3Vic2NyaXB0aW9ucy9JbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/root/nexmedia/nexclone/NexClone.Backend/Views/Tools/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVG9vbHMvSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [/root/nexmedia/nexclone/NexClone.Backend/Views/Users/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVXNlcnMvSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/root/nexmedia/nexclone/NexClone.Backend/Views/Voices/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVm9pY2VzL0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/root/nexmedia/nexclone/NexClone.Backend/Views/_ViewImports.cshtml]

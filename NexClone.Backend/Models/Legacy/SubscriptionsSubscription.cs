@@ -22,4 +22,6 @@ public partial class SubscriptionsSubscription
     public virtual SubscriptionsPlan Plan { get; set; } = null!;
 
     public virtual ICollection<SubscriptionsPayment> SubscriptionsPayments { get; set; } = new List<SubscriptionsPayment>();
+
+    public virtual UserAuthUser User { get; set; } = null!;
 }

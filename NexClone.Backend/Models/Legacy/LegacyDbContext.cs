@@ -31,6 +31,8 @@ public partial class LegacyDbContext : DbContext
 
     public virtual DbSet<ToolsTool> ToolsTools { get; set; }
 
+    public virtual DbSet<UserAuthUser> UserAuthUsers { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseNpgsql("Host=thomas.proxy.rlwy.net;Port=26423;Database=railway;Username=postgres;Password=vEaCDNCWiHsROlcZjJUekWOgTtINWhJY");
@@ -79,6 +81,11 @@ public partial class LegacyDbContext : DbContext
             entity.HasOne(d => d.Subscription).WithMany(p => p.SubscriptionsPayments)
                 .HasForeignKey(d => d.SubscriptionId)
                 .HasConstraintName("subscriptions_paymen_subscription_id_f8df362c_fk_subscript");
+
+            entity.HasOne(d => d.User).WithMany(p => p.SubscriptionsPayments)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("subscriptions_payment_user_id_d337a89a_fk_user_auth_user_id");
         });
 
         modelBuilder.Entity<SubscriptionsPlan>(entity =>
@@ -129,6 +136,11 @@ public partial class LegacyDbContext : DbContext
                 .HasForeignKey(d => d.PlanId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("subscriptions_subscr_plan_id_2c895107_fk_subscript");
+
+            entity.HasOne(d => d.User).WithMany(p => p.SubscriptionsSubscriptions)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("subscriptions_subscr_user_id_a353e93d_fk_user_auth");
         });
 
         modelBuilder.Entity<TextToVoiceDarijatdialect>(entity =>
@@ -231,6 +243,42 @@ public partial class LegacyDbContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(255)
                 .HasColumnName("name");
+        });
+
+        modelBuilder.Entity<UserAuthUser>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("user_auth_user_pkey");
+
+            entity.ToTable("user_auth_user");
+
+            entity.HasIndex(e => e.Email, "user_auth_user_email_b2452b58_like").HasOperators(new[] { "varchar_pattern_ops" });
+
+            entity.HasIndex(e => e.Email, "user_auth_user_email_key").IsUnique();
+
+            entity.Property(e => e.Id)
+                .ValueGeneratedNever()
+                .HasColumnName("id");
+            entity.Property(e => e.Country)
+                .HasMaxLength(255)
+                .HasColumnName("country");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.Email)
+                .HasMaxLength(254)
+                .HasColumnName("email");
+            entity.Property(e => e.Image)
+                .HasMaxLength(500)
+                .HasColumnName("image");
+            entity.Property(e => e.IsActive).HasColumnName("is_active");
+            entity.Property(e => e.IsStaff).HasColumnName("is_staff");
+            entity.Property(e => e.IsSuperuser).HasColumnName("is_superuser");
+            entity.Property(e => e.IsVerified).HasColumnName("is_verified");
+            entity.Property(e => e.LastLogin).HasColumnName("last_login");
+            entity.Property(e => e.Password)
+                .HasMaxLength(128)
+                .HasColumnName("password");
+            entity.Property(e => e.Username)
+                .HasMaxLength(255)
+                .HasColumnName("username");
         });
 
         OnModelCreatingPartial(modelBuilder);
