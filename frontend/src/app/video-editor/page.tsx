@@ -6,7 +6,8 @@ import Link from "next/link";
 interface LocalMedia { id: string; name: string; url: string; type: string; }
 type TrackType = 'video' | 'audio' | 'text' | 'sticker';
 interface TimelineTrack { id: string; type: TrackType; name: string; isHidden?: boolean; isMuted?: boolean; isLocked?: boolean; }
-interface TimelineItem { id: string; trackId: string; mediaId?: string; url?: string; name?: string; text?: string; startTime: number; duration: number; sourceOffset: number; filter?: string; x?: number; y?: number; width?: number; height?: number; fontSize?: number; color?: string; fontFamily?: string; rotation?: number; mediaType?: 'video' | 'audio' | 'image'; opacity?: number; blendMode?: string; volume?: number; }
+interface Keyframe { time: number; x?: number; y?: number; width?: number; rotation?: number; opacity?: number; }
+interface TimelineItem { id: string; trackId: string; mediaId?: string; url?: string; name?: string; text?: string; startTime: number; duration: number; sourceOffset: number; filter?: string; x?: number; y?: number; width?: number; height?: number; fontSize?: number; color?: string; fontFamily?: string; rotation?: number; mediaType?: 'video' | 'audio' | 'image'; opacity?: number; blendMode?: string; volume?: number; keyframes?: Keyframe[]; }
 type TransformMode = 'none' | 'drag' | 'scale' | 'rotate';
 type HwProfile = { ram: number; cores: number; tier: 'Pro' | 'Standard' | 'Limited'; showModal: boolean; maxRes: string; maxDur: number; isMobile: boolean; gpu: string; cpuBrand: string; screenRes: string; connection: string; canvasPerf: number; };
 
@@ -80,6 +81,14 @@ export default function VideoEditor() {
 
   const [copilotPrompt, setCopilotPrompt] = useState("");
   const [isCopilotRunning, setIsCopilotRunning] = useState(false);
+  const [aiMode, setAiMode] = useState<'edit' | 'generate'>('edit');
+  const [aiVideoPrompt, setAiVideoPrompt] = useState("");
+  const [isAiGenerating, setIsAiGenerating] = useState(false);
+  const [aiGenerateStatus, setAiGenerateStatus] = useState("");
+  const [stockSearchQuery, setStockSearchQuery] = useState("");
+  const [stockResults, setStockResults] = useState<{url: string; thumb: string; name: string}[]>([]);
+  const [isSearchingStock, setIsSearchingStock] = useState(false);
+  const [activeAnimTab] = useState<'keyframes'>('keyframes');
 
   const runCopilot = async () => {
     if (!copilotPrompt) return;
@@ -101,6 +110,142 @@ export default function VideoEditor() {
       alert("Error contacting AI copilot");
     } finally {
       setIsCopilotRunning(false);
+    }
+  };
+
+  // ─── KEYFRAME INTERPOLATION ENGINE ────────────────────────────────────────
+  const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+
+  const getInterpolatedProps = (item: TimelineItem, time: number) => {
+    if (!item.keyframes || item.keyframes.length === 0) {
+      return { x: item.x, y: item.y, width: item.width, rotation: item.rotation, opacity: item.opacity };
+    }
+    const sorted = [...item.keyframes].sort((a, b) => a.time - b.time);
+    const localTime = time - item.startTime;
+    if (localTime <= sorted[0].time) return { ...sorted[0], x: sorted[0].x ?? item.x, y: sorted[0].y ?? item.y, width: sorted[0].width ?? item.width, rotation: sorted[0].rotation ?? item.rotation, opacity: sorted[0].opacity ?? item.opacity };
+    if (localTime >= sorted[sorted.length - 1].time) { const l = sorted[sorted.length - 1]; return { x: l.x ?? item.x, y: l.y ?? item.y, width: l.width ?? item.width, rotation: l.rotation ?? item.rotation, opacity: l.opacity ?? item.opacity }; }
+    const nextIdx = sorted.findIndex(k => k.time > localTime);
+    const k0 = sorted[nextIdx - 1]; const k1 = sorted[nextIdx];
+    const t = (localTime - k0.time) / (k1.time - k0.time);
+    return {
+      x: lerp(k0.x ?? item.x ?? 50, k1.x ?? item.x ?? 50, t),
+      y: lerp(k0.y ?? item.y ?? 50, k1.y ?? item.y ?? 50, t),
+      width: lerp(k0.width ?? item.width ?? 100, k1.width ?? item.width ?? 100, t),
+      rotation: lerp(k0.rotation ?? item.rotation ?? 0, k1.rotation ?? item.rotation ?? 0, t),
+      opacity: lerp(k0.opacity ?? item.opacity ?? 100, k1.opacity ?? item.opacity ?? 100, t),
+    };
+  };
+
+  const addKeyframeAtPlayhead = () => {
+    if (!selectedItem) return;
+    const localTime = currentTime - selectedItem.startTime;
+    if (localTime < 0 || localTime > selectedItem.duration) return;
+    const newKf: Keyframe = {
+      time: localTime,
+      x: selectedItem.x ?? 50,
+      y: selectedItem.y ?? 50,
+      width: selectedItem.width ?? 100,
+      rotation: selectedItem.rotation ?? 0,
+      opacity: selectedItem.opacity ?? 100,
+    };
+    setTimelineItems(prev => prev.map(i => i.id === selectedItem.id ? {
+      ...i,
+      keyframes: [...(i.keyframes || []).filter(k => Math.abs(k.time - localTime) > 0.1), newKf]
+        .sort((a, b) => a.time - b.time)
+    } : i));
+  };
+
+  const removeKeyframe = (itemId: string, kfTime: number) => {
+    setTimelineItems(prev => prev.map(i => i.id === itemId ? {
+      ...i, keyframes: (i.keyframes || []).filter(k => k.time !== kfTime)
+    } : i));
+  };
+
+  // ─── AI VIDEO GENERATOR ────────────────────────────────────────────────────
+  const generateVideoFromAI = async () => {
+    if (!aiVideoPrompt.trim()) return;
+    setIsAiGenerating(true);
+    setAiGenerateStatus('🧠 AI is planning your video...');
+    try {
+      const res = await fetch('/api/ai-video-gen', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: aiVideoPrompt })
+      });
+      const data = await res.json();
+      if (data.error) { alert('AI Error: ' + data.error); return; }
+
+      const { plan, videoUrls } = data;
+      setAiGenerateStatus('🎬 Building timeline...');
+
+      let newTracks = [...tracks];
+      let vTrack = newTracks.filter(t => t.type === 'video').at(-1);
+      let tTrack = newTracks.find(t => t.type === 'text');
+      if (!vTrack) { vTrack = { id: Math.random().toString(36).substr(2,9), type: 'video', name: 'AI Video' }; newTracks.push(vTrack); }
+      if (!tTrack) { tTrack = { id: Math.random().toString(36).substr(2,9), type: 'text', name: 'Text' }; newTracks.push(tTrack); }
+      setTracks(sortTracks(newTracks));
+
+      const newItems: TimelineItem[] = [];
+      let cursor = 0;
+
+      // Title card
+      if (plan.title_card) {
+        newItems.push({ id: Math.random().toString(36).substr(2,9), trackId: tTrack!.id, text: plan.title_card.text, startTime: cursor, duration: plan.title_card.duration, sourceOffset: 0, x: 50, y: 45, fontSize: 80, color: plan.title_card.color || '#ffffff', fontFamily: 'Inter', rotation: 0, opacity: 100 });
+        cursor += plan.title_card.duration;
+      }
+
+      // Video sections
+      for (let i = 0; i < plan.sections.length; i++) {
+        const section = plan.sections[i];
+        const videoUrl = videoUrls[i];
+        const isRealVideo = videoUrl && !videoUrl.startsWith('data:');
+        newItems.push({
+          id: Math.random().toString(36).substr(2,9),
+          trackId: vTrack!.id,
+          url: videoUrl,
+          name: section.keyword,
+          startTime: cursor,
+          duration: section.duration,
+          sourceOffset: 0,
+          mediaType: isRealVideo ? 'video' : 'image',
+          filter: (section.filter ? section.filter + ' ' : '') + (plan.color_grade || ''),
+          x: 50, y: 50, width: 100, height: 100, opacity: 100, volume: 0,
+        });
+        if (section.text) {
+          newItems.push({ id: Math.random().toString(36).substr(2,9), trackId: tTrack!.id, text: section.text, startTime: cursor + 1, duration: section.duration - 2, sourceOffset: 0, x: 50, y: section.text_y || 80, fontSize: 48, color: '#ffffff', fontFamily: 'Inter', rotation: 0, opacity: 100 });
+        }
+        cursor += section.duration;
+      }
+
+      // Outro
+      if (plan.outro) {
+        newItems.push({ id: Math.random().toString(36).substr(2,9), trackId: tTrack!.id, text: plan.outro.text, startTime: cursor, duration: plan.outro.duration, sourceOffset: 0, x: 50, y: 50, fontSize: 56, color: '#ffffff', fontFamily: 'Inter', rotation: 0, opacity: 100 });
+      }
+
+      setTimelineItems(prev => [...prev, ...newItems]);
+      setAiVideoPrompt('');
+      setAiGenerateStatus('✅ Video project ready!');
+      setTimeout(() => setAiGenerateStatus(''), 3000);
+    } catch (e) {
+      alert('Failed to generate video');
+      setAiGenerateStatus('');
+    } finally {
+      setIsAiGenerating(false);
+    }
+  };
+
+  // ─── STOCK VIDEO SEARCH ────────────────────────────────────────────────────
+  const searchStockVideos = async () => {
+    if (!stockSearchQuery.trim()) return;
+    setIsSearchingStock(true);
+    try {
+      const res = await fetch(`/api/stock-search?q=${encodeURIComponent(stockSearchQuery)}`);
+      const data = await res.json();
+      setStockResults(data.results || []);
+    } catch (e) {
+      setStockResults([]);
+    } finally {
+      setIsSearchingStock(false);
     }
   };
 
@@ -389,12 +534,13 @@ export default function VideoEditor() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
       activeVisualItems.forEach(item => {
+         const interp = getInterpolatedProps(item, currentTime);
          const drawScaledElement = (element: any, elWidth: number, elHeight: number) => {
             ctx.save();
-            const pxX = (item.x || 50) * canvas.width / 100;
-            const pxY = (item.y || 50) * canvas.height / 100;
+            const pxX = (interp.x ?? 50) * canvas.width / 100;
+            const pxY = (interp.y ?? 50) * canvas.height / 100;
             ctx.translate(pxX, pxY);
-            ctx.rotate(((item.rotation || 0) * Math.PI) / 180);
+            ctx.rotate(((interp.rotation ?? 0) * Math.PI) / 180);
             
             let baseW = elWidth;
             let baseH = elHeight;
@@ -405,11 +551,11 @@ export default function VideoEditor() {
                 baseH *= fitScale;
             }
             
-            const scaleModifier = (item.width || 100) / 100;
+            const scaleModifier = (interp.width ?? 100) / 100;
             const drawW = baseW * scaleModifier;
             const drawH = baseH * scaleModifier;
             
-            ctx.globalAlpha = item.opacity !== undefined ? item.opacity / 100 : 1;
+            ctx.globalAlpha = interp.opacity !== undefined ? interp.opacity / 100 : 1;
             ctx.globalCompositeOperation = (item.blendMode as GlobalCompositeOperation) || 'source-over';
             ctx.filter = item.filter || 'none';
             ctx.drawImage(element, -drawW / 2, -drawH / 2, drawW, drawH);
@@ -731,25 +877,78 @@ export default function VideoEditor() {
           </div>
           <div className="flex-1 p-4 overflow-y-auto">
             {activeAssetTab === "copilot" && (
-              <div className="space-y-4 flex flex-col h-full">
-                <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-xs text-blue-300 leading-relaxed">
-                  <i className="fas fa-sparkles mr-2 text-yellow-400"></i>
-                  <strong>AI Copilot</strong><br/>
-                  Describe what you want me to do with your timeline, and I'll edit it instantly.
+              <div className="space-y-3">
+                {/* Mode Toggle */}
+                <div className="flex bg-[#111] rounded-lg p-1 border border-[#222]">
+                  <button onClick={() => setAiMode('edit')} className={`flex-1 py-2 text-xs font-bold rounded-md transition-all ${aiMode === 'edit' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'text-gray-500 hover:text-gray-300'}`}>
+                    <i className="fas fa-pen mr-1"></i> Edit Timeline
+                  </button>
+                  <button onClick={() => setAiMode('generate')} className={`flex-1 py-2 text-xs font-bold rounded-md transition-all ${aiMode === 'generate' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' : 'text-gray-500 hover:text-gray-300'}`}>
+                    <i className="fas fa-film mr-1"></i> Generate Video
+                  </button>
                 </div>
-                <textarea 
-                  value={copilotPrompt} 
-                  onChange={(e) => setCopilotPrompt(e.target.value)}
-                  placeholder="E.g., Turn all video clips black and white, or add a text layer that says 'Hello World'..."
-                  className="w-full h-32 bento-input text-xs resize-none"
-                />
-                <button 
-                  onClick={runCopilot} 
-                  disabled={isCopilotRunning || !copilotPrompt}
-                  className="w-full bento-btn-accent py-3 font-bold flex items-center justify-center disabled:opacity-50"
-                >
-                  {isCopilotRunning ? <><i className="fas fa-circle-notch fa-spin mr-2"></i> Thinking...</> : <><i className="fas fa-magic mr-2"></i> Magic Edit</>}
-                </button>
+
+                {aiMode === 'edit' && (
+                  <div className="space-y-3">
+                    <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 text-xs text-blue-300">
+                      <i className="fas fa-sparkles mr-1 text-yellow-400"></i> <strong>Timeline Editor</strong><br/>
+                      Describe changes to apply to your existing timeline.
+                    </div>
+                    <textarea value={copilotPrompt} onChange={(e) => setCopilotPrompt(e.target.value)}
+                      placeholder="E.g., Turn all video clips black and white, add a text layer 'Hello World'..."
+                      className="w-full h-28 bento-input text-xs resize-none" />
+                    <button onClick={runCopilot} disabled={isCopilotRunning || !copilotPrompt}
+                      className="w-full py-2.5 rounded-lg font-bold text-xs bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white disabled:opacity-50 flex items-center justify-center">
+                      {isCopilotRunning ? <><i className="fas fa-circle-notch fa-spin mr-2"></i>Thinking...</> : <><i className="fas fa-magic mr-2"></i>Magic Edit</>}
+                    </button>
+                  </div>
+                )}
+
+                {aiMode === 'generate' && (
+                  <div className="space-y-3">
+                    <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-3 text-xs text-purple-300">
+                      <i className="fas fa-wand-magic-sparkles mr-1 text-yellow-400"></i> <strong>AI Video Producer</strong><br/>
+                      Describe your video and AI will compose it with stock footage, text, colors & effects on the timeline.
+                    </div>
+                    <textarea value={aiVideoPrompt} onChange={(e) => setAiVideoPrompt(e.target.value)}
+                      placeholder="E.g., A cinematic travel video about Egypt with warm sunset tones and epic music vibes..."
+                      className="w-full h-28 bento-input text-xs resize-none" />
+                    {aiGenerateStatus && (
+                      <div className="bg-[#1a1a1a] border border-[#333] rounded-lg px-3 py-2 text-xs text-gray-300 animate-pulse">
+                        {aiGenerateStatus}
+                      </div>
+                    )}
+                    <button onClick={generateVideoFromAI} disabled={isAiGenerating || !aiVideoPrompt.trim()}
+                      className="w-full py-2.5 rounded-lg font-bold text-xs bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white disabled:opacity-50 flex items-center justify-center">
+                      {isAiGenerating ? <><i className="fas fa-circle-notch fa-spin mr-2"></i>Generating...</> : <><i className="fas fa-film mr-2"></i>Generate Video</>}
+                    </button>
+                    <div className="border-t border-[#222] pt-3">
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">🔍 Stock Video Search</p>
+                      <div className="flex gap-2">
+                        <input value={stockSearchQuery} onChange={e => setStockSearchQuery(e.target.value)}
+                          onKeyDown={e => e.key === 'Enter' && searchStockVideos()}
+                          placeholder="Search Pexels..." className="flex-1 bento-input text-xs py-1.5" />
+                        <button onClick={searchStockVideos} disabled={isSearchingStock}
+                          className="px-3 py-1.5 bg-[#262626] hover:bg-[#333] text-xs rounded-lg border border-[#333] disabled:opacity-50">
+                          {isSearchingStock ? <i className="fas fa-circle-notch fa-spin"></i> : <i className="fas fa-search"></i>}
+                        </button>
+                      </div>
+                      {stockResults.length > 0 && (
+                        <div className="grid grid-cols-2 gap-1.5 mt-2 max-h-48 overflow-y-auto">
+                          {stockResults.map((r, i) => (
+                            <div key={i} className="aspect-video bg-[#111] rounded overflow-hidden relative group cursor-pointer border border-[#222] hover:border-blue-500 transition-colors"
+                              onClick={() => { addToTimeline({ id: Math.random().toString(36).substr(2,9), name: r.name, url: r.url, type: 'video' }); }}>
+                              <img src={r.thumb} className="w-full h-full object-cover" alt={r.name} />
+                              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                <i className="fas fa-plus text-white text-lg"></i>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
             {activeAssetTab === "media" && (
@@ -887,6 +1086,7 @@ export default function VideoEditor() {
           <div className="flex border-b border-[var(--color-bento-border)] p-2 space-x-1 bg-[#141414]">
             <button onClick={() => setActivePropertyTab("basic")} className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-md ${activePropertyTab === "basic" ? "bg-[#262626] text-white" : "text-[var(--color-bento-muted)]"}`}>Props</button>
             {selectedItem?.trackId === 'T1' && <button onClick={() => setActivePropertyTab("text")} className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-md ${activePropertyTab === "text" ? "bg-[#262626] text-purple-400" : "text-[var(--color-bento-muted)]"}`}>Text</button>}
+            {selectedItem && <button onClick={() => setActivePropertyTab("anim")} className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-md ${activePropertyTab === "anim" ? "bg-orange-500/20 text-orange-400 border border-orange-500/30" : "text-[var(--color-bento-muted)] hover:text-orange-400"}`}><i className="fas fa-bezier-curve mr-1"></i>Anim</button>}
           </div>
           
           <div className="flex-1 overflow-y-auto p-4 space-y-6">
@@ -989,6 +1189,116 @@ export default function VideoEditor() {
                 )}
                 
                 <button onClick={() => setSelectedItemId(null)} className="md:hidden w-full bento-btn py-2 text-xs mt-4">Done Editing</button>
+              </div>
+            )}
+
+            {/* ANIM Tab — Keyframe Editor */}
+            {selectedItem && activePropertyTab === "anim" && (
+              <div className="space-y-4">
+                <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-3">
+                  <p className="text-xs font-bold text-orange-400 mb-1"><i className="fas fa-bezier-curve mr-1"></i> Keyframe Animator</p>
+                  <p className="text-[10px] text-gray-400">Set keyframes at different timeline positions to animate position, scale, rotation & opacity.</p>
+                </div>
+
+                {/* Playhead time display */}
+                <div className="flex items-center justify-between bg-[#111] rounded-lg p-2 border border-[#222]">
+                  <div className="text-[10px] text-gray-500">Playhead: <span className="font-mono text-white">{formatTime(currentTime)}</span></div>
+                  <div className="text-[10px] text-gray-500">Local: <span className="font-mono text-orange-400">{(currentTime - selectedItem.startTime).toFixed(2)}s</span></div>
+                </div>
+
+                {/* Add keyframe button */}
+                <button onClick={addKeyframeAtPlayhead}
+                  className="w-full py-2.5 rounded-lg font-bold text-xs bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white flex items-center justify-center gap-2">
+                  <i className="fas fa-diamond"></i> Add Keyframe at Playhead
+                </button>
+
+                {/* Keyframe list */}
+                {(selectedItem.keyframes && selectedItem.keyframes.length > 0) ? (
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{selectedItem.keyframes.length} Keyframes</p>
+                    {[...selectedItem.keyframes].sort((a, b) => a.time - b.time).map((kf, idx) => (
+                      <div key={idx} className="bg-[#111] border border-[#222] rounded-lg p-2.5 group hover:border-orange-500/40 transition-colors">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <i className="fas fa-diamond text-orange-400 text-[10px]"></i>
+                            <span className="text-xs font-bold text-white font-mono">{kf.time.toFixed(2)}s</span>
+                          </div>
+                          <div className="flex gap-1">
+                            <button onClick={() => setCurrentTime(selectedItem.startTime + kf.time)}
+                              className="w-5 h-5 rounded bg-blue-500/20 text-blue-400 flex items-center justify-center text-[10px] hover:bg-blue-500/40" title="Jump to keyframe">
+                              <i className="fas fa-play"></i>
+                            </button>
+                            <button onClick={() => removeKeyframe(selectedItem.id, kf.time)}
+                              className="w-5 h-5 rounded bg-red-500/20 text-red-400 flex items-center justify-center text-[10px] hover:bg-red-500/40">
+                              <i className="fas fa-times"></i>
+                            </button>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-5 gap-1">
+                          {[
+                            { label: 'X', val: kf.x?.toFixed(0) ?? '—', color: 'text-blue-400' },
+                            { label: 'Y', val: kf.y?.toFixed(0) ?? '—', color: 'text-green-400' },
+                            { label: 'Scale', val: kf.width?.toFixed(0) ?? '—', color: 'text-purple-400' },
+                            { label: 'Rot', val: kf.rotation?.toFixed(0) ?? '—', color: 'text-yellow-400' },
+                            { label: 'Opa', val: kf.opacity?.toFixed(0) ?? '—', color: 'text-red-400' },
+                          ].map(prop => (
+                            <div key={prop.label} className="bg-[#0a0a0a] rounded p-1 text-center border border-[#1a1a1a]">
+                              <p className={`text-[8px] font-bold ${prop.color} uppercase`}>{prop.label}</p>
+                              <p className="text-[10px] text-white font-mono">{prop.val}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-600">
+                    <i className="fas fa-bezier-curve text-3xl mb-3 block opacity-30"></i>
+                    <p className="text-xs">No keyframes yet.</p>
+                    <p className="text-[10px] mt-1">Move to a time and click Add Keyframe.</p>
+                  </div>
+                )}
+
+                {/* Quick animation presets */}
+                <div className="border-t border-[#222] pt-3">
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">⚡ Quick Presets</p>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {[
+                      { label: 'Fade In', fn: () => {
+                        const start = selectedItem.startTime;
+                        setTimelineItems(prev => prev.map(i => i.id === selectedItem.id ? { ...i,
+                          keyframes: [{ time: 0, opacity: 0, x: i.x, y: i.y, width: i.width, rotation: i.rotation },
+                                      { time: Math.min(2, i.duration * 0.3), opacity: 100, x: i.x, y: i.y, width: i.width, rotation: i.rotation }] } : i));
+                      }},
+                      { label: 'Fade Out', fn: () => {
+                        setTimelineItems(prev => prev.map(i => i.id === selectedItem.id ? { ...i,
+                          keyframes: [{ time: Math.max(0, i.duration - 2), opacity: 100, x: i.x, y: i.y, width: i.width, rotation: i.rotation },
+                                      { time: i.duration, opacity: 0, x: i.x, y: i.y, width: i.width, rotation: i.rotation }] } : i));
+                      }},
+                      { label: 'Slide L→R', fn: () => {
+                        setTimelineItems(prev => prev.map(i => i.id === selectedItem.id ? { ...i,
+                          keyframes: [{ time: 0, x: 0, y: i.y, width: i.width, rotation: i.rotation, opacity: 100 },
+                                      { time: i.duration, x: 100, y: i.y, width: i.width, rotation: i.rotation, opacity: 100 }] } : i));
+                      }},
+                      { label: 'Zoom In', fn: () => {
+                        setTimelineItems(prev => prev.map(i => i.id === selectedItem.id ? { ...i,
+                          keyframes: [{ time: 0, x: i.x, y: i.y, width: 20, rotation: i.rotation, opacity: 80 },
+                                      { time: i.duration, x: i.x, y: i.y, width: 130, rotation: i.rotation, opacity: 100 }] } : i));
+                      }},
+                      { label: 'Spin', fn: () => {
+                        setTimelineItems(prev => prev.map(i => i.id === selectedItem.id ? { ...i,
+                          keyframes: [{ time: 0, x: i.x, y: i.y, width: i.width, rotation: 0, opacity: 100 },
+                                      { time: i.duration, x: i.x, y: i.y, width: i.width, rotation: 360, opacity: 100 }] } : i));
+                      }},
+                      { label: 'Clear All', fn: () => setTimelineItems(prev => prev.map(i => i.id === selectedItem.id ? { ...i, keyframes: [] } : i)) },
+                    ].map(preset => (
+                      <button key={preset.label} onClick={preset.fn}
+                        className="py-1.5 px-2 text-[10px] font-bold bg-[#111] border border-[#222] hover:border-orange-500/50 hover:text-orange-400 text-gray-400 rounded-lg transition-colors">
+                        {preset.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
           </div>
