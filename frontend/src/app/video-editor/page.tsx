@@ -133,7 +133,8 @@ export default function VideoEditor() {
     let newTracks = [...tracks];
     
     if (media.type === 'video') {
-       let vTrack = newTracks.find(t => t.type === 'video');
+       // Pick the LAST video track (lowest Z-index = background/main) not the first (overlay)
+       let vTrack = newTracks.filter(t => t.type === 'video').at(-1) as TimelineTrack | undefined;
        let aTrack = newTracks.find(t => t.type === 'audio');
        if (!vTrack) {
           vTrack = { id: Math.random().toString(36).substr(2, 9), type: 'video', name: 'Video Track' };
@@ -706,7 +707,9 @@ export default function VideoEditor() {
                 <div className="grid grid-cols-2 gap-2">
                   {localMediaFiles.map(media => (
                     <div key={media.id} className="aspect-video bg-[#1a1a1a] rounded-lg border border-[var(--color-bento-border)] relative group overflow-hidden">
-                      {media.type === 'video' || media.type === 'image' ? <img src={media.url} className="w-full h-full object-cover" alt={media.name} /> : <div className="w-full h-full flex items-center justify-center bg-[#262626]"><i className="fas fa-music text-green-400"></i></div>}
+                      {media.type === 'image' && <img src={media.url} className="w-full h-full object-cover" alt={media.name} />}
+                      {media.type === 'video' && <video src={media.url} className="w-full h-full object-cover" preload="metadata" muted playsInline />}
+                      {media.type === 'audio' && <div className="w-full h-full flex items-center justify-center bg-[#262626]"><i className="fas fa-music text-green-400 text-3xl"></i></div>}
                       <button onClick={() => { addToTimeline(media); setShowMobileSidebar(false); }} disabled={isRendering} className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 md:opacity-100 md:bg-transparent flex items-center justify-center transition-opacity disabled:hidden">
                         <div className="w-8 h-8 rounded-full bg-blue-500/80 text-white flex items-center justify-center shadow-lg hover:scale-110"><i className="fas fa-plus"></i></div>
                       </button>
