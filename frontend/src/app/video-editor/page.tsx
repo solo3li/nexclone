@@ -204,7 +204,7 @@ export default function VideoEditor() {
         const el = document.getElementById(`player-${item.id}`) as HTMLMediaElement;
         const track = tracks.find(t => t.id === item.trackId);
         if (el) {
-          el.muted = item.mediaType === 'video' || (track?.isMuted ?? false);
+          el.muted = track?.isMuted ?? false;
           el.volume = item.volume !== undefined ? item.volume / 100 : 1.0;
           const isActive = activeItems.some(active => active.id === item.id);
           if (isActive) {
@@ -723,7 +723,7 @@ export default function VideoEditor() {
             <div className="hidden">
       {timelineItems.filter(i => i.mediaType === 'video' || i.mediaType === 'audio').map(item => {
          const El = item.mediaType === 'audio' ? 'audio' : 'video';
-         return <El key={item.id} id={`player-${item.id}`} src={item.url} muted={item.mediaType === 'video'} crossOrigin="anonymous" />;
+         return <El key={item.id} id={`player-${item.id}`} src={item.url} crossOrigin="anonymous" playsInline />;
       })}
    </div>
             <canvas ref={canvasRef} className="absolute inset-0 w-full h-full bg-black pointer-events-none" />
