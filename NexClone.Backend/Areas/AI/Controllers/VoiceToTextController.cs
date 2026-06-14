@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using NexClone.Backend.Models;
 using NexClone.Backend.Services.AI;
 using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace NexClone.Backend.Areas.AI.Controllers
@@ -14,11 +16,13 @@ namespace NexClone.Backend.Areas.AI.Controllers
     public class VoiceToTextController : ControllerBase
     {
         private readonly ISttService _sttService;
+        private readonly ApplicationDbContext _dbContext;
         private const long MaxFileSize = 25 * 1024 * 1024; // 25 MB
 
-        public VoiceToTextController(ISttService sttService)
+        public VoiceToTextController(ISttService sttService, ApplicationDbContext dbContext)
         {
             _sttService = sttService;
+            _dbContext = dbContext;
         }
 
         [HttpPost("transcribe")]
@@ -44,6 +48,22 @@ namespace NexClone.Backend.Areas.AI.Controllers
                 if (!result.Success)
                 {
                     return StatusCode(500, new { error = result.ErrorMessage });
+                }
+
+                var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (Guid.TryParse(userIdStr, out var userId))
+                {
+                    var history = new GenerationHistory
+                    {
+                        UserId = userId,
+                        Type = "voice-to-text",
+                        Title = audio.FileName,
+                        Status = "completed",
+                        Lang = targetLanguage,
+                        ResultText = translate ? result.TranslatedText : result.OriginalText
+                    };
+                    _dbContext.GenerationHistories.Add(history);
+                    await _dbContext.SaveChangesAsync();
                 }
 
                 return Ok(new

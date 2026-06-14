@@ -19,6 +19,7 @@ namespace NexClone.Backend.Models
         public DbSet<Payment> Payments { get; set; } = null!;
         public DbSet<ApiConfiguration> ApiConfigurations { get; set; } = null!;
         public DbSet<PaymentGatewayConfig> PaymentGatewayConfigs { get; set; } = null!;
+        public DbSet<GenerationHistory> GenerationHistories { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -62,6 +63,13 @@ namespace NexClone.Backend.Models
                 .WithMany(s => s.Payments)
                 .HasForeignKey(p => p.SubscriptionId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            // History mapping
+            builder.Entity<GenerationHistory>()
+                .HasOne(h => h.User)
+                .WithMany()
+                .HasForeignKey(h => h.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

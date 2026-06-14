@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NexClone.Backend.Models;
+using System.Security.Claims;
 using System.Text.Json;
 using System.Text;
 
@@ -12,11 +14,13 @@ namespace NexClone.Backend.Areas.AI.Controllers
     public class GptController : ControllerBase
     {
         private readonly IConfiguration _configuration;
+        private readonly ApplicationDbContext _dbContext;
         private readonly HttpClient _httpClient;
 
-        public GptController(IConfiguration configuration)
+        public GptController(IConfiguration configuration, ApplicationDbContext dbContext)
         {
             _configuration = configuration;
+            _dbContext = dbContext;
             _httpClient = new HttpClient();
             // Default to empty key if not set, user can add it in appsettings later
             _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_configuration["OpenAI:ApiKey"] ?? ""}");
@@ -55,9 +59,21 @@ namespace NexClone.Backend.Areas.AI.Controllers
                                          .GetProperty("content")
                                          .GetString();
                     
-                    // Return the expected Next.js format (was expecting JSON with "response" property in the python version)
-                    // The old frontend code was waiting for `res.json()`, and using `data.response`. Let's check frontend.
-                    // If frontend expects { response: "..." } we return that.
+                    var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    if (Guid.TryParse(userIdStr, out var userId))
+                    {
+                        var history = new GenerationHistory
+                        {
+                            UserId = userId,
+                            Type = "gpt",
+                            Title = request.Prompt.Length > 30 ? request.Prompt.Substring(0, 30) + "..." : request.Prompt,
+                            Status = "completed",
+                            ResultText = content
+                        };
+                        _dbContext.GenerationHistories.Add(history);
+                        await _dbContext.SaveChangesAsync();
+                    }
+
                     return Ok(new { text = content });
                 }
                 else

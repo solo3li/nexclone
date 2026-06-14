@@ -1,19 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useHistoryStore } from "../../store/useHistoryStore";
+import { useAuthStore } from "../../store/useAuthStore";
 
 export default function History() {
   const [activeTab, setActiveTab] = useState("all");
   const router = useRouter();
+  
+  const { history: historyData, isLoading, fetchHistory, deleteHistory } = useHistoryStore();
+  const { isAuthenticated } = useAuthStore();
 
-  const historyData = [
-    { id: "GEN-0145", type: "text-to-voice", title: "Blog Post Intro", date: "24 Oct 2024", duration: "1:24", status: "completed", lang: "English", voice: "Aurora" },
-    { id: "GEN-0144", type: "voice-to-text", title: "Interview Recording", date: "23 Oct 2024", duration: "45:10", status: "processing", lang: "Auto", voice: "-" },
-    { id: "GEN-0143", type: "text-to-voice", title: "YouTube Voiceover", date: "20 Oct 2024", duration: "8:05", status: "completed", lang: "Spanish", voice: "Atlas" },
-    { id: "GEN-0142", type: "voice-to-text", title: "Meeting Notes", date: "18 Oct 2024", duration: "12:30", status: "failed", lang: "French", voice: "-" },
-    { id: "GEN-0141", type: "text-to-voice", title: "Podcast Ad Read", date: "15 Oct 2024", duration: "0:45", status: "completed", lang: "English", voice: "Nova" },
-  ];
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/login");
+      return;
+    }
+    fetchHistory();
+  }, [isAuthenticated, router, fetchHistory]);
+
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (confirm("Are you sure you want to delete this record?")) {
+      await deleteHistory(id);
+    }
+  };
 
   const filteredData = activeTab === "all" ? historyData : historyData.filter(d => d.type === activeTab);
 
@@ -60,9 +72,14 @@ export default function History() {
         </button>
       </div>
 
-      {/* Data Table */}
       <div className="bento-card overflow-hidden">
-        <div className="overflow-x-auto">
+        {isLoading ? (
+          <div className="p-12 text-center flex flex-col items-center">
+            <i className="fas fa-circle-notch fa-spin text-3xl text-blue-500 mb-4"></i>
+            <p className="text-[var(--color-bento-muted)]">Loading your history...</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-[#0a0a0a] text-[var(--color-bento-muted)] text-xs uppercase tracking-wider">
@@ -82,23 +99,38 @@ export default function History() {
                   className="hover:bg-[#1a1a1a] transition-colors cursor-pointer group"
                   onClick={() => router.push(`/history/${item.id}`)}
                 >
-                  <td className="p-4 font-mono text-xs text-[var(--color-bento-muted)] group-hover:text-blue-400 transition-colors">{item.id}</td>
+                  <td className="p-4 font-mono text-xs text-[var(--color-bento-muted)] group-hover:text-blue-400 transition-colors">
+                    {item.id.split('-')[0]}...
+                  </td>
                   <td className="p-4">
                     {item.type === 'text-to-voice' ? (
-                      <div className="w-8 h-8 rounded-md bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20">
+                      <div className="w-8 h-8 rounded-md bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20" title="Text to Voice">
                         <i className="fas fa-volume-up text-xs"></i>
                       </div>
-                    ) : (
-                      <div className="w-8 h-8 rounded-md bg-purple-500/10 flex items-center justify-center text-purple-400 border border-purple-500/20">
+                    ) : item.type === 'voice-to-text' ? (
+                      <div className="w-8 h-8 rounded-md bg-purple-500/10 flex items-center justify-center text-purple-400 border border-purple-500/20" title="Voice to Text">
                         <i className="fas fa-microphone text-xs"></i>
+                      </div>
+                    ) : item.type === 'bg-remover' ? (
+                      <div className="w-8 h-8 rounded-md bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20" title="BG Remover">
+                        <i className="fas fa-image text-xs"></i>
+                      </div>
+                    ) : item.type === 'img-to-txt' ? (
+                      <div className="w-8 h-8 rounded-md bg-cyan-500/10 flex items-center justify-center text-cyan-400 border border-cyan-500/20" title="Image to Text">
+                        <i className="fas fa-file-alt text-xs"></i>
+                      </div>
+                    ) : (
+                      <div className="w-8 h-8 rounded-md bg-teal-500/10 flex items-center justify-center text-teal-400 border border-teal-500/20" title="GPT">
+                        <i className="fas fa-robot text-xs"></i>
                       </div>
                     )}
                   </td>
                   <td className="p-4 text-sm font-bold text-white">{item.title}</td>
                   <td className="p-4 text-xs text-[var(--color-bento-muted)] space-y-1">
-                    <div><span className="text-[#52525b]">Lang:</span> {item.lang}</div>
+                    {item.lang !== "Auto" && <div><span className="text-[#52525b]">Lang:</span> {item.lang}</div>}
                     {item.voice !== "-" && <div><span className="text-[#52525b]">Voice:</span> {item.voice}</div>}
-                    <div><span className="text-[#52525b]">Length:</span> {item.duration}</div>
+                    {item.duration !== "0:00" && <div><span className="text-[#52525b]">Length:</span> {item.duration}</div>}
+                    {!item.lang && !item.voice && <div className="italic">N/A</div>}
                   </td>
                   <td className="p-4 text-xs text-[var(--color-bento-muted)]">{item.date}</td>
                   <td className="p-4">
@@ -127,15 +159,20 @@ export default function History() {
                       >
                         <i className="fas fa-play text-[10px]"></i>
                       </button>
+                      {item.fileUrl && (
+                        <a 
+                          href={`http://localhost:8080${item.fileUrl}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()} 
+                          className="bento-btn w-7 h-7 rounded flex items-center justify-center text-[var(--color-bento-muted)] hover:text-white" 
+                          title="Download"
+                        >
+                          <i className="fas fa-download text-[10px]"></i>
+                        </a>
+                      )}
                       <button 
-                        onClick={(e) => e.stopPropagation()} 
-                        className="bento-btn w-7 h-7 rounded flex items-center justify-center text-[var(--color-bento-muted)] hover:text-white" 
-                        title="Download"
-                      >
-                        <i className="fas fa-download text-[10px]"></i>
-                      </button>
-                      <button 
-                        onClick={(e) => e.stopPropagation()} 
+                        onClick={(e) => handleDelete(e, item.id)} 
                         className="bento-btn w-7 h-7 rounded flex items-center justify-center text-[var(--color-bento-muted)] hover:text-red-400" 
                         title="Delete"
                       >
@@ -155,6 +192,7 @@ export default function History() {
             </div>
           )}
         </div>
+        )}
       </div>
 
     </div>
