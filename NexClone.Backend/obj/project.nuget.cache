@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "CodcibK2KTw=",
+  "dgSpecHash": "mKf7bc4AgBQ=",
   "success": true,
   "projectFilePath": "/root/nexmedia/nexclone/NexClone.Backend/NexClone.Backend.csproj",
   "expectedPackageFiles": [
@@ -32,6 +32,15 @@
     "/root/.nuget/packages/npgsql/10.0.3/npgsql.10.0.3.nupkg.sha512",
     "/root/.nuget/packages/npgsql.entityframeworkcore.postgresql/10.0.2/npgsql.entityframeworkcore.postgresql.10.0.2.nupkg.sha512",
     "/root/.nuget/packages/pipelines.sockets.unofficial/2.2.16/pipelines.sockets.unofficial.2.2.16.nupkg.sha512",
+    "/root/.nuget/packages/serilog/4.3.0/serilog.4.3.0.nupkg.sha512",
+    "/root/.nuget/packages/serilog.aspnetcore/10.0.0/serilog.aspnetcore.10.0.0.nupkg.sha512",
+    "/root/.nuget/packages/serilog.extensions.hosting/10.0.0/serilog.extensions.hosting.10.0.0.nupkg.sha512",
+    "/root/.nuget/packages/serilog.extensions.logging/10.0.0/serilog.extensions.logging.10.0.0.nupkg.sha512",
+    "/root/.nuget/packages/serilog.formatting.compact/3.0.0/serilog.formatting.compact.3.0.0.nupkg.sha512",
+    "/root/.nuget/packages/serilog.settings.configuration/10.0.0/serilog.settings.configuration.10.0.0.nupkg.sha512",
+    "/root/.nuget/packages/serilog.sinks.console/6.1.1/serilog.sinks.console.6.1.1.nupkg.sha512",
+    "/root/.nuget/packages/serilog.sinks.debug/3.0.0/serilog.sinks.debug.3.0.0.nupkg.sha512",
+    "/root/.nuget/packages/serilog.sinks.file/7.0.0/serilog.sinks.file.7.0.0.nupkg.sha512",
     "/root/.nuget/packages/stackexchange.redis/2.13.17/stackexchange.redis.2.13.17.nupkg.sha512",
     "/root/.nuget/packages/system.codedom/6.0.0/system.codedom.6.0.0.nupkg.sha512",
     "/root/.nuget/packages/system.composition/9.0.0/system.composition.9.0.0.nupkg.sha512",

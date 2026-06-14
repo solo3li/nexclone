@@ -28,7 +28,13 @@
                         @foreach (var item in Model)
                         {
                             <tr>
-                                <td><strong>@item.Name</strong></td>
+                                <td>
+                                    <strong>@item.Name</strong>
+                                    @if (item.IsFreeTrial)
+                                    {
+                                        <span style="background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-left: 0.5rem;">Free Trial</span>
+                                    }
+                                </td>
                                 <td>@item.DurationDays</td>
                                 <td>$@item.PriceUsd</td>
                                 <td>EGP @item.PriceEgp</td>

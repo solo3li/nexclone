@@ -75,6 +75,17 @@
             </div>
         </div>
 
+        <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+            <div class="bx--form-item">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="hidden" name="IsFreeTrial" value="false" />
+                    <input type="checkbox" id="IsFreeTrial" name="IsFreeTrial" value="true" class="bx--checkbox" @(Model.IsFreeTrial ? "checked" : "") style="cursor: pointer;" />
+                    <label for="IsFreeTrial" class="bx--checkbox-label" style="cursor: pointer; margin: 0; font-weight: bold;">Is this a Free Trial plan?</label>
+                </div>
+                <div class="bx--form__helper-text">If checked, this plan will be automatically assigned to new users upon registration.</div>
+            </div>
+        </div>
+
         <div style="display: flex; justify-content: flex-end; gap: 1rem;">
             <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">Cancel</a>
             <button type="submit" class="bx--btn bx--btn--primary">Save Changes</button>

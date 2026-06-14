@@ -1,0 +1,52 @@
+@model IEnumerable<NexClone.Backend.Models.GenerationHistory>
+
+@{
+    ViewData["Title"] = "Operations History";
+}
+
+<div class="bx--data-table-container">
+    <div class="bx--data-table-header">
+        <h4 class="bx--data-table-header__title">Operations History</h4>
+        <p class="bx--data-table-header__description">View the latest 500 AI operations performed by users.</p>
+    </div>
+
+    <table class="bx--data-table bx--data-table--sort">
+        <thead>
+            <tr>
+                <th><span class="bx--table-header-label">User Email</span></th>
+                <th><span class="bx--table-header-label">Tool</span></th>
+                <th><span class="bx--table-header-label">Task</span></th>
+                <th><span class="bx--table-header-label">Status</span></th>
+                <th><span class="bx--table-header-label">Credits</span></th>
+                <th><span class="bx--table-header-label">Date</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.User?.Email</td>
+                    <td><span style="background: #e0e0e0; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem;">@item.Type</span></td>
+                    <td>@item.Title</td>
+                    <td>
+                        @if (item.Status == "completed") {
+                            <span style="color: green; font-weight: bold;">@item.Status</span>
+                        } else if (item.Status == "failed") {
+                            <span style="color: red; font-weight: bold;">@item.Status</span>
+                        } else {
+                            <span style="color: orange; font-weight: bold;">@item.Status</span>
+                        }
+                    </td>
+                    <td>@item.CreditsUsed</td>
+                    <td>@item.CreatedAt.ToString("MMM dd, yyyy HH:mm")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @if (!Model.Any())
+    {
+        <div style="text-align: center; padding: 2rem; color: #525252; background: #ffffff; border-bottom: 1px solid #e0e0e0;">
+            No operations found.
+        </div>
+    }
+</div>

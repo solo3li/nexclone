@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -18,11 +19,13 @@ namespace NexClone.Backend.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
+        private readonly ApplicationDbContext _context;
 
-        public AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration)
+        public AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration, ApplicationDbContext context)
         {
             _userManager = userManager;
             _configuration = configuration;
+            _context = context;
         }
 
         [HttpPost("register")]
@@ -30,6 +33,12 @@ namespace NexClone.Backend.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
+            var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+            var userAgent = Request.Headers["User-Agent"].ToString() ?? "Unknown";
+
+            // Check if this IP has ever registered an account
+            bool hasClaimedFreeTrial = await _context.DeviceFingerprints.AnyAsync(df => df.IpAddress == ipAddress);
 
             var user = new ApplicationUser
             {
@@ -49,6 +58,33 @@ namespace NexClone.Backend.Controllers
                     errors.Add(error.Description);
                 return BadRequest(new { Errors = errors });
             }
+
+            // Log fingerprint
+            _context.DeviceFingerprints.Add(new DeviceFingerprint
+            {
+                UserId = user.Id,
+                IpAddress = ipAddress,
+                UserAgent = userAgent
+            });
+
+            if (!hasClaimedFreeTrial)
+            {
+                var freeTrialPlan = await _context.Plans.FirstOrDefaultAsync(p => p.IsFreeTrial);
+
+                if (freeTrialPlan != null)
+                {
+                    user.AvailableCredits = freeTrialPlan.MonthlyCredits;
+                    _context.Subscriptions.Add(new Subscription
+                    {
+                        UserId = user.Id,
+                        PlanId = freeTrialPlan.Id,
+                        StartDate = DateTime.UtcNow,
+                        EndDate = DateTime.UtcNow.AddDays(freeTrialPlan.DurationDays),
+                        Status = "Active"
+                    });
+                }
+            }
+            await _context.SaveChangesAsync();
 
             var token = GenerateJwtToken(user);
             SetTokenCookie(token);

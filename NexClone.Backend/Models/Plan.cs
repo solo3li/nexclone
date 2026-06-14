@@ -26,6 +26,9 @@ namespace NexClone.Backend.Models
         // JSON array of allowed tool identifiers, e.g., ["gpt", "text-to-voice", "voice-to-text", "bg-remover", "img-to-txt"]
         public string AllowedTools { get; set; } = "[]";
 
+        // Free Trial Flag
+        public bool IsFreeTrial { get; set; } = false;
+
         // Navigation
         public ICollection<Subscription> Subscriptions { get; set; } = new List<Subscription>();
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
