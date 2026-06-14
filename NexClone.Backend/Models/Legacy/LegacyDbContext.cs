@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -243,6 +243,9 @@ public partial class LegacyDbContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(255)
                 .HasColumnName("name");
+            entity.Property(e => e.CreditCost)
+                .HasPrecision(10, 2)
+                .HasColumnName("credit_cost");
         });
 
         modelBuilder.Entity<UserAuthUser>(entity =>

@@ -5,39 +5,32 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NexClone.Backend.Models;
 
+using NexClone.Backend.Models.Legacy;
+
 namespace NexClone.Backend.Services
 {
     public class CreditManagerService
     {
         private readonly ApplicationDbContext _context;
+        private readonly LegacyDbContext _legacyContext;
 
-        // Pricing Rules
-        // "gpt": per prompt
+        public CreditManagerService(ApplicationDbContext context, LegacyDbContext legacyContext)
+        {
+            _context = context;
+            _legacyContext = legacyContext;
+        }
         // "text-to-voice": per character
         // "voice-to-text": per second
         // "bg-remover": per image
         // "img-to-txt": per image
-        private readonly Dictionary<string, decimal> _toolPricing = new Dictionary<string, decimal>
-        {
-            { "gpt", 2m },             // 2 credits per prompt
-            { "text-to-voice", 0.1m }, // 0.1 credit per character (1 credit = 10 chars)
-            { "voice-to-text", 1m },   // 1 credit per second
-            { "bg-remover", 5m },      // 5 credits per image
-            { "img-to-txt", 3m }       // 3 credits per image
-        };
-
-        public CreditManagerService(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-
         public decimal CalculateCost(string toolId, decimal amount)
         {
-            if (_toolPricing.TryGetValue(toolId, out decimal rate))
+            var tool = _legacyContext.ToolsTools.FirstOrDefault(t => t.Name == toolId);
+            if (tool != null)
             {
-                return rate * amount;
+                return tool.CreditCost * amount;
             }
-            return 0m;
+            return 1m * amount; // Default fallback if tool not found in DB
         }
 
         public async Task<bool> IsToolAllowedForUser(Guid userId, string toolId)
