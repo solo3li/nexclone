@@ -12,6 +12,9 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
     { href: "/", label: "Dashboard", icon: "fa-home" },
     { href: "/voice-to-text", label: "Voice AI", icon: "fa-microphone" },
     { href: "/text-to-voice", label: "Speech AI", icon: "fa-volume-up" },
+    { href: "/dashboard/tools/gpt", label: "GPT Assistant", icon: "fa-robot" },
+    { href: "/dashboard/tools/bg-remover", label: "BG Remover", icon: "fa-image" },
+    { href: "/dashboard/tools/img-to-txt", label: "Image to Text", icon: "fa-file-alt" },
     { href: "/history", label: "History", icon: "fa-history" },
     { href: "/settings", label: "Settings", icon: "fa-cog" },
   ];
