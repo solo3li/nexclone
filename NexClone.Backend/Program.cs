@@ -72,6 +72,7 @@ builder.Services.AddHttpClient("AIGateway", client =>
 });
 
 builder.Services.AddScoped<NexClone.Backend.Services.AI.ITtsService, NexClone.Backend.Services.AI.TtsService>();
+builder.Services.AddScoped<NexClone.Backend.Services.AI.ISttService, NexClone.Backend.Services.AI.SttService>();
 
 var app = builder.Build();
 
