@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useAiStore } from "../../../../store/useAiStore";
 
 export default function BackgroundRemover() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [resultImage, setResultImage] = useState<string | null>(null);
+  const { removeBackground } = useAiStore();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -18,31 +20,10 @@ export default function BackgroundRemover() {
     setLoading(true);
     
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const token = localStorage.getItem("token");
-
-      const res = await fetch("http://localhost:8080/api/ai/remove-bg", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`
-        },
-        body: formData,
-      });
-
-      const data = await res.json();
-      
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to process image");
-      }
-
-      // If data contains the processed image URL, we use it. For now, we mock the result string if it only returned a filename.
-      setResultImage("https://via.placeholder.com/600x400?text=Background+Removed+Successfully!");
-      alert("Image processed by backend! Data: " + JSON.stringify(data));
-      
+      const url = await removeBackground(file);
+      setResultImage(url);
     } catch (err: any) {
-      alert("Error: " + err.message);
+      alert("Error processing image.");
     } finally {
       setLoading(false);
     }

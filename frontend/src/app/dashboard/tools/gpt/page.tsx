@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAiStore } from "../../../../store/useAiStore";
 
 export default function GPTAssistant() {
   const [messages, setMessages] = useState([
@@ -8,6 +9,7 @@ export default function GPTAssistant() {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const { chatWithGpt } = useAiStore();
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,26 +21,10 @@ export default function GPTAssistant() {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem("token");
-      
-      const res = await fetch("http://localhost:8080/api/ai/gpt", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({ prompt: userMsg }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to generate text");
-      }
-
-      setMessages(prev => [...prev, { role: "assistant", content: data.text || JSON.stringify(data) }]);
+      const reply = await chatWithGpt(userMsg);
+      setMessages(prev => [...prev, { role: "assistant", content: reply }]);
     } catch (err: any) {
-      setMessages(prev => [...prev, { role: "assistant", content: `Error: ${err.message}` }]);
+      setMessages(prev => [...prev, { role: "assistant", content: `Error: ${err.message || 'Failed to communicate with GPT'}` }]);
     } finally {
       setLoading(false);
     }

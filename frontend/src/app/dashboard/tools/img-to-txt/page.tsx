@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useAiStore } from "../../../../store/useAiStore";
 
 export default function ImageToText() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [resultText, setResultText] = useState("");
+  const { extractText } = useAiStore();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -13,13 +15,18 @@ export default function ImageToText() {
     }
   };
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!file) return;
     setLoading(true);
-    setTimeout(() => {
+    
+    try {
+      const text = await extractText(file);
+      setResultText(text);
+    } catch (err: any) {
+      alert("Error extracting text.");
+    } finally {
       setLoading(false);
-      setResultText("Mock OCR Data:\n\nRECEIPT\nTotal: $45.00\nDate: 2023-10-27\nThank you for your purchase!");
-    }, 2000);
+    }
   };
 
   return (
