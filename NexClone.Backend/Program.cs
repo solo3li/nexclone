@@ -104,6 +104,10 @@ builder.Services.AddScoped<NexClone.Backend.Services.Payments.IPaymentService, N
 // Register Credit Manager
 builder.Services.AddScoped<NexClone.Backend.Services.CreditManagerService>();
 
+// Add Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -112,6 +116,9 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 app.UseRouting();

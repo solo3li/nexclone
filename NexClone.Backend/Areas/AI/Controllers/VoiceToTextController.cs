@@ -30,7 +30,7 @@ namespace NexClone.Backend.Areas.AI.Controllers
 
         [HttpPost("transcribe")]
         public async Task<IActionResult> TranscribeAudio(
-            [FromForm] IFormFile audio, 
+            IFormFile audio, 
             [FromForm] bool translate = false, 
             [FromForm] string targetLanguage = "en")
         {
