@@ -7,8 +7,16 @@
                 @Html.AntiForgeryToken()
                 
                 <div class="bx--form-item" style="margin-bottom: 1.5rem;">
-                    <label for="ProviderName" class="bx--label">Provider Name (e.g., OpenAI, Darijat, Gemini)</label>
-                    <input id="ProviderName" name="ProviderName" type="text" class="bx--text-input" required />
+                    <label for="ProviderName" class="bx--label">Provider</label>
+                    <div class="bx--select">
+                        <select id="ProviderName" name="ProviderName" class="bx--select-input" required>
+                            <option value="" disabled selected hidden>Choose a Provider</option>
+                            <option value="OpenAI">OpenAI</option>
+                            <option value="Darijat">Darijat</option>
+                            <option value="Gemini">Gemini</option>
+                        </select>
+                        <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" class="bx--select__arrow"><path d="M8 11L3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z"></path></svg>
+                    </div>
                 </div>
 
                 <div class="bx--form-item" style="margin-bottom: 1.5rem;">
