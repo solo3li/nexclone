@@ -1,7 +1,0 @@
-flask
-flask-cors
-werkzeug
-requests
-openai
-gunicorn
-gevent>=22.10.2
