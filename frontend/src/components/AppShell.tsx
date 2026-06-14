@@ -11,8 +11,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
-  // Hide sidebar completely on studio pages for full-screen experience
-  const isFullScreenApp = pathname === "/video-editor" || pathname === "/3d-studio";
+  const isFullScreenApp = false;
 
   return (
     <div className="min-h-screen flex overflow-x-hidden bg-[var(--color-bento-bg)]">

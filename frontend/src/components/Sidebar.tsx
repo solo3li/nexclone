@@ -10,8 +10,6 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
 
   const links = [
     { href: "/", label: "Dashboard", icon: "fa-home" },
-    { href: "/video-editor", label: "Video Studio", icon: "fa-video" },
-    { href: "/3d-studio", label: "3D Studio", icon: "fa-cube" },
     { href: "/voice-to-text", label: "Voice AI", icon: "fa-microphone" },
     { href: "/text-to-voice", label: "Speech AI", icon: "fa-volume-up" },
     { href: "/history", label: "History", icon: "fa-history" },
