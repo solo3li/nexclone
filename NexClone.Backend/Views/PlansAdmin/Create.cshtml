@@ -50,9 +50,15 @@
                 <div class="bx--form__helper-text">Credits granted per month</div>
             </div>
             <div class="bx--form-item">
-                <label for="AllowedTools" class="bx--label">Allowed Tools (JSON Array)</label>
+                <label for="AllowedTools" class="bx--label">Allowed Tools</label>
                 <div class="bx--text-input__field-wrapper">
-                    <input id="AllowedTools" type="text" class="bx--text-input" name="AllowedTools" required value="@(Model?.AllowedTools ?? "[\"gpt\",\"text-to-voice\",\"voice-to-text\",\"bg-remover\",\"img-to-txt\"]")">
+                    <select id="AllowedTools" multiple name="SelectedTools" class="bx--text-input" style="height: auto; min-height: 120px; padding: 0.5rem;">
+                        @if(ViewBag.Tools != null) {
+                            foreach(var tool in ViewBag.Tools) {
+                                <option value="@tool.Name" style="padding: 0.5rem; border-bottom: 1px solid #eee;">@tool.Name</option>
+                            }
+                        }
+                    </select>
                 </div>
                 <div class="bx--form__helper-text">Tools included in this plan</div>
             </div>

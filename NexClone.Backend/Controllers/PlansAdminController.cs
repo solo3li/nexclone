@@ -9,10 +9,12 @@ namespace NexClone.Backend.Controllers
     public class PlansAdminController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly NexClone.Backend.Models.Legacy.LegacyDbContext _legacyContext;
 
-        public PlansAdminController(ApplicationDbContext context)
+        public PlansAdminController(ApplicationDbContext context, NexClone.Backend.Models.Legacy.LegacyDbContext legacyContext)
         {
             _context = context;
+            _legacyContext = legacyContext;
         }
 
         public async Task<IActionResult> Index()
@@ -22,22 +24,25 @@ namespace NexClone.Backend.Controllers
             return View(plans);
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             ViewData["Title"] = "Create Plan";
+            ViewBag.Tools = await _legacyContext.ToolsTools.OrderBy(t => t.Name).ToListAsync();
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Plan plan)
+        public async Task<IActionResult> Create(Plan plan, string[] SelectedTools)
         {
             if (ModelState.IsValid)
             {
+                plan.AllowedTools = System.Text.Json.JsonSerializer.Serialize(SelectedTools ?? new string[0]);
                 _context.Add(plan);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            ViewBag.Tools = await _legacyContext.ToolsTools.OrderBy(t => t.Name).ToListAsync();
             return View(plan);
         }
 
@@ -49,12 +54,13 @@ namespace NexClone.Backend.Controllers
             if (plan == null) return NotFound();
 
             ViewData["Title"] = $"Edit Plan - {plan.Name}";
+            ViewBag.Tools = await _legacyContext.ToolsTools.OrderBy(t => t.Name).ToListAsync();
             return View(plan);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Plan plan)
+        public async Task<IActionResult> Edit(int id, Plan plan, string[] SelectedTools)
         {
             if (id != plan.Id) return NotFound();
 
@@ -62,6 +68,7 @@ namespace NexClone.Backend.Controllers
             {
                 try
                 {
+                    plan.AllowedTools = System.Text.Json.JsonSerializer.Serialize(SelectedTools ?? new string[0]);
                     _context.Update(plan);
                     await _context.SaveChangesAsync();
                 }
@@ -72,6 +79,7 @@ namespace NexClone.Backend.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            ViewBag.Tools = await _legacyContext.ToolsTools.OrderBy(t => t.Name).ToListAsync();
             return View(plan);
         }
 
