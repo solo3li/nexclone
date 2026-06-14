@@ -51,8 +51,8 @@
                 <div class="bx--form__helper-text">Credits granted per month</div>
             </div>
             <div class="bx--form-item">
-                <label for="AllowedTools" class="bx--label">Allowed Tools</label>
-                <div class="bx--text-input__field-wrapper">
+                <label class="bx--label">Allowed Tools</label>
+                <div style="max-height: 200px; overflow-y: auto; border: 1px solid #e0e0e0; padding: 1rem; background: #f4f4f4;">
                     @{
                         var selectedTools = new List<string>();
                         try {
@@ -61,17 +61,15 @@
                             }
                         } catch {}
                     }
-                    <select id="AllowedTools" multiple name="SelectedTools" class="bx--text-input" style="height: auto; min-height: 120px; padding: 0.5rem;">
-                        @if(ViewBag.Tools != null) {
-                            foreach(var tool in ViewBag.Tools) {
-                                if(selectedTools.Contains(tool.Name)) {
-                                    <option value="@tool.Name" selected style="padding: 0.5rem; border-bottom: 1px solid #eee; background: #e0e0e0;">@tool.Name</option>
-                                } else {
-                                    <option value="@tool.Name" style="padding: 0.5rem; border-bottom: 1px solid #eee;">@tool.Name</option>
-                                }
-                            }
+                    @if(ViewBag.Tools != null) {
+                        foreach(var tool in ViewBag.Tools) {
+                            var isChecked = selectedTools.Contains(tool.Name) ? "checked" : "";
+                            <div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <input type="checkbox" id="tool_@tool.Id" name="SelectedTools" value="@tool.Name" class="bx--checkbox" @isChecked style="cursor: pointer;" />
+                                <label for="tool_@tool.Id" class="bx--checkbox-label" style="cursor: pointer; margin: 0; font-size: 0.875rem;">@tool.Name</label>
+                            </div>
                         }
-                    </select>
+                    }
                 </div>
                 <div class="bx--form__helper-text">Tools included in this plan</div>
             </div>
