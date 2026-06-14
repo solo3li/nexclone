@@ -74,6 +74,10 @@ builder.Services.AddHttpClient("AIGateway", client =>
 builder.Services.AddScoped<NexClone.Backend.Services.AI.ITtsService, NexClone.Backend.Services.AI.TtsService>();
 builder.Services.AddScoped<NexClone.Backend.Services.AI.ISttService, NexClone.Backend.Services.AI.SttService>();
 
+// Register Payment Service
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<NexClone.Backend.Services.Payments.IPaymentService, NexClone.Backend.Services.Payments.PaymobPaymentService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
