@@ -1,38 +1,26 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "../../store/useAuthStore";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const router = useRouter();
+  
+  // Get state and actions from Zustand
+  const { login, isLoading, error, clearError } = useAuthStore();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
+    clearError();
     
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      
-      const data = await res.json();
-      
-      if (!res.ok) {
-        throw new Error(data.message || "Invalid credentials");
-      }
-      
-      // Store token in localStorage (or HttpOnly cookie for production)
-      localStorage.setItem("token", data.token);
-      window.location.href = "/dashboard"; // Redirect on success
+      await login({ email, password });
+      router.push("/dashboard"); // Redirect on success
     } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      // Error is handled by Zustand and displayed below
     }
   };
 
@@ -84,10 +72,10 @@ export default function Login() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={isLoading}
             className="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition-all shadow-[0_0_20px_rgba(79,70,229,0.3)] disabled:opacity-50"
           >
-            {loading ? "Signing in..." : "Sign in"}
+            {isLoading ? "Signing in..." : "Sign in"}
           </button>
         </form>
 

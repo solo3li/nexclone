@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   description: "AI-powered creativity, made easy",
 };
 
+import AuthProvider from "@/components/AuthProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -23,9 +25,11 @@ export default function RootLayout({
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
       </head>
       <body className={`${nunito.className} bg-[#f0f3f8] text-[#4a5568]`}>
-        <AppShell>
-            {children}
-        </AppShell>
+        <AuthProvider>
+          <AppShell>
+              {children}
+          </AppShell>
+        </AuthProvider>
       </body>
     </html>
   );
