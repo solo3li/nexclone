@@ -39,6 +39,8 @@ namespace NexClone.Backend.Models
 
         public string ResultText { get; set; } = string.Empty;
 
+        public decimal CreditsUsed { get; set; } = 0;
+
         [ForeignKey("UserId")]
         public virtual ApplicationUser User { get; set; } = null!;
     }

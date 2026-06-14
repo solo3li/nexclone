@@ -30,5 +30,12 @@ namespace NexClone.Backend.Controllers
                 Version = "1.0.0"
             });
         }
+
+        [HttpGet("plans")]
+        public async Task<IActionResult> GetPlans()
+        {
+            var plans = await _context.Plans.OrderBy(p => p.PriceUsd).ToListAsync();
+            return Ok(plans);
+        }
     }
 }

@@ -12,6 +12,10 @@ namespace NexClone.Backend.Models
         public string? ImageUrl { get; set; }
         public bool IsActive { get; set; } = true;
         public bool IsStaff { get; set; } = false;
+        
+        // Credits Economy
+        public decimal AvailableCredits { get; set; } = 0;
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation Properties

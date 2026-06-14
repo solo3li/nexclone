@@ -20,10 +20,11 @@ namespace NexClone.Backend.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        // Limits
-        public int MaxTtsCharacters { get; set; } = 0;
-        public int MaxSttMinutes { get; set; } = 0;
-        public int MaxImagesGenerated { get; set; } = 0;
+        // Economy
+        public decimal MonthlyCredits { get; set; } = 0;
+        
+        // JSON array of allowed tool identifiers, e.g., ["gpt", "text-to-voice", "voice-to-text", "bg-remover", "img-to-txt"]
+        public string AllowedTools { get; set; } = "[]";
 
         // Navigation
         public ICollection<Subscription> Subscriptions { get; set; } = new List<Subscription>();

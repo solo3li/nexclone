@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NexClone.Backend.Models;
+using NexClone.Backend.Services;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Text;
@@ -16,11 +17,13 @@ namespace NexClone.Backend.Areas.AI.Controllers
         private readonly IConfiguration _configuration;
         private readonly ApplicationDbContext _dbContext;
         private readonly HttpClient _httpClient;
+        private readonly CreditManagerService _creditManager;
 
-        public GptController(IConfiguration configuration, ApplicationDbContext dbContext)
+        public GptController(IConfiguration configuration, ApplicationDbContext dbContext, CreditManagerService creditManager)
         {
             _configuration = configuration;
             _dbContext = dbContext;
+            _creditManager = creditManager;
             _httpClient = new HttpClient();
             // Default to empty key if not set, user can add it in appsettings later
             _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_configuration["OpenAI:ApiKey"] ?? ""}");
@@ -30,7 +33,17 @@ namespace NexClone.Backend.Areas.AI.Controllers
         public async Task<IActionResult> GenerateResponse([FromBody] GptRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Prompt))
-                return BadRequest("Prompt is required.");
+                return BadRequest(new { error = "Prompt is required." });
+
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+
+            if (!await _creditManager.IsToolAllowedForUser(userId, "gpt"))
+                return StatusCode(403, new { error = "Your current plan does not have access to this tool." });
+
+            var cost = _creditManager.CalculateCost("gpt", 1m);
+            if (!await _creditManager.HasEnoughCredits(userId, "gpt", cost))
+                return BadRequest(new { error = $"Insufficient credits. This action requires {cost} credits." });
 
             // Construct payload for OpenAI Chat Completions API
             var payload = new
@@ -59,20 +72,18 @@ namespace NexClone.Backend.Areas.AI.Controllers
                                          .GetProperty("content")
                                          .GetString();
                     
-                    var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                    if (Guid.TryParse(userIdStr, out var userId))
+                    var history = new GenerationHistory
                     {
-                        var history = new GenerationHistory
-                        {
-                            UserId = userId,
-                            Type = "gpt",
-                            Title = request.Prompt.Length > 30 ? request.Prompt.Substring(0, 30) + "..." : request.Prompt,
-                            Status = "completed",
-                            ResultText = content
-                        };
-                        _dbContext.GenerationHistories.Add(history);
-                        await _dbContext.SaveChangesAsync();
-                    }
+                        UserId = userId,
+                        Type = "gpt",
+                        Title = request.Prompt.Length > 30 ? request.Prompt.Substring(0, 30) + "..." : request.Prompt,
+                        Status = "completed",
+                        ResultText = content,
+                        CreditsUsed = cost
+                    };
+                    _dbContext.GenerationHistories.Add(history);
+                    await _creditManager.DeductCreditsAsync(userId, cost);
+                    await _dbContext.SaveChangesAsync();
 
                     return Ok(new { text = content });
                 }

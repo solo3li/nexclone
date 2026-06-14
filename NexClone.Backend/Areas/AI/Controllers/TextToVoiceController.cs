@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NexClone.Backend.Models;
+using NexClone.Backend.Services;
 using NexClone.Backend.Services.AI;
 using System;
 using System.IO;
@@ -18,12 +19,14 @@ namespace NexClone.Backend.Areas.AI.Controllers
         private readonly ITtsService _ttsService;
         private readonly ApplicationDbContext _dbContext;
         private readonly IWebHostEnvironment _env;
+        private readonly CreditManagerService _creditManager;
 
-        public TextToVoiceController(ITtsService ttsService, ApplicationDbContext dbContext, IWebHostEnvironment env)
+        public TextToVoiceController(ITtsService ttsService, ApplicationDbContext dbContext, IWebHostEnvironment env, CreditManagerService creditManager)
         {
             _ttsService = ttsService;
             _dbContext = dbContext;
             _env = env;
+            _creditManager = creditManager;
         }
 
         [HttpPost("generate")]
@@ -31,6 +34,16 @@ namespace NexClone.Backend.Areas.AI.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+
+            if (!await _creditManager.IsToolAllowedForUser(userId, "text-to-voice"))
+                return StatusCode(403, new { error = "Your current plan does not have access to this tool." });
+
+            var cost = _creditManager.CalculateCost("text-to-voice", request.Text.Length);
+            if (!await _creditManager.HasEnoughCredits(userId, "text-to-voice", cost))
+                return BadRequest(new { error = $"Insufficient credits. Generating this audio requires {cost} credits." });
 
             try
             {
@@ -52,23 +65,20 @@ namespace NexClone.Backend.Areas.AI.Controllers
                     await audioStream.CopyToAsync(fileStream);
                 }
 
-                // Get User ID
-                var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (Guid.TryParse(userIdStr, out var userId))
+                var history = new GenerationHistory
                 {
-                    var history = new GenerationHistory
-                    {
-                        UserId = userId,
-                        Type = "text-to-voice",
-                        Title = request.Text.Length > 30 ? request.Text.Substring(0, 30) + "..." : request.Text,
-                        Status = "completed",
-                        Lang = request.Language,
-                        Voice = request.VoiceName,
-                        FileUrl = $"/generations/{fileName}"
-                    };
-                    _dbContext.GenerationHistories.Add(history);
-                    await _dbContext.SaveChangesAsync();
-                }
+                    UserId = userId,
+                    Type = "text-to-voice",
+                    Title = request.Text.Length > 30 ? request.Text.Substring(0, 30) + "..." : request.Text,
+                    Status = "completed",
+                    Lang = request.Language,
+                    Voice = request.VoiceName,
+                    FileUrl = $"/generations/{fileName}",
+                    CreditsUsed = cost
+                };
+                _dbContext.GenerationHistories.Add(history);
+                await _creditManager.DeductCreditsAsync(userId, cost);
+                await _dbContext.SaveChangesAsync();
 
                 // Return the saved file so the frontend blob logic still works perfectly without modifications
                 return PhysicalFile(filePath, contentType, $"tts_output.{fileExtension}");

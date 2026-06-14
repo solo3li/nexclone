@@ -89,6 +89,9 @@ builder.Services.AddScoped<NexClone.Backend.Services.AI.ISttService, NexClone.Ba
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<NexClone.Backend.Services.Payments.IPaymentService, NexClone.Backend.Services.Payments.PaymobPaymentService>();
 
+// Register Credit Manager
+builder.Services.AddScoped<NexClone.Backend.Services.CreditManagerService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

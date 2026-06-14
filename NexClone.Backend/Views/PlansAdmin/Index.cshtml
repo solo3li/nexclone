@@ -19,9 +19,8 @@
                             <th><span class="bx--table-header-label">Duration (Days)</span></th>
                             <th><span class="bx--table-header-label">Price (USD)</span></th>
                             <th><span class="bx--table-header-label">Price (EGP)</span></th>
-                            <th><span class="bx--table-header-label">TTS Limit (Chars)</span></th>
-                            <th><span class="bx--table-header-label">STT Limit (Mins)</span></th>
-                            <th><span class="bx--table-header-label">Images Limit</span></th>
+                            <th><span class="bx--table-header-label">Monthly Credits</span></th>
+                            <th><span class="bx--table-header-label">Allowed Tools</span></th>
                             <th><span class="bx--table-header-label">Actions</span></th>
                         </tr>
                     </thead>
@@ -33,9 +32,8 @@
                                 <td>@item.DurationDays</td>
                                 <td>$@item.PriceUsd</td>
                                 <td>EGP @item.PriceEgp</td>
-                                <td>@item.MaxTtsCharacters</td>
-                                <td>@item.MaxSttMinutes</td>
-                                <td>@item.MaxImagesGenerated</td>
+                                <td>@item.MonthlyCredits</td>
+                                <td><small>@item.AllowedTools</small></td>
                                 <td>
                                     <div style="display: flex; gap: 0.5rem;">
                                         <a href="@Url.Action("Edit", new { id = item.Id })" class="bx--btn bx--btn--sm bx--btn--ghost">Edit</a>
