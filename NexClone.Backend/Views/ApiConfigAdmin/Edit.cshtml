@@ -1,0 +1,45 @@
+@model NexClone.Backend.Models.ApiConfiguration
+
+<div class="bx--grid">
+    <div class="bx--row">
+        <div class="bx--col-lg-8">
+            <form action="/ApiConfigAdmin/Edit/@Model.Id" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Id" value="@Model.Id" />
+                
+                <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+                    <label for="ProviderName" class="bx--label">Provider Name (e.g., OpenAI, Darijat, Gemini)</label>
+                    <input id="ProviderName" name="ProviderName" type="text" class="bx--text-input" value="@Model.ProviderName" required />
+                </div>
+
+                <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+                    <label for="ApiKey" class="bx--label">API Key</label>
+                    <input id="ApiKey" name="ApiKey" type="text" class="bx--text-input" value="@Model.ApiKey" required />
+                </div>
+
+                <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+                    <label for="BaseUrl" class="bx--label">Base URL (Optional)</label>
+                    <input id="BaseUrl" name="BaseUrl" type="text" class="bx--text-input" value="@Model.BaseUrl" />
+                </div>
+
+                <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+                    <div class="bx--checkbox-wrapper">
+                        <input id="IsActive" name="IsActive" type="checkbox" value="true" class="bx--checkbox" @(Model.IsActive ? "checked" : "") />
+                        <label for="IsActive" class="bx--checkbox-label">Is Active</label>
+                        <input type="hidden" name="IsActive" value="false" />
+                    </div>
+                </div>
+
+                <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+                    <label for="AdditionalSettings" class="bx--label">Additional Settings (JSON - Optional)</label>
+                    <textarea id="AdditionalSettings" name="AdditionalSettings" class="bx--text-area" rows="4">@Model.AdditionalSettings</textarea>
+                </div>
+
+                <div class="bx--form-item">
+                    <button type="submit" class="bx--btn bx--btn--primary">Update</button>
+                    <a href="/ApiConfigAdmin" class="bx--btn bx--btn--secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
