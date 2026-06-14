@@ -14,4 +14,6 @@ public partial class ToolsTool
     public DateTime CreatedAt { get; set; }
 
     public decimal CreditCost { get; set; } = 1.00m;
+
+    public bool IsActive { get; set; } = true;
 }

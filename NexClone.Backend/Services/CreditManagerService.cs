@@ -42,8 +42,12 @@ namespace NexClone.Backend.Services
 
             if (user == null) return false;
 
-            // Admin always has access
+            // Admin always has access, even for testing maintenance tools
             if (user.IsStaff) return true;
+
+            // Check if tool is active globally
+            var tool = await _legacyContext.ToolsTools.FirstOrDefaultAsync(t => t.Name == toolId);
+            if (tool != null && !tool.IsActive) return false;
 
             var activeSubscription = user.Subscriptions
                 .FirstOrDefault(s => s.Status == "Active" && s.EndDate > DateTime.UtcNow);

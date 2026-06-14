@@ -246,6 +246,8 @@ public partial class LegacyDbContext : DbContext
             entity.Property(e => e.CreditCost)
                 .HasPrecision(10, 2)
                 .HasColumnName("credit_cost");
+            entity.Property(e => e.IsActive)
+                .HasColumnName("is_active");
         });
 
         modelBuilder.Entity<UserAuthUser>(entity =>

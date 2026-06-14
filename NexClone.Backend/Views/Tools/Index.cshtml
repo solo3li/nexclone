@@ -17,6 +17,7 @@
                 <th><span class="bx--table-header-label">Tool Name</span></th>
                 <th><span class="bx--table-header-label">Description</span></th>
                 <th><span class="bx--table-header-label">Credit Cost</span></th>
+                <th><span class="bx--table-header-label">Status</span></th>
                 <th><span class="bx--table-header-label">Created At</span></th>
                 <th><span class="bx--table-header-label">Actions</span></th>
             </tr>
@@ -29,6 +30,16 @@
                     <td><strong>@item.Name</strong></td>
                     <td>@item.Description</td>
                     <td><strong>@item.CreditCost</strong></td>
+                    <td>
+                        @if (item.IsActive)
+                        {
+                            <span style="color: green; font-weight: bold;">Active</span>
+                        }
+                        else
+                        {
+                            <span style="color: orange; font-weight: bold;">Under Maintenance</span>
+                        }
+                    </td>
                     <td>@item.CreatedAt.ToString("MMM dd, yyyy")</td>
                     <td>
                         <a asp-action="Edit" asp-route-id="@item.Id" class="bx--btn bx--btn--primary bx--btn--sm" style="padding: 5px 10px; font-size: 12px; height: auto; min-height: unset; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; margin-right: 5px;">

@@ -37,6 +37,14 @@
                 </div>
                 <div class="bx--form__helper-text">How many credits this tool consumes per usage unit (e.g., per generation, per 100KB).</div>
             </div>
+
+            <div class="bx--form-item">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem;">
+                    <input type="checkbox" id="IsActive" class="bx--checkbox" asp-for="IsActive" style="cursor: pointer;" />
+                    <label for="IsActive" class="bx--checkbox-label" style="cursor: pointer; margin: 0; font-weight: bold;">Is Tool Active?</label>
+                </div>
+                <div class="bx--form__helper-text">Uncheck this to place the tool under maintenance.</div>
+            </div>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 1rem;">
