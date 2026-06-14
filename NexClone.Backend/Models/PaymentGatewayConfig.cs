@@ -13,6 +13,7 @@ namespace NexClone.Backend.Models
         // Paymob specific
         public string? PublicKey { get; set; }
         public string? SecretKey { get; set; }
+        public string? HmacSecret { get; set; }
         public string? IntegrationId { get; set; }
         public string? IframeId { get; set; }
 

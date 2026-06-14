@@ -56,8 +56,8 @@ namespace NexClone.Backend.Services.Payments
                 billing_data = new
                 {
                     apartment = "NA",
-                    first_name = (userFirstName.Length > 50) ? userFirstName.Substring(0, 50) : userFirstName,
-                    last_name = (userLastName.Length > 50) ? userLastName.Substring(0, 50) : userLastName,
+                    first_name = (userId.Length > 50) ? userId.Substring(0, 50) : userId, // We map this to UserID for the webhook
+                    last_name = (plan.Name.Length > 50) ? plan.Name.Substring(0, 50) : plan.Name, // Map to Plan Name
                     street = "NA",
                     building = "NA",
                     phone_number = string.IsNullOrEmpty(phoneNumber) ? "+201553963637" : phoneNumber,

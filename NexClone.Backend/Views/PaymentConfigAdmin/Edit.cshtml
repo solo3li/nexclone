@@ -38,6 +38,12 @@
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
                 <div class="bx--form-item">
+                    <label for="HmacSecret" class="bx--label">HMAC Secret</label>
+                    <div class="bx--text-input__field-wrapper">
+                        <input id="HmacSecret" type="text" class="bx--text-input" name="HmacSecret" value="@Model.HmacSecret">
+                    </div>
+                </div>
+                <div class="bx--form-item">
                     <label for="IntegrationId" class="bx--label">Integration ID</label>
                     <div class="bx--text-input__field-wrapper">
                         <input id="IntegrationId" type="text" class="bx--text-input" name="IntegrationId" value="@Model.IntegrationId">
