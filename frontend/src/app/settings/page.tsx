@@ -1,9 +1,55 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuthStore } from "../../store/useAuthStore";
 
 export default function Settings() {
+  const { user, updateProfile, changePassword } = useAuthStore();
   const [activeTab, setActiveTab] = useState("profile");
+  
+  // Profile State
+  const [fullName, setFullName] = useState("");
+  const [country, setCountry] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Password State
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+
+  useEffect(() => {
+    if (user) {
+      setFullName(user.fullName || "");
+      setCountry(user.country || "");
+    }
+  }, [user]);
+
+  const handleProfileUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      await updateProfile({ fullName, country });
+      alert("Profile updated successfully!");
+    } catch (err: any) {
+      alert("Failed to update profile.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      await changePassword({ currentPassword, newPassword });
+      alert("Password changed successfully!");
+      setCurrentPassword("");
+      setNewPassword("");
+    } catch (err: any) {
+      alert(err.message || "Failed to change password. Please check your current password.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto pb-20 animate-fade-in">
@@ -51,25 +97,78 @@ export default function Settings() {
               
               <div className="flex items-center space-x-6 mb-8">
                 <div className="w-20 h-20 rounded-full bg-[#1a1a1a] overflow-hidden border-2 border-[var(--color-bento-border)]">
-                  <img src="/static/img/avatar.jpg" alt="Profile" className="w-full h-full object-cover" />
+                  <img src={user?.imageUrl || "/static/img/avatar.jpg"} alt="Profile" className="w-full h-full object-cover" />
                 </div>
                 <button className="bento-btn px-4 py-2 text-sm font-bold">Change Avatar</button>
               </div>
 
-              <div className="space-y-4 max-w-md">
+              <form onSubmit={handleProfileUpdate} className="space-y-4 max-w-md">
                 <div>
                   <label className="block text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider mb-2">Full Name</label>
-                  <input type="text" className="bento-input w-full" defaultValue="Sarah J." />
+                  <input 
+                    type="text" 
+                    className="bento-input w-full" 
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                  />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider mb-2">Email Address</label>
-                  <input type="email" className="bento-input w-full" defaultValue="sarah@example.com" />
+                  <input 
+                    type="email" 
+                    className="bento-input w-full opacity-50 cursor-not-allowed" 
+                    value={user?.email || ""} 
+                    disabled 
+                  />
+                  <p className="text-[10px] text-[var(--color-bento-muted)] mt-1">Email cannot be changed.</p>
                 </div>
-              </div>
+                <div>
+                  <label className="block text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider mb-2">Country</label>
+                  <input 
+                    type="text" 
+                    className="bento-input w-full" 
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
+                  />
+                </div>
 
-              <div className="mt-8 pt-6 border-t border-[var(--color-bento-border)]">
-                <button className="bento-btn-primary px-6 py-2 text-sm">Save Changes</button>
-              </div>
+                <div className="mt-8 pt-6 border-t border-[var(--color-bento-border)]">
+                  <button type="submit" disabled={isLoading} className="bento-btn-primary px-6 py-2 text-sm disabled:opacity-50">
+                    {isLoading ? "Saving..." : "Save Changes"}
+                  </button>
+                </div>
+              </form>
+
+              {/* Password Change Section */}
+              <h2 className="text-xl font-bold text-white mb-6 border-b border-[var(--color-bento-border)] pb-4 mt-12">Security</h2>
+              <form onSubmit={handlePasswordChange} className="space-y-4 max-w-md">
+                <div>
+                  <label className="block text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider mb-2">Current Password</label>
+                  <input 
+                    type="password" 
+                    className="bento-input w-full" 
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider mb-2">New Password</label>
+                  <input 
+                    type="password" 
+                    className="bento-input w-full" 
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                    minLength={6}
+                  />
+                </div>
+                <div className="pt-2">
+                  <button type="submit" disabled={isLoading} className="bento-btn px-6 py-2 text-sm text-red-400 hover:bg-red-950/30 hover:border-red-500/50 transition-colors disabled:opacity-50">
+                    {isLoading ? "Updating..." : "Change Password"}
+                  </button>
+                </div>
+              </form>
             </div>
           )}
 

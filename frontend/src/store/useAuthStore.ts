@@ -4,7 +4,9 @@ import api from '../lib/axios';
 interface User {
   email: string;
   isVerified: boolean;
-  // Add other user properties as needed
+  fullName?: string;
+  country?: string;
+  imageUrl?: string;
 }
 
 interface AuthState {
@@ -18,6 +20,8 @@ interface AuthState {
   register: (userData: any) => Promise<void>;
   logout: () => Promise<void>;
   fetchUser: () => Promise<void>;
+  updateProfile: (data: { fullName?: string; country?: string }) => Promise<void>;
+  changePassword: (data: any) => Promise<void>;
   clearError: () => void;
 }
 
@@ -50,10 +54,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await api.post('/Auth/login', credentials);
-      const { email, isVerified } = response.data;
-      
       set({
-        user: { email, isVerified },
+        user: response.data,
         isAuthenticated: true,
         isLoading: false,
       });
@@ -70,10 +72,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await api.post('/Auth/register', userData);
-      const { email, isVerified } = response.data;
-      
       set({
-        user: { email, isVerified },
+        user: response.data,
         isAuthenticated: true,
         isLoading: false,
       });
@@ -101,6 +101,37 @@ export const useAuthStore = create<AuthState>((set) => ({
       isAuthenticated: false,
       error: null,
     });
+  },
+
+  updateProfile: async (data) => {
+    set({ isLoading: true, error: null });
+    try {
+      await api.put('/Account/profile', data);
+      set((state) => ({
+        user: state.user ? { ...state.user, ...data } : null,
+        isLoading: false
+      }));
+    } catch (error: any) {
+      set({
+        isLoading: false,
+        error: error.response?.data?.message || 'Failed to update profile.',
+      });
+      throw error;
+    }
+  },
+
+  changePassword: async (data) => {
+    set({ isLoading: true, error: null });
+    try {
+      await api.post('/Account/change-password', data);
+      set({ isLoading: false });
+    } catch (error: any) {
+      set({
+        isLoading: false,
+        error: error.response?.data?.message || 'Failed to change password.',
+      });
+      throw error;
+    }
   },
 
   clearError: () => set({ error: null }),

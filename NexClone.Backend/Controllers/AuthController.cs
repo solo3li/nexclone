@@ -35,6 +35,7 @@ namespace NexClone.Backend.Controllers
             {
                 UserName = request.Email,
                 Email = request.Email,
+                FullName = request.FullName,
                 Country = request.Country,
                 CreatedAt = DateTime.UtcNow
             };
@@ -144,6 +145,9 @@ namespace NexClone.Backend.Controllers
             return Ok(new
             {
                 Email = user.Email,
+                FullName = user.FullName,
+                Country = user.Country,
+                ImageUrl = user.ImageUrl,
                 IsVerified = user.IsVerified
             });
         }

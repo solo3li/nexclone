@@ -6,6 +6,7 @@ namespace NexClone.Backend.Models
 {
     public class ApplicationUser : IdentityUser<Guid>
     {
+        public string FullName { get; set; } = string.Empty;
         public string Country { get; set; } = string.Empty;
         public bool IsVerified { get; set; } = false;
         public string? ImageUrl { get; set; }
