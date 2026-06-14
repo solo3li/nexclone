@@ -17,6 +17,7 @@ namespace NexClone.Backend.Models
         public DbSet<Plan> Plans { get; set; } = null!;
         public DbSet<Subscription> Subscriptions { get; set; } = null!;
         public DbSet<Payment> Payments { get; set; } = null!;
+        public DbSet<ApiConfiguration> ApiConfigurations { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

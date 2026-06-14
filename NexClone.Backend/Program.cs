@@ -71,6 +71,8 @@ builder.Services.AddHttpClient("AIGateway", client =>
     client.BaseAddress = new Uri("http://localhost:5000"); // Example port for Flask apps
 });
 
+builder.Services.AddScoped<NexClone.Backend.Services.AI.ITtsService, NexClone.Backend.Services.AI.TtsService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
