@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useAuthStore } from "../store/useAuthStore";
 
 export default function Navbar() {
+  const { user, isAuthenticated, logout } = useAuthStore();
+
   return (
     <nav className="navbar">
       <div className="nav-container">
@@ -28,31 +31,7 @@ export default function Navbar() {
                 <i className="fas fa-volume-up"></i>
                 Text to Speech
               </Link>
-              <span className="dropdown-item maintenance-item">
-                <i className="fas fa-plane"></i>
-                Make My Trip
-                <span className="maintenance-tag">
-                  <i className="fas fa-tools"></i> Maintenance
-                </span>
-              </span>
-              <span className="dropdown-item maintenance-item">
-                <i className="fas fa-video"></i>
-                Video Caption
-                <span className="maintenance-tag">
-                  <i className="fas fa-tools"></i> Maintenance
-                </span>
-              </span>
-              <span className="dropdown-item maintenance-item">
-                <i className="fas fa-film"></i>
-                Video BG Remover
-                <span className="maintenance-tag">
-                  <i className="fas fa-tools"></i> Maintenance
-                </span>
-              </span>
             </div>
-          </div>
-          <div className="nav-item">
-            <Link href="/#fourth">Help</Link>
           </div>
           <div className="nav-item">
             <Link href="/history">History</Link>
@@ -65,18 +44,27 @@ export default function Navbar() {
           </div>
         </div>
 
-        <div className="profile-section">
-          <span className="username">Guest</span>
-          <img src="/static/img/avatar.jpg" alt="Profile Image" className="profile-img" />
-          <div className="lang-switcher">
-            <button className="lang-btn" title="Switch Language" aria-label="Switch Language">
-              <span className="lang-globe">
-                <i className="fas fa-globe"></i>
-              </span>
-              <span className="lang-current">EN</span>
-              <i className="fas fa-chevron-down lang-arrow"></i>
-            </button>
-          </div>
+        <div className="profile-section" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          {isAuthenticated ? (
+            <>
+              <span className="username font-bold text-sm truncate max-w-[150px]">{user?.email}</span>
+              <img src="/static/img/avatar.jpg" alt="Profile Image" className="profile-img" style={{ width: '40px', borderRadius: '50%' }} />
+              <button 
+                onClick={() => {
+                  logout();
+                  window.location.href = "/login";
+                }}
+                className="bento-btn px-4 py-2 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all font-bold text-xs"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className="bento-btn px-4 py-2 rounded-xl font-bold text-sm">Log in</Link>
+              <Link href="/register" className="bento-btn-primary px-4 py-2 rounded-xl font-bold text-sm">Sign up</Link>
+            </>
+          )}
         </div>
       </div>
     </nav>

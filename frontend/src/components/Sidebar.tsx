@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuthStore } from "../store/useAuthStore";
 
 export default function Sidebar({ isOpen }: { isOpen: boolean }) {
   const pathname = usePathname();
+  const { user, isAuthenticated, logout } = useAuthStore();
 
-    const links = [
+  const links = [
     { href: "/", label: "Dashboard", icon: "fa-home" },
     { href: "/video-editor", label: "Video Studio", icon: "fa-video" },
     { href: "/3d-studio", label: "3D Studio", icon: "fa-cube" },
@@ -37,8 +39,10 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
             <div className="w-10 h-10 rounded-full overflow-hidden bg-[#262626]">
               <img src="/static/img/avatar.jpg" alt="Profile" className="w-full h-full object-cover opacity-80" />
             </div>
-            <div className="flex-1">
-              <h3 className="font-bold text-sm text-white leading-tight">Sarah J.</h3>
+            <div className="flex-1 overflow-hidden">
+              <h3 className="font-bold text-sm text-white leading-tight truncate">
+                {isAuthenticated ? user?.email : "Guest"}
+              </h3>
               <span className="text-[10px] text-[var(--color-bento-muted)] uppercase tracking-wider font-bold">Pro Plan</span>
             </div>
           </div>
@@ -69,14 +73,18 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
           <Link href="/#pricing" className="bento-btn-primary block w-full text-center py-3 text-sm flex items-center justify-center">
             <i className="fas fa-bolt mr-2 text-yellow-500"></i> Upgrade
           </Link>
-          
-          <button className="bento-btn w-full px-4 py-2 text-xs flex items-center justify-between text-[var(--color-bento-muted)] hover:text-white">
-            <div className="flex items-center space-x-2">
-              <i className="fas fa-globe"></i>
-              <span>English</span>
-            </div>
-            <i className="fas fa-chevron-down text-[10px]"></i>
-          </button>
+
+          {isAuthenticated && (
+            <button 
+              onClick={() => {
+                logout();
+                window.location.href = "/login";
+              }}
+              className="bento-btn w-full px-4 py-2 text-xs flex items-center justify-center text-red-400 hover:text-red-300 hover:bg-red-950/30"
+            >
+              <i className="fas fa-sign-out-alt mr-2"></i> Sign Out
+            </button>
+          )}
         </div>
       </div>
     </div>
