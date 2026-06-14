@@ -1,61 +1,73 @@
 @model NexClone.Backend.Models.Plan
 
-<div class="mb-4">
-    <h2>@ViewData["Title"]</h2>
-</div>
-
-<div class="card shadow-sm">
-    <div class="card-body">
-        <form action="@Url.Action("Create")" method="post">
-            @Html.AntiForgeryToken()
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="Name" class="form-label">Plan Name</label>
-                    <input type="text" class="form-control" id="Name" name="Name" required value="@Model?.Name">
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="DurationDays" class="form-label">Duration (Days)</label>
-                    <input type="number" class="form-control" id="DurationDays" name="DurationDays" required min="1" value="@(Model?.DurationDays ?? 30)">
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="PriceUsd" class="form-label">Price (USD)</label>
-                    <input type="number" class="form-control" id="PriceUsd" name="PriceUsd" required min="0" step="0.01" value="@(Model?.PriceUsd ?? 0)">
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="PriceEgp" class="form-label">Price (EGP)</label>
-                    <input type="number" class="form-control" id="PriceEgp" name="PriceEgp" required min="0" step="0.01" value="@(Model?.PriceEgp ?? 0)">
-                </div>
-            </div>
-
-            <hr class="my-4">
-            <h5 class="mb-3">Usage Limits</h5>
-
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <label for="MaxTtsCharacters" class="form-label">TTS Characters</label>
-                    <input type="number" class="form-control" id="MaxTtsCharacters" name="MaxTtsCharacters" required min="0" value="@(Model?.MaxTtsCharacters ?? 0)">
-                    <div class="form-text">Maximum characters for Text-to-Speech</div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label for="MaxSttMinutes" class="form-label">STT Minutes</label>
-                    <input type="number" class="form-control" id="MaxSttMinutes" name="MaxSttMinutes" required min="0" value="@(Model?.MaxSttMinutes ?? 0)">
-                    <div class="form-text">Maximum minutes for Voice-to-Text</div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label for="MaxImagesGenerated" class="form-label">Images Generated</label>
-                    <input type="number" class="form-control" id="MaxImagesGenerated" name="MaxImagesGenerated" required min="0" value="@(Model?.MaxImagesGenerated ?? 0)">
-                    <div class="form-text">Maximum images for AI Generation</div>
-                </div>
-            </div>
-
-            <div class="d-flex justify-content-end gap-2 mt-4">
-                <a href="@Url.Action("Index")" class="btn btn-secondary">Cancel</a>
-                <button type="submit" class="btn btn-primary">Save Plan</button>
-            </div>
-        </form>
+<div class="bx--grid" style="padding-left: 0; max-width: 800px; margin-left: 0;">
+    <div class="bx--row" style="margin-bottom: 2rem;">
+        <h2 style="margin: 0; font-weight: 400; font-size: 1.5rem;">@ViewData["Title"]</h2>
     </div>
+
+    <form action="@Url.Action("Create")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0;">
+        @Html.AntiForgeryToken()
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <div class="bx--form-item">
+                <label for="Name" class="bx--label">Plan Name</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="Name" type="text" class="bx--text-input" name="Name" required value="@Model?.Name">
+                </div>
+            </div>
+            <div class="bx--form-item">
+                <label for="DurationDays" class="bx--label">Duration (Days)</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="DurationDays" type="number" class="bx--text-input" name="DurationDays" required min="1" value="@(Model?.DurationDays ?? 30)">
+                </div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+            <div class="bx--form-item">
+                <label for="PriceUsd" class="bx--label">Price (USD)</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="PriceUsd" type="number" class="bx--text-input" name="PriceUsd" required min="0" step="0.01" value="@(Model?.PriceUsd ?? 0)">
+                </div>
+            </div>
+            <div class="bx--form-item">
+                <label for="PriceEgp" class="bx--label">Price (EGP)</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="PriceEgp" type="number" class="bx--text-input" name="PriceEgp" required min="0" step="0.01" value="@(Model?.PriceEgp ?? 0)">
+                </div>
+            </div>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid #e0e0e0; margin-bottom: 2rem;">
+        <h4 style="margin-bottom: 1.5rem; font-weight: 400; font-size: 1.25rem;">Usage Limits</h4>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem;">
+            <div class="bx--form-item">
+                <label for="MaxTtsCharacters" class="bx--label">TTS Characters</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="MaxTtsCharacters" type="number" class="bx--text-input" name="MaxTtsCharacters" required min="0" value="@(Model?.MaxTtsCharacters ?? 0)">
+                </div>
+                <div class="bx--form__helper-text">Maximum characters for Text-to-Speech</div>
+            </div>
+            <div class="bx--form-item">
+                <label for="MaxSttMinutes" class="bx--label">STT Minutes</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="MaxSttMinutes" type="number" class="bx--text-input" name="MaxSttMinutes" required min="0" value="@(Model?.MaxSttMinutes ?? 0)">
+                </div>
+                <div class="bx--form__helper-text">Maximum minutes for Voice-to-Text</div>
+            </div>
+            <div class="bx--form-item">
+                <label for="MaxImagesGenerated" class="bx--label">Images Generated</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="MaxImagesGenerated" type="number" class="bx--text-input" name="MaxImagesGenerated" required min="0" value="@(Model?.MaxImagesGenerated ?? 0)">
+                </div>
+                <div class="bx--form__helper-text">Maximum images for AI Generation</div>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+            <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">Cancel</a>
+            <button type="submit" class="bx--btn bx--btn--primary">Save Plan</button>
+        </div>
+    </form>
 </div>
