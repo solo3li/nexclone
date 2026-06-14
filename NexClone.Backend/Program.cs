@@ -62,6 +62,17 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidAudience = builder.Configuration["Jwt:Audience"]
     };
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            if (context.Request.Cookies.ContainsKey("jwt"))
+            {
+                context.Token = context.Request.Cookies["jwt"];
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 
 // Setup HttpClient for AI Microservices

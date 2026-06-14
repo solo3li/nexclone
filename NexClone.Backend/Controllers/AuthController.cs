@@ -50,10 +50,10 @@ namespace NexClone.Backend.Controllers
             }
 
             var token = GenerateJwtToken(user);
+            SetTokenCookie(token);
 
             return Ok(new AuthResponse
             {
-                Token = token,
                 Email = user.Email,
                 IsVerified = user.IsVerified
             });
@@ -70,10 +70,10 @@ namespace NexClone.Backend.Controllers
                 return Unauthorized(new { Message = "Invalid email or password." });
 
             var token = GenerateJwtToken(user);
+            SetTokenCookie(token);
 
             return Ok(new AuthResponse
             {
-                Token = token,
                 Email = user.Email!,
                 IsVerified = user.IsVerified
             });
@@ -103,6 +103,49 @@ namespace NexClone.Backend.Controllers
                 signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private void SetTokenCookie(string token)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddDays(7)
+            };
+            Response.Cookies.Append("jwt", token, cookieOptions);
+        }
+
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            Response.Cookies.Delete("jwt", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None
+            });
+            return Ok(new { Message = "Logged out" });
+        }
+
+        [HttpGet("me")]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            if (!User.Identity?.IsAuthenticated ?? true)
+                return Unauthorized();
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return Unauthorized();
+
+            return Ok(new
+            {
+                Email = user.Email,
+                IsVerified = user.IsVerified
+            });
         }
     }
 }
