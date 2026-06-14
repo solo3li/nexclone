@@ -29,7 +29,7 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
             <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.2)]">
                <img src="/static/home/img/logo.png" alt="Logo" className="w-6 h-6 object-contain" />
             </div>
-            <span className="font-extrabold tracking-tight text-xl text-white">NexBento</span>
+            <span className="font-extrabold tracking-tight text-xl text-white">NexMedia AI</span>
           </div>
 
           {/* User Profile Mini Card */}

@@ -29,7 +29,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <div className="w-8 h-8 mr-2">
                 <img src="/static/home/img/logo.png" alt="Logo" className="w-full h-full object-contain filter invert" />
               </div>
-              NexBento
+              NexMedia AI
             </Link>
             <button 
               className="bento-btn w-10 h-10 flex items-center justify-center text-white"

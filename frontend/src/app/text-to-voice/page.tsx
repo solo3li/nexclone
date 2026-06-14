@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useAiStore } from "../../store/useAiStore";
+import { useAuthStore } from "../../store/useAuthStore";
 
 export default function TextToVoice() {
   const [text, setText] = useState("");
@@ -10,9 +12,16 @@ export default function TextToVoice() {
   const [styleInstruction, setStyleInstruction] = useState("Neutral");
 
   const { isGeneratingAudio, audioUrl, error, generateAudio, clearAudio } = useAiStore();
+  const { isAuthenticated } = useAuthStore();
+  const router = useRouter();
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const handleGenerate = async () => {
+    if (!isAuthenticated) {
+      alert("You must be logged in to use this tool.");
+      router.push("/login");
+      return;
+    }
     clearAudio();
     await generateAudio(text, language, voiceName, styleInstruction);
   };

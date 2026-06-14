@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAiStore } from "../../../../store/useAiStore";
+import { useAuthStore } from "../../../../store/useAuthStore";
 
 export default function GPTAssistant() {
   const [messages, setMessages] = useState([
@@ -10,9 +12,16 @@ export default function GPTAssistant() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const { chatWithGpt } = useAiStore();
+  const { isAuthenticated } = useAuthStore();
+  const router = useRouter();
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAuthenticated) {
+      alert("You must be logged in to use this tool.");
+      router.push("/login");
+      return;
+    }
     if (!input.trim()) return;
 
     const userMsg = input.trim();

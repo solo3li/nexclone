@@ -1,13 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAiStore } from "../../../../store/useAiStore";
+import { useAuthStore } from "../../../../store/useAuthStore";
 
 export default function ImageToText() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [resultText, setResultText] = useState("");
   const { extractText } = useAiStore();
+  const { isAuthenticated } = useAuthStore();
+  const router = useRouter();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -16,6 +20,11 @@ export default function ImageToText() {
   };
 
   const handleUpload = async () => {
+    if (!isAuthenticated) {
+      alert("You must be logged in to use this tool.");
+      router.push("/login");
+      return;
+    }
     if (!file) return;
     setLoading(true);
     

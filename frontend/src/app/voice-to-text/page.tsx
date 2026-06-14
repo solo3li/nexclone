@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { useAiStore } from "../../store/useAiStore";
+import { useAuthStore } from "../../store/useAuthStore";
 
 export default function VoiceToText() {
   const [isRecording, setIsRecording] = useState(false);
@@ -10,8 +12,15 @@ export default function VoiceToText() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const { isTranscribing, transcriptionText, error, transcribeAudio, clearError } = useAiStore();
+  const { isAuthenticated } = useAuthStore();
+  const router = useRouter();
 
   const startRecording = () => {
+    if (!isAuthenticated) {
+      alert("You must be logged in to use this tool.");
+      router.push("/login");
+      return;
+    }
     setIsRecording(true);
     setRecordingTime(0);
     timerRef.current = setInterval(() => {
@@ -34,6 +43,11 @@ export default function VoiceToText() {
   };
 
   const handleTranscribe = async () => {
+    if (!isAuthenticated) {
+      alert("You must be logged in to use this tool.");
+      router.push("/login");
+      return;
+    }
     if (!file) return;
     clearError();
     await transcribeAudio(file);
