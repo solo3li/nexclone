@@ -69,6 +69,22 @@
         .sidebar-nav {
             padding: 1.5rem 0;
             flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Custom Scrollbar for Sidebar */
+        .sidebar-nav::-webkit-scrollbar {
+            width: 6px;
+        }
+        .sidebar-nav::-webkit-scrollbar-track {
+            background: var(--sidebar-bg);
+        }
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background: #393939;
+            border-radius: 4px;
+        }
+        .sidebar-nav::-webkit-scrollbar-thumb:hover {
+            background: #525252;
         }
 
         .sidebar-menu {
