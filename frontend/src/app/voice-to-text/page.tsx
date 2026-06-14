@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useAiStore } from "../../store/useAiStore";
 
 export default function VoiceToText() {
   const [isRecording, setIsRecording] = useState(false);
@@ -8,12 +9,17 @@ export default function VoiceToText() {
   const [file, setFile] = useState<File | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  const { isTranscribing, transcriptionText, error, transcribeAudio, clearError } = useAiStore();
+
   const startRecording = () => {
     setIsRecording(true);
     setRecordingTime(0);
     timerRef.current = setInterval(() => {
       setRecordingTime((prev) => prev + 1);
     }, 1000);
+    // Note: Live recording logic to capture microphone data is omitted for brevity.
+    // In a full implementation, you would capture audio blobs via MediaRecorder, 
+    // convert them to a File object, and set it to the `file` state on stop.
   };
 
   const stopRecording = () => {
@@ -25,6 +31,12 @@ export default function VoiceToText() {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
     }
+  };
+
+  const handleTranscribe = async () => {
+    if (!file) return;
+    clearError();
+    await transcribeAudio(file);
   };
 
   const formatTime = (seconds: number) => {
@@ -40,6 +52,12 @@ export default function VoiceToText() {
         <h1 className="text-3xl font-extrabold text-white tracking-tight">Voice to Text</h1>
         <p className="text-[var(--color-bento-muted)] mt-2">Transcribe audio into highly accurate text using advanced AI.</p>
       </div>
+
+      {error && (
+        <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+          {error}
+        </div>
+      )}
 
       <div className="bento-grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 mb-4">
         
@@ -132,11 +150,45 @@ export default function VoiceToText() {
         </div>
 
         <div className="mt-8 flex justify-end">
-          <button className="bento-btn-accent px-8 py-3 text-sm flex items-center">
-            <i className="fas fa-magic mr-2"></i> Start Transcription
+          <button 
+            onClick={handleTranscribe}
+            disabled={!file || isTranscribing}
+            className={`px-8 py-3 text-sm flex items-center rounded-xl font-bold transition-all
+              ${!file 
+                ? 'bg-[#1a1a1a] text-[#52525b] cursor-not-allowed border border-[var(--color-bento-border)]' 
+                : 'bento-btn-accent shadow-[0_0_15px_rgba(59,130,246,0.3)]'
+              }
+            `}
+          >
+            {isTranscribing ? (
+              <><i className="fas fa-spinner fa-spin mr-2"></i> Transcribing...</>
+            ) : (
+              <><i className="fas fa-magic mr-2"></i> Start Transcription</>
+            )}
           </button>
         </div>
       </div>
+
+      {/* Transcription Result */}
+      {transcriptionText && (
+        <div className="mt-8 bento-card p-8 border border-green-500/30 bg-green-500/5 animate-fade-in">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-bold text-white flex items-center">
+              <i className="fas fa-check-circle text-green-400 mr-2"></i> Result
+            </h3>
+            <button 
+              onClick={() => navigator.clipboard.writeText(transcriptionText)}
+              className="text-[var(--color-bento-muted)] hover:text-white"
+              title="Copy to clipboard"
+            >
+              <i className="far fa-copy"></i>
+            </button>
+          </div>
+          <div className="p-4 bg-[#0a0a0a] rounded-xl border border-[var(--color-bento-border)] text-[var(--color-bento-text)] whitespace-pre-wrap leading-relaxed">
+            {transcriptionText}
+          </div>
+        </div>
+      )}
 
     </div>
   );
