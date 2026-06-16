@@ -20,13 +20,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       {!isFullScreenApp && <Sidebar isOpen={isSidebarOpen} />}
       
       {/* Main Content Area */}
-      <div className={`flex-1 transition-all duration-300 flex flex-col w-full min-h-screen ${!isFullScreenApp ? 'md:ml-64' : ''}`}>
+      <div className={`flex-1 transition-all duration-300 flex flex-col w-full min-h-screen ${!isFullScreenApp ? 'md:mr-64' : ''}`}>
         
         {/* Mobile Header */}
         {!isFullScreenApp && (
           <div className="md:hidden flex items-center justify-between p-4 border-b border-[var(--color-bento-border)] bg-[var(--color-bento-bg)]">
             <Link href="/" className="font-extrabold text-xl text-white tracking-tight flex items-center">
-              <div className="w-8 h-8 mr-2">
+              <div className="w-8 h-8 ml-2">
                 <img src="/static/home/img/logo.png" alt="Logo" className="w-full h-full object-contain filter invert" />
               </div>
               NexMedia AI
