@@ -19,8 +19,9 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
 
   return (
     <div 
-      className={`fixed top-0 right-0 h-screen w-64 border-l border-[var(--color-bento-border)] bg-[var(--color-bento-bg)] transition-transform duration-300 z-50
+      className={`fixed top-0 h-screen w-64 border-l border-[var(--color-bento-border)] bg-[var(--color-bento-bg)] transition-transform duration-300 z-50
         ${isOpen ? "translate-x-0" : "translate-x-full"} md:translate-x-0`}
+      style={{ right: 0, left: 'auto' }}
     >
       <div className="w-full h-full p-6 flex flex-col">
         
