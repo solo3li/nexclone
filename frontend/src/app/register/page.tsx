@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "../../store/useAuthStore";
 
 export default function Register() {
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
@@ -17,7 +18,7 @@ export default function Register() {
     clearError();
     
     try {
-      await register({ email, password, country: "Unknown" });
+      await register({ fullName, email, password, country: "Unknown" });
       router.push("/dashboard");
     } catch (err: any) {
       // Error is handled by Zustand and displayed below
@@ -53,6 +54,18 @@ export default function Register() {
           )}
 
           <form onSubmit={handleRegister} className="space-y-5">
+            <div>
+              <label className="block text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider mb-2">Full Name</label>
+              <input
+                type="text"
+                required
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="bento-input w-full"
+                placeholder="John Doe"
+              />
+            </div>
+
             <div>
               <label className="block text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider mb-2">Email Address</label>
               <input
