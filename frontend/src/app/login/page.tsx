@@ -23,7 +23,7 @@ export default function Login() {
       // Error is handled by Zustand and displayed below
     }
   };
-
+  return (
     <main className="min-h-screen bg-[var(--color-bento-bg)] flex flex-col items-center justify-center p-6 selection:bg-blue-500/30 relative">
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-600/5 blur-[120px]" />
@@ -94,4 +94,5 @@ export default function Login() {
         </div>
       </div>
     </main>
+  );
 }
