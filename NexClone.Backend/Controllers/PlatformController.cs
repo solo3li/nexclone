@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NexClone.Backend.Models;
+using NexClone.Backend.Models.Legacy;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace NexClone.Backend.Controllers
 {
@@ -10,10 +12,12 @@ namespace NexClone.Backend.Controllers
     public class PlatformController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly LegacyDbContext _legacyContext;
 
-        public PlatformController(ApplicationDbContext context)
+        public PlatformController(ApplicationDbContext context, LegacyDbContext legacyContext)
         {
             _context = context;
+            _legacyContext = legacyContext;
         }
 
         [HttpGet("stats")]
@@ -36,6 +40,26 @@ namespace NexClone.Backend.Controllers
         {
             var plans = await _context.Plans.OrderBy(p => p.PriceUsd).ToListAsync();
             return Ok(plans);
+        }
+
+        [HttpGet("voices")]
+        public async Task<IActionResult> GetVoices()
+        {
+            var voices = await _legacyContext.TextToVoiceDarijatvoices
+                .Where(v => v.IsActive)
+                .OrderBy(v => v.Order)
+                .Select(v => new {
+                    v.Id,
+                    v.Name,
+                    v.VoiceName,
+                    v.Accent,
+                    v.Gender,
+                    v.IsPremium,
+                    v.DemoAudio
+                })
+                .ToListAsync();
+                
+            return Ok(voices);
         }
     }
 }

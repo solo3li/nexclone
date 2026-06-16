@@ -4,17 +4,48 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAiStore } from "../../store/useAiStore";
 import { useAuthStore } from "../../store/useAuthStore";
+import api from "../../lib/axios";
+
+interface Voice {
+  id: number;
+  name: string;
+  voiceName: string;
+  accent: string;
+  gender: string;
+  isPremium: boolean;
+  demoAudio: string | null;
+}
 
 export default function TextToVoice() {
   const [text, setText] = useState("");
-  const [language, setLanguage] = useState("English (US)");
-  const [voiceName, setVoiceName] = useState("Aurora");
+  const [language, setLanguage] = useState("Arabic");
+  const [voiceName, setVoiceName] = useState("");
   const [styleInstruction, setStyleInstruction] = useState("Neutral");
+
+  const [voices, setVoices] = useState<Voice[]>([]);
+  const [loadingVoices, setLoadingVoices] = useState(true);
 
   const { isGeneratingAudio, audioUrl, error, generateAudio, clearAudio } = useAiStore();
   const { isAuthenticated } = useAuthStore();
   const router = useRouter();
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const fetchVoices = async () => {
+      try {
+        const res = await api.get('/platform/voices');
+        setVoices(res.data);
+        if (res.data.length > 0) {
+          setVoiceName(res.data[0].voiceName);
+        }
+      } catch (err) {
+        console.error("Failed to load voices:", err);
+      } finally {
+        setLoadingVoices(false);
+      }
+    };
+    fetchVoices();
+  }, []);
 
   const handleGenerate = async () => {
     if (!isAuthenticated) {
@@ -78,14 +109,42 @@ export default function TextToVoice() {
                 value={voiceName}
                 onChange={(e) => setVoiceName(e.target.value)}
                 className="bento-input w-full appearance-none text-sm"
+                disabled={loadingVoices}
               >
-                <option value="Aurora">Aurora (Female, Calm)</option>
-                <option value="Atlas">Atlas (Male, Deep)</option>
-                <option value="Nova">Nova (Female, Energetic)</option>
-                <option value="Orion">Orion (Male, Professional)</option>
+                {loadingVoices ? (
+                  <option>Loading voices...</option>
+                ) : (
+                  voices.map(v => (
+                    <option key={v.id} value={v.voiceName}>
+                      {v.name} ({v.gender}, {v.accent}) {v.isPremium ? "★ PRO" : ""}
+                    </option>
+                  ))
+                )}
+                {voices.length === 0 && !loadingVoices && (
+                  <>
+                    <option value="Aurora">Aurora (Female, Calm)</option>
+                    <option value="Atlas">Atlas (Male, Deep)</option>
+                  </>
+                )}
               </select>
               <i className="fas fa-chevron-down absolute right-4 top-4 text-[var(--color-bento-muted)] pointer-events-none text-xs"></i>
             </div>
+            
+            {/* Play Demo Button if available */}
+            {voices.find(v => v.voiceName === voiceName)?.demoAudio && (
+               <button 
+                 className="mt-2 text-xs text-blue-400 hover:text-blue-300 flex items-center transition-colors"
+                 onClick={() => {
+                   const demoAudioUrl = voices.find(v => v.voiceName === voiceName)?.demoAudio;
+                   if (demoAudioUrl) {
+                     const audio = new Audio(demoAudioUrl);
+                     audio.play().catch(e => console.error("Failed to play demo", e));
+                   }
+                 }}
+               >
+                 <i className="fas fa-play-circle mr-1"></i> Listen to demo
+               </button>
+            )}
           </div>
           
           <div className="space-y-2">
