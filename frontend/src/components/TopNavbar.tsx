@@ -178,6 +178,9 @@ export default function TopNavbar() {
               )}
             </div>
 
+            {isAuthenticated && (
+              <NavLink href="/dashboard" label={isAr ? "لوحة التحكم" : "Dashboard"} active={pathname === "/dashboard"} />
+            )}
             <NavLink href="/pricing"  label={isAr ? "الخطط"     : "Plans"}    active={pathname === "/pricing"} />
             <NavLink href="/history"  label={isAr ? "السجل"     : "History"}  active={pathname === "/history"} />
             <NavLink href="/settings" label={isAr ? "الإعدادات" : "Settings"} active={pathname === "/settings"} />
@@ -317,6 +320,7 @@ export default function TopNavbar() {
             dir={isAr ? "rtl" : "ltr"}
           >
             {[
+              ...(isAuthenticated ? [{ href: "/dashboard", label: isAr ? "لوحة التحكم" : "Dashboard" }] : []),
               { href: "/tools",    label: isAr ? "الأدوات"     : "Tools" },
               { href: "/pricing",  label: isAr ? "الخطط"       : "Plans" },
               { href: "/history",  label: isAr ? "السجل"       : "History" },
