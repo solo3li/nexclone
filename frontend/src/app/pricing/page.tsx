@@ -8,79 +8,62 @@ const plans = [
     nameAr: "المجانية",
     nameEn: "Free",
     price: "$0",
-    periodAr: "/ شهر",
-    periodEn: "/ month",
-    descAr: "لتجربة المنصة والبدء.",
-    descEn: "Get started, no commitment.",
+    period: { ar: "/ شهر", en: "/ month" },
+    desc: { ar: "لتجربة المنصة والبدء.", en: "Get started, no commitment." },
     cta: { ar: "ابدأ مجاناً", en: "Get started" },
     highlighted: false,
-    featuresAr: ["100 دقيقة صوت", "50 تحويل نص لصوت", "دعم فني عادي"],
-    featuresEn: ["100 min voice", "50 text-to-voice", "Standard support"],
+    features: {
+      ar: ["100 دقيقة صوت", "50 تحويل نص لصوت", "دعم فني عادي"],
+      en: ["100 min voice", "50 text-to-voice", "Standard support"],
+    },
   },
   {
     id: "pro",
     nameAr: "المحترفين",
     nameEn: "Pro",
     price: "$29",
-    periodAr: "/ شهر",
-    periodEn: "/ month",
-    descAr: "للمبدعين وصناع المحتوى.",
-    descEn: "For serious creators.",
+    period: { ar: "/ شهر", en: "/ month" },
+    desc: { ar: "للمبدعين وصناع المحتوى.", en: "For serious creators." },
     cta: { ar: "ابدأ الآن", en: "Get Pro" },
     highlighted: true,
-    featuresAr: [
-      "دقائق غير محدودة",
-      "أصوات ذكاء اصطناعي مميزة",
-      "جودة 4K للصور",
-      "أولوية في الدعم",
-      "بلا علامة مائية",
-    ],
-    featuresEn: [
-      "Unlimited minutes",
-      "Premium AI voices",
-      "4K image quality",
-      "Priority support",
-      "No watermark",
-    ],
+    features: {
+      ar: ["دقائق غير محدودة", "أصوات ذكاء اصطناعي مميزة", "جودة 4K للصور", "أولوية في الدعم", "بلا علامة مائية"],
+      en: ["Unlimited minutes", "Premium AI voices", "4K image quality", "Priority support", "No watermark"],
+    },
   },
   {
     id: "enterprise",
     nameAr: "الشركات",
     nameEn: "Enterprise",
     price: "$99",
-    periodAr: "/ شهر",
-    periodEn: "/ month",
-    descAr: "للفرق والمؤسسات.",
-    descEn: "For teams and orgs.",
+    period: { ar: "/ شهر", en: "/ month" },
+    desc: { ar: "للفرق والمؤسسات.", en: "For teams and orgs." },
     cta: { ar: "تواصل معنا", en: "Contact us" },
     highlighted: false,
-    featuresAr: ["كل مميزات Pro", "وصول API كامل", "مساحة عمل مشتركة", "مدير حساب", "دعم 24/7"],
-    featuresEn: ["All Pro features", "Full API access", "Team workspace", "Dedicated manager", "24/7 support"],
+    features: {
+      ar: ["كل مميزات Pro", "وصول API كامل", "مساحة عمل مشتركة", "مدير حساب", "دعم 24/7"],
+      en: ["All Pro features", "Full API access", "Team workspace", "Dedicated manager", "24/7 support"],
+    },
   },
 ];
-
-const CheckIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0 text-[var(--color-primary)]">
-    <polyline points="20 6 9 17 4 12" />
-  </svg>
-);
 
 export default function PricingPage() {
   const { language } = useLanguageStore();
   const isAr = language === "ar";
 
   return (
-    <div className="max-w-[1100px] mx-auto px-6 py-16" dir={isAr ? "rtl" : "ltr"}>
+    <div className="max-w-[1100px] mx-auto px-5 py-14 animate-fade-up" dir={isAr ? "rtl" : "ltr"}>
 
       {/* Header */}
-      <div className="text-center mb-14">
-        <p className="text-caption text-[var(--color-muted)] mb-3">
+      <div className="text-center mb-14 relative">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-40 rounded-full bg-[var(--brand)] blur-[120px] opacity-10 pointer-events-none" />
+        <p className="text-xs font-semibold text-[var(--brand-bright)] uppercase tracking-widest mb-3">
           {isAr ? "الأسعار" : "Pricing"}
         </p>
-        <h1 className="text-h1 text-[var(--color-ink)] mb-4">
+        <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-3">
           {isAr ? "خطط بسيطة وشفافة" : "Simple, transparent pricing"}
         </h1>
-        <p className="text-body text-[var(--color-muted)] max-w-md mx-auto">
+        <p className="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
           {isAr
             ? "اختر الخطة المناسبة. لا رسوم خفية، لا مفاجآت."
             : "Choose your plan. No hidden fees, no surprises."}
@@ -92,53 +75,56 @@ export default function PricingPage() {
         {plans.map((p) => (
           <div
             key={p.id}
-            className={`card p-7 flex flex-col gap-6 relative
+            className={`relative flex flex-col gap-6 p-7
               ${p.highlighted
-                ? "border-[var(--color-primary)] shadow-[0_4px_30px_rgba(37,99,235,0.12)] md:-translate-y-3"
-                : ""
+                ? "glass-card-brand md:-translate-y-4"
+                : "glass-card"
               }`}
           >
-            {/* Popular badge */}
+            {/* Glow blob for Pro */}
             {p.highlighted && (
-              <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 badge badge-primary text-[10px] shadow-sm">
+              <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-40 h-20 rounded-full bg-[var(--brand)] blur-[50px] opacity-30 pointer-events-none" />
+            )}
+
+            {p.highlighted && (
+              <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 badge badge-brand text-[9px] shadow-lg">
                 {isAr ? "الأكثر طلباً" : "Most popular"}
               </span>
             )}
 
-            {/* Plan name + desc */}
             <div>
-              <p className="text-small font-semibold text-[var(--color-muted)] mb-1">
+              <p className="text-xs font-semibold text-[var(--text-secondary)] mb-0.5">
                 {isAr ? p.nameAr : p.nameEn}
               </p>
-              <p className="text-small text-[var(--color-subtle)]">
-                {isAr ? p.descAr : p.descEn}
+              <p className="text-xs text-[var(--text-tertiary)]">
+                {isAr ? p.desc.ar : p.desc.en}
               </p>
             </div>
 
-            {/* Price */}
             <div className="flex items-baseline gap-1">
-              <span className="text-display text-[var(--color-ink)]">{p.price}</span>
-              <span className="text-small text-[var(--color-muted)]">
-                {isAr ? p.periodAr : p.periodEn}
-              </span>
+              <span className="text-4xl font-bold text-[var(--text-primary)]">{p.price}</span>
+              <span className="text-xs text-[var(--text-tertiary)]">{isAr ? p.period.ar : p.period.en}</span>
             </div>
 
-            {/* CTA */}
             <button
-              className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all
+              className={`w-full py-3 rounded-xl text-sm font-bold transition-all
                 ${p.highlighted
-                  ? "bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] shadow-[0_4px_14px_rgba(37,99,235,0.28)] hover:-translate-y-px"
-                  : "bg-[var(--color-surface)] text-[var(--color-ink)] hover:bg-[var(--color-surface-2)] border border-[var(--color-border)]"
+                  ? "bg-[var(--brand)] text-white border border-[var(--brand)] hover:bg-[var(--brand-bright)] hover:border-[var(--brand-bright)] hover:-translate-y-px"
+                  : "btn w-full justify-center"
                 }`}
+              style={p.highlighted ? { boxShadow: "0 4px 24px var(--brand-glow)" } : {}}
             >
               {isAr ? p.cta.ar : p.cta.en}
             </button>
 
-            {/* Features */}
             <ul className="space-y-3">
-              {(isAr ? p.featuresAr : p.featuresEn).map((f, i) => (
-                <li key={i} className="flex items-center gap-2.5 text-small text-[var(--color-muted)]">
-                  <CheckIcon />
+              {(isAr ? p.features.ar : p.features.en).map((f, i) => (
+                <li key={i} className="flex items-center gap-2.5 text-sm text-[var(--text-secondary)]">
+                  <span className="w-4 h-4 flex items-center justify-center shrink-0">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="w-3.5 h-3.5 text-[var(--brand-bright)]">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </span>
                   {f}
                 </li>
               ))}
@@ -147,11 +133,10 @@ export default function PricingPage() {
         ))}
       </div>
 
-      {/* Footer note */}
-      <p className="text-center mt-10 text-small text-[var(--color-subtle)]">
+      <p className="text-center mt-10 text-xs text-[var(--text-tertiary)]">
         {isAr
           ? "جميع الخطط تشمل تجديداً تلقائياً. يمكنك الإلغاء في أي وقت."
-          : "All plans include auto-renewal. Cancel anytime."}
+          : "All plans auto-renew. Cancel anytime."}
       </p>
     </div>
   );
