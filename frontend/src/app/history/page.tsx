@@ -161,7 +161,7 @@ export default function History() {
                       </button>
                       {item.fileUrl && (
                         <a 
-                          href={`http://localhost:8080${item.fileUrl}`}
+                          href={`http://178.62.192.74:8080${item.fileUrl}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()} 

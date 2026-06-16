@@ -18,9 +18,15 @@ interface Voice {
 
 export default function TextToVoice() {
   const [text, setText] = useState("");
-  const [language, setLanguage] = useState("Arabic");
+  const [languageMode, setLanguageMode] = useState<"Arabic" | "Other">("Arabic");
+  const [otherLanguage, setOtherLanguage] = useState("English (US)");
   const [voiceName, setVoiceName] = useState("");
-  const [styleInstruction, setStyleInstruction] = useState("Neutral");
+  
+  // New style settings
+  const [dialectFilter, setDialectFilter] = useState("");
+  const [emotion, setEmotion] = useState("");
+  const [performanceStyle, setPerformanceStyle] = useState("");
+  const [customInstructions, setCustomInstructions] = useState("");
 
   const [voices, setVoices] = useState<Voice[]>([]);
   const [loadingVoices, setLoadingVoices] = useState(true);
@@ -29,6 +35,25 @@ export default function TextToVoice() {
   const { isAuthenticated } = useAuthStore();
   const router = useRouter();
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const openAiVoices = [
+    { id: 'alloy', name: 'Alloy', gender: 'Neutral' },
+    { id: 'echo', name: 'Echo', gender: 'Male' },
+    { id: 'fable', name: 'Fable', gender: 'Male' },
+    { id: 'onyx', name: 'Onyx', gender: 'Male' },
+    { id: 'nova', name: 'Nova', gender: 'Female' },
+    { id: 'shimmer', name: 'Shimmer', gender: 'Female' }
+  ];
+
+  const handleLanguageModeChange = (mode: "Arabic" | "Other") => {
+    setLanguageMode(mode);
+    if (mode === "Arabic") {
+      const defaultVoice = voices.find(v => dialectFilter === "" || v.accent === dialectFilter);
+      setVoiceName(defaultVoice ? defaultVoice.voiceName : "Aurora");
+    } else {
+      setVoiceName("alloy");
+    }
+  };
 
   useEffect(() => {
     const fetchVoices = async () => {
@@ -54,170 +79,318 @@ export default function TextToVoice() {
       return;
     }
     clearAudio();
-    await generateAudio(text, language, voiceName, styleInstruction);
+
+    let finalStyleInstruction = "";
+    if (languageMode === "Arabic") {
+      const parts = [];
+      if (emotion) parts.push(`Emotion: ${emotion}`);
+      if (performanceStyle) parts.push(`Style: ${performanceStyle}`);
+      if (customInstructions) parts.push(`Extra: ${customInstructions}`);
+      finalStyleInstruction = parts.join(", ") || "Neutral";
+    } else {
+      finalStyleInstruction = "Neutral";
+    }
+
+    const targetLang = languageMode === "Arabic" ? "Arabic" : otherLanguage;
+    await generateAudio(text, targetLang, voiceName, finalStyleInstruction);
   };
 
   useEffect(() => {
-    // Automatically play the audio when it's generated
     if (audioUrl && audioRef.current) {
       audioRef.current.play().catch(e => console.error("Auto-play prevented", e));
     }
   }, [audioUrl]);
 
+  // Derived data
+  const uniqueAccents = Array.from(new Set(voices.map(v => v.accent).filter(Boolean)));
+  const filteredVoices = voices.filter(v => dialectFilter === "" || v.accent === dialectFilter);
+
+  // Play demo handler
+  const handlePlayDemo = (voice: Voice, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (voice.demoAudio) {
+      const audio = new Audio(voice.demoAudio);
+      audio.play().catch(err => console.error("Failed to play demo", err));
+    }
+  };
+
   return (
-    <div className="max-w-6xl mx-auto pb-20 animate-fade-in">
+    <div className="max-w-7xl mx-auto pb-20 animate-fade-in" dir="rtl">
       
-      <div className="mb-8">
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">Speech AI</h1>
-        <p className="text-[var(--color-bento-muted)] mt-2">Generate ultra-realistic human voices from text.</p>
+      <div className="mb-8 text-center">
+        <h1 className="text-4xl font-extrabold text-[#f1eff7] tracking-tight mb-2">مولد النص إلى صوت</h1>
+        <p className="text-[#a1a1aa] text-lg">حول النص إلى كلام طبيعي بسهولة باستخدام أداتنا بالذكاء الاصطناعي.</p>
       </div>
 
       {error && (
-        <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+        <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center">
           {error}
         </div>
       )}
 
-      <div className="bento-grid grid-cols-1 lg:grid-cols-3">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Left Column: Settings */}
-        <div className="bento-card p-6 space-y-6 lg:col-span-1 h-full">
-          <h3 className="font-bold text-white border-b border-[var(--color-bento-border)] pb-4">Voice Settings</h3>
-          
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider">Language</label>
-            <div className="relative">
-              <select 
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className="bento-input w-full appearance-none text-sm"
-              >
-                <option>English (US)</option>
-                <option>English (UK)</option>
-                <option>Arabic</option>
-                <option>Spanish</option>
-                <option>French</option>
-              </select>
-              <i className="fas fa-chevron-down absolute right-4 top-4 text-[var(--color-bento-muted)] pointer-events-none text-xs"></i>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider">Voice Model</label>
-            <div className="relative">
-              <select 
-                value={voiceName}
-                onChange={(e) => setVoiceName(e.target.value)}
-                className="bento-input w-full appearance-none text-sm"
-                disabled={loadingVoices}
-              >
-                {loadingVoices ? (
-                  <option>Loading voices...</option>
-                ) : (
-                  voices.map(v => (
-                    <option key={v.id} value={v.voiceName}>
-                      {v.name} ({v.gender}, {v.accent}) {v.isPremium ? "★ PRO" : ""}
-                    </option>
-                  ))
-                )}
-                {voices.length === 0 && !loadingVoices && (
-                  <>
-                    <option value="Aurora">Aurora (Female, Calm)</option>
-                    <option value="Atlas">Atlas (Male, Deep)</option>
-                  </>
-                )}
-              </select>
-              <i className="fas fa-chevron-down absolute right-4 top-4 text-[var(--color-bento-muted)] pointer-events-none text-xs"></i>
-            </div>
+        {/* Right Column: Settings (Because of RTL, it appears on the right) */}
+        <div className="lg:col-span-1 space-y-6">
+          <div className="bg-[#18181b] rounded-2xl border border-[#27272a] p-6 shadow-xl">
+            <h3 className="font-bold text-white mb-6 flex items-center">
+              <i className="fas fa-microphone-alt text-purple-500 ml-2"></i> إعدادات الصوت
+            </h3>
             
-            {/* Play Demo Button if available */}
-            {voices.find(v => v.voiceName === voiceName)?.demoAudio && (
-               <button 
-                 className="mt-2 text-xs text-blue-400 hover:text-blue-300 flex items-center transition-colors"
-                 onClick={() => {
-                   const demoAudioUrl = voices.find(v => v.voiceName === voiceName)?.demoAudio;
-                   if (demoAudioUrl) {
-                     const audio = new Audio(demoAudioUrl);
-                     audio.play().catch(e => console.error("Failed to play demo", e));
-                   }
-                 }}
-               >
-                 <i className="fas fa-play-circle mr-1"></i> Listen to demo
-               </button>
-            )}
-          </div>
-          
-          <div className="space-y-2">
-            <label className="text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider flex justify-between">
-              <span>Emotion / Tone</span>
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              {['Neutral', 'Excited', 'Sad', 'Angry'].map(emotion => (
-                <button 
-                  key={emotion}
-                  onClick={() => setStyleInstruction(emotion)}
-                  className={`py-2 rounded-lg text-xs font-bold transition-all border ${
-                    styleInstruction === emotion 
-                      ? 'bg-white text-black border-white' 
-                      : 'bg-[#0a0a0a] border-[var(--color-bento-border)] text-[var(--color-bento-muted)] hover:text-white hover:border-[#3f3f46]'
+            {/* Language Mode Toggle */}
+            <div className="space-y-3 mb-6">
+              <label className="text-xs font-bold text-[#a1a1aa] flex items-center">
+                <i className="fas fa-language ml-2"></i> وضع اللغة
+              </label>
+              <div className="flex bg-[#09090b] rounded-full p-1 border border-[#27272a]">
+                <button
+                  onClick={() => handleLanguageModeChange("Arabic")}
+                  className={`flex-1 py-2 text-sm font-bold rounded-full transition-all ${
+                    languageMode === "Arabic" 
+                      ? "bg-gradient-to-r from-purple-600 to-orange-400 text-white shadow-lg" 
+                      : "text-[#71717a] hover:text-white"
                   }`}
                 >
-                  {emotion}
+                  <i className="fas fa-keyboard ml-2"></i> العربية
                 </button>
-              ))}
+                <button
+                  onClick={() => handleLanguageModeChange("Other")}
+                  className={`flex-1 py-2 text-sm font-bold rounded-full transition-all ${
+                    languageMode === "Other" 
+                      ? "bg-gradient-to-r from-purple-600 to-orange-400 text-white shadow-lg" 
+                      : "text-[#71717a] hover:text-white"
+                  }`}
+                >
+                  <i className="fas fa-globe ml-2"></i> لغات أخرى
+                </button>
+              </div>
+
+              {languageMode === "Other" && (
+                <div className="mt-3">
+                  <select 
+                    value={otherLanguage}
+                    onChange={(e) => setOtherLanguage(e.target.value)}
+                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl p-3 text-sm text-white focus:border-purple-500 outline-none appearance-none"
+                  >
+                    <option>English (US)</option>
+                    <option>English (UK)</option>
+                    <option>Spanish</option>
+                    <option>French</option>
+                  </select>
+                </div>
+              )}
             </div>
+
+            {/* Voice Grid Selection */}
+            <div className="space-y-3 mb-6 border-t border-[#27272a] pt-6">
+              <label className="text-xs font-bold text-[#a1a1aa] flex items-center">
+                <i className="fas fa-user-voice ml-2"></i> اختر الصوت
+              </label>
+              
+              <div className="grid grid-cols-2 gap-3 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+                {languageMode === "Arabic" ? (
+                  loadingVoices ? (
+                    <div className="col-span-2 text-center text-[#71717a] py-4 text-sm">جاري تحميل الأصوات...</div>
+                  ) : filteredVoices.length > 0 ? (
+                    filteredVoices.map(v => (
+                      <div 
+                        key={v.id}
+                        onClick={() => setVoiceName(v.voiceName)}
+                        className={`relative p-3 rounded-xl border cursor-pointer transition-all flex flex-col items-center justify-center text-center space-y-2
+                          ${voiceName === v.voiceName 
+                            ? 'bg-purple-500/10 border-purple-500' 
+                            : 'bg-[#09090b] border-[#27272a] hover:border-[#3f3f46]'
+                          }`}
+                      >
+                        {v.isPremium && (
+                          <div className="absolute top-0 -translate-y-1/2 bg-orange-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">
+                            <i className="fas fa-crown ml-1 text-yellow-200"></i> مميز
+                          </div>
+                        )}
+                        <h4 className="font-bold text-white text-sm mt-2">{v.name}</h4>
+                        <p className="text-[10px] text-[#a1a1aa]">{v.accent}</p>
+                        <div className="text-[10px] text-[#71717a] flex items-center">
+                          <i className={`fas ${v.gender === 'Female' ? 'fa-venus' : 'fa-mars'} ml-1`}></i>
+                          {v.gender === 'Female' ? 'أنثى' : 'ذكر'}
+                        </div>
+                        {v.demoAudio && (
+                          <button 
+                            onClick={(e) => handlePlayDemo(v, e)}
+                            className="absolute top-2 left-2 text-[#71717a] hover:text-purple-400"
+                            title="استماع للعينة"
+                          >
+                            <i className="fas fa-play-circle"></i>
+                          </button>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="col-span-2 text-center text-[#71717a] py-4 text-sm">لا توجد أصوات مطابقة</div>
+                  )
+                ) : (
+                  openAiVoices.map(v => (
+                    <div 
+                        key={v.id}
+                        onClick={() => setVoiceName(v.id)}
+                        className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col items-center justify-center text-center space-y-2
+                          ${voiceName === v.id 
+                            ? 'bg-purple-500/10 border-purple-500' 
+                            : 'bg-[#09090b] border-[#27272a] hover:border-[#3f3f46]'
+                          }`}
+                      >
+                        <h4 className="font-bold text-white text-sm">{v.name}</h4>
+                        <div className="text-[10px] text-[#71717a] flex items-center">
+                           <i className={`fas ${v.gender === 'Female' ? 'fa-venus' : v.gender === 'Male' ? 'fa-mars' : 'fa-robot'} ml-1`}></i>
+                           {v.gender === 'Female' ? 'أنثى' : v.gender === 'Male' ? 'ذكر' : 'محايد'}
+                        </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Performance Options (Only for Arabic) */}
+            {languageMode === "Arabic" && (
+              <div className="space-y-4 border-t border-[#27272a] pt-6">
+                
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-[#a1a1aa] flex items-center">
+                    <i className="fas fa-comments ml-2 text-purple-400"></i> اللهجة
+                  </label>
+                  <select 
+                    value={dialectFilter}
+                    onChange={(e) => {
+                      setDialectFilter(e.target.value);
+                      // Reset voice if it doesn't match new dialect
+                      const firstMatch = voices.find(v => e.target.value === "" || v.accent === e.target.value);
+                      if (firstMatch) setVoiceName(firstMatch.voiceName);
+                    }}
+                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl p-3 text-sm text-white outline-none appearance-none"
+                  >
+                    <option value="">-- كل اللهجات --</option>
+                    {uniqueAccents.map((acc, idx) => (
+                      <option key={idx} value={acc as string}>{acc}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-[#a1a1aa] flex items-center">
+                    <i className="fas fa-heart ml-2 text-pink-500"></i> المشاعر
+                  </label>
+                  <select 
+                    value={emotion}
+                    onChange={(e) => setEmotion(e.target.value)}
+                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl p-3 text-sm text-white outline-none appearance-none"
+                  >
+                    <option value="">-- اختر المشاعر (اختياري) --</option>
+                    <option value="طبيعي">طبيعي (Neutral)</option>
+                    <option value="سعيد">سعيد (Happy)</option>
+                    <option value="حزين">حزين (Sad)</option>
+                    <option value="غاضب">غاضب (Angry)</option>
+                    <option value="متحمس">متحمس (Excited)</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-[#a1a1aa] flex items-center">
+                    <i className="fas fa-theater-masks ml-2 text-blue-400"></i> أسلوب الأداء
+                  </label>
+                  <select 
+                    value={performanceStyle}
+                    onChange={(e) => setPerformanceStyle(e.target.value)}
+                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl p-3 text-sm text-white outline-none appearance-none"
+                  >
+                    <option value="">-- اختر أسلوب الأداء (اختياري) --</option>
+                    <option value="إخباري">إخباري (News)</option>
+                    <option value="سرد قصصي">سرد قصصي (Storytelling)</option>
+                    <option value="وثائقي">وثائقي (Documentary)</option>
+                    <option value="حواري">حواري (Conversational)</option>
+                    <option value="إعلاني">إعلاني (Advertisement)</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-[#a1a1aa] flex items-center justify-between">
+                    <div className="flex items-center">
+                      <i className="fas fa-magic ml-2 text-orange-400"></i> إرشادات مخصصة
+                    </div>
+                    <span className="bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded text-[10px] border border-orange-500/30">
+                      <i className="fas fa-lock ml-1 text-[8px]"></i> للمشتركين فقط
+                    </span>
+                  </label>
+                  <textarea 
+                    value={customInstructions}
+                    onChange={(e) => setCustomInstructions(e.target.value)}
+                    className="w-full bg-[#09090b] border border-[#27272a] rounded-xl p-3 text-sm text-white outline-none resize-none h-20 placeholder-[#3f3f46]"
+                    placeholder="مثال: تحدث ببطء شديد، وركز على مخارج الحروف..."
+                  ></textarea>
+                </div>
+
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Right Column: Text Input & Player */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="bento-card p-6 flex flex-col min-h-[400px]">
-            <div className="flex justify-between items-center mb-4 pb-4 border-b border-[var(--color-bento-border)]">
-              <h3 className="font-bold text-white">Script</h3>
-              <span className="text-xs text-[var(--color-bento-muted)] font-mono">{text.length} / 5000</span>
+        {/* Left Column: Script Input & Output (Because of RTL, it appears on the left) */}
+        <div className="lg:col-span-2 flex flex-col space-y-6">
+          <div className="bg-[#18181b] rounded-2xl border border-[#27272a] p-6 shadow-xl flex flex-col min-h-[500px] relative">
+            
+            <div className="flex justify-between items-center mb-4">
+               <div className="bg-purple-900/40 text-purple-300 text-xs px-3 py-1 rounded-full border border-purple-500/30 font-mono">
+                 max 4096
+               </div>
+               <div className="text-sm font-bold text-white flex items-center">
+                 أدخل النص هنا <i className="fas fa-edit mr-2 text-[#a1a1aa]"></i>
+               </div>
             </div>
             
             <textarea 
-              className="w-full flex-1 resize-none mb-6 bg-transparent text-[var(--color-bento-text)] placeholder-[var(--color-bento-muted)] leading-relaxed outline-none"
-              placeholder="Type or paste your text here..."
+              className="w-full flex-1 resize-none bg-transparent text-white text-lg placeholder-[#3f3f46] leading-relaxed outline-none mb-4"
+              placeholder="اكتب النص هنا (الحد الأقصى 4096 حرف)..."
               value={text}
               onChange={(e) => setText(e.target.value)}
+              dir="auto"
+              maxLength={4096}
             ></textarea>
 
-            <div className="flex justify-end pt-4 border-t border-[var(--color-bento-border)]">
-              <button 
-                onClick={handleGenerate}
-                disabled={isGeneratingAudio || text.length === 0}
-                className={`px-8 py-3 text-sm flex items-center transition-all rounded-xl font-bold
-                  ${text.length === 0 
-                    ? 'bg-[#1a1a1a] text-[#52525b] cursor-not-allowed border border-[var(--color-bento-border)]' 
-                    : 'bento-btn-accent shadow-[0_0_15px_rgba(59,130,246,0.3)]'
-                  }
-                `}
-              >
-                {isGeneratingAudio ? (
-                  <><i className="fas fa-spinner fa-spin mr-2"></i> Synthesizing...</>
-                ) : (
-                  <><i className="fas fa-wave-square mr-2"></i> Generate Audio</>
-                )}
-              </button>
+            <div className="text-left text-[#71717a] text-xs font-mono mb-6">
+              characters 4096 / {text.length}
             </div>
+
+            <button 
+              onClick={handleGenerate}
+              disabled={isGeneratingAudio || text.length === 0}
+              className={`w-full py-4 text-md flex items-center justify-center transition-all rounded-xl font-bold
+                ${text.length === 0 
+                  ? 'bg-[#27272a] text-[#52525b] cursor-not-allowed' 
+                  : 'bg-gradient-to-r from-purple-600 to-orange-400 hover:opacity-90 text-white shadow-[0_0_20px_rgba(147,51,234,0.3)]'
+                }
+              `}
+            >
+              {isGeneratingAudio ? (
+                <><i className="fas fa-spinner fa-spin ml-2"></i> جاري توليد الصوت...</>
+              ) : (
+                <><i className="fas fa-magic ml-2"></i> إنشاء صوت</>
+              )}
+            </button>
           </div>
 
           {/* Audio Player Result */}
           {audioUrl && (
-            <div className="bento-card p-4 animate-fade-in flex items-center justify-between border border-blue-500/30 bg-blue-500/5">
-              <div className="flex items-center space-x-4 flex-1">
-                <audio ref={audioRef} controls src={audioUrl} className="w-full h-10 outline-none" />
+            <div className="bg-[#18181b] rounded-2xl border border-purple-500/30 p-4 shadow-xl flex items-center justify-between animate-fade-in relative overflow-hidden">
+              <div className="absolute inset-0 bg-purple-500/5"></div>
+              <div className="relative flex-1 px-4 z-10">
+                <audio ref={audioRef} controls src={audioUrl} className="w-full outline-none" />
               </div>
-              <div className="flex space-x-2 ml-4">
+              <div className="relative z-10 flex space-x-2 space-x-reverse">
                 <a 
                   href={audioUrl} 
                   download={`tts_output_${Date.now()}.mp3`}
-                  className="bento-btn w-10 h-10 rounded flex items-center justify-center text-[var(--color-bento-muted)] hover:text-white"
-                  title="Download Audio"
+                  className="bg-purple-600 hover:bg-purple-500 w-10 h-10 rounded-xl flex items-center justify-center text-white transition-colors"
+                  title="تحميل الصوت"
                 >
-                  <i className="fas fa-download text-sm"></i>
+                  <i className="fas fa-download"></i>
                 </a>
               </div>
             </div>
