@@ -4,12 +4,8 @@ import Link from "next/link";
 
 export default function DashboardHome() {
   const tools = [
-    { name: "Background Remover", desc: "Remove backgrounds from images instantly.", href: "/dashboard/tools/bg-remover", icon: "🖼️", color: "from-blue-500 to-indigo-500" },
-    { name: "GPT Assistant", desc: "Chat with an advanced AI model.", href: "/dashboard/tools/gpt", icon: "💬", color: "from-emerald-500 to-teal-500" },
-    { name: "Voice to Text", desc: "Transcribe audio into text.", href: "/dashboard/tools/voice-to-text", icon: "🎙️", color: "from-purple-500 to-pink-500" },
-    { name: "Text to Voice", desc: "Generate speech from text.", href: "/dashboard/tools/text-to-voice", icon: "🔊", color: "from-orange-500 to-red-500" },
-    { name: "Image to Text", desc: "Extract text from images (OCR).", href: "/dashboard/tools/img-to-txt", icon: "📄", color: "from-cyan-500 to-blue-500" },
-    { name: "Video Caption", desc: "Add subtitles to your videos.", href: "/dashboard/tools/video-caption", icon: "🎬", color: "from-fuchsia-500 to-purple-500" },
+    { name: "Voice to Text", desc: "Transcribe audio into text.", href: "/voice-to-text", icon: "🎙️", color: "from-purple-500 to-pink-500" },
+    { name: "Text to Voice", desc: "Generate speech from text.", href: "/text-to-voice", icon: "🔊", color: "from-orange-500 to-red-500" },
   ];
 
   return (
