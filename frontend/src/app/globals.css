@@ -3,13 +3,13 @@
 @theme {
   --font-sans: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
   
-  --color-bento-bg: #0a0a0a; /* Very dark, almost pitch black */
-  --color-bento-card: #111111; /* Slightly lighter than bg */
-  --color-bento-card-hover: #171717;
-  --color-bento-border: #262626; /* Subtle dark grey border */
-  --color-bento-text: #ededed;
-  --color-bento-muted: #a3a3a3;
-  --color-bento-accent: #3b82f6; /* Clean blue accent */
+  --color-bento-bg: #F8F8F8; /* Pearl White background */
+  --color-bento-card: #FFFFFF; /* Pure white cards */
+  --color-bento-card-hover: #FAFAFA;
+  --color-bento-border: #E0E0E0; /* Soft gray border */
+  --color-bento-text: #1A253C; /* Midnight Blue text */
+  --color-bento-muted: #64748B; /* Slate gray for muted text */
+  --color-bento-accent: #FF6F61; /* Vibrant Coral accent */
 }
 
 body {

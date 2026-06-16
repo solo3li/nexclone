@@ -118,7 +118,7 @@ export default function TextToVoice() {
     <div className="max-w-7xl mx-auto pb-20 animate-fade-in" dir="rtl">
       
       <div className="mb-8 text-center">
-        <h1 className="text-4xl font-extrabold text-white tracking-tight mb-2">مولد النص إلى صوت</h1>
+        <h1 className="text-4xl font-extrabold text-[var(--color-bento-text)] tracking-tight mb-2">مولد النص إلى صوت</h1>
         <p className="text-[var(--color-bento-muted)] text-lg">حول النص إلى كلام طبيعي بسهولة باستخدام أداتنا بالذكاء الاصطناعي.</p>
       </div>
 
@@ -133,7 +133,7 @@ export default function TextToVoice() {
         {/* Right Column: Settings */}
         <div className="lg:col-span-1 space-y-6 lg:sticky lg:top-6">
           <div className="bento-card p-6 max-h-[85vh] overflow-y-auto custom-scrollbar">
-            <h3 className="font-bold text-white mb-6 flex items-center">
+            <h3 className="font-bold text-[var(--color-bento-text)] mb-6 flex items-center">
               <i className="fas fa-microphone-alt text-blue-500 ml-2"></i> إعدادات الصوت
             </h3>
             
@@ -142,13 +142,13 @@ export default function TextToVoice() {
               <label className="text-xs font-bold text-[var(--color-bento-muted)] flex items-center">
                 <i className="fas fa-language ml-2"></i> وضع اللغة
               </label>
-              <div className="flex bg-[#0a0a0a] rounded-xl p-1 border border-[var(--color-bento-border)]">
+              <div className="flex bg-[var(--color-bento-bg)] rounded-xl p-1 border border-[var(--color-bento-border)]">
                 <button
                   onClick={() => handleLanguageModeChange("Arabic")}
                   className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${
                     languageMode === "Arabic" 
                       ? "bg-white text-black shadow-md" 
-                      : "text-[var(--color-bento-muted)] hover:text-white"
+                      : "text-[var(--color-bento-muted)] hover:text-[var(--color-bento-text)]"
                   }`}
                 >
                   <i className="fas fa-keyboard ml-2"></i> العربية
@@ -158,7 +158,7 @@ export default function TextToVoice() {
                   className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${
                     languageMode === "Other" 
                       ? "bg-white text-black shadow-md" 
-                      : "text-[var(--color-bento-muted)] hover:text-white"
+                      : "text-[var(--color-bento-muted)] hover:text-[var(--color-bento-text)]"
                   }`}
                 >
                   <i className="fas fa-globe ml-2"></i> لغات أخرى
@@ -199,15 +199,15 @@ export default function TextToVoice() {
                         className={`relative p-3 rounded-xl border cursor-pointer transition-all flex flex-col items-center justify-center text-center space-y-2
                           ${voiceName === v.voiceName 
                             ? 'bg-blue-500/10 border-blue-500' 
-                            : 'bg-[#0a0a0a] border-[var(--color-bento-border)] hover:border-[#3f3f46]'
+                            : 'bg-[var(--color-bento-bg)] border-[var(--color-bento-border)] hover:border-[var(--color-bento-border)]'
                           }`}
                       >
                         {v.isPremium && (
-                          <div className="absolute top-0 -translate-y-1/2 bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">
+                          <div className="absolute top-0 -translate-y-1/2 bg-blue-600 text-[var(--color-bento-text)] text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm">
                             <i className="fas fa-crown ml-1 text-yellow-200"></i> مميز
                           </div>
                         )}
-                        <h4 className="font-bold text-white text-sm mt-2">{v.name}</h4>
+                        <h4 className="font-bold text-[var(--color-bento-text)] text-sm mt-2">{v.name}</h4>
                         <p className="text-[10px] text-[var(--color-bento-muted)]">{v.accent}</p>
                         <div className="text-[10px] text-[var(--color-bento-muted)] flex items-center">
                           <i className={`fas ${v.gender === 'Female' ? 'fa-venus' : 'fa-mars'} ml-1`}></i>
@@ -235,10 +235,10 @@ export default function TextToVoice() {
                         className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col items-center justify-center text-center space-y-2
                           ${voiceName === v.id 
                             ? 'bg-blue-500/10 border-blue-500' 
-                            : 'bg-[#0a0a0a] border-[var(--color-bento-border)] hover:border-[#3f3f46]'
+                            : 'bg-[var(--color-bento-bg)] border-[var(--color-bento-border)] hover:border-[var(--color-bento-border)]'
                           }`}
                       >
-                        <h4 className="font-bold text-white text-sm">{v.name}</h4>
+                        <h4 className="font-bold text-[var(--color-bento-text)] text-sm">{v.name}</h4>
                         <div className="text-[10px] text-[var(--color-bento-muted)] flex items-center">
                            <i className={`fas ${v.gender === 'Female' ? 'fa-venus' : v.gender === 'Male' ? 'fa-mars' : 'fa-robot'} ml-1`}></i>
                            {v.gender === 'Female' ? 'أنثى' : v.gender === 'Male' ? 'ذكر' : 'محايد'}
@@ -336,7 +336,7 @@ export default function TextToVoice() {
           <div className="bento-card p-6 flex flex-col min-h-[500px] relative">
             
             <div className="flex justify-between items-center mb-4 pb-4 border-b border-[var(--color-bento-border)]">
-               <div className="text-sm font-bold text-white flex items-center">
+               <div className="text-sm font-bold text-[var(--color-bento-text)] flex items-center">
                  أدخل النص هنا <i className="fas fa-edit mr-2 text-[var(--color-bento-muted)]"></i>
                </div>
                <div className="bg-blue-900/40 text-blue-300 text-xs px-3 py-1 rounded-full border border-blue-500/30 font-mono flex-row-reverse">
@@ -345,7 +345,7 @@ export default function TextToVoice() {
             </div>
             
             <textarea 
-              className="w-full flex-1 resize-none bg-transparent text-[var(--color-bento-text)] text-lg placeholder-[#3f3f46] leading-relaxed outline-none mb-4"
+              className="w-full flex-1 resize-none bg-transparent text-[var(--color-bento-text)] text-lg placeholder-[var(--color-bento-muted)] leading-relaxed outline-none mb-4"
               placeholder="اكتب النص هنا (الحد الأقصى 4096 حرف)..."
               value={text}
               onChange={(e) => setText(e.target.value)}
@@ -362,7 +362,7 @@ export default function TextToVoice() {
               disabled={isGeneratingAudio || text.length === 0}
               className={`w-full py-4 text-md flex items-center justify-center transition-all rounded-xl font-bold
                 ${text.length === 0 
-                  ? 'bg-[#1a1a1a] text-[#52525b] cursor-not-allowed border border-[var(--color-bento-border)]' 
+                  ? 'bg-[var(--color-bento-card-hover)] text-[#52525b] cursor-not-allowed border border-[var(--color-bento-border)]' 
                   : 'bento-btn-accent shadow-[0_0_15px_rgba(59,130,246,0.3)]'
                 }
               `}
@@ -385,7 +385,7 @@ export default function TextToVoice() {
                 <a 
                   href={audioUrl} 
                   download={`tts_output_${Date.now()}.mp3`}
-                  className="bento-btn w-10 h-10 rounded-xl flex items-center justify-center text-[var(--color-bento-muted)] hover:text-white transition-colors"
+                  className="bento-btn w-10 h-10 rounded-xl flex items-center justify-center text-[var(--color-bento-muted)] hover:text-[var(--color-bento-text)] transition-colors"
                   title="تحميل الصوت"
                 >
                   <i className="fas fa-download"></i>
