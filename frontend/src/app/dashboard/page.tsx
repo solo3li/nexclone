@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useLanguageStore } from "../store/useLanguageStore";
+import { useLanguageStore } from "../../store/useLanguageStore";
 
 const days = {
   ar: ["الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"],

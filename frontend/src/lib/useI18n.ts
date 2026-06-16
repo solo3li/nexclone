@@ -134,7 +134,6 @@ const translations = {
   "settings.notif_updates":{ ar: "تحديثات المنتج والنشرات الإخبارية", en: "Product updates and newsletters" },
   "settings.save_prefs":   { ar: "حفظ التفضيلات",       en: "Save preferences" },
   "settings.saving":       { ar: "جاري الحفظ...",       en: "Saving..." },
-  "settings.updating":     { ar: "جاري التحديث...",      en: "Updating..." },
 
   // History
   "history.title":         { ar: "السجل",                en: "History" },
