@@ -4,8 +4,10 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAiStore } from "../../store/useAiStore";
 import { useAuthStore } from "../../store/useAuthStore";
+import { useI18n } from "../../lib/useI18n";
 
 export default function VoiceToText() {
+  const { t, isAr } = useI18n();
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [file, setFile] = useState<File | null>(null);
@@ -17,7 +19,7 @@ export default function VoiceToText() {
 
   const startRecording = () => {
     if (!isAuthenticated) {
-      alert("يجب تسجيل الدخول لاستخدام هذه الأداة.");
+      alert(isAr ? "يجب تسجيل الدخول لاستخدام هذه الأداة." : "Please sign in to use this tool.");
       router.push("/login");
       return;
     }
@@ -44,7 +46,7 @@ export default function VoiceToText() {
 
   const handleTranscribe = async () => {
     if (!isAuthenticated) {
-      alert("يجب تسجيل الدخول لاستخدام هذه الأداة.");
+      alert(isAr ? "يجب تسجيل الدخول لاستخدام هذه الأداة." : "Please sign in to use this tool.");
       router.push("/login");
       return;
     }
@@ -60,11 +62,11 @@ export default function VoiceToText() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto pb-20 animate-fade-in" dir="rtl">
+    <div className="max-w-5xl mx-auto pb-20 animate-fade-in">
       
       <div className="mb-8 text-center">
-        <h1 className="text-3xl font-extrabold text-[var(--color-bento-text)] tracking-tight">تحويل الصوت إلى نص</h1>
-        <p className="text-[var(--color-bento-muted)] mt-2">قم بتفريغ الملفات الصوتية إلى نصوص بدقة عالية باستخدام الذكاء الاصطناعي.</p>
+        <h1 className="text-3xl font-extrabold text-[var(--color-bento-text)] tracking-tight">{t("vtt.page_title")}</h1>
+        <p className="text-[var(--color-bento-muted)] mt-2">{t("vtt.page_desc")}</p>
       </div>
 
       {error && (
@@ -80,8 +82,8 @@ export default function VoiceToText() {
           <div className="w-16 h-16 rounded-2xl bg-[var(--color-bento-card-hover)] flex items-center justify-center text-blue-400 text-2xl mb-6 shadow-inner">
             <i className="fas fa-cloud-upload-alt"></i>
           </div>
-          <h3 className="text-xl font-bold text-[var(--color-bento-text)] mb-2">رفع ملف صوتي</h3>
-          <p className="text-sm text-[var(--color-bento-muted)] mb-6">MP3, WAV, M4A حتى 50 ميجابايت</p>
+          <h3 className="text-xl font-bold text-[var(--color-bento-text)] mb-2">{t("vtt.upload_title")}</h3>
+          <p className="text-sm text-[var(--color-bento-muted)] mb-6">{t("vtt.upload_desc")}</p>
           
           <input 
             type="file" 
@@ -94,7 +96,7 @@ export default function VoiceToText() {
             htmlFor="audio-upload" 
             className="bento-btn-primary px-8 py-3 cursor-pointer"
           >
-            اختر ملف
+            {t("vtt.choose_file")}
           </label>
           
           {file && (
@@ -122,7 +124,7 @@ export default function VoiceToText() {
           </div>
           
           <h3 className="text-lg font-bold text-[var(--color-bento-text)] mb-2 relative z-10">
-            {isRecording ? "جاري التسجيل..." : "تسجيل مباشر"}
+            {isRecording ? t("vtt.recording") : t("vtt.record_live")}
           </h3>
           <p className="text-2xl font-mono text-[var(--color-bento-muted)] font-bold tracking-widest relative z-10">
             {formatTime(recordingTime)}
@@ -133,33 +135,27 @@ export default function VoiceToText() {
 
       {/* Settings Section */}
       <div className="bento-card p-8">
-        <h3 className="text-lg font-bold text-[var(--color-bento-text)] mb-6">إعدادات التفريغ</h3>
+        <h3 className="text-lg font-bold text-[var(--color-bento-text)] mb-6">{t("vtt.settings_title")}</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider">لغة الملف الصوتي</label>
-            <div className="relative">
-              <select className="bento-input w-full appearance-none text-sm text-right">
-                <option>تلقائي</option>
-                <option>العربية</option>
-                <option>الإنجليزية</option>
-                <option>الإسبانية</option>
-                <option>الفرنسية</option>
-              </select>
-              <i className="fas fa-chevron-down absolute left-4 top-4 text-[var(--color-bento-muted)] pointer-events-none text-xs"></i>
-            </div>
+            <label className="text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider">{t("vtt.audio_lang")}</label>
+            <select className="bento-input w-full text-sm">
+              <option>{t("vtt.auto")}</option>
+              <option>{t("vtt.arabic")}</option>
+              <option>{t("vtt.english")}</option>
+              <option>{isAr ? "الإسبانية" : "Spanish"}</option>
+              <option>{isAr ? "الفرنسية" : "French"}</option>
+            </select>
           </div>
           
           <div className="space-y-2">
-            <label className="text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider">نوع المخرجات</label>
-            <div className="relative">
-              <select className="bento-input w-full appearance-none text-sm text-right">
-                <option>نص عادي</option>
-                <option>ترجمة (SRT)</option>
-                <option>ترجمة (VTT)</option>
-              </select>
-              <i className="fas fa-chevron-down absolute left-4 top-4 text-[var(--color-bento-muted)] pointer-events-none text-xs"></i>
-            </div>
+            <label className="text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider">{t("vtt.output_type")}</label>
+            <select className="bento-input w-full text-sm">
+              <option>{t("vtt.plain_text")}</option>
+              <option>{t("vtt.srt")}</option>
+              <option>{isAr ? "ترجمة (VTT)" : "Subtitle (VTT)"}</option>
+            </select>
           </div>
         </div>
 
@@ -175,9 +171,9 @@ export default function VoiceToText() {
             `}
           >
             {isTranscribing ? (
-              <><i className="fas fa-spinner fa-spin ml-2"></i> جاري التفريغ...</>
+              <><i className={`fas fa-spinner fa-spin ${isAr ? "ml-2" : "mr-2"}`}></i>{t("vtt.transcribing")}</>
             ) : (
-              <><i className="fas fa-magic ml-2"></i> بدء التفريغ</>
+              <><i className={`fas fa-magic ${isAr ? "ml-2" : "mr-2"}`}></i>{t("vtt.start_transcribe")}</>
             )}
           </button>
         </div>
@@ -188,7 +184,7 @@ export default function VoiceToText() {
         <div className="mt-8 bento-card p-8 border border-green-500/30 bg-green-500/5 animate-fade-in">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-bold text-[var(--color-bento-text)] flex items-center">
-              <i className="fas fa-check-circle text-green-400 ml-2"></i> النتيجة
+              <i className={`fas fa-check-circle text-green-400 ${isAr ? "ml-2" : "mr-2"}`}></i>{t("vtt.result")}
             </h3>
             <button 
               onClick={() => navigator.clipboard.writeText(transcriptionText)}
