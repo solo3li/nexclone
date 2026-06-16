@@ -20,7 +20,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       {!isFullScreenApp && <Sidebar isOpen={isSidebarOpen} />}
       
       {/* Main Content Area */}
-      <div className={`flex-1 transition-all duration-300 flex flex-col w-full min-h-screen ${!isFullScreenApp ? 'md:ms-64' : ''}`}>
+      <div className={`flex-1 transition-all duration-300 flex flex-col w-full min-h-screen ${!isFullScreenApp ? 'md:mr-64' : ''}`}>
         
         {/* Mobile Header */}
         {!isFullScreenApp && (
