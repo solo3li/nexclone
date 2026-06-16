@@ -27,12 +27,12 @@ body {
     background: var(--color-bento-card);
     border: 1px solid var(--color-bento-border);
     border-radius: 24px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* Lighter shadow for light theme */
     transition: all 0.3s ease;
   }
   
   .bento-card:hover {
-    border-color: #3f3f46;
+    border-color: var(--color-bento-accent);
     background: var(--color-bento-card-hover);
   }
 
@@ -46,22 +46,22 @@ body {
   }
   
   .bento-btn:hover {
-    background: #262626;
-    border-color: #3f3f46;
+    background: #F0F0F0;
+    border-color: var(--color-bento-accent);
   }
 
   .bento-btn-primary {
     background: var(--color-bento-text);
-    color: #000000;
+    color: #FFFFFF;
     border-radius: 12px;
     font-weight: bold;
     transition: all 0.2s ease-in-out;
   }
   
   .bento-btn-primary:hover {
-    background: #d4d4d8;
+    background: #2a3b5c;
     transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 14px rgba(26, 37, 60, 0.15);
   }
 
   .bento-btn-accent {
@@ -73,13 +73,13 @@ body {
   }
   
   .bento-btn-accent:hover {
-    background: #2563eb;
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+    background: #e55a4d;
+    box-shadow: 0 0 15px rgba(255, 111, 97, 0.4);
   }
 
   /* Form Elements */
   .bento-input {
-    background: #000000;
+    background: #FFFFFF;
     border: 1px solid var(--color-bento-border);
     border-radius: 12px;
     padding: 12px 16px;
@@ -89,8 +89,8 @@ body {
   
   .bento-input:focus {
     outline: none;
-    border-color: var(--color-bento-text);
-    background: #0a0a0a;
+    border-color: var(--color-bento-accent);
+    background: #FAFAFA;
   }
   
   /* Utilities for layout */
@@ -105,15 +105,15 @@ body {
     height: 8px;
   }
   .custom-scrollbar::-webkit-scrollbar-track {
-    background: #0f0f0f;
+    background: #F8F8F8;
     border-radius: 4px;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #262626;
+    background: #E0E0E0;
     border-radius: 4px;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #3f3f46;
+    background: #64748B;
   }
 
   .sticky-time-ruler {
