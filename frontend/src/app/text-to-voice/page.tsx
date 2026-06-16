@@ -131,8 +131,8 @@ export default function TextToVoice() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Right Column: Settings */}
-        <div className="lg:col-span-1 space-y-6">
-          <div className="bento-card p-6">
+        <div className="lg:col-span-1 space-y-6 lg:sticky lg:top-6">
+          <div className="bento-card p-6 max-h-[85vh] overflow-y-auto custom-scrollbar">
             <h3 className="font-bold text-white mb-6 flex items-center">
               <i className="fas fa-microphone-alt text-blue-500 ml-2"></i> إعدادات الصوت
             </h3>
