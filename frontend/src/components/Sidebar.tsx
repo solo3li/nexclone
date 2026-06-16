@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "../store/useAuthStore";
 
 export default function Sidebar({ isOpen }: { isOpen: boolean }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, isAuthenticated, logout } = useAuthStore();
 
   const links = [
@@ -25,7 +26,7 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
         
         <div className="flex-shrink-0">
           {/* Logo */}
-          <div className="flex items-center space-x-3 mb-8">
+          <div className="flex items-center gap-3 mb-8">
             <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.2)]">
                <img src="/static/home/img/logo.png" alt="Logo" className="w-6 h-6 object-contain" />
             </div>
@@ -33,7 +34,7 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
           </div>
 
           {/* User Profile Mini Card */}
-          <div className="bento-card p-3 flex items-center space-x-3 mb-8">
+          <div className="bento-card p-3 flex items-center gap-3 mb-8">
             <div className="w-10 h-10 rounded-full overflow-hidden bg-[#262626]">
               <img src="/static/img/avatar.jpg" alt="Profile" className="w-full h-full object-cover opacity-80" />
             </div>
@@ -41,7 +42,7 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
               <h3 className="font-bold text-sm text-white leading-tight truncate">
                 {isAuthenticated ? user?.email : "زائر"}
               </h3>
-              <span className="text-[10px] text-[var(--color-bento-muted)] uppercase tracking-wider font-bold">باقة المحترفين</span>
+              <span className="inline-block mt-1 bg-[#1a1a1a] text-xs text-[var(--color-bento-muted)] px-2 py-0.5 rounded-md font-bold tracking-wide">باقة المحترفين</span>
             </div>
           </div>
         </div>
@@ -55,7 +56,7 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
                 <Link 
                   key={link.label} 
                   href={link.href}
-                  className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all font-medium text-sm
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm
                     ${isActive 
                       ? "bg-white text-black font-bold shadow-[0_4px_12px_rgba(255,255,255,0.1)]" 
                       : "text-[var(--color-bento-muted)] hover:text-white hover:bg-[#1a1a1a]"}`}
@@ -78,7 +79,7 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
             <button 
               onClick={() => {
                 logout();
-                window.location.href = "/login";
+                router.push("/login");
               }}
               className="bento-btn w-full px-4 py-2 text-xs flex items-center justify-center text-red-400 hover:text-red-300 hover:bg-red-950/30"
             >
