@@ -1,146 +1,232 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useLanguageStore } from "../store/useLanguageStore";
+
+const days = {
+  ar: ["الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"],
+  en: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+};
+const bars = [40, 70, 50, 90, 60, 30, 45]; // heights in %
 
 export default function Home() {
-  const [billingCycle, setBillingCycle] = useState("month");
+  const { language } = useLanguageStore();
+  const isAr = language === "ar";
 
   return (
-    <div className="max-w-[1400px] mx-auto pb-20 animate-fade-in" dir="rtl">
-      
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+    <div className="max-w-[1300px] mx-auto px-6 py-10" dir={isAr ? "rtl" : "ltr"}>
+
+      {/* Page header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
         <div>
-          <h1 className="text-3xl font-extrabold text-[var(--color-bento-text)] tracking-tight">نظرة عامة</h1>
-          <p className="text-[var(--color-bento-muted)] mt-1 text-sm">مراقبة نشاط توليد الذكاء الاصطناعي ومساحة العمل الخاصة بك.</p>
+          <h1 className="text-h1 text-[var(--color-ink)]">
+            {isAr ? "نظرة عامة" : "Overview"}
+          </h1>
+          <p className="text-small text-[var(--color-muted)] mt-1">
+            {isAr
+              ? "مراقبة نشاط الذكاء الاصطناعي ومساحة العمل الخاصة بك."
+              : "Monitor your AI activity and workspace."}
+          </p>
         </div>
-        <div className="flex space-x-3 mt-4 md:mt-0">
-          <button className="bento-btn w-10 h-10 flex items-center justify-center text-[var(--color-bento-text)]">
-            <i className="fas fa-bell"></i>
+        <div className="flex items-center gap-2">
+          <button className="icon-box text-[var(--color-muted)] hover:text-[var(--color-ink)] transition-colors">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="w-4 h-4">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
           </button>
-          <button className="bento-btn-primary px-5 py-2 text-sm flex items-center">
-            <i className="fas fa-plus ml-2 text-[10px]"></i> مشروع جديد
+          <button className="btn btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="w-3.5 h-3.5">
+              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            {isAr ? "مشروع جديد" : "New project"}
           </button>
         </div>
       </div>
 
       {/* Bento Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-[minmax(180px,auto)]">
-        
-        {/* Welcome / Stats Card (Span 2 cols) */}
-        <div className="bento-card col-span-1 md:col-span-2 p-8 flex flex-col justify-between relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500 rounded-full blur-[100px] opacity-10 group-hover:opacity-20 transition-opacity"></div>
-          
-          <div className="relative z-10 mb-8">
-            <h2 className="text-2xl font-bold text-[var(--color-bento-text)] mb-2">مرحباً بعودتك.</h2>
-            <p className="text-[var(--color-bento-muted)] text-sm max-w-md">مساحة العمل الخاصة بك تعمل بسلاسة. لقد استخدمت 25% من إجمالي رصيدك هذا الشهر.</p>
-          </div>
-          
-          <div className="grid grid-cols-3 gap-4 relative z-10">
-            <div>
-              <p className="text-[10px] uppercase tracking-wider text-[var(--color-bento-muted)] font-bold mb-1">العمليات</p>
-              <h3 className="text-2xl font-extrabold text-[var(--color-bento-text)]">12,340</h3>
-            </div>
-            <div>
-              <p className="text-[10px] uppercase tracking-wider text-[var(--color-bento-muted)] font-bold mb-1">الرصيد</p>
-              <h3 className="text-2xl font-extrabold text-[var(--color-bento-text)]">4,120 <span className="text-[10px] text-green-400 font-normal mr-1" dir="ltr">+12%</span></h3>
-            </div>
-            <div>
-              <p className="text-[10px] uppercase tracking-wider text-[var(--color-bento-muted)] font-bold mb-1">الوقت الموفر</p>
-              <h3 className="text-2xl font-extrabold text-[var(--color-bento-text)]">45 س</h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 auto-rows-min">
+
+        {/* Welcome card — 2 cols */}
+        <div className="md:col-span-2 card p-7 relative overflow-hidden">
+          {/* Subtle background accent */}
+          <div className="absolute top-0 end-0 w-64 h-64 bg-blue-100 rounded-full blur-[80px] opacity-50 pointer-events-none" />
+
+          <div className="relative z-10">
+            <p className="text-caption text-[var(--color-muted)] mb-2">
+              {isAr ? "مرحباً بعودتك" : "Welcome back"}
+            </p>
+            <h2 className="text-h2 text-[var(--color-ink)] mb-2">
+              {isAr ? "مساحة عملك تعمل بسلاسة." : "Your workspace is running smoothly."}
+            </h2>
+            <p className="text-small text-[var(--color-muted)] mb-8">
+              {isAr
+                ? "لقد استخدمت 25% من إجمالي رصيدك هذا الشهر."
+                : "You've used 25% of your monthly credit."}
+            </p>
+
+            {/* Stats row */}
+            <div className="grid grid-cols-3 gap-6 pt-6 border-t border-[var(--color-border)]">
+              {[
+                { labelAr: "العمليات", labelEn: "Operations", value: "12,340", sub: null },
+                { labelAr: "الرصيد",   labelEn: "Credits",    value: "4,120",  sub: "+12%" },
+                { labelAr: "الوقت الموفر", labelEn: "Time saved", value: isAr ? "45 س" : "45 h", sub: null },
+              ].map((s) => (
+                <div key={s.labelEn}>
+                  <p className="text-caption text-[var(--color-muted)] mb-1">
+                    {isAr ? s.labelAr : s.labelEn}
+                  </p>
+                  <p className="text-h2 text-[var(--color-ink)] flex items-baseline gap-2">
+                    {s.value}
+                    {s.sub && (
+                      <span className="badge badge-success text-[9px]">{s.sub}</span>
+                    )}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Quick Tools (Span 1 col) */}
-        <div className="bento-card p-6 flex flex-col relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500 rounded-full blur-[80px] opacity-10"></div>
-          <div className="flex justify-between items-center mb-6 relative z-10">
-            <h3 className="font-bold text-[var(--color-bento-text)]">أدوات الذكاء الاصطناعي</h3>
-            <Link href="/dashboard" className="text-xs text-[var(--color-bento-muted)] hover:text-[var(--color-bento-text)]">عرض الكل</Link>
+        {/* Quick tools — 1 col */}
+        <div className="card p-6">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-h3 text-[var(--color-ink)]">
+              {isAr ? "الأدوات" : "Tools"}
+            </h3>
+            <Link href="/tools" className="text-small text-[var(--color-muted)] hover:text-[var(--color-primary)] transition-colors font-medium">
+              {isAr ? "الكل" : "All"}
+            </Link>
           </div>
-          
-          <div className="space-y-3 flex-1 relative z-10">            <Link href="/voice-to-text" className="bento-btn p-3 flex items-center justify-between group">
-              <div className="flex items-center space-x-3 space-x-reverse">
-                <div className="w-8 h-8 rounded-md bg-[var(--color-bento-card-hover)] flex items-center justify-center text-green-400 group-hover:bg-green-500/10">
-                  <i className="fas fa-microphone text-xs"></i>
+
+          <div className="space-y-2">
+            {[
+              {
+                href: "/voice-to-text",
+                color: "text-emerald-600",
+                bg: "bg-emerald-50",
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="w-3.5 h-3.5">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                  </svg>
+                ),
+                labelAr: "صوت إلى نص",
+                labelEn: "Voice to Text",
+              },
+              {
+                href: "/text-to-voice",
+                color: "text-violet-600",
+                bg: "bg-violet-50",
+                icon: (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="w-3.5 h-3.5">
+                    <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                  </svg>
+                ),
+                labelAr: "نص إلى صوت",
+                labelEn: "Text to Voice",
+              },
+            ].map((t) => (
+              <Link
+                key={t.href}
+                href={t.href}
+                className="row-hover flex items-center justify-between p-2.5 group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-lg ${t.bg} ${t.color} flex items-center justify-center shrink-0`}>
+                    {t.icon}
+                  </div>
+                  <span className="text-small font-medium text-[var(--color-ink)]">
+                    {isAr ? t.labelAr : t.labelEn}
+                  </span>
                 </div>
-                <span className="text-sm font-semibold text-[var(--color-bento-text)]">تحويل الصوت إلى نص</span>
-              </div>
-              <i className="fas fa-arrow-left text-[10px] text-[var(--color-bento-muted)] group-hover:text-[var(--color-bento-text)] transform group-hover:-translate-x-1 transition-all"></i>
-            </Link>
-            
-            <Link href="/text-to-voice" className="bento-btn p-3 flex items-center justify-between group">
-              <div className="flex items-center space-x-3 space-x-reverse">
-                <div className="w-8 h-8 rounded-md bg-[var(--color-bento-card-hover)] flex items-center justify-center text-purple-400 group-hover:bg-purple-500/10">
-                  <i className="fas fa-volume-up text-xs"></i>
-                </div>
-                <span className="text-sm font-semibold text-[var(--color-bento-text)]">تحويل النص إلى صوت</span>
-              </div>
-              <i className="fas fa-arrow-left text-[10px] text-[var(--color-bento-muted)] group-hover:text-[var(--color-bento-text)] transform group-hover:-translate-x-1 transition-all"></i>
-            </Link>
+                <svg
+                  viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                  className={`w-3.5 h-3.5 text-[var(--color-subtle)] transition-transform group-hover:${isAr ? "-translate-x-0.5 text-[var(--color-muted)]" : "translate-x-0.5 text-[var(--color-muted)]"}`}
+                >
+                  {isAr
+                    ? <polyline points="15 18 9 12 15 6" />
+                    : <polyline points="9 18 15 12 9 6" />}
+                </svg>
+              </Link>
+            ))}
           </div>
         </div>
 
-        {/* Chart / Performance (Span 2 cols, row 2) */}
-        <div className="bento-card col-span-1 md:col-span-2 p-6 flex flex-col relative">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="font-bold text-[var(--color-bento-text)]">رسم بياني للنشاط</h3>
-            <select className="bg-transparent border border-[var(--color-bento-border)] rounded-md text-xs text-[var(--color-bento-text)] p-1 outline-none mr-auto ml-0 text-left" dir="ltr">
-              <option className="bg-[var(--color-bento-bg)]">هذا الأسبوع</option>
-              <option className="bg-[var(--color-bento-bg)]">هذا الشهر</option>
+        {/* Activity Chart — 2 cols */}
+        <div className="md:col-span-2 card p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-h3 text-[var(--color-ink)]">
+              {isAr ? "النشاط الأسبوعي" : "Weekly activity"}
+            </h3>
+            <select className="bento-input !p-1.5 !text-xs !w-auto text-[var(--color-muted)]">
+              <option>{isAr ? "هذا الأسبوع" : "This week"}</option>
+              <option>{isAr ? "هذا الشهر" : "This month"}</option>
             </select>
           </div>
-          <div className="flex-1 w-full flex items-end justify-between px-2 pt-10 relative">
-            {/* Fake grid lines */}
-            <div className="absolute inset-0 flex flex-col justify-between border-b border-r border-[var(--color-bento-border)] mr-6 pb-6">
-              <div className="border-t border-[var(--color-bento-border)] opacity-30 w-full"></div>
-              <div className="border-t border-[var(--color-bento-border)] opacity-30 w-full"></div>
-              <div className="border-t border-[var(--color-bento-border)] opacity-30 w-full"></div>
-            </div>
-            
-            {/* Fake Bars */}
-            <div className="w-[10%] h-[40%] bg-blue-500/20 border-t-2 border-blue-500 rounded-t-sm z-10 mx-1"></div>
-            <div className="w-[10%] h-[70%] bg-blue-500/20 border-t-2 border-blue-500 rounded-t-sm z-10 mx-1"></div>
-            <div className="w-[10%] h-[50%] bg-blue-500/20 border-t-2 border-blue-500 rounded-t-sm z-10 mx-1"></div>
-            <div className="w-[10%] h-[90%] bg-blue-500/80 border-t-2 border-blue-400 rounded-t-sm z-10 mx-1 relative shadow-[0_0_15px_rgba(59,130,246,0.3)]">
-               <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-white text-black text-[10px] font-bold px-2 py-1 rounded">240</div>
-            </div>
-            <div className="w-[10%] h-[60%] bg-blue-500/20 border-t-2 border-blue-500 rounded-t-sm z-10 mx-1"></div>
-            <div className="w-[10%] h-[30%] bg-blue-500/20 border-t-2 border-blue-500 rounded-t-sm z-10 mx-1"></div>
-            <div className="w-[10%] h-[45%] bg-blue-500/20 border-t-2 border-blue-500 rounded-t-sm z-10 mx-1"></div>
+
+          {/* Bar chart */}
+          <div className="flex items-end justify-between gap-2 h-28 px-1">
+            {bars.map((h, i) => (
+              <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
+                {h === 90 && (
+                  <span className="text-[9px] font-bold text-[var(--color-primary)]">240</span>
+                )}
+                <div
+                  className={`w-full rounded-t-md transition-all ${
+                    h === 90
+                      ? "bg-[var(--color-primary)]"
+                      : "bg-[var(--color-surface-2)]"
+                  }`}
+                  style={{ height: `${h}%` }}
+                />
+              </div>
+            ))}
           </div>
-          <div className="flex justify-between w-full pl-2 pr-6 mt-3 text-[10px] font-bold text-[var(--color-bento-muted)] flex-row-reverse" dir="ltr">
-            <span>الاثنين</span><span>الثلاثاء</span><span>الأربعاء</span><span>الخميس</span><span>الجمعة</span><span>السبت</span><span>الأحد</span>
+
+          {/* X axis */}
+          <div className="flex justify-between px-1 mt-3">
+            {(isAr ? days.ar : days.en).map((d) => (
+              <span key={d} className="flex-1 text-center text-[10px] text-[var(--color-subtle)] font-medium">
+                {d}
+              </span>
+            ))}
           </div>
         </div>
 
-        {/* Subscription/Mini Plan (Span 1 col) */}
-        <div className="bento-card p-6 flex flex-col justify-between">
+        {/* Plan card — 1 col */}
+        <div className="card p-6 flex flex-col justify-between gap-5">
           <div>
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="font-bold text-[var(--color-bento-text)]">باقة المحترفين</h3>
-              <span className="px-2 py-1 bg-green-500/10 text-green-400 text-[10px] font-bold rounded">نشط</span>
+            <div className="flex items-start justify-between mb-1">
+              <h3 className="text-h3 text-[var(--color-ink)]">
+                {isAr ? "باقة المحترفين" : "Pro plan"}
+              </h3>
+              <span className="badge badge-success">{isAr ? "نشط" : "Active"}</span>
             </div>
-            <p className="text-xs text-[var(--color-bento-muted)] mb-6">أنت على باقة المحترفين بنظام الدفع الشهري.</p>
+            <p className="text-small text-[var(--color-muted)]">
+              {isAr ? "دفع شهري." : "Monthly billing."}
+            </p>
           </div>
-          
-          <div className="space-y-4">
-            <div>
-              <div className="flex justify-between text-[10px] font-bold text-[var(--color-bento-muted)] mb-1">
-                <span>التخزين</span>
-                <span className="text-[var(--color-bento-text)]" dir="ltr">45 GB / 100 GB</span>
-              </div>
-              <div className="h-1.5 w-full border border-[var(--color-bento-border)] rounded-full overflow-hidden">
-                <div className="h-full bg-[var(--color-bento-text)] w-[45%]"></div>
-              </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-small text-[var(--color-muted)]">
+                {isAr ? "التخزين" : "Storage"}
+              </span>
+              <span className="text-small text-[var(--color-ink)] font-medium" dir="ltr">45 / 100 GB</span>
             </div>
-            
-            <Link href="/settings" className="bento-btn w-full py-2 text-xs font-bold flex items-center justify-center">
-              إدارة الفوترة
-            </Link>
+            <div className="h-1.5 w-full rounded-full bg-[var(--color-surface-2)] overflow-hidden">
+              <div className="h-full bg-[var(--color-primary)] rounded-full" style={{ width: "45%" }} />
+            </div>
           </div>
+
+          <Link
+            href="/settings"
+            className="btn btn-secondary w-full justify-center text-sm"
+          >
+            {isAr ? "إدارة الفوترة" : "Manage billing"}
+          </Link>
         </div>
 
       </div>

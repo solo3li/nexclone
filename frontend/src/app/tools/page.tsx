@@ -3,114 +3,147 @@
 import Link from "next/link";
 import { useLanguageStore } from "../../store/useLanguageStore";
 
+const tools = [
+  {
+    href: "/voice-to-text",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+        <line x1="12" y1="19" x2="12" y2="23" /><line x1="8" y1="23" x2="16" y2="23" />
+      </svg>
+    ),
+    color: "text-emerald-600",
+    bgColor: "bg-emerald-50",
+    titleAr: "تحويل الصوت إلى نص",
+    titleEn: "Voice to Text",
+    descAr: "دقة عالية في النسخ — يدعم العربية والإنجليزية وأكثر من 30 لغة.",
+    descEn: "High-accuracy transcription — Arabic, English, and 30+ languages.",
+    tag: null,
+  },
+  {
+    href: "/text-to-voice",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+        <path d="M11 5L6 9H2v6h4l5 4V5z" />
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+        <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+      </svg>
+    ),
+    color: "text-violet-600",
+    bgColor: "bg-violet-50",
+    titleAr: "تحويل النص إلى صوت",
+    titleEn: "Text to Voice",
+    descAr: "أصوات طبيعية بالذكاء الاصطناعي — حوّل نصوصك إلى تعليق صوتي احترافي.",
+    descEn: "Neural text-to-speech — turn copy into natural, professional voiceovers.",
+    tag: null,
+  },
+  {
+    href: "#",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+        <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" />
+        <polyline points="21 15 16 10 5 21" />
+      </svg>
+    ),
+    color: "text-blue-600",
+    bgColor: "bg-blue-50",
+    titleAr: "توليد الصور",
+    titleEn: "Image Generation",
+    descAr: "صوراً إبداعية من وصف نصي — بجودة 4K وأسلوب قابل للضبط.",
+    descEn: "Creative images from text — 4K quality with adjustable style.",
+    tag: { ar: "قريباً", en: "Soon" },
+  },
+  {
+    href: "#",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+        <polygon points="23 7 16 12 23 17 23 7" /><rect x="1" y="5" width="15" height="14" rx="2" />
+      </svg>
+    ),
+    color: "text-rose-600",
+    bgColor: "bg-rose-50",
+    titleAr: "توليد الفيديو",
+    titleEn: "Video Generation",
+    descAr: "مقاطع فيديو متحركة من نص — سريع وقابل للتعديل.",
+    descEn: "Animated clips from text prompts — fast and fully editable.",
+    tag: { ar: "قريباً", en: "Soon" },
+  },
+];
+
 export default function ToolsPage() {
   const { language } = useLanguageStore();
-
-  const tools = [
-    {
-      id: "voice-to-text",
-      href: "/voice-to-text",
-      icon: "fa-microphone-alt",
-      color: "text-green-400",
-      bgHover: "group-hover:bg-green-500/10",
-      titleAr: "تحويل الصوت إلى نص",
-      titleEn: "Voice to Text",
-      descAr: "قم بتحويل ملفاتك الصوتية إلى نصوص مكتوبة بدقة عالية باستخدام الذكاء الاصطناعي.",
-      descEn: "Convert your audio files into highly accurate written text using AI.",
-      isNew: false
-    },
-    {
-      id: "text-to-voice",
-      href: "/text-to-voice",
-      icon: "fa-wave-square",
-      color: "text-purple-400",
-      bgHover: "group-hover:bg-purple-500/10",
-      titleAr: "تحويل النص إلى صوت",
-      titleEn: "Text to Voice",
-      descAr: "حوّل نصوصك إلى تعليق صوتي طبيعي واحترافي يدعم لغات متعددة.",
-      descEn: "Turn your texts into natural and professional voiceovers supporting multiple languages.",
-      isNew: false
-    },
-    {
-      id: "image-gen",
-      href: "#",
-      icon: "fa-image",
-      color: "text-blue-400",
-      bgHover: "group-hover:bg-blue-500/10",
-      titleAr: "توليد الصور",
-      titleEn: "Image Generation",
-      descAr: "صمم صوراً إبداعية من الوصف النصي بجودة فائقة.",
-      descEn: "Design creative images from text descriptions in high quality.",
-      isNew: true
-    },
-    {
-      id: "video-gen",
-      href: "#",
-      icon: "fa-video",
-      color: "text-pink-400",
-      bgHover: "group-hover:bg-pink-500/10",
-      titleAr: "توليد الفيديو",
-      titleEn: "Video Generation",
-      descAr: "قم بإنشاء مقاطع فيديو قصيرة ومتحركة بناءً على الأوامر النصية.",
-      descEn: "Create short animated videos based on text prompts.",
-      isNew: true
-    }
-  ];
+  const isAr = language === "ar";
 
   return (
-    <div className="max-w-7xl mx-auto pb-20 animate-fade-in" dir={language === 'ar' ? 'rtl' : 'ltr'}>
-      
-      {/* Header Section */}
-      <div className="mb-12 text-center md:text-start relative">
-        <div className="absolute top-[-50px] left-1/4 w-96 h-96 bg-[var(--color-bento-accent)] rounded-full blur-[120px] opacity-[0.15] pointer-events-none"></div>
-        <h1 className="text-4xl md:text-5xl font-extrabold text-[var(--color-bento-text)] tracking-tight mb-4 relative z-10">
-          {language === 'ar' ? 'أدوات الذكاء الاصطناعي' : 'AI Tools'}
+    <div className="max-w-[1100px] mx-auto px-6 py-16" dir={isAr ? "rtl" : "ltr"}>
+
+      {/* Header */}
+      <div className="mb-12">
+        <p className="text-caption text-[var(--color-muted)] mb-3">
+          {isAr ? "أدوات الذكاء الاصطناعي" : "AI Tools"}
+        </p>
+        <h1 className="text-h1 text-[var(--color-ink)] mb-4">
+          {isAr ? "كل الأدوات" : "All Tools"}
         </h1>
-        <p className="text-[var(--color-bento-muted)] text-lg max-w-2xl relative z-10">
-          {language === 'ar' 
-            ? 'مجموعة متكاملة من أدوات الذكاء الاصطناعي المصممة لمساعدتك على إنجاز مهامك الإبداعية والعملية بسرعة واحترافية.' 
-            : 'A complete suite of AI tools designed to help you accomplish your creative and professional tasks quickly.'}
+        <p className="text-body text-[var(--color-muted)] max-w-lg">
+          {isAr
+            ? "مجموعة متكاملة من أدوات الذكاء الاصطناعي لإنجاز مهامك الإبداعية."
+            : "A complete suite of AI tools for your creative workflow."}
         </p>
       </div>
 
-      {/* Grid Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
-        {tools.map((tool) => (
-          <Link 
-            key={tool.id} 
-            href={tool.href}
-            className={`bento-card p-6 flex flex-col group cursor-pointer h-full
-              ${tool.href === '#' ? 'opacity-70 pointer-events-none' : ''}
-            `}
-          >
-            <div className="flex justify-between items-start mb-6">
-              <div className={`w-14 h-14 rounded-2xl bg-[var(--color-bento-bg)] flex items-center justify-center border border-[var(--color-bento-border)] transition-colors duration-300 ${tool.bgHover}`}>
-                <i className={`fas ${tool.icon} text-2xl ${tool.color}`}></i>
-              </div>
-              
-              {tool.isNew && (
-                <span className="bg-[var(--color-bento-accent)] text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-[0_0_10px_rgba(100,100,250,0.3)]">
-                  {language === 'ar' ? 'قريباً' : 'Soon'}
+      {/* Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        {tools.map((t) => {
+          const isDisabled = t.href === "#";
+          return (
+            <Link
+              key={t.href + (isAr ? t.titleAr : t.titleEn)}
+              href={t.href}
+              className={`group card p-6 flex flex-col gap-5 relative
+                ${isDisabled ? "pointer-events-none" : ""}`}
+            >
+              {/* Tag */}
+              {t.tag && (
+                <span className="absolute top-5 end-5 badge badge-primary text-[10px]">
+                  {isAr ? t.tag.ar : t.tag.en}
                 </span>
               )}
-            </div>
 
-            <h3 className="text-xl font-bold text-[var(--color-bento-text)] mb-3 transition-colors group-hover:text-[var(--color-bento-accent)]">
-              {language === 'ar' ? tool.titleAr : tool.titleEn}
-            </h3>
-            
-            <p className="text-sm text-[var(--color-bento-muted)] leading-relaxed flex-1">
-              {language === 'ar' ? tool.descAr : tool.descEn}
-            </p>
+              {/* Icon */}
+              <div className={`w-12 h-12 rounded-xl ${t.bgColor} ${t.color} flex items-center justify-center`}>
+                {t.icon}
+              </div>
 
-            <div className="mt-6 pt-4 border-t border-[var(--color-bento-border)] flex items-center text-sm font-bold text-[var(--color-bento-muted)] group-hover:text-[var(--color-bento-text)] transition-colors">
-              <span>{language === 'ar' ? 'استخدم الأداة' : 'Use Tool'}</span>
-              <i className={`fas ${language === 'ar' ? 'fa-arrow-left mr-2' : 'fa-arrow-right ml-2'} text-[10px] transform transition-transform group-hover:${language === 'ar' ? '-translate-x-1' : 'translate-x-1'}`}></i>
-            </div>
-          </Link>
-        ))}
+              {/* Content */}
+              <div className="flex-1">
+                <h3 className="text-h3 text-[var(--color-ink)] mb-1.5 group-hover:text-[var(--color-primary)] transition-colors">
+                  {isAr ? t.titleAr : t.titleEn}
+                </h3>
+                <p className="text-small text-[var(--color-muted)] leading-relaxed">
+                  {isAr ? t.descAr : t.descEn}
+                </p>
+              </div>
+
+              {/* Arrow */}
+              {!isDisabled && (
+                <div className={`flex items-center gap-1 text-small text-[var(--color-muted)] group-hover:text-[var(--color-primary)] transition-colors font-medium`}>
+                  <span>{isAr ? "استخدم الأداة" : "Open tool"}</span>
+                  <svg
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                    className={`w-3.5 h-3.5 transition-transform group-hover:${isAr ? "-translate-x-0.5" : "translate-x-0.5"}`}
+                  >
+                    {isAr
+                      ? <polyline points="15 18 9 12 15 6" />
+                      : <polyline points="9 18 15 12 9 6" />}
+                  </svg>
+                </div>
+              )}
+            </Link>
+          );
+        })}
       </div>
-
     </div>
   );
 }
