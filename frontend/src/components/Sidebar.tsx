@@ -24,9 +24,9 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
       className={`fixed top-0 left-0 h-screen w-64 border-r border-[var(--color-bento-border)] bg-[var(--color-bento-bg)] transition-transform duration-300 z-50
         ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
     >
-      <div className="w-full h-full p-6 flex flex-col justify-between">
+      <div className="w-full h-full p-6 flex flex-col">
         
-        <div>
+        <div className="flex-shrink-0">
           {/* Logo */}
           <div className="flex items-center space-x-3 mb-8">
             <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.2)]">
@@ -47,8 +47,10 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
               <span className="text-[10px] text-[var(--color-bento-muted)] uppercase tracking-wider font-bold">Pro Plan</span>
             </div>
           </div>
+        </div>
 
-          {/* Navigation */}
+        {/* Navigation */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 -mr-2 pb-4">
           <nav className="space-y-2">
             {links.map((link) => {
               const isActive = pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href));
@@ -70,7 +72,7 @@ export default function Sidebar({ isOpen }: { isOpen: boolean }) {
         </div>
 
         {/* Bottom */}
-        <div className="space-y-4 pt-6 border-t border-[var(--color-bento-border)]">
+        <div className="flex-shrink-0 space-y-4 pt-6 border-t border-[var(--color-bento-border)]">
           <Link href="/#pricing" className="bento-btn-primary block w-full text-center py-3 text-sm flex items-center justify-center">
             <i className="fas fa-bolt mr-2 text-yellow-500"></i> Upgrade
           </Link>
