@@ -43,8 +43,8 @@ export default function Register() {
 
         <div className="bento-card p-8 sm:p-10 shadow-2xl">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-white mb-2">Create Account</h1>
-            <p className="text-[var(--color-bento-muted)] text-sm">Join NexMedia AI today</p>
+            <h1 className="text-2xl font-bold text-white mb-2">إنشاء حساب جديد</h1>
+            <p className="text-[var(--color-bento-muted)] text-sm">انضم إلى نكس ميديا للذكاء الاصطناعي اليوم</p>
           </div>
 
           {error && (
@@ -55,39 +55,41 @@ export default function Register() {
 
           <form onSubmit={handleRegister} className="space-y-5">
             <div>
-              <label className="block text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider mb-2">Full Name</label>
+              <label className="block text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider mb-2">الاسم الكامل</label>
               <input
                 type="text"
                 required
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 className="bento-input w-full"
-                placeholder="John Doe"
+                placeholder="أحمد محمد"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider mb-2">Email Address</label>
+              <label className="block text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider mb-2">البريد الإلكتروني</label>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="bento-input w-full"
+                className="bento-input w-full text-right"
+                dir="ltr"
                 placeholder="you@example.com"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider mb-2">Password</label>
+              <label className="block text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider mb-2">كلمة المرور</label>
               <input
                 type="password"
                 required
                 minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="bento-input w-full"
-                placeholder="Min 6 characters"
+                className="bento-input w-full text-right"
+                dir="ltr"
+                placeholder="6 أحرف على الأقل"
               />
             </div>
 
@@ -96,14 +98,14 @@ export default function Register() {
               disabled={isLoading}
               className="bento-btn-accent w-full py-3.5 mt-4 text-sm font-bold shadow-[0_0_20px_rgba(59,130,246,0.3)] disabled:opacity-50"
             >
-              {isLoading ? "Creating account..." : "Create account"}
+              {isLoading ? "جاري إنشاء الحساب..." : "إنشاء حساب"}
             </button>
           </form>
 
           <p className="mt-8 text-center text-[var(--color-bento-muted)] text-sm">
-            Already have an account?{" "}
+            لديك حساب بالفعل؟{" "}
             <a href="/login" className="text-blue-400 hover:text-blue-300 font-bold transition-colors">
-              Sign in
+              تسجيل الدخول
             </a>
           </p>
         </div>

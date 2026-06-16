@@ -41,8 +41,8 @@ export default function Login() {
 
         <div className="bento-card p-8 sm:p-10 shadow-2xl">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-white mb-2">Welcome Back</h1>
-            <p className="text-[var(--color-bento-muted)] text-sm">Sign in to your NexMedia AI account</p>
+            <h1 className="text-2xl font-bold text-white mb-2">أهلاً بك مجدداً</h1>
+            <p className="text-[var(--color-bento-muted)] text-sm">سجل دخولك إلى حسابك في نكس ميديا للذكاء الاصطناعي</p>
           </div>
 
           {error && (
@@ -53,25 +53,27 @@ export default function Login() {
 
           <form onSubmit={handleLogin} className="space-y-5">
             <div>
-              <label className="block text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider mb-2">Email Address</label>
+              <label className="block text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider mb-2">البريد الإلكتروني</label>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="bento-input w-full"
+                className="bento-input w-full text-right"
+                dir="ltr"
                 placeholder="you@example.com"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider mb-2">Password</label>
+              <label className="block text-xs font-bold text-[var(--color-bento-muted)] uppercase tracking-wider mb-2">كلمة المرور</label>
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="bento-input w-full"
+                className="bento-input w-full text-right"
+                dir="ltr"
                 placeholder="••••••••"
               />
             </div>
@@ -81,14 +83,14 @@ export default function Login() {
               disabled={isLoading}
               className="bento-btn-accent w-full py-3.5 mt-4 text-sm font-bold shadow-[0_0_20px_rgba(59,130,246,0.3)] disabled:opacity-50"
             >
-              {isLoading ? "Signing in..." : "Sign in"}
+              {isLoading ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
             </button>
           </form>
 
           <p className="mt-8 text-center text-[var(--color-bento-muted)] text-sm">
-            Don't have an account?{" "}
+            ليس لديك حساب؟{" "}
             <a href="/register" className="text-blue-400 hover:text-blue-300 font-bold transition-colors">
-              Sign up for free
+              قم بإنشاء حساب مجاني
             </a>
           </p>
         </div>

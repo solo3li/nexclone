@@ -74,7 +74,7 @@ export default function TextToVoice() {
 
   const handleGenerate = async () => {
     if (!isAuthenticated) {
-      alert("You must be logged in to use this tool.");
+      alert("يجب تسجيل الدخول لاستخدام هذه الأداة.");
       router.push("/login");
       return;
     }
@@ -172,10 +172,10 @@ export default function TextToVoice() {
                     onChange={(e) => setOtherLanguage(e.target.value)}
                     className="bento-input w-full appearance-none text-sm"
                   >
-                    <option>English (US)</option>
-                    <option>English (UK)</option>
-                    <option>Spanish</option>
-                    <option>French</option>
+                    <option value="English (US)">الإنجليزية (الولايات المتحدة)</option>
+                    <option value="English (UK)">الإنجليزية (المملكة المتحدة)</option>
+                    <option value="Spanish">الإسبانية</option>
+                    <option value="French">الفرنسية</option>
                   </select>
                 </div>
               )}
@@ -339,8 +339,8 @@ export default function TextToVoice() {
                <div className="text-sm font-bold text-white flex items-center">
                  أدخل النص هنا <i className="fas fa-edit mr-2 text-[var(--color-bento-muted)]"></i>
                </div>
-               <div className="bg-blue-900/40 text-blue-300 text-xs px-3 py-1 rounded-full border border-blue-500/30 font-mono">
-                 max 4096
+               <div className="bg-blue-900/40 text-blue-300 text-xs px-3 py-1 rounded-full border border-blue-500/30 font-mono flex-row-reverse">
+                 الحد الأقصى 4096
                </div>
             </div>
             
@@ -354,7 +354,7 @@ export default function TextToVoice() {
             ></textarea>
 
             <div className="text-left text-[var(--color-bento-muted)] text-xs font-mono mb-6">
-              characters 4096 / {text.length}
+              الأحرف 4096 / {text.length}
             </div>
 
             <button 

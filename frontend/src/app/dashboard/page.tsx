@@ -4,15 +4,15 @@ import Link from "next/link";
 
 export default function DashboardHome() {
   const tools = [
-    { name: "Voice to Text", desc: "Transcribe audio into text.", href: "/voice-to-text", icon: "🎙️", color: "from-purple-500 to-pink-500" },
-    { name: "Text to Voice", desc: "Generate speech from text.", href: "/text-to-voice", icon: "🔊", color: "from-orange-500 to-red-500" },
+    { name: "تحويل الصوت إلى نص", desc: "تفريغ المقاطع الصوتية إلى نصوص بدقة.", href: "/voice-to-text", icon: "🎙️", color: "from-purple-500 to-pink-500" },
+    { name: "تحويل النص إلى صوت", desc: "توليد أصوات بشرية طبيعية من النصوص.", href: "/text-to-voice", icon: "🔊", color: "from-orange-500 to-red-500" },
   ];
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Welcome to your Dashboard</h1>
-        <p className="text-slate-400">Select an AI tool to get started with your creative workflow.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-white mb-2">مرحباً بك في لوحة التحكم</h1>
+        <p className="text-slate-400">اختر أداة الذكاء الاصطناعي للبدء في إبداعك.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
