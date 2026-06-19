@@ -21,6 +21,13 @@ interface VoiceProfile {
   demoAudio: string;
 }
 
+interface OptionProfile {
+  id: number;
+  name: string;
+  value: string;
+  isPremium: boolean;
+}
+
 export default function TextToVoicePage() {
   const t = useTranslations("TextToVoice");
   const locale = useLocale();
@@ -31,6 +38,14 @@ export default function TextToVoicePage() {
   const [voices, setVoices] = useState<VoiceProfile[]>([]);
   const [selectedVoice, setSelectedVoice] = useState<string>("");
   const [voiceFilter, setVoiceFilter] = useState("all"); // "all" | "male" | "female"
+  
+  const [dialects, setDialects] = useState<OptionProfile[]>([]);
+  const [emotions, setEmotions] = useState<OptionProfile[]>([]);
+  const [styles, setStyles] = useState<OptionProfile[]>([]);
+
+  const [selectedDialect, setSelectedDialect] = useState<string>("");
+  const [selectedEmotion, setSelectedEmotion] = useState<string>("");
+  const [selectedStyle, setSelectedStyle] = useState<string>("");
   
   const [isProcessing, setIsProcessing] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -52,7 +67,24 @@ export default function TextToVoicePage() {
         console.error("Failed to load voices:", error);
       }
     };
+
+    const fetchOptions = async () => {
+      try {
+        const [dialectsRes, emotionsRes, stylesRes] = await Promise.all([
+          api.get("/api/platform/dialects"),
+          api.get("/api/platform/emotions"),
+          api.get("/api/platform/styles"),
+        ]);
+        setDialects(dialectsRes.data);
+        setEmotions(emotionsRes.data);
+        setStyles(stylesRes.data);
+      } catch (error) {
+        console.error("Failed to load options:", error);
+      }
+    };
+
     fetchVoices();
+    fetchOptions();
   }, []);
 
   const playDemo = (demoUrl: string) => {
@@ -70,12 +102,17 @@ export default function TextToVoicePage() {
     setError("");
     setAudioUrl(null);
 
+    let instruction = "";
+    if (selectedDialect) instruction += `Accent: ${selectedDialect}. `;
+    if (selectedEmotion) instruction += `Emotion: ${selectedEmotion}. `;
+    if (selectedStyle) instruction += `Style: ${selectedStyle}. `;
+
     try {
       const response = await api.post("/api/ai/text-to-voice/generate", {
         text: text,
         language: languageMode,
         voiceName: selectedVoice,
-        styleInstruction: ""
+        styleInstruction: instruction.trim()
       }, {
         responseType: 'blob'
       });
@@ -374,25 +411,58 @@ export default function TextToVoicePage() {
                 <div className="space-y-3">
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[11px] font-semibold text-white/60 px-2">{t('accent')}</label>
-                    <div className="flex justify-between items-center bg-[#0a0015]/60 border border-white/5 rounded-[16px] px-4 py-3 text-xs text-white/50 cursor-pointer hover:border-white/10">
-                      <span>-- {t('accent')} --</span>
-                      <ChevronDown className="w-3.5 h-3.5" />
+                    <div className="relative bg-[#0a0015]/60 border border-white/5 rounded-[16px] text-xs text-white/80 hover:border-white/10 transition-colors">
+                      <select 
+                        value={selectedDialect}
+                        onChange={(e) => setSelectedDialect(e.target.value)}
+                        className="w-full bg-transparent outline-none appearance-none cursor-pointer px-4 py-3 relative z-10"
+                      >
+                        <option value="" className="bg-[#0a0015] text-white/50">-- {t('accent')} --</option>
+                        {dialects.map(d => (
+                          <option key={d.id} value={d.value} className="bg-[#0a0015] text-white">
+                            {d.name} {d.isPremium ? '⭐' : ''}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className={`w-3.5 h-3.5 absolute top-1/2 -translate-y-1/2 ${isRtl ? 'left-4' : 'right-4'} pointer-events-none text-white/50 z-0`} />
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[11px] font-semibold text-white/60 px-2">{t('emotion')}</label>
-                    <div className="flex justify-between items-center bg-[#0a0015]/60 border border-white/5 rounded-[16px] px-4 py-3 text-xs text-white/50 cursor-pointer hover:border-white/10">
-                      <span>-- {t('emotion')} --</span>
-                      <ChevronDown className="w-3.5 h-3.5" />
+                    <div className="relative bg-[#0a0015]/60 border border-white/5 rounded-[16px] text-xs text-white/80 hover:border-white/10 transition-colors">
+                      <select 
+                        value={selectedEmotion}
+                        onChange={(e) => setSelectedEmotion(e.target.value)}
+                        className="w-full bg-transparent outline-none appearance-none cursor-pointer px-4 py-3 relative z-10"
+                      >
+                        <option value="" className="bg-[#0a0015] text-white/50">-- {t('emotion')} --</option>
+                        {emotions.map(e => (
+                          <option key={e.id} value={e.value} className="bg-[#0a0015] text-white">
+                            {e.name} {e.isPremium ? '⭐' : ''}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className={`w-3.5 h-3.5 absolute top-1/2 -translate-y-1/2 ${isRtl ? 'left-4' : 'right-4'} pointer-events-none text-white/50 z-0`} />
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[11px] font-semibold text-white/60 px-2">{t('performanceStyle')}</label>
-                    <div className="flex justify-between items-center bg-[#0a0015]/60 border border-white/5 rounded-[16px] px-4 py-3 text-xs text-white/50 cursor-pointer hover:border-white/10">
-                      <span>-- {t('performanceStyle')} --</span>
-                      <ChevronDown className="w-3.5 h-3.5" />
+                    <div className="relative bg-[#0a0015]/60 border border-white/5 rounded-[16px] text-xs text-white/80 hover:border-white/10 transition-colors">
+                      <select 
+                        value={selectedStyle}
+                        onChange={(e) => setSelectedStyle(e.target.value)}
+                        className="w-full bg-transparent outline-none appearance-none cursor-pointer px-4 py-3 relative z-10"
+                      >
+                        <option value="" className="bg-[#0a0015] text-white/50">-- {t('performanceStyle')} --</option>
+                        {styles.map(s => (
+                          <option key={s.id} value={s.value} className="bg-[#0a0015] text-white">
+                            {s.name} {s.isPremium ? '⭐' : ''}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className={`w-3.5 h-3.5 absolute top-1/2 -translate-y-1/2 ${isRtl ? 'left-4' : 'right-4'} pointer-events-none text-white/50 z-0`} />
                     </div>
                   </div>
 

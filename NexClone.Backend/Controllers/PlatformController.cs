@@ -61,5 +61,38 @@ namespace NexClone.Backend.Controllers
                 
             return Ok(voices);
         }
+
+        [HttpGet("dialects")]
+        public async Task<IActionResult> GetDialects()
+        {
+            var dialects = await _legacyContext.TextToVoiceDarijatdialects
+                .Where(d => d.IsActive)
+                .OrderBy(d => d.Order)
+                .Select(d => new { d.Id, d.Name, d.Value, d.IsPremium })
+                .ToListAsync();
+            return Ok(dialects);
+        }
+
+        [HttpGet("emotions")]
+        public async Task<IActionResult> GetEmotions()
+        {
+            var emotions = await _legacyContext.TextToVoiceDarijatemotions
+                .Where(e => e.IsActive)
+                .OrderBy(e => e.Order)
+                .Select(e => new { e.Id, e.Name, e.Value, e.IsPremium })
+                .ToListAsync();
+            return Ok(emotions);
+        }
+
+        [HttpGet("styles")]
+        public async Task<IActionResult> GetStyles()
+        {
+            var styles = await _legacyContext.TextToVoiceDarijatstyles
+                .Where(s => s.IsActive)
+                .OrderBy(s => s.Order)
+                .Select(s => new { s.Id, s.Name, s.Value, s.IsPremium })
+                .ToListAsync();
+            return Ok(styles);
+        }
     }
 }
