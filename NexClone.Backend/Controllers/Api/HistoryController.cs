@@ -37,16 +37,47 @@ namespace NexClone.Backend.Controllers.Api
                     type = h.Type,
                     title = h.Title,
                     date = h.CreatedAt.ToString("dd MMM yyyy"),
+                    createdAt = h.CreatedAt,
                     duration = h.Duration,
                     status = h.Status,
                     lang = h.Lang,
                     voice = h.Voice,
                     fileUrl = h.FileUrl,
-                    resultText = h.ResultText
+                    creditsUsed = h.CreditsUsed
                 })
                 .ToListAsync();
 
             return Ok(history);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(userIdStr, out var userId))
+                return Unauthorized();
+
+            var record = await _dbContext.GenerationHistories
+                .Where(h => h.Id == id && h.UserId == userId)
+                .Select(h => new
+                {
+                    id = h.Id,
+                    type = h.Type,
+                    title = h.Title,
+                    createdAt = h.CreatedAt,
+                    date = h.CreatedAt.ToString("dd MMM yyyy, HH:mm"),
+                    duration = h.Duration,
+                    status = h.Status,
+                    lang = h.Lang,
+                    voice = h.Voice,
+                    fileUrl = h.FileUrl,
+                    resultText = h.ResultText,
+                    creditsUsed = h.CreditsUsed
+                })
+                .FirstOrDefaultAsync();
+
+            if (record == null) return NotFound();
+            return Ok(record);
         }
 
         [HttpDelete("{id}")]
