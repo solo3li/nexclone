@@ -27,7 +27,11 @@ namespace NexClone.Backend.Controllers.Api
             bool translate = mode == "translate";
             string targetLang = translate ? "en" : (string.IsNullOrWhiteSpace(language) ? "en" : language);
 
-            var result = await _sttService.TranscribeAudioAsync(file, translate, targetLang);
+            using var ms = new System.IO.MemoryStream();
+            await file.CopyToAsync(ms);
+            var audioData = ms.ToArray();
+
+            var result = await _sttService.TranscribeAudioAsync(audioData, file.FileName, file.ContentType, translate, targetLang);
 
             if (!result.Success)
             {

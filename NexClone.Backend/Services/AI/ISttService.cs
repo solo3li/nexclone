@@ -5,7 +5,7 @@ namespace NexClone.Backend.Services.AI
 {
     public interface ISttService
     {
-        Task<SttResult> TranscribeAudioAsync(IFormFile audioFile, bool translate, string targetLanguage);
+        Task<SttResult> TranscribeAudioAsync(byte[] audioData, string fileName, string contentType, bool translate, string targetLanguage);
     }
 
     public class SttResult

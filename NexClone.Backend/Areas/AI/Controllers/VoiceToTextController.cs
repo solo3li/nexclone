@@ -21,23 +21,40 @@ namespace NexClone.Backend.Areas.AI.Controllers
         private readonly CreditManagerService _creditManager;
         private const long MaxFileSize = 25 * 1024 * 1024; // 25 MB
 
-        public VoiceToTextController(ISttService sttService, ApplicationDbContext dbContext, CreditManagerService creditManager)
+        private readonly IMediaService _mediaService;
+
+        public VoiceToTextController(ISttService sttService, ApplicationDbContext dbContext, CreditManagerService creditManager, IMediaService mediaService)
         {
             _sttService = sttService;
             _dbContext = dbContext;
             _creditManager = creditManager;
+            _mediaService = mediaService;
+        }
+
+        public class TranscribeRequest
+        {
+            public string FileId { get; set; }
+            public bool Translate { get; set; } = false;
+            public string TargetLanguage { get; set; } = "en";
         }
 
         [HttpPost("transcribe")]
-        public async Task<IActionResult> TranscribeAudio(
-            IFormFile audio, 
-            [FromForm] bool translate = false, 
-            [FromForm] string targetLanguage = "en")
+        public async Task<IActionResult> TranscribeAudio([FromBody] TranscribeRequest request)
         {
-            if (audio == null || audio.Length == 0)
-                return BadRequest(new { error = "No audio file provided" });
+            if (string.IsNullOrEmpty(request.FileId))
+                return BadRequest(new { error = "No fileId provided" });
 
-            if (audio.Length > MaxFileSize)
+            byte[] audioData;
+            try
+            {
+                audioData = await _mediaService.DownloadFileAsync(request.FileId);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = "Could not retrieve file from storage", details = ex.Message });
+            }
+
+            if (audioData.Length > MaxFileSize)
             {
                 return BadRequest(new { 
                     error = $"File too large. Maximum allowed size is {MaxFileSize / (1024 * 1024)}MB. Please compress your file or upload a smaller one." 
@@ -51,7 +68,7 @@ namespace NexClone.Backend.Areas.AI.Controllers
                 return StatusCode(403, new { error = "Your current plan does not have access to this tool." });
 
             // Charge 1 credit per 100KB of audio
-            decimal amount = (decimal)audio.Length / 102400m;
+            decimal amount = (decimal)audioData.Length / 102400m;
             var cost = _creditManager.CalculateCost("voice-to-text", amount);
             
             if (!await _creditManager.HasEnoughCredits(userId, "voice-to-text", cost))
@@ -59,7 +76,7 @@ namespace NexClone.Backend.Areas.AI.Controllers
 
             try
             {
-                var result = await _sttService.TranscribeAudioAsync(audio, translate, targetLanguage);
+                var result = await _sttService.TranscribeAudioAsync(audioData, request.FileId, "audio/mpeg", request.Translate, request.TargetLanguage);
 
                 if (!result.Success)
                 {
@@ -70,10 +87,10 @@ namespace NexClone.Backend.Areas.AI.Controllers
                 {
                     UserId = userId,
                     Type = "voice-to-text",
-                    Title = audio.FileName,
+                    Title = request.FileId,
                     Status = "completed",
-                    Lang = targetLanguage,
-                    ResultText = translate ? result.TranslatedText : result.OriginalText,
+                    Lang = request.TargetLanguage,
+                    ResultText = request.Translate ? result.TranslatedText : result.OriginalText,
                     CreditsUsed = cost
                 };
                 _dbContext.GenerationHistories.Add(history);

@@ -6,6 +6,8 @@ import { useTranslations } from "next-intl";
 import Navbar from "../../../../src/components/Navbar";
 import Footer from "../../../../src/components/Footer";
 import { UploadCloud, Mic, Square, Play, Copy, Download, Loader2 } from "lucide-react";
+import { uploadDirectToMinio } from "../../../../src/utils/upload";
+import api from "../../../../src/utils/api";
 
 const LANGUAGES = [
   { code: 'auto', name: 'Auto-Detect' },
@@ -85,22 +87,16 @@ export default function VoiceToTextPage() {
     setError("");
 
     try {
-      const formData = new FormData();
-      formData.append("file", file, file instanceof File ? file.name : "recording.webm");
-      formData.append("mode", mode);
-      formData.append("language", language);
+      const audioFile = file instanceof File ? file : new File([file], "recording.webm", { type: "audio/webm" });
+      const fileId = await uploadDirectToMinio(audioFile);
 
-      const res = await fetch("http://178.62.192.74:8080/api/tools/voice-to-text", {
-        method: "POST",
-        body: formData,
+      const res = await api.post("/api/ai/voice-to-text/transcribe", {
+        fileId: fileId,
+        translate: mode === "translate",
+        targetLanguage: language
       });
 
-      if (!res.ok) {
-        throw new Error("Failed to process");
-      }
-
-      const data = await res.json();
-      setResult(data.text);
+      setResult(res.data.translated_text || res.data.original_text);
     } catch (err) {
       setError(t('error'));
     } finally {

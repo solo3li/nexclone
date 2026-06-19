@@ -33,7 +33,7 @@ namespace NexClone.Backend.Services.AI
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<SttResult> TranscribeAudioAsync(IFormFile audioFile, bool translate, string targetLanguage)
+        public async Task<SttResult> TranscribeAudioAsync(byte[] audioData, string fileName, string contentType, bool translate, string targetLanguage)
         {
             var openAiConfig = await _dbContext.ApiConfigurations
                 .FirstOrDefaultAsync(c => c.ProviderName == "OpenAI" && c.IsActive);
@@ -45,7 +45,7 @@ namespace NexClone.Backend.Services.AI
 
             try
             {
-                string originalText = await CallWhisperApiAsync(audioFile, openAiConfig.ApiKey);
+                string originalText = await CallWhisperApiAsync(audioData, fileName, contentType, openAiConfig.ApiKey);
                 
                 var result = new SttResult
                 {
@@ -70,7 +70,7 @@ namespace NexClone.Backend.Services.AI
             }
         }
 
-        private async Task<string> CallWhisperApiAsync(IFormFile audioFile, string apiKey)
+        private async Task<string> CallWhisperApiAsync(byte[] audioData, string fileName, string contentType, string apiKey)
         {
             var client = _httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
@@ -78,10 +78,9 @@ namespace NexClone.Backend.Services.AI
             using var content = new MultipartFormDataContent();
             
             // Add file
-            using var fileStream = audioFile.OpenReadStream();
-            var streamContent = new StreamContent(fileStream);
-            streamContent.Headers.ContentType = new MediaTypeHeaderValue(audioFile.ContentType);
-            content.Add(streamContent, "file", audioFile.FileName);
+            var streamContent = new ByteArrayContent(audioData);
+            streamContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+            content.Add(streamContent, "file", fileName);
             
             // Add model
             content.Add(new StringContent("whisper-1"), "model");
