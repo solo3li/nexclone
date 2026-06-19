@@ -70,6 +70,7 @@ namespace NexClone.Backend.Areas.AI.Controllers
                     UserId = userId,
                     Type = "text-to-voice",
                     Title = request.Text.Length > 30 ? request.Text.Substring(0, 30) + "..." : request.Text,
+                    InputText = request.Text,
                     Status = "completed",
                     Lang = request.Language,
                     Voice = request.VoiceName,

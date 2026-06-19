@@ -72,6 +72,7 @@ namespace NexClone.Backend.Controllers.Api
                     voice = h.Voice,
                     fileUrl = h.FileUrl,
                     resultText = h.ResultText,
+                    inputText = h.InputText,
                     creditsUsed = h.CreditsUsed
                 })
                 .FirstOrDefaultAsync();
