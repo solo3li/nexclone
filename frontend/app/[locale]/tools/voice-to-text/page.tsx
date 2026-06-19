@@ -6,8 +6,8 @@ import { useTranslations, useLocale } from "next-intl";
 import Navbar from "../../../../src/components/Navbar";
 import Footer from "../../../../src/components/Footer";
 import {
-  UploadCloud, Mic, Square, Play, Copy, Download,
-  Loader2, FileAudio, CheckCircle2, X
+  UploadCloud, Mic, Square, Play, Pause, Copy, Download,
+  Loader2, FileAudio, CheckCircle2, X, Volume2
 } from "lucide-react";
 import { uploadDirectToMinio } from "../../../../src/utils/upload";
 import api from "../../../../src/utils/api";
@@ -52,6 +52,13 @@ export default function VoiceToTextPage() {
   const [error, setError] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
 
+  // Audio preview player state
+  const [audioPreviewUrl, setAudioPreviewUrl] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -70,6 +77,13 @@ export default function VoiceToTextPage() {
       mediaRecorder.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: "audio/webm" });
         setFile(blob);
+        // Create preview URL for recorded audio
+        if (audioPreviewUrl) URL.revokeObjectURL(audioPreviewUrl);
+        const url = URL.createObjectURL(blob);
+        setAudioPreviewUrl(url);
+        setIsPlaying(false);
+        setCurrentTime(0);
+        setDuration(0);
         setResult("");
         setStage('idle');
       };
@@ -95,6 +109,13 @@ export default function VoiceToTextPage() {
 
   const handleFileSelect = (selectedFile: File) => {
     setFile(selectedFile);
+    // Create object URL for preview
+    if (audioPreviewUrl) URL.revokeObjectURL(audioPreviewUrl);
+    const url = URL.createObjectURL(selectedFile);
+    setAudioPreviewUrl(url);
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
     setResult("");
     setStage('idle');
     setUploadProgress(0);
@@ -122,7 +143,37 @@ export default function VoiceToTextPage() {
     setUploadProgress(0);
     setResult("");
     setError("");
+    if (audioPreviewUrl) URL.revokeObjectURL(audioPreviewUrl);
+    setAudioPreviewUrl(null);
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
     if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const togglePlay = () => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!audioRef.current || !duration) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const ratio = x / rect.width;
+    audioRef.current.currentTime = ratio * duration;
+    setCurrentTime(ratio * duration);
+  };
+
+  const formatTime = (sec: number) => {
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
   const processAudio = async () => {
@@ -308,6 +359,64 @@ export default function VoiceToTextPage() {
                       <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
                     )}
                   </div>
+
+                  {/* ── Hidden Audio Element ── */}
+                  {audioPreviewUrl && (
+                    <audio
+                      ref={audioRef}
+                      src={audioPreviewUrl}
+                      onTimeUpdate={() => setCurrentTime(audioRef.current?.currentTime ?? 0)}
+                      onLoadedMetadata={() => setDuration(audioRef.current?.duration ?? 0)}
+                      onEnded={() => setIsPlaying(false)}
+                    />
+                  )}
+
+                  {/* ── Custom Audio Player ── */}
+                  {audioPreviewUrl && !isProcessing && (
+                    <div className="mx-4 mb-3 p-3 bg-[#0a0015]/60 border border-violet-500/20 rounded-xl" dir="ltr">
+                      <div className="flex items-center gap-3">
+                        {/* Play/Pause Button */}
+                        <button
+                          onClick={togglePlay}
+                          className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center shrink-0 hover:shadow-[0_0_16px_rgba(139,92,246,0.5)] transition-all active:scale-95"
+                        >
+                          {isPlaying
+                            ? <Pause className="w-4 h-4 text-white" />
+                            : <Play className="w-4 h-4 text-white ml-0.5" />
+                          }
+                        </button>
+
+                        {/* Timeline */}
+                        <div className="flex-1 flex flex-col gap-1">
+                          {/* Clickable progress track */}
+                          <div
+                            className="relative h-1.5 bg-white/10 rounded-full cursor-pointer group"
+                            onClick={handleSeek}
+                          >
+                            {/* Filled portion */}
+                            <div
+                              className="absolute inset-y-0 left-0 bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-full transition-all"
+                              style={{ width: duration ? `${(currentTime / duration) * 100}%` : '0%' }}
+                            />
+                            {/* Thumb */}
+                            <div
+                              className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity -translate-x-1.5"
+                              style={{ left: duration ? `${(currentTime / duration) * 100}%` : '0%' }}
+                            />
+                          </div>
+
+                          {/* Time display */}
+                          <div className="flex justify-between text-[10px] text-white/40 font-mono">
+                            <span>{formatTime(currentTime)}</span>
+                            <span>{duration ? formatTime(duration) : '--:--'}</span>
+                          </div>
+                        </div>
+
+                        {/* Volume icon */}
+                        <Volume2 className="w-4 h-4 text-white/30 shrink-0" />
+                      </div>
+                    </div>
+                  )}
 
                   {/* Progress Bar Area */}
                   <AnimatePresence>
