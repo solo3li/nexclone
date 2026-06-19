@@ -88,7 +88,7 @@ export default function VoiceToTextPage() {
 
     try {
       const audioFile = file instanceof File ? file : new File([file], "recording.webm", { type: "audio/webm" });
-      const fileId = await uploadDirectToMinio(audioFile);
+      const fileId = await uploadDirectToMinio(audioFile, 'voice-to-text');
 
       const res = await api.post("/api/ai/voice-to-text/transcribe", {
         fileId: fileId,

@@ -63,7 +63,7 @@ namespace NexClone.Backend.Services
             var presignedGetObjectArgs = new PresignedGetObjectArgs()
                 .WithBucket(bucketName)
                 .WithObject(objectName)
-                .WithExpiry(60 * 60 * 24); // 24 hours
+                .WithExpiry(60 * 60 * 24 * 7); // 7 days (maximum allowed by AWS/MinIO SigV4)
 
             return await _minioClient.PresignedGetObjectAsync(presignedGetObjectArgs).ConfigureAwait(false);
         }
