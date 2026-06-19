@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Zap, Menu, X, Globe } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link, usePathname, useRouter } from "../i18n/routing";
+import { useAppStore } from "../store/useAppStore";
+import api from "../utils/api";
 
 function LanguageSwitcher() {
   const locale = useLocale();
@@ -32,6 +34,17 @@ export default function Navbar() {
   
   const t = useTranslations('Navbar');
   const locale = useLocale();
+  const router = useRouter();
+
+  const { isAuthenticated, user, setUser, logout } = useAppStore();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      api.get("/api/auth/me").then(res => {
+        setUser(res.data);
+      }).catch(() => {});
+    }
+  }, [isAuthenticated, setUser]);
 
   const navLinks = [
     { label: t('home'), href: "#" },
@@ -88,22 +101,53 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-3">
             <LanguageSwitcher />
             
-            <Link
-              href="/login"
-              className="text-white/80 hover:text-white text-sm font-medium transition-colors px-4 py-2"
-            >
-              {t('login')}
-            </Link>
-            <Link
-              href="/profile"
-              className="relative px-5 py-2.5 rounded-xl text-sm font-semibold text-white overflow-hidden group"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-purple-600 group-hover:from-violet-500 group-hover:to-fuchsia-500 transition-all duration-300" />
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="absolute inset-0 bg-gradient-to-r from-violet-400/20 to-fuchsia-400/20 blur-sm" />
+            {isAuthenticated ? (
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-medium text-white/80 hidden lg:block">
+                  {user?.fullName || user?.email}
+                </span>
+                <Link
+                  href="/profile"
+                  className="relative px-5 py-2.5 rounded-xl text-sm font-semibold text-white overflow-hidden group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-purple-600 group-hover:from-violet-500 group-hover:to-fuchsia-500 transition-all duration-300" />
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute inset-0 bg-gradient-to-r from-violet-400/20 to-fuchsia-400/20 blur-sm" />
+                  </div>
+                  <span className="relative">{locale === 'ar' ? 'حسابي' : 'Profile'}</span>
+                </Link>
+                <button
+                  onClick={() => {
+                    api.post('/api/auth/logout').finally(() => {
+                      logout();
+                      router.push('/');
+                    });
+                  }}
+                  className="text-white/60 hover:text-white/90 text-sm font-medium transition-colors cursor-pointer"
+                >
+                  {locale === 'ar' ? 'خروج' : 'Logout'}
+                </button>
               </div>
-              <span className="relative">{t('startNow')}</span>
-            </Link>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="text-white/80 hover:text-white text-sm font-medium transition-colors px-4 py-2"
+                >
+                  {t('login')}
+                </Link>
+                <Link
+                  href="/register"
+                  className="relative px-5 py-2.5 rounded-xl text-sm font-semibold text-white overflow-hidden group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-purple-600 group-hover:from-violet-500 group-hover:to-fuchsia-500 transition-all duration-300" />
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute inset-0 bg-gradient-to-r from-violet-400/20 to-fuchsia-400/20 blur-sm" />
+                  </div>
+                  <span className="relative">{t('startNow')}</span>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -140,12 +184,37 @@ export default function Navbar() {
                   {link.label}
                 </a>
               ))}
-              <a
-                href="#pricing"
-                className="mt-2 w-full text-center py-3 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 text-white font-semibold"
-              >
-                {t('startNow')}
-              </a>
+              {isAuthenticated ? (
+                <>
+                  <Link
+                    href="/profile"
+                    onClick={() => setMenuOpen(false)}
+                    className="mt-2 w-full text-center py-3 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 text-white font-semibold"
+                  >
+                    {locale === 'ar' ? 'حسابي' : 'Profile'}
+                  </Link>
+                  <button
+                    onClick={() => {
+                      api.post('/api/auth/logout').finally(() => {
+                        logout();
+                        setMenuOpen(false);
+                        router.push('/');
+                      });
+                    }}
+                    className="mt-2 w-full text-center py-3 rounded-xl bg-white/5 border border-white/10 text-white font-semibold"
+                  >
+                    {locale === 'ar' ? 'تسجيل الخروج' : 'Logout'}
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/register"
+                  onClick={() => setMenuOpen(false)}
+                  className="mt-2 w-full text-center py-3 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 text-white font-semibold"
+                >
+                  {t('startNow')}
+                </Link>
+              )}
             </div>
           </motion.div>
         )}
