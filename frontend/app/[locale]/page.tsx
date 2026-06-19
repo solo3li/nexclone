@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+
 import Navbar from "../../src/components/Navbar";
 import HeroSection from "../../src/components/HeroSection";
 import MarqueeBanner from "../../src/components/MarqueeBanner";

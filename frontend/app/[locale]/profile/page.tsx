@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import Navbar from "../../../src/components/Navbar";
 import Footer from "../../../src/components/Footer";
-import { Activity, CreditCard, Receipt, Zap, Crown } from "lucide-react";
+import { Activity, Receipt, Crown } from "lucide-react";
 
 export default function ProfilePage() {
   const t = useTranslations("Profile");

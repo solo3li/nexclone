@@ -6,6 +6,8 @@ using NexClone.Backend.Models;
 using Serilog;
 using System;
 using System.Text;
+using Minio;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -96,6 +98,22 @@ builder.Services.AddHttpClient("AIGateway", client =>
 
 builder.Services.AddScoped<NexClone.Backend.Services.AI.ITtsService, NexClone.Backend.Services.AI.TtsService>();
 builder.Services.AddScoped<NexClone.Backend.Services.AI.ISttService, NexClone.Backend.Services.AI.SttService>();
+
+// Register MinIO Client
+builder.Services.AddSingleton<IMinioClient>(sp =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    // When running in Docker, endpoint might be "minio:9000". We check environment or use appsettings.
+    var endpoint = Environment.GetEnvironmentVariable("MINIO_ENDPOINT") ?? config["Minio:Endpoint"];
+    return new MinioClient()
+        .WithEndpoint(endpoint)
+        .WithCredentials(config["Minio:AccessKey"], config["Minio:SecretKey"])
+        .WithSSL(false)
+        .Build();
+});
+
+// Register Media Service
+builder.Services.AddScoped<NexClone.Backend.Services.IMediaService, NexClone.Backend.Services.MinioMediaService>();
 
 // Register Payment Service
 builder.Services.AddHttpClient();
