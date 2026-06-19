@@ -5,11 +5,43 @@ import { useTranslations, useLocale } from "next-intl";
 import { Link } from "../../../src/i18n/routing";
 import Navbar from "../../../src/components/Navbar";
 import { Mail, Lock, User, ArrowRight, ArrowLeft } from "lucide-react";
+import { useState } from "react";
+import api from "../../../src/utils/api";
+import { useRouter } from "../../../src/i18n/routing";
+import { useAppStore } from "../../../src/store/useAppStore";
 
 export default function RegisterPage() {
   const t = useTranslations("Auth");
   const locale = useLocale();
   const ArrowIcon = locale === 'ar' ? ArrowLeft : ArrowRight;
+  const router = useRouter();
+  const setUser = useAppStore(state => state.setUser);
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+      const res = await api.post("/api/auth/register", {
+        fullName: name,
+        email,
+        password,
+        country: "Unknown"
+      });
+      setUser(res.data);
+      router.push("/");
+    } catch (err: any) {
+      setError(err.response?.data?.Message || err.response?.data?.Errors?.[0] || "Registration failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="relative min-h-screen bg-[#0a0015] flex flex-col">
@@ -27,7 +59,8 @@ export default function RegisterPage() {
           
           <h1 className="text-3xl font-bold text-white mb-2 text-center">{t('register')}</h1>
           
-          <form className="mt-8 space-y-6" onSubmit={(e) => e.preventDefault()}>
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+            {error && <div className="p-3 rounded-lg bg-red-500/20 border border-red-500/50 text-red-200 text-sm">{error}</div>}
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-white/70 mb-2">{t('name')}</label>
@@ -37,6 +70,9 @@ export default function RegisterPage() {
                   </div>
                   <input
                     type="text"
+                    required
+                    value={name}
+                    onChange={e => setName(e.target.value)}
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-10 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 transition-all"
                     placeholder="John Doe"
                   />
@@ -51,6 +87,9 @@ export default function RegisterPage() {
                   </div>
                   <input
                     type="email"
+                    required
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-10 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 transition-all"
                     placeholder="user@example.com"
                   />
@@ -65,6 +104,9 @@ export default function RegisterPage() {
                   </div>
                   <input
                     type="password"
+                    required
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-10 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 transition-all"
                     placeholder="••••••••"
                   />
@@ -74,11 +116,12 @@ export default function RegisterPage() {
 
             <button
               type="submit"
-              className="group relative w-full flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-white font-bold text-lg overflow-hidden shadow-[0_0_20px_rgba(236,72,153,0.2)] hover:shadow-[0_0_30px_rgba(236,72,153,0.4)] transition-all duration-300 hover:-translate-y-0.5"
+              disabled={loading}
+              className="group relative w-full flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-white font-bold text-lg overflow-hidden shadow-[0_0_20px_rgba(236,72,153,0.2)] hover:shadow-[0_0_30px_rgba(236,72,153,0.4)] transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-600 to-pink-600" />
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-white/10 transition-opacity duration-300" />
-              <span className="relative">{t('submitRegister')}</span>
+              <span className="relative">{loading ? "..." : t('submitRegister')}</span>
               <ArrowIcon className={`w-5 h-5 relative transition-transform duration-300 ${locale === 'ar' ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
             </button>
           </form>
