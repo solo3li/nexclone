@@ -39,7 +39,8 @@ function absoluteUrl(path: string) {
 
 function detectMediaType(url: string): "audio" | "video" | "image" | "none" {
   if (!url) return "none";
-  const ext = url.split(".").pop()?.toLowerCase() ?? "";
+  const cleanUrl = url.split("?")[0];
+  const ext = cleanUrl.split(".").pop()?.toLowerCase() ?? "";
   if (["mp3", "wav", "ogg", "webm", "m4a", "aac", "flac"].includes(ext)) return "audio";
   if (["mp4", "webm", "ogg", "mov", "avi"].includes(ext)) return "video";
   if (["png", "jpg", "jpeg", "gif", "webp", "svg", "bmp"].includes(ext)) return "image";

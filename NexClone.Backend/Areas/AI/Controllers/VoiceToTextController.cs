@@ -87,7 +87,8 @@ namespace NexClone.Backend.Areas.AI.Controllers
                 {
                     UserId = userId,
                     Type = "voice-to-text",
-                    Title = request.FileId,
+                    Title = request.FileId.Split('/').LastOrDefault() ?? "Audio File",
+                    FileUrl = request.FileId,
                     Status = "completed",
                     Lang = request.TargetLanguage,
                     ResultText = request.Translate ? result.TranslatedText : result.OriginalText,
