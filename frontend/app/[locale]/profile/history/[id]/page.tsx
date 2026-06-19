@@ -252,7 +252,9 @@ export default function HistoryDetailPage() {
                     : (isRtl ? "✗ فشل" : "✗ Failed")}
                 </span>
               </div>
-              <h1 className="text-lg font-extrabold text-white leading-snug">{record.title}</h1>
+              <h1 className="text-lg font-extrabold text-white leading-snug truncate" title={record.title}>
+                {record.title.split('/').pop()}
+              </h1>
               <p className="text-xs text-white/40 mt-1">{record.date}</p>
             </div>
           </div>

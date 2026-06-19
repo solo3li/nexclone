@@ -243,7 +243,9 @@ export default function ProfilePage() {
 
                           {/* Info */}
                           <div className="flex-1 min-w-0">
-                            <p className="text-white font-semibold text-sm truncate">{record.title}</p>
+                            <p className="text-white font-semibold text-sm truncate" title={record.title}>
+                              {record.title.split('/').pop()}
+                            </p>
                             <div className="flex items-center gap-3 mt-1 flex-wrap">
                               <span className="text-[11px] text-white/40 flex items-center gap-1">
                                 <Clock className="w-3 h-3" />

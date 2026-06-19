@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NexClone.Backend.Models;
+using NexClone.Backend.Services;
 using System;
 using System.Linq;
 using System.Security.Claims;
@@ -15,10 +16,12 @@ namespace NexClone.Backend.Controllers.Api
     public class HistoryController : ControllerBase
     {
         private readonly ApplicationDbContext _dbContext;
+        private readonly IMediaService _mediaService;
 
-        public HistoryController(ApplicationDbContext dbContext)
+        public HistoryController(ApplicationDbContext dbContext, IMediaService mediaService)
         {
             _dbContext = dbContext;
+            _mediaService = mediaService;
         }
 
         [HttpGet]
@@ -78,7 +81,36 @@ namespace NexClone.Backend.Controllers.Api
                 .FirstOrDefaultAsync();
 
             if (record == null) return NotFound();
-            return Ok(record);
+
+            var finalFileUrl = record.fileUrl;
+            if (!string.IsNullOrEmpty(finalFileUrl) && !finalFileUrl.StartsWith("/") && !finalFileUrl.StartsWith("http"))
+            {
+                try
+                {
+                    finalFileUrl = await _mediaService.GetFileUrlAsync(finalFileUrl);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error generating presigned URL for {finalFileUrl}: {ex.Message}");
+                }
+            }
+
+            return Ok(new
+            {
+                record.id,
+                record.type,
+                record.title,
+                record.createdAt,
+                record.date,
+                record.duration,
+                record.status,
+                record.lang,
+                record.voice,
+                fileUrl = finalFileUrl,
+                record.resultText,
+                record.inputText,
+                record.creditsUsed
+            });
         }
 
         [HttpDelete("{id}")]
