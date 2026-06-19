@@ -108,7 +108,10 @@ export default function TextToVoicePage() {
   });
 
   return (
-    <div className="relative min-h-screen bg-[#111116] flex flex-col font-sans">
+    <div className="relative min-h-screen bg-[#0a0015] flex flex-col font-sans">
+      {/* Animated Orbs for consistent theme */}
+      <div className="absolute top-1/4 left-1/4 w-[60%] h-[500px] bg-violet-600/10 blur-[150px] pointer-events-none z-0 rounded-full" />
+      
       <Navbar />
 
       <main className="flex-1 container mx-auto px-4 pt-32 pb-20 relative z-10 max-w-[1400px]">
@@ -119,7 +122,7 @@ export default function TextToVoicePage() {
           className="text-center mb-8"
         >
           <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-2">{t('title')}</h1>
-          <p className="text-sm text-white/50">{t('subtitle')}</p>
+          <p className="text-sm text-white/60">{t('subtitle')}</p>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -131,15 +134,15 @@ export default function TextToVoicePage() {
             transition={{ delay: 0.1 }}
             className="lg:col-span-8 flex flex-col gap-4"
           >
-            <div className="bg-[#18181b] border border-white/5 rounded-[32px] p-6 flex flex-col gap-4 shadow-xl">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[32px] p-6 flex flex-col gap-4 shadow-xl">
               
               {/* Text Area Header */}
               <div className="flex justify-between items-center px-2" dir={isRtl ? 'rtl' : 'ltr'}>
                 <div className="flex items-center gap-2">
-                  <Edit3 className="w-5 h-5 text-violet-400" />
+                  <Edit3 className="w-5 h-5 text-fuchsia-400" />
                   <span className="text-white/80 font-semibold text-sm">{t('enterText')}</span>
                 </div>
-                <div className="flex items-center gap-2 bg-[#27272a] px-3 py-1 rounded-full text-xs font-medium text-violet-300 border border-violet-500/20">
+                <div className="flex items-center gap-2 bg-violet-500/10 px-3 py-1 rounded-full text-xs font-medium text-violet-300 border border-violet-500/20">
                   <span>{t('maxChars')} {MAX_CHARS}</span>
                 </div>
               </div>
@@ -150,7 +153,7 @@ export default function TextToVoicePage() {
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   placeholder={t('textPlaceholder')}
-                  className="w-full bg-[#09090b] border border-white/5 rounded-[24px] px-6 py-6 text-white focus:outline-none focus:ring-1 focus:ring-violet-500/30 transition-all resize-none min-h-[350px] placeholder:text-white/30 text-base leading-relaxed"
+                  className="w-full bg-[#0a0015]/60 border border-white/5 rounded-[24px] px-6 py-6 text-white focus:outline-none focus:ring-1 focus:ring-fuchsia-500/50 transition-all resize-none min-h-[350px] placeholder:text-white/30 text-base leading-relaxed"
                 />
                 <div className={`absolute bottom-4 ${isRtl ? 'left-6' : 'right-6'} text-xs text-white/40`}>
                   {t('characters')} {MAX_CHARS} / {text.length}
@@ -164,7 +167,7 @@ export default function TextToVoicePage() {
               <button
                 onClick={generateAudio}
                 disabled={isProcessing || !text.trim() || text.length > MAX_CHARS}
-                className="w-full py-4 mt-2 bg-gradient-to-r from-violet-600 to-orange-400 text-white rounded-full font-bold text-lg hover:shadow-[0_0_30px_rgba(139,92,246,0.3)] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+                className="w-full py-4 mt-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-full font-bold text-lg hover:shadow-[0_0_30px_rgba(139,92,246,0.4)] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
               >
                 {isProcessing ? (
                   <>
@@ -184,7 +187,7 @@ export default function TextToVoicePage() {
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mt-2 p-6 bg-[#09090b] border border-white/5 rounded-[24px] flex flex-col gap-4"
+                  className="mt-2 p-6 bg-[#0a0015]/60 border border-white/5 rounded-[24px] flex flex-col gap-4"
                   dir={isRtl ? 'rtl' : 'ltr'}
                 >
                   <div className="flex items-center justify-between">
@@ -204,7 +207,7 @@ export default function TextToVoicePage() {
 
             {/* Bottom Actions */}
             <div className="flex justify-between items-center mt-2 px-2" dir={isRtl ? 'rtl' : 'ltr'}>
-              <button className="flex items-center gap-2 px-4 py-2 bg-[#18181b] border border-white/5 rounded-lg text-white/50 hover:text-white/80 transition-colors text-xs">
+              <button className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/5 rounded-lg text-white/50 hover:text-white/80 transition-colors text-xs">
                 <RefreshCw className="w-3.5 h-3.5" />
                 {t('refresh')}
               </button>
@@ -228,17 +231,17 @@ export default function TextToVoicePage() {
             transition={{ delay: 0.2 }}
             className="lg:col-span-4 flex flex-col gap-4"
           >
-            <div className="bg-[#18181b] border border-white/5 rounded-[32px] p-6 h-full flex flex-col" dir={isRtl ? 'rtl' : 'ltr'}>
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[32px] p-6 h-full flex flex-col" dir={isRtl ? 'rtl' : 'ltr'}>
               
               <div className="flex items-center gap-2 mb-6 px-2">
-                <Mic className="w-5 h-5 text-violet-400" />
+                <Mic className="w-5 h-5 text-fuchsia-400" />
                 <h2 className="text-lg font-bold text-white">{t('voiceSettings')}</h2>
               </div>
               
               <div className="space-y-6">
                 
                 {/* Language Mode */}
-                <div className="bg-[#09090b] border border-white/5 rounded-[24px] p-5">
+                <div className="bg-[#0a0015]/60 border border-white/5 rounded-[24px] p-5">
                   <div className="flex items-center gap-2 mb-4">
                     <div className="w-6 h-6 bg-violet-600/20 rounded flex items-center justify-center">
                       <span className="text-violet-400 text-xs font-bold">Aa</span>
@@ -246,12 +249,12 @@ export default function TextToVoicePage() {
                     <span className="text-white/80 text-sm font-semibold">{t('languageMode')}</span>
                   </div>
                   
-                  <div className="flex bg-[#18181b] p-1.5 rounded-full border border-white/5">
+                  <div className="flex bg-white/5 p-1.5 rounded-full border border-white/5">
                     <button 
                       onClick={() => setLanguageMode('arabic')}
                       className={`flex-1 py-2 px-4 rounded-full text-xs font-medium transition-all flex items-center justify-center gap-2 ${
                         languageMode === 'arabic' 
-                          ? 'bg-gradient-to-r from-violet-600 to-orange-400 text-white' 
+                          ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white' 
                           : 'text-white/50 hover:text-white'
                       }`}
                     >
@@ -261,7 +264,7 @@ export default function TextToVoicePage() {
                       onClick={() => setLanguageMode('other')}
                       className={`flex-1 py-2 px-4 rounded-full text-xs font-medium transition-all flex items-center justify-center gap-2 ${
                         languageMode === 'other' 
-                          ? 'bg-gradient-to-r from-violet-600 to-orange-400 text-white' 
+                          ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white' 
                           : 'text-white/50 hover:text-white'
                       }`}
                     >
@@ -271,12 +274,12 @@ export default function TextToVoicePage() {
                 </div>
 
                 {/* Free Account Notice */}
-                <div className="bg-blue-500/10 border border-blue-500/20 rounded-[20px] p-4 flex flex-col gap-2">
+                <div className="bg-violet-500/10 border border-violet-500/20 rounded-[20px] p-4 flex flex-col gap-2">
                   <div className="flex gap-3">
-                    <Info className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
+                    <Info className="w-5 h-5 text-violet-400 shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-xs text-blue-200/80 leading-relaxed font-medium">{t('freeAccountNotice')}</p>
-                      <button className="text-blue-400 text-xs font-bold mt-2 flex items-center gap-1 hover:text-blue-300 transition-colors">
+                      <p className="text-xs text-violet-200/80 leading-relaxed font-medium">{t('freeAccountNotice')}</p>
+                      <button className="text-fuchsia-400 text-xs font-bold mt-2 flex items-center gap-1 hover:text-fuchsia-300 transition-colors">
                         {t('upgradeNow')} {isRtl ? '←' : '→'}
                       </button>
                     </div>
@@ -284,7 +287,7 @@ export default function TextToVoicePage() {
                 </div>
 
                 {/* Choose Voice */}
-                <div className="bg-[#09090b] border border-white/5 rounded-[24px] p-5 flex flex-col">
+                <div className="bg-[#0a0015]/60 border border-white/5 rounded-[24px] p-5 flex flex-col">
                   <div className="flex items-center gap-2 mb-4">
                     <User className="w-5 h-5 text-violet-400" />
                     <span className="text-white/80 text-sm font-semibold">{t('chooseVoice')}</span>
@@ -295,7 +298,7 @@ export default function TextToVoicePage() {
                     <button 
                       onClick={() => setVoiceFilter('all')}
                       className={`px-4 py-1.5 rounded-full text-[11px] font-medium transition-all ${
-                        voiceFilter === 'all' ? 'bg-violet-600 text-white' : 'bg-[#18181b] text-white/50 hover:text-white'
+                        voiceFilter === 'all' ? 'bg-violet-600 text-white' : 'bg-white/5 text-white/50 hover:text-white'
                       }`}
                     >
                       {t('all')}
@@ -303,7 +306,7 @@ export default function TextToVoicePage() {
                     <button 
                       onClick={() => setVoiceFilter('male')}
                       className={`px-4 py-1.5 rounded-full text-[11px] font-medium transition-all ${
-                        voiceFilter === 'male' ? 'bg-violet-600 text-white' : 'bg-[#18181b] text-white/50 hover:text-white'
+                        voiceFilter === 'male' ? 'bg-violet-600 text-white' : 'bg-white/5 text-white/50 hover:text-white'
                       }`}
                     >
                       {t('male')}
@@ -311,7 +314,7 @@ export default function TextToVoicePage() {
                     <button 
                       onClick={() => setVoiceFilter('female')}
                       className={`px-4 py-1.5 rounded-full text-[11px] font-medium transition-all ${
-                        voiceFilter === 'female' ? 'bg-violet-600 text-white' : 'bg-[#18181b] text-white/50 hover:text-white'
+                        voiceFilter === 'female' ? 'bg-violet-600 text-white' : 'bg-white/5 text-white/50 hover:text-white'
                       }`}
                     >
                       {t('female')}
@@ -331,14 +334,14 @@ export default function TextToVoicePage() {
                           onClick={() => setSelectedVoice(voice.voiceName)}
                           className={`relative cursor-pointer flex flex-col rounded-[16px] overflow-hidden transition-all border ${
                             selectedVoice === voice.voiceName 
-                              ? 'border-violet-500 bg-violet-500/10' 
-                              : 'border-white/5 bg-[#18181b] hover:bg-[#18181b]/80'
+                              ? 'border-violet-500 bg-violet-500/20' 
+                              : 'border-white/10 bg-white/5 hover:bg-white/10'
                           }`}
                         >
                           {/* Top colored bar based on tier */}
                           <div className={`w-full text-center py-1 text-[9px] font-bold ${
                             voice.isPremium 
-                              ? 'bg-orange-500 text-black' 
+                              ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-black' 
                               : 'bg-emerald-500 text-black'
                           }`}>
                             {voice.isPremium ? t('premium') : t('free')}
@@ -355,7 +358,7 @@ export default function TextToVoicePage() {
                             {voice.demoAudio && (
                               <button 
                                 onClick={(e) => { e.stopPropagation(); playDemo(voice.demoAudio); }}
-                                className="absolute bottom-2 left-2 p-1.5 bg-white/5 hover:bg-white/20 rounded-full text-white/60 hover:text-white transition-all"
+                                className="absolute bottom-2 left-2 p-1.5 bg-white/10 hover:bg-white/30 rounded-full text-white/60 hover:text-white transition-all"
                               >
                                 <Play className="w-2.5 h-2.5" />
                               </button>
@@ -371,7 +374,7 @@ export default function TextToVoicePage() {
                 <div className="space-y-3">
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[11px] font-semibold text-white/60 px-2">{t('accent')}</label>
-                    <div className="flex justify-between items-center bg-[#09090b] border border-white/5 rounded-[16px] px-4 py-3 text-xs text-white/50 cursor-pointer hover:border-white/10">
+                    <div className="flex justify-between items-center bg-[#0a0015]/60 border border-white/5 rounded-[16px] px-4 py-3 text-xs text-white/50 cursor-pointer hover:border-white/10">
                       <span>-- {t('accent')} --</span>
                       <ChevronDown className="w-3.5 h-3.5" />
                     </div>
@@ -379,7 +382,7 @@ export default function TextToVoicePage() {
 
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[11px] font-semibold text-white/60 px-2">{t('emotion')}</label>
-                    <div className="flex justify-between items-center bg-[#09090b] border border-white/5 rounded-[16px] px-4 py-3 text-xs text-white/50 cursor-pointer hover:border-white/10">
+                    <div className="flex justify-between items-center bg-[#0a0015]/60 border border-white/5 rounded-[16px] px-4 py-3 text-xs text-white/50 cursor-pointer hover:border-white/10">
                       <span>-- {t('emotion')} --</span>
                       <ChevronDown className="w-3.5 h-3.5" />
                     </div>
@@ -387,7 +390,7 @@ export default function TextToVoicePage() {
 
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[11px] font-semibold text-white/60 px-2">{t('performanceStyle')}</label>
-                    <div className="flex justify-between items-center bg-[#09090b] border border-white/5 rounded-[16px] px-4 py-3 text-xs text-white/50 cursor-pointer hover:border-white/10">
+                    <div className="flex justify-between items-center bg-[#0a0015]/60 border border-white/5 rounded-[16px] px-4 py-3 text-xs text-white/50 cursor-pointer hover:border-white/10">
                       <span>-- {t('performanceStyle')} --</span>
                       <ChevronDown className="w-3.5 h-3.5" />
                     </div>
@@ -395,10 +398,10 @@ export default function TextToVoicePage() {
 
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[11px] font-semibold text-white/60 px-2 flex items-center gap-1.5">
-                      <Wand2 className="w-3 h-3 text-orange-400" />
+                      <Wand2 className="w-3 h-3 text-fuchsia-400" />
                       {t('customInstructions')}
                     </label>
-                    <div className="flex flex-col items-center justify-center bg-[#09090b] border border-orange-500/20 rounded-[16px] px-4 py-4 text-sm text-orange-400/80 cursor-not-allowed hover:bg-orange-500/5 transition-colors">
+                    <div className="flex flex-col items-center justify-center bg-[#0a0015]/60 border border-fuchsia-500/20 rounded-[16px] px-4 py-4 text-sm text-fuchsia-400/80 cursor-not-allowed hover:bg-fuchsia-500/5 transition-colors">
                       <Lock className="w-4 h-4 mb-1.5 opacity-60" />
                       <span className="text-[9px] uppercase font-bold tracking-widest">{t('premium')}</span>
                     </div>
