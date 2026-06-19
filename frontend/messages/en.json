@@ -393,5 +393,24 @@
       "status": "Status",
       "invoice": "Invoice"
     }
+  },
+  "VoiceToText": {
+    "title": "Voice to Text",
+    "subtitle": "Transcribe or translate audio to text instantly with AI.",
+    "upload": "Upload Audio",
+    "record": "Record Voice",
+    "language": "Language",
+    "mode": "Mode",
+    "transcribe": "Transcribe (Original)",
+    "translate": "Translate to English",
+    "processing": "Processing...",
+    "process": "Start Processing",
+    "result": "Result",
+    "copy": "Copy Text",
+    "download": "Download .txt",
+    "dragDrop": "Drag & drop audio file here or click to browse",
+    "recording": "Recording...",
+    "stopRecording": "Stop Recording",
+    "error": "An error occurred during processing."
   }
 }

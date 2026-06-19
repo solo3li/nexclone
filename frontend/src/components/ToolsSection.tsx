@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { AnimatedText, AnimatedReveal } from "./AnimatedText";
 import { useTranslations, useLocale } from "next-intl";
+import { useRouter } from "../i18n/routing";
 
 type Tool = {
   icon: any;
@@ -30,12 +31,14 @@ type Tool = {
   glowColor: string;
   tags: string[];
   image: string;
+  href?: string;
 };
 
 function ToolCard({ tool, index }: { tool: Tool; index: number }) {
   const { ref, inView } = useInView({ triggerOnce: true, threshold: 0.1 });
   const t = useTranslations("Tools");
   const locale = useLocale();
+  const router = useRouter();
   const Icon = tool.icon;
   const ArrowIcon = locale === 'ar' ? ArrowLeft : ArrowRight;
 
@@ -81,6 +84,7 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       whileHover={{ scale: 1.02 }}
+      onClick={() => tool.href && router.push(tool.href)}
       className="group relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden cursor-pointer shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]"
     >
       <motion.div
@@ -181,6 +185,7 @@ export default function ToolsSection() {
       glowColor: "shadow-violet-500/20",
       tags: t.raw('list.t1.tags'),
       image: "/images/tool-1.png",
+      href: "/tools/voice-to-text"
     },
     {
       icon: Volume2,
