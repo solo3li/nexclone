@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Zap, Menu, X, Globe } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
-import { usePathname, useRouter } from "../i18n/routing";
+import { Link, usePathname, useRouter } from "../i18n/routing";
 
 function LanguageSwitcher() {
   const locale = useLocale();
@@ -60,7 +60,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
           {/* Logo */}
-          <a href="#" className="flex items-center gap-2.5 group">
+          <Link href="/" className="flex items-center gap-2.5 group">
             <div className="relative">
               <img src="/images/logo.png" alt={t('logo')} className="w-10 h-10 rounded-xl object-cover shadow-lg shadow-violet-500/30 group-hover:shadow-violet-500/60 transition-all duration-300" />
               <div className="absolute -inset-1 rounded-xl bg-gradient-to-br from-violet-500 to-purple-700 opacity-0 group-hover:opacity-30 blur-md transition-all duration-300" />
@@ -68,7 +68,7 @@ export default function Navbar() {
             <span className="text-white font-bold text-xl tracking-tight">
               <span className="text-violet-400">Nex</span>Media
             </span>
-          </a>
+          </Link>
 
           {/* Desktop Links */}
           <div className="hidden md:flex items-center gap-8">
@@ -88,14 +88,14 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-3">
             <LanguageSwitcher />
             
-            <a
-              href="#pricing"
+            <Link
+              href="/login"
               className="text-white/80 hover:text-white text-sm font-medium transition-colors px-4 py-2"
             >
               {t('login')}
-            </a>
-            <a
-              href="#pricing"
+            </Link>
+            <Link
+              href="/profile"
               className="relative px-5 py-2.5 rounded-xl text-sm font-semibold text-white overflow-hidden group"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-purple-600 group-hover:from-violet-500 group-hover:to-fuchsia-500 transition-all duration-300" />
@@ -103,7 +103,7 @@ export default function Navbar() {
                 <div className="absolute inset-0 bg-gradient-to-r from-violet-400/20 to-fuchsia-400/20 blur-sm" />
               </div>
               <span className="relative">{t('startNow')}</span>
-            </a>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}

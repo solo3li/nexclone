@@ -7,9 +7,18 @@
     "ctaSecondary": "See How It Works",
     "highlights": "Fast • Accurate • Professional",
     "stats": {
-      "users": { "value": "50k+", "label": "Active Users" },
-      "uptime": { "value": "99.9%", "label": "Uptime" },
-      "tools": { "value": "12+", "label": "AI Tools" }
+      "users": {
+        "value": "50k+",
+        "label": "Active Users"
+      },
+      "uptime": {
+        "value": "99.9%",
+        "label": "Uptime"
+      },
+      "tools": {
+        "value": "12+",
+        "label": "AI Tools"
+      }
     },
     "scrollDown": "Scroll Down"
   },
@@ -24,55 +33,83 @@
         "title": "Audio to Text",
         "desc": "Transcribe any audio file to highly accurate text supporting over 50 languages.",
         "badge": "Popular",
-        "tags": ["Voice", "Text", "AI"]
+        "tags": [
+          "Voice",
+          "Text",
+          "AI"
+        ]
       },
       "t2": {
         "title": "Text to Audio",
         "desc": "Convert text into natural, realistic human voices with varied emotions.",
         "badge": "New",
-        "tags": ["TTS", "Voiceover"]
+        "tags": [
+          "TTS",
+          "Voiceover"
+        ]
       },
       "t3": {
         "title": "Background Removal",
         "desc": "Remove image backgrounds flawlessly with one click using AI.",
         "badge": "Fast",
-        "tags": ["Images", "Design"]
+        "tags": [
+          "Images",
+          "Design"
+        ]
       },
       "t4": {
         "title": "Smart Translation",
         "desc": "Accurate, context-aware translation supporting diverse languages and dialects.",
         "badge": "",
-        "tags": ["Language", "Text"]
+        "tags": [
+          "Language",
+          "Text"
+        ]
       },
       "t5": {
         "title": "Video Processing",
         "desc": "Enhance video quality and generate automatic captions.",
         "badge": "Beta",
-        "tags": ["Video", "Media"]
+        "tags": [
+          "Video",
+          "Media"
+        ]
       },
       "t6": {
         "title": "Audio Enhancement",
         "desc": "Remove background noise and enhance audio quality like a studio.",
         "badge": "",
-        "tags": ["Audio", "Studio"]
+        "tags": [
+          "Audio",
+          "Studio"
+        ]
       },
       "t7": {
         "title": "Smart Writing",
         "desc": "Generate creative articles, marketing copy, and emails in seconds.",
         "badge": "",
-        "tags": ["Writing", "GPT"]
+        "tags": [
+          "Writing",
+          "GPT"
+        ]
       },
       "t8": {
         "title": "Text Extraction (OCR)",
         "desc": "Extract text from images and PDF documents easily.",
         "badge": "",
-        "tags": ["OCR", "Documents"]
+        "tags": [
+          "OCR",
+          "Documents"
+        ]
       },
       "t9": {
         "title": "Music Generation",
         "desc": "Create royalty-free music tailored to your specific mood and style.",
         "badge": "New",
-        "tags": ["Audio", "Music"]
+        "tags": [
+          "Audio",
+          "Music"
+        ]
       }
     }
   },
@@ -160,10 +197,22 @@
       }
     },
     "stats": {
-      "s1": { "val": "97%", "label": "Conversion Accuracy" },
-      "s2": { "val": "<1 s", "label": "Avg Processing" },
-      "s3": { "val": "24/7", "label": "Continuous Support" },
-      "s4": { "val": "500+", "label": "Enterprise Users" }
+      "s1": {
+        "val": "97%",
+        "label": "Conversion Accuracy"
+      },
+      "s2": {
+        "val": "<1 s",
+        "label": "Avg Processing"
+      },
+      "s3": {
+        "val": "24/7",
+        "label": "Continuous Support"
+      },
+      "s4": {
+        "val": "500+",
+        "label": "Enterprise Users"
+      }
     }
   },
   "Pricing": {
@@ -178,7 +227,10 @@
       "currency": "$",
       "period": "Forever",
       "desc": "To get started and try",
-      "price": { "monthly": "0", "yearly": "0" },
+      "price": {
+        "monthly": "0",
+        "yearly": "0"
+      },
       "features": [
         "100 minutes audio/month",
         "5000 words text generation",
@@ -186,7 +238,11 @@
         "Limited translation",
         "Email support"
       ],
-      "notIncluded": ["API", "Batch processing", "Priority processing"],
+      "notIncluded": [
+        "API",
+        "Batch processing",
+        "Priority processing"
+      ],
       "button": "Start for Free"
     },
     "proPlan": {
@@ -194,7 +250,10 @@
       "currency": "$",
       "period": "/ month",
       "desc": "For individuals and pros",
-      "price": { "monthly": "19.99", "yearly": "16.99" },
+      "price": {
+        "monthly": "19.99",
+        "yearly": "16.99"
+      },
       "features": [
         "2000 minutes audio/month",
         "Unlimited text",
@@ -205,7 +264,9 @@
         "Priority support",
         "Limited API"
       ],
-      "notIncluded": ["Batch processing"],
+      "notIncluded": [
+        "Batch processing"
+      ],
       "button": "Subscribe Now",
       "popular": "Most Popular"
     },
@@ -214,7 +275,10 @@
       "currency": "$",
       "period": "/ month",
       "desc": "For large teams",
-      "price": { "monthly": "49.99", "yearly": "39.99" },
+      "price": {
+        "monthly": "49.99",
+        "yearly": "39.99"
+      },
       "features": [
         "Unlimited audio & text",
         "Unlimited images",
@@ -267,16 +331,67 @@
     "desc": "The first comprehensive Arabic platform for artificial intelligence tools. We empower creators and businesses with advanced tools to boost productivity and creativity.",
     "products": {
       "title": "Products",
-      "links": ["Audio to Text", "Background Removal", "Smart Translation", "Music Generation", "API"]
+      "links": [
+        "Audio to Text",
+        "Background Removal",
+        "Smart Translation",
+        "Music Generation",
+        "API"
+      ]
     },
     "company": {
       "title": "Company",
-      "links": ["About Us", "Careers", "Blog", "Contact Us", "Partners"]
+      "links": [
+        "About Us",
+        "Careers",
+        "Blog",
+        "Contact Us",
+        "Partners"
+      ]
     },
     "legal": {
       "title": "Legal",
-      "links": ["Terms of Service", "Privacy Policy", "Cookie Policy", "Usage Guidelines"]
+      "links": [
+        "Terms of Service",
+        "Privacy Policy",
+        "Cookie Policy",
+        "Usage Guidelines"
+      ]
     },
     "rights": "All rights reserved. NexMedia AI"
+  },
+  "Auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email Address",
+    "password": "Password",
+    "name": "Full Name",
+    "submitLogin": "Sign In",
+    "submitRegister": "Create Account",
+    "noAccount": "Don\"t have an account?",
+    "haveAccount": "Already have an account?",
+    "forgotPassword": "Forgot Password?"
+  },
+  "Profile": {
+    "title": "My Profile",
+    "usage": {
+      "title": "Usage & Limits",
+      "tokens": "Tokens Used",
+      "generations": "AI Generations",
+      "limit": "Monthly Limit"
+    },
+    "subscription": {
+      "title": "Current Subscription",
+      "plan": "Pro Plan",
+      "status": "Active",
+      "upgrade": "Upgrade Plan"
+    },
+    "transactions": {
+      "title": "Transactions History",
+      "date": "Date",
+      "amount": "Amount",
+      "status": "Status",
+      "invoice": "Invoice"
+    }
   }
 }
