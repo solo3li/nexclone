@@ -1,6 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Sparkles, PlayCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, PlayCircle } from "lucide-react";
 import { AnimatedText, GlowPulse } from "./AnimatedText";
 import Scene from "./Scene";
 import { useTranslations, useLocale } from "next-intl";
@@ -28,12 +28,29 @@ export default function HeroSection() {
       {/* Content */}
       <div className="relative z-10 max-w-5xl mx-auto px-4 pt-32 pb-20 text-center flex flex-col justify-center min-h-screen">
         {/* Headline */}
-        <AnimatedText
-          text={t('title')}
-          as="h1"
-          delay={0.3}
+        <motion.h1
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.7 }}
           className={`text-4xl sm:text-5xl ${locale === 'ar' ? 'md:text-7xl' : 'md:text-6xl'} font-extrabold text-white leading-tight mb-4 max-w-4xl mx-auto`}
-        />
+        >
+          {locale === 'ar' ? (
+            <>
+              قوة الذكاء في خدمة{" "}
+              <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+                إبداعك
+              </span>
+            </>
+          ) : (
+            <>
+              The Power of AI at{" "}
+              <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
+                Your Service
+              </span>
+            </>
+          )}
+        </motion.h1>
+
 
         {/* Subtitle */}
         <AnimatedText
