@@ -198,6 +198,7 @@ export default function ToolsSection() {
       glowColor: "shadow-emerald-500/20",
       tags: t.raw('list.t2.tags'),
       image: "/images/tool-2.png",
+      href: "/tools/text-to-voice"
     },
     {
       icon: Image,

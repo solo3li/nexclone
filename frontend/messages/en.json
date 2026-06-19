@@ -412,5 +412,19 @@
     "recording": "Recording...",
     "stopRecording": "Stop Recording",
     "error": "An error occurred during processing."
+  },
+  "TextToVoice": {
+    "title": "Text to Voice",
+    "subtitle": "Convert your text into realistic human voiceovers.",
+    "textPlaceholder": "Type your text here...",
+    "language": "Language",
+    "voice": "Voice",
+    "style": "Style (Optional)",
+    "stylePlaceholder": "e.g. happy, sad, formal...",
+    "processing": "Generating...",
+    "process": "Generate Voice",
+    "result": "Result",
+    "download": "Download Audio",
+    "error": "An error occurred during generation."
   }
 }
