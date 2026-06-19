@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { motion } from "framer-motion";
-import { useTranslations } from "next-intl";
+import { useState, useRef, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations, useLocale } from "next-intl";
 import Navbar from "../../../../src/components/Navbar";
 import Footer from "../../../../src/components/Footer";
-import { UploadCloud, Mic, Square, Play, Copy, Download, Loader2 } from "lucide-react";
+import {
+  UploadCloud, Mic, Square, Play, Copy, Download,
+  Loader2, FileAudio, CheckCircle2, X
+} from "lucide-react";
 import { uploadDirectToMinio } from "../../../../src/utils/upload";
 import api from "../../../../src/utils/api";
 
@@ -26,19 +29,32 @@ const LANGUAGES = [
   { code: 'tr', name: 'Turkish - Türkçe' },
 ];
 
+type Stage = 'idle' | 'uploading' | 'transcribing' | 'done' | 'error';
+
+function formatBytes(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 export default function VoiceToTextPage() {
   const t = useTranslations("VoiceToText");
+  const locale = useLocale();
+  const isRtl = locale === 'ar';
 
   const [file, setFile] = useState<File | Blob | null>(null);
   const [mode, setMode] = useState("transcribe");
   const [language, setLanguage] = useState("auto");
   const [isRecording, setIsRecording] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [stage, setStage] = useState<Stage>('idle');
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [result, setResult] = useState("");
   const [error, setError] = useState("");
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const startRecording = async () => {
     try {
@@ -54,12 +70,15 @@ export default function VoiceToTextPage() {
       mediaRecorder.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: "audio/webm" });
         setFile(blob);
+        setResult("");
+        setStage('idle');
       };
 
       mediaRecorder.start();
       setIsRecording(true);
       setFile(null);
       setResult("");
+      setStage('idle');
     } catch (err) {
       console.error("Error accessing microphone:", err);
       alert("Could not access microphone.");
@@ -74,39 +93,72 @@ export default function VoiceToTextPage() {
     }
   };
 
+  const handleFileSelect = (selectedFile: File) => {
+    setFile(selectedFile);
+    setResult("");
+    setStage('idle');
+    setUploadProgress(0);
+    setError("");
+  };
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0]);
-      setResult("");
+      handleFileSelect(e.target.files[0]);
     }
+  };
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const droppedFile = e.dataTransfer.files[0];
+    if (droppedFile && droppedFile.type.startsWith('audio/')) {
+      handleFileSelect(droppedFile);
+    }
+  }, []);
+
+  const clearFile = () => {
+    setFile(null);
+    setStage('idle');
+    setUploadProgress(0);
+    setResult("");
+    setError("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const processAudio = async () => {
     if (!file) return;
-    setIsProcessing(true);
     setError("");
+    setResult("");
 
     try {
-      const audioFile = file instanceof File ? file : new File([file], "recording.webm", { type: "audio/webm" });
-      const fileId = await uploadDirectToMinio(audioFile, 'voice-to-text');
+      // Stage 1: Upload
+      setStage('uploading');
+      setUploadProgress(0);
+      const audioFile = file instanceof File
+        ? file
+        : new File([file], "recording.webm", { type: "audio/webm" });
 
+      const fileId = await uploadDirectToMinio(audioFile, 'voice-to-text', (percent) => {
+        setUploadProgress(percent);
+      });
+
+      // Stage 2: Transcribe
+      setStage('transcribing');
       const res = await api.post("/api/ai/voice-to-text/transcribe", {
-        fileId: fileId,
+        fileId,
         translate: mode === "translate",
-        targetLanguage: language
+        targetLanguage: language,
       });
 
       setResult(res.data.translated_text || res.data.original_text);
+      setStage('done');
     } catch (err) {
       setError(t('error'));
-    } finally {
-      setIsProcessing(false);
+      setStage('error');
     }
   };
 
-  const copyText = () => {
-    navigator.clipboard.writeText(result);
-  };
+  const copyText = () => navigator.clipboard.writeText(result);
 
   const downloadText = () => {
     const element = document.createElement("a");
@@ -118,10 +170,20 @@ export default function VoiceToTextPage() {
     document.body.removeChild(element);
   };
 
+  const isProcessing = stage === 'uploading' || stage === 'transcribing';
+
+  const stageLabel = {
+    idle: '',
+    uploading: isRtl ? 'جاري رفع الملف...' : 'Uploading file...',
+    transcribing: isRtl ? 'جاري تحليل الصوت...' : 'Analyzing audio...',
+    done: isRtl ? 'اكتمل بنجاح!' : 'Completed!',
+    error: isRtl ? 'حدث خطأ' : 'Error occurred',
+  };
+
   return (
     <div className="relative min-h-screen bg-[#0a0015] flex flex-col">
       <div className="fixed top-1/4 left-1/4 w-[60%] h-[500px] bg-violet-600/10 blur-[150px] pointer-events-none z-0 rounded-full" />
-      
+
       <Navbar />
 
       <main className="flex-1 container mx-auto px-4 pt-32 pb-20 relative z-10 max-w-5xl">
@@ -135,7 +197,7 @@ export default function VoiceToTextPage() {
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          
+
           {/* Controls & Input */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -143,8 +205,8 @@ export default function VoiceToTextPage() {
             transition={{ delay: 0.1 }}
             className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 flex flex-col gap-6"
           >
-            {/* Action Selection */}
-            <div className="flex gap-4 p-1 bg-white/5 rounded-xl border border-white/10 flex-row" dir={t('title') === 'تحويل الصوت إلى نص' ? 'rtl' : 'ltr'}>
+            {/* Mode Selection */}
+            <div className="flex gap-4 p-1 bg-white/5 rounded-xl border border-white/10" dir={isRtl ? 'rtl' : 'ltr'}>
               <button
                 onClick={() => setMode("transcribe")}
                 className={`flex-1 py-3 rounded-lg text-sm font-medium transition-all ${mode === "transcribe" ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg" : "text-white/60 hover:text-white"}`}
@@ -160,28 +222,42 @@ export default function VoiceToTextPage() {
             </div>
 
             {/* Language Selection */}
-            <div dir={t('title') === 'تحويل الصوت إلى نص' ? 'rtl' : 'ltr'}>
+            <div dir={isRtl ? 'rtl' : 'ltr'}>
               <label className="block text-sm font-medium text-white/70 mb-2">{t('language')}</label>
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                disabled={mode === 'translate'}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 transition-all disabled:opacity-50 appearance-none"
-              >
-                {LANGUAGES.map(lang => (
-                  <option key={lang.code} value={lang.code} className="bg-[#0a0015]">{lang.name}</option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  disabled={mode === 'translate'}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 transition-all disabled:opacity-50 appearance-none"
+                >
+                  {LANGUAGES.map(lang => (
+                    <option key={lang.code} value={lang.code} className="bg-[#0a0015]">{lang.name}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            {/* Input Methods */}
+            {/* Upload / Record area */}
             <div className="grid grid-cols-2 gap-4">
-              <label className="cursor-pointer group flex flex-col items-center justify-center p-6 bg-white/5 border border-white/10 border-dashed rounded-2xl hover:bg-white/10 hover:border-violet-500/50 transition-all text-center">
-                <UploadCloud className="w-8 h-8 text-violet-400 mb-3 group-hover:scale-110 transition-transform" />
+              {/* Drag & Drop Upload */}
+              <label
+                className={`cursor-pointer group flex flex-col items-center justify-center p-6 border border-dashed rounded-2xl hover:bg-white/10 transition-all text-center ${
+                  isDragOver
+                    ? 'bg-violet-500/20 border-violet-500 scale-105'
+                    : 'bg-white/5 border-white/10 hover:border-violet-500/50'
+                }`}
+                onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+                onDragLeave={() => setIsDragOver(false)}
+                onDrop={handleDrop}
+              >
+                <UploadCloud className={`w-8 h-8 mb-3 transition-all ${isDragOver ? 'text-violet-300 scale-125' : 'text-violet-400 group-hover:scale-110'}`} />
                 <span className="text-sm font-medium text-white">{t('upload')}</span>
-                <input type="file" accept="audio/*" onChange={handleFileUpload} className="hidden" />
+                <span className="text-[10px] text-white/30 mt-1">MP3, WAV, M4A...</span>
+                <input ref={fileInputRef} type="file" accept="audio/*" onChange={handleFileUpload} className="hidden" />
               </label>
 
+              {/* Record Button */}
               {isRecording ? (
                 <button
                   onClick={stopRecording}
@@ -201,23 +277,154 @@ export default function VoiceToTextPage() {
               )}
             </div>
 
-            {file && (
-              <div className="p-4 bg-white/5 rounded-xl border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <span className="text-sm text-white/80 truncate flex-1" dir="ltr">
-                  {file instanceof File ? file.name : "Recorded Audio"}
-                </span>
-                <button
-                  onClick={processAudio}
-                  disabled={isProcessing}
-                  className="px-6 py-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-lg font-medium text-sm hover:shadow-[0_0_20px_rgba(139,92,246,0.4)] transition-all disabled:opacity-50 flex items-center justify-center gap-2 whitespace-nowrap w-full sm:w-auto"
+            {/* File Card + Progress */}
+            <AnimatePresence>
+              {file && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.97 }}
+                  className="rounded-2xl overflow-hidden border border-white/10 bg-white/5"
                 >
-                  {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
-                  {isProcessing ? t('processing') : t('process')}
-                </button>
-              </div>
+                  {/* File Header */}
+                  <div className="flex items-center gap-3 px-4 py-3" dir={isRtl ? 'rtl' : 'ltr'}>
+                    <div className="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center shrink-0">
+                      <FileAudio className="w-5 h-5 text-violet-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-white truncate">
+                        {file instanceof File ? file.name : (isRtl ? 'تسجيل صوتي' : 'Recorded Audio')}
+                      </p>
+                      <p className="text-[11px] text-white/40">
+                        {file instanceof File ? formatBytes(file.size) : ''}
+                      </p>
+                    </div>
+                    {!isProcessing && (
+                      <button onClick={clearFile} className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-all shrink-0">
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                    {stage === 'done' && (
+                      <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                    )}
+                  </div>
+
+                  {/* Progress Bar Area */}
+                  <AnimatePresence>
+                    {(isProcessing || stage === 'done') && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="px-4 pb-4"
+                      >
+                        {/* Stage Label */}
+                        <div className="flex items-center justify-between mb-2" dir={isRtl ? 'rtl' : 'ltr'}>
+                          <div className="flex items-center gap-1.5">
+                            {stage === 'transcribing' && (
+                              <Loader2 className="w-3.5 h-3.5 text-fuchsia-400 animate-spin" />
+                            )}
+                            {stage === 'uploading' && (
+                              <UploadCloud className="w-3.5 h-3.5 text-violet-400" />
+                            )}
+                            {stage === 'done' && (
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                            )}
+                            <span className={`text-xs font-medium ${
+                              stage === 'done' ? 'text-emerald-400' :
+                              stage === 'transcribing' ? 'text-fuchsia-400' : 'text-violet-300'
+                            }`}>
+                              {stageLabel[stage]}
+                            </span>
+                          </div>
+                          <span className="text-xs text-white/40 font-mono">
+                            {stage === 'uploading' ? `${uploadProgress}%` :
+                             stage === 'transcribing' ? '...' :
+                             stage === 'done' ? '100%' : ''}
+                          </span>
+                        </div>
+
+                        {/* Main Progress Bar */}
+                        <div className="relative h-2 bg-white/10 rounded-full overflow-hidden">
+                          <motion.div
+                            className={`absolute inset-y-0 left-0 rounded-full ${
+                              stage === 'done'
+                                ? 'bg-gradient-to-r from-emerald-500 to-teal-400'
+                                : 'bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500'
+                            }`}
+                            initial={{ width: '0%' }}
+                            animate={{
+                              width: stage === 'uploading'
+                                ? `${uploadProgress}%`
+                                : stage === 'transcribing'
+                                ? '100%'
+                                : stage === 'done'
+                                ? '100%'
+                                : '0%',
+                            }}
+                            transition={{
+                              duration: stage === 'transcribing' ? 2.5 : 0.3,
+                              ease: stage === 'transcribing' ? 'easeInOut' : 'linear',
+                              repeat: stage === 'transcribing' ? Infinity : 0,
+                              repeatType: 'mirror',
+                            }}
+                          />
+                          {/* Shimmer effect */}
+                          {isProcessing && (
+                            <motion.div
+                              className="absolute inset-y-0 w-20 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
+                              animate={{ x: ['-80px', '400px'] }}
+                              transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
+                            />
+                          )}
+                        </div>
+
+                        {/* Step indicators */}
+                        <div className="flex items-center justify-between mt-3" dir={isRtl ? 'rtl' : 'ltr'}>
+                          {[
+                            { key: 'uploading', label: isRtl ? 'رفع الملف' : 'Upload', done: stage === 'transcribing' || stage === 'done' || stage === 'uploading' },
+                            { key: 'transcribing', label: isRtl ? 'تحليل الصوت' : 'Analyze', done: stage === 'done' || stage === 'transcribing' },
+                            { key: 'done', label: isRtl ? 'اكتمل' : 'Done', done: stage === 'done' },
+                          ].map((step) => (
+                            <div key={step.key} className="flex items-center gap-1.5">
+                              <div className={`w-1.5 h-1.5 rounded-full transition-colors duration-500 ${
+                                step.done ? 'bg-fuchsia-400' : 'bg-white/20'
+                              }`} />
+                              <span className={`text-[10px] font-medium transition-colors duration-500 ${
+                                step.done ? 'text-white/70' : 'text-white/30'
+                              }`}>{step.label}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Process Button */}
+                  {!isProcessing && stage !== 'done' && (
+                    <div className="px-4 pb-4">
+                      <button
+                        onClick={processAudio}
+                        className="w-full py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-xl font-semibold text-sm hover:shadow-[0_0_25px_rgba(139,92,246,0.4)] transition-all flex items-center justify-center gap-2"
+                      >
+                        <Play className="w-4 h-4" />
+                        {t('process')}
+                      </button>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {error && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-red-400 text-sm p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-center"
+              >
+                {error}
+              </motion.div>
             )}
-            
-            {error && <div className="text-red-400 text-sm mt-2 text-center">{error}</div>}
           </motion.div>
 
           {/* Output */}
@@ -227,7 +434,7 @@ export default function VoiceToTextPage() {
             transition={{ delay: 0.2 }}
             className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 flex flex-col"
           >
-            <div className="flex items-center justify-between mb-4" dir={t('title') === 'تحويل الصوت إلى نص' ? 'rtl' : 'ltr'}>
+            <div className="flex items-center justify-between mb-4" dir={isRtl ? 'rtl' : 'ltr'}>
               <h2 className="text-lg font-bold text-white">{t('result')}</h2>
               {result && (
                 <div className="flex gap-2">
@@ -240,26 +447,57 @@ export default function VoiceToTextPage() {
                 </div>
               )}
             </div>
-            
-            <div className={`flex-1 w-full bg-[#0a0015]/50 border border-white/5 rounded-2xl p-4 min-h-[300px] overflow-y-auto ${!result ? 'flex items-center justify-center' : ''}`}>
-              {isProcessing ? (
-                <div className="flex flex-col items-center justify-center text-white/50">
-                  <Loader2 className="w-8 h-8 animate-spin mb-4 text-violet-500" />
-                  <p>{t('processing')}</p>
-                </div>
-              ) : result ? (
-                <p className="text-white/90 leading-relaxed whitespace-pre-wrap" dir="auto">{result}</p>
-              ) : (
-                <p className="text-white/30 text-sm text-center">
-                  Your transcribed or translated text will appear here.
-                </p>
-              )}
+
+            <div className={`flex-1 w-full bg-[#0a0015]/50 border border-white/5 rounded-2xl p-4 min-h-[300px] overflow-y-auto ${!result && !isProcessing ? 'flex items-center justify-center' : ''}`}>
+              <AnimatePresence mode="wait">
+                {stage === 'transcribing' ? (
+                  <motion.div
+                    key="transcribing"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="flex flex-col items-center justify-center h-full gap-4 text-white/50"
+                  >
+                    {/* Animated waveform bars */}
+                    <div className="flex items-end gap-1 h-12">
+                      {[...Array(7)].map((_, i) => (
+                        <motion.div
+                          key={i}
+                          className="w-1.5 bg-gradient-to-t from-violet-600 to-fuchsia-400 rounded-full"
+                          animate={{ height: ['8px', `${16 + Math.random() * 28}px`, '8px'] }}
+                          transition={{ duration: 0.6 + i * 0.1, repeat: Infinity, ease: 'easeInOut', delay: i * 0.08 }}
+                        />
+                      ))}
+                    </div>
+                    <p className="text-sm">{isRtl ? 'جاري تحليل الصوت...' : 'Analyzing audio...'}</p>
+                  </motion.div>
+                ) : result ? (
+                  <motion.p
+                    key="result"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-white/90 leading-relaxed whitespace-pre-wrap"
+                    dir="auto"
+                  >
+                    {result}
+                  </motion.p>
+                ) : (
+                  <motion.p
+                    key="empty"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-white/30 text-sm text-center"
+                  >
+                    {isRtl ? 'النص المحوَّل سيظهر هنا...' : 'Your transcribed text will appear here...'}
+                  </motion.p>
+                )}
+              </AnimatePresence>
             </div>
           </motion.div>
 
         </div>
       </main>
-      
+
       <Footer />
     </div>
   );
