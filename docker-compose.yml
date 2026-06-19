@@ -41,6 +41,8 @@ services:
       - MINIO_ROOT_USER=minioadmin
       - MINIO_ROOT_PASSWORD=minioadmin
       - MINIO_API_CORS_ALLOW_ORIGIN=*
+      - MINIO_SERVER_URL=http://178.62.192.74:9000
+      - MINIO_BROWSER_REDIRECT_URL=http://178.62.192.74:9001
     command: server /data --console-address ":9001"
     networks:
       - nexclone_network
