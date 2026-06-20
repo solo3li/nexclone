@@ -15,7 +15,7 @@ export default function MobileBottomNav() {
     { icon: Wrench, label: t('tools'), href: "/#tools" },
     { icon: DollarSign, label: t('pricing'), href: "/pricing" },
     { icon: Star, label: t('reviews'), href: "/#testimonials" },
-    { icon: User, label: t('account'), href: "/account" },
+    { icon: User, label: t('account'), href: "/profile" },
   ];
 
   return (

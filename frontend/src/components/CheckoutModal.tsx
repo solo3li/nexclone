@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, UploadCloud, CheckCircle } from 'lucide-react';
 import { Plan } from '@/store/usePlansStore';
-import axios from 'axios';
 import { useLocale } from 'next-intl';
+import api from '@/utils/api';
 
 interface PaymentMethod {
   id: number;
@@ -31,8 +31,7 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
     if (method === 'Manual' && paymentMethods.length === 0) {
       const fetchMethods = async () => {
         try {
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-          const res = await axios.get(`${apiUrl}/api/ManualPayments/methods`);
+          const res = await api.get('/api/ManualPayments/methods');
           setPaymentMethods(res.data);
         } catch (err) {
           console.error('Failed to fetch payment methods', err);
@@ -54,7 +53,6 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
     try {
       setIsSubmitting(true);
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-      const token = localStorage.getItem('token');
       // For a real implementation, we would call an API that returns a Checkout URL
       // Since CheckoutController returns a View in the backend, we might just redirect the user
       window.location.href = `${apiUrl}/Checkout/Pay?planId=${plan.id}&currency=${currency}`;
@@ -78,12 +76,8 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
       formData.append('PlanId', plan.id.toString());
       formData.append('ReceiptImage', file);
 
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-      const token = localStorage.getItem('token');
-      
-      await axios.post(`${apiUrl}/api/ManualPayments`, formData, {
+      await api.post('/api/ManualPayments', formData, {
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
         }
       });
