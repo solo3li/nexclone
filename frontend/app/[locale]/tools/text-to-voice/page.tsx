@@ -52,6 +52,8 @@ export default function TextToVoicePage() {
   const [error, setError] = useState("");
   const [estimatedCost, setEstimatedCost] = useState<number | null>(null);
   const [isEstimating, setIsEstimating] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingCost, setPendingCost] = useState<number | null>(null);
 
   const currentlyPlayingRef = useRef<HTMLAudioElement | null>(null);
   
@@ -92,25 +94,24 @@ export default function TextToVoicePage() {
   }, []);
 
   useEffect(() => {
-    const handler = setTimeout(async () => {
-      if (!text.trim() || text.length > maxChars) {
-        setEstimatedCost(null);
-        return;
-      }
-      setIsEstimating(true);
-      try {
-        const response = await api.post("/api/ai/text-to-voice/estimate", { text });
-        setEstimatedCost(response.data.estimatedCost);
-      } catch (err: any) {
-        console.error("Estimation error:", err);
-        setEstimatedCost(null);
-      } finally {
-        setIsEstimating(false);
-      }
-    }, 500);
+    setEstimatedCost(null);
+  }, [text]);
 
-    return () => clearTimeout(handler);
-  }, [text, maxChars]);
+  const handleProcessClick = async () => {
+    if (!text.trim() || text.length > maxChars) return;
+    setIsEstimating(true);
+    setError("");
+    try {
+      const response = await api.post("/api/ai/text-to-voice/estimate", { text });
+      setPendingCost(response.data.estimatedCost);
+      setShowConfirmModal(true);
+    } catch (err: any) {
+      console.error("Estimation error:", err);
+      setError(err.response?.data?.error || t('error'));
+    } finally {
+      setIsEstimating(false);
+    }
+  };
 
   const playDemo = (demoUrl: string) => {
     if (currentlyPlayingRef.current) {
@@ -121,7 +122,8 @@ export default function TextToVoicePage() {
     currentlyPlayingRef.current = audio;
   };
 
-  const generateAudio = async () => {
+  const confirmGenerate = async () => {
+    setShowConfirmModal(false);
     if (!text.trim() || text.length > maxChars) return;
     setIsProcessing(true);
     setError("");
@@ -150,6 +152,7 @@ export default function TextToVoicePage() {
       setError(err.response?.data?.error || t('error'));
     } finally {
       setIsProcessing(false);
+      setPendingCost(null);
     }
   };
 
@@ -225,23 +228,9 @@ export default function TextToVoicePage() {
               {/* Error Message */}
               {error && <div className="text-red-400 text-sm p-3 bg-red-500/10 rounded-xl border border-red-500/20 mx-2">{error}</div>}
 
-              {/* Estimation */}
-              {text.trim() && text.length <= maxChars && (
-                <div className="flex justify-center items-center py-2 text-sm">
-                  {isEstimating ? (
-                    <span className="text-white/40 flex items-center gap-2"><Loader2 className="w-3 h-3 animate-spin" /> {isRtl ? "جاري حساب التكلفة..." : "Calculating cost..."}</span>
-                  ) : estimatedCost !== null ? (
-                    <span className="text-fuchsia-400 font-medium flex items-center gap-1.5 bg-fuchsia-500/10 px-3 py-1 rounded-full border border-fuchsia-500/20">
-                      <Zap className="w-4 h-4" />
-                      {isRtl ? "التكلفة المتوقعة:" : "Estimated Cost:"} {estimatedCost} {isRtl ? "كريدت" : "Credits"}
-                    </span>
-                  ) : null}
-                </div>
-              )}
-
               {/* Generate Button */}
               <button
-                onClick={generateAudio}
+                onClick={handleProcessClick}
                 disabled={isProcessing || isEstimating || !text.trim() || text.length > maxChars}
                 className="w-full py-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-full font-bold text-lg hover:shadow-[0_0_30px_rgba(139,92,246,0.4)] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
               >
@@ -524,6 +513,47 @@ export default function TextToVoicePage() {
 
         </div>
       </main>
+
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" dir={isRtl ? 'rtl' : 'ltr'}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-[#0f0024] border border-white/10 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-fuchsia-500/20 flex items-center justify-center">
+                <Zap className="w-5 h-5 text-fuchsia-400" />
+              </div>
+              <div>
+                <h3 className="text-white font-bold text-lg">{isRtl ? "تأكيد العملية" : "Confirm Action"}</h3>
+                <p className="text-white/50 text-sm">{isRtl ? "سيتم خصم رصيد من حسابك" : "Credits will be deducted"}</p>
+              </div>
+            </div>
+            
+            <div className="bg-white/5 rounded-2xl p-4 mb-6 flex justify-between items-center">
+              <span className="text-white/70 font-medium">{isRtl ? "التكلفة المتوقعة:" : "Estimated Cost:"}</span>
+              <span className="text-fuchsia-400 font-bold text-xl">{pendingCost} {isRtl ? "كريدت" : "Credits"}</span>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-white rounded-xl font-semibold transition-colors"
+              >
+                {isRtl ? "إلغاء" : "Cancel"}
+              </button>
+              <button
+                onClick={confirmGenerate}
+                className="flex-1 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-xl font-semibold hover:opacity-90 transition-opacity"
+              >
+                {isRtl ? "تأكيد" : "Confirm"}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
       
       <Footer />
     </div>

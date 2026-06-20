@@ -135,7 +135,7 @@ builder.Services.AddRateLimiter(options =>
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
     options.AddFixedWindowLimiter("ApiPolicy", opt =>
     {
-        opt.PermitLimit = 5;
+        opt.PermitLimit = 100;
         opt.Window = TimeSpan.FromMinutes(1);
         opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
         opt.QueueLimit = 0;
@@ -166,9 +166,8 @@ app.MapScalarApiReference();
 
 app.UseHttpsRedirection();
 app.UseRouting();
-app.UseRateLimiter();
-
 app.UseCors("AllowNextjs");
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();
