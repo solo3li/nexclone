@@ -33,6 +33,14 @@ namespace NexClone.Backend.Services
         {
             bucketName ??= _defaultBucket;
 
+            var bucketExistsArgs = new BucketExistsArgs().WithBucket(bucketName);
+            bool found = await _minioClient.BucketExistsAsync(bucketExistsArgs).ConfigureAwait(false);
+            if (!found)
+            {
+                var makeBucketArgs = new MakeBucketArgs().WithBucket(bucketName);
+                await _minioClient.MakeBucketAsync(makeBucketArgs).ConfigureAwait(false);
+            }
+
             var putObjectArgs = new PutObjectArgs()
                 .WithBucket(bucketName)
                 .WithObject(objectName)

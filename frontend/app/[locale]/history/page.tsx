@@ -91,7 +91,7 @@ export default function HistoryPage() {
   };
 
   const goToDetail = (id: string) => {
-    // Currently redirects to tools based on logic, or just nothing.
+    router.push(`/${locale}/history/${id}`);
   };
 
   const filters = ["all", ...Array.from(new Set(history.map(h => h.type)))];
