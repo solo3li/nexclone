@@ -42,7 +42,7 @@
 
         <div class="bx--col-lg-8">
             <!-- Assign Plan Section -->
-            <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0;">
+            <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; height: 100%;">
                 <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">Assign New Plan</h3>
                 
                 <form asp-action="AssignPlan" method="post">
@@ -70,6 +70,49 @@
                         <button type="submit" class="bx--btn bx--btn--primary">Assign Selected Plan</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Devices / Fingerprints Section -->
+    <div class="bx--row" style="margin-top: 2rem;">
+        <div class="bx--col">
+            <h3 class="bx--type-productive-heading-04" style="margin-bottom: 1rem;">Registered Devices & Logins</h3>
+            <div class="bx--data-table-container">
+                <table class="bx--data-table">
+                    <thead>
+                        <tr>
+                            <th><span class="bx--table-header-label">Date/Time</span></th>
+                            <th><span class="bx--table-header-label">IP Address</span></th>
+                            <th><span class="bx--table-header-label">Fingerprint Hash</span></th>
+                            <th><span class="bx--table-header-label">User Agent</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (ViewBag.Devices != null)
+                        {
+                            var devices = ViewBag.Devices as IEnumerable<NexClone.Backend.Models.DeviceFingerprint>;
+                            if (devices != null && devices.Any())
+                            {
+                                foreach (var device in devices)
+                                {
+                                    <tr>
+                                        <td>@device.CreatedAt.ToString("MMM dd, yyyy HH:mm")</td>
+                                        <td>@device.IpAddress</td>
+                                        <td><code style="background: #e5e5e5; padding: 2px 4px; border-radius: 4px;">@device.FingerprintHash</code></td>
+                                        <td><span style="display: inline-block; max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="@device.UserAgent">@device.UserAgent</span></td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4" style="text-align: center;">No device records found for this user.</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

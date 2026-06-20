@@ -38,8 +38,14 @@ namespace NexClone.Backend.Controllers
                 
             if (user == null) return NotFound();
 
+            var devices = await _context.DeviceFingerprints
+                .Where(d => d.UserId == id)
+                .OrderByDescending(d => d.CreatedAt)
+                .ToListAsync();
+
             ViewData["Title"] = $"User Details - {user.Email}";
             ViewBag.Plans = new SelectList(await _context.Plans.ToListAsync(), "Id", "Name");
+            ViewBag.Devices = devices;
             return View(user);
         }
 
