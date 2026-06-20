@@ -62,7 +62,7 @@ export default function PricingSection() {
   ];
 
   return (
-    <section id="pricing" className="relative py-24 bg-[#0a0015]" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+    <section id="pricing-home" className="relative py-24 bg-[#0a0015]" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
       {/* BG */}
       <div className="absolute inset-0">
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-violet-500/30 to-transparent" />

@@ -4,6 +4,10 @@ import React, { useEffect, useState } from 'react';
 import { usePlansStore } from '@/store/usePlansStore';
 import { Check, X, Sparkles, Zap, Server } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Navbar from "../../../src/components/Navbar";
+import Footer from "../../../src/components/Footer";
+import MobileBottomNav from "../../../src/components/MobileBottomNav";
+import CursorGlow from "../../../src/components/CursorGlow";
 
 export default function PricingPage() {
   const { plans, isLoading, error, fetchPlans } = usePlansStore();
@@ -23,12 +27,15 @@ export default function PricingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white py-20 px-4 relative overflow-hidden">
+    <div className="relative min-h-screen bg-[#0a0a0a] text-white overflow-hidden">
+      <CursorGlow />
+      <Navbar />
+      
       {/* Background Orbs */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/20 rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto relative z-10">
+      <div className="max-w-7xl mx-auto relative z-10 py-32 px-4">
         <div className="text-center mb-16 space-y-4">
           <motion.h1 
             initial={{ opacity: 0, y: -20 }}
@@ -176,6 +183,10 @@ export default function PricingPage() {
           </div>
         )}
       </div>
+
+      <Footer />
+      <MobileBottomNav />
+      <div className="h-16 md:hidden" />
     </div>
   );
 }
