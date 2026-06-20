@@ -3,6 +3,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Home, Wrench, DollarSign, Star, User } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
+import { Link } from "../i18n/routing";
 
 export default function MobileBottomNav() {
   const [active, setActive] = useState(0);
@@ -10,11 +11,11 @@ export default function MobileBottomNav() {
   const locale = useLocale();
 
   const tabs = [
-    { icon: Home, label: t('home'), href: "#" },
-    { icon: Wrench, label: t('tools'), href: "#tools" },
-    { icon: DollarSign, label: t('pricing'), href: "#pricing" },
-    { icon: Star, label: t('reviews'), href: "#testimonials" },
-    { icon: User, label: t('account'), href: "#" },
+    { icon: Home, label: t('home'), href: "/" },
+    { icon: Wrench, label: t('tools'), href: "/#tools" },
+    { icon: DollarSign, label: t('pricing'), href: "/pricing" },
+    { icon: Star, label: t('reviews'), href: "/#testimonials" },
+    { icon: User, label: t('account'), href: "/account" },
   ];
 
   return (
@@ -29,9 +30,9 @@ export default function MobileBottomNav() {
           const isActive = active === i;
 
           return (
-            <a
+            <Link
               key={tab.label}
-              href={tab.href}
+              href={tab.href as any}
               onClick={() => setActive(i)}
               className="relative flex flex-col items-center gap-1 px-3 py-1 group"
             >
@@ -75,11 +76,10 @@ export default function MobileBottomNav() {
               >
                 {tab.label}
               </span>
-            </a>
+            </Link>
           );
         })}
       </div>
     </nav>
   );
 }
-

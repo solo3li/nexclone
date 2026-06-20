@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { AnimatedText, AnimatedReveal } from "./AnimatedText";
 import { useTranslations, useLocale } from "next-intl";
-import { useRouter } from "../i18n/routing";
+import { Link, useRouter } from "../i18n/routing";
 
 type Tool = {
   icon: any;
@@ -236,13 +236,13 @@ export default function ToolsSection() {
 
         {/* Bottom CTA */}
         <AnimatedReveal delay={0.3} className="text-center mt-12">
-          <a
-            href="#pricing"
+          <Link
+            href="/pricing"
             className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-bold text-lg transition-all duration-300 shadow-2xl shadow-violet-500/30 hover:shadow-violet-500/50"
           >
             <PenTool className="w-5 h-5" />
             {t('startUsing')}
-          </a>
+          </Link>
         </AnimatedReveal>
       </div>
     </section>

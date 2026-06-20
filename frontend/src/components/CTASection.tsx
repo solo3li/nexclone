@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
 import { AnimatedText, AnimatedReveal, GlowPulse } from "./AnimatedText";
 import { useTranslations, useLocale } from "next-intl";
+import { Link } from "../i18n/routing";
 
 export default function CTASection() {
   const t = useTranslations("CTA");
@@ -50,18 +51,19 @@ export default function CTASection() {
 
         <AnimatedReveal delay={0.4}>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <motion.a
-              href="#pricing"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.97 }}
-              className="group relative flex items-center gap-2 px-10 py-4 rounded-2xl text-white font-bold text-xl overflow-hidden shadow-2xl shadow-violet-500/40"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 bg-size-200 group-hover:bg-pos-100 transition-all duration-500" />
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-white/10 transition-opacity duration-300" />
-              <Sparkles className="w-5 h-5 relative" />
-              <span className="relative">{t('button')}</span>
-              <ArrowIcon className={`w-5 h-5 relative transition-transform duration-300 ${locale === 'ar' ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
-            </motion.a>
+            <Link href="/pricing" className="group">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.97 }}
+                className="relative flex items-center gap-2 px-10 py-4 rounded-2xl text-white font-bold text-xl overflow-hidden shadow-2xl shadow-violet-500/40"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 bg-size-200 group-hover:bg-pos-100 transition-all duration-500" />
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-white/10 transition-opacity duration-300" />
+                <Sparkles className="w-5 h-5 relative" />
+                <span className="relative">{t('button')}</span>
+                <ArrowIcon className={`w-5 h-5 relative transition-transform duration-300 ${locale === 'ar' ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
+              </motion.div>
+            </Link>
           </div>
         </AnimatedReveal>
 

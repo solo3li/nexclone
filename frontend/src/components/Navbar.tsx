@@ -47,10 +47,10 @@ export default function Navbar() {
   }, [isAuthenticated, setUser]);
 
   const navLinks = [
-    { label: t('home'), href: "#" },
-    { label: t('tools'), href: "#tools" },
-    { label: t('pricing'), href: "#pricing" },
-    { label: t('reviews'), href: "#testimonials" },
+    { label: t('home'), href: "/" },
+    { label: t('tools'), href: "/#tools" },
+    { label: t('pricing'), href: "/pricing" },
+    { label: t('reviews'), href: "/#testimonials" },
   ];
 
   useEffect(() => {
@@ -86,14 +86,14 @@ export default function Navbar() {
           {/* Desktop Links */}
           <div className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.label}
                 href={link.href}
                 className="text-white/70 hover:text-white text-sm font-medium transition-colors duration-200 relative group"
               >
                 {link.label}
                 <span className={`absolute -bottom-0.5 ${locale === 'ar' ? 'right-0' : 'left-0'} w-full h-px bg-gradient-to-r from-violet-500 to-fuchsia-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ${locale === 'ar' ? 'origin-right' : 'origin-left'}`} />
-              </a>
+              </Link>
             ))}
           </div>
 
@@ -175,14 +175,14 @@ export default function Navbar() {
           >
             <div className="px-4 py-4 flex flex-col gap-4" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
               {navLinks.map((link) => (
-                <a
+                <Link
                   key={link.label}
                   href={link.href}
                   onClick={() => setMenuOpen(false)}
                   className="text-white/80 hover:text-white text-base font-medium py-2 border-b border-white/5 transition-colors"
                 >
                   {link.label}
-                </a>
+                </Link>
               ))}
               {isAuthenticated ? (
                 <>
