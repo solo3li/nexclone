@@ -103,6 +103,26 @@ namespace NexClone.Backend.Controllers
             return RedirectToAction(nameof(Details), new { id = userId });
         }
 
+        [HttpPost]
+        public async Task<IActionResult> AdjustCredits(Guid userId, decimal amount, string operation)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return NotFound();
+
+            if (operation == "add")
+            {
+                user.AvailableCredits += amount;
+            }
+            else if (operation == "remove")
+            {
+                user.AvailableCredits -= amount;
+                if (user.AvailableCredits < 0) user.AvailableCredits = 0;
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Details), new { id = userId });
+        }
+
         [HttpGet("seed")]
         public async Task<IActionResult> Seed([FromServices] Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> userManager)
         {

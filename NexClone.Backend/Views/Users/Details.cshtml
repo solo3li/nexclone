@@ -41,6 +41,38 @@
         </div>
 
         <div class="bx--col-lg-8">
+            <!-- Manage Credits Section -->
+            <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem;">
+                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">Manage Credits</h3>
+                
+                <form asp-action="AdjustCredits" method="post">
+                    <input type="hidden" name="userId" value="@Model.Id" />
+                    
+                    <div style="display: flex; gap: 1rem; align-items: flex-end; margin-bottom: 1rem;">
+                        <div class="bx--form-item" style="flex: 1;">
+                            <label for="amount" class="bx--label">Amount</label>
+                            <div class="bx--text-input__field-wrapper">
+                                <input id="amount" type="number" class="bx--text-input" name="amount" required min="0.01" step="0.01" placeholder="Enter amount...">
+                            </div>
+                        </div>
+                        <div class="bx--form-item" style="flex: 1;">
+                            <label for="operation" class="bx--label">Operation</label>
+                            <div class="bx--select">
+                                <select id="operation" name="operation" class="bx--select-input" required>
+                                    <option value="add">Add (+)</option>
+                                    <option value="remove">Remove (-)</option>
+                                </select>
+                                <svg focusable="false" preserveAspectRatio="xMidYMid meet" style="will-change: transform;" xmlns="http://www.w3.org/2000/svg" class="bx--select__arrow" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 11L3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z"></path></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button type="submit" class="bx--btn bx--btn--primary">Update Credits</button>
+                    </div>
+                </form>
+            </div>
+
             <!-- Assign Plan Section -->
             <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; height: 100%;">
                 <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">Assign New Plan</h3>

@@ -15,6 +15,7 @@ namespace NexClone.Backend.Services
         public long MaxFileSizeMb { get; set; } = 25;
         // Cost per unit. If not set, we will fallback to LegacyDbContext
         public decimal? CostPerUnit { get; set; }
+        public int BlockSize { get; set; } = 1;
     }
 
     public class PolicyValidationResult
@@ -93,6 +94,11 @@ namespace NexClone.Backend.Services
                 amountForCost = usageAmountForLimits / 102400m; 
             }
 
+            if (toolPolicy.BlockSize > 1)
+            {
+                amountForCost = amountForCost / toolPolicy.BlockSize;
+            }
+
             decimal totalCost = amountForCost * costPerUnit;
 
             // Check credits
@@ -119,6 +125,7 @@ namespace NexClone.Backend.Services
                 policy.Enabled = plan.TtsEnabled;
                 policy.MaxCharsPerRequest = plan.TtsMaxCharsPerRequest;
                 policy.CostPerUnit = plan.TtsCostPerChar;
+                policy.BlockSize = plan.TtsCharactersBlock;
             }
             else if (toolId == "voice-to-text")
             {

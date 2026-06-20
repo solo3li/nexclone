@@ -75,7 +75,14 @@
                 <div class="bx--form__helper-text">-1 for unlimited</div>
             </div>
             <div class="bx--form-item">
-                <label for="TtsCostPerChar" class="bx--label">Cost per Char</label>
+                <label for="TtsCharactersBlock" class="bx--label">Characters Block Size</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="TtsCharactersBlock" type="number" class="bx--text-input" name="TtsCharactersBlock" required min="1" value="@Model.TtsCharactersBlock">
+                </div>
+                <div class="bx--form__helper-text">Cost will be calculated per this amount</div>
+            </div>
+            <div class="bx--form-item">
+                <label for="TtsCostPerChar" class="bx--label">Cost per Block</label>
                 <div class="bx--text-input__field-wrapper">
                     <input id="TtsCostPerChar" type="number" class="bx--text-input" name="TtsCostPerChar" required min="0" step="0.0001" value="@Model.TtsCostPerChar">
                 </div>
