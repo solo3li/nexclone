@@ -67,7 +67,7 @@
 
 @section Scripts {
     <script>
-        const models = {
+        var providerModelsMap = {
             "OpenAI": [
                 { value: "", text: "Default" },
                 { value: "tts-1", text: "tts-1" },
@@ -80,6 +80,8 @@
             ],
             "Gemini": [
                 { value: "", text: "Default" },
+                { value: "gemini-1.5-flash", text: "gemini-1.5-flash" },
+                { value: "gemini-1.5-pro", text: "gemini-1.5-pro" },
                 { value: "gemini-2.0-flash-exp", text: "gemini-2.0-flash-exp" },
                 { value: "gemini-2.0-pro", text: "gemini-2.0-pro" },
                 { value: "gemini-2.5-flash", text: "gemini-2.5-flash" },
@@ -97,14 +99,15 @@
         function updateModels() {
             const providerSelect = document.getElementById("ProviderName");
             const modelSelect = document.getElementById("ModelName");
-            const provider = providerSelect.value;
+            if (!providerSelect || !modelSelect) return;
             
+            const provider = providerSelect.value;
             const currentModel = "@(Model?.ModelName)";
 
             modelSelect.innerHTML = "";
             
-            if (models[provider]) {
-                models[provider].forEach(function(m) {
+            if (providerModelsMap[provider]) {
+                providerModelsMap[provider].forEach(function(m) {
                     const option = document.createElement("option");
                     option.value = m.value;
                     option.text = m.text;
@@ -117,6 +120,10 @@
             }
         }
 
+        // Execute immediately for HTMX requests
+        updateModels();
+
+        // Also bind to DOMContentLoaded for direct page loads
         document.addEventListener("DOMContentLoaded", function() {
             updateModels();
         });
