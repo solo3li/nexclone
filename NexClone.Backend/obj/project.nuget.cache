@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "5NFV3DMzV0E=",
+  "dgSpecHash": "r9fHaaXf/74=",
   "success": true,
-  "projectFilePath": "/src/NexClone.Backend.csproj",
+  "projectFilePath": "/app/NexClone.Backend.csproj",
   "expectedPackageFiles": [
     "/root/.nuget/packages/communitytoolkit.highperformance/8.4.0/communitytoolkit.highperformance.8.4.0.nupkg.sha512",
     "/root/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",

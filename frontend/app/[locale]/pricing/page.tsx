@@ -8,10 +8,16 @@ import Navbar from "../../../src/components/Navbar";
 import Footer from "../../../src/components/Footer";
 import MobileBottomNav from "../../../src/components/MobileBottomNav";
 import CursorGlow from "../../../src/components/CursorGlow";
+import { useLocale } from 'next-intl';
+import CheckoutModal from '@/components/CheckoutModal';
+import { Plan } from '@/store/usePlansStore';
 
 export default function PricingPage() {
   const { plans, isLoading, error, fetchPlans } = usePlansStore();
   const [currency, setCurrency] = useState<'USD' | 'EGP'>('USD');
+  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+  const locale = useLocale();
+  const isRtl = locale === 'ar';
 
   useEffect(() => {
     fetchPlans();
@@ -42,7 +48,7 @@ export default function PricingPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-5xl md:text-6xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-400"
           >
-            Choose Your Superpower
+            {isRtl ? 'اختر باقتك الخارقة' : 'Choose Your Superpower'}
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0 }}
@@ -50,7 +56,7 @@ export default function PricingPage() {
             transition={{ delay: 0.1 }}
             className="text-xl text-gray-400 max-w-2xl mx-auto"
           >
-            Unleash the full potential of Next-Gen AI models with pricing that scales with your ambitions.
+            {isRtl ? 'أطلق العنان لإمكانيات نماذج الذكاء الاصطناعي من الجيل القادم بأسعار تتناسب مع طموحاتك.' : 'Unleash the full potential of Next-Gen AI models with pricing that scales with your ambitions.'}
           </motion.p>
 
           <motion.div 
@@ -115,7 +121,7 @@ export default function PricingPage() {
                       <div className="p-3 bg-white/5 inline-block rounded-2xl mb-4 border border-white/5 group-hover:border-white/20 transition-colors">
                         {getIcon(index)}
                       </div>
-                      <h3 className="text-2xl font-semibold text-white mb-2">{plan.name}</h3>
+                      <h3 className="text-2xl font-semibold text-white mb-2">{isRtl ? plan.nameAr : plan.name}</h3>
                       <div className="flex items-baseline gap-2">
                         <span className="text-5xl font-extrabold tracking-tight">
                           {price === 0 ? 'Free' : `${currencySymbol}${price}`}
@@ -173,8 +179,11 @@ export default function PricingPage() {
                       </div>
                     </div>
 
-                    <button className={`w-full py-4 mt-8 rounded-xl font-semibold transition-all duration-300 ${isPopular ? 'bg-white text-black hover:bg-gray-100 hover:shadow-lg hover:shadow-white/20' : 'bg-white/10 text-white hover:bg-white/20'}`}>
-                      {plan.priceUsd === 0 ? 'Get Started for Free' : 'Subscribe Now'}
+                    <button 
+                      onClick={() => setSelectedPlan(plan)}
+                      className={`w-full py-4 mt-8 rounded-xl font-semibold transition-all duration-300 ${isPopular ? 'bg-white text-black hover:bg-gray-100 hover:shadow-lg hover:shadow-white/20' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                    >
+                      {plan.priceUsd === 0 ? (isRtl ? 'ابدأ مجاناً' : 'Get Started for Free') : (isRtl ? 'اشترك الآن' : 'Subscribe Now')}
                     </button>
                   </div>
                 </motion.div>
@@ -187,6 +196,14 @@ export default function PricingPage() {
       <Footer />
       <MobileBottomNav />
       <div className="h-16 md:hidden" />
+
+      {selectedPlan && (
+        <CheckoutModal 
+          plan={selectedPlan} 
+          currency={currency} 
+          onClose={() => setSelectedPlan(null)} 
+        />
+      )}
     </div>
   );
 }

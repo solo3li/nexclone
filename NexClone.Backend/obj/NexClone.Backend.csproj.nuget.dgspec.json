@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/src/NexClone.Backend.csproj": {}
+    "/app/NexClone.Backend.csproj": {}
   },
   "projects": {
-    "/src/NexClone.Backend.csproj": {
+    "/app/NexClone.Backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/src/NexClone.Backend.csproj",
+        "projectUniqueName": "/app/NexClone.Backend.csproj",
         "projectName": "NexClone.Backend",
-        "projectPath": "/src/NexClone.Backend.csproj",
+        "projectPath": "/app/NexClone.Backend.csproj",
         "packagesPath": "/root/.nuget/packages/",
-        "outputPath": "/src/obj/",
+        "outputPath": "/app/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/root/.nuget/NuGet/NuGet.Config"

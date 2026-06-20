@@ -19,28 +19,41 @@ namespace NexClone.Backend.Controllers
             _userManager = userManager;
         }
 
-        public async Task<IActionResult> Pay(int planId)
+        public async Task<IActionResult> Pay(int planId, string currency = "USD")
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
 
-            var result = await _paymentService.CreatePaymobIntentAsync(
-                planId, 
-                user.Id.ToString(), 
-                user.Email ?? "user@example.com", 
-                user.UserName ?? "Guest", 
-                "User", 
-                user.PhoneNumber ?? ""
-            );
-
-            if (!result.IsSuccess)
+            if (currency == "EGP")
             {
-                ViewData["ErrorMessage"] = result.ErrorMessage;
-                return View("Error");
+                var result = await _paymentService.CreatePaymobIntentAsync(
+                    planId, 
+                    user.Id.ToString(), 
+                    user.Email ?? "user@example.com", 
+                    user.UserName ?? "Guest", 
+                    "User", 
+                    user.PhoneNumber ?? ""
+                );
+
+                if (!result.IsSuccess)
+                {
+                    ViewData["ErrorMessage"] = result.ErrorMessage;
+                    return View("Error");
+                }
+
+                ViewData["CheckoutUrl"] = result.CheckoutUrl;
+                return View();
+            }
+            else if (currency == "USD")
+            {
+                // PayPal Integration
+                // For now, redirect to a generic success or mock checkout for PayPal
+                // You would typically call an IPaymentService method for PayPal here
+                ViewData["CheckoutUrl"] = $"/api/webhooks/paypal-mock-success?planId={planId}&userId={user.Id}";
+                return View("PayPalCheckout"); // A view showing the PayPal button
             }
 
-            ViewData["CheckoutUrl"] = result.CheckoutUrl;
-            return View();
+            return BadRequest("Invalid Currency");
         }
     }
 }

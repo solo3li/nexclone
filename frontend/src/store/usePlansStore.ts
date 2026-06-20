@@ -4,6 +4,9 @@ import axios from 'axios';
 export interface Plan {
   id: number;
   name: string;
+  nameAr: string;
+  description: string;
+  descriptionAr: string;
   priceUsd: number;
   priceEgp: number;
   durationDays: number;

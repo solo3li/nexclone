@@ -20,129 +20,129 @@ build_property.TargetFrameworkVersion = v10.0
 build_property.EntryPointFilePath = 
 build_property.RootNamespace = NexClone.Backend
 build_property.RootNamespace = NexClone.Backend
-build_property.ProjectDir = /src/
+build_property.ProjectDir = /app/
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 10.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = /src
+build_property.MSBuildProjectDirectory = /app
 build_property._RazorSourceGeneratorDebug = 
 build_property.EffectiveAnalysisLevelStyle = 10.0
 build_property.EnableCodeStyleSeverity = 
 
-[/src/Views/ApiConfigAdmin/Create.cshtml]
+[/app/Views/ApiConfigAdmin/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQXBpQ29uZmlnQWRtaW4vQ3JlYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/ApiConfigAdmin/Edit.cshtml]
+[/app/Views/ApiConfigAdmin/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQXBpQ29uZmlnQWRtaW4vRWRpdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/ApiConfigAdmin/Index.cshtml]
+[/app/Views/ApiConfigAdmin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQXBpQ29uZmlnQWRtaW4vSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/Checkout/Pay.cshtml]
+[/app/Views/Checkout/Pay.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQ2hlY2tvdXQvUGF5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/HistoryAdmin/Index.cshtml]
+[/app/Views/HistoryAdmin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSGlzdG9yeUFkbWluL0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/Home/Index.cshtml]
+[/app/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/Home/Privacy.cshtml]
+[/app/Views/Home/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9Qcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/LogsAdmin/Index.cshtml]
+[/app/Views/LogsAdmin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTG9nc0FkbWluL0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/PaymentConfigAdmin/Create.cshtml]
+[/app/Views/PaymentConfigAdmin/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGF5bWVudENvbmZpZ0FkbWluL0NyZWF0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/PaymentConfigAdmin/Edit.cshtml]
+[/app/Views/PaymentConfigAdmin/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGF5bWVudENvbmZpZ0FkbWluL0VkaXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/PaymentConfigAdmin/Index.cshtml]
+[/app/Views/PaymentConfigAdmin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGF5bWVudENvbmZpZ0FkbWluL0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/Plans/Index.cshtml]
+[/app/Views/Plans/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGxhbnMvSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/PlansAdmin/Create.cshtml]
+[/app/Views/PlansAdmin/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGxhbnNBZG1pbi9DcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/PlansAdmin/Edit.cshtml]
+[/app/Views/PlansAdmin/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGxhbnNBZG1pbi9FZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/PlansAdmin/Index.cshtml]
+[/app/Views/PlansAdmin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUGxhbnNBZG1pbi9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/Shared/Error.cshtml]
+[/app/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL0Vycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/Shared/_ValidationScriptsPartial.cshtml]
+[/app/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/Subscriptions/Index.cshtml]
+[/app/Views/Subscriptions/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU3Vic2NyaXB0aW9ucy9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/ToolConfigAdmin/Create.cshtml]
+[/app/Views/ToolConfigAdmin/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVG9vbENvbmZpZ0FkbWluL0NyZWF0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/ToolConfigAdmin/Edit.cshtml]
+[/app/Views/ToolConfigAdmin/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVG9vbENvbmZpZ0FkbWluL0VkaXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/ToolConfigAdmin/Index.cshtml]
+[/app/Views/ToolConfigAdmin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVG9vbENvbmZpZ0FkbWluL0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/Tools/Edit.cshtml]
+[/app/Views/Tools/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVG9vbHMvRWRpdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/Tools/Index.cshtml]
+[/app/Views/Tools/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVG9vbHMvSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/Users/Details.cshtml]
+[/app/Views/Users/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVXNlcnMvRGV0YWlscy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/Users/Index.cshtml]
+[/app/Views/Users/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVXNlcnMvSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/Voices/Index.cshtml]
+[/app/Views/Voices/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvVm9pY2VzL0luZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/_ViewImports.cshtml]
+[/app/Views/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/_ViewStart.cshtml]
+[/app/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/Shared/_Layout.cshtml]
+[/app/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-0yc1u00xnq

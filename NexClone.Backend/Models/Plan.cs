@@ -13,6 +13,16 @@ namespace NexClone.Backend.Models
         [MaxLength(255)]
         public string Name { get; set; } = string.Empty;
 
+        [Required]
+        [MaxLength(255)]
+        public string NameAr { get; set; } = string.Empty;
+
+        [MaxLength(1000)]
+        public string? Description { get; set; }
+
+        [MaxLength(1000)]
+        public string? DescriptionAr { get; set; }
+
         public int DurationDays { get; set; }
 
         public decimal PriceUsd { get; set; }

@@ -29,6 +29,9 @@ namespace NexClone.Backend.Models
         [MaxLength(300)]
         public string? Notes { get; set; }
 
+        [MaxLength(500)]
+        public string? ReceiptUrl { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 

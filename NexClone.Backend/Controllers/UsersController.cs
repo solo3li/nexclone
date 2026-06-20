@@ -90,6 +90,9 @@ namespace NexClone.Backend.Controllers
             {
                 _context.Plans.Add(new Plan { 
                     Name = "Free Tier", 
+                    NameAr = "الباقة المجانية",
+                    Description = "Get started with limited features.",
+                    DescriptionAr = "ابدأ بخصائص محدودة.",
                     PriceUsd = 0, PriceEgp = 0, 
                     DurationDays = 30, MonthlyCredits = 50, 
                     TtsEnabled = true, TtsMaxCharsPerRequest = 250, TtsCostPerChar = 0.01m,
@@ -102,6 +105,9 @@ namespace NexClone.Backend.Controllers
             {
                 _context.Plans.Add(new Plan { 
                     Name = "Pro Tier", 
+                    NameAr = "الباقة الاحترافية",
+                    Description = "Best for professionals and creators.",
+                    DescriptionAr = "الأفضل للمحترفين وصناع المحتوى.",
                     PriceUsd = 15, PriceEgp = 750, 
                     DurationDays = 30, MonthlyCredits = 2500, 
                     TtsEnabled = true, TtsMaxCharsPerRequest = 2000, TtsCostPerChar = 0.005m,
@@ -114,6 +120,9 @@ namespace NexClone.Backend.Controllers
             {
                 _context.Plans.Add(new Plan { 
                     Name = "Enterprise Tier", 
+                    NameAr = "باقة الشركات",
+                    Description = "Unlimited access for heavy users and teams.",
+                    DescriptionAr = "وصول غير محدود للمستخدمين بكثافة والفرق.",
                     PriceUsd = 49, PriceEgp = 2450, 
                     DurationDays = 30, MonthlyCredits = 10000, 
                     TtsEnabled = true, TtsMaxCharsPerRequest = -1, TtsCostPerChar = 0.002m,
