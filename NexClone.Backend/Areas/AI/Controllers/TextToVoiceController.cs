@@ -56,9 +56,7 @@ namespace NexClone.Backend.Areas.AI.Controllers
                     request.Text,
                     request.Language,
                     request.VoiceName,
-                    request.StyleInstruction,
-                    request.IsSongMode,
-                    request.EnvironmentMode
+                    request.StyleInstruction
                 );
 
                 // Upload to MinIO
@@ -100,7 +98,5 @@ namespace NexClone.Backend.Areas.AI.Controllers
         public string Language { get; set; } = "other"; // "arabic" or "other"
         public string VoiceName { get; set; } = string.Empty;
         public string StyleInstruction { get; set; } = string.Empty;
-        public bool IsSongMode { get; set; } = false;
-        public string EnvironmentMode { get; set; } = string.Empty;
     }
 }

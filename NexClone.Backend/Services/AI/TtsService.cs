@@ -28,41 +28,10 @@ namespace NexClone.Backend.Services.AI
             string text, 
             string language, 
             string voiceName, 
-            string styleInstruction,
-            bool isSongMode = false,
-            string environmentMode = "")
+            string styleInstruction)
         {
             if (string.IsNullOrWhiteSpace(text))
                 throw new ArgumentException("Text cannot be empty.");
-
-            if (isSongMode)
-            {
-                var goApiConfig = await _dbContext.ApiConfigurations.FirstOrDefaultAsync(c => c.ProviderName == "GoAPI" && c.IsActive);
-                if (goApiConfig != null && !string.IsNullOrWhiteSpace(goApiConfig.ApiKey))
-                {
-                    try
-                    {
-                        return await GenerateGoApiSongAsync(text, styleInstruction, environmentMode, goApiConfig);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"GoAPI failed: {ex.Message}. Falling back to Gemini...");
-                    }
-                }
-
-                // Fallback to Gemini with enhanced prompt
-                var geminiConfig = await _dbContext.ApiConfigurations.FirstOrDefaultAsync(c => c.ProviderName == "Gemini" && c.IsActive);
-                if (geminiConfig != null)
-                {
-                    string enhancedPrompt = $"Perform this text as a song. Style: {styleInstruction}. Environment: {environmentMode}. Add vocal sound effects and sing rhythmically.";
-                    var toolConfigTemp = await _dbContext.ToolConfigurations.FirstOrDefaultAsync(t => t.ToolName == "text-to-voice" && t.IsActive);
-                    return await GenerateGeminiAudioAsync(text, voiceName, enhancedPrompt, geminiConfig, toolConfigTemp?.ModelName);
-                }
-                else
-                {
-                    throw new Exception("Song Mode requires either GoAPI or Gemini to be configured and active.");
-                }
-            }
 
             var toolConfig = await _dbContext.ToolConfigurations.FirstOrDefaultAsync(t => t.ToolName == "text-to-voice" && t.IsActive);
             
@@ -302,15 +271,6 @@ namespace NexClone.Backend.Services.AI
             writer.Write(pcmData);
 
             return ms.ToArray();
-        }
-        private async Task<(Stream, string, string)> GenerateGoApiSongAsync(string text, string styleInstruction, string environmentMode, ApiConfiguration config)
-        {
-            // TODO: Implement actual GoAPI call for Suno.
-            // GoAPI is an asynchronous service that returns a Task ID.
-            // This would require a polling loop (e.g. Task.Delay(5000) for up to 3 minutes)
-            // or an architectural shift to Webhooks/Websockets.
-            // For now, we simulate a connection error to trigger the Gemini Fallback.
-            throw new Exception("GoAPI endpoint not fully implemented yet. Please add payload structures.");
         }
     }
 }

@@ -9,8 +9,6 @@ namespace NexClone.Backend.Services.AI
             string text, 
             string language, 
             string voiceName, 
-            string styleInstruction,
-            bool isSongMode = false,
-            string environmentMode = "");
+            string styleInstruction);
     }
 }
