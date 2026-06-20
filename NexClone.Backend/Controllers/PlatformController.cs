@@ -4,6 +4,7 @@ using NexClone.Backend.Models;
 using NexClone.Backend.Models.Legacy;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Security.Claims;
 
 namespace NexClone.Backend.Controllers
 {
@@ -93,6 +94,45 @@ namespace NexClone.Backend.Controllers
                 .Select(s => new { s.Id, s.Name, s.Value, s.IsPremium })
                 .ToListAsync();
             return Ok(styles);
+        }
+
+        [HttpGet("tts-config")]
+        public async Task<IActionResult> GetTtsConfig()
+        {
+            int maxChars = 150; // Default
+
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                var userIdStr = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+                if (Guid.TryParse(userIdStr, out var userId))
+                {
+                    var activeSubscription = await _context.Subscriptions
+                        .Where(s => s.UserId == userId && s.Status == "active")
+                        .OrderByDescending(s => s.EndDate)
+                        .FirstOrDefaultAsync();
+
+                    int planId = activeSubscription?.PlanId ?? 0; // 0 usually means Free/Default
+
+                    var toolConfig = await _context.ToolConfigurations.FirstOrDefaultAsync(t => t.ToolName == "text-to-voice" && t.IsActive);
+                    if (toolConfig != null && !string.IsNullOrEmpty(toolConfig.AdditionalSettings))
+                    {
+                        try
+                        {
+                            using var doc = System.Text.Json.JsonDocument.Parse(toolConfig.AdditionalSettings);
+                            if (doc.RootElement.TryGetProperty("limits", out var limitsProp))
+                            {
+                                if (limitsProp.TryGetProperty(planId.ToString(), out var limitElement) && limitElement.TryGetInt32(out int limit))
+                                {
+                                    maxChars = limit;
+                                }
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+
+            return Ok(new { maxChars = maxChars });
         }
     }
 }

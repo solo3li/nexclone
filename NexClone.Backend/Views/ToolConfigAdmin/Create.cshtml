@@ -57,6 +57,42 @@
             </label>
         </div>
 
+        <div id="tts-limits-section" style="display: none; margin-bottom: 2rem; padding: 1rem; border: 1px solid #e0e0e0; background: #f4f4f4;">
+            <h4 style="margin-top: 0; margin-bottom: 1rem;">TTS Character Limits per Package</h4>
+            @{
+                var limits = new System.Collections.Generic.Dictionary<string, int>();
+                if (!string.IsNullOrEmpty(Model?.AdditionalSettings))
+                {
+                    try
+                    {
+                        using var doc = System.Text.Json.JsonDocument.Parse(Model.AdditionalSettings);
+                        if (doc.RootElement.TryGetProperty("limits", out var limitsProp))
+                        {
+                            foreach (var prop in limitsProp.EnumerateObject())
+                            {
+                                if (prop.Value.TryGetInt32(out int limit))
+                                {
+                                    limits[prop.Name] = limit;
+                                }
+                            }
+                        }
+                    }
+                    catch { }
+                }
+            }
+            @if (ViewBag.Plans != null)
+            {
+                foreach (var plan in (IEnumerable<NexClone.Backend.Models.Plan>)ViewBag.Plans)
+                {
+                    int currentLimit = limits.ContainsKey(plan.Id.ToString()) ? limits[plan.Id.ToString()] : 150;
+                    <div class="bx--form-item" style="margin-bottom: 1rem;">
+                        <label for="PlanLimit_@plan.Id" class="bx--label">@plan.Name Character Limit</label>
+                        <input id="PlanLimit_@plan.Id" type="number" class="bx--text-input" name="PlanLimit_@plan.Id" value="@currentLimit" min="1" required>
+                    </div>
+                }
+            }
+        </div>
+
         <div style="display: flex; justify-content: flex-end; gap: 1rem;">
             <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">Cancel</a>
             <button type="submit" class="bx--btn bx--btn--primary">Create</button>
@@ -118,6 +154,24 @@
         // Also bind to DOMContentLoaded for direct page loads
         document.addEventListener("DOMContentLoaded", function() {
             updateModels();
+            updateTtsLimitsVisibility();
         });
+
+        const toolSelect = document.getElementById("ToolName");
+        if (toolSelect) {
+            toolSelect.addEventListener("change", updateTtsLimitsVisibility);
+        }
+
+        function updateTtsLimitsVisibility() {
+            const toolSelect = document.getElementById("ToolName");
+            const limitsSection = document.getElementById("tts-limits-section");
+            if (toolSelect && limitsSection) {
+                if (toolSelect.value === "text-to-voice") {
+                    limitsSection.style.display = "block";
+                } else {
+                    limitsSection.style.display = "none";
+                }
+            }
+        }
     </script>
 }

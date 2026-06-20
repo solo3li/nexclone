@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NexClone.Backend.Models;
 using NexClone.Backend.Services;
 using NexClone.Backend.Services.AI;
 using System;
 using System.IO;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -46,6 +48,36 @@ namespace NexClone.Backend.Areas.AI.Controllers
             var cost = _creditManager.CalculateCost("text-to-voice", request.Text.Length);
             if (!await _creditManager.HasEnoughCredits(userId, "text-to-voice", cost))
                 return BadRequest(new { error = $"Insufficient credits. Generating this audio requires {cost} credits." });
+
+            var activeSubscription = await _dbContext.Subscriptions
+                .Where(s => s.UserId == userId && s.Status == "active")
+                .OrderByDescending(s => s.EndDate)
+                .FirstOrDefaultAsync();
+
+            int planId = activeSubscription?.PlanId ?? 0;
+            int maxChars = 150; // Default limit
+
+            var toolConfig = await _dbContext.ToolConfigurations.FirstOrDefaultAsync(t => t.ToolName == "text-to-voice" && t.IsActive);
+            if (toolConfig != null && !string.IsNullOrEmpty(toolConfig.AdditionalSettings))
+            {
+                try
+                {
+                    using var doc = System.Text.Json.JsonDocument.Parse(toolConfig.AdditionalSettings);
+                    if (doc.RootElement.TryGetProperty("limits", out var limitsProp))
+                    {
+                        if (limitsProp.TryGetProperty(planId.ToString(), out var limitElement) && limitElement.TryGetInt32(out int limit))
+                        {
+                            maxChars = limit;
+                        }
+                    }
+                }
+                catch { }
+            }
+
+            if (request.Text.Length > maxChars)
+            {
+                return BadRequest(new { error = $"Your current plan allows a maximum of {maxChars} characters per request." });
+            }
 
             try
             {

@@ -31,15 +31,34 @@ namespace NexClone.Backend.Controllers
         {
             ViewData["Title"] = "Add Tool Configuration";
             ViewBag.Tools = new SelectList(await _legacyContext.ToolsTools.ToListAsync(), "Name", "Name");
+            ViewBag.Plans = await _context.Plans.ToListAsync();
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ToolConfiguration config)
+        public async Task<IActionResult> Create(ToolConfiguration config, Microsoft.AspNetCore.Http.IFormCollection form)
         {
             if (ModelState.IsValid)
             {
+                if (config.ToolName == "text-to-voice")
+                {
+                    var limits = new System.Collections.Generic.Dictionary<string, int>();
+                    foreach (var key in form.Keys.Where(k => k.StartsWith("PlanLimit_")))
+                    {
+                        var planIdStr = key.Replace("PlanLimit_", "");
+                        if (int.TryParse(form[key], out int limit))
+                        {
+                            limits[planIdStr] = limit;
+                        }
+                    }
+                    if (limits.Count > 0)
+                    {
+                        var settingsObj = new { limits = limits };
+                        config.AdditionalSettings = System.Text.Json.JsonSerializer.Serialize(settingsObj);
+                    }
+                }
+
                 config.Id = Guid.NewGuid();
                 config.UpdatedAt = DateTime.UtcNow;
                 _context.Add(config);
@@ -47,6 +66,7 @@ namespace NexClone.Backend.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewBag.Tools = new SelectList(await _legacyContext.ToolsTools.ToListAsync(), "Name", "Name", config.ToolName);
+            ViewBag.Plans = await _context.Plans.ToListAsync();
             return View(config);
         }
 
@@ -59,12 +79,13 @@ namespace NexClone.Backend.Controllers
 
             ViewData["Title"] = $"Edit Tool Configuration - {config.ToolName}";
             ViewBag.Tools = new SelectList(await _legacyContext.ToolsTools.ToListAsync(), "Name", "Name", config.ToolName);
+            ViewBag.Plans = await _context.Plans.ToListAsync();
             return View(config);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, ToolConfiguration config)
+        public async Task<IActionResult> Edit(Guid id, ToolConfiguration config, Microsoft.AspNetCore.Http.IFormCollection form)
         {
             if (id != config.Id) return NotFound();
 
@@ -72,6 +93,26 @@ namespace NexClone.Backend.Controllers
             {
                 try
                 {
+                    if (config.ToolName == "text-to-voice")
+                    {
+                        var limits = new System.Collections.Generic.Dictionary<string, int>();
+                        foreach (var key in form.Keys.Where(k => k.StartsWith("PlanLimit_")))
+                        {
+                            var planIdStr = key.Replace("PlanLimit_", "");
+                            if (int.TryParse(form[key], out int limit))
+                            {
+                                limits[planIdStr] = limit;
+                            }
+                        }
+                        if (limits.Count > 0)
+                        {
+                            // Merge with existing AdditionalSettings if necessary, or just overwrite limits
+                            // Assuming for now it just overwrites or we create a new limits object
+                            var settingsObj = new { limits = limits };
+                            config.AdditionalSettings = System.Text.Json.JsonSerializer.Serialize(settingsObj);
+                        }
+                    }
+
                     config.UpdatedAt = DateTime.UtcNow;
                     _context.Update(config);
                     await _context.SaveChangesAsync();
@@ -83,6 +124,8 @@ namespace NexClone.Backend.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            ViewBag.Tools = new SelectList(await _legacyContext.ToolsTools.ToListAsync(), "Name", "Name", config.ToolName);
+            ViewBag.Plans = await _context.Plans.ToListAsync();
             return View(config);
         }
 

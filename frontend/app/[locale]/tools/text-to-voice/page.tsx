@@ -53,7 +53,7 @@ export default function TextToVoicePage() {
 
   const currentlyPlayingRef = useRef<HTMLAudioElement | null>(null);
   
-  const MAX_CHARS = 150; // Dynamic based on user plan in the future
+  const [maxChars, setMaxChars] = useState(150);
 
   useEffect(() => {
     const fetchVoices = async () => {
@@ -70,14 +70,16 @@ export default function TextToVoicePage() {
 
     const fetchOptions = async () => {
       try {
-        const [dialectsRes, emotionsRes, stylesRes] = await Promise.all([
+        const [dialectsRes, emotionsRes, stylesRes, configRes] = await Promise.all([
           api.get("/api/platform/dialects"),
           api.get("/api/platform/emotions"),
           api.get("/api/platform/styles"),
+          api.get("/api/platform/tts-config").catch(() => ({ data: { maxChars: 150 } }))
         ]);
         setDialects(dialectsRes.data);
         setEmotions(emotionsRes.data);
         setStyles(stylesRes.data);
+        setMaxChars(configRes.data.maxChars || 150);
       } catch (error) {
         console.error("Failed to load options:", error);
       }
@@ -97,7 +99,7 @@ export default function TextToVoicePage() {
   };
 
   const generateAudio = async () => {
-    if (!text.trim() || text.length > MAX_CHARS) return;
+    if (!text.trim() || text.length > maxChars) return;
     setIsProcessing(true);
     setError("");
     setAudioUrl(null);
@@ -180,7 +182,7 @@ export default function TextToVoicePage() {
                   <span className="text-white/80 font-semibold text-sm">{t('enterText')}</span>
                 </div>
                 <div className="flex items-center gap-2 bg-violet-500/10 px-3 py-1 rounded-full text-xs font-medium text-violet-300 border border-violet-500/20">
-                  <span>{t('maxChars')} {MAX_CHARS}</span>
+                  <span>{t('maxChars')} {maxChars}</span>
                 </div>
               </div>
 
@@ -193,7 +195,7 @@ export default function TextToVoicePage() {
                   className="w-full bg-[#0a0015]/60 border border-white/5 rounded-[24px] px-6 py-6 text-white focus:outline-none focus:ring-1 focus:ring-fuchsia-500/50 transition-all resize-none min-h-[350px] placeholder:text-white/30 text-base leading-relaxed"
                 />
                 <div className={`absolute bottom-4 ${isRtl ? 'left-6' : 'right-6'} text-xs text-white/40`}>
-                  {t('characters')} {MAX_CHARS} / {text.length}
+                  {t('characters')} {maxChars} / {text.length}
                 </div>
               </div>
 
@@ -203,7 +205,7 @@ export default function TextToVoicePage() {
               {/* Generate Button */}
               <button
                 onClick={generateAudio}
-                disabled={isProcessing || !text.trim() || text.length > MAX_CHARS}
+                disabled={isProcessing || !text.trim() || text.length > maxChars}
                 className="w-full py-4 mt-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-full font-bold text-lg hover:shadow-[0_0_30px_rgba(139,92,246,0.4)] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
               >
                 {isProcessing ? (
