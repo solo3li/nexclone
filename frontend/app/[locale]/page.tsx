@@ -38,7 +38,6 @@ export default function Page() {
           <HowItWorks />
           <FeaturesSection />
           <PricingSection />
-          <TestimonialsSection />
           <CTASection />
         </main>
         <Footer />

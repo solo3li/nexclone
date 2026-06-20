@@ -48,9 +48,8 @@ export default function Navbar() {
 
   const navLinks = [
     { label: t('home'), href: "/" },
-    { label: t('tools'), href: "/#tools" },
+    { label: t('tools'), href: "/tools" },
     { label: t('pricing'), href: "/pricing" },
-    { label: t('reviews'), href: "/#testimonials" },
   ];
 
   useEffect(() => {
