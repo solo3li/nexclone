@@ -16,6 +16,8 @@ namespace NexClone.Backend.Models
 
         public string UserAgent { get; set; } = string.Empty;
 
+        public string FingerprintHash { get; set; } = string.Empty;
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

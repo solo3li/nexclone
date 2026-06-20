@@ -28,17 +28,53 @@ namespace NexClone.Backend.Controllers
             _context = context;
         }
 
+        private static readonly HttpClient _httpClient = new HttpClient();
+
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            // 1. Check for disposable email
+            var domain = request.Email.Split('@').LastOrDefault()?.ToLower();
+            if (!string.IsNullOrEmpty(domain))
+            {
+                try
+                {
+                    var response = await _httpClient.GetAsync($"https://open.kickbox.com/v1/disposable/{domain}");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var content = await response.Content.ReadAsStringAsync();
+                        using var doc = System.Text.Json.JsonDocument.Parse(content);
+                        if (doc.RootElement.TryGetProperty("disposable", out var isDisposableElement) && isDisposableElement.GetBoolean())
+                        {
+                            return BadRequest(new { Errors = new[] { "عفواً، لا يمكن التسجيل باستخدام بريد إلكتروني مؤقت (Disposable Email)." } });
+                        }
+                    }
+                }
+                catch
+                {
+                    // Ignore errors so registration isn't blocked if API is down
+                }
+            }
+
             var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
             var userAgent = Request.Headers["User-Agent"].ToString() ?? "Unknown";
+            var fingerprint = request.DeviceFingerprint ?? string.Empty;
 
-            // Check if this IP has ever registered an account
-            bool hasClaimedFreeTrial = await _context.DeviceFingerprints.AnyAsync(df => df.IpAddress == ipAddress);
+            // Check if this fingerprint or IP has ever registered an account
+            bool hasClaimedFreeTrial = false;
+            
+            if (!string.IsNullOrEmpty(fingerprint))
+            {
+                hasClaimedFreeTrial = await _context.DeviceFingerprints.AnyAsync(df => df.FingerprintHash == fingerprint);
+            }
+            
+            if (!hasClaimedFreeTrial)
+            {
+                hasClaimedFreeTrial = await _context.DeviceFingerprints.AnyAsync(df => df.IpAddress == ipAddress);
+            }
 
             var user = new ApplicationUser
             {
@@ -64,7 +100,8 @@ namespace NexClone.Backend.Controllers
             {
                 UserId = user.Id,
                 IpAddress = ipAddress,
-                UserAgent = userAgent
+                UserAgent = userAgent,
+                FingerprintHash = fingerprint
             });
 
             if (!hasClaimedFreeTrial)

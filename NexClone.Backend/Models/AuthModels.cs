@@ -16,6 +16,8 @@ namespace NexClone.Backend.Models
         public string Password { get; set; } = string.Empty;
 
         public string Country { get; set; } = "Unknown";
+
+        public string? DeviceFingerprint { get; set; }
     }
 
     public class LoginRequest

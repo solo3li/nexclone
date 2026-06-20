@@ -28,11 +28,18 @@ export default function RegisterPage() {
     setLoading(true);
     setError("");
     try {
+      // Generate Fingerprint
+      const fpPromise = import('@fingerprintjs/fingerprintjs').then(FingerprintJS => FingerprintJS.load());
+      const fp = await fpPromise;
+      const result = await fp.get();
+      const visitorId = result.visitorId;
+
       const res = await api.post("/api/auth/register", {
         fullName: name,
         email,
         password,
-        country: "Unknown"
+        country: "Unknown",
+        deviceFingerprint: visitorId
       });
       setUser(res.data);
       router.push("/");
