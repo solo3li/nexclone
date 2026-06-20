@@ -24,6 +24,8 @@ namespace NexClone.Backend.Models
         public string? DescriptionAr { get; set; }
 
         public int DurationDays { get; set; }
+        
+        public int GracePeriodDays { get; set; } = 3;
 
         public decimal PriceUsd { get; set; }
         public decimal PriceEgp { get; set; }

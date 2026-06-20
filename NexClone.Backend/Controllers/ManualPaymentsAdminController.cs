@@ -65,6 +65,21 @@ namespace NexClone.Backend.Controllers
                 payment.SubscriptionId = newSub.Id;
             }
 
+            var latestSub = await _context.Subscriptions
+                .Include(s => s.Plan)
+                .Where(s => s.UserId == payment.UserId)
+                .OrderByDescending(s => s.EndDate)
+                .FirstOrDefaultAsync();
+
+            if (latestSub != null && latestSub.EndDate < DateTime.UtcNow)
+            {
+                var graceEnds = latestSub.EndDate.AddDays(latestSub.Plan.GracePeriodDays);
+                if (DateTime.UtcNow > graceEnds)
+                {
+                    payment.User.AvailableCredits = 0;
+                }
+            }
+
             // Increment User Credits
             payment.User.AvailableCredits += payment.Plan.MonthlyCredits;
             _context.Users.Update(payment.User);

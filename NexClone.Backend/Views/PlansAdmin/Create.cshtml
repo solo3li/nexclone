@@ -8,7 +8,7 @@
     <form action="@Url.Action("Create")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0;">
         @Html.AntiForgeryToken()
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
             <div class="bx--form-item">
                 <label for="Name" class="bx--label">Plan Name</label>
                 <div class="bx--text-input__field-wrapper">
@@ -19,6 +19,12 @@
                 <label for="DurationDays" class="bx--label">Duration (Days)</label>
                 <div class="bx--text-input__field-wrapper">
                     <input id="DurationDays" type="number" class="bx--text-input" name="DurationDays" required min="1" value="@(Model?.DurationDays ?? 30)">
+                </div>
+            </div>
+            <div class="bx--form-item">
+                <label for="GracePeriodDays" class="bx--label">Grace Period (Days)</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="GracePeriodDays" type="number" class="bx--text-input" name="GracePeriodDays" required min="0" value="@(Model?.GracePeriodDays ?? 3)">
                 </div>
             </div>
         </div>

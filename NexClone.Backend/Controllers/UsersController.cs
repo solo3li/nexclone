@@ -80,6 +80,21 @@ namespace NexClone.Backend.Controllers
 
             _context.Subscriptions.Add(newSub);
             
+            var latestSubForCredits = await _context.Subscriptions
+                .Include(s => s.Plan)
+                .Where(s => s.UserId == user.Id)
+                .OrderByDescending(s => s.EndDate)
+                .FirstOrDefaultAsync();
+
+            if (latestSubForCredits != null && latestSubForCredits.EndDate < DateTime.UtcNow)
+            {
+                var graceEnds = latestSubForCredits.EndDate.AddDays(latestSubForCredits.Plan.GracePeriodDays);
+                if (DateTime.UtcNow > graceEnds)
+                {
+                    user.AvailableCredits = 0;
+                }
+            }
+
             // Optionally, top up user credits
             user.AvailableCredits += plan.MonthlyCredits;
 

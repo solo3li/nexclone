@@ -9,7 +9,7 @@
         @Html.AntiForgeryToken()
         <input type="hidden" name="Id" value="@Model.Id" />
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
             <div class="bx--form-item">
                 <label for="Name" class="bx--label">Plan Name</label>
                 <div class="bx--text-input__field-wrapper">
@@ -20,6 +20,12 @@
                 <label for="DurationDays" class="bx--label">Duration (Days)</label>
                 <div class="bx--text-input__field-wrapper">
                     <input id="DurationDays" type="number" class="bx--text-input" name="DurationDays" required min="1" value="@Model.DurationDays">
+                </div>
+            </div>
+            <div class="bx--form-item">
+                <label for="GracePeriodDays" class="bx--label">Grace Period (Days)</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="GracePeriodDays" type="number" class="bx--text-input" name="GracePeriodDays" required min="0" value="@Model.GracePeriodDays">
                 </div>
             </div>
         </div>
