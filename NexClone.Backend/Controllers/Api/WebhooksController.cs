@@ -96,6 +96,10 @@ namespace NexClone.Backend.Controllers.Api
                         _context.Subscriptions.Add(newSub);
                     }
 
+                    // Increment user credits
+                    user.AvailableCredits += plan.MonthlyCredits;
+                    _context.Users.Update(user);
+
                     // 6. Record Payment Transaction
                     int orderId = obj.TryGetProperty("id", out var idProp) ? idProp.GetInt32() : 0;
                     int amountCents = obj.TryGetProperty("amount_cents", out var amountProp) ? amountProp.GetInt32() : 0;

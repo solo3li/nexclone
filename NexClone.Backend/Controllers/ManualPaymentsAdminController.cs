@@ -31,7 +31,11 @@ namespace NexClone.Backend.Controllers
         [HttpPost]
         public async Task<IActionResult> Approve(int id)
         {
-            var payment = await _context.Payments.Include(p => p.Plan).FirstOrDefaultAsync(p => p.Id == id);
+            var payment = await _context.Payments
+                .Include(p => p.Plan)
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.Id == id);
+                
             if (payment == null || payment.Status != "Pending") return NotFound();
 
             payment.Status = "Approved";
@@ -60,6 +64,10 @@ namespace NexClone.Backend.Controllers
                 await _context.SaveChangesAsync();
                 payment.SubscriptionId = newSub.Id;
             }
+
+            // Increment User Credits
+            payment.User.AvailableCredits += payment.Plan.MonthlyCredits;
+            _context.Users.Update(payment.User);
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
