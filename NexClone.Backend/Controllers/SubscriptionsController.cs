@@ -1,21 +1,21 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NexClone.Backend.Models.Legacy;
+using NexClone.Backend.Models;
 
 namespace NexClone.Backend.Controllers
 {
     public class SubscriptionsController : Controller
     {
-        private readonly LegacyDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public SubscriptionsController(LegacyDbContext context)
+        public SubscriptionsController(ApplicationDbContext context)
         {
             _context = context;
         }
 
         public async Task<IActionResult> Index()
         {
-            var subscriptions = await _context.SubscriptionsSubscriptions
+            var subscriptions = await _context.Subscriptions
                 .Include(s => s.Plan)
                 .OrderByDescending(s => s.CreatedAt)
                 .ToListAsync();
@@ -23,12 +23,12 @@ namespace NexClone.Backend.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Delete(long id)
+        public async Task<IActionResult> Delete(Guid id)
         {
-            var sub = await _context.SubscriptionsSubscriptions.FindAsync(id);
+            var sub = await _context.Subscriptions.FindAsync(id);
             if (sub != null)
             {
-                _context.SubscriptionsSubscriptions.Remove(sub);
+                _context.Subscriptions.Remove(sub);
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Index));

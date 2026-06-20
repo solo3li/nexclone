@@ -9,12 +9,10 @@ namespace NexClone.Backend.Controllers
     public class PlansAdminController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly NexClone.Backend.Models.Legacy.LegacyDbContext _legacyContext;
 
-        public PlansAdminController(ApplicationDbContext context, NexClone.Backend.Models.Legacy.LegacyDbContext legacyContext)
+        public PlansAdminController(ApplicationDbContext context)
         {
             _context = context;
-            _legacyContext = legacyContext;
         }
 
         public async Task<IActionResult> Index()

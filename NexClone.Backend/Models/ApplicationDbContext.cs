@@ -24,6 +24,12 @@ namespace NexClone.Backend.Models
         public DbSet<DeviceFingerprint> DeviceFingerprints { get; set; } = null!;
         public DbSet<ToolConfiguration> ToolConfigurations { get; set; } = null!;
 
+        // TTS Lookups
+        public DbSet<Voice> Voices { get; set; } = null!;
+        public DbSet<Dialect> Dialects { get; set; } = null!;
+        public DbSet<Emotion> Emotions { get; set; } = null!;
+        public DbSet<Style> Styles { get; set; } = null!;
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

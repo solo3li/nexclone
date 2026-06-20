@@ -43,10 +43,6 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Setup Legacy Database (Imported Django Tables)
-builder.Services.AddDbContext<NexClone.Backend.Models.Legacy.LegacyDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 // Setup Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options => {
     options.SignIn.RequireConfirmedAccount = false;
@@ -57,6 +53,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options => {
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
+
+// Register custom password hasher for Django PBKDF2 backwards compatibility
+builder.Services.AddScoped<IPasswordHasher<ApplicationUser>, NexClone.Backend.Services.DjangoPasswordHasher>();
 
 // Setup JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not found");

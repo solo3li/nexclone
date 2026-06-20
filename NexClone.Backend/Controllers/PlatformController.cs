@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NexClone.Backend.Models;
-using NexClone.Backend.Models.Legacy;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Security.Claims;
@@ -13,12 +12,10 @@ namespace NexClone.Backend.Controllers
     public class PlatformController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private readonly LegacyDbContext _legacyContext;
 
-        public PlatformController(ApplicationDbContext context, LegacyDbContext legacyContext)
+        public PlatformController(ApplicationDbContext context)
         {
             _context = context;
-            _legacyContext = legacyContext;
         }
 
         [HttpGet("stats")]
@@ -46,7 +43,7 @@ namespace NexClone.Backend.Controllers
         [HttpGet("voices")]
         public async Task<IActionResult> GetVoices()
         {
-            var voices = await _legacyContext.TextToVoiceDarijatvoices
+            var voices = await _context.Voices
                 .Where(v => v.IsActive)
                 .OrderBy(v => v.Order)
                 .Select(v => new {
@@ -66,7 +63,7 @@ namespace NexClone.Backend.Controllers
         [HttpGet("dialects")]
         public async Task<IActionResult> GetDialects()
         {
-            var dialects = await _legacyContext.TextToVoiceDarijatdialects
+            var dialects = await _context.Dialects
                 .Where(d => d.IsActive)
                 .OrderBy(d => d.Order)
                 .Select(d => new { d.Id, d.Name, d.Value, d.IsPremium })
@@ -77,7 +74,7 @@ namespace NexClone.Backend.Controllers
         [HttpGet("emotions")]
         public async Task<IActionResult> GetEmotions()
         {
-            var emotions = await _legacyContext.TextToVoiceDarijatemotions
+            var emotions = await _context.Emotions
                 .Where(e => e.IsActive)
                 .OrderBy(e => e.Order)
                 .Select(e => new { e.Id, e.Name, e.Value, e.IsPremium })
@@ -88,7 +85,7 @@ namespace NexClone.Backend.Controllers
         [HttpGet("styles")]
         public async Task<IActionResult> GetStyles()
         {
-            var styles = await _legacyContext.TextToVoiceDarijatstyles
+            var styles = await _context.Styles
                 .Where(s => s.IsActive)
                 .OrderBy(s => s.Order)
                 .Select(s => new { s.Id, s.Name, s.Value, s.IsPremium })

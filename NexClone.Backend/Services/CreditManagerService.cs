@@ -5,19 +5,16 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NexClone.Backend.Models;
 
-using NexClone.Backend.Models.Legacy;
 
 namespace NexClone.Backend.Services
 {
     public class CreditManagerService
     {
         private readonly ApplicationDbContext _context;
-        private readonly LegacyDbContext _legacyContext;
 
-        public CreditManagerService(ApplicationDbContext context, LegacyDbContext legacyContext)
+        public CreditManagerService(ApplicationDbContext context)
         {
             _context = context;
-            _legacyContext = legacyContext;
         }
         // "text-to-voice": per character
         // "voice-to-text": per second
@@ -25,12 +22,8 @@ namespace NexClone.Backend.Services
         // "img-to-txt": per image
         public decimal CalculateCost(string toolId, decimal amount)
         {
-            var tool = _legacyContext.ToolsTools.FirstOrDefault(t => t.Name == toolId);
-            if (tool != null)
-            {
-                return tool.CreditCost * amount;
-            }
-            return 1m * amount; // Default fallback if tool not found in DB
+            // Default legacy cost, since it's now driven by Plan policies.
+            return 1m * amount; 
         }
 
         public async Task<bool> IsToolAllowedForUser(Guid userId, string toolId)
@@ -46,7 +39,7 @@ namespace NexClone.Backend.Services
             if (user.IsStaff) return true;
 
             // Check if tool is active globally
-            var tool = await _legacyContext.ToolsTools.FirstOrDefaultAsync(t => t.Name == toolId);
+            var tool = await _context.ToolConfigurations.FirstOrDefaultAsync(t => t.ToolName == toolId);
             if (tool != null && !tool.IsActive) return false;
 
             var activeSubscription = user.Subscriptions

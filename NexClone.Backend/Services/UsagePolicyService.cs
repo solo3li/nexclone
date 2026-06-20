@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NexClone.Backend.Models;
-using NexClone.Backend.Models.Legacy;
 using System.Linq;
 
 namespace NexClone.Backend.Services
@@ -28,12 +27,10 @@ namespace NexClone.Backend.Services
     public class UsagePolicyService
     {
         private readonly ApplicationDbContext _context;
-        private readonly LegacyDbContext _legacyContext;
 
-        public UsagePolicyService(ApplicationDbContext context, LegacyDbContext legacyContext)
+        public UsagePolicyService(ApplicationDbContext context)
         {
             _context = context;
-            _legacyContext = legacyContext;
         }
 
         /// <summary>
@@ -139,8 +136,8 @@ namespace NexClone.Backend.Services
 
         private decimal GetLegacyCostPerUnit(string toolId)
         {
-            var tool = _legacyContext.ToolsTools.FirstOrDefault(t => t.Name == toolId);
-            return tool?.CreditCost ?? 1m;
+            // Fallback since legacy credit cost is now part of the Plan.
+            return 1m;
         }
     }
 }

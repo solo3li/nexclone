@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using NexClone.Backend.Models;
-using NexClone.Backend.Models.Legacy; // For LegacyDbContext
 using System;
 using System.IO;
 using System.Linq;
@@ -14,13 +13,11 @@ namespace NexClone.Backend.Services.AI
     public class TtsService : ITtsService
     {
         private readonly ApplicationDbContext _dbContext;
-        private readonly LegacyDbContext _legacyDbContext;
         private readonly IHttpClientFactory _httpClientFactory;
 
-        public TtsService(ApplicationDbContext dbContext, LegacyDbContext legacyDbContext, IHttpClientFactory httpClientFactory)
+        public TtsService(ApplicationDbContext dbContext, IHttpClientFactory httpClientFactory)
         {
             _dbContext = dbContext;
-            _legacyDbContext = legacyDbContext;
             _httpClientFactory = httpClientFactory;
         }
 
@@ -155,7 +152,7 @@ namespace NexClone.Backend.Services.AI
         {
             // Resolve Gemini voice from Darijat mapping
             string geminiVoice = "Zephyr";
-            var voiceModel = await _legacyDbContext.TextToVoiceDarijatvoices.FirstOrDefaultAsync(v => v.VoiceName == voiceName);
+            var voiceModel = await _dbContext.Voices.FirstOrDefaultAsync(v => v.VoiceName == voiceName);
             if (voiceModel != null && !string.IsNullOrEmpty(voiceModel.GeminiVoice))
             {
                 geminiVoice = voiceModel.GeminiVoice;

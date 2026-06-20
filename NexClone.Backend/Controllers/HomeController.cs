@@ -4,16 +4,15 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NexClone.Backend.Models;
-using NexClone.Backend.Models.Legacy;
 using NexClone.Backend.Models.ViewModels;
 
 namespace NexClone.Backend.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly LegacyDbContext _context;
+    private readonly ApplicationDbContext _context;
 
-    public HomeController(LegacyDbContext context)
+    public HomeController(ApplicationDbContext context)
     {
         _context = context;
     }
@@ -23,20 +22,20 @@ public class HomeController : Controller
         var model = new DashboardViewModel();
 
         // 1. Total Users
-        model.TotalUsers = await _context.UserAuthUsers.CountAsync();
+        model.TotalUsers = await _context.Users.CountAsync();
 
         // 2. Active Subscriptions
-        model.ActiveSubscriptions = await _context.SubscriptionsSubscriptions
+        model.ActiveSubscriptions = await _context.Subscriptions
             .Where(s => s.Status == "active")
             .CountAsync();
 
         // 3. Total Revenue
-        model.TotalRevenue = await _context.SubscriptionsPayments
+        model.TotalRevenue = await _context.Payments
             .Where(p => p.Status == "successful" || p.Status == "paid")
             .SumAsync(p => p.Amount);
 
         // 4. Recent Activity (Last 5 payments)
-        model.RecentActivity = await _context.SubscriptionsPayments
+        model.RecentActivity = await _context.Payments
             .Include(p => p.User)
             .Include(p => p.Plan)
             .OrderByDescending(p => p.CreatedAt)
@@ -46,7 +45,7 @@ public class HomeController : Controller
         // 5. Chart Data (Revenue by month for the last 6 months)
         var sixMonthsAgo = System.DateTime.UtcNow.AddMonths(-6);
         
-        var monthlyRevenue = await _context.SubscriptionsPayments
+        var monthlyRevenue = await _context.Payments
             .Where(p => (p.Status == "successful" || p.Status == "paid") && p.CreatedAt >= sixMonthsAgo)
             .GroupBy(p => new { p.CreatedAt.Year, p.CreatedAt.Month })
             .Select(g => new 

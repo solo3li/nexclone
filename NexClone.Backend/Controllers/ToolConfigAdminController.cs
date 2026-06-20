@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using NexClone.Backend.Models;
-using NexClone.Backend.Models.Legacy;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,12 +11,10 @@ namespace NexClone.Backend.Controllers
     public class ToolConfigAdminController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly LegacyDbContext _legacyContext;
 
-        public ToolConfigAdminController(ApplicationDbContext context, LegacyDbContext legacyContext)
+        public ToolConfigAdminController(ApplicationDbContext context)
         {
             _context = context;
-            _legacyContext = legacyContext;
         }
 
         public async Task<IActionResult> Index()
@@ -30,7 +27,8 @@ namespace NexClone.Backend.Controllers
         public async Task<IActionResult> Create()
         {
             ViewData["Title"] = "Add Tool Configuration";
-            ViewBag.Tools = new SelectList(await _legacyContext.ToolsTools.ToListAsync(), "Name", "Name");
+            var toolNames = new List<string> { "text-to-voice", "voice-to-text" };
+            ViewBag.Tools = new SelectList(toolNames);
             ViewBag.Plans = await _context.Plans.ToListAsync();
             return View();
         }
@@ -41,15 +39,14 @@ namespace NexClone.Backend.Controllers
         {
             if (ModelState.IsValid)
             {
-
-
                 config.Id = Guid.NewGuid();
                 config.UpdatedAt = DateTime.UtcNow;
                 _context.Add(config);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.Tools = new SelectList(await _legacyContext.ToolsTools.ToListAsync(), "Name", "Name", config.ToolName);
+            var toolNames = new List<string> { "text-to-voice", "voice-to-text" };
+            ViewBag.Tools = new SelectList(toolNames, config.ToolName);
             ViewBag.Plans = await _context.Plans.ToListAsync();
             return View(config);
         }
@@ -62,7 +59,8 @@ namespace NexClone.Backend.Controllers
             if (config == null) return NotFound();
 
             ViewData["Title"] = $"Edit Tool Configuration - {config.ToolName}";
-            ViewBag.Tools = new SelectList(await _legacyContext.ToolsTools.ToListAsync(), "Name", "Name", config.ToolName);
+            var toolNames = new List<string> { "text-to-voice", "voice-to-text" };
+            ViewBag.Tools = new SelectList(toolNames, config.ToolName);
             ViewBag.Plans = await _context.Plans.ToListAsync();
             return View(config);
         }
@@ -77,8 +75,6 @@ namespace NexClone.Backend.Controllers
             {
                 try
                 {
-
-
                     config.UpdatedAt = DateTime.UtcNow;
                     _context.Update(config);
                     await _context.SaveChangesAsync();
@@ -90,7 +86,8 @@ namespace NexClone.Backend.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.Tools = new SelectList(await _legacyContext.ToolsTools.ToListAsync(), "Name", "Name", config.ToolName);
+            var toolNames = new List<string> { "text-to-voice", "voice-to-text" };
+            ViewBag.Tools = new SelectList(toolNames, config.ToolName);
             ViewBag.Plans = await _context.Plans.ToListAsync();
             return View(config);
         }
