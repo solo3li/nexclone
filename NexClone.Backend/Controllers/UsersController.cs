@@ -86,17 +86,41 @@ namespace NexClone.Backend.Controllers
         public async Task<IActionResult> Seed([FromServices] Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> userManager)
         {
             // Seed Plans
-            if (!await _context.Plans.AnyAsync(p => p.Name == "Free Plan"))
+            if (!await _context.Plans.AnyAsync(p => p.Name == "Free Tier"))
             {
-                _context.Plans.Add(new Plan { Name = "Free Plan", PriceUsd = 0, PriceEgp = 0, DurationDays = 30, MonthlyCredits = 500, TtsEnabled = true, TtsMaxCharsPerRequest = 150, CreatedAt = DateTime.UtcNow });
+                _context.Plans.Add(new Plan { 
+                    Name = "Free Tier", 
+                    PriceUsd = 0, PriceEgp = 0, 
+                    DurationDays = 30, MonthlyCredits = 50, 
+                    TtsEnabled = true, TtsMaxCharsPerRequest = 250, TtsCostPerChar = 0.01m,
+                    SttEnabled = true, SttMaxFileSizeMb = 5, SttCostPerMinute = 1.0m,
+                    IsFreeTrial = true,
+                    CreatedAt = DateTime.UtcNow 
+                });
             }
-            if (!await _context.Plans.AnyAsync(p => p.Name == "Basic Plan"))
+            if (!await _context.Plans.AnyAsync(p => p.Name == "Pro Tier"))
             {
-                _context.Plans.Add(new Plan { Name = "Basic Plan", PriceUsd = 10, PriceEgp = 500, DurationDays = 30, MonthlyCredits = 2000, TtsEnabled = true, TtsMaxCharsPerRequest = 500, CreatedAt = DateTime.UtcNow });
+                _context.Plans.Add(new Plan { 
+                    Name = "Pro Tier", 
+                    PriceUsd = 15, PriceEgp = 750, 
+                    DurationDays = 30, MonthlyCredits = 2500, 
+                    TtsEnabled = true, TtsMaxCharsPerRequest = 2000, TtsCostPerChar = 0.005m,
+                    SttEnabled = true, SttMaxFileSizeMb = 25, SttCostPerMinute = 0.5m,
+                    IsFreeTrial = false,
+                    CreatedAt = DateTime.UtcNow 
+                });
             }
-            if (!await _context.Plans.AnyAsync(p => p.Name == "Pro Plan"))
+            if (!await _context.Plans.AnyAsync(p => p.Name == "Enterprise Tier"))
             {
-                _context.Plans.Add(new Plan { Name = "Pro Plan", PriceUsd = 30, PriceEgp = 1500, DurationDays = 30, MonthlyCredits = 10000, TtsEnabled = true, TtsMaxCharsPerRequest = -1, CreatedAt = DateTime.UtcNow });
+                _context.Plans.Add(new Plan { 
+                    Name = "Enterprise Tier", 
+                    PriceUsd = 49, PriceEgp = 2450, 
+                    DurationDays = 30, MonthlyCredits = 10000, 
+                    TtsEnabled = true, TtsMaxCharsPerRequest = -1, TtsCostPerChar = 0.002m,
+                    SttEnabled = true, SttMaxFileSizeMb = -1, SttCostPerMinute = 0.2m,
+                    IsFreeTrial = false,
+                    CreatedAt = DateTime.UtcNow 
+                });
             }
             await _context.SaveChangesAsync();
 
