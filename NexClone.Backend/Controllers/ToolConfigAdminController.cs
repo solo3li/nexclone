@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using NexClone.Backend.Models;
+using NexClone.Backend.Models.Legacy;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,10 +12,12 @@ namespace NexClone.Backend.Controllers
     public class ToolConfigAdminController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly LegacyDbContext _legacyContext;
 
-        public ToolConfigAdminController(ApplicationDbContext context)
+        public ToolConfigAdminController(ApplicationDbContext context, LegacyDbContext legacyContext)
         {
             _context = context;
+            _legacyContext = legacyContext;
         }
 
         public async Task<IActionResult> Index()
@@ -23,9 +27,10 @@ namespace NexClone.Backend.Controllers
             return View(configs);
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             ViewData["Title"] = "Add Tool Configuration";
+            ViewBag.Tools = new SelectList(await _legacyContext.ToolsTools.ToListAsync(), "Name", "Name");
             return View();
         }
 
@@ -41,6 +46,7 @@ namespace NexClone.Backend.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            ViewBag.Tools = new SelectList(await _legacyContext.ToolsTools.ToListAsync(), "Name", "Name", config.ToolName);
             return View(config);
         }
 
@@ -52,6 +58,7 @@ namespace NexClone.Backend.Controllers
             if (config == null) return NotFound();
 
             ViewData["Title"] = $"Edit Tool Configuration - {config.ToolName}";
+            ViewBag.Tools = new SelectList(await _legacyContext.ToolsTools.ToListAsync(), "Name", "Name", config.ToolName);
             return View(config);
         }
 

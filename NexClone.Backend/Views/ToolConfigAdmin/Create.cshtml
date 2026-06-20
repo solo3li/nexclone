@@ -10,19 +10,30 @@
 
         <div class="bx--form-item" style="margin-bottom: 1.5rem;">
             <label for="ToolName" class="bx--label">Tool Name</label>
-            <div class="bx--text-input__field-wrapper">
-                <input id="ToolName" type="text" class="bx--text-input" name="ToolName" required value="@(Model?.ToolName)">
+            <div class="bx--select">
+                <select id="ToolName" class="bx--select-input" name="ToolName" required>
+                    <option class="bx--select-option" value="" disabled selected>Select a tool</option>
+                    @if (ViewBag.Tools != null)
+                    {
+                        foreach (var tool in (SelectList)ViewBag.Tools)
+                        {
+                            if (Model?.ToolName == tool.Value) { <option class="bx--select-option" value="@tool.Value" selected>@tool.Text</option> }
+                            else { <option class="bx--select-option" value="@tool.Value">@tool.Text</option> }
+                        }
+                    }
+                </select>
+                <svg focusable="false" preserveAspectRatio="xMidYMid meet" style="will-change: transform;" xmlns="http://www.w3.org/2000/svg" class="bx--select__arrow" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 11L3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z"></path></svg>
             </div>
-            <div class="bx--form__helper-text">e.g., text-to-voice, text-to-image</div>
+            <div class="bx--form__helper-text">Select the AI tool to configure.</div>
         </div>
 
         <div class="bx--form-item" style="margin-bottom: 1.5rem;">
             <label for="ProviderName" class="bx--label">Provider Name</label>
             <div class="bx--select">
-                <select id="ProviderName" class="bx--select-input" name="ProviderName" required>
-                    <option class="bx--select-option" value="OpenAI">OpenAI</option>
-                    <option class="bx--select-option" value="Darijat">Darijat</option>
-                    <option class="bx--select-option" value="Gemini">Gemini</option>
+                <select id="ProviderName" class="bx--select-input" name="ProviderName" required onchange="updateModels()">
+                    @if(Model?.ProviderName == "OpenAI") { <option class="bx--select-option" value="OpenAI" selected>OpenAI</option> } else { <option class="bx--select-option" value="OpenAI">OpenAI</option> }
+                    @if(Model?.ProviderName == "Darijat") { <option class="bx--select-option" value="Darijat" selected>Darijat</option> } else { <option class="bx--select-option" value="Darijat">Darijat</option> }
+                    @if(Model?.ProviderName == "Gemini") { <option class="bx--select-option" value="Gemini" selected>Gemini</option> } else { <option class="bx--select-option" value="Gemini">Gemini</option> }
                 </select>
                 <svg focusable="false" preserveAspectRatio="xMidYMid meet" style="will-change: transform;" xmlns="http://www.w3.org/2000/svg" class="bx--select__arrow" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 11L3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z"></path></svg>
             </div>
@@ -30,10 +41,13 @@
 
         <div class="bx--form-item" style="margin-bottom: 1.5rem;">
             <label for="ModelName" class="bx--label">Model Name</label>
-            <div class="bx--text-input__field-wrapper">
-                <input id="ModelName" type="text" class="bx--text-input" name="ModelName" value="@(Model?.ModelName)">
+            <div class="bx--select">
+                <select id="ModelName" class="bx--select-input" name="ModelName">
+                    <!-- Options populated by JS -->
+                </select>
+                <svg focusable="false" preserveAspectRatio="xMidYMid meet" style="will-change: transform;" xmlns="http://www.w3.org/2000/svg" class="bx--select__arrow" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 11L3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z"></path></svg>
             </div>
-            <div class="bx--form__helper-text">Optional. e.g., tts-1, gemini-2.0-flash-exp</div>
+            <div class="bx--form__helper-text">Select the model to use for the selected provider.</div>
         </div>
 
         <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom: 2rem;">
@@ -49,3 +63,61 @@
         </div>
     </form>
 </div>
+
+@section Scripts {
+    <script>
+        const models = {
+            "OpenAI": [
+                { value: "", text: "Default" },
+                { value: "tts-1", text: "tts-1" },
+                { value: "tts-1-hd", text: "tts-1-hd" },
+                { value: "gpt-4o", text: "gpt-4o" },
+                { value: "gpt-4-turbo", text: "gpt-4-turbo" },
+                { value: "gpt-3.5-turbo", text: "gpt-3.5-turbo" },
+                { value: "dall-e-3", text: "dall-e-3" },
+                { value: "whisper-1", text: "whisper-1" }
+            ],
+            "Gemini": [
+                { value: "", text: "Default" },
+                { value: "gemini-2.0-flash-exp", text: "gemini-2.0-flash-exp" },
+                { value: "gemini-2.0-pro", text: "gemini-2.0-pro" },
+                { value: "gemini-2.5-flash", text: "gemini-2.5-flash" },
+                { value: "gemini-2.5-pro", text: "gemini-2.5-pro" },
+                { value: "gemini-3.0-flash", text: "gemini-3.0-flash" },
+                { value: "gemini-3.0-pro", text: "gemini-3.0-pro" },
+                { value: "gemini-3.5-flash", text: "gemini-3.5-flash" },
+                { value: "gemini-3.5-pro", text: "gemini-3.5-pro" }
+            ],
+            "Darijat": [
+                { value: "", text: "Default" }
+            ]
+        };
+
+        function updateModels() {
+            const providerSelect = document.getElementById("ProviderName");
+            const modelSelect = document.getElementById("ModelName");
+            const provider = providerSelect.value;
+            
+            const currentModel = "@(Model?.ModelName)";
+
+            modelSelect.innerHTML = "";
+            
+            if (models[provider]) {
+                models[provider].forEach(function(m) {
+                    const option = document.createElement("option");
+                    option.value = m.value;
+                    option.text = m.text;
+                    option.className = "bx--select-option";
+                    if (m.value === currentModel) {
+                        option.selected = true;
+                    }
+                    modelSelect.appendChild(option);
+                });
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            updateModels();
+        });
+    </script>
+}
