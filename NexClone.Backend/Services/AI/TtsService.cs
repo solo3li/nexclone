@@ -168,7 +168,7 @@ namespace NexClone.Backend.Services.AI
             var client = _httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Add("x-goog-api-key", config.ApiKey);
 
-            var modelName = string.IsNullOrWhiteSpace(customModelName) ? "gemini-2.0-flash-exp" : customModelName; 
+            var modelName = string.IsNullOrWhiteSpace(customModelName) ? "gemini-2.5-flash-preview-tts" : customModelName; 
             if (string.IsNullOrWhiteSpace(customModelName) && !string.IsNullOrEmpty(config.AdditionalSettings))
             {
                 try
