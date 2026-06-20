@@ -107,27 +107,14 @@ namespace NexClone.Backend.Controllers
                 if (Guid.TryParse(userIdStr, out var userId))
                 {
                     var activeSubscription = await _context.Subscriptions
+                        .Include(s => s.Plan)
                         .Where(s => s.UserId == userId && s.Status == "active")
                         .OrderByDescending(s => s.EndDate)
                         .FirstOrDefaultAsync();
 
-                    int planId = activeSubscription?.PlanId ?? 0; // 0 usually means Free/Default
-
-                    var toolConfig = await _context.ToolConfigurations.FirstOrDefaultAsync(t => t.ToolName == "text-to-voice" && t.IsActive);
-                    if (toolConfig != null && !string.IsNullOrEmpty(toolConfig.AdditionalSettings))
+                    if (activeSubscription?.Plan != null)
                     {
-                        try
-                        {
-                            using var doc = System.Text.Json.JsonDocument.Parse(toolConfig.AdditionalSettings);
-                            if (doc.RootElement.TryGetProperty("limits", out var limitsProp))
-                            {
-                                if (limitsProp.TryGetProperty(planId.ToString(), out var limitElement) && limitElement.TryGetInt32(out int limit))
-                                {
-                                    maxChars = limit;
-                                }
-                            }
-                        }
-                        catch { }
+                        maxChars = activeSubscription.Plan.TtsMaxCharsPerRequest;
                     }
                 }
             }
