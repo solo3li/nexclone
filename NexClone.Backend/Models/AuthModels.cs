@@ -28,6 +28,8 @@ namespace NexClone.Backend.Models
 
         [Required]
         public string Password { get; set; } = string.Empty;
+
+        public string? DeviceFingerprint { get; set; }
     }
 
     public class AuthResponse

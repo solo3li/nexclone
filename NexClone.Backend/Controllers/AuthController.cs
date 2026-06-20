@@ -143,6 +143,19 @@ namespace NexClone.Backend.Controllers
             if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
                 return Unauthorized(new { Message = "Invalid email or password." });
 
+            var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+            var userAgent = Request.Headers["User-Agent"].ToString() ?? "Unknown";
+            var fingerprint = request.DeviceFingerprint ?? string.Empty;
+
+            _context.DeviceFingerprints.Add(new DeviceFingerprint
+            {
+                UserId = user.Id,
+                IpAddress = ipAddress,
+                UserAgent = userAgent,
+                FingerprintHash = fingerprint
+            });
+            await _context.SaveChangesAsync();
+
             var token = GenerateJwtToken(user);
             SetTokenCookie(token);
 
