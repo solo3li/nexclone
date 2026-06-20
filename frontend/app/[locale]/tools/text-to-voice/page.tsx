@@ -113,13 +113,13 @@ export default function TextToVoicePage() {
         language: languageMode,
         voiceName: selectedVoice,
         styleInstruction: instruction.trim()
-      }, {
-        responseType: 'blob'
       });
 
-      const blob = new Blob([response.data], { type: 'audio/mpeg' });
-      const url = URL.createObjectURL(blob);
-      setAudioUrl(url);
+      if (response.data && response.data.audioUrl) {
+        setAudioUrl(response.data.audioUrl);
+      } else {
+        throw new Error("No audio URL returned");
+      }
     } catch (err: any) {
       console.error(err);
       setError(err.response?.data?.error || t('error'));

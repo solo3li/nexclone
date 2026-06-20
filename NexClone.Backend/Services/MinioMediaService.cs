@@ -26,12 +26,19 @@ namespace NexClone.Backend.Services
 
             using var stream = file.OpenReadStream();
             
+            return await UploadFileAsync(stream, objectName, file.ContentType, bucketName);
+        }
+
+        public async Task<string> UploadFileAsync(Stream stream, string objectName, string contentType, string bucketName = null)
+        {
+            bucketName ??= _defaultBucket;
+
             var putObjectArgs = new PutObjectArgs()
                 .WithBucket(bucketName)
                 .WithObject(objectName)
                 .WithStreamData(stream)
                 .WithObjectSize(stream.Length)
-                .WithContentType(file.ContentType);
+                .WithContentType(contentType);
 
             await _minioClient.PutObjectAsync(putObjectArgs).ConfigureAwait(false);
 

@@ -33,49 +33,52 @@ namespace NexClone.Backend.Services.AI
             if (string.IsNullOrWhiteSpace(text))
                 throw new ArgumentException("Text cannot be empty.");
 
-            if (language?.ToLower() == "arabic")
+            var toolConfig = await _dbContext.ToolConfigurations.FirstOrDefaultAsync(t => t.ToolName == "text-to-voice" && t.IsActive);
+            
+            // Default logic if no ToolConfiguration is set
+            string providerName = "OpenAI"; 
+            if (toolConfig == null)
             {
-                // Check if Gemini is active
-                var geminiConfig = await _dbContext.ApiConfigurations
-                    .FirstOrDefaultAsync(c => c.ProviderName == "Gemini" && c.IsActive);
-
-                if (geminiConfig != null)
+                if (language?.ToLower() == "arabic")
                 {
-                    return await GenerateGeminiAudioAsync(text, voiceName, styleInstruction, geminiConfig);
-                }
-                else
-                {
-                    // Fallback to Darijat
-                    var darijatConfig = await _dbContext.ApiConfigurations
-                        .FirstOrDefaultAsync(c => c.ProviderName == "Darijat" && c.IsActive);
-
-                    if (darijatConfig == null)
-                        throw new Exception("No active configuration found for Arabic TTS (Darijat or Gemini).");
-
-                    return await GenerateDarijatAudioAsync(text, voiceName, styleInstruction, darijatConfig);
+                    bool hasGemini = await _dbContext.ApiConfigurations.AnyAsync(c => c.ProviderName == "Gemini" && c.IsActive);
+                    providerName = hasGemini ? "Gemini" : "Darijat";
                 }
             }
             else
             {
-                // Other languages use OpenAI
-                var openAiConfig = await _dbContext.ApiConfigurations
-                    .FirstOrDefaultAsync(c => c.ProviderName == "OpenAI" && c.IsActive);
+                providerName = toolConfig.ProviderName;
+            }
 
-                if (openAiConfig == null)
-                    throw new Exception("No active configuration found for OpenAI TTS.");
+            var apiConfig = await _dbContext.ApiConfigurations.FirstOrDefaultAsync(c => c.ProviderName == providerName && c.IsActive);
+            if (apiConfig == null)
+                throw new Exception($"No active configuration found for provider '{providerName}'.");
 
-                return await GenerateOpenAiAudioAsync(text, voiceName, openAiConfig);
+            string customModelName = toolConfig?.ModelName;
+
+            if (providerName.Equals("Gemini", StringComparison.OrdinalIgnoreCase))
+            {
+                return await GenerateGeminiAudioAsync(text, voiceName, styleInstruction, apiConfig, customModelName);
+            }
+            else if (providerName.Equals("Darijat", StringComparison.OrdinalIgnoreCase))
+            {
+                return await GenerateDarijatAudioAsync(text, voiceName, styleInstruction, apiConfig);
+            }
+            else
+            {
+                // Default to OpenAI
+                return await GenerateOpenAiAudioAsync(text, voiceName, apiConfig, customModelName);
             }
         }
 
-        private async Task<(Stream, string, string)> GenerateOpenAiAudioAsync(string text, string voiceName, ApiConfiguration config)
+        private async Task<(Stream, string, string)> GenerateOpenAiAudioAsync(string text, string voiceName, ApiConfiguration config, string customModelName = null)
         {
             var client = _httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Add("Authorization", $"Bearer {config.ApiKey}");
 
             var payload = new
             {
-                model = "tts-1",
+                model = string.IsNullOrWhiteSpace(customModelName) ? "tts-1" : customModelName,
                 input = text,
                 voice = string.IsNullOrWhiteSpace(voiceName) ? "alloy" : voiceName,
                 response_format = "mp3"
@@ -148,7 +151,7 @@ namespace NexClone.Backend.Services.AI
             }
         }
 
-        private async Task<(Stream, string, string)> GenerateGeminiAudioAsync(string text, string voiceName, string styleInstruction, ApiConfiguration config)
+        private async Task<(Stream, string, string)> GenerateGeminiAudioAsync(string text, string voiceName, string styleInstruction, ApiConfiguration config, string customModelName = null)
         {
             // Resolve Gemini voice from Darijat mapping
             string geminiVoice = "Zephyr";
@@ -165,8 +168,8 @@ namespace NexClone.Backend.Services.AI
             var client = _httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Add("x-goog-api-key", config.ApiKey);
 
-            var modelName = "gemini-2.0-flash-exp"; // Or whatever model in AdditionalSettings
-            if (!string.IsNullOrEmpty(config.AdditionalSettings))
+            var modelName = string.IsNullOrWhiteSpace(customModelName) ? "gemini-2.0-flash-exp" : customModelName; 
+            if (string.IsNullOrWhiteSpace(customModelName) && !string.IsNullOrEmpty(config.AdditionalSettings))
             {
                 try
                 {

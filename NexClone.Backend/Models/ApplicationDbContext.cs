@@ -21,6 +21,7 @@ namespace NexClone.Backend.Models
         public DbSet<PaymentGatewayConfig> PaymentGatewayConfigs { get; set; } = null!;
         public DbSet<GenerationHistory> GenerationHistories { get; set; } = null!;
         public DbSet<DeviceFingerprint> DeviceFingerprints { get; set; } = null!;
+        public DbSet<ToolConfiguration> ToolConfigurations { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

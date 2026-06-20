@@ -1,0 +1,51 @@
+@model NexClone.Backend.Models.ToolConfiguration
+
+<div class="bx--grid" style="padding-left: 0; max-width: 600px; margin-left: 0;">
+    <div class="bx--row" style="margin-bottom: 2rem;">
+        <h2 style="margin: 0; font-weight: 400; font-size: 1.5rem;">@ViewData["Title"]</h2>
+    </div>
+
+    <form action="@Url.Action("Create")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0;">
+        @Html.AntiForgeryToken()
+
+        <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+            <label for="ToolName" class="bx--label">Tool Name</label>
+            <div class="bx--text-input__field-wrapper">
+                <input id="ToolName" type="text" class="bx--text-input" name="ToolName" required value="@(Model?.ToolName)">
+            </div>
+            <div class="bx--form__helper-text">e.g., text-to-voice, text-to-image</div>
+        </div>
+
+        <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+            <label for="ProviderName" class="bx--label">Provider Name</label>
+            <div class="bx--select">
+                <select id="ProviderName" class="bx--select-input" name="ProviderName" required>
+                    <option class="bx--select-option" value="OpenAI">OpenAI</option>
+                    <option class="bx--select-option" value="Darijat">Darijat</option>
+                    <option class="bx--select-option" value="Gemini">Gemini</option>
+                </select>
+                <svg focusable="false" preserveAspectRatio="xMidYMid meet" style="will-change: transform;" xmlns="http://www.w3.org/2000/svg" class="bx--select__arrow" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 11L3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z"></path></svg>
+            </div>
+        </div>
+
+        <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+            <label for="ModelName" class="bx--label">Model Name</label>
+            <div class="bx--text-input__field-wrapper">
+                <input id="ModelName" type="text" class="bx--text-input" name="ModelName" value="@(Model?.ModelName)">
+            </div>
+            <div class="bx--form__helper-text">Optional. e.g., tts-1, gemini-2.0-flash-exp</div>
+        </div>
+
+        <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom: 2rem;">
+            <input id="IsActive" class="bx--checkbox" type="checkbox" value="true" name="IsActive" @(Model == null || Model.IsActive ? "checked" : "")>
+            <label for="IsActive" class="bx--checkbox-label" title="Active Status">
+                <span class="bx--checkbox-label-text">Set as Active Configuration</span>
+            </label>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+            <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">Cancel</a>
+            <button type="submit" class="bx--btn bx--btn--primary">Create</button>
+        </div>
+    </form>
+</div>

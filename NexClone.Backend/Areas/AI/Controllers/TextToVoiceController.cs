@@ -20,13 +20,15 @@ namespace NexClone.Backend.Areas.AI.Controllers
         private readonly ApplicationDbContext _dbContext;
         private readonly IWebHostEnvironment _env;
         private readonly CreditManagerService _creditManager;
+        private readonly IMediaService _mediaService;
 
-        public TextToVoiceController(ITtsService ttsService, ApplicationDbContext dbContext, IWebHostEnvironment env, CreditManagerService creditManager)
+        public TextToVoiceController(ITtsService ttsService, ApplicationDbContext dbContext, IWebHostEnvironment env, CreditManagerService creditManager, IMediaService mediaService)
         {
             _ttsService = ttsService;
             _dbContext = dbContext;
             _env = env;
             _creditManager = creditManager;
+            _mediaService = mediaService;
         }
 
         [HttpPost("generate")]
@@ -54,16 +56,12 @@ namespace NexClone.Backend.Areas.AI.Controllers
                     request.StyleInstruction
                 );
 
-                // Option 2: Save to disk and return URL (If you need history/downloads later)
+                // Upload to MinIO
                 string fileName = $"{Guid.NewGuid()}.{fileExtension}";
-                string directoryPath = Path.Combine(_env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), "generations");
-                if (!Directory.Exists(directoryPath)) Directory.CreateDirectory(directoryPath);
+                string objectKey = $"text-to-voice/{userId:N}/{DateTime.UtcNow:yyyy-MM}/{fileName}";
                 
-                string filePath = Path.Combine(directoryPath, fileName);
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    await audioStream.CopyToAsync(fileStream);
-                }
+                audioStream.Position = 0; // Ensure stream is at the beginning
+                string fileUrl = await _mediaService.UploadFileAsync(audioStream, objectKey, contentType);
 
                 var history = new GenerationHistory
                 {
@@ -74,15 +72,16 @@ namespace NexClone.Backend.Areas.AI.Controllers
                     Status = "completed",
                     Lang = request.Language,
                     Voice = request.VoiceName,
-                    FileUrl = $"/generations/{fileName}",
+                    FileUrl = fileUrl,
                     CreditsUsed = cost
                 };
                 _dbContext.GenerationHistories.Add(history);
                 await _creditManager.DeductCreditsAsync(userId, cost);
                 await _dbContext.SaveChangesAsync();
 
-                // Return the saved file so the frontend blob logic still works perfectly without modifications
-                return PhysicalFile(filePath, contentType, $"tts_output.{fileExtension}");
+                // Return a JSON response with the presigned URL so the frontend can play it directly
+                var finalUrl = await _mediaService.GetFileUrlAsync(fileUrl);
+                return Ok(new { audioUrl = finalUrl });
             }
             catch (Exception ex)
             {
