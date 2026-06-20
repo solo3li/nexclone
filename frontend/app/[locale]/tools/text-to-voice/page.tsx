@@ -7,7 +7,7 @@ import Navbar from "../../../../src/components/Navbar";
 import Footer from "../../../../src/components/Footer";
 import { 
   Play, Download, Loader2, Volume2, Wand2, Mic, 
-  RefreshCw, Clock, Lock, ChevronDown, User, Users, Info, Edit3, Globe
+  RefreshCw, Clock, Lock, ChevronDown, User, Users, Info, Edit3, Globe, Zap
 } from "lucide-react";
 import api from "../../../../src/utils/api";
 
