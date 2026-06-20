@@ -14,11 +14,25 @@ namespace NexClone.Backend.Controllers.Api
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IConfiguration _configuration;
 
-        public ManualPaymentsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public ManualPaymentsController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, IConfiguration configuration)
         {
             _context = context;
             _userManager = userManager;
+            _configuration = configuration;
+        }
+
+        [HttpGet("methods")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetMethods()
+        {
+            var methods = await _context.ManualPaymentMethods
+                .Where(m => m.IsActive)
+                .Select(m => new { m.Id, m.Name, m.AccountDetails, m.Instructions })
+                .ToListAsync();
+            
+            return Ok(methods);
         }
 
         public class ManualPaymentRequestDto

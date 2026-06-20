@@ -1,8 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, UploadCloud, CheckCircle } from 'lucide-react';
 import { Plan } from '@/store/usePlansStore';
 import axios from 'axios';
 import { useLocale } from 'next-intl';
+
+interface PaymentMethod {
+  id: number;
+  name: string;
+  accountDetails: string;
+  instructions: string | null;
+}
 
 interface CheckoutModalProps {
   plan: Plan | null;
@@ -16,8 +23,24 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const locale = useLocale();
   const isRtl = locale === 'ar';
+
+  useEffect(() => {
+    if (method === 'Manual' && paymentMethods.length === 0) {
+      const fetchMethods = async () => {
+        try {
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+          const res = await axios.get(`${apiUrl}/api/ManualPayments/methods`);
+          setPaymentMethods(res.data);
+        } catch (err) {
+          console.error('Failed to fetch payment methods', err);
+        }
+      };
+      fetchMethods();
+    }
+  }, [method]);
 
   if (!plan) return null;
 
@@ -142,11 +165,18 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
                 <div className="space-y-6">
                   <div className="bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-gray-300">
                     <p className="mb-2 font-semibold text-white">{isRtl ? 'تفاصيل التحويل:' : 'Transfer Details:'}</p>
-                    <ul className="list-disc list-inside space-y-1">
-                      <li>Vodafone Cash: 01012345678</li>
-                      <li>InstaPay: admin@instapay</li>
-                      <li>Binance ID: 123456789 (USDT TRC20)</li>
-                    </ul>
+                    {paymentMethods.length > 0 ? (
+                      <ul className="list-disc list-inside space-y-2">
+                        {paymentMethods.map(pm => (
+                          <li key={pm.id}>
+                            <span className="font-semibold text-white">{pm.name}:</span> {pm.accountDetails}
+                            {pm.instructions && <p className="text-xs text-gray-400 mt-1 mr-4 ml-4">{pm.instructions}</p>}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-gray-400">{isRtl ? 'جاري تحميل طرق الدفع...' : 'Loading payment methods...'}</p>
+                    )}
                     <div className="mt-4 pt-4 border-t border-white/10 flex justify-between items-center">
                       <span className="text-gray-400">{isRtl ? 'المبلغ المطلوب إرساله' : 'Amount to send'}</span>
                       <span className="text-xl font-bold text-white">

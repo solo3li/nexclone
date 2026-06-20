@@ -634,7 +634,6 @@
 /src/obj/Debug/net10.0/staticwebassets.build.json.cache
 /src/obj/Debug/net10.0/staticwebassets.development.json
 /src/obj/Debug/net10.0/staticwebassets.build.endpoints.json
-/src/obj/Debug/net10.0/swae.build.ex.cache
 /src/obj/Debug/net10.0/NexClone.D2B00670.Up2Date
 /src/obj/Debug/net10.0/NexClone.Backend.dll
 /src/obj/Debug/net10.0/refint/NexClone.Backend.dll
@@ -642,3 +641,17 @@
 /src/obj/Debug/net10.0/NexClone.Backend.genruntimeconfig.cache
 /src/obj/Debug/net10.0/ref/NexClone.Backend.dll
 /app/bin/Debug/net10.0/TagLibSharp.dll
+/src/bin/Debug/net10.0/Microsoft.Extensions.Caching.Abstractions.dll
+/src/bin/Debug/net10.0/Microsoft.Extensions.Caching.Memory.dll
+/src/bin/Debug/net10.0/Microsoft.Extensions.Configuration.dll
+/src/bin/Debug/net10.0/Microsoft.Extensions.Configuration.Abstractions.dll
+/src/bin/Debug/net10.0/Microsoft.Extensions.Configuration.Binder.dll
+/src/bin/Debug/net10.0/Microsoft.Extensions.DependencyInjection.dll
+/src/bin/Debug/net10.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll
+/src/bin/Debug/net10.0/Microsoft.Extensions.Diagnostics.Abstractions.dll
+/src/bin/Debug/net10.0/Microsoft.Extensions.FileProviders.Abstractions.dll
+/src/bin/Debug/net10.0/Microsoft.Extensions.Hosting.Abstractions.dll
+/src/bin/Debug/net10.0/Microsoft.Extensions.Logging.dll
+/src/bin/Debug/net10.0/Microsoft.Extensions.Logging.Abstractions.dll
+/src/bin/Debug/net10.0/Microsoft.Extensions.Options.dll
+/src/bin/Debug/net10.0/Microsoft.Extensions.Primitives.dll
