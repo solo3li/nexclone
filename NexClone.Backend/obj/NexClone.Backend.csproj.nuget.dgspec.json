@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/root/nexmedia/nexclone/NexClone.Backend/NexClone.Backend.csproj": {}
+    "/app/NexClone.Backend.csproj": {}
   },
   "projects": {
-    "/root/nexmedia/nexclone/NexClone.Backend/NexClone.Backend.csproj": {
+    "/app/NexClone.Backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/root/nexmedia/nexclone/NexClone.Backend/NexClone.Backend.csproj",
+        "projectUniqueName": "/app/NexClone.Backend.csproj",
         "projectName": "NexClone.Backend",
-        "projectPath": "/root/nexmedia/nexclone/NexClone.Backend/NexClone.Backend.csproj",
+        "projectPath": "/app/NexClone.Backend.csproj",
         "packagesPath": "/root/.nuget/packages/",
-        "outputPath": "/root/nexmedia/nexclone/NexClone.Backend/obj/",
+        "outputPath": "/app/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/root/.nuget/NuGet/NuGet.Config"
@@ -20,11 +20,11 @@
           "net10.0"
         ],
         "sources": {
-          "/usr/lib/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net10.0": {
+            "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {}
           }
@@ -39,10 +39,11 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.300"
       },
       "frameworks": {
         "net10.0": {
+          "framework": "net10.0",
           "targetAlias": "net10.0",
           "dependencies": {
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
@@ -53,15 +54,27 @@
               "target": "Package",
               "version": "[10.0.9, )"
             },
+            "Microsoft.AspNetCore.OpenApi": {
+              "target": "Package",
+              "version": "[10.0.9, )"
+            },
             "Microsoft.EntityFrameworkCore.Design": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
               "target": "Package",
               "version": "[10.0.9, )"
             },
+            "Minio": {
+              "target": "Package",
+              "version": "[6.0.*, )"
+            },
             "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",
               "version": "[10.0.2, )"
+            },
+            "Scalar.AspNetCore": {
+              "target": "Package",
+              "version": "[1.2.*, )"
             },
             "Serilog.AspNetCore": {
               "target": "Package",
@@ -74,10 +87,6 @@
             "StackExchange.Redis": {
               "target": "Package",
               "version": "[2.13.17, )"
-            },
-            "Swashbuckle.AspNetCore": {
-              "target": "Package",
-              "version": "[10.2.1, )"
             }
           },
           "imports": [
@@ -99,7 +108,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/10.0.109/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/10.0.301/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

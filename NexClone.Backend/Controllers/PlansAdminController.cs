@@ -24,33 +24,22 @@ namespace NexClone.Backend.Controllers
             return View(plans);
         }
 
-        public async Task<IActionResult> Create()
+        public IActionResult Create()
         {
             ViewData["Title"] = "Create Plan";
-            ViewBag.Tools = await _legacyContext.ToolsTools.OrderBy(t => t.Name).ToListAsync();
-            return View();
+            return View(new Plan());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Plan plan, string[] SelectedTools, System.Collections.Generic.Dictionary<string, int> ToolLimits)
+        public async Task<IActionResult> Create(Plan plan)
         {
             if (ModelState.IsValid)
             {
-                var allowedWithLimits = new System.Collections.Generic.Dictionary<string, int>();
-                if (SelectedTools != null)
-                {
-                    foreach (var t in SelectedTools)
-                    {
-                        allowedWithLimits[t] = ToolLimits != null && ToolLimits.ContainsKey(t) ? ToolLimits[t] : -1;
-                    }
-                }
-                plan.AllowedTools = System.Text.Json.JsonSerializer.Serialize(allowedWithLimits);
                 _context.Add(plan);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.Tools = await _legacyContext.ToolsTools.OrderBy(t => t.Name).ToListAsync();
             return View(plan);
         }
 
@@ -62,13 +51,12 @@ namespace NexClone.Backend.Controllers
             if (plan == null) return NotFound();
 
             ViewData["Title"] = $"Edit Plan - {plan.Name}";
-            ViewBag.Tools = await _legacyContext.ToolsTools.OrderBy(t => t.Name).ToListAsync();
             return View(plan);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Plan plan, string[] SelectedTools, System.Collections.Generic.Dictionary<string, int> ToolLimits)
+        public async Task<IActionResult> Edit(int id, Plan plan)
         {
             if (id != plan.Id) return NotFound();
 
@@ -76,15 +64,6 @@ namespace NexClone.Backend.Controllers
             {
                 try
                 {
-                    var allowedWithLimits = new System.Collections.Generic.Dictionary<string, int>();
-                    if (SelectedTools != null)
-                    {
-                        foreach (var t in SelectedTools)
-                        {
-                            allowedWithLimits[t] = ToolLimits != null && ToolLimits.ContainsKey(t) ? ToolLimits[t] : -1;
-                        }
-                    }
-                    plan.AllowedTools = System.Text.Json.JsonSerializer.Serialize(allowedWithLimits);
                     _context.Update(plan);
                     await _context.SaveChangesAsync();
                 }
@@ -95,7 +74,6 @@ namespace NexClone.Backend.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.Tools = await _legacyContext.ToolsTools.OrderBy(t => t.Name).ToListAsync();
             return View(plan);
         }
 

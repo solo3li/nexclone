@@ -54,19 +54,8 @@ namespace NexClone.Backend.Services
 
             if (activeSubscription == null) return false;
 
-            // Example AllowedTools format: "[\"gpt\", \"text-to-voice\"]" or "{\"text-to-voice\": 150}"
-            var allowedToolsJson = activeSubscription.Plan.AllowedTools ?? "[]";
-            
-            if (allowedToolsJson.Trim().StartsWith("[")) {
-                return allowedToolsJson.Contains($"\"{toolId}\"");
-            } else if (allowedToolsJson.Trim().StartsWith("{")) {
-                try {
-                    var dict = System.Text.Json.JsonSerializer.Deserialize<System.Collections.Generic.Dictionary<string, int>>(allowedToolsJson);
-                    return dict != null && dict.ContainsKey(toolId);
-                } catch {
-                    return false;
-                }
-            }
+            if (toolId == "text-to-voice") return activeSubscription.Plan.TtsEnabled;
+            if (toolId == "voice-to-text") return activeSubscription.Plan.SttEnabled;
             return false;
         }
 

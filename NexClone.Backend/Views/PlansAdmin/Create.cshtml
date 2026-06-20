@@ -41,7 +41,7 @@
         <hr style="border: none; border-top: 1px solid #e0e0e0; margin-bottom: 2rem;">
         <h4 style="margin-bottom: 1.5rem; font-weight: 400; font-size: 1.25rem;">Economy Limits</h4>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem;">
+        <div style="margin-bottom: 2rem;">
             <div class="bx--form-item">
                 <label for="MonthlyCredits" class="bx--label">Monthly Credits</label>
                 <div class="bx--text-input__field-wrapper">
@@ -49,22 +49,53 @@
                 </div>
                 <div class="bx--form__helper-text">Credits granted per month</div>
             </div>
+        </div>
+
+        <h4 style="margin-bottom: 1.5rem; font-weight: 400; font-size: 1.1rem;">Text-to-Voice (TTS) Settings</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem; background: #f4f4f4; padding: 1.5rem;">
             <div class="bx--form-item">
-                <label class="bx--label">Allowed Tools</label>
-                <div style="max-height: 200px; overflow-y: auto; border: 1px solid #e0e0e0; padding: 1rem; background: #f4f4f4;">
-                    @if(ViewBag.Tools != null) {
-                        foreach(var tool in ViewBag.Tools) {
-                            <div style="margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between;">
-                                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <input type="checkbox" id="tool_@tool.Id" name="SelectedTools" value="@tool.Name" class="bx--checkbox" style="cursor: pointer;" onchange="document.getElementById('limit_@tool.Id').style.display = this.checked ? 'block' : 'none';" />
-                                    <label for="tool_@tool.Id" class="bx--checkbox-label" style="cursor: pointer; margin: 0; font-size: 0.875rem;">@tool.Name</label>
-                                </div>
-                                <input type="number" id="limit_@tool.Id" name="ToolLimits[@tool.Name]" value="-1" class="bx--text-input" style="width: 120px; display: none;" placeholder="Limit per operation (-1 unlim)" />
-                            </div>
-                        }
-                    }
+                <div style="display: flex; align-items: center; gap: 0.5rem; height: 100%;">
+                    <input type="hidden" name="TtsEnabled" value="false" />
+                    <input type="checkbox" id="TtsEnabled" name="TtsEnabled" value="true" class="bx--checkbox" @(Model?.TtsEnabled != false ? "checked" : "") style="cursor: pointer;" />
+                    <label for="TtsEnabled" class="bx--checkbox-label" style="cursor: pointer; margin: 0; font-weight: bold;">Enable TTS</label>
                 </div>
-                <div class="bx--form__helper-text">Tools included in this plan</div>
+            </div>
+            <div class="bx--form-item">
+                <label for="TtsMaxCharsPerRequest" class="bx--label">Max Chars per request</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="TtsMaxCharsPerRequest" type="number" class="bx--text-input" name="TtsMaxCharsPerRequest" required min="-1" value="@(Model?.TtsMaxCharsPerRequest ?? 3000)">
+                </div>
+                <div class="bx--form__helper-text">-1 for unlimited</div>
+            </div>
+            <div class="bx--form-item">
+                <label for="TtsCostPerChar" class="bx--label">Cost per Char</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="TtsCostPerChar" type="number" class="bx--text-input" name="TtsCostPerChar" required min="0" step="0.0001" value="@(Model?.TtsCostPerChar ?? 0.001m)">
+                </div>
+            </div>
+        </div>
+
+        <h4 style="margin-bottom: 1.5rem; font-weight: 400; font-size: 1.1rem;">Voice-to-Text (STT) Settings</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem; background: #f4f4f4; padding: 1.5rem;">
+            <div class="bx--form-item">
+                <div style="display: flex; align-items: center; gap: 0.5rem; height: 100%;">
+                    <input type="hidden" name="SttEnabled" value="false" />
+                    <input type="checkbox" id="SttEnabled" name="SttEnabled" value="true" class="bx--checkbox" @(Model?.SttEnabled != false ? "checked" : "") style="cursor: pointer;" />
+                    <label for="SttEnabled" class="bx--checkbox-label" style="cursor: pointer; margin: 0; font-weight: bold;">Enable STT</label>
+                </div>
+            </div>
+            <div class="bx--form-item">
+                <label for="SttMaxFileSizeMb" class="bx--label">Max File Size (MB)</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="SttMaxFileSizeMb" type="number" class="bx--text-input" name="SttMaxFileSizeMb" required min="-1" value="@(Model?.SttMaxFileSizeMb ?? 25)">
+                </div>
+                <div class="bx--form__helper-text">-1 for unlimited</div>
+            </div>
+            <div class="bx--form-item">
+                <label for="SttCostPer100Kb" class="bx--label">Cost per 100KB</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="SttCostPer100Kb" type="number" class="bx--text-input" name="SttCostPer100Kb" required min="0" step="0.0001" value="@(Model?.SttCostPer100Kb ?? 1.0m)">
+                </div>
             </div>
         </div>
 

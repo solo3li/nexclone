@@ -88,18 +88,15 @@ namespace NexClone.Backend.Controllers
             // Seed Plans
             if (!await _context.Plans.AnyAsync(p => p.Name == "Free Plan"))
             {
-                var toolsFree = new System.Collections.Generic.Dictionary<string, int> { { "text-to-voice", 150 } };
-                _context.Plans.Add(new Plan { Name = "Free Plan", PriceUsd = 0, PriceEgp = 0, DurationDays = 30, MonthlyCredits = 500, AllowedTools = System.Text.Json.JsonSerializer.Serialize(toolsFree), CreatedAt = DateTime.UtcNow });
+                _context.Plans.Add(new Plan { Name = "Free Plan", PriceUsd = 0, PriceEgp = 0, DurationDays = 30, MonthlyCredits = 500, TtsEnabled = true, TtsMaxCharsPerRequest = 150, CreatedAt = DateTime.UtcNow });
             }
             if (!await _context.Plans.AnyAsync(p => p.Name == "Basic Plan"))
             {
-                var toolsBasic = new System.Collections.Generic.Dictionary<string, int> { { "text-to-voice", 500 } };
-                _context.Plans.Add(new Plan { Name = "Basic Plan", PriceUsd = 10, PriceEgp = 500, DurationDays = 30, MonthlyCredits = 2000, AllowedTools = System.Text.Json.JsonSerializer.Serialize(toolsBasic), CreatedAt = DateTime.UtcNow });
+                _context.Plans.Add(new Plan { Name = "Basic Plan", PriceUsd = 10, PriceEgp = 500, DurationDays = 30, MonthlyCredits = 2000, TtsEnabled = true, TtsMaxCharsPerRequest = 500, CreatedAt = DateTime.UtcNow });
             }
             if (!await _context.Plans.AnyAsync(p => p.Name == "Pro Plan"))
             {
-                var toolsPro = new System.Collections.Generic.Dictionary<string, int> { { "text-to-voice", -1 } };
-                _context.Plans.Add(new Plan { Name = "Pro Plan", PriceUsd = 30, PriceEgp = 1500, DurationDays = 30, MonthlyCredits = 10000, AllowedTools = System.Text.Json.JsonSerializer.Serialize(toolsPro), CreatedAt = DateTime.UtcNow });
+                _context.Plans.Add(new Plan { Name = "Pro Plan", PriceUsd = 30, PriceEgp = 1500, DurationDays = 30, MonthlyCredits = 10000, TtsEnabled = true, TtsMaxCharsPerRequest = -1, CreatedAt = DateTime.UtcNow });
             }
             await _context.SaveChangesAsync();
 

@@ -1,5 +1,4 @@
 using System;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NexClone.Backend.Models;
@@ -60,15 +59,11 @@ namespace NexClone.Backend.Services
             if (activeSubscription == null)
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "No active subscription found." };
 
-            var toolPolicy = GetToolPolicy(activeSubscription.Plan.AllowedTools, toolId);
+            var toolPolicy = GetToolPolicy(activeSubscription.Plan, toolId);
 
             if (!toolPolicy.Enabled)
             {
-                // Fallback check against old AllowedTools format (like ["gpt", "text-to-voice"])
-                if (!IsToolAllowedLegacyFormat(activeSubscription.Plan.AllowedTools, toolId))
-                {
-                    return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Your current plan does not have access to this tool." };
-                }
+                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Your current plan does not have access to this tool." };
             }
 
             // Specific limits check
@@ -114,51 +109,25 @@ namespace NexClone.Backend.Services
             return new PolicyValidationResult { IsAllowed = true, TotalCost = totalCost };
         }
 
-        public ToolPolicy GetToolPolicy(string allowedToolsJson, string toolId)
+        public ToolPolicy GetToolPolicy(Plan plan, string toolId)
         {
             var policy = new ToolPolicy();
-            if (string.IsNullOrWhiteSpace(allowedToolsJson)) return policy;
+            if (plan == null) return policy;
 
-            try
+            if (toolId == "text-to-voice")
             {
-                if (allowedToolsJson.Trim().StartsWith("{"))
-                {
-                    using var doc = JsonDocument.Parse(allowedToolsJson);
-                    if (doc.RootElement.TryGetProperty(toolId, out var toolElement))
-                    {
-                        if (toolElement.ValueKind == JsonValueKind.Object)
-                        {
-                            policy.Enabled = true;
-                            if (toolElement.TryGetProperty("enabled", out var e))
-                                policy.Enabled = e.GetBoolean();
-                            if (toolElement.TryGetProperty("max_chars_per_request", out var m))
-                                policy.MaxCharsPerRequest = m.GetInt32();
-                            if (toolElement.TryGetProperty("max_file_size_mb", out var f))
-                                policy.MaxFileSizeMb = f.GetInt64();
-                            if (toolElement.TryGetProperty("cost_per_unit", out var c))
-                                policy.CostPerUnit = c.GetDecimal();
-                        }
-                        else if (toolElement.ValueKind == JsonValueKind.Number)
-                        {
-                            // Old { "text-to-voice": 150 } format
-                            policy.Enabled = true;
-                            policy.MaxCharsPerRequest = toolElement.GetInt32();
-                        }
-                    }
-                }
+                policy.Enabled = plan.TtsEnabled;
+                policy.MaxCharsPerRequest = plan.TtsMaxCharsPerRequest;
+                policy.CostPerUnit = plan.TtsCostPerChar;
             }
-            catch { }
+            else if (toolId == "voice-to-text")
+            {
+                policy.Enabled = plan.SttEnabled;
+                policy.MaxFileSizeMb = plan.SttMaxFileSizeMb;
+                policy.CostPerUnit = plan.SttCostPer100Kb;
+            }
+
             return policy;
-        }
-
-        private bool IsToolAllowedLegacyFormat(string allowedToolsJson, string toolId)
-        {
-            if (string.IsNullOrWhiteSpace(allowedToolsJson)) return false;
-            if (allowedToolsJson.Trim().StartsWith("["))
-            {
-                return allowedToolsJson.Contains($"\"{toolId}\"");
-            }
-            return false;
         }
 
         private decimal GetLegacyCostPerUnit(string toolId)

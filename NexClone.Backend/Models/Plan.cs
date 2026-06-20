@@ -22,9 +22,15 @@ namespace NexClone.Backend.Models
 
         // Economy
         public decimal MonthlyCredits { get; set; } = 0;
-        
-        // JSON array of allowed tool identifiers, e.g., ["gpt", "text-to-voice", "voice-to-text", "bg-remover", "img-to-txt"]
-        public string AllowedTools { get; set; } = "[]";
+        // Text-To-Voice (TTS) Settings
+        public bool TtsEnabled { get; set; } = true;
+        public int TtsMaxCharsPerRequest { get; set; } = 3000;
+        public decimal TtsCostPerChar { get; set; } = 0.001m;
+
+        // Voice-To-Text (STT) Settings
+        public bool SttEnabled { get; set; } = true;
+        public int SttMaxFileSizeMb { get; set; } = 25;
+        public decimal SttCostPer100Kb { get; set; } = 1.0m;
 
         // Free Trial Flag
         public bool IsFreeTrial { get; set; } = false;
