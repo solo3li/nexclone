@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NexClone.Backend.Data;
 using NexClone.Backend.Models;
 using System.ComponentModel.DataAnnotations;
 
@@ -116,8 +115,7 @@ namespace NexClone.Backend.Controllers.Api
             if (existingSub != null)
             {
                 existingSub.EndDate = (existingSub.EndDate > DateTime.UtcNow ? existingSub.EndDate : DateTime.UtcNow).AddDays(payment.Plan.DurationDays);
-                existingSub.CreditsRemaining += payment.Plan.MonthlyCredits;
-                existingSub.IsActive = true;
+                existingSub.Status = "Active";
                 payment.SubscriptionId = existingSub.Id;
             }
             else
@@ -128,8 +126,7 @@ namespace NexClone.Backend.Controllers.Api
                     PlanId = payment.Plan.Id,
                     StartDate = DateTime.UtcNow,
                     EndDate = DateTime.UtcNow.AddDays(payment.Plan.DurationDays),
-                    CreditsRemaining = payment.Plan.MonthlyCredits,
-                    IsActive = true
+                    Status = "Active"
                 };
                 _context.Subscriptions.Add(newSub);
                 await _context.SaveChangesAsync();
