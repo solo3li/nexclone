@@ -120,5 +120,25 @@ namespace NexClone.Backend.Areas.AI.Controllers
                 return StatusCode(500, new { error = "Internal server error during transcription.", details = ex.Message });
             }
         }
+        public class EstimateRequest
+        {
+            public long FileSizeBytes { get; set; }
+            public double DurationMinutes { get; set; }
+        }
+
+        [HttpPost("estimate")]
+        public async Task<IActionResult> EstimateAudio([FromBody] EstimateRequest request)
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+
+            double duration = request.DurationMinutes <= 0 ? 0.01 : request.DurationMinutes;
+
+            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "voice-to-text", request.FileSizeBytes, (decimal)duration);
+            if (!policyResult.IsAllowed)
+                return BadRequest(new { error = policyResult.ErrorMessage });
+
+            return Ok(new { estimatedCost = policyResult.TotalCost });
+        }
     }
 }

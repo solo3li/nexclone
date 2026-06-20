@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
 import Navbar from "../../../../src/components/Navbar";
 import Footer from "../../../../src/components/Footer";
 import {
   UploadCloud, Mic, Square, Play, Pause, Copy, Download,
-  Loader2, FileAudio, CheckCircle2, X, Volume2
+  Loader2, FileAudio, CheckCircle2, X, Volume2, Zap
 } from "lucide-react";
 import { uploadDirectToMinio } from "../../../../src/utils/upload";
 import api from "../../../../src/utils/api";
@@ -51,6 +51,8 @@ export default function VoiceToTextPage() {
   const [result, setResult] = useState("");
   const [error, setError] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
+  const [estimatedCost, setEstimatedCost] = useState<number | null>(null);
+  const [isEstimating, setIsEstimating] = useState(false);
 
   // Audio preview player state
   const [audioPreviewUrl, setAudioPreviewUrl] = useState<string | null>(null);
@@ -62,6 +64,27 @@ export default function VoiceToTextPage() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  useEffect(() => {
+    if (!file || duration <= 0) {
+      setEstimatedCost(null);
+      return;
+    }
+    const fetchEstimate = async () => {
+      setIsEstimating(true);
+      try {
+        const fileSizeBytes = file.size;
+        const durationMinutes = duration / 60;
+        const res = await api.post("/api/ai/voice-to-text/estimate", { fileSizeBytes, durationMinutes });
+        setEstimatedCost(res.data.estimatedCost);
+      } catch (err) {
+        console.error("Failed to estimate:", err);
+      } finally {
+        setIsEstimating(false);
+      }
+    };
+    fetchEstimate();
+  }, [file, duration]);
 
   const startRecording = async () => {
     try {
@@ -512,9 +535,22 @@ export default function VoiceToTextPage() {
                   {/* Process Button */}
                   {!isProcessing && stage !== 'done' && (
                     <div className="px-4 pb-4">
+                      {estimatedCost !== null && (
+                        <div className="flex justify-center items-center pb-3 text-sm">
+                          {isEstimating ? (
+                            <span className="text-white/40 flex items-center gap-2"><Loader2 className="w-3 h-3 animate-spin" /> {isRtl ? "جاري حساب التكلفة..." : "Calculating cost..."}</span>
+                          ) : (
+                            <span className="text-fuchsia-400 font-medium flex items-center gap-1.5 bg-fuchsia-500/10 px-3 py-1 rounded-full border border-fuchsia-500/20">
+                              <Zap className="w-4 h-4" />
+                              {isRtl ? "التكلفة المتوقعة:" : "Estimated Cost:"} {estimatedCost.toFixed(2)} {isRtl ? "كريدت" : "Credits"}
+                            </span>
+                          )}
+                        </div>
+                      )}
                       <button
                         onClick={processAudio}
-                        className="w-full py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-xl font-semibold text-sm hover:shadow-[0_0_25px_rgba(139,92,246,0.4)] transition-all flex items-center justify-center gap-2"
+                        disabled={isEstimating}
+                        className="w-full py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-xl font-semibold text-sm hover:shadow-[0_0_25px_rgba(139,92,246,0.4)] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                       >
                         <Play className="w-4 h-4" />
                         {t('process')}

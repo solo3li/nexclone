@@ -1,117 +1,152 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import Navbar from "../../../src/components/Navbar";
 import Footer from "../../../src/components/Footer";
+import MobileBottomNav from "../../../src/components/MobileBottomNav";
 import {
-  Activity, Crown, History, Mic, Volume2, FileText,
-  Image, Loader2, Trash2, ExternalLink, ChevronRight,
-  Clock, Zap, AlertCircle
+  Activity, Crown, History, FileText, User as UserIcon, Lock,
+  Image as ImageIcon, Loader2, Save, Upload
 } from "lucide-react";
 import api from "../../../src/utils/api";
 import { useAppStore } from "../../../src/store/useAppStore";
-
-interface GenerationRecord {
-  id: string;
-  type: string;
-  title: string;
-  date: string;
-  createdAt: string;
-  duration: string;
-  status: string;
-  lang: string;
-  voice: string;
-  fileUrl: string;
-  creditsUsed: number;
-}
-
-const TOOL_ICONS: Record<string, any> = {
-  "text-to-voice": Volume2,
-  "voice-to-text": Mic,
-  "gpt": FileText,
-  "bg-remover": Image,
-};
-
-const TOOL_COLORS: Record<string, string> = {
-  "text-to-voice": "from-violet-500/20 to-fuchsia-500/20 border-violet-500/30 text-violet-400",
-  "voice-to-text": "from-fuchsia-500/20 to-pink-500/20 border-fuchsia-500/30 text-fuchsia-400",
-  "gpt": "from-blue-500/20 to-cyan-500/20 border-blue-500/30 text-blue-400",
-  "bg-remover": "from-emerald-500/20 to-teal-500/20 border-emerald-500/30 text-emerald-400",
-};
-
-const TOOL_LABELS: Record<string, string> = {
-  "text-to-voice": "نص إلى صوت",
-  "voice-to-text": "صوت إلى نص",
-  "gpt": "GPT",
-  "bg-remover": "إزالة خلفية",
-};
 
 export default function ProfilePage() {
   const t = useTranslations("Profile");
   const locale = useLocale();
   const isRtl = locale === "ar";
   const router = useRouter();
+  
   const user = useAppStore(state => state.user);
+  const setUser = useAppStore(state => state.setUser);
+  
+  const [historyCount, setHistoryCount] = useState(0);
+  
+  // Settings State
+  const [fullName, setFullName] = useState(user?.fullName || "");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(user?.imageUrl || null);
+  
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
+  
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [history, setHistory] = useState<GenerationRecord[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [activeFilter, setActiveFilter] = useState("all");
+  useEffect(() => {
+    if (user && !fullName) {
+      setFullName(user.fullName || "");
+      setImagePreview(user.imageUrl || null);
+    }
+  }, [user]);
 
   useEffect(() => {
     const fetchHistory = async () => {
       try {
         const res = await api.get("/api/history");
-        setHistory(res.data);
+        setHistoryCount(res.data.length);
       } catch (err) {
-        console.error("Failed to fetch history:", err);
-      } finally {
-        setLoading(false);
+        console.error("Failed to fetch history count:", err);
       }
     };
     fetchHistory();
   }, []);
 
-  const deleteRecord = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!confirm(isRtl ? "هل أنت متأكد من الحذف؟" : "Are you sure you want to delete?")) return;
-    setDeletingId(id);
-    try {
-      await api.delete(`/api/history/${id}`);
-      setHistory(prev => prev.filter(r => r.id !== id));
-    } catch {
-      alert(isRtl ? "فشل الحذف" : "Failed to delete");
-    } finally {
-      setDeletingId(null);
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setProfileImage(file);
+      setImagePreview(URL.createObjectURL(file));
     }
   };
 
-  const goToDetail = (id: string) => {
-    router.push(`/${locale}/profile/history/${id}`);
+  const handleUpdateProfile = async () => {
+    setSavingProfile(true);
+    try {
+      const formData = new FormData();
+      formData.append("FullName", fullName);
+      if (profileImage) {
+        formData.append("ProfileImage", profileImage);
+      }
+
+      const res = await api.put("/api/profile", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      });
+      
+      // Update local store
+      if (user) {
+        useAppStore.setState({ user: { ...user, fullName: res.data.fullName, imageUrl: res.data.imageUrl } });
+      }
+      alert(isRtl ? "تم التحديث بنجاح" : "Profile updated successfully");
+    } catch (err) {
+      console.error(err);
+      alert(isRtl ? "حدث خطأ أثناء التحديث" : "Error updating profile");
+    } finally {
+      setSavingProfile(false);
+    }
   };
 
-  const filters = ["all", "text-to-voice", "voice-to-text", "gpt", "bg-remover"];
-  const filtered = activeFilter === "all" ? history : history.filter(r => r.type === activeFilter);
+  const handleChangePassword = async () => {
+    if (!currentPassword || !newPassword) return;
+    setSavingPassword(true);
+    try {
+      await api.post("/api/profile/change-password", { currentPassword, newPassword });
+      alert(isRtl ? "تم تغيير كلمة المرور بنجاح" : "Password changed successfully");
+      setCurrentPassword("");
+      setNewPassword("");
+    } catch (err) {
+      console.error(err);
+      alert(isRtl ? "كلمة المرور الحالية غير صحيحة" : "Incorrect current password");
+    } finally {
+      setSavingPassword(false);
+    }
+  };
 
   return (
-    <div className="relative min-h-screen bg-[#0a0015] flex flex-col">
+    <div className="relative min-h-screen bg-[#0a0015] flex flex-col selection:bg-violet-500/30">
       <div className="fixed top-[-20%] right-[-10%] w-[60%] h-[600px] bg-fuchsia-600/10 blur-[150px] pointer-events-none z-0 rounded-full" />
       <div className="fixed bottom-[-10%] left-[-10%] w-[50%] h-[500px] bg-violet-600/10 blur-[120px] pointer-events-none z-0 rounded-full" />
 
       <Navbar />
 
       <main className="flex-1 container mx-auto px-4 pt-32 pb-20 relative z-10 max-w-6xl">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-10 flex items-center justify-between">
           <h1 className="text-4xl font-extrabold text-white">{t('title')}</h1>
+          <button 
+            onClick={() => router.push(`/${locale}/history`)}
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-fuchsia-600 to-violet-600 hover:from-fuchsia-500 hover:to-violet-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-fuchsia-500/25"
+          >
+            <History className="w-5 h-5" />
+            {isRtl ? "سجل العمليات" : "Generation History"}
+          </button>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-          {/* Left Column */}
+          {/* Left Column: Info & Stats */}
           <div className="lg:col-span-1 space-y-6">
+
+            {/* Profile Avatar summary */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
+              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 text-center"
+            >
+              <div className="w-24 h-24 mx-auto rounded-full bg-white/10 mb-4 overflow-hidden border-2 border-white/20 flex items-center justify-center">
+                {imagePreview ? (
+                  <img src={imagePreview} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <UserIcon className="w-10 h-10 text-white/50" />
+                )}
+              </div>
+              <h2 className="text-xl font-bold text-white">{user?.fullName || "User"}</h2>
+              <p className="text-white/50 text-sm mt-1">{user?.email}</p>
+            </motion.div>
 
             {/* Subscription Card */}
             <motion.div
@@ -157,7 +192,7 @@ export default function ProfilePage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-white/5 rounded-2xl p-3 text-center">
-                  <p className="text-2xl font-extrabold text-white">{history.length}</p>
+                  <p className="text-2xl font-extrabold text-white">{historyCount}</p>
                   <p className="text-xs text-white/50 mt-1">{isRtl ? "إجمالي العمليات" : "Total Operations"}</p>
                 </div>
                 <div className="bg-white/5 rounded-2xl p-3 text-center">
@@ -171,140 +206,137 @@ export default function ProfilePage() {
 
           </div>
 
-          {/* Right Column: Real History */}
-          <div className="lg:col-span-2">
+          {/* Right Column: Settings */}
+          <div className="lg:col-span-2 space-y-6">
+            
+            {/* General Profile Settings */}
             <motion.div
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 h-full flex flex-col"
+              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 md:p-8"
+              dir={isRtl ? "rtl" : "ltr"}
             >
-              {/* Header */}
-              <div className="flex items-center gap-3 mb-6" dir={isRtl ? "rtl" : "ltr"}>
-                <div className="w-10 h-10 rounded-xl bg-fuchsia-500/20 flex items-center justify-center border border-fuchsia-500/30">
-                  <History className="w-5 h-5 text-fuchsia-400" />
-                </div>
-                <h2 className="text-xl font-bold text-white flex-1">
-                  {isRtl ? "سجل العمليات" : "Generation History"}
-                </h2>
-                <span className="text-xs text-white/40 bg-white/5 px-3 py-1 rounded-full border border-white/10">
-                  {filtered.length} {isRtl ? "عملية" : "records"}
-                </span>
-              </div>
+              <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                <UserIcon className="w-6 h-6 text-fuchsia-400" />
+                {isRtl ? "إعدادات الحساب" : "Account Settings"}
+              </h2>
 
-              {/* Filter Pills */}
-              <div className="flex gap-2 mb-5 flex-wrap" dir={isRtl ? "rtl" : "ltr"}>
-                {filters.map(f => (
+              <div className="space-y-6">
+                {/* Profile Picture Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-white/70 mb-3">
+                    {isRtl ? "الصورة الشخصية" : "Profile Picture"}
+                  </label>
+                  <div className="flex items-center gap-4">
+                    <div className="w-20 h-20 rounded-xl bg-white/5 border border-white/10 overflow-hidden flex items-center justify-center relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                      {imagePreview ? (
+                        <img src={imagePreview} alt="Profile Preview" className="w-full h-full object-cover" />
+                      ) : (
+                        <ImageIcon className="w-8 h-8 text-white/30" />
+                      )}
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
+                        <Upload className="w-6 h-6 text-white" />
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs text-white/40 mb-2">
+                        {isRtl ? "الصور المدعومة: JPG, PNG. أقصى حجم 2MB." : "Supported formats: JPG, PNG. Max size 2MB."}
+                      </p>
+                      <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition-colors">
+                        {isRtl ? "اختر صورة" : "Choose Image"}
+                      </button>
+                      <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        onChange={handleImageChange} 
+                        accept="image/*" 
+                        className="hidden" 
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Full Name */}
+                <div>
+                  <label className="block text-sm font-medium text-white/70 mb-2">
+                    {isRtl ? "الاسم الكامل" : "Full Name"}
+                  </label>
+                  <input
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-fuchsia-500/50 focus:ring-1 focus:ring-fuchsia-500/50 transition-all"
+                    placeholder={isRtl ? "أدخل اسمك" : "Enter your name"}
+                  />
+                </div>
+
+                <div className="pt-4 flex justify-end">
                   <button
-                    key={f}
-                    onClick={() => setActiveFilter(f)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                      activeFilter === f
-                        ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white"
-                        : "bg-white/5 text-white/50 hover:text-white border border-white/10"
-                    }`}
+                    onClick={handleUpdateProfile}
+                    disabled={savingProfile}
+                    className="px-6 py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition-colors flex items-center gap-2 disabled:opacity-50"
                   >
-                    {f === "all" ? (isRtl ? "الكل" : "All") : (TOOL_LABELS[f] || f)}
+                    {savingProfile ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+                    {isRtl ? "حفظ التغييرات" : "Save Changes"}
                   </button>
-                ))}
+                </div>
               </div>
-
-              {/* Content */}
-              {loading ? (
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="flex flex-col items-center gap-3 text-white/40">
-                    <Loader2 className="w-8 h-8 animate-spin text-violet-400" />
-                    <p className="text-sm">{isRtl ? "جاري التحميل..." : "Loading..."}</p>
-                  </div>
-                </div>
-              ) : filtered.length === 0 ? (
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="text-center text-white/30">
-                    <AlertCircle className="w-10 h-10 mx-auto mb-3 opacity-50" />
-                    <p className="text-sm">{isRtl ? "لا توجد عمليات بعد" : "No operations yet"}</p>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex-1 space-y-3 overflow-y-auto max-h-[550px] pr-1">
-                  <AnimatePresence>
-                    {filtered.map((record, i) => {
-                      const Icon = TOOL_ICONS[record.type] || Zap;
-                      const colorClass = TOOL_COLORS[record.type] || "from-white/10 to-white/5 border-white/10 text-white/50";
-
-                      return (
-                        <motion.div
-                          key={record.id}
-                          initial={{ opacity: 0, x: isRtl ? 20 : -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          transition={{ delay: i * 0.04 }}
-                          onClick={() => goToDetail(record.id)}
-                          className="group flex items-center gap-4 p-4 bg-white/[0.03] hover:bg-white/[0.07] border border-white/10 hover:border-violet-500/30 rounded-2xl cursor-pointer transition-all"
-                          dir={isRtl ? "rtl" : "ltr"}
-                        >
-                          {/* Icon */}
-                          <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${colorClass} flex items-center justify-center border shrink-0`}>
-                            <Icon className="w-5 h-5" />
-                          </div>
-
-                          {/* Info */}
-                          <div className="flex-1 min-w-0">
-                            <p className="text-white font-semibold text-sm truncate" title={record.title}>
-                              {record.title.split('/').pop()}
-                            </p>
-                            <div className="flex items-center gap-3 mt-1 flex-wrap">
-                              <span className="text-[11px] text-white/40 flex items-center gap-1">
-                                <Clock className="w-3 h-3" />
-                                {record.date}
-                              </span>
-                              {record.lang && record.lang !== "-" && (
-                                <span className="text-[11px] text-white/40">{record.lang}</span>
-                              )}
-                              {record.creditsUsed > 0 && (
-                                <span className="text-[11px] text-fuchsia-400/70 flex items-center gap-0.5">
-                                  <Zap className="w-2.5 h-2.5" />
-                                  {record.creditsUsed}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Status + Actions */}
-                          <div className="flex items-center gap-2 shrink-0">
-                            <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${
-                              record.status === "completed"
-                                ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
-                                : record.status === "failed"
-                                ? "bg-red-500/15 text-red-400 border border-red-500/20"
-                                : "bg-yellow-500/15 text-yellow-400 border border-yellow-500/20"
-                            }`}>
-                              {record.status === "completed" ? (isRtl ? "مكتمل" : "Done") :
-                               record.status === "failed" ? (isRtl ? "فشل" : "Failed") :
-                               (isRtl ? "جاري" : "Processing")}
-                            </span>
-                            <button
-                              onClick={(e) => deleteRecord(record.id, e)}
-                              disabled={deletingId === record.id}
-                              className="p-1.5 rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
-                            >
-                              {deletingId === record.id
-                                ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                : <Trash2 className="w-3.5 h-3.5" />
-                              }
-                            </button>
-                            <ChevronRight className={`w-4 h-4 text-white/20 group-hover:text-violet-400 transition-colors ${isRtl ? "rotate-180" : ""}`} />
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-                  </AnimatePresence>
-                </div>
-              )}
             </motion.div>
+
+            {/* Password Settings */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 md:p-8"
+              dir={isRtl ? "rtl" : "ltr"}
+            >
+              <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                <Lock className="w-6 h-6 text-violet-400" />
+                {isRtl ? "تغيير كلمة المرور" : "Change Password"}
+              </h2>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-white/70 mb-2">
+                    {isRtl ? "كلمة المرور الحالية" : "Current Password"}
+                  </label>
+                  <input
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/50 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-white/70 mb-2">
+                    {isRtl ? "كلمة المرور الجديدة" : "New Password"}
+                  </label>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/50 transition-all"
+                  />
+                </div>
+                <div className="pt-4 flex justify-end">
+                  <button
+                    onClick={handleChangePassword}
+                    disabled={savingPassword || !currentPassword || !newPassword}
+                    className="px-6 py-3 bg-white/10 border border-white/20 text-white font-bold rounded-xl hover:bg-white/20 transition-colors flex items-center gap-2 disabled:opacity-50"
+                  >
+                    {savingPassword ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+                    {isRtl ? "تحديث كلمة المرور" : "Update Password"}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+
           </div>
 
         </div>
       </main>
 
       <Footer />
+      <MobileBottomNav />
+      <div className="h-16 md:hidden" />
     </div>
   );
 }

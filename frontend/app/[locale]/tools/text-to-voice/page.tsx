@@ -50,6 +50,8 @@ export default function TextToVoicePage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [estimatedCost, setEstimatedCost] = useState<number | null>(null);
+  const [isEstimating, setIsEstimating] = useState(false);
 
   const currentlyPlayingRef = useRef<HTMLAudioElement | null>(null);
   
@@ -88,6 +90,27 @@ export default function TextToVoicePage() {
     fetchVoices();
     fetchOptions();
   }, []);
+
+  useEffect(() => {
+    const handler = setTimeout(async () => {
+      if (!text.trim() || text.length > maxChars) {
+        setEstimatedCost(null);
+        return;
+      }
+      setIsEstimating(true);
+      try {
+        const response = await api.post("/api/ai/text-to-voice/estimate", { text });
+        setEstimatedCost(response.data.estimatedCost);
+      } catch (err: any) {
+        console.error("Estimation error:", err);
+        setEstimatedCost(null);
+      } finally {
+        setIsEstimating(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(handler);
+  }, [text, maxChars]);
 
   const playDemo = (demoUrl: string) => {
     if (currentlyPlayingRef.current) {
@@ -202,11 +225,25 @@ export default function TextToVoicePage() {
               {/* Error Message */}
               {error && <div className="text-red-400 text-sm p-3 bg-red-500/10 rounded-xl border border-red-500/20 mx-2">{error}</div>}
 
+              {/* Estimation */}
+              {text.trim() && text.length <= maxChars && (
+                <div className="flex justify-center items-center py-2 text-sm">
+                  {isEstimating ? (
+                    <span className="text-white/40 flex items-center gap-2"><Loader2 className="w-3 h-3 animate-spin" /> {isRtl ? "جاري حساب التكلفة..." : "Calculating cost..."}</span>
+                  ) : estimatedCost !== null ? (
+                    <span className="text-fuchsia-400 font-medium flex items-center gap-1.5 bg-fuchsia-500/10 px-3 py-1 rounded-full border border-fuchsia-500/20">
+                      <Zap className="w-4 h-4" />
+                      {isRtl ? "التكلفة المتوقعة:" : "Estimated Cost:"} {estimatedCost} {isRtl ? "كريدت" : "Credits"}
+                    </span>
+                  ) : null}
+                </div>
+              )}
+
               {/* Generate Button */}
               <button
                 onClick={generateAudio}
-                disabled={isProcessing || !text.trim() || text.length > maxChars}
-                className="w-full py-4 mt-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-full font-bold text-lg hover:shadow-[0_0_30px_rgba(139,92,246,0.4)] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+                disabled={isProcessing || isEstimating || !text.trim() || text.length > maxChars}
+                className="w-full py-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white rounded-full font-bold text-lg hover:shadow-[0_0_30px_rgba(139,92,246,0.4)] transition-all disabled:opacity-50 flex items-center justify-center gap-3"
               >
                 {isProcessing ? (
                   <>

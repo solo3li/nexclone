@@ -139,5 +139,49 @@ namespace NexClone.Backend.Services
             // Fallback since legacy credit cost is now part of the Plan.
             return 1m;
         }
+
+        public async Task<PolicyValidationResult> EstimateCostAsync(Guid userId, string toolId, decimal usageAmountForLimits, decimal? usageAmountForCost = null)
+        {
+            var user = await _context.Users
+                .Include(u => u.Subscriptions)
+                    .ThenInclude(s => s.Plan)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null) 
+                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "User not found." };
+
+            if (user.IsStaff) 
+                return new PolicyValidationResult { IsAllowed = true, TotalCost = 0 };
+
+            var activeSubscription = user.Subscriptions
+                .FirstOrDefault(s => s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow);
+
+            if (activeSubscription == null)
+                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "No active subscription found." };
+
+            var toolPolicy = GetToolPolicy(activeSubscription.Plan, toolId);
+
+            if (!toolPolicy.Enabled)
+                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Your current plan does not have access to this tool." };
+
+            if (toolId == "text-to-voice" && toolPolicy.MaxCharsPerRequest != -1 && usageAmountForLimits > toolPolicy.MaxCharsPerRequest)
+                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Your current plan allows a maximum of {toolPolicy.MaxCharsPerRequest} characters per request." };
+            
+            if (toolId == "voice-to-text" && toolPolicy.MaxFileSizeMb != -1 && usageAmountForLimits > (toolPolicy.MaxFileSizeMb * 1024 * 1024))
+                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"File too large. Maximum allowed size is {toolPolicy.MaxFileSizeMb}MB." };
+
+            decimal costPerUnit = toolPolicy.CostPerUnit ?? GetLegacyCostPerUnit(toolId);
+            decimal amountForCost = usageAmountForCost ?? usageAmountForLimits;
+            
+            if (toolId == "voice-to-text" && usageAmountForCost == null)
+                amountForCost = usageAmountForLimits / 102400m; 
+
+            if (toolPolicy.BlockSize > 1)
+                amountForCost = amountForCost / toolPolicy.BlockSize;
+
+            decimal totalCost = amountForCost * costPerUnit;
+
+            return new PolicyValidationResult { IsAllowed = true, TotalCost = totalCost };
+        }
     }
 }

@@ -90,6 +90,22 @@ namespace NexClone.Backend.Areas.AI.Controllers
                 return StatusCode(500, new { message = "Error generating audio", details = ex.Message });
             }
         }
+
+        [HttpPost("estimate")]
+        public async Task<IActionResult> EstimateAudio([FromBody] TtsRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+
+            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "text-to-voice", request.Text.Length);
+            if (!policyResult.IsAllowed)
+                return BadRequest(new { error = policyResult.ErrorMessage });
+
+            return Ok(new { estimatedCost = policyResult.TotalCost });
+        }
     }
 
     public class TtsRequest
