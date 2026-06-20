@@ -33,10 +33,6 @@ namespace NexClone.Backend.Services
             _context = context;
         }
 
-        /// <summary>
-        /// Validates limits and deducts credits in one go.
-        /// usageAmount: for text-to-voice this is character count, for voice-to-text this is file size in bytes.
-        /// </summary>
         public async Task<PolicyValidationResult> ValidateAndChargeAsync(Guid userId, string toolId, decimal usageAmountForLimits, decimal? usageAmountForCost = null)
         {
             var user = await _context.Users
@@ -47,45 +43,38 @@ namespace NexClone.Backend.Services
             if (user == null) 
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "User not found." };
 
-            // Admins skip all limits and costs
-            if (user.IsStaff) 
-                return new PolicyValidationResult { IsAllowed = true, TotalCost = 0 };
-
+            Plan targetPlan = null;
             var activeSubscription = user.Subscriptions
                 .FirstOrDefault(s => s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow);
 
-            if (activeSubscription == null)
+            if (activeSubscription != null)
+            {
+                targetPlan = activeSubscription.Plan;
+            }
+            else if (user.IsStaff)
+            {
+                // Fallback for staff without subscription so they can still test but get charged
+                targetPlan = await _context.Plans.FirstOrDefaultAsync() ?? new Plan();
+            }
+            else
+            {
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "No active subscription found." };
+            }
 
-            var toolPolicy = GetToolPolicy(activeSubscription.Plan, toolId);
+            var toolPolicy = GetToolPolicy(targetPlan, toolId);
 
             if (!toolPolicy.Enabled)
-            {
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Your current plan does not have access to this tool." };
-            }
 
-            // Specific limits check
-            if (toolId == "text-to-voice")
-            {
-                if (toolPolicy.MaxCharsPerRequest != -1 && usageAmountForLimits > toolPolicy.MaxCharsPerRequest)
-                {
-                    return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Your current plan allows a maximum of {toolPolicy.MaxCharsPerRequest} characters per request." };
-                }
-            }
+            if (toolId == "text-to-voice" && toolPolicy.MaxCharsPerRequest != -1 && usageAmountForLimits > toolPolicy.MaxCharsPerRequest)
+                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Your current plan allows a maximum of {toolPolicy.MaxCharsPerRequest} characters per request." };
             
-            if (toolId == "voice-to-text")
-            {
-                if (toolPolicy.MaxFileSizeMb != -1 && usageAmountForLimits > (toolPolicy.MaxFileSizeMb * 1024 * 1024))
-                {
-                    return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"File too large. Maximum allowed size is {toolPolicy.MaxFileSizeMb}MB." };
-                }
-            }
+            if (toolId == "voice-to-text" && toolPolicy.MaxFileSizeMb != -1 && usageAmountForLimits > (toolPolicy.MaxFileSizeMb * 1024 * 1024))
+                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"File too large. Maximum allowed size is {toolPolicy.MaxFileSizeMb}MB." };
 
-            // Cost Calculation
             decimal costPerUnit = toolPolicy.CostPerUnit ?? GetLegacyCostPerUnit(toolId);
             decimal amountForCost = usageAmountForCost ?? usageAmountForLimits;
             
-            // Note: If usageAmountForCost is null, legacy logic applies.
             if (toolId == "voice-to-text" && usageAmountForCost == null)
             {
                 amountForCost = usageAmountForLimits / 102400m; 
@@ -98,13 +87,11 @@ namespace NexClone.Backend.Services
 
             decimal totalCost = amountForCost * costPerUnit;
 
-            // Check credits
             if (user.AvailableCredits < totalCost)
             {
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Insufficient credits. This requires {totalCost:F2} credits." };
             }
 
-            // Deduct
             user.AvailableCredits -= totalCost;
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
@@ -136,7 +123,6 @@ namespace NexClone.Backend.Services
 
         private decimal GetLegacyCostPerUnit(string toolId)
         {
-            // Fallback since legacy credit cost is now part of the Plan.
             return 1m;
         }
 
@@ -150,16 +136,24 @@ namespace NexClone.Backend.Services
             if (user == null) 
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "User not found." };
 
-            if (user.IsStaff) 
-                return new PolicyValidationResult { IsAllowed = true, TotalCost = 0 };
-
+            Plan targetPlan = null;
             var activeSubscription = user.Subscriptions
                 .FirstOrDefault(s => s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow);
 
-            if (activeSubscription == null)
+            if (activeSubscription != null)
+            {
+                targetPlan = activeSubscription.Plan;
+            }
+            else if (user.IsStaff)
+            {
+                targetPlan = await _context.Plans.FirstOrDefaultAsync() ?? new Plan();
+            }
+            else
+            {
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "No active subscription found." };
+            }
 
-            var toolPolicy = GetToolPolicy(activeSubscription.Plan, toolId);
+            var toolPolicy = GetToolPolicy(targetPlan, toolId);
 
             if (!toolPolicy.Enabled)
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Your current plan does not have access to this tool." };
