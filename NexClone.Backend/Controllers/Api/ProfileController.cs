@@ -53,7 +53,20 @@ namespace NexClone.Backend.Controllers.Api
                 return BadRequest(new { Errors = result.Errors });
             }
 
-            return Ok(new { Message = "Profile updated successfully", ImageUrl = user.ImageUrl, FullName = user.FullName });
+            string? presignedUrl = null;
+            if (!string.IsNullOrEmpty(user.ImageUrl))
+            {
+                if (user.ImageUrl.StartsWith("http"))
+                {
+                    presignedUrl = user.ImageUrl;
+                }
+                else
+                {
+                    presignedUrl = await _mediaService.GetFileUrlAsync(user.ImageUrl, "profile");
+                }
+            }
+
+            return Ok(new { Message = "Profile updated successfully", ImageUrl = presignedUrl, FullName = user.FullName });
         }
 
         [HttpPost("change-password")]

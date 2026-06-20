@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using NexClone.Backend.Models;
+using NexClone.Backend.Services;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -20,12 +21,14 @@ namespace NexClone.Backend.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
         private readonly ApplicationDbContext _context;
+        private readonly IMediaService _mediaService;
 
-        public AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration, ApplicationDbContext context)
+        public AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration, ApplicationDbContext context, IMediaService mediaService)
         {
             _userManager = userManager;
             _configuration = configuration;
             _context = context;
+            _mediaService = mediaService;
         }
 
         private static readonly HttpClient _httpClient = new HttpClient();
@@ -232,12 +235,25 @@ namespace NexClone.Backend.Controllers
                 .Include(s => s.Plan)
                 .FirstOrDefaultAsync(s => s.UserId == user.Id && s.Status == "Active" && s.EndDate > DateTime.UtcNow);
 
+            string? imageUrl = null;
+            if (!string.IsNullOrEmpty(user.ImageUrl))
+            {
+                if (user.ImageUrl.StartsWith("http"))
+                {
+                    imageUrl = user.ImageUrl;
+                }
+                else
+                {
+                    imageUrl = await _mediaService.GetFileUrlAsync(user.ImageUrl, "profile");
+                }
+            }
+
             return Ok(new
             {
                 Email = user.Email,
                 FullName = user.FullName,
                 Country = user.Country,
-                ImageUrl = user.ImageUrl,
+                ImageUrl = imageUrl,
                 IsVerified = user.IsVerified,
                 AvailableCredits = user.AvailableCredits,
                 ActivePlan = activeSub != null ? new {
