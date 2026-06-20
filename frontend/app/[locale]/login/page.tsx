@@ -86,7 +86,7 @@ export default function LoginPage() {
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <label className="block text-sm font-medium text-white/70">{t('password')}</label>
-                  <a href="#" className="text-xs text-violet-400 hover:text-violet-300">{t('forgotPassword')}</a>
+                  <Link href="/forgot-password" className="text-xs text-violet-400 hover:text-violet-300">{t('forgotPassword')}</Link>
                 </div>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none rtl:left-auto rtl:right-0 rtl:pr-3">

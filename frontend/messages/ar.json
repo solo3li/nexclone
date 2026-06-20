@@ -370,7 +370,19 @@
     "submitRegister": "تسجيل",
     "noAccount": "ليس لديك حساب؟",
     "haveAccount": "لديك حساب بالفعل؟",
-    "forgotPassword": "نسيت كلمة المرور؟"
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "forgotPasswordDesc": "أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور.",
+    "resetLinkSent": "إذا كان هناك حساب بهذا البريد الإلكتروني، فقد تم إرسال رابط استعادة كلمة المرور. يرجى التحقق من صندوق الوارد.",
+    "backToLogin": "العودة لتسجيل الدخول",
+    "sendResetLink": "إرسال رابط الاستعادة",
+    "resetPasswordTitle": "تعيين كلمة مرور جديدة",
+    "resetPasswordDesc": "أدخل كلمة المرور الجديدة أدناه.",
+    "passwordResetSuccess": "تم إعادة تعيين كلمة المرور بنجاح. سيتم توجيهك لتسجيل الدخول...",
+    "goToLogin": "اذهب لتسجيل الدخول الآن",
+    "newPassword": "كلمة المرور الجديدة",
+    "confirmNewPassword": "تأكيد كلمة المرور الجديدة",
+    "passwordsDoNotMatch": "كلمتا المرور غير متطابقتين.",
+    "submitResetPassword": "تأكيد تغيير كلمة المرور"
   },
   "Profile": {
     "title": "ملفي الشخصي",

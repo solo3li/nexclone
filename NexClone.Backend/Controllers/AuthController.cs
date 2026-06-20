@@ -22,13 +22,15 @@ namespace NexClone.Backend.Controllers
         private readonly IConfiguration _configuration;
         private readonly ApplicationDbContext _context;
         private readonly IMediaService _mediaService;
+        private readonly IEmailService _emailService;
 
-        public AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration, ApplicationDbContext context, IMediaService mediaService)
+        public AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration, ApplicationDbContext context, IMediaService mediaService, IEmailService emailService)
         {
             _userManager = userManager;
             _configuration = configuration;
             _context = context;
             _mediaService = mediaService;
+            _emailService = emailService;
         }
 
         private static readonly HttpClient _httpClient = new HttpClient();
@@ -167,6 +169,66 @@ namespace NexClone.Backend.Controllers
                 Email = user.Email!,
                 IsVerified = user.IsVerified
             });
+        }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user == null || !await _userManager.IsEmailConfirmedAsync(user))
+            {
+                // Return success even if not found to prevent email enumeration attacks
+                return Ok(new { Message = "If an account with this email exists, a password reset link has been sent." });
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            
+            var origin = Request.Headers["Origin"].FirstOrDefault() ?? "http://178.62.192.74:3000";
+            var resetLink = $"{origin}/reset-password?email={Uri.EscapeDataString(request.Email)}&token={Uri.EscapeDataString(token)}";
+
+            string emailHtml = $@"
+<div style='font-family: Arial, sans-serif; background-color: #0a0015; color: #ffffff; padding: 40px; text-align: center; border-radius: 8px;'>
+    <h2 style='color: #8b5cf6;'>إعادة تعيين كلمة المرور</h2>
+    <p style='color: #d1d5db; font-size: 16px; margin-bottom: 30px;'>لقد طلبت إعادة تعيين كلمة المرور الخاصة بحسابك في NexMedia. اضغط على الزر أدناه لاختيار كلمة مرور جديدة.</p>
+    <a href='{resetLink}' style='background-color: #8b5cf6; color: #ffffff; text-decoration: none; padding: 15px 30px; font-size: 16px; font-weight: bold; border-radius: 50px; display: inline-block;'>إعادة تعيين كلمة المرور</a>
+    <p style='color: #9ca3af; font-size: 14px; margin-top: 30px;'>إذا لم تقم بطلب ذلك، يمكنك تجاهل هذه الرسالة.</p>
+</div>
+            ";
+
+            await _emailService.SendEmailAsync(user.Email, user.FullName ?? user.UserName ?? "User", "إعادة تعيين كلمة المرور - NexMedia", emailHtml);
+
+            return Ok(new { Message = "If an account with this email exists, a password reset link has been sent." });
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user == null)
+            {
+                return BadRequest(new { Message = "Invalid request." });
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, request.Token, request.NewPassword);
+
+            if (result.Succeeded)
+            {
+                return Ok(new { Message = "Password has been reset successfully." });
+            }
+
+            var errors = new List<string>();
+            foreach (var error in result.Errors)
+            {
+                errors.Add(error.Description);
+            }
+
+            return BadRequest(new { Errors = errors });
         }
 
         private string GenerateJwtToken(ApplicationUser user)

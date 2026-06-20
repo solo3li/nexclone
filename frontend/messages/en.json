@@ -370,7 +370,19 @@
     "submitRegister": "Create Account",
     "noAccount": "Don\"t have an account?",
     "haveAccount": "Already have an account?",
-    "forgotPassword": "Forgot Password?"
+    "forgotPassword": "Forgot Password?",
+    "forgotPasswordDesc": "Enter your email address and we'll send you a link to reset your password.",
+    "resetLinkSent": "If an account with this email exists, a password reset link has been sent. Please check your inbox.",
+    "backToLogin": "Back to Login",
+    "sendResetLink": "Send Reset Link",
+    "resetPasswordTitle": "Set New Password",
+    "resetPasswordDesc": "Enter your new password below.",
+    "passwordResetSuccess": "Your password has been successfully reset. Redirecting to login...",
+    "goToLogin": "Go to Login Now",
+    "newPassword": "New Password",
+    "confirmNewPassword": "Confirm New Password",
+    "passwordsDoNotMatch": "Passwords do not match.",
+    "submitResetPassword": "Reset Password"
   },
   "Profile": {
     "title": "My Profile",
