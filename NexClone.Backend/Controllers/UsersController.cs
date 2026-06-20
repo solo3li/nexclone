@@ -17,14 +17,35 @@ namespace NexClone.Backend.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString, int? planId)
         {
-            var users = await _context.Users
+            var query = _context.Users
                 .Include(u => u.Subscriptions.Where(s => s.Status == "active"))
                     .ThenInclude(s => s.Plan)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                searchString = searchString.ToLower();
+                query = query.Where(u => 
+                    u.Email.ToLower().Contains(searchString) || 
+                    u.PhoneNumber.Contains(searchString) || 
+                    u.Id.ToString().Contains(searchString));
+            }
+
+            if (planId.HasValue)
+            {
+                query = query.Where(u => u.Subscriptions.Any(s => s.Status == "active" && s.PlanId == planId.Value));
+            }
+
+            var users = await query
                 .OrderByDescending(u => u.CreatedAt)
                 .Take(100)
                 .ToListAsync();
+
+            ViewBag.Plans = new SelectList(await _context.Plans.ToListAsync(), "Id", "Name");
+            ViewBag.CurrentSearch = searchString;
+            ViewBag.CurrentPlanId = planId;
 
             return View(users);
         }

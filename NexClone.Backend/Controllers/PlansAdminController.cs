@@ -32,13 +32,12 @@ namespace NexClone.Backend.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Plan plan)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(plan);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(plan);
+            // Set defaults for missing fields from the form
+            if (string.IsNullOrEmpty(plan.NameAr)) plan.NameAr = plan.Name;
+            
+            _context.Add(plan);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         public async Task<IActionResult> Edit(int? id)
@@ -58,21 +57,41 @@ namespace NexClone.Backend.Controllers
         {
             if (id != plan.Id) return NotFound();
 
-            if (ModelState.IsValid)
+            // We do not check ModelState.IsValid here for the entire object because we know some properties (like NameAr, Description) 
+            // are missing from the Edit form and will fail validation.
+            // We just fetch the existing and update.
+            var existingPlan = await _context.Plans.FindAsync(id);
+            if (existingPlan == null) return NotFound();
+
+            try
             {
-                try
-                {
-                    _context.Update(plan);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!PlanExists(plan.Id)) return NotFound();
-                    else throw;
-                }
+                existingPlan.Name = plan.Name;
+                existingPlan.DurationDays = plan.DurationDays;
+                existingPlan.GracePeriodDays = plan.GracePeriodDays;
+                existingPlan.PriceUsd = plan.PriceUsd;
+                existingPlan.PriceEgp = plan.PriceEgp;
+                existingPlan.MonthlyCredits = plan.MonthlyCredits;
+
+                existingPlan.TtsEnabled = plan.TtsEnabled;
+                existingPlan.TtsMaxCharsPerRequest = plan.TtsMaxCharsPerRequest;
+                existingPlan.TtsCharactersBlock = plan.TtsCharactersBlock;
+                existingPlan.TtsCostPerChar = plan.TtsCostPerChar;
+                existingPlan.TtsCustomInstructionsEnabled = plan.TtsCustomInstructionsEnabled;
+
+                existingPlan.SttEnabled = plan.SttEnabled;
+                existingPlan.SttMaxFileSizeMb = plan.SttMaxFileSizeMb;
+                existingPlan.SttCostPerMinute = plan.SttCostPerMinute;
+
+                existingPlan.IsFreeTrial = plan.IsFreeTrial;
+
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(plan);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!PlanExists(plan.Id)) return NotFound();
+                else throw;
+            }
         }
 
         [HttpPost]

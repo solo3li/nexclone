@@ -17,6 +17,7 @@ namespace NexClone.Backend.Controllers
         {
             var subscriptions = await _context.Subscriptions
                 .Include(s => s.Plan)
+                .Include(s => s.User)
                 .OrderByDescending(s => s.CreatedAt)
                 .ToListAsync();
             return View(subscriptions);
