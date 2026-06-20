@@ -58,7 +58,27 @@ namespace NexClone.Backend.Areas.AI.Controllers
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
-            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "voice-to-text", audioData.Length);
+            double audioDurationMinutes = 1.0;
+            try
+            {
+                var tempFile = System.IO.Path.GetTempFileName();
+                System.IO.File.WriteAllBytes(tempFile, audioData);
+                using (var tfile = TagLib.File.Create(tempFile))
+                {
+                    audioDurationMinutes = tfile.Properties.Duration.TotalMinutes;
+                }
+                System.IO.File.Delete(tempFile);
+                
+                // Ensure at least 0.01 minutes
+                if (audioDurationMinutes <= 0) audioDurationMinutes = 0.01;
+            }
+            catch (Exception)
+            {
+                // Fallback if audio format is unrecognized or invalid
+                audioDurationMinutes = 1.0;
+            }
+
+            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "voice-to-text", audioData.Length, (decimal)audioDurationMinutes);
             if (!policyResult.IsAllowed)
                 return BadRequest(new { error = policyResult.ErrorMessage });
 

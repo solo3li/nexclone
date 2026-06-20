@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Lm3u1JLmD14=",
+  "dgSpecHash": "5NFV3DMzV0E=",
   "success": true,
-  "projectFilePath": "/app/NexClone.Backend.csproj",
+  "projectFilePath": "/src/NexClone.Backend.csproj",
   "expectedPackageFiles": [
     "/root/.nuget/packages/communitytoolkit.highperformance/8.4.0/communitytoolkit.highperformance.8.4.0.nupkg.sha512",
     "/root/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",
@@ -56,7 +56,8 @@
     "/root/.nuget/packages/system.composition.typedparts/9.0.0/system.composition.typedparts.9.0.0.nupkg.sha512",
     "/root/.nuget/packages/system.identitymodel.tokens.jwt/8.0.1/system.identitymodel.tokens.jwt.8.0.1.nupkg.sha512",
     "/root/.nuget/packages/system.io.hashing/10.0.2/system.io.hashing.10.0.2.nupkg.sha512",
-    "/root/.nuget/packages/system.reactive/6.0.1/system.reactive.6.0.1.nupkg.sha512"
+    "/root/.nuget/packages/system.reactive/6.0.1/system.reactive.6.0.1.nupkg.sha512",
+    "/root/.nuget/packages/taglibsharp/2.3.0/taglibsharp.2.3.0.nupkg.sha512"
   ],
   "logs": []
 }

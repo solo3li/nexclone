@@ -39,7 +39,7 @@ namespace NexClone.Backend.Services
         /// Validates limits and deducts credits in one go.
         /// usageAmount: for text-to-voice this is character count, for voice-to-text this is file size in bytes.
         /// </summary>
-        public async Task<PolicyValidationResult> ValidateAndChargeAsync(Guid userId, string toolId, decimal usageAmount)
+        public async Task<PolicyValidationResult> ValidateAndChargeAsync(Guid userId, string toolId, decimal usageAmountForLimits, decimal? usageAmountForCost = null)
         {
             var user = await _context.Users
                 .Include(u => u.Subscriptions)
@@ -69,7 +69,7 @@ namespace NexClone.Backend.Services
             // Specific limits check
             if (toolId == "text-to-voice")
             {
-                if (toolPolicy.MaxCharsPerRequest != -1 && usageAmount > toolPolicy.MaxCharsPerRequest)
+                if (toolPolicy.MaxCharsPerRequest != -1 && usageAmountForLimits > toolPolicy.MaxCharsPerRequest)
                 {
                     return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Your current plan allows a maximum of {toolPolicy.MaxCharsPerRequest} characters per request." };
                 }
@@ -77,7 +77,7 @@ namespace NexClone.Backend.Services
             
             if (toolId == "voice-to-text")
             {
-                if (toolPolicy.MaxFileSizeMb != -1 && usageAmount > (toolPolicy.MaxFileSizeMb * 1024 * 1024))
+                if (toolPolicy.MaxFileSizeMb != -1 && usageAmountForLimits > (toolPolicy.MaxFileSizeMb * 1024 * 1024))
                 {
                     return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"File too large. Maximum allowed size is {toolPolicy.MaxFileSizeMb}MB." };
                 }
@@ -85,12 +85,12 @@ namespace NexClone.Backend.Services
 
             // Cost Calculation
             decimal costPerUnit = toolPolicy.CostPerUnit ?? GetLegacyCostPerUnit(toolId);
-            decimal amountForCost = usageAmount;
+            decimal amountForCost = usageAmountForCost ?? usageAmountForLimits;
             
-            // Legacy scaling for voice-to-text was 1 credit per 100KB
-            if (toolId == "voice-to-text")
+            // Note: If usageAmountForCost is null, legacy logic applies.
+            if (toolId == "voice-to-text" && usageAmountForCost == null)
             {
-                amountForCost = usageAmount / 102400m; 
+                amountForCost = usageAmountForLimits / 102400m; 
             }
 
             decimal totalCost = amountForCost * costPerUnit;
@@ -124,7 +124,7 @@ namespace NexClone.Backend.Services
             {
                 policy.Enabled = plan.SttEnabled;
                 policy.MaxFileSizeMb = plan.SttMaxFileSizeMb;
-                policy.CostPerUnit = plan.SttCostPer100Kb;
+                policy.CostPerUnit = plan.SttCostPerMinute;
             }
 
             return policy;

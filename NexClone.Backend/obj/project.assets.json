@@ -1066,6 +1066,19 @@
         "build": {
           "buildTransitive/net6.0/_._": {}
         }
+      },
+      "TagLibSharp/2.3.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/TagLibSharp.dll": {
+            "related": ".pdb"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/TagLibSharp.dll": {
+            "related": ".pdb"
+          }
+        }
       }
     }
   },
@@ -3157,6 +3170,21 @@
         "system.reactive.6.0.1.nupkg.sha512",
         "system.reactive.nuspec"
       ]
+    },
+    "TagLibSharp/2.3.0": {
+      "sha512": "Qo4z6ZjnIfbR3Us1Za5M2vQ97OWZPmODvVmepxZ8XW0UIVLGdO2T63/N3b23kCcyiwuIe0TQvMEQG8wUCCD1mA==",
+      "type": "package",
+      "path": "taglibsharp/2.3.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net462/TagLibSharp.dll",
+        "lib/net462/TagLibSharp.pdb",
+        "lib/netstandard2.0/TagLibSharp.dll",
+        "lib/netstandard2.0/TagLibSharp.pdb",
+        "taglibsharp.2.3.0.nupkg.sha512",
+        "taglibsharp.nuspec"
+      ]
     }
   },
   "projectFileDependencyGroups": {
@@ -3170,7 +3198,8 @@
       "Scalar.AspNetCore >= 1.2.*",
       "Serilog.AspNetCore >= 10.0.0",
       "Serilog.Sinks.File >= 7.0.0",
-      "StackExchange.Redis >= 2.13.17"
+      "StackExchange.Redis >= 2.13.17",
+      "TagLibSharp >= 2.3.0"
     ]
   },
   "packageFolders": {
@@ -3179,11 +3208,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/app/NexClone.Backend.csproj",
+      "projectUniqueName": "/src/NexClone.Backend.csproj",
       "projectName": "NexClone.Backend",
-      "projectPath": "/app/NexClone.Backend.csproj",
+      "projectPath": "/src/NexClone.Backend.csproj",
       "packagesPath": "/root/.nuget/packages/",
-      "outputPath": "/app/obj/",
+      "outputPath": "/src/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/root/.nuget/NuGet/NuGet.Config"
@@ -3259,6 +3288,10 @@
           "StackExchange.Redis": {
             "target": "Package",
             "version": "[2.13.17, )"
+          },
+          "TagLibSharp": {
+            "target": "Package",
+            "version": "[2.3.0, )"
           }
         },
         "imports": [

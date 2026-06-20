@@ -20,6 +20,7 @@
     <PackageReference Include="Minio" Version="6.0.*" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
     <PackageReference Include="Scalar.AspNetCore" Version="1.2.*" />
+    <PackageReference Include="TagLibSharp" Version="2.3.0" />
   </ItemGroup>
 
 </Project>

@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/app/NexClone.Backend.csproj": {}
+    "/src/NexClone.Backend.csproj": {}
   },
   "projects": {
-    "/app/NexClone.Backend.csproj": {
+    "/src/NexClone.Backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/app/NexClone.Backend.csproj",
+        "projectUniqueName": "/src/NexClone.Backend.csproj",
         "projectName": "NexClone.Backend",
-        "projectPath": "/app/NexClone.Backend.csproj",
+        "projectPath": "/src/NexClone.Backend.csproj",
         "packagesPath": "/root/.nuget/packages/",
-        "outputPath": "/app/obj/",
+        "outputPath": "/src/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/root/.nuget/NuGet/NuGet.Config"
@@ -87,6 +87,10 @@
             "StackExchange.Redis": {
               "target": "Package",
               "version": "[2.13.17, )"
+            },
+            "TagLibSharp": {
+              "target": "Package",
+              "version": "[2.3.0, )"
             }
           },
           "imports": [

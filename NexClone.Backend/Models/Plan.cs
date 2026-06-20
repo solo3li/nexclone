@@ -30,7 +30,7 @@ namespace NexClone.Backend.Models
         // Voice-To-Text (STT) Settings
         public bool SttEnabled { get; set; } = true;
         public int SttMaxFileSizeMb { get; set; } = 25;
-        public decimal SttCostPer100Kb { get; set; } = 1.0m;
+        public decimal SttCostPerMinute { get; set; } = 1.0m;
 
         // Free Trial Flag
         public bool IsFreeTrial { get; set; } = false;
