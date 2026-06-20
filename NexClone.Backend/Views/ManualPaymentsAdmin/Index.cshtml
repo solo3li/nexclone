@@ -1,0 +1,62 @@
+@model IEnumerable<NexClone.Backend.Models.Payment>
+
+@{
+    ViewData["Title"] = "Pending Manual Payments";
+}
+
+<div class="bx--data-table-container">
+    <div class="bx--data-table-header">
+        <h4 class="bx--data-table-header__title">@ViewData["Title"]</h4>
+        <p class="bx--data-table-header__description">Review and approve or reject manual bank/wallet transfers.</p>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info mt-3">No pending payments at this time.</div>
+    }
+    else
+    {
+        <table class="bx--data-table">
+            <thead>
+                <tr>
+                    <th>User Email</th>
+                    <th>Plan</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Receipt</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var payment in Model)
+                {
+                    <tr>
+                        <td>@payment.User?.Email</td>
+                        <td>@payment.Plan?.Name</td>
+                        <td>@payment.Amount @payment.Currency</td>
+                        <td>@payment.CreatedAt.ToString("g")</td>
+                        <td>
+                            <a href="@payment.ReceiptUrl" target="_blank" class="bx--btn bx--btn--sm bx--btn--ghost">
+                                <i class='bx bx-search'></i> View
+                            </a>
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 8px;">
+                                <form method="post" asp-action="Approve" asp-route-id="@payment.Id">
+                                    <button type="submit" class="bx--btn bx--btn--sm bx--btn--primary" style="background-color: #24a148;">
+                                        Approve
+                                    </button>
+                                </form>
+                                <form method="post" asp-action="Reject" asp-route-id="@payment.Id">
+                                    <button type="submit" class="bx--btn bx--btn--sm bx--btn--danger" style="background-color: #da1e28;">
+                                        Reject
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
