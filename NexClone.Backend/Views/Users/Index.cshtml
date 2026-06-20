@@ -26,6 +26,7 @@
                             <th><span class="bx--table-header-label">Email</span></th>
                             <th><span class="bx--table-header-label">Country</span></th>
                             <th><span class="bx--table-header-label">Credits</span></th>
+                            <th><span class="bx--table-header-label">Current Plan</span></th>
                             <th><span class="bx--table-header-label">Role</span></th>
                             <th><span class="bx--table-header-label">Joined</span></th>
                             <th><span class="bx--table-header-label">Actions</span></th>
@@ -35,7 +36,7 @@
                         @if (!Model.Any())
                         {
                             <tr>
-                                <td colspan="6" style="text-align: center; padding: 2rem;">
+                                <td colspan="7" style="text-align: center; padding: 2rem;">
                                     <p class="bx--type-productive-heading-03">No users found in the database.</p>
                                 </td>
                             </tr>
@@ -44,10 +45,21 @@
                         {
                             foreach (var user in Model)
                             {
+                                var currentSub = user.Subscriptions?.FirstOrDefault(s => s.Status == "active");
                                 <tr>
                                     <td>@user.Email</td>
                                     <td>@user.Country</td>
                                     <td>@user.AvailableCredits</td>
+                                    <td>
+                                        @if (currentSub?.Plan != null)
+                                        {
+                                            <span class="bx--tag bx--tag--green">@currentSub.Plan.Name</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="bx--tag bx--tag--gray">None</span>
+                                        }
+                                    </td>
                                     <td>
                                         @if (user.IsStaff)
                                         {
@@ -60,7 +72,7 @@
                                     </td>
                                     <td>@user.CreatedAt.ToString("MMM dd, yyyy")</td>
                                     <td>
-                                        <a href="@Url.Action("AssignPlan", new { id = user.Id })" class="bx--btn bx--btn--primary bx--btn--sm">Assign Plan</a>
+                                        <a href="@Url.Action("Details", new { id = user.Id })" class="bx--btn bx--btn--ghost bx--btn--sm">View Details</a>
                                     </td>
                                 </tr>
                             }

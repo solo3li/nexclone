@@ -20,6 +20,8 @@ namespace NexClone.Backend.Controllers
         public async Task<IActionResult> Index()
         {
             var users = await _context.Users
+                .Include(u => u.Subscriptions.Where(s => s.Status == "active"))
+                    .ThenInclude(s => s.Plan)
                 .OrderByDescending(u => u.CreatedAt)
                 .Take(100)
                 .ToListAsync();
@@ -27,12 +29,16 @@ namespace NexClone.Backend.Controllers
             return View(users);
         }
 
-        public async Task<IActionResult> AssignPlan(Guid id)
+        public async Task<IActionResult> Details(Guid id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _context.Users
+                .Include(u => u.Subscriptions)
+                    .ThenInclude(s => s.Plan)
+                .FirstOrDefaultAsync(u => u.Id == id);
+                
             if (user == null) return NotFound();
 
-            ViewData["Title"] = $"Assign Plan to {user.Email}";
+            ViewData["Title"] = $"User Details - {user.Email}";
             ViewBag.Plans = new SelectList(await _context.Plans.ToListAsync(), "Id", "Name");
             return View(user);
         }
@@ -73,7 +79,7 @@ namespace NexClone.Backend.Controllers
 
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Details), new { id = userId });
         }
 
         [HttpGet("seed")]
