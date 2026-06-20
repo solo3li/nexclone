@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using NexClone.Backend.Models;
 using NexClone.Backend.Services;
 using NexClone.Backend.Services.AI;
@@ -14,20 +15,20 @@ namespace NexClone.Backend.Areas.AI.Controllers
     [Route("api/ai/voice-to-text")]
     [ApiController]
     [Authorize] // Requires JWT
+    [EnableRateLimiting("ApiPolicy")]
     public class VoiceToTextController : ControllerBase
     {
         private readonly ISttService _sttService;
         private readonly ApplicationDbContext _dbContext;
-        private readonly CreditManagerService _creditManager;
-        private const long MaxFileSize = 25 * 1024 * 1024; // 25 MB
+        private readonly UsagePolicyService _usagePolicy;
 
         private readonly IMediaService _mediaService;
 
-        public VoiceToTextController(ISttService sttService, ApplicationDbContext dbContext, CreditManagerService creditManager, IMediaService mediaService)
+        public VoiceToTextController(ISttService sttService, ApplicationDbContext dbContext, UsagePolicyService usagePolicy, IMediaService mediaService)
         {
             _sttService = sttService;
             _dbContext = dbContext;
-            _creditManager = creditManager;
+            _usagePolicy = usagePolicy;
             _mediaService = mediaService;
         }
 
@@ -54,25 +55,14 @@ namespace NexClone.Backend.Areas.AI.Controllers
                 return BadRequest(new { error = "Could not retrieve file from storage", details = ex.Message });
             }
 
-            if (audioData.Length > MaxFileSize)
-            {
-                return BadRequest(new { 
-                    error = $"File too large. Maximum allowed size is {MaxFileSize / (1024 * 1024)}MB. Please compress your file or upload a smaller one." 
-                });
-            }
-
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
-            if (!await _creditManager.IsToolAllowedForUser(userId, "voice-to-text"))
-                return StatusCode(403, new { error = "Your current plan does not have access to this tool." });
+            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "voice-to-text", audioData.Length);
+            if (!policyResult.IsAllowed)
+                return BadRequest(new { error = policyResult.ErrorMessage });
 
-            // Charge 1 credit per 100KB of audio
-            decimal amount = (decimal)audioData.Length / 102400m;
-            var cost = _creditManager.CalculateCost("voice-to-text", amount);
-            
-            if (!await _creditManager.HasEnoughCredits(userId, "voice-to-text", cost))
-                return BadRequest(new { error = $"Insufficient credits. Transcribing this audio requires {cost:F2} credits." });
+            var cost = policyResult.TotalCost;
 
             try
             {
@@ -95,7 +85,6 @@ namespace NexClone.Backend.Areas.AI.Controllers
                     CreditsUsed = cost
                 };
                 _dbContext.GenerationHistories.Add(history);
-                await _creditManager.DeductCreditsAsync(userId, cost);
                 await _dbContext.SaveChangesAsync();
 
                 return Ok(new

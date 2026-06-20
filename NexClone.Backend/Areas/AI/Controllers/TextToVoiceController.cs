@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using NexClone.Backend.Models;
 using NexClone.Backend.Services;
@@ -16,20 +17,21 @@ namespace NexClone.Backend.Areas.AI.Controllers
     [Route("api/ai/text-to-voice")]
     [ApiController]
     [Authorize] // Requires JWT
+    [EnableRateLimiting("ApiPolicy")]
     public class TextToVoiceController : ControllerBase
     {
         private readonly ITtsService _ttsService;
         private readonly ApplicationDbContext _dbContext;
         private readonly IWebHostEnvironment _env;
-        private readonly CreditManagerService _creditManager;
+        private readonly UsagePolicyService _usagePolicy;
         private readonly IMediaService _mediaService;
 
-        public TextToVoiceController(ITtsService ttsService, ApplicationDbContext dbContext, IWebHostEnvironment env, CreditManagerService creditManager, IMediaService mediaService)
+        public TextToVoiceController(ITtsService ttsService, ApplicationDbContext dbContext, IWebHostEnvironment env, UsagePolicyService usagePolicy, IMediaService mediaService)
         {
             _ttsService = ttsService;
             _dbContext = dbContext;
             _env = env;
-            _creditManager = creditManager;
+            _usagePolicy = usagePolicy;
             _mediaService = mediaService;
         }
 
@@ -42,43 +44,11 @@ namespace NexClone.Backend.Areas.AI.Controllers
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
-            if (!await _creditManager.IsToolAllowedForUser(userId, "text-to-voice"))
-                return StatusCode(403, new { error = "Your current plan does not have access to this tool." });
+            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "text-to-voice", request.Text.Length);
+            if (!policyResult.IsAllowed)
+                return BadRequest(new { error = policyResult.ErrorMessage });
 
-            var cost = _creditManager.CalculateCost("text-to-voice", request.Text.Length);
-            if (!await _creditManager.HasEnoughCredits(userId, "text-to-voice", cost))
-                return BadRequest(new { error = $"Insufficient credits. Generating this audio requires {cost} credits." });
-
-            var activeSubscription = await _dbContext.Subscriptions
-                .Include(s => s.Plan)
-                .Where(s => s.UserId == userId && s.Status == "active")
-                .OrderByDescending(s => s.EndDate)
-                .FirstOrDefaultAsync();
-
-            int maxChars = 150; // Default limit
-            bool unlimited = false;
-
-            if (activeSubscription?.Plan != null && !string.IsNullOrEmpty(activeSubscription.Plan.AllowedTools))
-            {
-                try
-                {
-                    if (activeSubscription.Plan.AllowedTools.Trim().StartsWith("{"))
-                    {
-                        using var doc = System.Text.Json.JsonDocument.Parse(activeSubscription.Plan.AllowedTools);
-                        if (doc.RootElement.TryGetProperty("text-to-voice", out var limitElement) && limitElement.TryGetInt32(out int limit))
-                        {
-                            if (limit == -1) unlimited = true;
-                            else if (limit > 0) maxChars = limit;
-                        }
-                    }
-                }
-                catch { }
-            }
-
-            if (!unlimited && request.Text.Length > maxChars)
-            {
-                return BadRequest(new { error = $"Your current plan allows a maximum of {maxChars} characters per request." });
-            }
+            var cost = policyResult.TotalCost;
 
             try
             {
@@ -109,7 +79,6 @@ namespace NexClone.Backend.Areas.AI.Controllers
                     CreditsUsed = cost
                 };
                 _dbContext.GenerationHistories.Add(history);
-                await _creditManager.DeductCreditsAsync(userId, cost);
                 await _dbContext.SaveChangesAsync();
 
                 // Return a JSON response with the presigned URL so the frontend can play it directly

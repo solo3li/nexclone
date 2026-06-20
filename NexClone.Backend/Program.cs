@@ -8,6 +8,8 @@ using System;
 using System.Text;
 using Minio;
 using Scalar.AspNetCore;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -122,6 +124,22 @@ builder.Services.AddScoped<NexClone.Backend.Services.Payments.IPaymentService, N
 // Register Credit Manager
 builder.Services.AddScoped<NexClone.Backend.Services.CreditManagerService>();
 
+// Register Usage Policy Service
+builder.Services.AddScoped<NexClone.Backend.Services.UsagePolicyService>();
+
+// Add Rate Limiting
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddFixedWindowLimiter("ApiPolicy", opt =>
+    {
+        opt.PermitLimit = 5;
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = 0;
+    });
+});
+
 // Add Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
@@ -140,6 +158,7 @@ app.MapScalarApiReference();
 
 app.UseHttpsRedirection();
 app.UseRouting();
+app.UseRateLimiter();
 
 app.UseCors("AllowNextjs");
 
