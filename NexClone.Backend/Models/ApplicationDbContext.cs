@@ -23,6 +23,7 @@ namespace NexClone.Backend.Models
         public DbSet<ManualPaymentMethod> ManualPaymentMethods { get; set; } = null!;
         public DbSet<DeviceFingerprint> DeviceFingerprints { get; set; } = null!;
         public DbSet<ToolConfiguration> ToolConfigurations { get; set; } = null!;
+        public DbSet<EmailTemplate> EmailTemplates { get; set; } = null!;
 
         // TTS Lookups
         public DbSet<Voice> Voices { get; set; } = null!;

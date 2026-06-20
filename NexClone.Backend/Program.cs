@@ -116,6 +116,9 @@ builder.Services.AddSingleton<IMinioClient>(sp =>
 // Register Media Service
 builder.Services.AddScoped<NexClone.Backend.Services.IMediaService, NexClone.Backend.Services.MinioMediaService>();
 
+// Register Email Service
+builder.Services.AddScoped<NexClone.Backend.Services.IEmailService, NexClone.Backend.Services.BrevoEmailService>();
+
 // Register Payment Service
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<NexClone.Backend.Services.Payments.IPaymentService, NexClone.Backend.Services.Payments.PaymobPaymentService>();
