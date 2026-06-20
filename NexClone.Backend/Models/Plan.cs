@@ -39,6 +39,7 @@ namespace NexClone.Backend.Models
         public int TtsMaxCharsPerRequest { get; set; } = 3000;
         public int TtsCharactersBlock { get; set; } = 1;
         public decimal TtsCostPerChar { get; set; } = 0.001m;
+        public bool TtsCustomInstructionsEnabled { get; set; } = false;
 
         // Voice-To-Text (STT) Settings
         public bool SttEnabled { get; set; } = true;

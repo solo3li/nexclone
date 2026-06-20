@@ -3208,11 +3208,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/app/NexClone.Backend/NexClone.Backend.csproj",
+      "projectUniqueName": "/src/NexClone.Backend/NexClone.Backend.csproj",
       "projectName": "NexClone.Backend",
-      "projectPath": "/app/NexClone.Backend/NexClone.Backend.csproj",
+      "projectPath": "/src/NexClone.Backend/NexClone.Backend.csproj",
       "packagesPath": "/root/.nuget/packages/",
-      "outputPath": "/app/NexClone.Backend/obj/",
+      "outputPath": "/src/NexClone.Backend/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/root/.nuget/NuGet/NuGet.Config"

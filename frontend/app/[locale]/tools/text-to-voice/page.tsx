@@ -54,6 +54,8 @@ export default function TextToVoicePage() {
   const [isEstimating, setIsEstimating] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingCost, setPendingCost] = useState<number | null>(null);
+  const [customInstructionsEnabled, setCustomInstructionsEnabled] = useState(false);
+  const [customInstruction, setCustomInstruction] = useState("");
 
   const currentlyPlayingRef = useRef<HTMLAudioElement | null>(null);
   
@@ -78,12 +80,13 @@ export default function TextToVoicePage() {
           api.get("/api/platform/dialects"),
           api.get("/api/platform/emotions"),
           api.get("/api/platform/styles"),
-          api.get("/api/platform/tts-config").catch(() => ({ data: { maxChars: 150 } }))
+          api.get("/api/platform/tts-config").catch(() => ({ data: { maxChars: 150, customInstructionsEnabled: false } }))
         ]);
         setDialects(dialectsRes.data);
         setEmotions(emotionsRes.data);
         setStyles(stylesRes.data);
         setMaxChars(configRes.data.maxChars || 150);
+        setCustomInstructionsEnabled(configRes.data.customInstructionsEnabled || false);
       } catch (error) {
         console.error("Failed to load options:", error);
       }
@@ -133,6 +136,7 @@ export default function TextToVoicePage() {
     if (selectedDialect) instruction += `Accent: ${selectedDialect}. `;
     if (selectedEmotion) instruction += `Emotion: ${selectedEmotion}. `;
     if (selectedStyle) instruction += `Style: ${selectedStyle}. `;
+    if (customInstruction) instruction += `Additional Context: ${customInstruction}. `;
 
     try {
       const response = await api.post("/api/ai/text-to-voice/generate", {
@@ -500,10 +504,19 @@ export default function TextToVoicePage() {
                       <Wand2 className="w-3 h-3 text-fuchsia-400" />
                       {t('customInstructions')}
                     </label>
-                    <div className="flex flex-col items-center justify-center bg-[#0a0015]/60 border border-fuchsia-500/20 rounded-[16px] px-4 py-4 text-sm text-fuchsia-400/80 cursor-not-allowed hover:bg-fuchsia-500/5 transition-colors">
-                      <Lock className="w-4 h-4 mb-1.5 opacity-60" />
-                      <span className="text-[9px] uppercase font-bold tracking-widest">{t('premium')}</span>
-                    </div>
+                    {customInstructionsEnabled ? (
+                      <textarea
+                        value={customInstruction}
+                        onChange={(e) => setCustomInstruction(e.target.value)}
+                        placeholder={t('customInstructionsPlaceholder') || "Enter custom voice directions..."}
+                        className="w-full bg-[#0a0015]/60 border border-white/5 rounded-[16px] px-4 py-3 text-white text-xs focus:outline-none focus:border-fuchsia-500/50 transition-colors resize-none h-20 placeholder:text-white/30"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center bg-[#0a0015]/60 border border-fuchsia-500/20 rounded-[16px] px-4 py-4 text-sm text-fuchsia-400/80 cursor-not-allowed hover:bg-fuchsia-500/5 transition-colors">
+                        <Lock className="w-4 h-4 mb-1.5 opacity-60" />
+                        <span className="text-[9px] uppercase font-bold tracking-widest">{t('premium')}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 

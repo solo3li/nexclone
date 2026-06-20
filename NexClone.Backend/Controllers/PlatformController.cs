@@ -97,26 +97,37 @@ namespace NexClone.Backend.Controllers
         public async Task<IActionResult> GetTtsConfig()
         {
             int maxChars = 150; // Default
+            bool customInstructionsEnabled = false;
 
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
                 var userIdStr = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
                 if (Guid.TryParse(userIdStr, out var userId))
                 {
+                    var user = await _context.Users.FindAsync(userId);
+                    if (user != null && user.IsStaff)
+                    {
+                        // Staff gets maximum features by default or we can check the db
+                        maxChars = 10000;
+                        customInstructionsEnabled = true;
+                    }
+
                     var activeSubscription = await _context.Subscriptions
                         .Include(s => s.Plan)
-                        .Where(s => s.UserId == userId && s.Status == "active")
+                        .Where(s => s.UserId == userId && s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow)
                         .OrderByDescending(s => s.EndDate)
                         .FirstOrDefaultAsync();
 
                     if (activeSubscription?.Plan != null)
                     {
+                        // If they have a plan, it overrides defaults, even for staff (so staff can test limits)
                         maxChars = activeSubscription.Plan.TtsMaxCharsPerRequest;
+                        customInstructionsEnabled = activeSubscription.Plan.TtsCustomInstructionsEnabled;
                     }
                 }
             }
 
-            return Ok(new { maxChars = maxChars });
+            return Ok(new { maxChars = maxChars, customInstructionsEnabled = customInstructionsEnabled });
         }
     }
 }

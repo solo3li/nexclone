@@ -256,11 +256,13 @@ namespace NexClone.Backend.Controllers
                 ImageUrl = imageUrl,
                 IsVerified = user.IsVerified,
                 AvailableCredits = user.AvailableCredits,
+                IsStaff = user.IsStaff,
                 ActivePlan = activeSub != null ? new {
                     Name = activeSub.Plan.Name,
                     NameAr = activeSub.Plan.NameAr,
                     Status = activeSub.Status,
-                    EndDate = activeSub.EndDate
+                    EndDate = activeSub.EndDate,
+                    TtsCustomInstructionsEnabled = activeSub.Plan.TtsCustomInstructionsEnabled
                 } : null
             });
         }
