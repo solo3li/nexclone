@@ -178,7 +178,7 @@ namespace NexClone.Backend.Controllers
                 return BadRequest(ModelState);
 
             var user = await _userManager.FindByEmailAsync(request.Email);
-            if (user == null || !await _userManager.IsEmailConfirmedAsync(user))
+            if (user == null)
             {
                 // Return success even if not found to prevent email enumeration attacks
                 return Ok(new { Message = "If an account with this email exists, a password reset link has been sent." });
