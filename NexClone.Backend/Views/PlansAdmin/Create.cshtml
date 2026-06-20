@@ -59,7 +59,7 @@
                                     <input type="checkbox" id="tool_@tool.Id" name="SelectedTools" value="@tool.Name" class="bx--checkbox" style="cursor: pointer;" onchange="document.getElementById('limit_@tool.Id').style.display = this.checked ? 'block' : 'none';" />
                                     <label for="tool_@tool.Id" class="bx--checkbox-label" style="cursor: pointer; margin: 0; font-size: 0.875rem;">@tool.Name</label>
                                 </div>
-                                <input type="number" id="limit_@tool.Id" name="ToolLimits[@tool.Name]" value="-1" class="bx--text-input" style="width: 100px; display: none;" placeholder="Limit (-1 for unlim)" />
+                                <input type="number" id="limit_@tool.Id" name="ToolLimits[@tool.Name]" value="-1" class="bx--text-input" style="width: 120px; display: none;" placeholder="Limit per operation (-1 unlim)" />
                             </div>
                         }
                     }

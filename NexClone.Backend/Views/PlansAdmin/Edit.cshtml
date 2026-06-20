@@ -77,7 +77,7 @@
                                     <input type="checkbox" id="tool_@tool.Id" name="SelectedTools" value="@tool.Name" class="bx--checkbox" @isChecked style="cursor: pointer;" onchange="document.getElementById('limit_@tool.Id').style.display = this.checked ? 'block' : 'none';" />
                                     <label for="tool_@tool.Id" class="bx--checkbox-label" style="cursor: pointer; margin: 0; font-size: 0.875rem;">@tool.Name</label>
                                 </div>
-                                <input type="number" id="limit_@tool.Id" name="ToolLimits[@tool.Name]" value="@limitVal" class="bx--text-input" style="width: 100px; display: @(isChecked == "checked" ? "block" : "none");" placeholder="Limit (-1 for unlim)" />
+                                <input type="number" id="limit_@tool.Id" name="ToolLimits[@tool.Name]" value="@limitVal" class="bx--text-input" style="width: 120px; display: @(isChecked == "checked" ? "block" : "none");" placeholder="Limit per operation (-1 unlim)" />
                             </div>
                         }
                     }
