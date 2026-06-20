@@ -215,13 +215,24 @@ namespace NexClone.Backend.Controllers
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) return Unauthorized();
 
+            var activeSub = await _context.Subscriptions
+                .Include(s => s.Plan)
+                .FirstOrDefaultAsync(s => s.UserId == user.Id && s.Status == "Active" && s.EndDate > DateTime.UtcNow);
+
             return Ok(new
             {
                 Email = user.Email,
                 FullName = user.FullName,
                 Country = user.Country,
                 ImageUrl = user.ImageUrl,
-                IsVerified = user.IsVerified
+                IsVerified = user.IsVerified,
+                AvailableCredits = user.AvailableCredits,
+                ActivePlan = activeSub != null ? new {
+                    Name = activeSub.Plan.Name,
+                    NameAr = activeSub.Plan.NameAr,
+                    Status = activeSub.Status,
+                    EndDate = activeSub.EndDate
+                } : null
             });
         }
     }

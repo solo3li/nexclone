@@ -12,6 +12,7 @@ import {
   Clock, Zap, AlertCircle
 } from "lucide-react";
 import api from "../../../src/utils/api";
+import { useAppStore } from "../../../src/store/useAppStore";
 
 interface GenerationRecord {
   id: string;
@@ -53,6 +54,7 @@ export default function ProfilePage() {
   const locale = useLocale();
   const isRtl = locale === "ar";
   const router = useRouter();
+  const user = useAppStore(state => state.user);
 
   const [history, setHistory] = useState<GenerationRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -126,15 +128,17 @@ export default function ProfilePage() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center pb-4 border-b border-white/5">
                   <span className="text-white/60">{t('subscription.plan')}</span>
-                  <span className="text-white font-bold bg-white/10 px-3 py-1 rounded-full text-sm">Pro</span>
+                  <span className="text-white font-bold bg-white/10 px-3 py-1 rounded-full text-sm">
+                    {user?.activePlan ? (isRtl ? user.activePlan.nameAr : user.activePlan.name) : (isRtl ? "مجاني" : "Free")}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center pb-4 border-b border-white/5">
                   <span className="text-white/60">{t('subscription.status')}</span>
                   <span className="text-emerald-400 font-medium text-sm flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400" /> Active
+                    <span className="w-2 h-2 rounded-full bg-emerald-400" /> {user?.activePlan ? user.activePlan.status : "Active"}
                   </span>
                 </div>
-                <button className="w-full py-3 mt-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white font-medium transition-all hover:border-white/20">
+                <button onClick={() => router.push(`/${locale}/pricing`)} className="w-full py-3 mt-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white font-medium transition-all hover:border-white/20">
                   {t('subscription.upgrade')}
                 </button>
               </div>
@@ -157,10 +161,10 @@ export default function ProfilePage() {
                   <p className="text-xs text-white/50 mt-1">{isRtl ? "إجمالي العمليات" : "Total Operations"}</p>
                 </div>
                 <div className="bg-white/5 rounded-2xl p-3 text-center">
-                  <p className="text-2xl font-extrabold text-fuchsia-400">
-                    {history.reduce((sum, r) => sum + (r.creditsUsed || 0), 0)}
+                  <p className="text-2xl font-extrabold text-emerald-400">
+                    {user?.availableCredits || 0}
                   </p>
-                  <p className="text-xs text-white/50 mt-1">{isRtl ? "كريدت مُستخدم" : "Credits Used"}</p>
+                  <p className="text-xs text-white/50 mt-1">{isRtl ? "كريدت متاح" : "Available Credits"}</p>
                 </div>
               </div>
             </motion.div>
