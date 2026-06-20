@@ -1,4 +1,4 @@
-@model IEnumerable<NexClone.Backend.Models.Legacy.UserAuthUser>
+@model IEnumerable<NexClone.Backend.Models.ApplicationUser>
 
 @{
     ViewData["Title"] = "Users Management";
@@ -20,21 +20,12 @@
                     <p class="bx--data-table-header__description">Manage users and their status</p>
                 </div>
 
-                <!-- HTMX refresh button for demonstration -->
-                <section class="bx--table-toolbar">
-                    <div class="bx--toolbar-content">
-                        <button hx-get="/Users" hx-target="#main-content" class="bx--btn bx--btn--primary" type="button">
-                            Refresh Data
-                        </button>
-                    </div>
-                </section>
-
                 <table class="bx--data-table">
                     <thead>
                         <tr>
                             <th><span class="bx--table-header-label">Email</span></th>
                             <th><span class="bx--table-header-label">Country</span></th>
-                            <th><span class="bx--table-header-label">Verified</span></th>
+                            <th><span class="bx--table-header-label">Credits</span></th>
                             <th><span class="bx--table-header-label">Role</span></th>
                             <th><span class="bx--table-header-label">Joined</span></th>
                             <th><span class="bx--table-header-label">Actions</span></th>
@@ -56,16 +47,7 @@
                                 <tr>
                                     <td>@user.Email</td>
                                     <td>@user.Country</td>
-                                    <td>
-                                        @if (user.IsVerified)
-                                        {
-                                            <span class="bx--tag bx--tag--green">Verified</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="bx--tag bx--tag--gray">Pending</span>
-                                        }
-                                    </td>
+                                    <td>@user.AvailableCredits</td>
                                     <td>
                                         @if (user.IsStaff)
                                         {
@@ -78,7 +60,7 @@
                                     </td>
                                     <td>@user.CreatedAt.ToString("MMM dd, yyyy")</td>
                                     <td>
-                                        <button class="bx--btn bx--btn--ghost bx--btn--sm">Edit</button>
+                                        <a href="@Url.Action("AssignPlan", new { id = user.Id })" class="bx--btn bx--btn--primary bx--btn--sm">Assign Plan</a>
                                     </td>
                                 </tr>
                             }
