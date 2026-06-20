@@ -47,6 +47,17 @@ export default function TextToVoicePage() {
   const [selectedEmotion, setSelectedEmotion] = useState<string>("");
   const [selectedStyle, setSelectedStyle] = useState<string>("");
   
+  const [isSongMode, setIsSongMode] = useState(false);
+  const [selectedEnvironment, setSelectedEnvironment] = useState<string>("");
+
+  const environments = [
+    { id: 1, name: "استوديو احترافي", value: "Professional Studio" },
+    { id: 2, name: "حفلة صاخبة", value: "Loud Concert" },
+    { id: 3, name: "بار / نادي", value: "Bar/Club" },
+    { id: 4, name: "شارع", value: "Street" },
+    { id: 5, name: "سيارة", value: "Car" }
+  ];
+  
   const [isProcessing, setIsProcessing] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -114,7 +125,9 @@ export default function TextToVoicePage() {
         text: text,
         language: languageMode,
         voiceName: selectedVoice,
-        styleInstruction: instruction.trim()
+        styleInstruction: instruction.trim(),
+        isSongMode: isSongMode,
+        environmentMode: isSongMode ? selectedEnvironment : ""
       });
 
       if (response.data && response.data.audioUrl) {
@@ -312,6 +325,28 @@ export default function TextToVoicePage() {
                   </div>
                 </div>
 
+                {/* Song Mode Toggle */}
+                <div className="bg-gradient-to-r from-violet-600/20 to-fuchsia-600/20 border border-fuchsia-500/30 rounded-[24px] p-5">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 bg-fuchsia-600/20 rounded flex items-center justify-center">
+                        <span className="text-fuchsia-400 text-xs">🎵</span>
+                      </div>
+                      <span className="text-white/80 text-sm font-bold">وضع الأغنية (Song Mode)</span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        className="sr-only peer" 
+                        checked={isSongMode}
+                        onChange={(e) => setIsSongMode(e.target.checked)}
+                      />
+                      <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-fuchsia-500"></div>
+                    </label>
+                  </div>
+                  <p className="text-[10px] text-white/50 px-8">يسمح بتوليد موسيقى وأغاني بأساليب مختلفة (مهرجانات، راب، طرب) بدلاً من التحدث العادي.</p>
+                </div>
+
                 {/* Free Account Notice */}
                 <div className="bg-violet-500/10 border border-violet-500/20 rounded-[20px] p-4 flex flex-col gap-2">
                   <div className="flex gap-3">
@@ -448,6 +483,27 @@ export default function TextToVoicePage() {
                       <ChevronDown className={`w-3.5 h-3.5 absolute top-1/2 -translate-y-1/2 ${isRtl ? 'left-4' : 'right-4'} pointer-events-none text-white/50 z-0`} />
                     </div>
                   </div>
+
+                  {isSongMode && (
+                    <div className="flex flex-col gap-1.5 mt-3">
+                      <label className="text-[11px] font-semibold text-white/60 px-2 text-fuchsia-300">بيئة الموسيقى (Environment)</label>
+                      <div className="relative bg-fuchsia-900/20 border border-fuchsia-500/30 rounded-[16px] text-xs text-white/80 hover:border-fuchsia-500/50 transition-colors">
+                        <select 
+                          value={selectedEnvironment}
+                          onChange={(e) => setSelectedEnvironment(e.target.value)}
+                          className="w-full bg-transparent outline-none appearance-none cursor-pointer px-4 py-3 relative z-10"
+                        >
+                          <option value="" className="bg-[#0a0015] text-white/50">-- اختر بيئة الاستماع --</option>
+                          {environments.map(env => (
+                            <option key={env.id} value={env.value} className="bg-[#0a0015] text-white">
+                              {env.name}
+                            </option>
+                          ))}
+                        </select>
+                        <ChevronDown className={`w-3.5 h-3.5 absolute top-1/2 -translate-y-1/2 ${isRtl ? 'left-4' : 'right-4'} pointer-events-none text-fuchsia-500 z-0`} />
+                      </div>
+                    </div>
+                  )}
 
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[11px] font-semibold text-white/60 px-2">{t('performanceStyle')}</label>
