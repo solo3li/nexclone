@@ -232,8 +232,7 @@ namespace NexClone.Backend.Services.AI
                 // Production code should wrap PCM in WAV header like the old Python code did.
                 var mimeType = inlineData.GetProperty("mimeType").GetString() ?? "";
                 
-                // Extremely basic WAV wrapper if PCM
-                if (mimeType.Contains("audio/L16") || mimeType.Contains("pcm"))
+                if (mimeType.ToLowerInvariant().Contains("audio/l16") || mimeType.ToLowerInvariant().Contains("pcm"))
                 {
                     var wavBytes = PcmToWav(audioBytes, 24000, 1, 16);
                     return (new MemoryStream(wavBytes), "audio/wav", "wav");
