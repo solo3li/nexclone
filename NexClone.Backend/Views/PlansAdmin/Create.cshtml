@@ -54,9 +54,12 @@
                 <div style="max-height: 200px; overflow-y: auto; border: 1px solid #e0e0e0; padding: 1rem; background: #f4f4f4;">
                     @if(ViewBag.Tools != null) {
                         foreach(var tool in ViewBag.Tools) {
-                            <div style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                                <input type="checkbox" id="tool_@tool.Id" name="SelectedTools" value="@tool.Name" class="bx--checkbox" style="cursor: pointer;" />
-                                <label for="tool_@tool.Id" class="bx--checkbox-label" style="cursor: pointer; margin: 0; font-size: 0.875rem;">@tool.Name</label>
+                            <div style="margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" id="tool_@tool.Id" name="SelectedTools" value="@tool.Name" class="bx--checkbox" style="cursor: pointer;" onchange="document.getElementById('limit_@tool.Id').style.display = this.checked ? 'block' : 'none';" />
+                                    <label for="tool_@tool.Id" class="bx--checkbox-label" style="cursor: pointer; margin: 0; font-size: 0.875rem;">@tool.Name</label>
+                                </div>
+                                <input type="number" id="limit_@tool.Id" name="ToolLimits[@tool.Name]" value="-1" class="bx--text-input" style="width: 100px; display: none;" placeholder="Limit (-1 for unlim)" />
                             </div>
                         }
                     }

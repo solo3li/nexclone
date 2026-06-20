@@ -41,23 +41,7 @@ namespace NexClone.Backend.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (config.ToolName == "text-to-voice")
-                {
-                    var limits = new System.Collections.Generic.Dictionary<string, int>();
-                    foreach (var key in form.Keys.Where(k => k.StartsWith("PlanLimit_")))
-                    {
-                        var planIdStr = key.Replace("PlanLimit_", "");
-                        if (int.TryParse(form[key], out int limit))
-                        {
-                            limits[planIdStr] = limit;
-                        }
-                    }
-                    if (limits.Count > 0)
-                    {
-                        var settingsObj = new { limits = limits };
-                        config.AdditionalSettings = System.Text.Json.JsonSerializer.Serialize(settingsObj);
-                    }
-                }
+
 
                 config.Id = Guid.NewGuid();
                 config.UpdatedAt = DateTime.UtcNow;
@@ -93,25 +77,7 @@ namespace NexClone.Backend.Controllers
             {
                 try
                 {
-                    if (config.ToolName == "text-to-voice")
-                    {
-                        var limits = new System.Collections.Generic.Dictionary<string, int>();
-                        foreach (var key in form.Keys.Where(k => k.StartsWith("PlanLimit_")))
-                        {
-                            var planIdStr = key.Replace("PlanLimit_", "");
-                            if (int.TryParse(form[key], out int limit))
-                            {
-                                limits[planIdStr] = limit;
-                            }
-                        }
-                        if (limits.Count > 0)
-                        {
-                            // Merge with existing AdditionalSettings if necessary, or just overwrite limits
-                            // Assuming for now it just overwrites or we create a new limits object
-                            var settingsObj = new { limits = limits };
-                            config.AdditionalSettings = System.Text.Json.JsonSerializer.Serialize(settingsObj);
-                        }
-                    }
+
 
                     config.UpdatedAt = DateTime.UtcNow;
                     _context.Update(config);

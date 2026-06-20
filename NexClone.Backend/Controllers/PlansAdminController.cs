@@ -33,11 +33,19 @@ namespace NexClone.Backend.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Plan plan, string[] SelectedTools)
+        public async Task<IActionResult> Create(Plan plan, string[] SelectedTools, System.Collections.Generic.Dictionary<string, int> ToolLimits)
         {
             if (ModelState.IsValid)
             {
-                plan.AllowedTools = System.Text.Json.JsonSerializer.Serialize(SelectedTools ?? new string[0]);
+                var allowedWithLimits = new System.Collections.Generic.Dictionary<string, int>();
+                if (SelectedTools != null)
+                {
+                    foreach (var t in SelectedTools)
+                    {
+                        allowedWithLimits[t] = ToolLimits != null && ToolLimits.ContainsKey(t) ? ToolLimits[t] : -1;
+                    }
+                }
+                plan.AllowedTools = System.Text.Json.JsonSerializer.Serialize(allowedWithLimits);
                 _context.Add(plan);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -60,7 +68,7 @@ namespace NexClone.Backend.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Plan plan, string[] SelectedTools)
+        public async Task<IActionResult> Edit(int id, Plan plan, string[] SelectedTools, System.Collections.Generic.Dictionary<string, int> ToolLimits)
         {
             if (id != plan.Id) return NotFound();
 
@@ -68,7 +76,15 @@ namespace NexClone.Backend.Controllers
             {
                 try
                 {
-                    plan.AllowedTools = System.Text.Json.JsonSerializer.Serialize(SelectedTools ?? new string[0]);
+                    var allowedWithLimits = new System.Collections.Generic.Dictionary<string, int>();
+                    if (SelectedTools != null)
+                    {
+                        foreach (var t in SelectedTools)
+                        {
+                            allowedWithLimits[t] = ToolLimits != null && ToolLimits.ContainsKey(t) ? ToolLimits[t] : -1;
+                        }
+                    }
+                    plan.AllowedTools = System.Text.Json.JsonSerializer.Serialize(allowedWithLimits);
                     _context.Update(plan);
                     await _context.SaveChangesAsync();
                 }

@@ -50,31 +50,32 @@ namespace NexClone.Backend.Areas.AI.Controllers
                 return BadRequest(new { error = $"Insufficient credits. Generating this audio requires {cost} credits." });
 
             var activeSubscription = await _dbContext.Subscriptions
+                .Include(s => s.Plan)
                 .Where(s => s.UserId == userId && s.Status == "active")
                 .OrderByDescending(s => s.EndDate)
                 .FirstOrDefaultAsync();
 
-            int planId = activeSubscription?.PlanId ?? 0;
             int maxChars = 150; // Default limit
+            bool unlimited = false;
 
-            var toolConfig = await _dbContext.ToolConfigurations.FirstOrDefaultAsync(t => t.ToolName == "text-to-voice" && t.IsActive);
-            if (toolConfig != null && !string.IsNullOrEmpty(toolConfig.AdditionalSettings))
+            if (activeSubscription?.Plan != null && !string.IsNullOrEmpty(activeSubscription.Plan.AllowedTools))
             {
                 try
                 {
-                    using var doc = System.Text.Json.JsonDocument.Parse(toolConfig.AdditionalSettings);
-                    if (doc.RootElement.TryGetProperty("limits", out var limitsProp))
+                    if (activeSubscription.Plan.AllowedTools.Trim().StartsWith("{"))
                     {
-                        if (limitsProp.TryGetProperty(planId.ToString(), out var limitElement) && limitElement.TryGetInt32(out int limit))
+                        using var doc = System.Text.Json.JsonDocument.Parse(activeSubscription.Plan.AllowedTools);
+                        if (doc.RootElement.TryGetProperty("text-to-voice", out var limitElement) && limitElement.TryGetInt32(out int limit))
                         {
-                            maxChars = limit;
+                            if (limit == -1) unlimited = true;
+                            else if (limit > 0) maxChars = limit;
                         }
                     }
                 }
                 catch { }
             }
 
-            if (request.Text.Length > maxChars)
+            if (!unlimited && request.Text.Length > maxChars)
             {
                 return BadRequest(new { error = $"Your current plan allows a maximum of {maxChars} characters per request." });
             }
