@@ -459,5 +459,10 @@
     "result": "Result",
     "download": "Download Audio",
     "error": "An error occurred during generation."
+  },
+  "NotFound": {
+    "title": "Page Not Found",
+    "subtitle": "Oops! The page you are looking for does not exist or has been moved.",
+    "backHome": "Back to Home"
   }
 }
