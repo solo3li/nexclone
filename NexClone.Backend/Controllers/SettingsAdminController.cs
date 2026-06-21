@@ -45,7 +45,7 @@ namespace NexClone.Backend.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SaveAll(Dictionary<string, string> settings, Microsoft.AspNetCore.Http.IFormCollection form)
+        public async Task<IActionResult> SaveSettings(Dictionary<string, string> settings)
         {
             if (settings == null) return RedirectToAction(nameof(Index));
 
@@ -75,6 +75,14 @@ namespace NexClone.Backend.Controllers
                 }
             }
 
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveToolsMaintenance(Microsoft.AspNetCore.Http.IFormCollection form)
+        {
             var toolConfigs = await _context.ToolConfigurations.ToListAsync();
             foreach (var tool in toolConfigs)
             {
