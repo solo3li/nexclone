@@ -9,12 +9,8 @@ export function GoogleAuthProviderWrapper({
   children: React.ReactNode;
   clientId: string | null;
 }) {
-  if (!clientId) {
-    return <>{children}</>;
-  }
-
   return (
-    <GoogleOAuthProvider clientId={clientId}>
+    <GoogleOAuthProvider clientId={clientId || "missing-client-id"}>
       {children}
     </GoogleOAuthProvider>
   );
