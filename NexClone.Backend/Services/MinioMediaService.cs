@@ -71,7 +71,7 @@ namespace NexClone.Backend.Services
             bool found = await _minioClient.BucketExistsAsync(bucketExistsArgs).ConfigureAwait(false);
             if (!found)
             {
-                var makeBucketArgs = new MakeBucketArgs().WithBucket(bucketName);
+                var makeBucketArgs = new MakeBucketArgs().WithBucket(bucketName).WithLocation(_region);
                 await _minioClient.MakeBucketAsync(makeBucketArgs).ConfigureAwait(false);
             }
 
