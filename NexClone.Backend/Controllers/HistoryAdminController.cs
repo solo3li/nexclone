@@ -35,13 +35,18 @@ namespace NexClone.Backend.Controllers
             return View(history);
         }
 
-        public async Task<IActionResult> Details(Guid id)
+        public async Task<IActionResult> Details(Guid id, [FromServices] NexClone.Backend.Services.IMediaService mediaService)
         {
             var history = await _context.GenerationHistories
                 .Include(h => h.User)
                 .FirstOrDefaultAsync(h => h.Id == id);
 
             if (history == null) return NotFound();
+
+            if (!string.IsNullOrEmpty(history.FileUrl) && !history.FileUrl.StartsWith("http"))
+            {
+                history.FileUrl = await mediaService.GetFileUrlAsync(history.FileUrl, history.Type);
+            }
 
             return View(history);
         }

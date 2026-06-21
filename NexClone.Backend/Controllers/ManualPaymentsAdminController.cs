@@ -28,7 +28,7 @@ namespace NexClone.Backend.Controllers
             return View(pending);
         }
 
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int id, [FromServices] NexClone.Backend.Services.IMediaService mediaService)
         {
             var payment = await _context.Payments
                 .Include(p => p.User)
@@ -36,6 +36,11 @@ namespace NexClone.Backend.Controllers
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (payment == null) return NotFound();
+
+            if (!string.IsNullOrEmpty(payment.ReceiptUrl) && !payment.ReceiptUrl.StartsWith("http"))
+            {
+                payment.ReceiptUrl = await mediaService.GetFileUrlAsync(payment.ReceiptUrl, "receipts");
+            }
 
             return View(payment);
         }
