@@ -110,12 +110,22 @@ namespace NexClone.Backend.Services
             await EnsureClientInitializedAsync();
             bucketName ??= _defaultBucket;
 
+            var settings = _context.AppSettings.ToList();
+            var publicEndpoint = settings.FirstOrDefault(s => s.Key == "Minio.PublicEndpoint")?.Value ?? "178.62.192.74:9000";
+            var accessKey = settings.FirstOrDefault(s => s.Key == "Minio.AccessKey")?.Value ?? "minioadmin";
+            var secretKey = settings.FirstOrDefault(s => s.Key == "Minio.SecretKey")?.Value ?? "minioadmin";
+
+            var publicClient = new MinioClient()
+                .WithEndpoint(publicEndpoint)
+                .WithCredentials(accessKey, secretKey)
+                .Build();
+
             var presignedPutObjectArgs = new PresignedPutObjectArgs()
                 .WithBucket(bucketName)
                 .WithObject(objectName)
                 .WithExpiry(60 * 60); // 1 hour expiry
 
-            return await _minioClient.PresignedPutObjectAsync(presignedPutObjectArgs).ConfigureAwait(false);
+            return await publicClient.PresignedPutObjectAsync(presignedPutObjectArgs).ConfigureAwait(false);
         }
     }
 }

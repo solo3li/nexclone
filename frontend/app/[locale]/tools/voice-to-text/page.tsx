@@ -311,7 +311,10 @@ export default function VoiceToTextPage() {
                 {t('transcribe')}
               </button>
               <button
-                onClick={() => setMode("translate")}
+                onClick={() => {
+                  setMode("translate");
+                  if (language === 'auto') setLanguage('en');
+                }}
                 className={`flex-1 py-3 rounded-lg text-sm font-medium transition-all ${mode === "translate" ? "bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white shadow-lg" : "text-white/60 hover:text-white"}`}
               >
                 {t('translate')}
@@ -320,15 +323,16 @@ export default function VoiceToTextPage() {
 
             {/* Language Selection */}
             <div dir={isRtl ? 'rtl' : 'ltr'}>
-              <label className="block text-sm font-medium text-white/70 mb-2">{t('language')}</label>
+              <label className="block text-sm font-medium text-white/70 mb-2">
+                {mode === 'translate' ? t('targetLanguage') : t('language')}
+              </label>
               <div className="relative">
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
-                  disabled={mode === 'translate'}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 transition-all disabled:opacity-50 appearance-none"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-violet-500/50 transition-all appearance-none"
                 >
-                  {LANGUAGES.map(lang => (
+                  {LANGUAGES.filter(lang => mode === 'transcribe' || lang.code !== 'auto').map(lang => (
                     <option key={lang.code} value={lang.code} className="bg-[#0a0015]">{lang.name}</option>
                   ))}
                 </select>
