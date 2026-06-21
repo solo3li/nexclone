@@ -26,15 +26,18 @@ namespace NexClone.Backend.Services
         {
             if (_minioClient != null) return;
 
-            var settings = _context.AppSettings.ToList();
-            var endpoint = settings.FirstOrDefault(s => s.Key == "Minio.Endpoint")?.Value ?? "minio:9000";
-            var accessKey = settings.FirstOrDefault(s => s.Key == "Minio.AccessKey")?.Value ?? "minioadmin";
-            var secretKey = settings.FirstOrDefault(s => s.Key == "Minio.SecretKey")?.Value ?? "minioadmin";
-            _defaultBucket = settings.FirstOrDefault(s => s.Key == "Minio.BucketName")?.Value ?? "nexmedia";
+            // AWS S3 Configuration
+            var endpoint = "s3.eu-north-1.amazonaws.com";
+            var accessKey = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID") ?? "YOUR_AWS_ACCESS_KEY";
+            var secretKey = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY") ?? "YOUR_AWS_SECRET_KEY";
+            var region = "eu-north-1";
+            _defaultBucket = "nexmedia-files-2026";
 
             _minioClient = new MinioClient()
                 .WithEndpoint(endpoint)
                 .WithCredentials(accessKey, secretKey)
+                .WithRegion(region)
+                .WithSSL(true)
                 .Build();
         }
 
@@ -98,11 +101,10 @@ namespace NexClone.Backend.Services
             await EnsureClientInitializedAsync();
             bucketName ??= _defaultBucket;
 
-            var settings = _context.AppSettings.ToList();
-            var publicEndpoint = settings.FirstOrDefault(s => s.Key == "Minio.PublicEndpoint")?.Value ?? "178.62.192.74:9000";
-
-            // Return direct URL since nexmedia bucket is public
-            return $"http://{publicEndpoint}/{bucketName}/{objectName}";
+            // AWS S3 Virtual-Hosted Style URL
+            var publicEndpoint = $"{bucketName}.s3.eu-north-1.amazonaws.com";
+            
+            return $"https://{publicEndpoint}/{objectName}";
         }
 
         public async Task<string> GeneratePresignedUploadUrlAsync(string objectName, string contentType, string bucketName = null)
@@ -110,22 +112,12 @@ namespace NexClone.Backend.Services
             await EnsureClientInitializedAsync();
             bucketName ??= _defaultBucket;
 
-            var settings = _context.AppSettings.ToList();
-            var publicEndpoint = settings.FirstOrDefault(s => s.Key == "Minio.PublicEndpoint")?.Value ?? "178.62.192.74:9000";
-            var accessKey = settings.FirstOrDefault(s => s.Key == "Minio.AccessKey")?.Value ?? "minioadmin";
-            var secretKey = settings.FirstOrDefault(s => s.Key == "Minio.SecretKey")?.Value ?? "minioadmin";
-
-            var publicClient = new MinioClient()
-                .WithEndpoint(publicEndpoint)
-                .WithCredentials(accessKey, secretKey)
-                .Build();
-
             var presignedPutObjectArgs = new PresignedPutObjectArgs()
                 .WithBucket(bucketName)
                 .WithObject(objectName)
                 .WithExpiry(60 * 60); // 1 hour expiry
 
-            return await publicClient.PresignedPutObjectAsync(presignedPutObjectArgs).ConfigureAwait(false);
+            return await _minioClient.PresignedPutObjectAsync(presignedPutObjectArgs).ConfigureAwait(false);
         }
     }
 }
