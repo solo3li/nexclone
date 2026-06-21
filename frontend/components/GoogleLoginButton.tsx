@@ -1,13 +1,13 @@
 "use client";
 
 import { GoogleLogin } from '@react-oauth/google';
-import axios from 'axios';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useRouter } from '../src/i18n/routing';
+import api from '../src/utils/api';
+import { useAppStore } from '../src/store/useAppStore';
 
 export function GoogleLoginButton() {
   const router = useRouter();
-  const t = useTranslations('auth'); // assuming translations exist, or just use raw strings if not
+  const setUser = useAppStore(state => state.setUser);
 
   return (
     <div className="w-full flex justify-center">
@@ -15,15 +15,14 @@ export function GoogleLoginButton() {
         onSuccess={async (credentialResponse) => {
           if (!credentialResponse.credential) return;
           try {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-            
             // Post to our new backend endpoint
-            const res = await axios.post(`${apiUrl}/api/auth/google-login`, {
+            const res = await api.post(`/api/auth/google-login`, {
               token: credentialResponse.credential
             });
             
             if (res.status === 200) {
-              window.location.href = '/profile';
+              setUser(res.data);
+              router.push('/profile');
             }
           } catch (error) {
             console.error("Login failed", error);
