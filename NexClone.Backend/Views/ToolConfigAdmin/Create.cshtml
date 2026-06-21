@@ -57,7 +57,12 @@
             </label>
         </div>
 
-
+        <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom: 2rem;">
+            <input id="IsMaintenanceMode" class="bx--checkbox" type="checkbox" value="true" name="IsMaintenanceMode" @(Model != null && Model.IsMaintenanceMode ? "checked" : "")>
+            <label for="IsMaintenanceMode" class="bx--checkbox-label" title="Maintenance Mode">
+                <span class="bx--checkbox-label-text">Enable Maintenance Mode for this Tool</span>
+            </label>
+        </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 1rem;">
             <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">Cancel</a>

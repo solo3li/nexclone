@@ -2,25 +2,45 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Minio;
 using Minio.DataModel.Args;
+using NexClone.Backend.Models;
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace NexClone.Backend.Services
 {
     public class MinioMediaService : IMediaService
     {
-        private readonly IMinioClient _minioClient;
-        private readonly string _defaultBucket;
+        private IMinioClient _minioClient;
+        private string _defaultBucket;
+        private readonly ApplicationDbContext _context;
 
-        public MinioMediaService(IMinioClient minioClient, IConfiguration configuration)
+        public MinioMediaService(ApplicationDbContext context, IConfiguration configuration)
         {
-            _minioClient = minioClient;
-            _defaultBucket = configuration["Minio:BucketName"] ?? "nexmedia";
+            _context = context;
+            _defaultBucket = "nexmedia"; // Will be overridden if set in DB
+        }
+
+        private async Task EnsureClientInitializedAsync()
+        {
+            if (_minioClient != null) return;
+
+            var settings = _context.AppSettings.ToList();
+            var endpoint = settings.FirstOrDefault(s => s.Key == "Minio.Endpoint")?.Value ?? "minio:9000";
+            var accessKey = settings.FirstOrDefault(s => s.Key == "Minio.AccessKey")?.Value ?? "minioadmin";
+            var secretKey = settings.FirstOrDefault(s => s.Key == "Minio.SecretKey")?.Value ?? "minioadmin";
+            _defaultBucket = settings.FirstOrDefault(s => s.Key == "Minio.BucketName")?.Value ?? "nexmedia";
+
+            _minioClient = new MinioClient()
+                .WithEndpoint(endpoint)
+                .WithCredentials(accessKey, secretKey)
+                .Build();
         }
 
         public async Task<string> UploadFileAsync(IFormFile file, string bucketName = null)
         {
+            await EnsureClientInitializedAsync();
             bucketName ??= _defaultBucket;
             var objectName = $"{Guid.NewGuid()}_{file.FileName}";
 
@@ -31,6 +51,7 @@ namespace NexClone.Backend.Services
 
         public async Task<string> UploadFileAsync(Stream stream, string objectName, string contentType, string bucketName = null)
         {
+            await EnsureClientInitializedAsync();
             bucketName ??= _defaultBucket;
 
             var bucketExistsArgs = new BucketExistsArgs().WithBucket(bucketName);
@@ -55,6 +76,7 @@ namespace NexClone.Backend.Services
 
         public async Task<byte[]> DownloadFileAsync(string objectName, string bucketName = null)
         {
+            await EnsureClientInitializedAsync();
             bucketName ??= _defaultBucket;
             using var memoryStream = new MemoryStream();
 
@@ -73,6 +95,7 @@ namespace NexClone.Backend.Services
 
         public async Task<string> GetFileUrlAsync(string objectName, string bucketName = null)
         {
+            await EnsureClientInitializedAsync();
             bucketName ??= _defaultBucket;
 
             var presignedGetObjectArgs = new PresignedGetObjectArgs()
@@ -85,6 +108,7 @@ namespace NexClone.Backend.Services
 
         public async Task<string> GeneratePresignedUploadUrlAsync(string objectName, string contentType, string bucketName = null)
         {
+            await EnsureClientInitializedAsync();
             bucketName ??= _defaultBucket;
 
             var presignedPutObjectArgs = new PresignedPutObjectArgs()

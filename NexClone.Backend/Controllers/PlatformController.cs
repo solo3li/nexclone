@@ -127,7 +127,12 @@ namespace NexClone.Backend.Controllers
                 }
             }
 
-            return Ok(new { maxChars = maxChars, customInstructionsEnabled = customInstructionsEnabled });
+            var activeToolConfig = await _context.ToolConfigurations
+                .FirstOrDefaultAsync(c => c.ToolName == "text-to-voice" && c.IsActive);
+
+            bool isMaintenanceMode = activeToolConfig?.IsMaintenanceMode ?? false;
+
+            return Ok(new { maxChars = maxChars, customInstructionsEnabled = customInstructionsEnabled, isMaintenanceMode = isMaintenanceMode });
         }
     }
 }

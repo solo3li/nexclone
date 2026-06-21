@@ -100,18 +100,6 @@ builder.Services.AddHttpClient("AIGateway", client =>
 builder.Services.AddScoped<NexClone.Backend.Services.AI.ITtsService, NexClone.Backend.Services.AI.TtsService>();
 builder.Services.AddScoped<NexClone.Backend.Services.AI.ISttService, NexClone.Backend.Services.AI.SttService>();
 
-// Register MinIO Client
-builder.Services.AddSingleton<IMinioClient>(sp =>
-{
-    var config = sp.GetRequiredService<IConfiguration>();
-    // When running in Docker, endpoint might be "minio:9000". We check environment or use appsettings.
-    var endpoint = Environment.GetEnvironmentVariable("MINIO_ENDPOINT") ?? config["Minio:Endpoint"];
-    return new MinioClient()
-        .WithEndpoint(endpoint)
-        .WithCredentials(config["Minio:AccessKey"], config["Minio:SecretKey"])
-        .WithSSL(false)
-        .Build();
-});
 
 // Register Media Service
 builder.Services.AddScoped<NexClone.Backend.Services.IMediaService, NexClone.Backend.Services.MinioMediaService>();
@@ -152,6 +140,27 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     dbContext.Database.Migrate();
+
+    // Seed Default Settings
+    var defaultSettings = new List<NexClone.Backend.Models.AppSetting>
+    {
+        new NexClone.Backend.Models.AppSetting { Key = "Site.MaintenanceMode", Value = "false", Description = "Global maintenance mode toggle (true/false)" },
+        new NexClone.Backend.Models.AppSetting { Key = "Site.MaintenanceEndDate", Value = "", Description = "Optional end date for maintenance (ISO 8601 string)" },
+        new NexClone.Backend.Models.AppSetting { Key = "Origin.AllowedOrigins", Value = "http://localhost:3000,http://localhost:3001,https://nexclone.com", Description = "Comma-separated list of allowed origins for CORS" },
+        new NexClone.Backend.Models.AppSetting { Key = "Minio.Endpoint", Value = "minio:9000", Description = "Minio endpoint address" },
+        new NexClone.Backend.Models.AppSetting { Key = "Minio.AccessKey", Value = "minioadmin", Description = "Minio access key" },
+        new NexClone.Backend.Models.AppSetting { Key = "Minio.SecretKey", Value = "minioadmin", Description = "Minio secret key" },
+        new NexClone.Backend.Models.AppSetting { Key = "Minio.BucketName", Value = "nexmedia", Description = "Minio bucket name" }
+    };
+
+    foreach (var setting in defaultSettings)
+    {
+        if (!dbContext.AppSettings.Any(s => s.Key == setting.Key))
+        {
+            dbContext.AppSettings.Add(setting);
+        }
+    }
+    dbContext.SaveChanges();
 }
 
 // Configure the HTTP request pipeline.

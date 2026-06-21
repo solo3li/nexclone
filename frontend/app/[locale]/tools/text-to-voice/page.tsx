@@ -57,6 +57,7 @@ export default function TextToVoicePage() {
   const [customInstructionsEnabled, setCustomInstructionsEnabled] = useState(false);
   const [customInstruction, setCustomInstruction] = useState("");
 
+  const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
   const currentlyPlayingRef = useRef<HTMLAudioElement | null>(null);
   
   const [maxChars, setMaxChars] = useState(150);
@@ -87,6 +88,7 @@ export default function TextToVoicePage() {
         setStyles(stylesRes.data);
         setMaxChars(configRes.data.maxChars || 150);
         setCustomInstructionsEnabled(configRes.data.customInstructionsEnabled || false);
+        setIsMaintenanceMode(configRes.data.isMaintenanceMode || false);
       } catch (error) {
         console.error("Failed to load options:", error);
       }
@@ -184,7 +186,17 @@ export default function TextToVoicePage() {
       <Navbar />
 
       <main className="flex-1 container mx-auto px-4 pt-32 pb-20 relative z-10 max-w-[1400px]">
-        {/* Header */}
+        {isMaintenanceMode ? (
+          <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
+            <div className="w-20 h-20 bg-violet-600/20 rounded-full flex items-center justify-center mb-6">
+              <Wand2 className="w-10 h-10 text-violet-500" />
+            </div>
+            <h1 className="text-3xl font-bold text-white mb-4">هذه الأداة تحت الصيانة مؤقتاً</h1>
+            <p className="text-white/60 max-w-md">نحن نقوم بتحديث أداة تحويل النص إلى صوت لتحسين الجودة. يرجى المحاولة لاحقاً. نعتذر عن الإزعاج.</p>
+          </div>
+        ) : (
+          <>
+            {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -525,6 +537,8 @@ export default function TextToVoicePage() {
           </motion.div>
 
         </div>
+        </>
+        )}
       </main>
 
       {/* Confirmation Modal */}

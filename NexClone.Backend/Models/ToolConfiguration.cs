@@ -20,6 +20,7 @@ namespace NexClone.Backend.Models
         public string ModelName { get; set; } = string.Empty; // e.g. "gemini-2.0-flash-exp"
 
         public bool IsActive { get; set; } = true;
+        public bool IsMaintenanceMode { get; set; } = false;
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
