@@ -36,23 +36,19 @@
                         <td>@payment.Amount @payment.Currency</td>
                         <td>@payment.CreatedAt.ToString("g")</td>
                         <td>
-                            <a href="@payment.ReceiptUrl" target="_blank" class="bx--btn bx--btn--sm bx--btn--ghost">
-                                <i class='bx bx-search'></i> View
-                            </a>
+                            @if (!string.IsNullOrEmpty(payment.ReceiptUrl))
+                            {
+                                <span class="bx--tag bx--tag--green">Has Screenshot</span>
+                            }
+                            else
+                            {
+                                <span class="bx--tag bx--tag--gray">No Screenshot</span>
+                            }
                         </td>
                         <td>
-                            <div style="display: flex; gap: 8px;">
-                                <form method="post" asp-action="Approve" asp-route-id="@payment.Id">
-                                    <button type="submit" class="bx--btn bx--btn--sm bx--btn--primary" style="background-color: #24a148;">
-                                        Approve
-                                    </button>
-                                </form>
-                                <form method="post" asp-action="Reject" asp-route-id="@payment.Id">
-                                    <button type="submit" class="bx--btn bx--btn--sm bx--btn--danger" style="background-color: #da1e28;">
-                                        Reject
-                                    </button>
-                                </form>
-                            </div>
+                            <a href="@Url.Action("Details", new { id = payment.Id })" class="bx--btn bx--btn--sm bx--btn--secondary">
+                                <i class='bx bx-detail'></i> Details
+                            </a>
                         </td>
                     </tr>
                 }

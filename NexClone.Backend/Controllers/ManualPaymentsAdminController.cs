@@ -28,6 +28,18 @@ namespace NexClone.Backend.Controllers
             return View(pending);
         }
 
+        public async Task<IActionResult> Details(int id)
+        {
+            var payment = await _context.Payments
+                .Include(p => p.User)
+                .Include(p => p.Plan)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (payment == null) return NotFound();
+
+            return View(payment);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Approve(int id)
         {

@@ -10,6 +10,24 @@
         <p class="bx--data-table-header__description">View the latest 500 AI operations performed by users.</p>
     </div>
 
+    <div style="margin-bottom: 2rem; background: #f4f4f4; padding: 1rem; border: 1px solid #e0e0e0;">
+        <form method="get" asp-action="Index" style="display: flex; gap: 1rem; align-items: flex-end;">
+            <div class="bx--form-item" style="flex: 1; max-width: 400px;">
+                <label for="searchEmail" class="bx--label">Search by User Email</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="searchEmail" type="text" name="searchEmail" class="bx--text-input" placeholder="e.g. user@example.com" value="@ViewBag.CurrentSearch">
+                </div>
+            </div>
+            <div>
+                <button type="submit" class="bx--btn bx--btn--primary">Search</button>
+                @if (!string.IsNullOrEmpty(ViewBag.CurrentSearch as string))
+                {
+                    <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">Clear</a>
+                }
+            </div>
+        </form>
+    </div>
+
     <table class="bx--data-table bx--data-table--sort">
         <thead>
             <tr>
@@ -19,6 +37,7 @@
                 <th><span class="bx--table-header-label">Status</span></th>
                 <th><span class="bx--table-header-label">Credits</span></th>
                 <th><span class="bx--table-header-label">Date</span></th>
+                <th><span class="bx--table-header-label">Actions</span></th>
             </tr>
         </thead>
         <tbody>
@@ -39,6 +58,11 @@
                     </td>
                     <td>@item.CreditsUsed</td>
                     <td>@item.CreatedAt.ToString("MMM dd, yyyy HH:mm")</td>
+                    <td>
+                        <a href="@Url.Action("Details", new { id = item.Id })" class="bx--btn bx--btn--sm bx--btn--secondary">
+                            <i class='bx bx-detail'></i> Details
+                        </a>
+                    </td>
                 </tr>
             }
         </tbody>
