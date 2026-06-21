@@ -25,6 +25,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
+    env_file:
+      - .env
     networks:
       - nexclone_network
     depends_on:
