@@ -9,6 +9,7 @@ import { useState } from "react";
 import api from "../../../src/utils/api";
 import { useRouter } from "../../../src/i18n/routing";
 import { useAppStore } from "../../../src/store/useAppStore";
+import { GoogleLoginButton } from "../../../components/GoogleLoginButton";
 
 export default function LoginPage() {
   const t = useTranslations("Auth");
@@ -114,6 +115,16 @@ export default function LoginPage() {
               <span className="relative">{loading ? "..." : t('submitLogin')}</span>
               <ArrowIcon className={`w-5 h-5 relative transition-transform duration-300 ${locale === 'ar' ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
             </button>
+            
+            <div className="relative flex items-center py-2">
+              <div className="flex-grow border-t border-white/10"></div>
+              <span className="flex-shrink-0 mx-4 text-white/40 text-sm">أو</span>
+              <div className="flex-grow border-t border-white/10"></div>
+            </div>
+
+            <div className="mt-4">
+              <GoogleLoginButton />
+            </div>
           </form>
 
           <div className="mt-6 text-center">

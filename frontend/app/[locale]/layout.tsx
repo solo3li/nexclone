@@ -37,6 +37,8 @@ async function getPublicSettings() {
   }
 }
 
+import { GoogleAuthProviderWrapper } from "../../components/GoogleAuthProviderWrapper";
+
 export default async function RootLayout({
   children,
   params
@@ -54,16 +56,19 @@ export default async function RootLayout({
   const settings = await getPublicSettings();
   const isMaintenanceMode = settings?.isMaintenanceMode === true;
   const maintenanceEndDate = settings?.maintenanceEndDate;
+  const googleClientId = settings?.googleClientId;
 
   return (
     <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} className={`${cairo.variable} ${inter.variable} scroll-smooth`}>
       <body className={`bg-[#0a0015] font-sans antialiased text-white overflow-x-hidden ${locale === 'ar' ? 'font-cairo' : 'font-inter'}`}>
         <NextIntlClientProvider messages={messages}>
-          {isMaintenanceMode ? (
-            <MaintenanceScreen endDate={maintenanceEndDate} />
-          ) : (
-            children
-          )}
+          <GoogleAuthProviderWrapper clientId={googleClientId}>
+            {isMaintenanceMode ? (
+              <MaintenanceScreen endDate={maintenanceEndDate} />
+            ) : (
+              children
+            )}
+          </GoogleAuthProviderWrapper>
         </NextIntlClientProvider>
       </body>
     </html>

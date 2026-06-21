@@ -114,4 +114,22 @@
             <button type="submit" class="bx--btn bx--btn--primary">Save AWS S3 Settings</button>
         </div>
     </form>
+
+    <!-- GOOGLE OAUTH SETTINGS FORM -->
+    <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #ea4335;">
+        @Html.AntiForgeryToken()
+
+        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">Google OAuth Settings</h3>
+        <p style="color: #525252; margin-bottom: 1rem; font-size: 0.875rem;">Configure Google Login for your users.</p>
+        
+        <div class="bx--form-item" style="margin-bottom: 1rem;">
+            <label for="OAuth_GoogleClientId" class="bx--label">Google Client ID</label>
+            <input id="OAuth_GoogleClientId" type="text" class="bx--text-input" name="settings[OAuth.GoogleClientId]" value="@Model.FirstOrDefault(s => s.Key == "OAuth.GoogleClientId")?.Value" placeholder="xxxx-xxxx.apps.googleusercontent.com">
+            <div class="bx--form__helper-text">Found in Google Cloud Console > APIs & Services > Credentials</div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
+            <button type="submit" class="bx--btn bx--btn--primary">Save Google OAuth Settings</button>
+        </div>
+    </form>
 </div>

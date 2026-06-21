@@ -1,3 +1,4 @@
+using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
@@ -159,6 +160,118 @@ namespace NexClone.Backend.Controllers
                 UserAgent = userAgent,
                 FingerprintHash = fingerprint
             });
+            await _context.SaveChangesAsync();
+
+            var token = GenerateJwtToken(user);
+            SetTokenCookie(token);
+
+            return Ok(new AuthResponse
+            {
+                Email = user.Email!,
+                IsVerified = user.IsVerified
+            });
+        }
+
+        [HttpPost("google-login")]
+        public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var googleClientId = await _context.AppSettings
+                .Where(s => s.Key == "OAuth.GoogleClientId")
+                .Select(s => s.Value)
+                .FirstOrDefaultAsync();
+
+            if (string.IsNullOrWhiteSpace(googleClientId))
+            {
+                return BadRequest(new { Message = "Google Login is not configured on this server." });
+            }
+
+            GoogleJsonWebSignature.Payload payload;
+            try
+            {
+                payload = await GoogleJsonWebSignature.ValidateAsync(request.Token, new GoogleJsonWebSignature.ValidationSettings
+                {
+                    Audience = new[] { googleClientId }
+                });
+            }
+            catch (InvalidJwtException)
+            {
+                return Unauthorized(new { Message = "Invalid Google Token." });
+            }
+
+            var user = await _userManager.FindByEmailAsync(payload.Email);
+            var isNewUser = false;
+
+            if (user == null)
+            {
+                isNewUser = true;
+                user = new ApplicationUser
+                {
+                    UserName = payload.Email,
+                    Email = payload.Email,
+                    FullName = payload.Name ?? "Google User",
+                    Country = "Unknown",
+                    CreatedAt = DateTime.UtcNow,
+                    IsVerified = payload.EmailVerified
+                };
+
+                // Create user with a strong random password
+                var result = await _userManager.CreateAsync(user, Guid.NewGuid().ToString() + "A!1a");
+                
+                if (!result.Succeeded)
+                {
+                    return BadRequest(new { Message = "Could not create user account." });
+                }
+            }
+
+            var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+            var userAgent = Request.Headers["User-Agent"].ToString() ?? "Unknown";
+            var fingerprint = request.DeviceFingerprint ?? string.Empty;
+
+            // Check trial eligibility if new user
+            if (isNewUser)
+            {
+                bool hasClaimedFreeTrial = false;
+                
+                if (!string.IsNullOrEmpty(fingerprint))
+                {
+                    hasClaimedFreeTrial = await _context.DeviceFingerprints.AnyAsync(df => df.FingerprintHash == fingerprint);
+                }
+                
+                if (!hasClaimedFreeTrial)
+                {
+                    hasClaimedFreeTrial = await _context.DeviceFingerprints.AnyAsync(df => df.IpAddress == ipAddress);
+                }
+
+                if (!hasClaimedFreeTrial)
+                {
+                    var freeTrialPlan = await _context.Plans.FirstOrDefaultAsync(p => p.IsFreeTrial);
+
+                    if (freeTrialPlan != null)
+                    {
+                        user.AvailableCredits = freeTrialPlan.MonthlyCredits;
+                        _context.Subscriptions.Add(new Subscription
+                        {
+                            UserId = user.Id,
+                            PlanId = freeTrialPlan.Id,
+                            StartDate = DateTime.UtcNow,
+                            EndDate = DateTime.UtcNow.AddDays(freeTrialPlan.DurationDays),
+                            Status = "Active"
+                        });
+                    }
+                }
+            }
+
+            _context.DeviceFingerprints.Add(new DeviceFingerprint
+            {
+                UserId = user.Id,
+                IpAddress = ipAddress,
+                UserAgent = userAgent,
+                FingerprintHash = fingerprint
+            });
+            
             await _context.SaveChangesAsync();
 
             var token = GenerateJwtToken(user);

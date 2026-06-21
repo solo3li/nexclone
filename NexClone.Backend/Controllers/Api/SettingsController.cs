@@ -27,10 +27,13 @@ namespace NexClone.Backend.Controllers.Api
             
             var maintenanceEndDate = settings.FirstOrDefault(s => s.Key == "Site.MaintenanceEndDate")?.Value;
 
+            var googleClientId = settings.FirstOrDefault(s => s.Key == "OAuth.GoogleClientId")?.Value;
+
             return Ok(new
             {
                 isMaintenanceMode,
-                maintenanceEndDate
+                maintenanceEndDate,
+                googleClientId = string.IsNullOrWhiteSpace(googleClientId) ? null : googleClientId
             });
         }
     }
