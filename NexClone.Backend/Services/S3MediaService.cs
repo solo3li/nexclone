@@ -11,14 +11,14 @@ using System.Threading.Tasks;
 
 namespace NexClone.Backend.Services
 {
-    public class MinioMediaService : IMediaService
+    public class S3MediaService : IMediaService
     {
         private IMinioClient _minioClient;
         private string _defaultBucket;
         private string _region;
         private readonly ApplicationDbContext _context;
 
-        public MinioMediaService(ApplicationDbContext context, IConfiguration configuration)
+        public S3MediaService(ApplicationDbContext context, IConfiguration configuration)
         {
             _context = context;
             _defaultBucket = "nexmedia"; // Will be overridden if set in DB

@@ -102,7 +102,7 @@ builder.Services.AddScoped<NexClone.Backend.Services.AI.ISttService, NexClone.Ba
 
 
 // Register Media Service
-builder.Services.AddScoped<NexClone.Backend.Services.IMediaService, NexClone.Backend.Services.MinioMediaService>();
+builder.Services.AddScoped<NexClone.Backend.Services.IMediaService, NexClone.Backend.Services.S3MediaService>();
 
 // Register Email Service
 builder.Services.AddScoped<NexClone.Backend.Services.IEmailService, NexClone.Backend.Services.BrevoEmailService>();
@@ -146,11 +146,7 @@ using (var scope = app.Services.CreateScope())
     {
         new NexClone.Backend.Models.AppSetting { Key = "Site.MaintenanceMode", Value = "false", Description = "Global maintenance mode toggle (true/false)" },
         new NexClone.Backend.Models.AppSetting { Key = "Site.MaintenanceEndDate", Value = "", Description = "Optional end date for maintenance (ISO 8601 string)" },
-        new NexClone.Backend.Models.AppSetting { Key = "Origin.AllowedOrigins", Value = "http://localhost:3000,http://localhost:3001,https://nexclone.com", Description = "Comma-separated list of allowed origins for CORS" },
-        new NexClone.Backend.Models.AppSetting { Key = "Minio.Endpoint", Value = "minio:9000", Description = "Minio endpoint address" },
-        new NexClone.Backend.Models.AppSetting { Key = "Minio.AccessKey", Value = "minioadmin", Description = "Minio access key" },
-        new NexClone.Backend.Models.AppSetting { Key = "Minio.SecretKey", Value = "minioadmin", Description = "Minio secret key" },
-        new NexClone.Backend.Models.AppSetting { Key = "Minio.BucketName", Value = "nexmedia", Description = "Minio bucket name" }
+        new NexClone.Backend.Models.AppSetting { Key = "Origin.AllowedOrigins", Value = "http://localhost:3000,http://localhost:3001,https://nexclone.com", Description = "Comma-separated list of allowed origins for CORS" }
     };
 
     foreach (var setting in defaultSettings)
