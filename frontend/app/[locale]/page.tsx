@@ -37,7 +37,6 @@ export default function Page() {
           <ToolsSection />
           <HowItWorks />
           <FeaturesSection />
-          <PricingSection />
           <CTASection />
         </main>
         <Footer />
