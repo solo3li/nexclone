@@ -55,26 +55,31 @@
             <div class="bx--form__helper-text">Comma-separated list of allowed origins. Use * to allow all (not recommended).</div>
         </div>
 
-        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem; margin-top: 2rem;">Minio Settings</h3>
+        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem; margin-top: 2rem;">AWS S3 Settings</h3>
         
         <div class="bx--form-item" style="margin-bottom: 1.5rem;">
-            <label for="Minio_Endpoint" class="bx--label">Endpoint</label>
-            <input id="Minio_Endpoint" type="text" class="bx--text-input" name="settings[Minio.Endpoint]" value="@Model.FirstOrDefault(s => s.Key == "Minio.Endpoint")?.Value">
+            <label for="S3_Endpoint" class="bx--label">Endpoint</label>
+            <input id="S3_Endpoint" type="text" class="bx--text-input" name="settings[S3.Endpoint]" value="@Model.FirstOrDefault(s => s.Key == "S3.Endpoint")?.Value" placeholder="s3.amazonaws.com">
         </div>
 
         <div class="bx--form-item" style="margin-bottom: 1.5rem;">
-            <label for="Minio_AccessKey" class="bx--label">Access Key</label>
-            <input id="Minio_AccessKey" type="text" class="bx--text-input" name="settings[Minio.AccessKey]" value="@Model.FirstOrDefault(s => s.Key == "Minio.AccessKey")?.Value">
+            <label for="S3_Region" class="bx--label">Region</label>
+            <input id="S3_Region" type="text" class="bx--text-input" name="settings[S3.Region]" value="@Model.FirstOrDefault(s => s.Key == "S3.Region")?.Value" placeholder="eu-north-1">
         </div>
 
         <div class="bx--form-item" style="margin-bottom: 1.5rem;">
-            <label for="Minio_SecretKey" class="bx--label">Secret Key</label>
-            <input id="Minio_SecretKey" type="password" class="bx--text-input" name="settings[Minio.SecretKey]" value="@Model.FirstOrDefault(s => s.Key == "Minio.SecretKey")?.Value">
+            <label for="S3_AccessKey" class="bx--label">Access Key</label>
+            <input id="S3_AccessKey" type="text" class="bx--text-input" name="settings[S3.AccessKey]" value="@Model.FirstOrDefault(s => s.Key == "S3.AccessKey")?.Value">
+        </div>
+
+        <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+            <label for="S3_SecretKey" class="bx--label">Secret Key</label>
+            <input id="S3_SecretKey" type="password" class="bx--text-input" name="settings[S3.SecretKey]" value="@Model.FirstOrDefault(s => s.Key == "S3.SecretKey")?.Value">
         </div>
 
         <div class="bx--form-item" style="margin-bottom: 2rem;">
-            <label for="Minio_BucketName" class="bx--label">Bucket Name</label>
-            <input id="Minio_BucketName" type="text" class="bx--text-input" name="settings[Minio.BucketName]" value="@Model.FirstOrDefault(s => s.Key == "Minio.BucketName")?.Value">
+            <label for="S3_BucketName" class="bx--label">Bucket Name</label>
+            <input id="S3_BucketName" type="text" class="bx--text-input" name="settings[S3.BucketName]" value="@Model.FirstOrDefault(s => s.Key == "S3.BucketName")?.Value">
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
