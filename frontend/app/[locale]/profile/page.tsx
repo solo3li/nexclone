@@ -173,6 +173,19 @@ export default function ProfilePage() {
                     <span className="w-2 h-2 rounded-full bg-emerald-400" /> {user?.activePlan ? user.activePlan.status : "Active"}
                   </span>
                 </div>
+                <div className="flex justify-between items-center pb-4 border-b border-white/5">
+                  <span className="text-white/60">{isRtl ? "تاريخ الانتهاء" : "Expiration Date"}</span>
+                  <span className="text-white font-medium text-sm">
+                    {user?.activePlan?.endDate 
+                      ? new Date(user.activePlan.endDate).toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })
+                      : (isRtl ? "بدون تاريخ انتهاء (مجاني)" : "No expiration (Free)")
+                    }
+                  </span>
+                </div>
                 <button onClick={() => router.push(`/${locale}/pricing`)} className="w-full py-3 mt-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white font-medium transition-all hover:border-white/20">
                   {t('subscription.upgrade')}
                 </button>
