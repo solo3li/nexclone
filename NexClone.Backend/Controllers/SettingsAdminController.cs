@@ -20,12 +20,32 @@ namespace NexClone.Backend.Controllers
         {
             ViewData["Title"] = "Global Settings";
             var settings = await _context.AppSettings.ToListAsync();
+            
+            var toolConfigs = await _context.ToolConfigurations.ToListAsync();
+            var defaultTools = new[] { "text-to-voice", "voice-to-text" };
+            bool changesMade = false;
+            foreach (var defaultTool in defaultTools)
+            {
+                if (!toolConfigs.Any(t => t.ToolName == defaultTool))
+                {
+                    var newConfig = new ToolConfiguration { ToolName = defaultTool, ProviderName = "System", ModelName = "Default", IsActive = true, IsMaintenanceMode = false };
+                    _context.ToolConfigurations.Add(newConfig);
+                    toolConfigs.Add(newConfig);
+                    changesMade = true;
+                }
+            }
+            if (changesMade)
+            {
+                await _context.SaveChangesAsync();
+            }
+
+            ViewBag.ToolConfigurations = toolConfigs;
             return View(settings);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SaveAll(Dictionary<string, string> settings)
+        public async Task<IActionResult> SaveAll(Dictionary<string, string> settings, Microsoft.AspNetCore.Http.IFormCollection form)
         {
             if (settings == null) return RedirectToAction(nameof(Index));
 
@@ -52,6 +72,18 @@ namespace NexClone.Backend.Controllers
                         Description = "Dynamically added setting",
                         UpdatedAt = System.DateTime.UtcNow
                     });
+                }
+            }
+
+            var toolConfigs = await _context.ToolConfigurations.ToListAsync();
+            foreach (var tool in toolConfigs)
+            {
+                bool isMaintenance = form.ContainsKey($"toolMaintenance_{tool.Id}");
+                if (tool.IsMaintenanceMode != isMaintenance)
+                {
+                    tool.IsMaintenanceMode = isMaintenance;
+                    tool.UpdatedAt = System.DateTime.UtcNow;
+                    _context.Update(tool);
                 }
             }
 

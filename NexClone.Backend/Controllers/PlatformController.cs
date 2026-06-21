@@ -134,5 +134,16 @@ namespace NexClone.Backend.Controllers
 
             return Ok(new { maxChars = maxChars, customInstructionsEnabled = customInstructionsEnabled, isMaintenanceMode = isMaintenanceMode });
         }
+
+        [HttpGet("vtt-config")]
+        public async Task<IActionResult> GetVttConfig()
+        {
+            var activeToolConfig = await _context.ToolConfigurations
+                .FirstOrDefaultAsync(c => c.ToolName == "voice-to-text" && c.IsActive);
+
+            bool isMaintenanceMode = activeToolConfig?.IsMaintenanceMode ?? false;
+
+            return Ok(new { isMaintenanceMode = isMaintenanceMode });
+        }
     }
 }

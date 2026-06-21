@@ -53,6 +53,7 @@ export default function VoiceToTextPage() {
   const [isDragOver, setIsDragOver] = useState(false);
   const [estimatedCost, setEstimatedCost] = useState<number | null>(null);
   const [isEstimating, setIsEstimating] = useState(false);
+  const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
 
   // Audio preview player state
   const [audioPreviewUrl, setAudioPreviewUrl] = useState<string | null>(null);
@@ -65,6 +66,18 @@ export default function VoiceToTextPage() {
   const chunksRef = useRef<BlobPart[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const res = await api.get("/api/platform/vtt-config");
+        setIsMaintenanceMode(res.data.isMaintenanceMode || false);
+      } catch (err) {
+        console.error("Failed to fetch config:", err);
+      }
+    };
+    fetchConfig();
+  }, []);
+
   useEffect(() => {
     if (!file || duration <= 0) {
       setEstimatedCost(null);
@@ -261,11 +274,21 @@ export default function VoiceToTextPage() {
       <Navbar />
 
       <main className="flex-1 container mx-auto px-4 pt-32 pb-20 relative z-10 max-w-5xl">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
+        {isMaintenanceMode ? (
+          <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
+            <div className="w-20 h-20 bg-violet-600/20 rounded-full flex items-center justify-center mb-6">
+              <Mic className="w-10 h-10 text-violet-500" />
+            </div>
+            <h1 className="text-3xl font-bold text-white mb-4">هذه الأداة تحت الصيانة مؤقتاً</h1>
+            <p className="text-white/60 max-w-md">نحن نقوم بتحديث أداة تحويل الصوت إلى نص لتحسين الجودة. يرجى المحاولة لاحقاً. نعتذر عن الإزعاج.</p>
+          </div>
+        ) : (
+          <>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center mb-12"
+            >
           <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4">{t('title')}</h1>
           <p className="text-lg text-white/60">{t('subtitle')}</p>
         </motion.div>
@@ -641,6 +664,8 @@ export default function VoiceToTextPage() {
           </motion.div>
 
         </div>
+          </>
+        )}
       </main>
 
       <Footer />

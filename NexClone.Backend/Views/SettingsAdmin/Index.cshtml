@@ -30,6 +30,23 @@
             <div class="bx--form__helper-text">Leave blank for indefinite maintenance.</div>
         </div>
 
+        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem; margin-top: 2rem;">Tools Maintenance</h3>
+        <p style="color: #525252; margin-bottom: 1rem; font-size: 0.875rem;">Enable maintenance mode for specific tools. This will show a maintenance screen to users attempting to access them.</p>
+
+        @if (ViewBag.ToolConfigurations != null)
+        {
+            var tools = (IEnumerable<NexClone.Backend.Models.ToolConfiguration>)ViewBag.ToolConfigurations;
+            foreach (var tool in tools)
+            {
+                <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom: 1rem;">
+                    <input id="toolMaintenance_@(tool.Id)" class="bx--checkbox" type="checkbox" name="toolMaintenance_@(tool.Id)" value="true" @(tool.IsMaintenanceMode ? "checked" : "")>
+                    <label for="toolMaintenance_@(tool.Id)" class="bx--checkbox-label" title="Enable Maintenance Mode for @tool.ToolName">
+                        <span class="bx--checkbox-label-text">@tool.ToolName (Provider: @tool.ProviderName)</span>
+                    </label>
+                </div>
+            }
+        }
+
         <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem; margin-top: 2rem;">Origin (CORS) Settings</h3>
         
         <div class="bx--form-item" style="margin-bottom: 2rem;">

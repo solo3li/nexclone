@@ -43,7 +43,7 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
 
   const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["10deg", "-10deg"]);
   const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-10deg", "10deg"]);
-  
+
   const bgX = useTransform(mouseXSpring, [-0.5, 0.5], [0, 100]);
   const bgY = useTransform(mouseYSpring, [-0.5, 0.5], [0, 100]);
   const background = useMotionTemplate`radial-gradient(circle at ${bgX}% ${bgY}%, rgba(255,255,255,0.15) 0%, transparent 60%)`;
@@ -100,10 +100,10 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
 
       {/* Cover Image Container */}
       <div className="relative h-48 w-full overflow-hidden shrink-0 z-0 border-b border-white/10 bg-[#0a0015]/50">
-        <img 
-          src={tool.image} 
-          alt={tool.title} 
-          className="absolute inset-0 w-full h-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-110 group-hover:opacity-100" 
+        <img
+          src={tool.image}
+          alt={tool.title}
+          className="absolute inset-0 w-full h-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-110 group-hover:opacity-100"
         />
         {/* Subtle gradient fade to smoothly blend into the card body */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#0d011a] via-transparent to-transparent opacity-80" />
