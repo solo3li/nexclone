@@ -62,6 +62,12 @@ namespace NexClone.Backend.Services
             }
 
             var toolPolicy = GetToolPolicy(targetPlan, toolId);
+            if (user.IsStaff) 
+            {
+                toolPolicy.Enabled = true;
+                toolPolicy.MaxCharsPerRequest = -1;
+                toolPolicy.MaxFileSizeMb = -1;
+            }
 
             if (!toolPolicy.Enabled)
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Your current plan does not have access to this tool." };
@@ -154,6 +160,12 @@ namespace NexClone.Backend.Services
             }
 
             var toolPolicy = GetToolPolicy(targetPlan, toolId);
+            if (user.IsStaff) 
+            {
+                toolPolicy.Enabled = true;
+                toolPolicy.MaxCharsPerRequest = -1;
+                toolPolicy.MaxFileSizeMb = -1;
+            }
 
             if (!toolPolicy.Enabled)
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Your current plan does not have access to this tool." };

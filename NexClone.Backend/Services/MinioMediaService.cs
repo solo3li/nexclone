@@ -98,12 +98,11 @@ namespace NexClone.Backend.Services
             await EnsureClientInitializedAsync();
             bucketName ??= _defaultBucket;
 
-            var presignedGetObjectArgs = new PresignedGetObjectArgs()
-                .WithBucket(bucketName)
-                .WithObject(objectName)
-                .WithExpiry(60 * 60 * 24 * 7); // 7 days (maximum allowed by AWS/MinIO SigV4)
+            var settings = _context.AppSettings.ToList();
+            var publicEndpoint = settings.FirstOrDefault(s => s.Key == "Minio.PublicEndpoint")?.Value ?? "178.62.192.74:9000";
 
-            return await _minioClient.PresignedGetObjectAsync(presignedGetObjectArgs).ConfigureAwait(false);
+            // Return direct URL since nexmedia bucket is public
+            return $"http://{publicEndpoint}/{bucketName}/{objectName}";
         }
 
         public async Task<string> GeneratePresignedUploadUrlAsync(string objectName, string contentType, string bucketName = null)

@@ -94,15 +94,27 @@ namespace NexClone.Backend.Areas.AI.Controllers
         [HttpPost("estimate")]
         public async Task<IActionResult> EstimateAudio([FromBody] TtsRequest request)
         {
+            Console.WriteLine($"[ESTIMATE] Request received: TextLength={request?.Text?.Length}, Language={request?.Language}, VoiceName={request?.VoiceName}");
             if (!ModelState.IsValid)
+            {
+                var errors = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                Console.WriteLine($"[ESTIMATE] ModelState Invalid: {errors}");
                 return BadRequest(ModelState);
+            }
 
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+            if (!Guid.TryParse(userIdStr, out var userId)) 
+            {
+                Console.WriteLine("[ESTIMATE] Unauthorized: Missing userId");
+                return Unauthorized();
+            }
 
             var policyResult = await _usagePolicy.EstimateCostAsync(userId, "text-to-voice", request.Text.Length);
             if (!policyResult.IsAllowed)
+            {
+                Console.WriteLine($"[ESTIMATE] Policy Denied: {policyResult.ErrorMessage}");
                 return BadRequest(new { error = policyResult.ErrorMessage });
+            }
 
             return Ok(new { estimatedCost = policyResult.TotalCost });
         }
@@ -111,8 +123,8 @@ namespace NexClone.Backend.Areas.AI.Controllers
     public class TtsRequest
     {
         public string Text { get; set; } = string.Empty;
-        public string Language { get; set; } = "other"; // "arabic" or "other"
-        public string VoiceName { get; set; } = string.Empty;
-        public string StyleInstruction { get; set; } = string.Empty;
+        public string? Language { get; set; } = "other"; // "arabic" or "other"
+        public string? VoiceName { get; set; } = string.Empty;
+        public string? StyleInstruction { get; set; } = string.Empty;
     }
 }

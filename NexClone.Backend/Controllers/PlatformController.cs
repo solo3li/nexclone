@@ -12,10 +12,12 @@ namespace NexClone.Backend.Controllers
     public class PlatformController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly NexClone.Backend.Services.IMediaService _mediaService;
 
-        public PlatformController(ApplicationDbContext context)
+        public PlatformController(ApplicationDbContext context, NexClone.Backend.Services.IMediaService mediaService)
         {
             _context = context;
+            _mediaService = mediaService;
         }
 
         [HttpGet("stats")]
@@ -46,18 +48,28 @@ namespace NexClone.Backend.Controllers
             var voices = await _context.Voices
                 .Where(v => v.IsActive)
                 .OrderBy(v => v.Order)
-                .Select(v => new {
+                .ToListAsync();
+
+            var mappedVoices = new List<object>();
+            foreach(var v in voices)
+            {
+                string demoUrl = null;
+                if (!string.IsNullOrWhiteSpace(v.DemoAudio))
+                {
+                    demoUrl = await _mediaService.GetFileUrlAsync(v.DemoAudio);
+                }
+                mappedVoices.Add(new {
                     v.Id,
                     v.Name,
                     v.VoiceName,
                     v.Accent,
                     v.Gender,
                     v.IsPremium,
-                    v.DemoAudio
-                })
-                .ToListAsync();
+                    DemoAudio = demoUrl
+                });
+            }
                 
-            return Ok(voices);
+            return Ok(mappedVoices);
         }
 
         [HttpGet("dialects")]

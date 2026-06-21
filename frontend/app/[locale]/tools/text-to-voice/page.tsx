@@ -46,6 +46,7 @@ export default function TextToVoicePage() {
   const [selectedDialect, setSelectedDialect] = useState<string>("");
   const [selectedEmotion, setSelectedEmotion] = useState<string>("");
   const [selectedStyle, setSelectedStyle] = useState<string>("");
+  const [selectedOtherLanguage, setSelectedOtherLanguage] = useState<string>("English");
   
   const [isProcessing, setIsProcessing] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -107,7 +108,12 @@ export default function TextToVoicePage() {
     setIsEstimating(true);
     setError("");
     try {
-      const response = await api.post("/api/ai/text-to-voice/estimate", { text });
+      const response = await api.post("/api/ai/text-to-voice/estimate", { 
+        text,
+        language: languageMode,
+        voiceName: selectedVoice,
+        styleInstruction: ""
+      });
       setPendingCost(response.data.estimatedCost);
       setShowConfirmModal(true);
     } catch (err: any) {
@@ -135,10 +141,15 @@ export default function TextToVoicePage() {
     setAudioUrl(null);
 
     let instruction = "";
-    if (selectedDialect) instruction += `Accent: ${selectedDialect}. `;
+    if (languageMode === 'other') {
+      instruction += `Language: ${selectedOtherLanguage}. `;
+    } else {
+      if (selectedDialect) instruction += `Accent: ${selectedDialect}. `;
+    }
+    
     if (selectedEmotion) instruction += `Emotion: ${selectedEmotion}. `;
     if (selectedStyle) instruction += `Style: ${selectedStyle}. `;
-    if (customInstruction) instruction += `Additional Context: ${customInstruction}. `;
+    if (customInstruction && languageMode !== 'other') instruction += `Additional Context: ${customInstruction}. `;
 
     try {
       const response = await api.post("/api/ai/text-to-voice/generate", {
@@ -354,7 +365,8 @@ export default function TextToVoicePage() {
                   </div>
                 </div>
 
-                {/* Free Account Notice */}
+                {/* Free Account Notice - Only in Arabic Mode */}
+                {languageMode === 'arabic' && (
                 <div className="bg-violet-500/10 border border-violet-500/20 rounded-[20px] p-4 flex flex-col gap-2">
                   <div className="flex gap-3">
                     <Info className="w-5 h-5 text-violet-400 shrink-0 mt-0.5" />
@@ -366,8 +378,10 @@ export default function TextToVoicePage() {
                     </div>
                   </div>
                 </div>
+                )}
 
-                {/* Choose Voice */}
+                {/* Choose Voice - Only in Arabic Mode */}
+                {languageMode === 'arabic' && (
                 <div className="bg-[#0a0015]/60 border border-white/5 rounded-[24px] p-5 flex flex-col">
                   <div className="flex items-center gap-2 mb-4">
                     <User className="w-5 h-5 text-violet-400" />
@@ -450,9 +464,35 @@ export default function TextToVoicePage() {
                     )}
                   </div>
                 </div>
+                )}
+
+                {/* Target Language Selection - Only in Other Languages Mode */}
+                {languageMode === 'other' && (
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[11px] font-semibold text-white/60 px-2">{isRtl ? 'اللغة المطلوبة' : 'Target Language'}</label>
+                    <div className="relative bg-[#0a0015]/60 border border-white/5 rounded-[16px] text-xs text-white/80 hover:border-white/10 transition-colors">
+                      <select 
+                        value={selectedOtherLanguage}
+                        onChange={(e) => setSelectedOtherLanguage(e.target.value)}
+                        className="w-full bg-transparent outline-none appearance-none cursor-pointer px-4 py-3 relative z-10"
+                      >
+                        <option value="English" className="bg-[#0a0015] text-white">English (الإنجليزية)</option>
+                        <option value="French" className="bg-[#0a0015] text-white">French (الفرنسية)</option>
+                        <option value="Spanish" className="bg-[#0a0015] text-white">Spanish (الإسبانية)</option>
+                        <option value="German" className="bg-[#0a0015] text-white">German (الألمانية)</option>
+                        <option value="Italian" className="bg-[#0a0015] text-white">Italian (الإيطالية)</option>
+                        <option value="Turkish" className="bg-[#0a0015] text-white">Turkish (التركية)</option>
+                        <option value="Russian" className="bg-[#0a0015] text-white">Russian (الروسية)</option>
+                      </select>
+                      <ChevronDown className={`w-3.5 h-3.5 absolute top-1/2 -translate-y-1/2 ${isRtl ? 'left-4' : 'right-4'} pointer-events-none text-white/50 z-0`} />
+                    </div>
+                  </div>
+                )}
 
                 {/* UI Placeholders for Advanced Settings */}
                 <div className="space-y-3">
+                  
+                  {languageMode === 'arabic' && (
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[11px] font-semibold text-white/60 px-2">{t('accent')}</label>
                     <div className="relative bg-[#0a0015]/60 border border-white/5 rounded-[16px] text-xs text-white/80 hover:border-white/10 transition-colors">
@@ -471,6 +511,7 @@ export default function TextToVoicePage() {
                       <ChevronDown className={`w-3.5 h-3.5 absolute top-1/2 -translate-y-1/2 ${isRtl ? 'left-4' : 'right-4'} pointer-events-none text-white/50 z-0`} />
                     </div>
                   </div>
+                  )}
 
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[11px] font-semibold text-white/60 px-2">{t('emotion')}</label>
@@ -511,6 +552,7 @@ export default function TextToVoicePage() {
                     </div>
                   </div>
 
+                  {languageMode === 'arabic' && (
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[11px] font-semibold text-white/60 px-2 flex items-center gap-1.5">
                       <Wand2 className="w-3 h-3 text-fuchsia-400" />
@@ -530,6 +572,7 @@ export default function TextToVoicePage() {
                       </div>
                     )}
                   </div>
+                  )}
                 </div>
 
               </div>
