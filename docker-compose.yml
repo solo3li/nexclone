@@ -8,7 +8,7 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - ./frontend/.env.local
+      - .front.env
     networks:
       - nexclone_network
     depends_on:
