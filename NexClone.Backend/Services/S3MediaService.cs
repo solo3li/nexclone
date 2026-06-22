@@ -97,13 +97,42 @@ namespace NexClone.Backend.Services
             catch (Exception ex)
             {
                 Console.Error.WriteLine($"[S3MediaService] Upload failed for '{uniqueObjectName}': {ex.Message}");
-                // Return empty string so callers can handle missing media gracefully
-                return string.Empty;
+                
+                // Fallback to local storage if S3 fails
+                try
+                {
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                    if (!Directory.Exists(uploadsFolder))
+                    {
+                        Directory.CreateDirectory(uploadsFolder);
+                    }
+                    var localPath = Path.Combine(uploadsFolder, uniqueObjectName);
+                    
+                    memStream.Position = 0;
+                    using (var fileStream = new FileStream(localPath, FileMode.Create))
+                    {
+                        await memStream.CopyToAsync(fileStream);
+                    }
+                    
+                    return $"/uploads/{uniqueObjectName}"; // return absolute path for frontend
+                }
+                catch (Exception localEx)
+                {
+                    Console.Error.WriteLine($"[S3MediaService] Local fallback also failed: {localEx.Message}");
+                    return string.Empty;
+                }
             }
         }
 
         public async Task<byte[]> DownloadFileAsync(string objectName, string bucketName = null)
         {
+            if (objectName.StartsWith("/uploads/"))
+            {
+                var localPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", objectName.TrimStart('/'));
+                if (File.Exists(localPath)) return await File.ReadAllBytesAsync(localPath);
+                return Array.Empty<byte>();
+            }
+
             await EnsureClientInitializedAsync();
             using var memoryStream = new MemoryStream();
 
@@ -122,6 +151,9 @@ namespace NexClone.Backend.Services
 
         public async Task<string> GetFileUrlAsync(string objectName, string bucketName = null)
         {
+            if (objectName.StartsWith("/uploads/")) return objectName;
+            if (objectName.StartsWith("http://") || objectName.StartsWith("https://")) return objectName;
+
             await EnsureClientInitializedAsync();
 
             // AWS S3 Virtual-Hosted Style URL

@@ -184,6 +184,7 @@ app.MapOpenApi();
 app.MapScalarApiReference();
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseRouting();
 app.UseCors("AllowNextjs");
 app.UseRateLimiter();

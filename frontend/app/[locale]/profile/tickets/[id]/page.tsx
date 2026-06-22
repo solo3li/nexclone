@@ -186,21 +186,21 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
               {msg.attachmentUrl && (
                 <div className="mt-2">
                   {msg.attachmentType === "image" ? (
-                    <a href={msg.attachmentUrl} target="_blank" rel="noreferrer">
-                      <img
-                        src={msg.attachmentUrl}
-                        alt="Attachment"
-                        className="max-w-full rounded-xl max-h-48 object-cover border border-white/10"
+                    <a href={msg.attachmentUrl.startsWith('/') ? `${process.env.NEXT_PUBLIC_API_URL}${msg.attachmentUrl}` : msg.attachmentUrl} target="_blank" rel="noreferrer">
+                      <img 
+                        src={msg.attachmentUrl.startsWith('/') ? `${process.env.NEXT_PUBLIC_API_URL}${msg.attachmentUrl}` : msg.attachmentUrl}
+                        alt="Attachment" 
+                        className="max-w-xs rounded-xl border border-white/10"
                       />
                     </a>
                   ) : msg.attachmentType === "audio" ? (
-                    <audio src={msg.attachmentUrl} controls className="max-w-full h-10" />
+                    <audio src={msg.attachmentUrl.startsWith('/') ? `${process.env.NEXT_PUBLIC_API_URL}${msg.attachmentUrl}` : msg.attachmentUrl} controls className="max-w-full h-10" />
                   ) : (
                     <a
-                      href={msg.attachmentUrl}
+                      href={msg.attachmentUrl.startsWith('/') ? `${process.env.NEXT_PUBLIC_API_URL}${msg.attachmentUrl}` : msg.attachmentUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="flex items-center gap-2 text-sm text-white/80 hover:text-white underline"
+                      className="inline-block px-4 py-2 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 text-sm text-blue-400"
                     >
                       📎 View Attachment
                     </a>
