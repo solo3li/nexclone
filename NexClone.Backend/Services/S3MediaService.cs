@@ -65,26 +65,41 @@ namespace NexClone.Backend.Services
         {
             await EnsureClientInitializedAsync();
             
-            string actualObjectName = string.IsNullOrWhiteSpace(bucketName) || bucketName == _defaultBucket ? objectName : $"{bucketName}/{objectName}";
+            // Use a unique name to avoid conflicts
+            var uniqueObjectName = $"{Guid.NewGuid()}_{objectName}";
 
-            var bucketExistsArgs = new BucketExistsArgs().WithBucket(_defaultBucket);
-            bool found = await _minioClient.BucketExistsAsync(bucketExistsArgs).ConfigureAwait(false);
-            if (!found)
+            // Read stream into memory first to ensure we have length
+            using var memStream = new MemoryStream();
+            await stream.CopyToAsync(memStream);
+            memStream.Position = 0;
+
+            try
             {
-                var makeBucketArgs = new MakeBucketArgs().WithBucket(_defaultBucket).WithLocation(_region);
-                await _minioClient.MakeBucketAsync(makeBucketArgs).ConfigureAwait(false);
+                var bucketExistsArgs = new BucketExistsArgs().WithBucket(_defaultBucket);
+                bool found = await _minioClient.BucketExistsAsync(bucketExistsArgs).ConfigureAwait(false);
+                if (!found)
+                {
+                    var makeBucketArgs = new MakeBucketArgs().WithBucket(_defaultBucket).WithLocation(_region);
+                    await _minioClient.MakeBucketAsync(makeBucketArgs).ConfigureAwait(false);
+                }
+
+                var putObjectArgs = new PutObjectArgs()
+                    .WithBucket(_defaultBucket)
+                    .WithObject(uniqueObjectName)
+                    .WithStreamData(memStream)
+                    .WithObjectSize(memStream.Length)
+                    .WithContentType(contentType);
+
+                await _minioClient.PutObjectAsync(putObjectArgs).ConfigureAwait(false);
+
+                return uniqueObjectName;
             }
-
-            var putObjectArgs = new PutObjectArgs()
-                .WithBucket(_defaultBucket)
-                .WithObject(actualObjectName)
-                .WithStreamData(stream)
-                .WithObjectSize(stream.Length)
-                .WithContentType(contentType);
-
-            await _minioClient.PutObjectAsync(putObjectArgs).ConfigureAwait(false);
-
-            return actualObjectName;
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"[S3MediaService] Upload failed for '{uniqueObjectName}': {ex.Message}");
+                // Return empty string so callers can handle missing media gracefully
+                return string.Empty;
+            }
         }
 
         public async Task<byte[]> DownloadFileAsync(string objectName, string bucketName = null)

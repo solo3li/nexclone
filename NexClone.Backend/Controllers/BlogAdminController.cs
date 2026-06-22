@@ -104,9 +104,19 @@ namespace NexClone.Backend.Controllers
 
                 if (MediaFile != null && MediaFile.Length > 0)
                 {
-                    var fileUrl = await _mediaService.UploadFileAsync(MediaFile.OpenReadStream(), MediaFile.FileName, MediaFile.ContentType);
-                    existing.MediaUrl = fileUrl;
-                    existing.MediaType = MediaFile.ContentType.StartsWith("video") ? "video" : "image";
+                    try
+                    {
+                        var fileUrl = await _mediaService.UploadFileAsync(MediaFile.OpenReadStream(), MediaFile.FileName, MediaFile.ContentType);
+                        if (!string.IsNullOrEmpty(fileUrl))
+                        {
+                            existing.MediaUrl = fileUrl;
+                            existing.MediaType = MediaFile.ContentType.StartsWith("video") ? "video" : "image";
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Error.WriteLine($"[BlogAdmin] File upload error on edit: {ex.Message}");
+                    }
                 }
 
                 _context.Update(existing);
