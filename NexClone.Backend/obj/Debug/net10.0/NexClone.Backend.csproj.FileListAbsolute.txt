@@ -1322,3 +1322,9 @@
 /src/NexClone.Backend/obj/Debug/net10.0/NexClone.Backend.pdb
 /src/NexClone.Backend/obj/Debug/net10.0/NexClone.Backend.genruntimeconfig.cache
 /src/NexClone.Backend/obj/Debug/net10.0/ref/NexClone.Backend.dll
+/app/NexClone.Backend/bin/Debug/net10.0/Google.Apis.dll
+/app/NexClone.Backend/bin/Debug/net10.0/Google.Apis.Auth.dll
+/app/NexClone.Backend/bin/Debug/net10.0/Google.Apis.Core.dll
+/app/NexClone.Backend/bin/Debug/net10.0/Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.dll
+/app/NexClone.Backend/bin/Debug/net10.0/System.Management.dll
+/app/NexClone.Backend/bin/Debug/net10.0/runtimes/win/lib/net7.0/System.Management.dll
