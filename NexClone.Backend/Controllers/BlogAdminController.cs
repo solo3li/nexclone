@@ -38,11 +38,14 @@ namespace NexClone.Backend.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(BlogPost post, IFormFile MediaFile)
+        public async Task<IActionResult> Create(BlogPost post, IFormFile? MediaFile)
         {
+            // Remove navigation properties from validation
+            ModelState.Remove("Comments");
+            
             if (ModelState.IsValid)
             {
-                if (MediaFile != null)
+                if (MediaFile != null && MediaFile.Length > 0)
                 {
                     var fileUrl = await _mediaService.UploadFileAsync(MediaFile.OpenReadStream(), MediaFile.FileName, MediaFile.ContentType);
                     post.MediaUrl = fileUrl;
@@ -50,10 +53,25 @@ namespace NexClone.Backend.Controllers
                 }
                 
                 post.CreatedAt = DateTime.UtcNow;
+                post.Comments = new List<BlogComment>();
                 _context.BlogPosts.Add(post);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            
+            // Log validation errors to help debug
+            foreach (var key in ModelState.Keys)
+            {
+                var state = ModelState[key];
+                if (state?.Errors?.Count > 0)
+                {
+                    foreach (var error in state.Errors)
+                    {
+                        Console.WriteLine($"ModelState Error [{key}]: {error.ErrorMessage}");
+                    }
+                }
+            }
+            
             return View(post);
         }
 
@@ -68,9 +86,12 @@ namespace NexClone.Backend.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, BlogPost post, IFormFile MediaFile)
+        public async Task<IActionResult> Edit(int id, BlogPost post, IFormFile? MediaFile)
         {
             if (id != post.Id) return NotFound();
+
+            // Remove navigation properties from validation
+            ModelState.Remove("Comments");
 
             if (ModelState.IsValid)
             {
@@ -81,7 +102,7 @@ namespace NexClone.Backend.Controllers
                 existing.Content = post.Content;
                 existing.IsPublished = post.IsPublished;
 
-                if (MediaFile != null)
+                if (MediaFile != null && MediaFile.Length > 0)
                 {
                     var fileUrl = await _mediaService.UploadFileAsync(MediaFile.OpenReadStream(), MediaFile.FileName, MediaFile.ContentType);
                     existing.MediaUrl = fileUrl;
