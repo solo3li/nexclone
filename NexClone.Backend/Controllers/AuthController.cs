@@ -377,7 +377,8 @@ namespace NexClone.Backend.Controllers
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
-                Expires = DateTime.UtcNow.AddDays(7)
+                Expires = DateTime.UtcNow.AddDays(7),
+                Path = "/"
             };
             Response.Cookies.Append("jwt", token, cookieOptions);
         }
@@ -385,11 +386,13 @@ namespace NexClone.Backend.Controllers
         [HttpPost("logout")]
         public IActionResult Logout()
         {
-            Response.Cookies.Delete("jwt", new CookieOptions
+            Response.Cookies.Append("jwt", "", new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.None
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddDays(-10),
+                Path = "/"
             });
             return Ok(new { Message = "Logged out" });
         }
