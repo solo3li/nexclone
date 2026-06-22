@@ -64,6 +64,14 @@ builder.Services.AddAuthentication(options =>
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
+.AddCookie(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme, options =>
+{
+    options.LoginPath = "/AdminAuth/Login";
+    options.AccessDeniedPath = "/AdminAuth/AccessDenied";
+    options.Cookie.Name = "AdminAuthCookie";
+    options.Cookie.HttpOnly = true;
+    options.ExpireTimeSpan = TimeSpan.FromDays(7);
+})
 .AddJwtBearer(options =>
 {
     options.RequireHttpsMetadata = false;

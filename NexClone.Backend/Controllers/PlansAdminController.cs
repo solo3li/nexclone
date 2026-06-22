@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NexClone.Backend.Models;
@@ -6,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace NexClone.Backend.Controllers
 {
+    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Admin")]
     public class PlansAdminController : Controller
     {
         private readonly ApplicationDbContext _context;

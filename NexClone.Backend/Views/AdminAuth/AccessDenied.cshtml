@@ -1,0 +1,55 @@
+@{
+    Layout = null;
+    ViewData["Title"] = "Access Denied";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - NexClone</title>
+    <!-- Carbon Design System CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/carbon-components/css/carbon-components.min.css">
+    <style>
+        body {
+            background-color: #f4f4f4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+        }
+        .error-container {
+            background: #ffffff;
+            padding: 3rem;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .error-header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: #da1e28;
+            margin-bottom: 1rem;
+        }
+        .error-header p {
+            color: #161616;
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-header">
+            <h1>Access Denied</h1>
+            <p>You do not have permission to access the requested admin resource.</p>
+        </div>
+        <a href="/" class="bx--btn bx--btn--primary">Return to Home</a>
+        <a href="/AdminAuth/Login" class="bx--btn bx--btn--secondary">Log in as Admin</a>
+    </div>
+</body>
+</html>

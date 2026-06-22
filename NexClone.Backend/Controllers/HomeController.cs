@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,7 +10,8 @@ using NexClone.Backend.Models.ViewModels;
 
 namespace NexClone.Backend.Controllers;
 
-public class HomeController : Controller
+[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Admin")]
+    public class HomeController : Controller
 {
     private readonly ApplicationDbContext _context;
 

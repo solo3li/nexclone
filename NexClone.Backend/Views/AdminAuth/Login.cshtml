@@ -1,0 +1,109 @@
+@{
+    Layout = null;
+    ViewData["Title"] = "Admin Login";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - NexClone</title>
+    <!-- Carbon Design System CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/carbon-components/css/carbon-components.min.css">
+    <style>
+        body {
+            background-color: #f4f4f4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+        }
+        .login-container {
+            background: #ffffff;
+            padding: 3rem;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .login-header {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .login-header h1 {
+            font-size: 2rem;
+            font-weight: 300;
+            color: #161616;
+            margin-bottom: 0.5rem;
+        }
+        .login-header p {
+            color: #525252;
+            font-size: 0.875rem;
+        }
+        .bx--form-item {
+            margin-bottom: 1.5rem;
+        }
+        .bx--label {
+            color: #161616;
+            font-weight: 600;
+        }
+        .bx--text-input {
+            width: 100%;
+            background-color: #f4f4f4;
+            border-bottom: 1px solid #8d8d8d;
+        }
+        .bx--text-input:focus {
+            outline: 2px solid #0f62fe;
+            border-bottom-color: transparent;
+        }
+        .bx--btn--primary {
+            width: 100%;
+            margin-top: 1rem;
+        }
+        .validation-summary-errors {
+            color: #da1e28;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+        }
+        .validation-summary-errors ul {
+            padding-left: 1.5rem;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>NexClone Admin</h1>
+            <p>Log in to access the control panel</p>
+        </div>
+
+        <form method="post" action="/AdminAuth/Login">
+            <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+            
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="validation-summary-errors">
+                    @Html.ValidationSummary(false)
+                </div>
+            }
+
+            <div class="bx--form-item">
+                <label for="email" class="bx--label">Email Address</label>
+                <input id="email" name="email" type="email" class="bx--text-input" placeholder="admin@example.com" required autofocus>
+            </div>
+            
+            <div class="bx--form-item">
+                <label for="password" class="bx--label">Password</label>
+                <input id="password" name="password" type="password" class="bx--text-input" placeholder="••••••••" required>
+            </div>
+
+            <button class="bx--btn bx--btn--primary" type="submit">
+                Log in
+            </button>
+        </form>
+    </div>
+</body>
+</html>
