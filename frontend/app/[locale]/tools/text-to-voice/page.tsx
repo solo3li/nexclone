@@ -10,6 +10,8 @@ import {
   RefreshCw, Clock, Lock, ChevronDown, User, Users, Info, Edit3, Globe, Zap
 } from "lucide-react";
 import api from "../../../../src/utils/api";
+import { useAppStore } from "../../../../src/store/useAppStore";
+import { useRouter } from "../../../../src/i18n/routing";
 
 interface VoiceProfile {
   id: number;
@@ -32,6 +34,8 @@ export default function TextToVoicePage() {
   const t = useTranslations("TextToVoice");
   const locale = useLocale();
   const isRtl = locale === 'ar';
+  const { isAuthenticated } = useAppStore();
+  const router = useRouter();
 
   const [text, setText] = useState("");
   const [languageMode, setLanguageMode] = useState("arabic"); // "arabic" | "other"
@@ -104,6 +108,10 @@ export default function TextToVoicePage() {
   }, [text]);
 
   const handleProcessClick = async () => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
     if (!text.trim() || text.length > maxChars) return;
     setIsEstimating(true);
     setError("");

@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import { uploadDirectToMinio } from "../../../../src/utils/upload";
 import api from "../../../../src/utils/api";
+import { useAppStore } from "../../../../src/store/useAppStore";
+import { useRouter } from "../../../../src/i18n/routing";
 
 const LANGUAGES = [
   { code: 'auto', name: 'Auto-Detect' },
@@ -41,6 +43,8 @@ export default function VoiceToTextPage() {
   const t = useTranslations("VoiceToText");
   const locale = useLocale();
   const isRtl = locale === 'ar';
+  const { isAuthenticated } = useAppStore();
+  const router = useRouter();
 
   const [file, setFile] = useState<File | Blob | null>(null);
   const [mode, setMode] = useState("transcribe");
@@ -213,6 +217,10 @@ export default function VoiceToTextPage() {
   };
 
   const processAudio = async () => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
     if (!file) return;
     setError("");
     setResult("");
