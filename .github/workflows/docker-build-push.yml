@@ -44,4 +44,4 @@ jobs:
           cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-frontend:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-frontend:buildcache,mode=max
           build-args: |
-            NEXT_PUBLIC_API_URL=http://178.62.192.74:8080
+            NEXT_PUBLIC_API_URL=https://nexclone-backend-production.up.railway.app
