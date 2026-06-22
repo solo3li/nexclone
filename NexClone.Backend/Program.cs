@@ -139,9 +139,9 @@ builder.Services.AddRateLimiter(options =>
     });
 });
 
-// Add Swagger (Removed OpenApi for net8.0)
+// Add OpenAPI (net10.0)
 builder.Services.AddEndpointsApiExplorer();
-// builder.Services.AddOpenApi();
+builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
@@ -175,7 +175,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-// app.MapOpenApi();
+app.MapOpenApi();
 app.MapScalarApiReference();
 
 app.UseHttpsRedirection();
@@ -186,7 +186,7 @@ app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseStaticFiles();
+app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "areas",
@@ -194,7 +194,8 @@ app.MapControllerRoute(
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}")
+    .WithStaticAssets();
 
 app.MapHub<NexClone.Backend.Hubs.TicketHub>("/hubs/ticket");
 
