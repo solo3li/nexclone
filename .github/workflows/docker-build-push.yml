@@ -27,7 +27,7 @@ jobs:
       - name: Build and push Backend Image
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./NexClone.Backend
           file: ./NexClone.Backend/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/nexclone-backend:latest
