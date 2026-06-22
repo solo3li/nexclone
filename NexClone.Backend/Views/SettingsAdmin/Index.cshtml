@@ -62,6 +62,51 @@
         </div>
     </form>
 
+    <!-- PAYMENT METHODS MAINTENANCE FORM -->
+    <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #f1c21b;">
+        @Html.AntiForgeryToken()
+
+        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">Payment Methods Maintenance</h3>
+        <p style="color: #525252; margin-bottom: 1rem; font-size: 0.875rem;">Disable specific payment methods during maintenance. Users will see "Under Maintenance" in the checkout page.</p>
+
+        @{
+            bool paymobMaintenance = (Model.FirstOrDefault(s => s.Key == "Payment.Paymob.Maintenance")?.Value == "true");
+            bool payPalMaintenance = (Model.FirstOrDefault(s => s.Key == "Payment.PayPal.Maintenance")?.Value == "true");
+            bool manualMaintenance = (Model.FirstOrDefault(s => s.Key == "Payment.Manual.Maintenance")?.Value == "true");
+        }
+
+        <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom: 1rem;">
+            <input type="hidden" name="settings[Payment.Paymob.Maintenance]" value="false" id="hidden_Payment_Paymob_Maintenance" />
+            <input id="Payment_Paymob_Maintenance" class="bx--checkbox" type="checkbox" name="settings[Payment.Paymob.Maintenance]" value="true" @(paymobMaintenance ? "checked" : "") onchange="document.getElementById('hidden_Payment_Paymob_Maintenance').disabled = this.checked;">
+            <label for="Payment_Paymob_Maintenance" class="bx--checkbox-label">
+                <span class="bx--checkbox-label-text">Paymob</span>
+            </label>
+            <script>document.getElementById('hidden_Payment_Paymob_Maintenance').disabled = document.getElementById('Payment_Paymob_Maintenance').checked;</script>
+        </div>
+
+        <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom: 1rem;">
+            <input type="hidden" name="settings[Payment.PayPal.Maintenance]" value="false" id="hidden_Payment_PayPal_Maintenance" />
+            <input id="Payment_PayPal_Maintenance" class="bx--checkbox" type="checkbox" name="settings[Payment.PayPal.Maintenance]" value="true" @(payPalMaintenance ? "checked" : "") onchange="document.getElementById('hidden_Payment_PayPal_Maintenance').disabled = this.checked;">
+            <label for="Payment_PayPal_Maintenance" class="bx--checkbox-label">
+                <span class="bx--checkbox-label-text">PayPal</span>
+            </label>
+            <script>document.getElementById('hidden_Payment_PayPal_Maintenance').disabled = document.getElementById('Payment_PayPal_Maintenance').checked;</script>
+        </div>
+
+        <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom: 1rem;">
+            <input type="hidden" name="settings[Payment.Manual.Maintenance]" value="false" id="hidden_Payment_Manual_Maintenance" />
+            <input id="Payment_Manual_Maintenance" class="bx--checkbox" type="checkbox" name="settings[Payment.Manual.Maintenance]" value="true" @(manualMaintenance ? "checked" : "") onchange="document.getElementById('hidden_Payment_Manual_Maintenance').disabled = this.checked;">
+            <label for="Payment_Manual_Maintenance" class="bx--checkbox-label">
+                <span class="bx--checkbox-label-text">Manual Transfer</span>
+            </label>
+            <script>document.getElementById('hidden_Payment_Manual_Maintenance').disabled = document.getElementById('Payment_Manual_Maintenance').checked;</script>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
+            <button type="submit" class="bx--btn bx--btn--primary">Save Payment Settings</button>
+        </div>
+    </form>
+
     <!-- CORS SETTINGS FORM -->
     <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #24a148;">
         @Html.AntiForgeryToken()

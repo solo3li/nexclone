@@ -24,8 +24,25 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+  const [maintenanceModes, setMaintenanceModes] = useState({ paymob: false, paypal: false, manual: false });
   const locale = useLocale();
   const isRtl = locale === 'ar';
+
+  useEffect(() => {
+    const fetchMaintenanceModes = async () => {
+      try {
+        const res = await api.get('/api/platform/payment-methods');
+        setMaintenanceModes({
+          paymob: res.data.paymobMaintenance,
+          paypal: res.data.payPalMaintenance,
+          manual: res.data.manualMaintenance
+        });
+      } catch (err) {
+        console.error('Failed to fetch payment maintenance modes', err);
+      }
+    };
+    fetchMaintenanceModes();
+  }, []);
 
   useEffect(() => {
     if (method === 'Manual' && paymentMethods.length === 0) {
@@ -39,7 +56,7 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
       };
       fetchMethods();
     }
-  }, [method]);
+  }, [method, paymentMethods.length]);
 
   if (!plan) return null;
 
@@ -52,10 +69,12 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
   const handleGatewayCheckout = async () => {
     try {
       setIsSubmitting(true);
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-      // For a real implementation, we would call an API that returns a Checkout URL
-      // Since CheckoutController returns a View in the backend, we might just redirect the user
-      window.location.href = `${apiUrl}/Checkout/Pay?planId=${plan.id}&currency=${currency}`;
+      const res = await api.post('/api/checkout/pay', { planId: plan.id, currency });
+      if (res.data && res.data.checkoutUrl) {
+        window.location.href = res.data.checkoutUrl;
+      } else {
+        throw new Error('No checkout URL returned');
+      }
     } catch (err) {
       console.error(err);
       setError(isRtl ? 'حدث خطأ' : 'An error occurred');
@@ -122,15 +141,19 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
               <div className="flex gap-4 mb-6">
                 <button
                   onClick={() => setMethod('Gateway')}
-                  className={`flex-1 py-3 rounded-xl border font-semibold transition-all ${method === 'Gateway' ? 'bg-blue-600/20 border-blue-500 text-blue-400' : 'border-white/10 text-gray-400 hover:bg-white/5'}`}
+                  disabled={currency === 'EGP' ? maintenanceModes.paymob : maintenanceModes.paypal}
+                  className={`flex-1 py-3 rounded-xl border font-semibold transition-all ${method === 'Gateway' ? 'bg-blue-600/20 border-blue-500 text-blue-400' : 'border-white/10 text-gray-400 hover:bg-white/5'} disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   {currency === 'EGP' ? 'Paymob' : 'PayPal'}
+                  {(currency === 'EGP' ? maintenanceModes.paymob : maintenanceModes.paypal) && <span className="block text-[10px] text-red-400 mt-1">{isRtl ? 'قيد الصيانة' : 'Under Maintenance'}</span>}
                 </button>
                 <button
                   onClick={() => setMethod('Manual')}
-                  className={`flex-1 py-3 rounded-xl border font-semibold transition-all ${method === 'Manual' ? 'bg-purple-600/20 border-purple-500 text-purple-400' : 'border-white/10 text-gray-400 hover:bg-white/5'}`}
+                  disabled={maintenanceModes.manual}
+                  className={`flex-1 py-3 rounded-xl border font-semibold transition-all ${method === 'Manual' ? 'bg-purple-600/20 border-purple-500 text-purple-400' : 'border-white/10 text-gray-400 hover:bg-white/5'} disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   {isRtl ? 'تحويل يدوي' : 'Manual Transfer'}
+                  {maintenanceModes.manual && <span className="block text-[10px] text-red-400 mt-1">{isRtl ? 'قيد الصيانة' : 'Under Maintenance'}</span>}
                 </button>
               </div>
 
@@ -147,7 +170,7 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
                   </div>
                   <button 
                     onClick={handleGatewayCheckout}
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || (currency === 'EGP' ? maintenanceModes.paymob : maintenanceModes.paypal)}
                     className="w-full bg-white text-black font-semibold py-4 rounded-xl hover:bg-gray-100 transition disabled:opacity-50"
                   >
                     {isSubmitting ? '...' : (isRtl ? 'ادفع الآن' : 'Pay Now')}

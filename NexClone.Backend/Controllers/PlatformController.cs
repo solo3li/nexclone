@@ -157,5 +157,22 @@ namespace NexClone.Backend.Controllers
 
             return Ok(new { isMaintenanceMode = isMaintenanceMode });
         }
+
+        [HttpGet("payment-methods")]
+        public async Task<IActionResult> GetPaymentMethods()
+        {
+            var settings = await _context.AppSettings.ToListAsync();
+            
+            bool paymobMaintenance = settings.FirstOrDefault(s => s.Key == "Payment.Paymob.Maintenance")?.Value == "true";
+            bool payPalMaintenance = settings.FirstOrDefault(s => s.Key == "Payment.PayPal.Maintenance")?.Value == "true";
+            bool manualMaintenance = settings.FirstOrDefault(s => s.Key == "Payment.Manual.Maintenance")?.Value == "true";
+
+            return Ok(new
+            {
+                PaymobMaintenance = paymobMaintenance,
+                PayPalMaintenance = payPalMaintenance,
+                ManualMaintenance = manualMaintenance
+            });
+        }
     }
 }
