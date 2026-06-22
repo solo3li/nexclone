@@ -28,6 +28,10 @@ builder.Host.UseSerilog();
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
 
+// Persist DataProtection keys to DB so antiforgery tokens survive container restarts
+builder.Services.AddDataProtection()
+    .PersistKeysToDbContext<ApplicationDbContext>();
+
 // Setup CORS for Next.js
 builder.Services.AddCors(options =>
 {

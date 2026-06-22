@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 
 namespace NexClone.Backend.Models
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>, IDataProtectionKeyContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -30,6 +31,9 @@ namespace NexClone.Backend.Models
         public DbSet<BlogComment> BlogComments { get; set; } = null!;
         public DbSet<SupportTicket> SupportTickets { get; set; } = null!;
         public DbSet<TicketMessage> TicketMessages { get; set; } = null!;
+
+        // DataProtection keys - persisted to DB to survive container restarts
+        public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
 
         // TTS Lookups
         public DbSet<Voice> Voices { get; set; } = null!;

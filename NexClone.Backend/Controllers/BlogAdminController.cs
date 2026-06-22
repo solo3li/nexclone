@@ -38,18 +38,35 @@ namespace NexClone.Backend.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(BlogPost post, IFormFile? MediaFile)
+        public async Task<IActionResult> Create(BlogPost post, IFormFile? MediaFile, string? MediaUrl, string? MediaType)
         {
             // Remove navigation properties from validation
             ModelState.Remove("Comments");
             
             if (ModelState.IsValid)
             {
+                // Priority 1: uploaded file
                 if (MediaFile != null && MediaFile.Length > 0)
                 {
-                    var fileUrl = await _mediaService.UploadFileAsync(MediaFile.OpenReadStream(), MediaFile.FileName, MediaFile.ContentType);
-                    post.MediaUrl = fileUrl;
-                    post.MediaType = MediaFile.ContentType.StartsWith("video") ? "video" : "image";
+                    try
+                    {
+                        var fileUrl = await _mediaService.UploadFileAsync(MediaFile.OpenReadStream(), MediaFile.FileName, MediaFile.ContentType);
+                        if (!string.IsNullOrEmpty(fileUrl))
+                        {
+                            post.MediaUrl = fileUrl;
+                            post.MediaType = MediaFile.ContentType.StartsWith("video") ? "video" : "image";
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Error.WriteLine($"[BlogAdmin] File upload error: {ex.Message}");
+                    }
+                }
+                // Priority 2: direct URL entered manually
+                else if (!string.IsNullOrWhiteSpace(MediaUrl))
+                {
+                    post.MediaUrl = MediaUrl;
+                    post.MediaType = string.IsNullOrWhiteSpace(MediaType) ? "image" : MediaType;
                 }
                 
                 post.CreatedAt = DateTime.UtcNow;
@@ -57,19 +74,6 @@ namespace NexClone.Backend.Controllers
                 _context.BlogPosts.Add(post);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
-            }
-            
-            // Log validation errors to help debug
-            foreach (var key in ModelState.Keys)
-            {
-                var state = ModelState[key];
-                if (state?.Errors?.Count > 0)
-                {
-                    foreach (var error in state.Errors)
-                    {
-                        Console.WriteLine($"ModelState Error [{key}]: {error.ErrorMessage}");
-                    }
-                }
             }
             
             return View(post);

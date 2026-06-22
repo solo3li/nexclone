@@ -17,9 +17,13 @@
                         <textarea class="bx--text-area" name="Content" rows="15" required style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;"></textarea>
                     </div>
 
-                    <div class="bx--form-item" style="margin-bottom: 1.5rem;">
-                        <label class="bx--label" style="font-weight: 600;">Media Upload (Image/Video)</label>
-                        <input type="file" name="MediaFile" style="display: block; margin-top: 0.5rem;" accept="image/*,video/*" />
+                    <div class="bx--form-item" style="margin-bottom: 0.5rem;">
+                        <label class="bx--label" style="font-weight: 600;">Media</label>
+                        <p style="font-size: 0.8rem; color: #6f6f6f; margin-bottom: 0.75rem;">Option 1: Upload a file (requires S3 configuration in Global Settings)</p>
+                        <input type="file" name="MediaFile" style="display: block; margin-bottom: 1rem;" accept="image/*,video/*" />
+                        <p style="font-size: 0.8rem; color: #6f6f6f; margin-bottom: 0.5rem;">Option 2: Or enter a direct URL to an image/video</p>
+                        <input type="url" name="MediaUrl" placeholder="https://example.com/image.jpg" style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;" />
+                        <input type="hidden" name="MediaType" id="mediaTypeInput" value="" />
                     </div>
 
                     <div class="bx--form-item" style="margin-bottom: 1.5rem;">
@@ -38,3 +42,18 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Auto-detect media type from URL
+    document.querySelector('input[name="MediaUrl"]').addEventListener('change', function() {
+        const url = this.value.toLowerCase();
+        const typeInput = document.getElementById('mediaTypeInput');
+        if (url.includes('.mp4') || url.includes('.webm') || url.includes('.mov') || url.includes('video')) {
+            typeInput.value = 'video';
+        } else if (url) {
+            typeInput.value = 'image';
+        } else {
+            typeInput.value = '';
+        }
+    });
+</script>
