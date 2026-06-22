@@ -1,0 +1,126 @@
+@model NexClone.Backend.Models.SupportTicket
+
+<div class="bx--grid" style="padding-left: 0; padding-right: 0;">
+    <div class="bx--row" style="margin-bottom: 2rem;">
+        <div class="bx--col" style="display: flex; justify-content: space-between; align-items: center;">
+            <a href="/TicketsAdmin" class="bx--btn bx--btn--secondary" style="background-color: #393939; color: white; padding: 0.875rem 2rem; text-decoration: none; border-radius: 4px; font-weight: 600;">Back to Tickets</a>
+            
+            <form method="post" action="/TicketsAdmin/UpdateStatus" style="display: flex; gap: 1rem; align-items: center;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+                <select name="status" class="bx--select-input" style="padding: 0.5rem; border-radius: 4px; border: 1px solid #8d8d8d;">
+                    <option value="Open" selected="@(Model.Status == "Open")">Open</option>
+                    <option value="InProgress" selected="@(Model.Status == "InProgress")">In Progress</option>
+                    <option value="Closed" selected="@(Model.Status == "Closed")">Closed</option>
+                </select>
+                <button type="submit" class="bx--btn bx--btn--sm bx--btn--primary" style="background-color: #0f62fe; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer;">Update Status</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="bx--row">
+        <div class="bx--col-lg-8">
+            <div class="bx--tile" style="background-color: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 2rem; height: 500px; display: flex; flex-direction: column;">
+                <h3 style="margin-bottom: 1.5rem; font-weight: 600;">Chat History</h3>
+                
+                <div id="chat-messages" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 1.5rem; padding-right: 1rem; margin-bottom: 1rem;">
+                    @foreach (var msg in Model.Messages.OrderBy(m => m.CreatedAt))
+                    {
+                        <div style="align-self: @(msg.IsAdminMessage ? "flex-end" : "flex-start"); background-color: @(msg.IsAdminMessage ? "#0f62fe" : "#f4f4f4"); color: @(msg.IsAdminMessage ? "white" : "#161616"); padding: 1rem; border-radius: 8px; max-width: 80%;">
+                            <div style="font-size: 0.75rem; margin-bottom: 0.5rem; color: @(msg.IsAdminMessage ? "#e0e0e0" : "#8d8d8d");">
+                                <strong>@(msg.IsAdminMessage ? "Admin" : Model.User.Email)</strong> - @msg.CreatedAt.ToLocalTime().ToString("g")
+                            </div>
+                            @if (!string.IsNullOrEmpty(msg.Content))
+                            {
+                                <p style="margin-bottom: 0.5rem; white-space: pre-wrap;">@msg.Content</p>
+                            }
+                            @if (!string.IsNullOrEmpty(msg.AttachmentUrl))
+                            {
+                                if (msg.AttachmentType == "image")
+                                {
+                                    <a href="@msg.AttachmentUrl" target="_blank"><img src="@msg.AttachmentUrl" style="max-width: 200px; border-radius: 4px;" /></a>
+                                }
+                                else if (msg.AttachmentType == "audio")
+                                {
+                                    <audio controls src="@msg.AttachmentUrl" style="width: 200px;"></audio>
+                                }
+                                else
+                                {
+                                    <a href="@msg.AttachmentUrl" target="_blank" style="color: @(msg.IsAdminMessage ? "white" : "#0f62fe"); text-decoration: underline;">View Attachment</a>
+                                }
+                            }
+                        </div>
+                    }
+                </div>
+
+                @if (Model.Status != "Closed")
+                {
+                    <form method="post" action="/TicketsAdmin/SendMessage" enctype="multipart/form-data" style="display: flex; gap: 1rem; align-items: flex-end; border-top: 1px solid #e0e0e0; padding-top: 1rem;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <div style="flex: 1;">
+                            <textarea name="content" class="bx--text-area" rows="2" placeholder="Type a reply..." style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px; resize: none;"></textarea>
+                        </div>
+                        <div>
+                            <input type="file" name="attachment" accept="image/*,audio/*" style="width: 200px; font-size: 0.875rem;" />
+                        </div>
+                        <button type="submit" class="bx--btn bx--btn--primary" style="background-color: #0f62fe; color: white; padding: 0.75rem 2rem; border: none; cursor: pointer; border-radius: 4px; font-weight: 600; height: 100%;">Send</button>
+                    </form>
+                }
+                else
+                {
+                    <div style="text-align: center; padding: 1rem; background-color: #f4f4f4; color: #8d8d8d; border-radius: 4px;">
+                        This ticket is closed.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.js"></script>
+    <script>
+        const chatMessages = document.getElementById('chat-messages');
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/hubs/ticket")
+            .build();
+
+        connection.on("ReceiveMessage", function (msg) {
+            // Only append if it's from user, to avoid duplicate if admin just sent it and page reloaded
+            if (msg.senderName !== "Admin") {
+                const div = document.createElement("div");
+                div.style = "align-self: flex-start; background-color: #f4f4f4; color: #161616; padding: 1rem; border-radius: 8px; max-width: 80%;";
+                
+                let html = `<div style="font-size: 0.75rem; margin-bottom: 0.5rem; color: #8d8d8d;">
+                                <strong>${msg.senderName}</strong> - Just now
+                            </div>`;
+                if (msg.content) {
+                    html += `<p style="margin-bottom: 0.5rem; white-space: pre-wrap;">${msg.content}</p>`;
+                }
+                if (msg.attachmentUrl) {
+                    if (msg.attachmentType === "image") {
+                        html += `<a href="${msg.attachmentUrl}" target="_blank"><img src="${msg.attachmentUrl}" style="max-width: 200px; border-radius: 4px;" /></a>`;
+                    } else if (msg.attachmentType === "audio") {
+                        html += `<audio controls src="${msg.attachmentUrl}" style="width: 200px;"></audio>`;
+                    } else {
+                        html += `<a href="${msg.attachmentUrl}" target="_blank" style="color: #0f62fe; text-decoration: underline;">View Attachment</a>`;
+                    }
+                }
+                div.innerHTML = html;
+                chatMessages.appendChild(div);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        });
+
+        connection.start().then(function () {
+            connection.invoke("JoinTicketGroup", "@Model.Id").catch(function (err) {
+                return console.error(err.toString());
+            });
+        }).catch(function (err) {
+            return console.error(err.toString());
+        });
+    </script>
+}

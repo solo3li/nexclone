@@ -26,6 +26,7 @@ builder.Host.UseSerilog();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddSignalR();
 
 // Setup CORS for Next.js
 builder.Services.AddCors(options =>
@@ -138,9 +139,9 @@ builder.Services.AddRateLimiter(options =>
     });
 });
 
-// Add Swagger
+// Add Swagger (Removed OpenApi for net8.0)
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddOpenApi();
+// builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
@@ -174,7 +175,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.MapOpenApi();
+// app.MapOpenApi();
 app.MapScalarApiReference();
 
 app.UseHttpsRedirection();
@@ -185,7 +186,7 @@ app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapStaticAssets();
+app.UseStaticFiles();
 
 app.MapControllerRoute(
     name: "areas",
@@ -193,7 +194,8 @@ app.MapControllerRoute(
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapHub<NexClone.Backend.Hubs.TicketHub>("/hubs/ticket");
 
 app.Run();

@@ -1,0 +1,45 @@
+@model NexClone.Backend.Models.BlogPost
+
+<div class="bx--grid" style="padding-left: 0; padding-right: 0;">
+    <div class="bx--row">
+        <div class="bx--col-lg-12">
+            <div class="bx--tile" style="background-color: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <form method="post" action="/BlogAdmin/Edit/@Model.Id" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="Id" value="@Model.Id" />
+                    
+                    <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+                        <label class="bx--label" style="font-weight: 600;">Title</label>
+                        <input type="text" class="bx--text-input" name="Title" value="@Model.Title" required style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;" />
+                    </div>
+
+                    <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+                        <label class="bx--label" style="font-weight: 600;">Content (HTML/Markdown)</label>
+                        <textarea class="bx--text-area" name="Content" rows="15" required style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;">@Model.Content</textarea>
+                    </div>
+
+                    <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+                        <label class="bx--label" style="font-weight: 600;">Replace Media (Image/Video)</label>
+                        <input type="file" name="MediaFile" style="display: block; margin-top: 0.5rem;" accept="image/*,video/*" />
+                        @if(!string.IsNullOrEmpty(Model.MediaUrl))
+                        {
+                            <p style="margin-top: 0.5rem; font-size: 0.875rem; color: #525252;">Current media: @Model.MediaType</p>
+                        }
+                    </div>
+
+                    <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+                        <label class="bx--checkbox-wrapper">
+                            <input type="checkbox" name="IsPublished" value="true" @(Model.IsPublished ? "checked" : "") class="bx--checkbox" />
+                            <span class="bx--checkbox-label">Published</span>
+                        </label>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="submit" class="bx--btn bx--btn--primary" style="background-color: #0f62fe; color: white; padding: 0.875rem 2rem; border: none; cursor: pointer; border-radius: 4px; font-weight: 600;">Save Changes</button>
+                        <a href="/BlogAdmin" class="bx--btn bx--btn--secondary" style="background-color: #e0e0e0; color: #161616; padding: 0.875rem 2rem; text-decoration: none; border-radius: 4px; font-weight: 600;">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

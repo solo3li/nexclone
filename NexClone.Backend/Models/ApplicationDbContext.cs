@@ -25,6 +25,11 @@ namespace NexClone.Backend.Models
         public DbSet<ToolConfiguration> ToolConfigurations { get; set; } = null!;
         public DbSet<EmailTemplate> EmailTemplates { get; set; } = null!;
         public DbSet<AppSetting> AppSettings { get; set; } = null!;
+        public DbSet<CustomPage> CustomPages { get; set; } = null!;
+        public DbSet<BlogPost> BlogPosts { get; set; } = null!;
+        public DbSet<BlogComment> BlogComments { get; set; } = null!;
+        public DbSet<SupportTicket> SupportTickets { get; set; } = null!;
+        public DbSet<TicketMessage> TicketMessages { get; set; } = null!;
 
         // TTS Lookups
         public DbSet<Voice> Voices { get; set; } = null!;

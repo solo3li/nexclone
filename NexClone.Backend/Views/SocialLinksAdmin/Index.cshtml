@@ -1,0 +1,30 @@
+@model IEnumerable<NexClone.Backend.Models.AppSetting>
+
+@{
+    ViewData["Title"] = "Communication Links";
+}
+
+<div class="bx--grid" style="padding-left: 0; padding-right: 0;">
+    <div class="bx--row">
+        <div class="bx--col-lg-8">
+            <div class="bx--tile" style="background-color: #ffffff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <h3 style="margin-bottom: 1.5rem; font-weight: 300;">Manage Social & Communication Links</h3>
+                <form method="post" action="/SocialLinksAdmin/Save">
+                    @Html.AntiForgeryToken()
+                    @foreach (var setting in Model)
+                    {
+                        var labelName = setting.Key.Replace("Social.", "");
+                        <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+                            <label class="bx--label" style="font-weight: 600; color: #161616;">@labelName Link</label>
+                            <input type="text" class="bx--text-input" name="settings[@setting.Key]" value="@setting.Value" placeholder="e.g. https://twitter.com/yourpage" style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px; background-color: #f4f4f4;" />
+                        </div>
+                    }
+
+                    <button type="submit" class="bx--btn bx--btn--primary" style="margin-top: 1rem; background-color: #0f62fe; color: white; padding: 0.875rem 2rem; border: none; cursor: pointer; border-radius: 4px; font-weight: 600;">
+                        Save Links
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

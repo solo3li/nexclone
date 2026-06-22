@@ -174,5 +174,36 @@ namespace NexClone.Backend.Controllers
                 ManualMaintenance = manualMaintenance
             });
         }
+
+        [HttpGet("social-links")]
+        public async Task<IActionResult> GetSocialLinks()
+        {
+            var settings = await _context.AppSettings
+                .Where(s => s.Key.StartsWith("Social."))
+                .ToListAsync();
+
+            var links = settings.ToDictionary(s => s.Key.Replace("Social.", ""), s => s.Value);
+            return Ok(links);
+        }
+
+        [HttpGet("custom-page/{slug}")]
+        public async Task<IActionResult> GetCustomPage(string slug)
+        {
+            var page = await _context.CustomPages.FirstOrDefaultAsync(p => p.Slug == slug);
+            if (page == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(new
+            {
+                page.Slug,
+                page.TitleEn,
+                page.TitleAr,
+                page.ContentEn,
+                page.ContentAr,
+                page.UpdatedAt
+            });
+        }
     }
 }
