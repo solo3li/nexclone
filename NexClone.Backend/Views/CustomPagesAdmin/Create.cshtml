@@ -9,7 +9,13 @@
                     
                     <div class="bx--form-item" style="margin-bottom: 1.5rem;">
                         <label class="bx--label" style="font-weight: 600;">Slug (e.g. privacy-policy)</label>
-                        <input type="text" class="bx--text-input" name="Slug" required style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;" />
+                        <select name="Slug" required class="bx--select-input" style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px; background: white;">
+                            <option value="">Select a page type...</option>
+                            <option value="about-us">About Us (من نحن)</option>
+                            <option value="privacy-policy">Privacy Policy (سياسة الخصوصية)</option>
+                            <option value="contact-us">Contact Us (تواصل معنا)</option>
+                            <option value="terms-of-service">Terms of Service (شروط الخدمة)</option>
+                        </select>
                     </div>
 
                     <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">

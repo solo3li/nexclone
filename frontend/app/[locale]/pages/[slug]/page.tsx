@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-export default async function CustomPage({ params }: { params: { locale: string; slug: string } }) {
-  const { locale, slug } = params;
+export default async function CustomPage({ params }: { params: Promise<{ locale: string; slug: string }> }) {
+  const { locale, slug } = await params;
   
   let page = null;
   try {

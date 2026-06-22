@@ -10,7 +10,12 @@
                     
                     <div class="bx--form-item" style="margin-bottom: 1.5rem;">
                         <label class="bx--label" style="font-weight: 600;">Slug</label>
-                        <input type="text" class="bx--text-input" name="Slug" value="@Model.Slug" required style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;" />
+                        <select name="Slug" required class="bx--select-input" style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px; background: white;">
+                            <option value="about-us" selected="@(Model.Slug == "about-us")">About Us (من نحن)</option>
+                            <option value="privacy-policy" selected="@(Model.Slug == "privacy-policy")">Privacy Policy (سياسة الخصوصية)</option>
+                            <option value="contact-us" selected="@(Model.Slug == "contact-us")">Contact Us (تواصل معنا)</option>
+                            <option value="terms-of-service" selected="@(Model.Slug == "terms-of-service")">Terms of Service (شروط الخدمة)</option>
+                        </select>
                     </div>
 
                     <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">

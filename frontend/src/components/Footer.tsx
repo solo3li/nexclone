@@ -24,7 +24,7 @@ export default function Footer() {
     [t('company.title')]: [
       { label: t.raw('company.links')[0], href: "/pages/about-us" },
       { label: t.raw('company.links')[1], href: "/blog" },
-      { label: t.raw('company.links')[2], href: "/#contact" }
+      { label: t.raw('company.links')[2], href: "/pages/contact-us" }
     ],
     [t('legal.title')]: [
       { label: t.raw('legal.links')[0], href: "/pages/privacy-policy" }

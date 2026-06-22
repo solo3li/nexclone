@@ -130,7 +130,7 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
   }
 
   return (
-    <div className="bg-white/5 border border-white/10 p-6 md:p-8 rounded-3xl flex flex-col h-[700px] max-h-[80vh]">
+    <div className="bg-white/5 border border-white/10 p-6 md:p-8 rounded-3xl flex flex-col h-[calc(100vh-100px)] w-full">
       <div className="flex justify-between items-center mb-6 pb-6 border-b border-white/10">
         <div>
           <div className="flex items-center gap-3 mb-2">
