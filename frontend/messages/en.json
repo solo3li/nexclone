@@ -333,29 +333,21 @@
       "title": "Products",
       "links": [
         "Audio to Text",
-        "Background Removal",
-        "Smart Translation",
-        "Music Generation",
-        "API"
+        "Text to Audio"
       ]
     },
     "company": {
       "title": "Company",
       "links": [
         "About Us",
-        "Careers",
         "Blog",
-        "Contact Us",
-        "Partners"
+        "Contact Us"
       ]
     },
     "legal": {
       "title": "Legal",
       "links": [
-        "Terms of Service",
-        "Privacy Policy",
-        "Cookie Policy",
-        "Usage Guidelines"
+        "Privacy Policy"
       ]
     },
     "rights": "All rights reserved. NexMedia AI"
