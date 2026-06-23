@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration
-API_URL="http://178.62.192.74:8080/api"
+API_URL="http://localhost:8080/api"
 echo "======================================"
 echo "   Testing NexClone API Endpoints     "
 echo "   Target: $API_URL                   "

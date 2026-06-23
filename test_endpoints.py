@@ -29,12 +29,15 @@ def run_tests():
     res = session.post(f"{BASE_URL}/auth/login", json={"email": email, "password": password})
     print_result("Login", res)
 
-    token = res.json().get("token")
-    if token:
+    set_cookie = res.headers.get("Set-Cookie", "")
+    import re
+    match = re.search(r"jwt=([^;]+)", set_cookie)
+    if match:
+        token = match.group(1)
         session.headers.update({"Authorization": f"Bearer {token}"})
-        print("✅ Token extracted and added to headers.")
+        print("✅ Token extracted from Set-Cookie and added to headers.")
     else:
-        print("❌ Login failed: Token not found in response.")
+        print("❌ Login failed: JWT cookie not found.")
         return
 
     # 2. Text to Voice

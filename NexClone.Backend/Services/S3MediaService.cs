@@ -16,6 +16,7 @@ namespace NexClone.Backend.Services
         private IMinioClient _minioClient;
         private string _defaultBucket;
         private string _region;
+        private string _endpoint;
         private readonly ApplicationDbContext _context;
 
         public S3MediaService(ApplicationDbContext context, IConfiguration configuration)
@@ -40,6 +41,7 @@ namespace NexClone.Backend.Services
             var secretKey = !string.IsNullOrWhiteSpace(dbSecretKey) ? dbSecretKey : (Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY") ?? "YOUR_AWS_SECRET_KEY");
             var region = !string.IsNullOrWhiteSpace(dbRegion) ? dbRegion : "eu-north-1";
             _region = region;
+            _endpoint = endpoint;
             
             _defaultBucket = !string.IsNullOrWhiteSpace(dbBucketName) ? dbBucketName : "nexmedia-ai-files";
 
@@ -98,40 +100,13 @@ namespace NexClone.Backend.Services
             {
                 Console.Error.WriteLine($"[S3MediaService] Upload failed for '{uniqueObjectName}': {ex.Message}");
                 
-                // Fallback to local storage if S3 fails
-                try
-                {
-                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-                    if (!Directory.Exists(uploadsFolder))
-                    {
-                        Directory.CreateDirectory(uploadsFolder);
-                    }
-                    var localPath = Path.Combine(uploadsFolder, uniqueObjectName);
-                    
-                    memStream.Position = 0;
-                    using (var fileStream = new FileStream(localPath, FileMode.Create))
-                    {
-                        await memStream.CopyToAsync(fileStream);
-                    }
-                    
-                    return $"/uploads/{uniqueObjectName}"; // return absolute path for frontend
-                }
-                catch (Exception localEx)
-                {
-                    Console.Error.WriteLine($"[S3MediaService] Local fallback also failed: {localEx.Message}");
-                    return string.Empty;
-                }
+                throw; // No local fallback allowed as per requirements.
             }
         }
 
         public async Task<byte[]> DownloadFileAsync(string objectName, string bucketName = null)
         {
-            if (objectName.StartsWith("/uploads/"))
-            {
-                var localPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", objectName.TrimStart('/'));
-                if (File.Exists(localPath)) return await File.ReadAllBytesAsync(localPath);
-                return Array.Empty<byte>();
-            }
+            // Local storage logic removed.
 
             await EnsureClientInitializedAsync();
             using var memoryStream = new MemoryStream();
@@ -151,15 +126,20 @@ namespace NexClone.Backend.Services
 
         public async Task<string> GetFileUrlAsync(string objectName, string bucketName = null)
         {
-            if (objectName.StartsWith("/uploads/")) return objectName;
+            // Local storage logic removed.
             if (objectName.StartsWith("http://") || objectName.StartsWith("https://")) return objectName;
 
             await EnsureClientInitializedAsync();
 
-            // AWS S3 Virtual-Hosted Style URL
-            var publicEndpoint = $"{_defaultBucket}.s3.{_region}.amazonaws.com";
-            
-            return $"https://{publicEndpoint}/{objectName}";
+            if (_endpoint.Contains("amazonaws.com"))
+            {
+                var publicEndpoint = $"{_defaultBucket}.s3.{_region}.amazonaws.com";
+                return $"https://{publicEndpoint}/{objectName}";
+            }
+            else
+            {
+                return $"https://{_endpoint}/{_defaultBucket}/{objectName}";
+            }
         }
 
         public async Task<string> GeneratePresignedUploadUrlAsync(string objectName, string contentType, string bucketName = null)
