@@ -441,7 +441,7 @@ export default function TextToVoicePage() {
                   </div>
 
                   {/* Voices Grid */}
-                  <div className="grid grid-cols-2 gap-2 max-h-[160px] overflow-y-auto custom-scrollbar pr-1">
+                  <div className="grid grid-cols-2 gap-1.5 max-h-[160px] overflow-y-auto custom-scrollbar pr-1">
                     {voices.length === 0 ? (
                       <div className="col-span-2 text-center text-white/40 py-8">
                         <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />
@@ -455,45 +455,52 @@ export default function TextToVoicePage() {
                           onClick={() => {
                             if (isAllowed) setSelectedVoice(voice.voiceName);
                           }}
-                          className={`relative flex flex-col rounded-[16px] overflow-hidden transition-all border ${
+                          className={`relative flex items-center p-1.5 rounded-lg border transition-all ${
                             !isAllowed 
                               ? 'border-white/5 bg-white/5 opacity-60 cursor-not-allowed'
                               : selectedVoice === voice.voiceName 
                                 ? 'border-violet-500 bg-violet-500/20 cursor-pointer' 
                                 : 'border-white/10 bg-white/5 hover:bg-white/10 cursor-pointer'
                           }`}
+                          dir={isRtl ? 'rtl' : 'ltr'}
                         >
                           {!isAllowed && (
-                            <div className="absolute inset-0 bg-[#0a0015]/60 z-10 flex items-center justify-center backdrop-blur-[1px]">
-                              <Lock className="w-6 h-6 text-white/50" />
+                            <div className="absolute inset-0 bg-[#0a0015]/80 z-10 flex items-center justify-center backdrop-blur-[1px] rounded-lg">
+                              <Lock className="w-3.5 h-3.5 text-white/50" />
                             </div>
                           )}
-                          {/* Top colored bar based on tier */}
-                          <div className={`w-full text-center py-1 text-[9px] font-bold ${
-                            voice.isPremium 
-                              ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-black' 
-                              : 'bg-emerald-500 text-black'
-                          }`}>
-                            {voice.isPremium ? t('premium') : t('free')}
-                          </div>
                           
-                          <div className="p-2 pb-5 flex flex-col items-center text-center gap-0.5">
-                            <h4 className="text-white font-bold text-[11px] leading-tight">{voice.name}</h4>
-                            <p className="text-[8px] text-white/50 leading-tight">{voice.accent}</p>
-                            <div className="flex items-center gap-1 text-[8px] text-white/40 mt-0.5">
-                              {voice.gender.toLowerCase() === 'ذكر' || voice.gender.toLowerCase() === 'male' ? <User className="w-2.5 h-2.5" /> : <Users className="w-2.5 h-2.5" />}
+                          {/* Play Button */}
+                          {voice.demoAudio ? (
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); playDemo(voice.demoAudio); }}
+                              className={`shrink-0 w-6 h-6 rounded-full bg-white/10 hover:bg-white/30 flex items-center justify-center ${isRtl ? 'ml-2' : 'mr-2'} transition-colors z-20`}
+                            >
+                              <Play className="w-2.5 h-2.5 text-white/80" />
+                            </button>
+                          ) : (
+                            <div className={`shrink-0 w-6 h-6 rounded-full bg-white/5 flex items-center justify-center ${isRtl ? 'ml-2' : 'mr-2'}`}>
+                              <User className="w-2.5 h-2.5 text-white/30" />
+                            </div>
+                          )}
+                          
+                          {/* Info */}
+                          <div className="flex flex-col flex-1 min-w-0 justify-center">
+                            <div className="flex items-center justify-between mb-0.5">
+                              <span className="text-[10px] font-bold text-white truncate">{voice.name}</span>
+                              <span className={`text-[7px] px-1 py-0.5 rounded-sm font-bold ml-1 shrink-0 ${
+                                voice.isPremium ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'
+                              }`}>
+                                {voice.isPremium ? t('premium') : t('free')}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1 text-[8px] text-white/50 truncate">
+                              <span className="truncate">{voice.accent}</span>
+                              <span>•</span>
                               <span>{voice.gender}</span>
                             </div>
-                            
-                            {voice.demoAudio && (
-                                <button 
-                                  onClick={(e) => { e.stopPropagation(); playDemo(voice.demoAudio); }}
-                                  className="absolute bottom-1 left-1 p-1 bg-white/10 hover:bg-white/30 rounded-full text-white/60 hover:text-white transition-all"
-                                >
-                                  <Play className="w-2.5 h-2.5" />
-                                </button>
-                            )}
                           </div>
+                          
                         </div>
                       )})
                     )}
