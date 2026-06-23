@@ -21,11 +21,16 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [acceptedPolicy, setAcceptedPolicy] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!acceptedPolicy) {
+      setError(locale === 'ar' ? "يجب الموافقة على سياسة الخصوصية أولاً" : "You must agree to the privacy policy first");
+      return;
+    }
     setLoading(true);
     setError("");
     try {
@@ -119,6 +124,23 @@ export default function RegisterPage() {
                     placeholder="••••••••"
                   />
                 </div>
+              </div>
+
+              <div className="flex items-start gap-3 pt-2">
+                <input
+                  type="checkbox"
+                  id="privacy"
+                  required
+                  checked={acceptedPolicy}
+                  onChange={(e) => setAcceptedPolicy(e.target.checked)}
+                  className="mt-1 w-4 h-4 rounded border-white/20 bg-white/5 text-pink-500 focus:ring-pink-500/50 cursor-pointer"
+                />
+                <label htmlFor="privacy" className="text-sm text-white/70 leading-relaxed cursor-pointer">
+                  {locale === 'ar' ? "لقد قرأت وأوافق على " : "I have read and agree to the "}
+                  <Link href="/privacy" target="_blank" className="text-pink-400 hover:text-pink-300 underline font-medium">
+                    {locale === 'ar' ? "سياسة الخصوصية" : "Privacy Policy"}
+                  </Link>
+                </label>
               </div>
             </div>
 
