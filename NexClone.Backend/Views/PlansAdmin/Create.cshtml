@@ -61,8 +61,8 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem; background: #f4f4f4; padding: 1.5rem;">
             <div class="bx--form-item">
                 <div style="display: flex; align-items: center; gap: 0.5rem; height: 100%;">
-                    <input type="hidden" name="TtsEnabled" value="false" />
                     <input type="checkbox" id="TtsEnabled" name="TtsEnabled" value="true" class="bx--checkbox" @(Model?.TtsEnabled != false ? "checked" : "") style="cursor: pointer;" />
+                    <input type="hidden" name="TtsEnabled" value="false" />
                     <label for="TtsEnabled" class="bx--checkbox-label" style="cursor: pointer; margin: 0; font-weight: bold;">Enable TTS</label>
                 </div>
             </div>
@@ -88,8 +88,8 @@
             </div>
             <div class="bx--form-item">
                 <div style="display: flex; align-items: center; gap: 0.5rem; height: 100%;">
-                    <input type="hidden" name="TtsCustomInstructionsEnabled" value="false" />
                     <input type="checkbox" id="TtsCustomInstructionsEnabled" name="TtsCustomInstructionsEnabled" value="true" class="bx--checkbox" style="cursor: pointer;" />
+                    <input type="hidden" name="TtsCustomInstructionsEnabled" value="false" />
                     <label for="TtsCustomInstructionsEnabled" class="bx--checkbox-label" style="cursor: pointer; margin: 0; font-weight: bold;">Enable Custom Instructions</label>
                 </div>
             </div>
@@ -114,8 +114,8 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem; background: #f4f4f4; padding: 1.5rem;">
             <div class="bx--form-item">
                 <div style="display: flex; align-items: center; gap: 0.5rem; height: 100%;">
-                    <input type="hidden" name="SttEnabled" value="false" />
                     <input type="checkbox" id="SttEnabled" name="SttEnabled" value="true" class="bx--checkbox" @(Model?.SttEnabled != false ? "checked" : "") style="cursor: pointer;" />
+                    <input type="hidden" name="SttEnabled" value="false" />
                     <label for="SttEnabled" class="bx--checkbox-label" style="cursor: pointer; margin: 0; font-weight: bold;">Enable STT</label>
                 </div>
             </div>
@@ -137,8 +137,8 @@
         <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-bottom: 2rem;">
             <div class="bx--form-item">
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <input type="hidden" name="IsDefaultRegistrationPlan" value="false" />
                     <input type="checkbox" id="IsDefaultRegistrationPlan" name="IsDefaultRegistrationPlan" value="true" class="bx--checkbox" style="cursor: pointer;" />
+                    <input type="hidden" name="IsDefaultRegistrationPlan" value="false" />
                     <label for="IsDefaultRegistrationPlan" class="bx--checkbox-label" style="cursor: pointer; margin: 0; font-weight: bold;">Set as Default Registration Plan</label>
                 </div>
                 <div class="bx--form__helper-text">If checked, this plan will be automatically assigned to new users upon registration. Only one plan can be default.</div>
@@ -146,8 +146,8 @@
             
             <div class="bx--form-item">
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <input type="hidden" name="IsFreeTrial" value="false" />
                     <input type="checkbox" id="IsFreeTrial" name="IsFreeTrial" value="true" class="bx--checkbox" @(Model?.IsFreeTrial == true ? "checked" : "") style="cursor: pointer;" />
+                    <input type="hidden" name="IsFreeTrial" value="false" />
                     <label for="IsFreeTrial" class="bx--checkbox-label" style="cursor: pointer; margin: 0; font-weight: bold;">Is this a Free Trial plan?</label>
                 </div>
             </div>
