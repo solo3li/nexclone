@@ -61,6 +61,25 @@
         </div>
 
         <div class="bx--col-lg-8">
+            <!-- Extend Subscription Section -->
+            @if (currentSub != null)
+            {
+            <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem;">
+                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">Extend Active Subscription</h3>
+                <form asp-action="ExtendSubscription" method="post" style="display: flex; gap: 1rem; align-items: flex-end;">
+                    <input type="hidden" name="userId" value="@Model.Id" />
+                    <div class="bx--form-item">
+                        <label for="extraDays" class="bx--label">Extra Days</label>
+                        <div class="bx--text-input__field-wrapper">
+                            <input id="extraDays" type="number" class="bx--text-input" name="extraDays" required min="1" placeholder="e.g. 10">
+                        </div>
+                    </div>
+                    <div>
+                        <button type="submit" class="bx--btn bx--btn--primary">Extend</button>
+                    </div>
+                </form>
+            </div>
+            }
             <!-- Manage Credits Section -->
             <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem;">
                 <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">Manage Credits</h3>

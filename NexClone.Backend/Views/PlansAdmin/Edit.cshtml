@@ -94,6 +94,21 @@
                     <label for="TtsCustomInstructionsEnabled" class="bx--checkbox-label" style="cursor: pointer; margin: 0; font-weight: bold;">Enable Custom Instructions</label>
                 </div>
             </div>
+            <div class="bx--form-item" style="grid-column: span 3;">
+                <label for="selectedVoices" class="bx--label">Allowed Voices (Select multiple. Leave empty for all voices)</label>
+                <div class="bx--text-input__field-wrapper">
+                    <select id="selectedVoices" name="selectedVoices" class="bx--select" multiple style="height: 120px; padding: 0.5rem;">
+                        @if (ViewBag.AllVoices != null)
+                        {
+                            foreach (var voice in ViewBag.AllVoices as List<NexClone.Backend.Models.Voice>)
+                            {
+                                var isSelected = Model.AllowedVoices != null && Model.AllowedVoices.Split(',').Contains(voice.VoiceName) ? "selected" : "";
+                                <option value="@voice.VoiceName" @isSelected>@voice.Name (@voice.VoiceName)</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
         </div>
 
         <h4 style="margin-bottom: 1.5rem; font-weight: 400; font-size: 1.1rem;">Voice-to-Text (STT) Settings</h4>
@@ -123,11 +138,19 @@
         <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-bottom: 2rem;">
             <div class="bx--form-item">
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="hidden" name="IsDefaultRegistrationPlan" value="false" />
+                    <input type="checkbox" id="IsDefaultRegistrationPlan" name="IsDefaultRegistrationPlan" value="true" class="bx--checkbox" @(Model.IsDefaultRegistrationPlan ? "checked" : "") style="cursor: pointer;" />
+                    <label for="IsDefaultRegistrationPlan" class="bx--checkbox-label" style="cursor: pointer; margin: 0; font-weight: bold;">Set as Default Registration Plan</label>
+                </div>
+                <div class="bx--form__helper-text">If checked, this plan will be automatically assigned to new users upon registration. Only one plan can be default.</div>
+            </div>
+            
+            <div class="bx--form-item">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
                     <input type="hidden" name="IsFreeTrial" value="false" />
                     <input type="checkbox" id="IsFreeTrial" name="IsFreeTrial" value="true" class="bx--checkbox" @(Model.IsFreeTrial ? "checked" : "") style="cursor: pointer;" />
                     <label for="IsFreeTrial" class="bx--checkbox-label" style="cursor: pointer; margin: 0; font-weight: bold;">Is this a Free Trial plan?</label>
                 </div>
-                <div class="bx--form__helper-text">If checked, this plan will be automatically assigned to new users upon registration.</div>
             </div>
         </div>
 

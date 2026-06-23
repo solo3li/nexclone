@@ -49,6 +49,12 @@ namespace NexClone.Backend.Models
         // Free Trial Flag
         public bool IsFreeTrial { get; set; } = false;
 
+        // TTS Allowed Voices (Comma separated VoiceNames)
+        public string? AllowedVoices { get; set; }
+
+        // Default Registration Plan
+        public bool IsDefaultRegistrationPlan { get; set; } = false;
+
         // Navigation
         public ICollection<Subscription> Subscriptions { get; set; } = new List<Subscription>();
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();

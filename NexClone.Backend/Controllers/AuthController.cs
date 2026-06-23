@@ -112,17 +112,18 @@ namespace NexClone.Backend.Controllers
 
             if (!hasClaimedFreeTrial)
             {
-                var freeTrialPlan = await _context.Plans.FirstOrDefaultAsync(p => p.IsFreeTrial);
+                var targetPlan = await _context.Plans.FirstOrDefaultAsync(p => p.IsDefaultRegistrationPlan) 
+                              ?? await _context.Plans.FirstOrDefaultAsync(p => p.IsFreeTrial);
 
-                if (freeTrialPlan != null)
+                if (targetPlan != null)
                 {
-                    user.AvailableCredits = freeTrialPlan.MonthlyCredits;
+                    user.AvailableCredits = targetPlan.MonthlyCredits;
                     _context.Subscriptions.Add(new Subscription
                     {
                         UserId = user.Id,
-                        PlanId = freeTrialPlan.Id,
+                        PlanId = targetPlan.Id,
                         StartDate = DateTime.UtcNow,
-                        EndDate = DateTime.UtcNow.AddDays(freeTrialPlan.DurationDays),
+                        EndDate = DateTime.UtcNow.AddDays(targetPlan.DurationDays),
                         Status = "Active"
                     });
                 }

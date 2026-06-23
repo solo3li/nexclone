@@ -149,6 +149,27 @@ namespace NexClone.Backend.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ExtendSubscription(Guid userId, int extraDays)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return NotFound();
+
+            var activeSub = await _context.Subscriptions
+                .Where(s => s.UserId == userId && s.Status == "active")
+                .OrderByDescending(s => s.EndDate)
+                .FirstOrDefaultAsync();
+
+            if (activeSub != null)
+            {
+                activeSub.EndDate = activeSub.EndDate.AddDays(extraDays);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Details), new { id = userId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangePassword(Guid userId, string newPassword, [FromServices] Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> userManager)
         {
             var user = await userManager.FindByIdAsync(userId.ToString());
