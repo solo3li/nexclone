@@ -61,6 +61,7 @@ export default function TextToVoicePage() {
   const [pendingCost, setPendingCost] = useState<number | null>(null);
   const [customInstructionsEnabled, setCustomInstructionsEnabled] = useState(false);
   const [customInstruction, setCustomInstruction] = useState("");
+  const [allowedVoices, setAllowedVoices] = useState<string[] | null>(null);
 
   const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
   const currentlyPlayingRef = useRef<HTMLAudioElement | null>(null);
@@ -94,6 +95,7 @@ export default function TextToVoicePage() {
         setMaxChars(configRes.data.maxChars || 150);
         setCustomInstructionsEnabled(configRes.data.customInstructionsEnabled || false);
         setIsMaintenanceMode(configRes.data.isMaintenanceMode || false);
+        setAllowedVoices(configRes.data.allowedVoices || null);
       } catch (error) {
         console.error("Failed to load options:", error);
       }
@@ -196,6 +198,18 @@ export default function TextToVoicePage() {
     if (voiceFilter === 'female') return v.gender.toLowerCase() === 'أنثى' || v.gender.toLowerCase() === 'female';
     return true;
   });
+
+  useEffect(() => {
+    const isAllowed = (v: string) => allowedVoices === null || allowedVoices.includes(v);
+    if (filteredVoices.length > 0) {
+      if (!selectedVoice || !isAllowed(selectedVoice) || !filteredVoices.some(v => v.voiceName === selectedVoice)) {
+        const allowedInFiltered = filteredVoices.filter(v => isAllowed(v.voiceName));
+        if (allowedInFiltered.length > 0) {
+          setSelectedVoice(allowedInFiltered[0].voiceName);
+        }
+      }
+    }
+  }, [filteredVoices, selectedVoice, allowedVoices]);
 
   return (
     <div className="relative min-h-screen bg-[#0a0015] flex flex-col font-sans">
@@ -431,16 +445,27 @@ export default function TextToVoicePage() {
                         <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />
                       </div>
                     ) : (
-                      filteredVoices.map(voice => (
+                      filteredVoices.map(voice => {
+                        const isAllowed = allowedVoices === null || allowedVoices.includes(voice.voiceName);
+                        return (
                         <div 
                           key={voice.voiceName}
-                          onClick={() => setSelectedVoice(voice.voiceName)}
-                          className={`relative cursor-pointer flex flex-col rounded-[16px] overflow-hidden transition-all border ${
-                            selectedVoice === voice.voiceName 
-                              ? 'border-violet-500 bg-violet-500/20' 
-                              : 'border-white/10 bg-white/5 hover:bg-white/10'
+                          onClick={() => {
+                            if (isAllowed) setSelectedVoice(voice.voiceName);
+                          }}
+                          className={`relative flex flex-col rounded-[16px] overflow-hidden transition-all border ${
+                            !isAllowed 
+                              ? 'border-white/5 bg-white/5 opacity-60 cursor-not-allowed'
+                              : selectedVoice === voice.voiceName 
+                                ? 'border-violet-500 bg-violet-500/20 cursor-pointer' 
+                                : 'border-white/10 bg-white/5 hover:bg-white/10 cursor-pointer'
                           }`}
                         >
+                          {!isAllowed && (
+                            <div className="absolute inset-0 bg-[#0a0015]/60 z-10 flex items-center justify-center backdrop-blur-[1px]">
+                              <Lock className="w-6 h-6 text-white/50" />
+                            </div>
+                          )}
                           {/* Top colored bar based on tier */}
                           <div className={`w-full text-center py-1 text-[9px] font-bold ${
                             voice.isPremium 
@@ -468,7 +493,7 @@ export default function TextToVoicePage() {
                             )}
                           </div>
                         </div>
-                      ))
+                      )})
                     )}
                   </div>
                 </div>

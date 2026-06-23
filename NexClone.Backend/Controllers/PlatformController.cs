@@ -110,6 +110,7 @@ namespace NexClone.Backend.Controllers
         {
             int maxChars = 150; // Default
             bool customInstructionsEnabled = false;
+            List<string> allowedVoices = null;
 
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
@@ -135,6 +136,10 @@ namespace NexClone.Backend.Controllers
                         // If they have a plan, it overrides defaults, even for staff (so staff can test limits)
                         maxChars = activeSubscription.Plan.TtsMaxCharsPerRequest;
                         customInstructionsEnabled = activeSubscription.Plan.TtsCustomInstructionsEnabled;
+                        if (!string.IsNullOrEmpty(activeSubscription.Plan.AllowedVoices))
+                        {
+                            allowedVoices = activeSubscription.Plan.AllowedVoices.Split(',').Select(v => v.Trim()).ToList();
+                        }
                     }
                 }
             }
@@ -144,7 +149,7 @@ namespace NexClone.Backend.Controllers
 
             bool isMaintenanceMode = activeToolConfig?.IsMaintenanceMode ?? false;
 
-            return Ok(new { maxChars = maxChars, customInstructionsEnabled = customInstructionsEnabled, isMaintenanceMode = isMaintenanceMode });
+            return Ok(new { maxChars = maxChars, customInstructionsEnabled = customInstructionsEnabled, isMaintenanceMode = isMaintenanceMode, allowedVoices = allowedVoices });
         }
 
         [HttpGet("vtt-config")]
