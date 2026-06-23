@@ -326,24 +326,7 @@ export default function VoiceToTextPage() {
             transition={{ delay: 0.1 }}
             className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex flex-col gap-4"
           >
-            {/* Mode Selection */}
-            <div className="flex gap-4 p-1 bg-white/5 rounded-xl border border-white/10" dir={isRtl ? 'rtl' : 'ltr'}>
-              <button
-                onClick={() => setMode("transcribe")}
-                className={`flex-1 py-3 rounded-lg text-sm font-medium transition-all ${mode === "transcribe" ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg" : "text-white/60 hover:text-white"}`}
-              >
-                {t('transcribe')}
-              </button>
-              <button
-                onClick={() => {
-                  setMode("translate");
-                  if (language === 'auto') setLanguage('en');
-                }}
-                className={`flex-1 py-3 rounded-lg text-sm font-medium transition-all ${mode === "translate" ? "bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white shadow-lg" : "text-white/60 hover:text-white"}`}
-              >
-                {t('translate')}
-              </button>
-            </div>
+            {/* Mode Selection Removed */}
 
             {/* Language Selection */}
             <div dir={isRtl ? 'rtl' : 'ltr'}>
