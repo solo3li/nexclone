@@ -2,12 +2,34 @@
 
 @{
     ViewData["Title"] = "User Details";
-    var currentSub = Model.Subscriptions?.FirstOrDefault(s => s.Status == "active");
+    var currentSub = Model.Subscriptions?.FirstOrDefault(s => s.Status != null && s.Status.ToLower() == "active");
 }
 
 <div class="bx--grid bx--grid--full-width">
     <div class="bx--row" style="margin-bottom: 2rem;">
         <div class="bx--col">
+            @if (TempData["Success"] != null)
+            {
+                <div class="bx--inline-notification bx--inline-notification--success" role="alert" style="margin-bottom: 1rem; width: 100%; max-width: none;">
+                    <div class="bx--inline-notification__details">
+                        <div class="bx--inline-notification__text-wrapper">
+                            <p class="bx--inline-notification__title">Success:</p>
+                            <p class="bx--inline-notification__subtitle">@TempData["Success"]</p>
+                        </div>
+                    </div>
+                </div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="bx--inline-notification bx--inline-notification--error" role="alert" style="margin-bottom: 1rem; width: 100%; max-width: none;">
+                    <div class="bx--inline-notification__details">
+                        <div class="bx--inline-notification__text-wrapper">
+                            <p class="bx--inline-notification__title">Error:</p>
+                            <p class="bx--inline-notification__subtitle">@TempData["Error"]</p>
+                        </div>
+                    </div>
+                </div>
+            }
             <h1 class="bx--type-productive-heading-05">User Details: @Model.Email</h1>
         </div>
     </div>
@@ -62,8 +84,6 @@
 
         <div class="bx--col-lg-8">
             <!-- Extend Subscription Section -->
-            @if (currentSub != null)
-            {
             <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem;">
                 <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">Extend Active Subscription</h3>
                 <form asp-action="ExtendSubscription" method="post" style="display: flex; gap: 1rem; align-items: flex-end;">
@@ -79,7 +99,6 @@
                     </div>
                 </form>
             </div>
-            }
             <!-- Manage Credits Section -->
             <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem;">
                 <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">Manage Credits</h3>

@@ -26,7 +26,7 @@ namespace NexClone.Backend.Controllers
             if (pageNumber < 1) pageNumber = 1;
 
             var query = _context.Users
-                .Include(u => u.Subscriptions.Where(s => s.Status == "active"))
+                .Include(u => u.Subscriptions.Where(s => s.Status == "active" || s.Status == "Active"))
                     .ThenInclude(s => s.Plan)
                 .AsQueryable();
 
@@ -41,7 +41,7 @@ namespace NexClone.Backend.Controllers
 
             if (planId.HasValue)
             {
-                query = query.Where(u => u.Subscriptions.Any(s => s.Status == "active" && s.PlanId == planId.Value));
+                query = query.Where(u => u.Subscriptions.Any(s => (s.Status == "active" || s.Status == "Active") && s.PlanId == planId.Value));
             }
 
             int totalItems = await query.CountAsync();
@@ -148,11 +148,11 @@ namespace NexClone.Backend.Controllers
             if (user == null || plan == null) return NotFound();
 
             // Cancel any existing active subscriptions
-            var existingSubs = await _context.Subscriptions
-                .Where(s => s.UserId == userId && s.Status == "active")
+            var activeSubscriptions = await _context.Subscriptions
+                .Where(s => s.UserId == userId && (s.Status == "active" || s.Status == "Active"))
                 .ToListAsync();
 
-            foreach (var sub in existingSubs)
+            foreach (var sub in activeSubscriptions)
             {
                 sub.Status = "canceled";
             }
@@ -220,14 +220,31 @@ namespace NexClone.Backend.Controllers
             if (user == null) return NotFound();
 
             var activeSub = await _context.Subscriptions
-                .Where(s => s.UserId == userId && s.Status == "active")
+                .Where(s => s.UserId == userId && (s.Status == "active" || s.Status == "Active"))
                 .OrderByDescending(s => s.EndDate)
                 .FirstOrDefaultAsync();
+
+            if (activeSub == null)
+            {
+                activeSub = await _context.Subscriptions
+                    .Where(s => s.UserId == userId)
+                    .OrderByDescending(s => s.EndDate)
+                    .FirstOrDefaultAsync();
+            }
 
             if (activeSub != null)
             {
                 activeSub.EndDate = activeSub.EndDate.AddDays(extraDays);
+                if (activeSub.EndDate > DateTime.UtcNow)
+                {
+                    activeSub.Status = "Active";
+                }
                 await _context.SaveChangesAsync();
+                TempData["Success"] = $"Extended subscription by {extraDays} days.";
+            }
+            else
+            {
+                TempData["Error"] = "User has no subscriptions to extend. Please assign a plan first.";
             }
 
             return RedirectToAction(nameof(Details), new { id = userId });
