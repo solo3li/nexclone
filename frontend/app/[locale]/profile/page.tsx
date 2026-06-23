@@ -21,8 +21,11 @@ export default function ProfilePage() {
   const router = useRouter();
   
   const user = useAppStore(state => state.user);
+  const isAuthenticated = useAppStore(state => state.isAuthenticated);
   
   const [historyCount, setHistoryCount] = useState(0);
+  const [isReady, setIsReady] = useState(false);
+
   
   // Settings State
   const [fullName, setFullName] = useState(user?.fullName || "");
@@ -37,6 +40,7 @@ export default function ProfilePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    setIsReady(true);
     if (user && !fullName) {
       setFullName(user.fullName || "");
       setImagePreview(user.imageUrl || null);
@@ -45,6 +49,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const fetchHistory = async () => {
+      if (!user) return;
       try {
         const res = await api.get("/api/history");
         setHistoryCount(res.data.length);
@@ -52,8 +57,10 @@ export default function ProfilePage() {
         console.error("Failed to fetch history count:", err);
       }
     };
-    fetchHistory();
-  }, []);
+    if (isReady) {
+      fetchHistory();
+    }
+  }, [user, isReady]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -106,6 +113,31 @@ export default function ProfilePage() {
       setSavingPassword(false);
     }
   };
+
+  if (isReady && !isAuthenticated && !user) {
+    return (
+      <div className="relative min-h-screen bg-[#0a0015] flex flex-col selection:bg-violet-500/30">
+        <Navbar />
+        <main className="flex-1 container mx-auto px-4 pt-32 pb-20 relative z-10 flex items-center justify-center">
+           <div className="text-center p-10 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl max-w-md w-full relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-violet-500/20 blur-3xl rounded-full" />
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-fuchsia-500/20 blur-3xl rounded-full" />
+              <div className="w-20 h-20 bg-white/5 rounded-2xl mx-auto flex items-center justify-center mb-6 border border-white/10 shadow-xl relative z-10">
+                 <Lock className="w-10 h-10 text-violet-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-4 relative z-10">{isRtl ? "سجل الدخول للمتابعة" : "Login to continue"}</h2>
+              <p className="text-white/60 mb-8 relative z-10">{isRtl ? "يجب عليك تسجيل الدخول أو إنشاء حساب جديد للوصول إلى هذه الصفحة." : "You need to login or create a new account to access this page."}</p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
+                 <button onClick={() => router.push(`/${locale}/login`)} className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold transition-all w-full">{isRtl ? "تسجيل الدخول" : "Login"}</button>
+                 <button onClick={() => router.push(`/${locale}/register`)} className="px-6 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-violet-500/25 w-full">{isRtl ? "انضم الآن" : "Join Now"}</button>
+              </div>
+           </div>
+        </main>
+        <Footer />
+        <MobileBottomNav />
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen bg-[#0a0015] flex flex-col selection:bg-violet-500/30">

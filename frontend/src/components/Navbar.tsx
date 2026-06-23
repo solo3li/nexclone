@@ -105,6 +105,10 @@ export default function Navbar() {
                 <span className="text-sm font-medium text-white/80 hidden lg:block">
                   {user?.fullName || user?.email}
                 </span>
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold text-sm hidden md:flex">
+                  <Zap className="w-4 h-4" />
+                  {user?.availableCredits || 0}
+                </div>
                 <Link
                   href="/profile"
                   className="relative px-5 py-2.5 rounded-xl text-sm font-semibold text-white overflow-hidden group"

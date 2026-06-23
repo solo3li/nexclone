@@ -373,11 +373,12 @@ namespace NexClone.Backend.Controllers
 
         private void SetTokenCookie(string token)
         {
+            var isHttps = Request.IsHttps || Request.Headers["X-Forwarded-Proto"] == "https";
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None,
+                Secure = isHttps,
+                SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
                 Expires = DateTime.UtcNow.AddDays(7),
                 Path = "/"
             };
@@ -387,11 +388,12 @@ namespace NexClone.Backend.Controllers
         [HttpPost("logout")]
         public IActionResult Logout()
         {
+            var isHttps = Request.IsHttps || Request.Headers["X-Forwarded-Proto"] == "https";
             Response.Cookies.Append("jwt", "", new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None,
+                Secure = isHttps,
+                SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
                 Expires = DateTime.UtcNow.AddDays(-10),
                 Path = "/"
             });
