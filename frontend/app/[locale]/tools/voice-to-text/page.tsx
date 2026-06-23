@@ -7,7 +7,7 @@ import Navbar from "../../../../src/components/Navbar";
 import Footer from "../../../../src/components/Footer";
 import {
   UploadCloud, Mic, Square, Play, Pause, Copy, Download,
-  Loader2, FileAudio, CheckCircle2, X, Volume2, Zap
+  Loader2, FileAudio, CheckCircle2, X, Volume2, Zap, AudioWaveform
 } from "lucide-react";
 import { uploadDirectToMinio } from "../../../../src/utils/upload";
 import api from "../../../../src/utils/api";
@@ -304,7 +304,7 @@ export default function VoiceToTextPage() {
         )}
       </header>
 
-      <main className="flex-1 container mx-auto px-4 pt-24 pb-20 relative z-10 max-w-[1400px]">
+      <main className="flex-1 container mx-auto px-4 pt-20 pb-10 relative z-10 max-w-6xl">
         {isMaintenanceMode ? (
           <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
             <div className="w-20 h-20 bg-violet-600/20 rounded-full flex items-center justify-center mb-6">
@@ -315,23 +315,16 @@ export default function VoiceToTextPage() {
           </div>
         ) : (
           <>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center mb-12"
-            >
-          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4">{t('title')}</h1>
-          <p className="text-lg text-white/60">{t('subtitle')}</p>
-        </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
           {/* Controls & Input */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 flex flex-col gap-6"
+            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex flex-col gap-4"
           >
             {/* Mode Selection */}
             <div className="flex gap-4 p-1 bg-white/5 rounded-xl border border-white/10" dir={isRtl ? 'rtl' : 'ltr'}>
@@ -635,7 +628,7 @@ export default function VoiceToTextPage() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 flex flex-col"
+            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex flex-col h-auto min-h-[300px]"
           >
             <div className="flex items-center justify-between mb-4" dir={isRtl ? 'rtl' : 'ltr'}>
               <h2 className="text-lg font-bold text-white">{t('result')}</h2>
@@ -651,7 +644,7 @@ export default function VoiceToTextPage() {
               )}
             </div>
 
-            <div className={`flex-1 w-full bg-[#0a0015]/50 border border-white/5 rounded-2xl p-4 min-h-[300px] overflow-y-auto ${!result && !isProcessing ? 'flex items-center justify-center' : ''}`}>
+            <div className={`flex-1 w-full bg-[#0a0015]/50 border border-white/5 rounded-2xl p-4 min-h-[150px] overflow-y-auto ${!result && !isProcessing ? 'flex items-center justify-center' : ''}`}>
               <AnimatePresence mode="wait">
                 {stage === 'transcribing' ? (
                   <motion.div
@@ -697,7 +690,6 @@ export default function VoiceToTextPage() {
               </AnimatePresence>
             </div>
           </motion.div>
-
         </div>
           </>
         )}
