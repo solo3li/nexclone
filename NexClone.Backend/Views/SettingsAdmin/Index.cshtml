@@ -124,41 +124,7 @@
         </div>
     </form>
 
-    <!-- AWS S3 SETTINGS FORM -->
-    <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #8a3ffc;">
-        @Html.AntiForgeryToken()
 
-        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">AWS S3 Settings</h3>
-        
-        <div class="bx--form-item" style="margin-bottom: 1.5rem;">
-            <label for="S3_Endpoint" class="bx--label">Endpoint</label>
-            <input id="S3_Endpoint" type="text" class="bx--text-input" name="settings[S3.Endpoint]" value="@Model.FirstOrDefault(s => s.Key == "S3.Endpoint")?.Value" placeholder="s3.amazonaws.com">
-        </div>
-
-        <div class="bx--form-item" style="margin-bottom: 1.5rem;">
-            <label for="S3_Region" class="bx--label">Region</label>
-            <input id="S3_Region" type="text" class="bx--text-input" name="settings[S3.Region]" value="@Model.FirstOrDefault(s => s.Key == "S3.Region")?.Value" placeholder="eu-north-1">
-        </div>
-
-        <div class="bx--form-item" style="margin-bottom: 1.5rem;">
-            <label for="S3_AccessKey" class="bx--label">Access Key</label>
-            <input id="S3_AccessKey" type="text" class="bx--text-input" name="settings[S3.AccessKey]" value="@Model.FirstOrDefault(s => s.Key == "S3.AccessKey")?.Value">
-        </div>
-
-        <div class="bx--form-item" style="margin-bottom: 1.5rem;">
-            <label for="S3_SecretKey" class="bx--label">Secret Key</label>
-            <input id="S3_SecretKey" type="password" class="bx--text-input" name="settings[S3.SecretKey]" value="@Model.FirstOrDefault(s => s.Key == "S3.SecretKey")?.Value">
-        </div>
-
-        <div class="bx--form-item" style="margin-bottom: 1rem;">
-            <label for="S3_BucketName" class="bx--label">Bucket Name</label>
-            <input id="S3_BucketName" type="text" class="bx--text-input" name="settings[S3.BucketName]" value="@Model.FirstOrDefault(s => s.Key == "S3.BucketName")?.Value">
-        </div>
-
-        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
-            <button type="submit" class="bx--btn bx--btn--primary">Save AWS S3 Settings</button>
-        </div>
-    </form>
 
     <!-- GOOGLE OAUTH SETTINGS FORM -->
     <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #ea4335;">
