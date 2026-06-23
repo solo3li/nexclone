@@ -265,7 +265,7 @@ export default function TextToVoicePage() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
-            className="lg:col-span-8 flex flex-col gap-4"
+            className="lg:col-span-8 flex flex-col gap-4 order-2 lg:order-1"
           >
             <div className="flex-1 bg-[#120822]/80 backdrop-blur-xl rounded-2xl border border-white/5 p-4 flex flex-col relative overflow-hidden group shadow-2xl transition-all duration-500 hover:border-violet-500/30">
               
@@ -344,7 +344,7 @@ export default function TextToVoicePage() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            className="lg:col-span-4 flex flex-col gap-4"
+            className="lg:col-span-4 flex flex-col gap-4 order-1 lg:order-2"
           >
               <div className="bg-[#120822]/80 backdrop-blur-xl rounded-2xl border border-white/5 p-3 flex-shrink-0">
               <div className="flex items-center gap-2 mb-2 px-1">
