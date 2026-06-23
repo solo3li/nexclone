@@ -46,12 +46,23 @@
                     <div><strong>Country:</strong> @(string.IsNullOrEmpty(Model.Country) ? "N/A" : Model.Country)</div>
                     <div><strong>Joined:</strong> @Model.CreatedAt.ToString("MMM dd, yyyy")</div>
                     <div><strong>Available Credits:</strong> @Model.AvailableCredits</div>
-                    <div>
+                    <div style="grid-column: span 2;">
                         <strong>Current Plan:</strong> 
                         @if (currentSub?.Plan != null)
                         {
-                            <span class="bx--tag bx--tag--green">@currentSub.Plan.Name</span>
-                            <span>(Expires: @currentSub.EndDate.ToString("MMM dd, yyyy"))</span>
+                            <span class="bx--tag bx--tag--green" style="margin-bottom: 0.5rem;">@currentSub.Plan.Name</span>
+                            <div style="background: #ffffff; padding: 1rem; border: 1px solid #e0e0e0; border-radius: 4px; display: inline-block; margin-top: 0.5rem; width: 100%;">
+                                <div style="display: flex; justify-content: space-between; gap: 2rem;">
+                                    <div>
+                                        <strong style="color: #525252; font-size: 0.875rem;">Started On:</strong><br/>
+                                        <span>@currentSub.StartDate.ToString("MMM dd, yyyy HH:mm")</span>
+                                    </div>
+                                    <div>
+                                        <strong style="color: #525252; font-size: 0.875rem;">Expires On:</strong><br/>
+                                        <span>@currentSub.EndDate.ToString("MMM dd, yyyy HH:mm")</span>
+                                    </div>
+                                </div>
+                            </div>
                         }
                         else
                         {
