@@ -477,21 +477,21 @@ export default function TextToVoicePage() {
                             {voice.isPremium ? t('premium') : t('free')}
                           </div>
                           
-                          <div className="p-4 flex flex-col items-center text-center gap-1.5">
-                            <h4 className="text-white font-bold text-[13px]">{voice.name}</h4>
-                            <p className="text-[9px] text-white/50">{voice.accent}</p>
-                            <div className="flex items-center gap-1 text-[9px] text-white/40 mt-1">
+                          <div className="p-2 pb-5 flex flex-col items-center text-center gap-0.5">
+                            <h4 className="text-white font-bold text-[11px] leading-tight">{voice.name}</h4>
+                            <p className="text-[8px] text-white/50 leading-tight">{voice.accent}</p>
+                            <div className="flex items-center gap-1 text-[8px] text-white/40 mt-0.5">
                               {voice.gender.toLowerCase() === 'ذكر' || voice.gender.toLowerCase() === 'male' ? <User className="w-2.5 h-2.5" /> : <Users className="w-2.5 h-2.5" />}
                               <span>{voice.gender}</span>
                             </div>
                             
                             {voice.demoAudio && (
-                              <button 
-                                onClick={(e) => { e.stopPropagation(); playDemo(voice.demoAudio); }}
-                                className="absolute bottom-2 left-2 p-1.5 bg-white/10 hover:bg-white/30 rounded-full text-white/60 hover:text-white transition-all"
-                              >
-                                <Play className="w-2.5 h-2.5" />
-                              </button>
+                                <button 
+                                  onClick={(e) => { e.stopPropagation(); playDemo(voice.demoAudio); }}
+                                  className="absolute bottom-1 left-1 p-1 bg-white/10 hover:bg-white/30 rounded-full text-white/60 hover:text-white transition-all"
+                                >
+                                  <Play className="w-2.5 h-2.5" />
+                                </button>
                             )}
                           </div>
                         </div>
@@ -525,16 +525,16 @@ export default function TextToVoicePage() {
                 )}
 
                 {/* UI Placeholders for Advanced Settings */}
-                <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-2">
                   
                   {languageMode === 'arabic' && (
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[11px] font-semibold text-white/60 px-2">{t('accent')}</label>
-                    <div className="relative bg-[#0a0015]/60 border border-white/5 rounded-[16px] text-xs text-white/80 hover:border-white/10 transition-colors">
+                  <div className="flex flex-col gap-0.5">
+                    <label className="text-[9px] font-semibold text-white/60 px-1">{t('accent')}</label>
+                    <div className="relative bg-[#0a0015]/60 border border-white/5 rounded-lg text-[10px] text-white/80 hover:border-white/10 transition-colors">
                       <select 
                         value={selectedDialect}
                         onChange={(e) => setSelectedDialect(e.target.value)}
-                        className="w-full bg-transparent outline-none appearance-none cursor-pointer px-4 py-3 relative z-10"
+                        className="w-full bg-transparent outline-none appearance-none cursor-pointer px-2 py-1.5 relative z-10"
                       >
                         <option value="" className="bg-[#0a0015] text-white/50">-- {t('accent')} --</option>
                         {dialects.map(d => (
@@ -543,7 +543,7 @@ export default function TextToVoicePage() {
                           </option>
                         ))}
                       </select>
-                      <ChevronDown className={`w-3.5 h-3.5 absolute top-1/2 -translate-y-1/2 ${isRtl ? 'left-4' : 'right-4'} pointer-events-none text-white/50 z-0`} />
+                      <ChevronDown className={`w-3 h-3 absolute top-1/2 -translate-y-1/2 ${isRtl ? 'left-2' : 'right-2'} pointer-events-none text-white/50 z-0`} />
                     </div>
                   </div>
                   )}
@@ -583,14 +583,14 @@ export default function TextToVoicePage() {
                           </option>
                         ))}
                       </select>
-                      <ChevronDown className={`w-3.5 h-3.5 absolute top-1/2 -translate-y-1/2 ${isRtl ? 'left-4' : 'right-4'} pointer-events-none text-white/50 z-0`} />
+                      <ChevronDown className={`w-3 h-3 absolute top-1/2 -translate-y-1/2 ${isRtl ? 'left-2' : 'right-2'} pointer-events-none text-white/50 z-0`} />
                     </div>
                   </div>
 
                   {languageMode === 'arabic' && (
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[11px] font-semibold text-white/60 px-2 flex items-center gap-1.5">
-                      <Wand2 className="w-3 h-3 text-fuchsia-400" />
+                  <div className="flex flex-col gap-0.5">
+                    <label className="text-[9px] font-semibold text-white/60 px-1 flex items-center gap-1">
+                      <Wand2 className="w-2.5 h-2.5 text-fuchsia-400" />
                       {t('customInstructions')}
                     </label>
                     {customInstructionsEnabled ? (
