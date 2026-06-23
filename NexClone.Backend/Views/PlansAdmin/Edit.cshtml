@@ -95,18 +95,19 @@
                 </div>
             </div>
             <div class="bx--form-item" style="grid-column: span 3;">
-                <label for="selectedVoices" class="bx--label">Allowed Voices (Select multiple. Leave empty for all voices)</label>
-                <div class="bx--text-input__field-wrapper">
-                    <select id="selectedVoices" name="selectedVoices" class="bx--select" multiple style="height: 120px; padding: 0.5rem;">
-                        @if (ViewBag.AllVoices != null)
+                <label class="bx--label">Allowed Voices (Select multiple. Leave empty for all voices)</label>
+                <div style="max-height: 200px; overflow-y: auto; border: 1px solid #e0e0e0; padding: 1rem; background: #fff; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
+                    @if (ViewBag.AllVoices != null)
+                    {
+                        foreach (var voice in ViewBag.AllVoices as List<NexClone.Backend.Models.Voice>)
                         {
-                            foreach (var voice in ViewBag.AllVoices as List<NexClone.Backend.Models.Voice>)
-                            {
-                                var isSelected = Model.AllowedVoices != null && Model.AllowedVoices.Split(',').Contains(voice.VoiceName) ? "selected" : "";
-                                <option value="@voice.VoiceName" @isSelected>@voice.Name (@voice.VoiceName)</option>
-                            }
+                            bool isChecked = Model.AllowedVoices != null && Model.AllowedVoices.Split(',').Contains(voice.VoiceName);
+                            <div class="bx--checkbox-wrapper">
+                                <input type="checkbox" id="voice_@voice.VoiceName" name="selectedVoices" value="@voice.VoiceName" class="bx--checkbox" @(isChecked ? "checked" : "") style="cursor: pointer;" />
+                                <label for="voice_@voice.VoiceName" class="bx--checkbox-label" style="cursor: pointer;">@voice.Name (@voice.VoiceName)</label>
+                            </div>
                         }
-                    </select>
+                    }
                 </div>
             </div>
         </div>

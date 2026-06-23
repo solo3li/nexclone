@@ -43,7 +43,6 @@ namespace NexClone.Backend.Controllers
 
             var users = await query
                 .OrderByDescending(u => u.CreatedAt)
-                .Take(100)
                 .ToListAsync();
 
             ViewBag.Plans = new SelectList(await _context.Plans.ToListAsync(), "Id", "Name");
