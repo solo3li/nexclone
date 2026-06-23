@@ -2,6 +2,8 @@ using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using NexClone.Backend.Models;
@@ -110,24 +112,7 @@ namespace NexClone.Backend.Controllers
                 FingerprintHash = fingerprint
             });
 
-            if (!hasClaimedFreeTrial)
-            {
-                var targetPlan = await _context.Plans.FirstOrDefaultAsync(p => p.IsDefaultRegistrationPlan) 
-                              ?? await _context.Plans.FirstOrDefaultAsync(p => p.IsFreeTrial);
 
-                if (targetPlan != null)
-                {
-                    user.AvailableCredits = targetPlan.MonthlyCredits;
-                    _context.Subscriptions.Add(new Subscription
-                    {
-                        UserId = user.Id,
-                        PlanId = targetPlan.Id,
-                        StartDate = DateTime.UtcNow,
-                        EndDate = DateTime.UtcNow.AddDays(targetPlan.DurationDays),
-                        Status = "Active"
-                    });
-                }
-            }
             await _context.SaveChangesAsync();
 
             var token = GenerateJwtToken(user);
@@ -246,23 +231,6 @@ namespace NexClone.Backend.Controllers
                     hasClaimedFreeTrial = await _context.DeviceFingerprints.AnyAsync(df => df.IpAddress == ipAddress);
                 }
 
-                if (!hasClaimedFreeTrial)
-                {
-                    var freeTrialPlan = await _context.Plans.FirstOrDefaultAsync(p => p.IsFreeTrial);
-
-                    if (freeTrialPlan != null)
-                    {
-                        user.AvailableCredits = freeTrialPlan.MonthlyCredits;
-                        _context.Subscriptions.Add(new Subscription
-                        {
-                            UserId = user.Id,
-                            PlanId = freeTrialPlan.Id,
-                            StartDate = DateTime.UtcNow,
-                            EndDate = DateTime.UtcNow.AddDays(freeTrialPlan.DurationDays),
-                            Status = "Active"
-                        });
-                    }
-                }
             }
 
             _context.DeviceFingerprints.Add(new DeviceFingerprint
@@ -400,6 +368,64 @@ namespace NexClone.Backend.Controllers
             return Ok(new { Message = "Logged out" });
         }
 
+        [HttpPost("add-phone")]
+        [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> AddPhone([FromBody] AddPhoneRequest request)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return Unauthorized();
+
+            if (!string.IsNullOrEmpty(user.PhoneNumber))
+            {
+                return BadRequest(new { Message = "رقم الهاتف مسجل بالفعل." });
+            }
+
+            user.PhoneNumber = request.PhoneNumber;
+
+            var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+            var fingerprint = request.DeviceFingerprint ?? string.Empty;
+
+            bool hasClaimedFreeTrial = false;
+
+            if (!string.IsNullOrEmpty(fingerprint))
+            {
+                hasClaimedFreeTrial = await _context.DeviceFingerprints.AnyAsync(df => df.FingerprintHash == fingerprint && df.UserId != user.Id);
+            }
+
+            if (!hasClaimedFreeTrial)
+            {
+                hasClaimedFreeTrial = await _context.DeviceFingerprints.AnyAsync(df => df.IpAddress == ipAddress && df.UserId != user.Id);
+            }
+
+            if (!hasClaimedFreeTrial)
+            {
+                var targetPlan = await _context.Plans.FirstOrDefaultAsync(p => p.IsDefaultRegistrationPlan) 
+                              ?? await _context.Plans.FirstOrDefaultAsync(p => p.IsFreeTrial);
+
+                if (targetPlan != null)
+                {
+                    user.AvailableCredits += targetPlan.MonthlyCredits;
+                    _context.Subscriptions.Add(new Subscription
+                    {
+                        UserId = user.Id,
+                        PlanId = targetPlan.Id,
+                        StartDate = DateTime.UtcNow,
+                        EndDate = DateTime.UtcNow.AddDays(targetPlan.DurationDays),
+                        Status = "Active"
+                    });
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Message = "تم تسجيل رقم الهاتف بنجاح." });
+        }
+
         [HttpGet("me")]
         public async Task<IActionResult> GetCurrentUser()
         {
@@ -436,6 +462,7 @@ namespace NexClone.Backend.Controllers
                 Country = user.Country,
                 ImageUrl = imageUrl,
                 IsVerified = user.IsVerified,
+                HasPhoneNumber = !string.IsNullOrEmpty(user.PhoneNumber),
                 AvailableCredits = user.AvailableCredits,
                 IsStaff = user.IsStaff,
                 ActivePlan = activeSub != null ? new {

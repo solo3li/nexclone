@@ -12,7 +12,8 @@ import {
 import { uploadDirectToMinio } from "../../../../src/utils/upload";
 import api from "../../../../src/utils/api";
 import { useAppStore } from "../../../../src/store/useAppStore";
-import { useRouter } from "../../../../src/i18n/routing";
+import { useRouter, Link } from "../../../../src/i18n/routing";
+import { ArrowLeft, ArrowRight, Wallet } from "lucide-react";
 
 const LANGUAGES = [
   { code: 'auto', name: 'Auto-Detect' },
@@ -43,8 +44,9 @@ export default function VoiceToTextPage() {
   const t = useTranslations("VoiceToText");
   const locale = useLocale();
   const isRtl = locale === 'ar';
-  const { isAuthenticated } = useAppStore();
+  const { user, isAuthenticated, hasPhoneNumber } = useAppStore();
   const router = useRouter();
+  const ArrowIcon = locale === 'ar' ? ArrowRight : ArrowLeft;
 
   const [file, setFile] = useState<File | Blob | null>(null);
   const [mode, setMode] = useState("transcribe");
@@ -277,11 +279,32 @@ export default function VoiceToTextPage() {
 
   return (
     <div className="relative min-h-screen bg-[#0a0015] flex flex-col">
-      <div className="fixed top-1/4 left-1/4 w-[60%] h-[500px] bg-violet-600/10 blur-[150px] pointer-events-none z-0 rounded-full" />
+      <div className="absolute top-1/4 right-1/4 w-[60%] h-[500px] bg-fuchsia-600/10 blur-[150px] pointer-events-none z-0 rounded-full" />
+      
+      {/* Minimal Header */}
+      <header className="fixed top-0 left-0 right-0 h-16 bg-[#0a0015]/80 backdrop-blur-md border-b border-white/5 z-50 flex items-center justify-between px-4 lg:px-8" dir={isRtl ? 'rtl' : 'ltr'}>
+        <div className="flex items-center gap-4">
+          <Link href="/tools" className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors text-white/70 hover:text-white">
+            <ArrowIcon className="w-5 h-5" />
+          </Link>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-fuchsia-600 to-pink-600 flex items-center justify-center">
+              <AudioWaveform className="w-4 h-4 text-white" />
+            </div>
+            <h1 className="text-white font-bold text-sm lg:text-base hidden sm:block">{t('title')}</h1>
+          </div>
+        </div>
+        
+        {isAuthenticated && (
+          <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5">
+            <Wallet className="w-4 h-4 text-fuchsia-400" />
+            <span className="text-white font-bold text-sm">{user?.availableCredits || 0}</span>
+            <span className="text-white/50 text-xs ml-1 rtl:mr-1">{isRtl ? 'رصيد' : 'Credits'}</span>
+          </div>
+        )}
+      </header>
 
-      <Navbar />
-
-      <main className="flex-1 container mx-auto px-4 pt-32 pb-20 relative z-10 max-w-5xl">
+      <main className="flex-1 container mx-auto px-4 pt-24 pb-20 relative z-10 max-w-[1400px]">
         {isMaintenanceMode ? (
           <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
             <div className="w-20 h-20 bg-violet-600/20 rounded-full flex items-center justify-center mb-6">
@@ -680,7 +703,7 @@ export default function VoiceToTextPage() {
         )}
       </main>
 
-      <Footer />
+
     </div>
   );
 }
