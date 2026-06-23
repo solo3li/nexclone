@@ -6,8 +6,12 @@
 
 <div class="bx--grid bx--grid--full-width">
     <div class="bx--row">
-        <div class="bx--col">
-            <h1 class="bx--type-productive-heading-05" style="margin-bottom: 2rem;">Users Management</h1>
+        <div class="bx--col" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h1 class="bx--type-productive-heading-05">Users Management</h1>
+            <a href="@Url.Action("Create")" class="bx--btn bx--btn--primary">
+                Create User
+                <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="16" height="16" viewBox="0 0 32 32" aria-hidden="true" class="bx--btn__icon"><path d="M17 15L17 8 15 8 15 15 8 15 8 17 15 17 15 24 17 24 17 17 24 17 24 15z"></path></svg>
+            </a>
         </div>
     </div>
     
@@ -109,6 +113,45 @@
                     </tbody>
                 </table>
             </div>
+            
+            <!-- Pagination Controls -->
+            @if (ViewBag.TotalPages > 1)
+            {
+                <div class="bx--pagination" data-pagination style="border: 1px solid #e0e0e0; border-top: none; display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 1rem; background: #ffffff;">
+                    <div class="bx--pagination__left">
+                        <span class="bx--pagination__text">
+                            Page @ViewBag.PageNumber of @ViewBag.TotalPages
+                        </span>
+                    </div>
+                    <div class="bx--pagination__right" style="display: flex; gap: 0.5rem;">
+                        @if (ViewBag.PageNumber > 1)
+                        {
+                            <a href="@Url.Action("Index", new { searchString = ViewBag.CurrentSearch, planId = ViewBag.CurrentPlanId, pageNumber = ViewBag.PageNumber - 1 })" class="bx--btn bx--btn--ghost bx--btn--sm" style="padding: 0 1rem;">
+                                Previous
+                            </a>
+                        }
+                        else
+                        {
+                            <button class="bx--btn bx--btn--ghost bx--btn--sm" disabled style="padding: 0 1rem; opacity: 0.5;">
+                                Previous
+                            </button>
+                        }
+
+                        @if (ViewBag.PageNumber < ViewBag.TotalPages)
+                        {
+                            <a href="@Url.Action("Index", new { searchString = ViewBag.CurrentSearch, planId = ViewBag.CurrentPlanId, pageNumber = ViewBag.PageNumber + 1 })" class="bx--btn bx--btn--primary bx--btn--sm" style="padding: 0 1rem;">
+                                Next
+                            </a>
+                        }
+                        else
+                        {
+                            <button class="bx--btn bx--btn--primary bx--btn--sm" disabled style="padding: 0 1rem; opacity: 0.5;">
+                                Next
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </div>

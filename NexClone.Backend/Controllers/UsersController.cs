@@ -20,8 +20,11 @@ namespace NexClone.Backend.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index(string searchString, int? planId)
+        public async Task<IActionResult> Index(string searchString, int? planId, int pageNumber = 1)
         {
+            int pageSize = 20;
+            if (pageNumber < 1) pageNumber = 1;
+
             var query = _context.Users
                 .Include(u => u.Subscriptions.Where(s => s.Status == "active"))
                     .ThenInclude(s => s.Plan)
@@ -41,13 +44,20 @@ namespace NexClone.Backend.Controllers
                 query = query.Where(u => u.Subscriptions.Any(s => s.Status == "active" && s.PlanId == planId.Value));
             }
 
+            int totalItems = await query.CountAsync();
+            int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
             var users = await query
                 .OrderByDescending(u => u.CreatedAt)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
             ViewBag.Plans = new SelectList(await _context.Plans.ToListAsync(), "Id", "Name");
             ViewBag.CurrentSearch = searchString;
             ViewBag.CurrentPlanId = planId;
+            ViewBag.PageNumber = pageNumber;
+            ViewBag.TotalPages = totalPages;
 
             return View(users);
         }
@@ -70,6 +80,62 @@ namespace NexClone.Backend.Controllers
             ViewBag.Plans = new SelectList(await _context.Plans.ToListAsync(), "Id", "Name");
             ViewBag.Devices = devices;
             return View(user);
+        }
+
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(string email, string fullName, string password, [FromServices] Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> userManager)
+        {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            {
+                ModelState.AddModelError("", "Email and Password are required.");
+                return View();
+            }
+
+            var user = new ApplicationUser 
+            { 
+                UserName = email, 
+                Email = email, 
+                FullName = fullName,
+                CreatedAt = DateTime.UtcNow,
+                IsVerified = true,
+                AvailableCredits = 0
+            };
+
+            var result = await userManager.CreateAsync(user, password);
+            if (result.Succeeded)
+            {
+                var targetPlan = await _context.Plans.FirstOrDefaultAsync(p => p.IsDefaultRegistrationPlan) 
+                              ?? await _context.Plans.FirstOrDefaultAsync(p => p.IsFreeTrial);
+
+                if (targetPlan != null)
+                {
+                    user.AvailableCredits = targetPlan.MonthlyCredits;
+                    _context.Subscriptions.Add(new Subscription
+                    {
+                        UserId = user.Id,
+                        PlanId = targetPlan.Id,
+                        StartDate = DateTime.UtcNow,
+                        EndDate = DateTime.UtcNow.AddDays(targetPlan.DurationDays),
+                        Status = "Active"
+                    });
+                    await _context.SaveChangesAsync();
+                }
+
+                return RedirectToAction(nameof(Index));
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError("", error.Description);
+            }
+
+            return View();
         }
 
         [HttpPost]
