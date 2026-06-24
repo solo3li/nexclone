@@ -7,6 +7,7 @@ product
 ## Users
 General users (Everyone). Anyone looking to leverage AI tools for productivity, content creation, or daily tasks.
 
+
 ## Product Purpose
 A centralized dashboard platform providing access to AI tools (like voice-to-text and text-to-voice) to simplify and automate workflows.
 
