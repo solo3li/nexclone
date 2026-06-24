@@ -126,19 +126,31 @@ namespace NexClone.Backend.Services
 
         public async Task<string> GetFileUrlAsync(string objectName, string bucketName = null)
         {
-            // Local storage logic removed.
             if (objectName.StartsWith("http://") || objectName.StartsWith("https://")) return objectName;
 
             await EnsureClientInitializedAsync();
 
-            if (_endpoint.Contains("amazonaws.com"))
+            try
             {
-                var publicEndpoint = $"{_defaultBucket}.s3.{_region}.amazonaws.com";
-                return $"https://{publicEndpoint}/{objectName}";
+                var presignedGetObjectArgs = new PresignedGetObjectArgs()
+                    .WithBucket(_defaultBucket)
+                    .WithObject(objectName)
+                    .WithExpiry(60 * 60 * 24 * 7); // 7 days expiry
+
+                return await _minioClient.PresignedGetObjectAsync(presignedGetObjectArgs).ConfigureAwait(false);
             }
-            else
+            catch (Exception ex)
             {
-                return $"https://{_endpoint}/{_defaultBucket}/{objectName}";
+                Console.WriteLine($"[S3MediaService] Error generating presigned URL for {objectName}: {ex.Message}");
+                if (_endpoint.Contains("amazonaws.com"))
+                {
+                    var publicEndpoint = $"{_defaultBucket}.s3.{_region}.amazonaws.com";
+                    return $"https://{publicEndpoint}/{objectName}";
+                }
+                else
+                {
+                    return $"https://{_endpoint}/{_defaultBucket}/{objectName}";
+                }
             }
         }
 
