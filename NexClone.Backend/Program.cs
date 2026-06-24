@@ -186,7 +186,7 @@ if (!app.Environment.IsDevelopment())
 app.MapOpenApi();
 app.MapScalarApiReference();
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection(); // Commented out to prevent warnings since Railway handles HTTPS termination
 app.UseStaticFiles();
 app.UseRouting();
 app.UseCors("AllowNextjs");
