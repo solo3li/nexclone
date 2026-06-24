@@ -94,7 +94,15 @@
                 <input type="hidden" name="TtsCustomInstructionsEnabled" value="false" />
             </div>
             <div class="bx--form-item" style="grid-column: span 3;">
-                <label class="bx--label">Allowed Voices (Select multiple. Leave empty for all voices)</label>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <label class="bx--label" style="margin-bottom: 0;">Allowed Voices (Select multiple. Leave empty for all voices)</label>
+                    <div class="bx--checkbox-wrapper">
+                        <input type="checkbox" id="selectAllVoices" class="bx--checkbox" />
+                        <label for="selectAllVoices" class="bx--checkbox-label">
+                            <span class="bx--checkbox-label-text">Select All</span>
+                        </label>
+                    </div>
+                </div>
                 <div style="max-height: 200px; overflow-y: auto; border: 1px solid #e0e0e0; padding: 1rem; background: #fff; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
                     @if (ViewBag.AllVoices != null)
                     {
@@ -161,3 +169,29 @@
         </div>
     </form>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const selectAllCb = document.getElementById('selectAllVoices');
+        const voiceCbs = document.querySelectorAll('input[name="selectedVoices"]');
+
+        if (selectAllCb && voiceCbs.length > 0) {
+            const updateSelectAll = () => {
+                let allChecked = true;
+                voiceCbs.forEach(cb => { if (!cb.checked) allChecked = false; });
+                selectAllCb.checked = allChecked;
+            };
+            
+            updateSelectAll();
+
+            selectAllCb.addEventListener('change', function () {
+                const isChecked = this.checked;
+                voiceCbs.forEach(cb => { cb.checked = isChecked; });
+            });
+
+            voiceCbs.forEach(cb => {
+                cb.addEventListener('change', updateSelectAll);
+            });
+        }
+    });
+</script>
