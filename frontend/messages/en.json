@@ -443,6 +443,7 @@
     "emotion": "Emotion",
     "performanceStyle": "Performance Style",
     "customInstructions": "Custom Instructions",
+    "customInstructionsPlaceholder": "Enter custom voice directions...",
     "recentConversions": "Recent Conversions",
     "refresh": "Refresh",
     "noConversions": "No conversions yet",

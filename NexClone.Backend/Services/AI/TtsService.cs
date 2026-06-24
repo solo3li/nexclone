@@ -234,8 +234,21 @@ namespace NexClone.Backend.Services.AI
                     var wavBytes = PcmToWav(audioBytes, 24000, 1, 16);
                     return (new MemoryStream(wavBytes), "audio/wav", "wav");
                 }
+                else if (mimeType.ToLowerInvariant().Contains("ogg"))
+                {
+                    return (new MemoryStream(audioBytes), "audio/ogg", "ogg");
+                }
+                else if (mimeType.ToLowerInvariant().Contains("wav"))
+                {
+                    return (new MemoryStream(audioBytes), "audio/wav", "wav");
+                }
+                else if (mimeType.ToLowerInvariant().Contains("mpeg") || mimeType.ToLowerInvariant().Contains("mp3"))
+                {
+                    return (new MemoryStream(audioBytes), "audio/mpeg", "mp3");
+                }
                 
-                return (new MemoryStream(audioBytes), "audio/mpeg", "mp3");
+                string ext = mimeType.Split('/').LastOrDefault()?.Split(';').FirstOrDefault() ?? "bin";
+                return (new MemoryStream(audioBytes), mimeType, ext);
             }
             catch (Exception ex)
             {
