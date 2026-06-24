@@ -123,7 +123,7 @@
                             Page @ViewBag.PageNumber of @ViewBag.TotalPages
                         </span>
                     </div>
-                    <div class="bx--pagination__right" style="display: flex; gap: 0.5rem;">
+                    <div class="bx--pagination__right" style="display: flex; gap: 0.5rem; align-items: center;">
                         @if (ViewBag.PageNumber > 1)
                         {
                             <a href="@Url.Action("Index", new { searchString = ViewBag.CurrentSearch, planId = ViewBag.CurrentPlanId, pageNumber = ViewBag.PageNumber - 1 })" class="bx--btn bx--btn--ghost bx--btn--sm" style="padding: 0 1rem;">
@@ -136,6 +136,43 @@
                                 Previous
                             </button>
                         }
+
+                        <div style="display: flex; gap: 0.25rem; align-items: center; margin: 0 0.5rem;">
+                            @{
+                                int startPage = Math.Max(1, ViewBag.PageNumber - 2);
+                                int endPage = Math.Min(ViewBag.TotalPages, ViewBag.PageNumber + 2);
+                            }
+
+                            @if (startPage > 1)
+                            {
+                                <a href="@Url.Action("Index", new { searchString = ViewBag.CurrentSearch, planId = ViewBag.CurrentPlanId, pageNumber = 1 })" class="bx--btn bx--btn--ghost bx--btn--sm" style="padding: 0 0.5rem;">1</a>
+                                @if (startPage > 2)
+                                {
+                                    <span style="padding: 0 0.5rem; color: #525252;">...</span>
+                                }
+                            }
+
+                            @for (int i = startPage; i <= endPage; i++)
+                            {
+                                if (i == ViewBag.PageNumber)
+                                {
+                                    <button class="bx--btn bx--btn--primary bx--btn--sm" disabled style="padding: 0 0.5rem; background-color: #0f62fe; color: white; opacity: 1;">@i</button>
+                                }
+                                else
+                                {
+                                    <a href="@Url.Action("Index", new { searchString = ViewBag.CurrentSearch, planId = ViewBag.CurrentPlanId, pageNumber = i })" class="bx--btn bx--btn--ghost bx--btn--sm" style="padding: 0 0.5rem;">@i</a>
+                                }
+                            }
+
+                            @if (endPage < ViewBag.TotalPages)
+                            {
+                                @if (endPage < ViewBag.TotalPages - 1)
+                                {
+                                    <span style="padding: 0 0.5rem; color: #525252;">...</span>
+                                }
+                                <a href="@Url.Action("Index", new { searchString = ViewBag.CurrentSearch, planId = ViewBag.CurrentPlanId, pageNumber = ViewBag.TotalPages })" class="bx--btn bx--btn--ghost bx--btn--sm" style="padding: 0 0.5rem;">@ViewBag.TotalPages</a>
+                            }
+                        </div>
 
                         @if (ViewBag.PageNumber < ViewBag.TotalPages)
                         {
