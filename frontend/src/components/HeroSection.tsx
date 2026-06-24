@@ -80,21 +80,14 @@ export default function HeroSection() {
           transition={{ delay: 1, duration: 0.6 }}
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
-          <Link
-            href="/pricing"
+          <a
+            href="#tools"
             className="group relative w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-2xl text-white font-bold text-lg overflow-hidden shadow-[0_0_40px_rgba(139,92,246,0.3)] hover:shadow-[0_0_60px_rgba(139,92,246,0.5)] transition-all duration-300 hover:-translate-y-1"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-fuchsia-600 group-hover:from-violet-500 group-hover:to-fuchsia-500 transition-all duration-300" />
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-white/10 transition-opacity duration-300" />
             <span className="relative">{t('ctaPrimary')}</span>
             <ArrowIcon className={`w-5 h-5 relative transition-transform duration-300 ${locale === 'ar' ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
-          </Link>
-          <a
-            href="#tools"
-            className="group flex items-center gap-2 px-8 py-4 rounded-2xl text-white/80 font-semibold text-lg border border-white/20 hover:border-white/40 hover:bg-white/10 hover:-translate-y-1 hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] transition-all duration-300 backdrop-blur-md"
-          >
-            <PlayCircle className="w-5 h-5 text-violet-400 group-hover:scale-110 transition-transform" />
-            {t('ctaSecondary')}
           </a>
         </motion.div>
 

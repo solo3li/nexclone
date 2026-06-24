@@ -115,14 +115,20 @@ namespace NexClone.Backend.Controllers
 
             await _context.SaveChangesAsync();
 
-            var token = GenerateJwtToken(user);
-            SetTokenCookie(token);
+            var verificationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var origin = Request.Headers["Origin"].FirstOrDefault() ?? "http://178.62.192.74:3000";
+            var verifyLink = $"{origin}/ar/verify-email?email={Uri.EscapeDataString(user.Email)}&token={Uri.EscapeDataString(verificationToken)}";
 
-            return Ok(new AuthResponse
-            {
-                Email = user.Email,
-                IsVerified = user.IsVerified
-            });
+            string emailHtml = $@"
+<div style='font-family: Arial, sans-serif; background-color: #0a0015; color: #ffffff; padding: 40px; text-align: center; border-radius: 8px;'>
+    <h2 style='color: #8b5cf6;'>تأكيد البريد الإلكتروني</h2>
+    <p style='color: #d1d5db; font-size: 16px; margin-bottom: 30px;'>مرحباً بك في NexMedia! يرجى الضغط على الزر أدناه لتأكيد بريدك الإلكتروني وتفعيل حسابك.</p>
+    <a href='{verifyLink}' style='background-color: #8b5cf6; color: #ffffff; text-decoration: none; padding: 15px 30px; font-size: 16px; font-weight: bold; border-radius: 50px; display: inline-block;'>تفعيل الحساب</a>
+</div>";
+
+            await _emailService.SendEmailAsync(user.Email, user.FullName ?? user.UserName ?? "User", "تفعيل الحساب - NexMedia", emailHtml);
+
+            return Ok(new { Message = "تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني لتفعيل الحساب." });
         }
 
         [HttpPost("login")]
@@ -133,7 +139,10 @@ namespace NexClone.Backend.Controllers
 
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
-                return Unauthorized(new { Message = "Invalid email or password." });
+                return Unauthorized(new { Message = "كلمة المرور أو البريد الإلكتروني غير صحيح." });
+
+            if (!user.IsVerified)
+                return Unauthorized(new { Message = "الرجاء تأكيد بريدك الإلكتروني أولاً قبل تسجيل الدخول.", RequiresVerification = true });
 
             var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
             var userAgent = Request.Headers["User-Agent"].ToString() ?? "Unknown";
@@ -311,6 +320,30 @@ namespace NexClone.Backend.Controllers
             }
 
             return BadRequest(new { Errors = errors });
+        }
+
+        [HttpPost("verify-email")]
+        public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user == null)
+            {
+                return BadRequest(new { Message = "طلب غير صالح." });
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, request.Token);
+
+            if (result.Succeeded)
+            {
+                user.IsVerified = true;
+                await _userManager.UpdateAsync(user);
+                return Ok(new { Message = "تم تفعيل البريد الإلكتروني بنجاح." });
+            }
+
+            return BadRequest(new { Message = "رابط التفعيل غير صالح أو منتهي الصلاحية." });
         }
 
         private string GenerateJwtToken(ApplicationUser user)

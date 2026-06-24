@@ -19,6 +19,7 @@ export default function CompleteProfilePage() {
   const { user, isAuthenticated, hasPhoneNumber, setUser } = useAppStore();
 
   const [phone, setPhone] = useState("");
+  const [countryCode, setCountryCode] = useState("+20");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -51,7 +52,7 @@ export default function CompleteProfilePage() {
       const visitorId = result.visitorId;
 
       const res = await api.post("/api/auth/add-phone", {
-        phoneNumber: phone,
+        phoneNumber: `${countryCode}${phone}`,
         deviceFingerprint: visitorId
       });
 
@@ -100,19 +101,46 @@ export default function CompleteProfilePage() {
                 <label className="block text-sm font-medium text-white/70 mb-2">
                   {locale === 'ar' ? 'رقم الهاتف' : 'Phone Number'}
                 </label>
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none rtl:left-auto rtl:right-0 rtl:pr-3">
-                    <Phone className="h-5 w-5 text-white/40 group-focus-within:text-pink-400 transition-colors" />
+                <div className="flex gap-2" dir="ltr">
+                  <div className="relative group w-[35%]">
+                    <select
+                      value={countryCode}
+                      onChange={(e) => setCountryCode(e.target.value)}
+                      className="w-full h-full bg-white/5 border border-white/10 rounded-xl px-2 py-3 text-white focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="+20" className="bg-[#0a0015] text-white">🇪🇬 +20</option>
+                      <option value="+966" className="bg-[#0a0015] text-white">🇸🇦 +966</option>
+                      <option value="+971" className="bg-[#0a0015] text-white">🇦🇪 +971</option>
+                      <option value="+965" className="bg-[#0a0015] text-white">🇰🇼 +965</option>
+                      <option value="+974" className="bg-[#0a0015] text-white">🇶🇦 +974</option>
+                      <option value="+968" className="bg-[#0a0015] text-white">🇴🇲 +968</option>
+                      <option value="+973" className="bg-[#0a0015] text-white">🇧🇭 +973</option>
+                      <option value="+212" className="bg-[#0a0015] text-white">🇲🇦 +212</option>
+                      <option value="+213" className="bg-[#0a0015] text-white">🇩🇿 +213</option>
+                      <option value="+216" className="bg-[#0a0015] text-white">🇹🇳 +216</option>
+                      <option value="+962" className="bg-[#0a0015] text-white">🇯🇴 +962</option>
+                      <option value="+961" className="bg-[#0a0015] text-white">🇱🇧 +961</option>
+                      <option value="+963" className="bg-[#0a0015] text-white">🇸🇾 +963</option>
+                      <option value="+964" className="bg-[#0a0015] text-white">🇮🇶 +964</option>
+                      <option value="+970" className="bg-[#0a0015] text-white">🇵🇸 +970</option>
+                      <option value="+249" className="bg-[#0a0015] text-white">🇸🇩 +249</option>
+                      <option value="+218" className="bg-[#0a0015] text-white">🇱🇾 +218</option>
+                      <option value="+967" className="bg-[#0a0015] text-white">🇾🇪 +967</option>
+                    </select>
                   </div>
-                  <input
-                    type="tel"
-                    required
-                    value={phone}
-                    onChange={e => setPhone(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-10 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 transition-all text-left rtl:text-right"
-                    placeholder="+1234567890"
-                    dir="ltr"
-                  />
+                  <div className="relative group w-[65%]">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Phone className="h-5 w-5 text-white/40 group-focus-within:text-pink-400 transition-colors" />
+                    </div>
+                    <input
+                      type="tel"
+                      required
+                      value={phone}
+                      onChange={e => setPhone(e.target.value)}
+                      className="w-full h-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-3 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 transition-all"
+                      placeholder="1001234567"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
