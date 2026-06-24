@@ -34,12 +34,15 @@ export default function LoginPage() {
       const result = await fp.get();
       const visitorId = result.visitorId;
 
-      const res = await api.post("/api/auth/login", {
+      await api.post("/api/auth/login", {
         email,
         password,
         deviceFingerprint: visitorId
       });
-      setUser(res.data);
+      
+      const meRes = await api.get("/api/auth/me");
+      setUser(meRes.data);
+      
       router.push("/");
     } catch (err: any) {
       setError(err.response?.data?.Message || "Login failed");
