@@ -35,7 +35,7 @@ export default function TextToVoicePage() {
   const t = useTranslations("TextToVoice");
   const locale = useLocale();
   const isRtl = locale === 'ar';
-  const { user, isAuthenticated, hasPhoneNumber } = useAppStore();
+  const { user, isAuthenticated, hasPhoneNumber, setUser } = useAppStore();
   const router = useRouter();
   const ArrowIcon = locale === 'ar' ? ArrowRight : ArrowLeft;
 
@@ -179,6 +179,10 @@ export default function TextToVoicePage() {
 
       if (response.data && response.data.audioUrl) {
         setAudioUrl(response.data.audioUrl);
+        // Refresh user profile to update credits dynamically
+        api.get("/api/auth/me").then(res => {
+          if (res.data) setUser(res.data);
+        }).catch(err => console.error("Failed to update user profile", err));
       } else {
         throw new Error("No audio URL returned");
       }
@@ -285,7 +289,7 @@ export default function TextToVoicePage() {
                 <textarea
                   value={text}
                   onChange={(e) => setText(e.target.value)}
-                  placeholder={t('textPlaceholder')}
+                  placeholder={t('textPlaceholder', { maxChars })}
                   className="w-full bg-[#0a0015]/60 border border-white/5 rounded-xl px-4 py-4 text-white focus:outline-none focus:ring-1 focus:ring-fuchsia-500/50 transition-all resize-none min-h-[300px] placeholder:text-white/30 text-base leading-relaxed"
                 />
                 <div className={`absolute bottom-4 ${isRtl ? 'left-6' : 'right-6'} text-xs text-white/40`}>
@@ -393,7 +397,7 @@ export default function TextToVoicePage() {
                   <div className="flex gap-2 items-start">
                     <Info className="w-3.5 h-3.5 text-violet-400 shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-[9px] text-violet-200/80 leading-snug font-medium">{t('freeAccountNotice')}</p>
+                      <p className="text-[9px] text-violet-200/80 leading-snug font-medium">{t('freeAccountNotice', { maxChars })}</p>
                       <button className="text-fuchsia-400 text-[9px] font-bold mt-0.5 flex items-center gap-1 hover:text-fuchsia-300 transition-colors">
                         {t('upgradeNow')} {isRtl ? '←' : '→'}
                       </button>

@@ -44,7 +44,7 @@ export default function VoiceToTextPage() {
   const t = useTranslations("VoiceToText");
   const locale = useLocale();
   const isRtl = locale === 'ar';
-  const { user, isAuthenticated, hasPhoneNumber } = useAppStore();
+  const { user, isAuthenticated, hasPhoneNumber, setUser } = useAppStore();
   const router = useRouter();
   const ArrowIcon = locale === 'ar' ? ArrowRight : ArrowLeft;
 
@@ -249,6 +249,10 @@ export default function VoiceToTextPage() {
 
       setResult(res.data.translated_text || res.data.original_text);
       setStage('done');
+      // Refresh user profile to update credits dynamically
+      api.get("/api/auth/me").then(res => {
+        if (res.data) setUser(res.data);
+      }).catch(err => console.error("Failed to update user profile", err));
     } catch (err) {
       setError(t('error'));
       setStage('error');
