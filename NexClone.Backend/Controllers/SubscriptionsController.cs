@@ -44,6 +44,29 @@ namespace NexClone.Backend.Controllers
             return View(subscriptions);
         }
 
+        public async Task<IActionResult> Details(int id)
+        {
+            var subscription = await _context.Subscriptions
+                .Include(s => s.Plan)
+                .Include(s => s.User)
+                .FirstOrDefaultAsync(s => s.Id == id);
+
+            if (subscription == null)
+            {
+                TempData["ErrorMessage"] = "Subscription not found.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var history = await _context.GenerationHistories
+                .Where(g => g.UserId == subscription.UserId)
+                .OrderByDescending(g => g.CreatedAt)
+                .ToListAsync();
+
+            ViewBag.History = history;
+
+            return View(subscription);
+        }
+
         [HttpPost]
         public async Task<IActionResult> UpdateEndDate(int id, DateTime newEndDate)
         {

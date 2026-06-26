@@ -1,0 +1,120 @@
+@model NexClone.Backend.Models.Subscription
+@using NexClone.Backend.Models
+
+@{
+    ViewData["Title"] = "Subscription Details";
+    var history = ViewBag.History as IEnumerable<GenerationHistory> ?? Enumerable.Empty<GenerationHistory>();
+}
+
+<div class="bx--grid">
+    <div class="bx--row">
+        <div class="bx--col">
+            <h4 style="margin-bottom: 1rem;">Subscription Details</h4>
+            <a href="@Url.Action("Index", "Subscriptions")" class="bx--btn bx--btn--secondary" style="margin-bottom: 2rem;">Back to List</a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div data-notification class="bx--inline-notification bx--inline-notification--success" role="alert" style="margin-bottom: 1rem;">
+            <div class="bx--inline-notification__details">
+                <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bx--inline-notification__icon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M10,1c-4.9,0-9,4.1-9,9s4.1,9,9,9s9-4.1,9-9S14.9,1,10,1z M8.7,13.5l-3.2-3.2l1-1l2.2,2.2l4.8-4.8l1,1L8.7,13.5z"></path></svg>
+                <div class="bx--inline-notification__text-wrapper">
+                    <p class="bx--inline-notification__title">Success</p>
+                    <p class="bx--inline-notification__subtitle">@TempData["SuccessMessage"]</p>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div data-notification class="bx--inline-notification bx--inline-notification--error" role="alert" style="margin-bottom: 1rem;">
+            <div class="bx--inline-notification__details">
+                <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bx--inline-notification__icon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M10,1c-5,0-9,4-9,9s4,9,9,9s9-4,9-9S15,1,10,1z M13.5,14.5l-8-8l1-1l8,8L13.5,14.5z"></path></svg>
+                <div class="bx--inline-notification__text-wrapper">
+                    <p class="bx--inline-notification__title">Error</p>
+                    <p class="bx--inline-notification__subtitle">@TempData["ErrorMessage"]</p>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="bx--row" style="margin-bottom: 2rem;">
+        <!-- User Info -->
+        <div class="bx--col-md-4">
+            <div class="bx--tile">
+                <h5 style="margin-bottom: 1rem;">User Information</h5>
+                <p><strong>Name:</strong> @(Model.User?.FullName)</p>
+                <p><strong>Email:</strong> @(Model.User?.Email)</p>
+                <p><strong>Available Credits (Balance):</strong> @(Model.User?.AvailableCredits ?? 0)</p>
+                <p><strong>Joined:</strong> @(Model.User?.CreatedAt.ToString("g"))</p>
+            </div>
+        </div>
+
+        <!-- Subscription Info -->
+        <div class="bx--col-md-4">
+            <div class="bx--tile">
+                <h5 style="margin-bottom: 1rem;">Subscription Info</h5>
+                <p><strong>Plan Name:</strong> @(Model.Plan?.Name)</p>
+                <p><strong>Status:</strong> 
+                    <span class="bx--tag @(Model.Status == "active" ? "bx--tag--green" : "bx--tag--red")">
+                        @(Model.Status ?? "unknown")
+                    </span>
+                </p>
+                <p><strong>Start Date:</strong> @Model.StartDate.ToString("g")</p>
+                <p><strong>Current End Date:</strong> @Model.EndDate.ToString("g")</p>
+            </div>
+        </div>
+
+        <!-- Edit Subscription -->
+        <div class="bx--col-md-4">
+            <div class="bx--tile">
+                <h5 style="margin-bottom: 1rem;">Update Subscription</h5>
+                <form asp-action="UpdateEndDate" method="post">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <div class="bx--form-item">
+                        <label class="bx--label">New End Date</label>
+                        <input type="datetime-local" name="newEndDate" class="bx--text-input" value="@Model.EndDate.ToString("yyyy-MM-ddTHH:mm")" required />
+                    </div>
+                    <button type="submit" class="bx--btn bx--btn--primary" style="margin-top: 1rem;">Update Date</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Table -->
+    <div class="bx--row">
+        <div class="bx--col">
+            <h5 style="margin-bottom: 1rem;">User Generation History</h5>
+            @if (history.Any())
+            {
+                <table class="bx--data-table">
+                    <thead>
+                        <tr>
+                            <th>Tool Name</th>
+                            <th>Cost</th>
+                            <th>Prompt / Input</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in history)
+                        {
+                            <tr>
+                                <td>@item.Type</td>
+                                <td>@item.CreditsUsed</td>
+                                <td>@(string.IsNullOrEmpty(item.InputText) ? "-" : (item.InputText.Length > 50 ? item.InputText.Substring(0, 50) + "..." : item.InputText))</td>
+                                <td>@item.CreatedAt.ToString("g")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p>No generation history found for this user.</p>
+            }
+        </div>
+    </div>
+</div>
