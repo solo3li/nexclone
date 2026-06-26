@@ -50,21 +50,33 @@ namespace NexClone.Backend.Controllers
             var sub = await _context.Subscriptions.FindAsync(id);
             if (sub != null)
             {
-                // PostgreSQL requires DateTimeKind.Utc
-                var utcEndDate = DateTime.SpecifyKind(newEndDate, DateTimeKind.Utc);
-                sub.EndDate = utcEndDate;
-                // If the new end date is in the past, update the status to expired
-                if (utcEndDate <= DateTime.UtcNow)
+                try 
                 {
-                    sub.Status = "expired";
-                }
-                else if (sub.Status == "expired")
-                {
-                    sub.Status = "active";
-                }
+                    // PostgreSQL requires DateTimeKind.Utc
+                    var utcEndDate = DateTime.SpecifyKind(newEndDate, DateTimeKind.Utc);
+                    sub.EndDate = utcEndDate;
+                    // If the new end date is in the past, update the status to expired
+                    if (utcEndDate <= DateTime.UtcNow)
+                    {
+                        sub.Status = "expired";
+                    }
+                    else if (sub.Status == "expired")
+                    {
+                        sub.Status = "active";
+                    }
 
-                _context.Subscriptions.Update(sub);
-                await _context.SaveChangesAsync();
+                    _context.Subscriptions.Update(sub);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Subscription end date updated successfully.";
+                }
+                catch (Exception)
+                {
+                    TempData["ErrorMessage"] = "Failed to update subscription end date.";
+                }
+            }
+            else 
+            {
+                TempData["ErrorMessage"] = "Subscription not found.";
             }
             return RedirectToAction(nameof(Index));
         }
@@ -75,8 +87,20 @@ namespace NexClone.Backend.Controllers
             var sub = await _context.Subscriptions.FindAsync(id);
             if (sub != null)
             {
-                _context.Subscriptions.Remove(sub);
-                await _context.SaveChangesAsync();
+                try 
+                {
+                    _context.Subscriptions.Remove(sub);
+                    await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Subscription deleted successfully.";
+                }
+                catch (Exception)
+                {
+                    TempData["ErrorMessage"] = "Failed to delete subscription.";
+                }
+            }
+            else 
+            {
+                TempData["ErrorMessage"] = "Subscription not found.";
             }
             return RedirectToAction(nameof(Index));
         }
