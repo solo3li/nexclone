@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "User Subscriptions";
+    var lastUsedDates = ViewBag.LastUsedDates as Dictionary<Guid, DateTime?> ?? new Dictionary<Guid, DateTime?>();
 }
 
 <div class="bx--data-table-container">
@@ -16,6 +17,8 @@
                 <th><span class="bx--table-header-label">User</span></th>
                 <th><span class="bx--table-header-label">Plan</span></th>
                 <th><span class="bx--table-header-label">Price</span></th>
+                <th><span class="bx--table-header-label">Balance</span></th>
+                <th><span class="bx--table-header-label">Last Used</span></th>
                 <th><span class="bx--table-header-label">Start Date</span></th>
                 <th><span class="bx--table-header-label">End Date</span></th>
                 <th><span class="bx--table-header-label">Status</span></th>
@@ -26,21 +29,33 @@
         <tbody>
             @foreach (var item in Model)
             {
+                var lastUsed = lastUsedDates.ContainsKey(item.UserId) ? lastUsedDates[item.UserId] : null;
+                
                 <tr>
                     <td>@(item.User?.Email ?? "Unknown User")</td>
                     <td><strong>@item.Plan.Name</strong></td>
                     <td>$@item.Plan.PriceUsd</td>
+                    <td>@(item.User != null ? item.User.AvailableCredits.ToString("0.##") : "0") Credits</td>
+                    <td>@(lastUsed.HasValue ? lastUsed.Value.ToString("MMM dd, yyyy HH:mm") : "Never")</td>
                     <td>@item.StartDate.ToString("MMM dd, yyyy")</td>
-                    <td>@item.EndDate.ToString("MMM dd, yyyy")</td>
                     <td>
-                        <span style="color: @(item.Status == "active" ? "green" : "gray");">
+                        <form asp-action="UpdateEndDate" method="post" style="display:flex; gap: 5px; align-items: center;">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <input type="date" name="newEndDate" value="@item.EndDate.ToString("yyyy-MM-dd")" class="bx--text-input" style="height: 30px; font-size: 12px; padding: 0 5px;" required />
+                            <button type="submit" class="bx--btn bx--btn--primary bx--btn--sm" style="padding: 5px 10px; font-size: 12px; height: 30px; min-height: unset;">
+                                Update
+                            </button>
+                        </form>
+                    </td>
+                    <td>
+                        <span style="color: @(item.Status.ToLower() == "active" ? "green" : "gray"); font-weight: bold;">
                             @item.Status.ToUpper()
                         </span>
                     </td>
                     <td>@item.CreatedAt.ToString("MMM dd, yyyy")</td>
                     <td>
                         <form asp-action="Delete" asp-route-id="@item.Id" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this subscription?');">
-                            <button type="submit" class="bx--btn bx--btn--danger bx--btn--sm" style="padding: 5px 10px; font-size: 12px; height: auto; min-height: unset;">
+                            <button type="submit" class="bx--btn bx--btn--danger bx--btn--sm" style="padding: 5px 10px; font-size: 12px; height: 30px; min-height: unset;">
                                 Delete
                             </button>
                         </form>

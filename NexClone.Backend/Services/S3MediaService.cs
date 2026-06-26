@@ -43,8 +43,11 @@ namespace NexClone.Backend.Services
             var endpoint = !string.IsNullOrWhiteSpace(envEndpoint) ? envEndpoint :
                            (!string.IsNullOrWhiteSpace(dbEndpoint) ? dbEndpoint : "s3.eu-north-1.amazonaws.com");
             
-            var accessKey = !string.IsNullOrWhiteSpace(dbAccessKey) ? dbAccessKey : (Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID") ?? "YOUR_AWS_ACCESS_KEY");
-            var secretKey = !string.IsNullOrWhiteSpace(dbSecretKey) ? dbSecretKey : (Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY") ?? "YOUR_AWS_SECRET_KEY");
+            var envAccessKey = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID");
+            var envSecretKey = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY");
+            
+            var accessKey = !string.IsNullOrWhiteSpace(envAccessKey) ? envAccessKey : (!string.IsNullOrWhiteSpace(dbAccessKey) ? dbAccessKey : "YOUR_AWS_ACCESS_KEY");
+            var secretKey = !string.IsNullOrWhiteSpace(envSecretKey) ? envSecretKey : (!string.IsNullOrWhiteSpace(dbSecretKey) ? dbSecretKey : "YOUR_AWS_SECRET_KEY");
             
             var region = !string.IsNullOrWhiteSpace(envRegion) ? envRegion :
                          (!string.IsNullOrWhiteSpace(dbRegion) ? dbRegion : "eu-north-1");

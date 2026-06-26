@@ -38,7 +38,10 @@ namespace NexClone.Backend.Controllers
         [HttpGet("plans")]
         public async Task<IActionResult> GetPlans()
         {
-            var plans = await _context.Plans.OrderBy(p => p.PriceUsd).ToListAsync();
+            var plans = await _context.Plans
+                .Where(p => !p.IsDefaultRegistrationPlan)
+                .OrderBy(p => p.PriceUsd)
+                .ToListAsync();
             return Ok(plans);
         }
 
