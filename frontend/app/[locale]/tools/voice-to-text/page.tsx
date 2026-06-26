@@ -16,7 +16,7 @@ import { useRouter, Link } from "../../../../src/i18n/routing";
 import { ArrowLeft, ArrowRight, Wallet } from "lucide-react";
 
 const LANGUAGES = [
-  { code: 'auto', name: 'Auto-Detect' },
+  { code: 'auto', name: 'لغة الصوت الأصلية (Auto-Detect)' },
   { code: 'ar', name: 'Arabic - العربية' },
   { code: 'en', name: 'English' },
   { code: 'es', name: 'Spanish - Español' },
@@ -243,7 +243,7 @@ export default function VoiceToTextPage() {
       setStage('transcribing');
       const res = await api.post("/api/ai/voice-to-text/transcribe", {
         fileId,
-        translate: mode === "translate",
+        translate: language !== "auto",
         targetLanguage: language,
       });
 
