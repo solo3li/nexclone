@@ -36,20 +36,32 @@ namespace NexClone.Backend.Services
             var dbRegion = appSettings.FirstOrDefault(s => s.Key == "S3.Region")?.Value;
             var dbBucketName = appSettings.FirstOrDefault(s => s.Key == "S3.BucketName")?.Value;
 
-            var endpoint = !string.IsNullOrWhiteSpace(dbEndpoint) ? dbEndpoint : "s3.eu-north-1.amazonaws.com";
+            var envEndpoint = Environment.GetEnvironmentVariable("S3_ENDPOINT");
+            var envRegion = Environment.GetEnvironmentVariable("S3_REGION");
+            var envBucketName = Environment.GetEnvironmentVariable("S3_BUCKET_NAME");
+
+            var endpoint = !string.IsNullOrWhiteSpace(envEndpoint) ? envEndpoint :
+                           (!string.IsNullOrWhiteSpace(dbEndpoint) ? dbEndpoint : "s3.eu-north-1.amazonaws.com");
+            
             var accessKey = !string.IsNullOrWhiteSpace(dbAccessKey) ? dbAccessKey : (Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID") ?? "YOUR_AWS_ACCESS_KEY");
             var secretKey = !string.IsNullOrWhiteSpace(dbSecretKey) ? dbSecretKey : (Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY") ?? "YOUR_AWS_SECRET_KEY");
-            var region = !string.IsNullOrWhiteSpace(dbRegion) ? dbRegion : "eu-north-1";
+            
+            var region = !string.IsNullOrWhiteSpace(envRegion) ? envRegion :
+                         (!string.IsNullOrWhiteSpace(dbRegion) ? dbRegion : "eu-north-1");
             _region = region;
             _endpoint = endpoint;
             
-            _defaultBucket = !string.IsNullOrWhiteSpace(dbBucketName) ? dbBucketName : "nexmedia-ai-files";
+            _defaultBucket = !string.IsNullOrWhiteSpace(envBucketName) ? envBucketName :
+                             (!string.IsNullOrWhiteSpace(dbBucketName) ? dbBucketName : "nexmedia-ai-files");
+
+            var useSslStr = Environment.GetEnvironmentVariable("S3_USE_SSL");
+            bool useSsl = string.IsNullOrWhiteSpace(useSslStr) || useSslStr.ToLower() == "true";
 
             _minioClient = new MinioClient()
                 .WithEndpoint(endpoint)
                 .WithCredentials(accessKey, secretKey)
                 .WithRegion(region)
-                .WithSSL(true)
+                .WithSSL(useSsl)
                 .Build();
         }
 
