@@ -96,6 +96,7 @@
                             <th>Cost</th>
                             <th>Prompt / Input</th>
                             <th>Date</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -106,6 +107,11 @@
                                 <td>@item.CreditsUsed</td>
                                 <td>@(string.IsNullOrEmpty(item.InputText) ? "-" : (item.InputText.Length > 50 ? item.InputText.Substring(0, 50) + "..." : item.InputText))</td>
                                 <td>@item.CreatedAt.ToString("g")</td>
+                                <td>
+                                    <a href="@Url.Action("Details", "HistoryAdmin", new { id = item.Id })" class="bx--btn bx--btn--secondary bx--btn--sm" style="padding: 5px 10px; font-size: 12px; height: 30px; min-height: unset; text-decoration: none; display: inline-block;">
+                                        View Details
+                                    </a>
+                                </td>
                             </tr>
                         }
                     </tbody>
