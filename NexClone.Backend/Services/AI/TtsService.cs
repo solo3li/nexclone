@@ -75,6 +75,8 @@ namespace NexClone.Backend.Services.AI
             var requestCount = await _dbContext.GenerationHistories
                 .CountAsync(h => h.Type == config.ToolName && h.CreatedAt >= today);
 
+            int cumulativeQuota = 0;
+
             foreach (var rule in sortedRules)
             {
                 bool isTimeValid = true;
@@ -95,12 +97,11 @@ namespace NexClone.Backend.Services.AI
                     }
                 }
 
-                // 2. Check Quota
+                // 2. Check Quota (Cumulative)
                 if (rule.MaxDailyRequests.HasValue)
                 {
-                    // For simplicity, we check if the global tool request count exceeds this rule's quota.
-                    // If we wanted strictly per-rule quota, we'd need to store the provider/model in the history and filter.
-                    if (requestCount >= rule.MaxDailyRequests.Value)
+                    cumulativeQuota += rule.MaxDailyRequests.Value;
+                    if (requestCount >= cumulativeQuota)
                     {
                         isQuotaValid = false;
                     }

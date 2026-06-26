@@ -98,6 +98,8 @@ namespace NexClone.Backend.Services.AI
             var requestCount = await _dbContext.GenerationHistories
                 .CountAsync(h => h.Type == config.ToolName && h.CreatedAt >= today);
 
+            int cumulativeQuota = 0;
+
             foreach (var rule in sortedRules)
             {
                 bool isTimeValid = true;
@@ -119,7 +121,8 @@ namespace NexClone.Backend.Services.AI
 
                 if (rule.MaxDailyRequests.HasValue)
                 {
-                    if (requestCount >= rule.MaxDailyRequests.Value)
+                    cumulativeQuota += rule.MaxDailyRequests.Value;
+                    if (requestCount >= cumulativeQuota)
                     {
                         isQuotaValid = false;
                     }
