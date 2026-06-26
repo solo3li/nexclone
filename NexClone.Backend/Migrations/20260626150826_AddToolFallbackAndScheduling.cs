@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -43,18 +43,6 @@ namespace NexClone.Backend.Migrations
                 type: "integer",
                 nullable: true);
 
-            migrationBuilder.AddColumn<string>(
-                name: "AllowedVoices",
-                table: "Plans",
-                type: "text",
-                nullable: true);
-
-            migrationBuilder.AddColumn<bool>(
-                name: "IsDefaultRegistrationPlan",
-                table: "Plans",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
         }
 
         /// <inheritdoc />
@@ -80,13 +68,6 @@ namespace NexClone.Backend.Migrations
                 name: "MaxDailyRequests",
                 table: "ToolConfigurations");
 
-            migrationBuilder.DropColumn(
-                name: "AllowedVoices",
-                table: "Plans");
-
-            migrationBuilder.DropColumn(
-                name: "IsDefaultRegistrationPlan",
-                table: "Plans");
         }
     }
 }
