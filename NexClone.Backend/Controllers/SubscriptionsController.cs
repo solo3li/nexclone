@@ -50,9 +50,11 @@ namespace NexClone.Backend.Controllers
             var sub = await _context.Subscriptions.FindAsync(id);
             if (sub != null)
             {
-                sub.EndDate = newEndDate;
+                // PostgreSQL requires DateTimeKind.Utc
+                var utcEndDate = DateTime.SpecifyKind(newEndDate, DateTimeKind.Utc);
+                sub.EndDate = utcEndDate;
                 // If the new end date is in the past, update the status to expired
-                if (newEndDate <= DateTime.UtcNow)
+                if (utcEndDate <= DateTime.UtcNow)
                 {
                     sub.Status = "expired";
                 }
