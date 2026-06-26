@@ -22,6 +22,16 @@ namespace NexClone.Backend.Models
         public bool IsActive { get; set; } = true;
         public bool IsMaintenanceMode { get; set; } = false;
 
+        // Fallback & Scheduling
+        [MaxLength(100)]
+        public string? FallbackProviderName { get; set; }
+        [MaxLength(100)]
+        public string? FallbackModelName { get; set; }
+
+        public TimeSpan? ActiveFromTime { get; set; }
+        public TimeSpan? ActiveToTime { get; set; }
+        public int? MaxDailyRequests { get; set; }
+
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         // JSON field for any extra settings the tool might need

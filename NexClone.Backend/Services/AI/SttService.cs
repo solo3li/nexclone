@@ -35,17 +35,30 @@ namespace NexClone.Backend.Services.AI
 
         public async Task<SttResult> TranscribeAudioAsync(byte[] audioData, string fileName, string contentType, bool translate, string targetLanguage)
         {
-            var openAiConfig = await _dbContext.ApiConfigurations
-                .FirstOrDefaultAsync(c => c.ProviderName == "OpenAI" && c.IsActive);
+            var toolConfig = await _dbContext.ToolConfigurations.FirstOrDefaultAsync(t => t.ToolName == "voice-to-text" && t.IsActive);
+            var (providerName, modelName) = await ResolveProviderAsync(toolConfig);
 
-            if (openAiConfig == null || string.IsNullOrWhiteSpace(openAiConfig.ApiKey))
+            var apiConfig = await _dbContext.ApiConfigurations.FirstOrDefaultAsync(c => c.ProviderName == providerName && c.IsActive);
+
+            if (apiConfig == null || string.IsNullOrWhiteSpace(apiConfig.ApiKey))
             {
-                return new SttResult { Success = false, ErrorMessage = "No active configuration found for OpenAI." };
+                return new SttResult { Success = false, ErrorMessage = $"No active configuration found for provider '{providerName}'." };
             }
 
             try
             {
-                string originalText = await CallWhisperApiAsync(audioData, fileName, contentType, openAiConfig.ApiKey);
+                string originalText = "";
+                
+                // Currently only Whisper/OpenAI is implemented for STT
+                if (providerName.Equals("OpenAI", StringComparison.OrdinalIgnoreCase))
+                {
+                    originalText = await CallWhisperApiAsync(audioData, fileName, contentType, apiConfig.ApiKey);
+                }
+                else
+                {
+                    // Fallback to OpenAI if other providers aren't implemented for STT yet
+                    originalText = await CallWhisperApiAsync(audioData, fileName, contentType, apiConfig.ApiKey);
+                }
                 
                 var result = new SttResult
                 {
@@ -56,7 +69,7 @@ namespace NexClone.Backend.Services.AI
                 if (translate)
                 {
                     string targetLangName = _languageNames.ContainsKey(targetLanguage) ? _languageNames[targetLanguage] : targetLanguage;
-                    string translatedText = await CallTranslateApiAsync(originalText, targetLangName, openAiConfig.ApiKey);
+                    string translatedText = await CallTranslateApiAsync(originalText, targetLangName, apiConfig.ApiKey);
                     
                     result.TranslatedText = translatedText;
                     result.TargetLanguage = targetLanguage;
@@ -68,6 +81,50 @@ namespace NexClone.Backend.Services.AI
             {
                 return new SttResult { Success = false, ErrorMessage = ex.Message };
             }
+        }
+
+        private async Task<(string ProviderName, string ModelName)> ResolveProviderAsync(ToolConfiguration config)
+        {
+            if (config == null)
+            {
+                return ("OpenAI", null);
+            }
+
+            bool useFallback = false;
+
+            if (config.ActiveFromTime.HasValue && config.ActiveToTime.HasValue)
+            {
+                var now = DateTime.UtcNow.TimeOfDay;
+                if (config.ActiveFromTime <= config.ActiveToTime)
+                {
+                    if (now < config.ActiveFromTime || now > config.ActiveToTime)
+                        useFallback = true;
+                }
+                else
+                {
+                    if (now < config.ActiveFromTime && now > config.ActiveToTime)
+                        useFallback = true;
+                }
+            }
+
+            if (!useFallback && config.MaxDailyRequests.HasValue)
+            {
+                var today = DateTime.UtcNow.Date;
+                var requestCount = await _dbContext.GenerationHistories
+                    .CountAsync(h => h.Type == config.ToolName && h.CreatedAt >= today);
+
+                if (requestCount >= config.MaxDailyRequests.Value)
+                {
+                    useFallback = true;
+                }
+            }
+
+            if (useFallback && !string.IsNullOrWhiteSpace(config.FallbackProviderName))
+            {
+                return (config.FallbackProviderName, config.FallbackModelName);
+            }
+
+            return (config.ProviderName, config.ModelName);
         }
 
         private async Task<string> CallWhisperApiAsync(byte[] audioData, string fileName, string contentType, string apiKey)

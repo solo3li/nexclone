@@ -32,26 +32,11 @@ namespace NexClone.Backend.Services.AI
 
             var toolConfig = await _dbContext.ToolConfigurations.FirstOrDefaultAsync(t => t.ToolName == "text-to-voice" && t.IsActive);
             
-            // Default logic if no ToolConfiguration is set
-            string providerName = "OpenAI"; 
-            if (toolConfig == null)
-            {
-                if (language?.ToLower() == "arabic")
-                {
-                    bool hasGemini = await _dbContext.ApiConfigurations.AnyAsync(c => c.ProviderName == "Gemini" && c.IsActive);
-                    providerName = hasGemini ? "Gemini" : "Darijat";
-                }
-            }
-            else
-            {
-                providerName = toolConfig.ProviderName;
-            }
+            var (providerName, customModelName) = await ResolveProviderAsync(toolConfig, language);
 
             var apiConfig = await _dbContext.ApiConfigurations.FirstOrDefaultAsync(c => c.ProviderName == providerName && c.IsActive);
             if (apiConfig == null)
                 throw new Exception($"No active configuration found for provider '{providerName}'.");
-
-            string customModelName = toolConfig?.ModelName;
 
             if (providerName.Equals("Gemini", StringComparison.OrdinalIgnoreCase))
             {
@@ -66,6 +51,59 @@ namespace NexClone.Backend.Services.AI
                 // Default to OpenAI
                 return await GenerateOpenAiAudioAsync(text, voiceName, apiConfig, customModelName);
             }
+        }
+
+        private async Task<(string ProviderName, string ModelName)> ResolveProviderAsync(ToolConfiguration config, string language)
+        {
+            if (config == null)
+            {
+                // Default logic if no ToolConfiguration is set
+                string provider = "OpenAI";
+                if (language?.ToLower() == "arabic")
+                {
+                    bool hasGemini = await _dbContext.ApiConfigurations.AnyAsync(c => c.ProviderName == "Gemini" && c.IsActive);
+                    provider = hasGemini ? "Gemini" : "Darijat";
+                }
+                return (provider, null);
+            }
+
+            bool useFallback = false;
+
+            // 1. Check Schedule
+            if (config.ActiveFromTime.HasValue && config.ActiveToTime.HasValue)
+            {
+                var now = DateTime.UtcNow.TimeOfDay;
+                if (config.ActiveFromTime <= config.ActiveToTime)
+                {
+                    if (now < config.ActiveFromTime || now > config.ActiveToTime)
+                        useFallback = true;
+                }
+                else // wraps around midnight
+                {
+                    if (now < config.ActiveFromTime && now > config.ActiveToTime)
+                        useFallback = true;
+                }
+            }
+
+            // 2. Check Daily Limits
+            if (!useFallback && config.MaxDailyRequests.HasValue)
+            {
+                var today = DateTime.UtcNow.Date;
+                var requestCount = await _dbContext.GenerationHistories
+                    .CountAsync(h => h.Type == config.ToolName && h.CreatedAt >= today);
+
+                if (requestCount >= config.MaxDailyRequests.Value)
+                {
+                    useFallback = true;
+                }
+            }
+
+            if (useFallback && !string.IsNullOrWhiteSpace(config.FallbackProviderName))
+            {
+                return (config.FallbackProviderName, config.FallbackModelName);
+            }
+
+            return (config.ProviderName, config.ModelName);
         }
 
         private async Task<(Stream, string, string)> GenerateOpenAiAudioAsync(string text, string voiceName, ApiConfiguration config, string customModelName = null)
