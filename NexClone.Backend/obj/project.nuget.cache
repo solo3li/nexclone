@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "XmYe3cgK6LQ=",
+  "dgSpecHash": "ib6N+LXecZU=",
   "success": true,
-  "projectFilePath": "/src/NexClone.Backend.csproj",
+  "projectFilePath": "/app/NexClone.Backend.csproj",
   "expectedPackageFiles": [
     "/root/.nuget/packages/communitytoolkit.highperformance/8.4.0/communitytoolkit.highperformance.8.4.0.nupkg.sha512",
     "/root/.nuget/packages/google.apis/1.68.0/google.apis.1.68.0.nupkg.sha512",

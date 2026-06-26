@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Collections.Generic;
 
 namespace NexClone.Backend.Models
 {
@@ -13,24 +14,10 @@ namespace NexClone.Backend.Models
         [MaxLength(100)]
         public string ToolName { get; set; } = string.Empty; // e.g. "text-to-voice", "bg-remover"
 
-        [MaxLength(100)]
-        public string ProviderName { get; set; } = string.Empty; // e.g. "Gemini", "OpenAI"
-
-        [MaxLength(100)]
-        public string ModelName { get; set; } = string.Empty; // e.g. "gemini-2.0-flash-exp"
-
         public bool IsActive { get; set; } = true;
         public bool IsMaintenanceMode { get; set; } = false;
 
-        // Fallback & Scheduling
-        [MaxLength(100)]
-        public string? FallbackProviderName { get; set; }
-        [MaxLength(100)]
-        public string? FallbackModelName { get; set; }
-
-        public TimeSpan? ActiveFromTime { get; set; }
-        public TimeSpan? ActiveToTime { get; set; }
-        public int? MaxDailyRequests { get; set; }
+        public ICollection<ToolRoutingRule> RoutingRules { get; set; } = new List<ToolRoutingRule>();
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 

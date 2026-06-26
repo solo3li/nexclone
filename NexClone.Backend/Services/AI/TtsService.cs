@@ -30,7 +30,9 @@ namespace NexClone.Backend.Services.AI
             if (string.IsNullOrWhiteSpace(text))
                 throw new ArgumentException("Text cannot be empty.");
 
-            var toolConfig = await _dbContext.ToolConfigurations.FirstOrDefaultAsync(t => t.ToolName == "text-to-voice" && t.IsActive);
+            var toolConfig = await _dbContext.ToolConfigurations
+                .Include(t => t.RoutingRules)
+                .FirstOrDefaultAsync(t => t.ToolName == "text-to-voice" && t.IsActive);
             
             var (providerName, customModelName) = await ResolveProviderAsync(toolConfig, language);
 
@@ -55,9 +57,9 @@ namespace NexClone.Backend.Services.AI
 
         private async Task<(string ProviderName, string ModelName)> ResolveProviderAsync(ToolConfiguration config, string language)
         {
-            if (config == null)
+            if (config == null || config.RoutingRules == null || !config.RoutingRules.Any())
             {
-                // Default logic if no ToolConfiguration is set
+                // Default logic if no ToolConfiguration or rules are set
                 string provider = "OpenAI";
                 if (language?.ToLower() == "arabic")
                 {
@@ -67,43 +69,52 @@ namespace NexClone.Backend.Services.AI
                 return (provider, null);
             }
 
-            bool useFallback = false;
+            var sortedRules = config.RoutingRules.OrderBy(r => r.Priority).ToList();
+            var today = DateTime.UtcNow.Date;
+            var now = DateTime.UtcNow.TimeOfDay;
+            var requestCount = await _dbContext.GenerationHistories
+                .CountAsync(h => h.Type == config.ToolName && h.CreatedAt >= today);
 
-            // 1. Check Schedule
-            if (config.ActiveFromTime.HasValue && config.ActiveToTime.HasValue)
+            foreach (var rule in sortedRules)
             {
-                var now = DateTime.UtcNow.TimeOfDay;
-                if (config.ActiveFromTime <= config.ActiveToTime)
+                bool isTimeValid = true;
+                bool isQuotaValid = true;
+
+                // 1. Check Schedule
+                if (rule.ActiveFromTime.HasValue && rule.ActiveToTime.HasValue)
                 {
-                    if (now < config.ActiveFromTime || now > config.ActiveToTime)
-                        useFallback = true;
+                    if (rule.ActiveFromTime <= rule.ActiveToTime)
+                    {
+                        if (now < rule.ActiveFromTime || now > rule.ActiveToTime)
+                            isTimeValid = false;
+                    }
+                    else // wraps around midnight
+                    {
+                        if (now < rule.ActiveFromTime && now > rule.ActiveToTime)
+                            isTimeValid = false;
+                    }
                 }
-                else // wraps around midnight
+
+                // 2. Check Quota
+                if (rule.MaxDailyRequests.HasValue)
                 {
-                    if (now < config.ActiveFromTime && now > config.ActiveToTime)
-                        useFallback = true;
+                    // For simplicity, we check if the global tool request count exceeds this rule's quota.
+                    // If we wanted strictly per-rule quota, we'd need to store the provider/model in the history and filter.
+                    if (requestCount >= rule.MaxDailyRequests.Value)
+                    {
+                        isQuotaValid = false;
+                    }
+                }
+
+                if (isTimeValid && isQuotaValid)
+                {
+                    return (rule.ProviderName, rule.ModelName);
                 }
             }
 
-            // 2. Check Daily Limits
-            if (!useFallback && config.MaxDailyRequests.HasValue)
-            {
-                var today = DateTime.UtcNow.Date;
-                var requestCount = await _dbContext.GenerationHistories
-                    .CountAsync(h => h.Type == config.ToolName && h.CreatedAt >= today);
-
-                if (requestCount >= config.MaxDailyRequests.Value)
-                {
-                    useFallback = true;
-                }
-            }
-
-            if (useFallback && !string.IsNullOrWhiteSpace(config.FallbackProviderName))
-            {
-                return (config.FallbackProviderName, config.FallbackModelName);
-            }
-
-            return (config.ProviderName, config.ModelName);
+            // If all rules fail, fallback to the first rule as a last resort, or throw
+            var fallback = sortedRules.First();
+            return (fallback.ProviderName, fallback.ModelName);
         }
 
         private async Task<(Stream, string, string)> GenerateOpenAiAudioAsync(string text, string voiceName, ApiConfiguration config, string customModelName = null)

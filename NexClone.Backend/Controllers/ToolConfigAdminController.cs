@@ -24,7 +24,7 @@ namespace NexClone.Backend.Controllers
         {
             ViewData["Title"] = "Tool Settings";
             
-            var allConfigs = await _context.ToolConfigurations.ToListAsync();
+            var allConfigs = await _context.ToolConfigurations.Include(c => c.RoutingRules).ToListAsync();
             var providers = await _context.ApiConfigurations.Where(a => a.IsActive).Select(a => a.ProviderName).ToListAsync();
             
             ViewBag.Providers = new SelectList(providers);
@@ -51,25 +51,40 @@ namespace NexClone.Backend.Controllers
         {
             if (ModelState.IsValid)
             {
-                var existing = await _context.ToolConfigurations.FirstOrDefaultAsync(c => c.ToolName == config.ToolName);
+                var existing = await _context.ToolConfigurations
+                    .Include(c => c.RoutingRules)
+                    .FirstOrDefaultAsync(c => c.ToolName == config.ToolName);
+
                 if (existing != null)
                 {
-                    existing.ProviderName = config.ProviderName;
-                    existing.ModelName = config.ModelName;
                     existing.IsActive = config.IsActive;
                     existing.IsMaintenanceMode = config.IsMaintenanceMode;
-                    existing.FallbackProviderName = config.FallbackProviderName;
-                    existing.FallbackModelName = config.FallbackModelName;
-                    existing.ActiveFromTime = config.ActiveFromTime;
-                    existing.ActiveToTime = config.ActiveToTime;
-                    existing.MaxDailyRequests = config.MaxDailyRequests;
                     existing.UpdatedAt = DateTime.UtcNow;
+
+                    _context.ToolRoutingRules.RemoveRange(existing.RoutingRules);
+                    
+                    if (config.RoutingRules != null)
+                    {
+                        foreach (var rule in config.RoutingRules)
+                        {
+                            rule.ToolConfigurationId = existing.Id;
+                            _context.ToolRoutingRules.Add(rule);
+                        }
+                    }
+
                     _context.Update(existing);
                 }
                 else
                 {
                     config.Id = Guid.NewGuid();
                     config.UpdatedAt = DateTime.UtcNow;
+                    if (config.RoutingRules != null)
+                    {
+                        foreach (var rule in config.RoutingRules)
+                        {
+                            rule.ToolConfigurationId = config.Id;
+                        }
+                    }
                     _context.Add(config);
                 }
                 await _context.SaveChangesAsync();

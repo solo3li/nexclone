@@ -51,7 +51,7 @@
                 <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom: 1rem;">
                     <input id="toolMaintenance_@(tool.Id)" class="bx--checkbox" type="checkbox" name="toolMaintenance_@(tool.Id)" value="true" @(tool.IsMaintenanceMode ? "checked" : "")>
                     <label for="toolMaintenance_@(tool.Id)" class="bx--checkbox-label" title="Enable Maintenance Mode for @tool.ToolName">
-                        <span class="bx--checkbox-label-text">@tool.ToolName (Provider: @tool.ProviderName)</span>
+                        <span class="bx--checkbox-label-text">@tool.ToolName</span>
                     </label>
                 </div>
             }

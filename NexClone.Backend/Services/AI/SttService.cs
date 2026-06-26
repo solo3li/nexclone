@@ -35,7 +35,9 @@ namespace NexClone.Backend.Services.AI
 
         public async Task<SttResult> TranscribeAudioAsync(byte[] audioData, string fileName, string contentType, bool translate, string targetLanguage)
         {
-            var toolConfig = await _dbContext.ToolConfigurations.FirstOrDefaultAsync(t => t.ToolName == "voice-to-text" && t.IsActive);
+            var toolConfig = await _dbContext.ToolConfigurations
+                .Include(t => t.RoutingRules)
+                .FirstOrDefaultAsync(t => t.ToolName == "voice-to-text" && t.IsActive);
             var (providerName, modelName) = await ResolveProviderAsync(toolConfig);
 
             var apiConfig = await _dbContext.ApiConfigurations.FirstOrDefaultAsync(c => c.ProviderName == providerName && c.IsActive);
@@ -85,46 +87,52 @@ namespace NexClone.Backend.Services.AI
 
         private async Task<(string ProviderName, string ModelName)> ResolveProviderAsync(ToolConfiguration config)
         {
-            if (config == null)
+            if (config == null || config.RoutingRules == null || !config.RoutingRules.Any())
             {
                 return ("OpenAI", null);
             }
 
-            bool useFallback = false;
+            var sortedRules = config.RoutingRules.OrderBy(r => r.Priority).ToList();
+            var today = DateTime.UtcNow.Date;
+            var now = DateTime.UtcNow.TimeOfDay;
+            var requestCount = await _dbContext.GenerationHistories
+                .CountAsync(h => h.Type == config.ToolName && h.CreatedAt >= today);
 
-            if (config.ActiveFromTime.HasValue && config.ActiveToTime.HasValue)
+            foreach (var rule in sortedRules)
             {
-                var now = DateTime.UtcNow.TimeOfDay;
-                if (config.ActiveFromTime <= config.ActiveToTime)
+                bool isTimeValid = true;
+                bool isQuotaValid = true;
+
+                if (rule.ActiveFromTime.HasValue && rule.ActiveToTime.HasValue)
                 {
-                    if (now < config.ActiveFromTime || now > config.ActiveToTime)
-                        useFallback = true;
+                    if (rule.ActiveFromTime <= rule.ActiveToTime)
+                    {
+                        if (now < rule.ActiveFromTime || now > rule.ActiveToTime)
+                            isTimeValid = false;
+                    }
+                    else
+                    {
+                        if (now < rule.ActiveFromTime && now > rule.ActiveToTime)
+                            isTimeValid = false;
+                    }
                 }
-                else
+
+                if (rule.MaxDailyRequests.HasValue)
                 {
-                    if (now < config.ActiveFromTime && now > config.ActiveToTime)
-                        useFallback = true;
+                    if (requestCount >= rule.MaxDailyRequests.Value)
+                    {
+                        isQuotaValid = false;
+                    }
+                }
+
+                if (isTimeValid && isQuotaValid)
+                {
+                    return (rule.ProviderName, rule.ModelName);
                 }
             }
 
-            if (!useFallback && config.MaxDailyRequests.HasValue)
-            {
-                var today = DateTime.UtcNow.Date;
-                var requestCount = await _dbContext.GenerationHistories
-                    .CountAsync(h => h.Type == config.ToolName && h.CreatedAt >= today);
-
-                if (requestCount >= config.MaxDailyRequests.Value)
-                {
-                    useFallback = true;
-                }
-            }
-
-            if (useFallback && !string.IsNullOrWhiteSpace(config.FallbackProviderName))
-            {
-                return (config.FallbackProviderName, config.FallbackModelName);
-            }
-
-            return (config.ProviderName, config.ModelName);
+            var fallback = sortedRules.First();
+            return (fallback.ProviderName, fallback.ModelName);
         }
 
         private async Task<string> CallWhisperApiAsync(byte[] audioData, string fileName, string contentType, string apiKey)

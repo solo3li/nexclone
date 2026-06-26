@@ -24,6 +24,7 @@ namespace NexClone.Backend.Models
         public DbSet<ManualPaymentMethod> ManualPaymentMethods { get; set; } = null!;
         public DbSet<DeviceFingerprint> DeviceFingerprints { get; set; } = null!;
         public DbSet<ToolConfiguration> ToolConfigurations { get; set; } = null!;
+        public DbSet<ToolRoutingRule> ToolRoutingRules { get; set; } = null!;
         public DbSet<EmailTemplate> EmailTemplates { get; set; } = null!;
         public DbSet<AppSetting> AppSettings { get; set; } = null!;
         public DbSet<CustomPage> CustomPages { get; set; } = null!;

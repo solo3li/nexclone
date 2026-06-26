@@ -31,7 +31,7 @@ namespace NexClone.Backend.Controllers
             {
                 if (!toolConfigs.Any(t => t.ToolName == defaultTool))
                 {
-                    var newConfig = new ToolConfiguration { ToolName = defaultTool, ProviderName = "System", ModelName = "Default", IsActive = true, IsMaintenanceMode = false };
+                    var newConfig = new ToolConfiguration { ToolName = defaultTool, IsActive = true, IsMaintenanceMode = false };
                     _context.ToolConfigurations.Add(newConfig);
                     toolConfigs.Add(newConfig);
                     changesMade = true;
