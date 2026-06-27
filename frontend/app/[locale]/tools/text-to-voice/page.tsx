@@ -556,6 +556,30 @@ export default function TextToVoicePage() {
                         <option value="Italian" className="bg-[#0a0015] text-white">Italian (الإيطالية)</option>
                         <option value="Turkish" className="bg-[#0a0015] text-white">Turkish (التركية)</option>
                         <option value="Russian" className="bg-[#0a0015] text-white">Russian (الروسية)</option>
+                        <option value="Portuguese" className="bg-[#0a0015] text-white">Portuguese (البرتغالية)</option>
+                        <option value="Japanese" className="bg-[#0a0015] text-white">Japanese (اليابانية)</option>
+                        <option value="Korean" className="bg-[#0a0015] text-white">Korean (الكورية)</option>
+                        <option value="Chinese" className="bg-[#0a0015] text-white">Chinese (الصينية)</option>
+                        <option value="Hindi" className="bg-[#0a0015] text-white">Hindi (الهندية)</option>
+                        <option value="Dutch" className="bg-[#0a0015] text-white">Dutch (الهولندية)</option>
+                        <option value="Polish" className="bg-[#0a0015] text-white">Polish (البولندية)</option>
+                        <option value="Swedish" className="bg-[#0a0015] text-white">Swedish (السويدية)</option>
+                        <option value="Indonesian" className="bg-[#0a0015] text-white">Indonesian (الإندونيسية)</option>
+                        <option value="Vietnamese" className="bg-[#0a0015] text-white">Vietnamese (الفيتنامية)</option>
+                        <option value="Thai" className="bg-[#0a0015] text-white">Thai (التايلاندية)</option>
+                        <option value="Greek" className="bg-[#0a0015] text-white">Greek (اليونانية)</option>
+                        <option value="Hebrew" className="bg-[#0a0015] text-white">Hebrew (العبرية)</option>
+                        <option value="Finnish" className="bg-[#0a0015] text-white">Finnish (الفنلندية)</option>
+                        <option value="Danish" className="bg-[#0a0015] text-white">Danish (الدنماركية)</option>
+                        <option value="Norwegian" className="bg-[#0a0015] text-white">Norwegian (النرويجية)</option>
+                        <option value="Czech" className="bg-[#0a0015] text-white">Czech (التشيكية)</option>
+                        <option value="Hungarian" className="bg-[#0a0015] text-white">Hungarian (المجرية)</option>
+                        <option value="Romanian" className="bg-[#0a0015] text-white">Romanian (الرومانية)</option>
+                        <option value="Ukrainian" className="bg-[#0a0015] text-white">Ukrainian (الأوكرانية)</option>
+                        <option value="Bengali" className="bg-[#0a0015] text-white">Bengali (البنغالية)</option>
+                        <option value="Urdu" className="bg-[#0a0015] text-white">Urdu (الأردية)</option>
+                        <option value="Persian" className="bg-[#0a0015] text-white">Persian (الفارسية)</option>
+                        <option value="Malay" className="bg-[#0a0015] text-white">Malay (الماليزية)</option>
                       </select>
                       <ChevronDown className={`w-3.5 h-3.5 absolute top-1/2 -translate-y-1/2 ${isRtl ? 'left-4' : 'right-4'} pointer-events-none text-white/50 z-0`} />
                     </div>
