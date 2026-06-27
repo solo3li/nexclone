@@ -117,8 +117,6 @@ namespace NexClone.Backend.Services
                 
                 if (quality == "High")
                     policy.CostPerUnit = plan.TtsCostPerCharHigh;
-                else if (quality == "Medium")
-                    policy.CostPerUnit = plan.TtsCostPerCharMedium;
                 else
                     policy.CostPerUnit = plan.TtsCostPerChar;
                     

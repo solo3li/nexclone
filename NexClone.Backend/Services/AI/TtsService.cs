@@ -215,95 +215,102 @@ namespace NexClone.Backend.Services.AI
             var client = _httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Add("x-goog-api-key", config.ApiKey);
 
-            var modelName = string.IsNullOrWhiteSpace(customModelName) ? "gemini-2.5-flash-preview-tts" : customModelName; 
+            var modelNamesStr = string.IsNullOrWhiteSpace(customModelName) ? "gemini-2.5-flash-preview-tts" : customModelName; 
             if (string.IsNullOrWhiteSpace(customModelName) && !string.IsNullOrEmpty(config.AdditionalSettings))
             {
                 try
                 {
                     using var doc = JsonDocument.Parse(config.AdditionalSettings);
                     if (doc.RootElement.TryGetProperty("gemini_model", out var mElement))
-                        modelName = mElement.GetString() ?? modelName;
+                        modelNamesStr = mElement.GetString() ?? modelNamesStr;
                 }
                 catch { }
             }
 
-            var url = $"https://generativelanguage.googleapis.com/v1beta/models/{modelName}:generateContent";
-            
-            var payload = new
+            var modelNames = modelNamesStr.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(m => m.Trim()).ToArray();
+            Exception lastException = null;
+
+            foreach (var modelName in modelNames)
             {
-                contents = new[]
+                var url = $"https://generativelanguage.googleapis.com/v1beta/models/{modelName}:generateContent";
+                
+                var payload = new
                 {
-                    new { parts = new[] { new { text = prompt } } }
-                },
-                generationConfig = new
-                {
-                    responseModalities = new[] { "AUDIO" },
-                    speechConfig = new
+                    contents = new[]
                     {
-                        voiceConfig = new
+                        new { parts = new[] { new { text = prompt } } }
+                    },
+                    generationConfig = new
+                    {
+                        responseModalities = new[] { "AUDIO" },
+                        speechConfig = new
                         {
-                            prebuiltVoiceConfig = new { voiceName = geminiVoice }
+                            voiceConfig = new
+                            {
+                                prebuiltVoiceConfig = new { voiceName = geminiVoice }
+                            }
                         }
                     }
+                };
+
+                var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+                var response = await client.PostAsync(url, content);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    lastException = new Exception($"Gemini API Error ({modelName}): {error}");
+                    continue; // Try next fallback model
                 }
-            };
 
-            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-            var response = await client.PostAsync(url, content);
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                using var jsonDoc = JsonDocument.Parse(jsonResponse);
+                
+                try
+                {
+                    var inlineData = jsonDoc.RootElement
+                        .GetProperty("candidates")[0]
+                        .GetProperty("content")
+                        .GetProperty("parts")[0]
+                        .GetProperty("inlineData");
+                    
+                    var base64Audio = inlineData.GetProperty("data").GetString();
+                    if (string.IsNullOrEmpty(base64Audio))
+                        throw new Exception("Gemini API returned empty audio data.");
 
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Gemini API Error: {error}");
+                    var audioBytes = Convert.FromBase64String(base64Audio);
+                    
+                    var mimeType = inlineData.GetProperty("mimeType").GetString() ?? "";
+                    
+                    if (mimeType.ToLowerInvariant().Contains("audio/l16") || mimeType.ToLowerInvariant().Contains("pcm"))
+                    {
+                        var wavBytes = PcmToWav(audioBytes, 24000, 1, 16);
+                        return (new MemoryStream(wavBytes), "audio/wav", "wav");
+                    }
+                    else if (mimeType.ToLowerInvariant().Contains("ogg"))
+                    {
+                        return (new MemoryStream(audioBytes), "audio/ogg", "ogg");
+                    }
+                    else if (mimeType.ToLowerInvariant().Contains("wav"))
+                    {
+                        return (new MemoryStream(audioBytes), "audio/wav", "wav");
+                    }
+                    else if (mimeType.ToLowerInvariant().Contains("mpeg") || mimeType.ToLowerInvariant().Contains("mp3"))
+                    {
+                        return (new MemoryStream(audioBytes), "audio/mpeg", "mp3");
+                    }
+                    
+                    string ext = mimeType.Split('/').LastOrDefault()?.Split(';').FirstOrDefault() ?? "bin";
+                    return (new MemoryStream(audioBytes), mimeType, ext);
+                }
+                catch (Exception ex)
+                {
+                    lastException = new Exception($"Error parsing Gemini response from model {modelName}: {ex.Message}");
+                    continue; // Try next fallback model on parse error
+                }
             }
 
-            var jsonResponse = await response.Content.ReadAsStringAsync();
-            using var jsonDoc = JsonDocument.Parse(jsonResponse);
-            
-            try
-            {
-                var inlineData = jsonDoc.RootElement
-                    .GetProperty("candidates")[0]
-                    .GetProperty("content")
-                    .GetProperty("parts")[0]
-                    .GetProperty("inlineData");
-                
-                var base64Audio = inlineData.GetProperty("data").GetString();
-                if (string.IsNullOrEmpty(base64Audio))
-                    throw new Exception("Gemini API returned empty audio data.");
-
-                var audioBytes = Convert.FromBase64String(base64Audio);
-                
-                // Add minimal WAV header for PCM data if needed, or just return bytes
-                // For simplicity, returning raw bytes wrapped in MemoryStream
-                // Production code should wrap PCM in WAV header like the old Python code did.
-                var mimeType = inlineData.GetProperty("mimeType").GetString() ?? "";
-                
-                if (mimeType.ToLowerInvariant().Contains("audio/l16") || mimeType.ToLowerInvariant().Contains("pcm"))
-                {
-                    var wavBytes = PcmToWav(audioBytes, 24000, 1, 16);
-                    return (new MemoryStream(wavBytes), "audio/wav", "wav");
-                }
-                else if (mimeType.ToLowerInvariant().Contains("ogg"))
-                {
-                    return (new MemoryStream(audioBytes), "audio/ogg", "ogg");
-                }
-                else if (mimeType.ToLowerInvariant().Contains("wav"))
-                {
-                    return (new MemoryStream(audioBytes), "audio/wav", "wav");
-                }
-                else if (mimeType.ToLowerInvariant().Contains("mpeg") || mimeType.ToLowerInvariant().Contains("mp3"))
-                {
-                    return (new MemoryStream(audioBytes), "audio/mpeg", "mp3");
-                }
-                
-                string ext = mimeType.Split('/').LastOrDefault()?.Split(';').FirstOrDefault() ?? "bin";
-                return (new MemoryStream(audioBytes), mimeType, ext);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error parsing Gemini response: {ex.Message}");
-            }
+            throw lastException ?? new Exception("Gemini API failed with all available fallback models.");
         }
 
         private static byte[] PcmToWav(byte[] pcmData, int sampleRate, int channels, int bitsPerSample)

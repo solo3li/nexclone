@@ -93,7 +93,6 @@ namespace NexClone.Backend.Controllers
                 existingPlan.TtsMaxCharsPerRequest = plan.TtsMaxCharsPerRequest;
                 existingPlan.TtsCharactersBlock = plan.TtsCharactersBlock;
                 existingPlan.TtsCostPerChar = plan.TtsCostPerChar;
-                existingPlan.TtsCostPerCharMedium = plan.TtsCostPerCharMedium;
                 existingPlan.TtsCostPerCharHigh = plan.TtsCostPerCharHigh;
                 existingPlan.TtsCustomInstructionsEnabled = plan.TtsCustomInstructionsEnabled;
 

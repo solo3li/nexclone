@@ -404,7 +404,7 @@ export default function TextToVoicePage() {
                   </div>
                   
                   <div className="flex bg-white/5 p-1 rounded-full border border-white/5 gap-1">
-                    {['Standard', 'Medium', 'High'].map((q) => (
+                    {['Standard', 'High'].map((q) => (
                       <button
                         key={q}
                         onClick={() => setSelectedQuality(q)}
@@ -414,7 +414,7 @@ export default function TextToVoicePage() {
                             : 'text-white/50 hover:text-white'
                         }`}
                       >
-                        {isRtl ? (q === 'Standard' ? 'عادية' : q === 'Medium' ? 'متوسطة' : 'عالية') : q}
+                        {isRtl ? (q === 'Standard' ? 'عادية' : 'عالية') : q}
                       </button>
                     ))}
                   </div>
