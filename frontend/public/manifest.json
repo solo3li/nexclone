@@ -1,0 +1,44 @@
+{
+  "name": "NexMedia - AI Tools Platform",
+  "short_name": "NexMedia",
+  "description": "Advanced AI tools platform - Text to Voice, Voice to Text, and more",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0015",
+  "theme_color": "#7c3aed",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Text to Voice",
+      "short_name": "TTS",
+      "description": "Convert text to speech",
+      "url": "/ar/tools/text-to-voice",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Voice to Text",
+      "short_name": "STT",
+      "description": "Transcribe speech to text",
+      "url": "/ar/tools/voice-to-text",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}
