@@ -16,27 +16,39 @@
       "src": "/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [
     {
-      "name": "Text to Voice",
+      "name": "تحويل النص لصوت",
       "short_name": "TTS",
-      "description": "Convert text to speech",
+      "description": "تحويل النص إلى كلام بالذكاء الاصطناعي",
       "url": "/ar/tools/text-to-voice",
       "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Voice to Text",
+      "name": "تحويل الصوت لنص",
       "short_name": "STT",
-      "description": "Transcribe speech to text",
+      "description": "تحويل الكلام إلى نص بالذكاء الاصطناعي",
       "url": "/ar/tools/voice-to-text",
       "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
     }
