@@ -435,8 +435,7 @@ export default function TextToVoicePage() {
                 </div>
                 )}
 
-                {/* Choose Voice - Only in Arabic Mode */}
-                {languageMode === 'arabic' && (
+                {/* Choose Voice - For all modes */}
                 <div className="bg-[#0a0015]/60 border border-white/5 rounded-xl p-2 flex flex-col">
                   <div className="flex items-center justify-between mb-2 px-1 flex-shrink-0">
                     <div className="flex items-center gap-1.5">
@@ -539,7 +538,6 @@ export default function TextToVoicePage() {
                     )}
                   </div>
                 </div>
-                )}
 
                 {/* Target Language Selection - Only in Other Languages Mode */}
                 {languageMode === 'other' && (
