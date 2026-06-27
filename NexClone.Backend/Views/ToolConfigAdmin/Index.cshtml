@@ -111,17 +111,31 @@
                         
                         <div id="rules-container-@toolName" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;">
                             @{
-                                var sortedRules = config.RoutingRules?.OrderBy(r => r.Priority).ToList() ?? new List<NexClone.Backend.Models.ToolRoutingRule>();
+                                var sortedRules = config.RoutingRules?.ToList() ?? new List<NexClone.Backend.Models.ToolRoutingRule>();
                             }
                             @for (int r = 0; r < sortedRules.Count; r++)
                             {
                                 var rule = sortedRules[r];
                                 <div class="rule-block" style="background: #ffffff; padding: 1.5rem; border: 1px solid #e0e0e0; border-left: 4px solid #0f62fe; position: relative;">
-                                    <button type="button" class="bx--btn bx--btn--sm bx--btn--danger" style="position: absolute; top: 1rem; right: 1rem;" onclick="this.closest('.rule-block').remove(); updatePriorities('@toolName');">
+                                    <button type="button" class="bx--btn bx--btn--sm bx--btn--danger" style="position: absolute; top: 1rem; right: 1rem;" onclick="this.closest('.rule-block').remove(); updateRuleIndices('@toolName');">
                                         Remove
                                     </button>
-                                    <h4 class="rule-priority bx--type-productive-heading-01" style="margin-bottom: 1rem; color: #0f62fe;">Priority: <span class="priority-label">@(r+1)</span></h4>
-                                    <input type="hidden" class="rule-priority-input" name="RoutingRules[@r].Priority" value="@(r+1)" />
+                                    
+                                    @if (toolName == "text-to-voice")
+                                    {
+                                        <div class="bx--form-item" style="margin-bottom: 1rem;">
+                                            <label class="bx--label">Quality Level</label>
+                                            <select name="RoutingRules[@r].QualityLevel" class="bx--select-input rule-quality-input" required>
+                                                <option value="Standard" selected="@(rule.QualityLevel == "Standard")">Standard</option>
+                                                <option value="Medium" selected="@(rule.QualityLevel == "Medium")">Medium</option>
+                                                <option value="High" selected="@(rule.QualityLevel == "High")">High</option>
+                                            </select>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <input type="hidden" name="RoutingRules[@r].QualityLevel" value="Standard" class="rule-quality-input" />
+                                    }
                                     
                                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
                                         <div class="bx--form-item">
@@ -147,6 +161,10 @@
                                         <div class="bx--form-item">
                                             <label class="bx--label">Max Daily Requests</label>
                                             <input type="number" name="RoutingRules[@r].MaxDailyRequests" class="bx--text-input" value="@rule.MaxDailyRequests" placeholder="Unlimited" min="1" />
+                                        </div>
+                                        <div class="bx--form-item">
+                                            <label class="bx--label">Max Requests/Min</label>
+                                            <input type="number" name="RoutingRules[@r].MaxRequestsPerMinute" class="bx--text-input" value="@rule.MaxRequestsPerMinute" placeholder="Unlimited" min="1" />
                                         </div>
                                         <div class="bx--form-item">
                                             <label class="bx--label">Active From Time</label>
@@ -223,11 +241,20 @@
 
             const html = `
                 <div class="rule-block" style="background: #ffffff; padding: 1.5rem; border: 1px solid #e0e0e0; border-left: 4px solid #0f62fe; position: relative;">
-                    <button type="button" class="bx--btn bx--btn--sm bx--btn--danger" style="position: absolute; top: 1rem; right: 1rem;" onclick="this.closest('.rule-block').remove(); updatePriorities('${toolName}');">
+                    <button type="button" class="bx--btn bx--btn--sm bx--btn--danger" style="position: absolute; top: 1rem; right: 1rem;" onclick="this.closest('.rule-block').remove(); updateRuleIndices('${toolName}');">
                         Remove
                     </button>
-                    <h4 class="rule-priority bx--type-productive-heading-01" style="margin-bottom: 1rem; color: #0f62fe;">Priority: <span class="priority-label">${count + 1}</span></h4>
-                    <input type="hidden" class="rule-priority-input" name="RoutingRules[${count}].Priority" value="${count + 1}" />
+                    
+                    ${toolName === "text-to-voice" ? `
+                    <div class="bx--form-item" style="margin-bottom: 1rem;">
+                        <label class="bx--label">Quality Level</label>
+                        <select name="RoutingRules[${count}].QualityLevel" class="bx--select-input rule-quality-input" required>
+                            <option value="Standard">Standard</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                    ` : `<input type="hidden" name="RoutingRules[${count}].QualityLevel" value="Standard" class="rule-quality-input" />`}
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
                         <div class="bx--form-item">
@@ -248,6 +275,10 @@
                             <input type="number" name="RoutingRules[${count}].MaxDailyRequests" class="bx--text-input" placeholder="Unlimited" min="1" />
                         </div>
                         <div class="bx--form-item">
+                            <label class="bx--label">Max Requests/Min</label>
+                            <input type="number" name="RoutingRules[${count}].MaxRequestsPerMinute" class="bx--text-input" placeholder="Unlimited" min="1" />
+                        </div>
+                        <div class="bx--form-item">
                             <label class="bx--label">Active From Time</label>
                             <input type="time" name="RoutingRules[${count}].ActiveFromTime" class="bx--text-input" />
                         </div>
@@ -262,20 +293,21 @@
             container.insertAdjacentHTML('beforeend', html);
         };
 
-        window.updatePriorities = function(toolName) {
+        window.updateRuleIndices = function(toolName) {
             const container = document.getElementById(`rules-container-${toolName}`);
             const blocks = container.querySelectorAll('.rule-block');
             
             blocks.forEach((block, index) => {
-                // Update priority label
-                block.querySelector('.priority-label').innerText = index + 1;
-                // Update priority hidden input
-                block.querySelector('.rule-priority-input').value = index + 1;
-                // Update input names to maintain continuous array indexing for model binding
-                block.querySelector('.rule-priority-input').name = `RoutingRules[${index}].Priority`;
-                block.querySelector('select[name^="RoutingRules"]').name = `RoutingRules[${index}].ProviderName`;
+                const qualityInput = block.querySelector('.rule-quality-input');
+                if (qualityInput) qualityInput.name = `RoutingRules[${index}].QualityLevel`;
+                
+                block.querySelector('select[name^="RoutingRules"][name$=".ProviderName"]').name = `RoutingRules[${index}].ProviderName`;
                 block.querySelector('input[name$=".ModelName"]').name = `RoutingRules[${index}].ModelName`;
                 block.querySelector('input[name$=".MaxDailyRequests"]').name = `RoutingRules[${index}].MaxDailyRequests`;
+                
+                const rpmInput = block.querySelector('input[name$=".MaxRequestsPerMinute"]');
+                if (rpmInput) rpmInput.name = `RoutingRules[${index}].MaxRequestsPerMinute`;
+                
                 block.querySelector('input[name$=".ActiveFromTime"]').name = `RoutingRules[${index}].ActiveFromTime`;
                 block.querySelector('input[name$=".ActiveToTime"]').name = `RoutingRules[${index}].ActiveToTime`;
             });

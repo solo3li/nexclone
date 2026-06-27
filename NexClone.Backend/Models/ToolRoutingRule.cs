@@ -14,7 +14,10 @@ namespace NexClone.Backend.Models
         [ForeignKey("ToolConfigurationId")]
         public ToolConfiguration ToolConfiguration { get; set; }
 
-        public int Priority { get; set; }
+        // Priority is no longer used for fallback ordering, but rather it could be kept for ordering in UI
+        // We add QualityLevel to map "Standard", "Medium", "High"
+        [StringLength(50)]
+        public string QualityLevel { get; set; } = "Standard";
 
         [StringLength(100)]
         public string ProviderName { get; set; }
@@ -27,5 +30,7 @@ namespace NexClone.Backend.Models
         public TimeSpan? ActiveToTime { get; set; }
 
         public int? MaxDailyRequests { get; set; }
+        
+        public int? MaxRequestsPerMinute { get; set; }
     }
 }

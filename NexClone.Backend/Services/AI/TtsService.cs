@@ -25,7 +25,8 @@ namespace NexClone.Backend.Services.AI
             string text, 
             string language, 
             string voiceName, 
-            string styleInstruction)
+            string styleInstruction,
+            string quality = "Standard")
         {
             if (string.IsNullOrWhiteSpace(text))
                 throw new ArgumentException("Text cannot be empty.");
@@ -34,7 +35,7 @@ namespace NexClone.Backend.Services.AI
                 .Include(t => t.RoutingRules)
                 .FirstOrDefaultAsync(t => t.ToolName == "text-to-voice" && t.IsActive);
             
-            var (providerName, customModelName) = await ResolveProviderAsync(toolConfig, language);
+            var (providerName, customModelName) = await ResolveProviderAsync(toolConfig, language, quality);
 
             var apiConfig = await _dbContext.ApiConfigurations.FirstOrDefaultAsync(c => c.ProviderName == providerName && c.IsActive);
             if (apiConfig == null)
@@ -55,7 +56,7 @@ namespace NexClone.Backend.Services.AI
             }
         }
 
-        private async Task<(string ProviderName, string ModelName)> ResolveProviderAsync(ToolConfiguration config, string language)
+        private async Task<(string ProviderName, string ModelName)> ResolveProviderAsync(ToolConfiguration config, string language, string quality)
         {
             if (config == null || config.RoutingRules == null || !config.RoutingRules.Any())
             {
@@ -69,53 +70,52 @@ namespace NexClone.Backend.Services.AI
                 return (provider, null);
             }
 
-            var sortedRules = config.RoutingRules.OrderBy(r => r.Priority).ToList();
+            var rule = config.RoutingRules.FirstOrDefault(r => r.QualityLevel == quality);
+            if (rule == null)
+            {
+                // Fallback to Standard or first available rule if requested quality doesn't exist
+                rule = config.RoutingRules.FirstOrDefault(r => r.QualityLevel == "Standard") ?? config.RoutingRules.First();
+            }
+
             var today = DateTime.UtcNow.Date;
             var now = DateTime.UtcNow.TimeOfDay;
-            var requestCount = await _dbContext.GenerationHistories
-                .CountAsync(h => h.Type == config.ToolName && h.CreatedAt >= today);
+            var oneMinuteAgo = DateTime.UtcNow.AddMinutes(-1);
 
-            int cumulativeQuota = 0;
-
-            foreach (var rule in sortedRules)
+            // Time check
+            if (rule.ActiveFromTime.HasValue && rule.ActiveToTime.HasValue)
             {
-                bool isTimeValid = true;
-                bool isQuotaValid = true;
-
-                // 1. Check Schedule
-                if (rule.ActiveFromTime.HasValue && rule.ActiveToTime.HasValue)
+                if (rule.ActiveFromTime <= rule.ActiveToTime)
                 {
-                    if (rule.ActiveFromTime <= rule.ActiveToTime)
-                    {
-                        if (now < rule.ActiveFromTime || now > rule.ActiveToTime)
-                            isTimeValid = false;
-                    }
-                    else // wraps around midnight
-                    {
-                        if (now < rule.ActiveFromTime && now > rule.ActiveToTime)
-                            isTimeValid = false;
-                    }
+                    if (now < rule.ActiveFromTime || now > rule.ActiveToTime)
+                        throw new Exception("The selected quality model is currently outside its active operating hours.");
                 }
-
-                // 2. Check Quota (Cumulative)
-                if (rule.MaxDailyRequests.HasValue)
+                else // wraps around midnight
                 {
-                    cumulativeQuota += rule.MaxDailyRequests.Value;
-                    if (requestCount >= cumulativeQuota)
-                    {
-                        isQuotaValid = false;
-                    }
-                }
-
-                if (isTimeValid && isQuotaValid)
-                {
-                    return (rule.ProviderName, rule.ModelName);
+                    if (now < rule.ActiveFromTime && now > rule.ActiveToTime)
+                        throw new Exception("The selected quality model is currently outside its active operating hours.");
                 }
             }
 
-            // If all rules fail, fallback to the first rule as a last resort, or throw
-            var fallback = sortedRules.First();
-            return (fallback.ProviderName, fallback.ModelName);
+            // Quota Check
+            if (rule.MaxDailyRequests.HasValue)
+            {
+                var dailyCount = await _dbContext.GenerationHistories
+                    .CountAsync(h => h.Type == config.ToolName && h.CreatedAt >= today);
+                
+                if (dailyCount >= rule.MaxDailyRequests.Value)
+                    throw new Exception("There is high demand on this quality, please choose another quality.");
+            }
+
+            if (rule.MaxRequestsPerMinute.HasValue)
+            {
+                var minuteCount = await _dbContext.GenerationHistories
+                    .CountAsync(h => h.Type == config.ToolName && h.CreatedAt >= oneMinuteAgo);
+
+                if (minuteCount >= rule.MaxRequestsPerMinute.Value)
+                    throw new Exception("There is high demand on this quality, please choose another quality.");
+            }
+
+            return (rule.ProviderName, rule.ModelName);
         }
 
         private async Task<(Stream, string, string)> GenerateOpenAiAudioAsync(string text, string voiceName, ApiConfiguration config, string customModelName = null)

@@ -33,7 +33,7 @@ namespace NexClone.Backend.Services
             _context = context;
         }
 
-        public async Task<PolicyValidationResult> ValidateAndChargeAsync(Guid userId, string toolId, decimal usageAmountForLimits, decimal? usageAmountForCost = null)
+        public async Task<PolicyValidationResult> ValidateAndChargeAsync(Guid userId, string toolId, decimal usageAmountForLimits, decimal? usageAmountForCost = null, string quality = "Standard")
         {
             var user = await _context.Users
                 .Include(u => u.Subscriptions)
@@ -61,7 +61,7 @@ namespace NexClone.Backend.Services
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "No active subscription found." };
             }
 
-            var toolPolicy = GetToolPolicy(targetPlan, toolId);
+            var toolPolicy = GetToolPolicy(targetPlan, toolId, quality);
             if (user.IsStaff) 
             {
                 toolPolicy.Enabled = true;
@@ -105,7 +105,7 @@ namespace NexClone.Backend.Services
             return new PolicyValidationResult { IsAllowed = true, TotalCost = totalCost };
         }
 
-        public ToolPolicy GetToolPolicy(Plan plan, string toolId)
+        public ToolPolicy GetToolPolicy(Plan plan, string toolId, string quality = "Standard")
         {
             var policy = new ToolPolicy();
             if (plan == null) return policy;
@@ -114,7 +114,14 @@ namespace NexClone.Backend.Services
             {
                 policy.Enabled = plan.TtsEnabled;
                 policy.MaxCharsPerRequest = plan.TtsMaxCharsPerRequest;
-                policy.CostPerUnit = plan.TtsCostPerChar;
+                
+                if (quality == "High")
+                    policy.CostPerUnit = plan.TtsCostPerCharHigh;
+                else if (quality == "Medium")
+                    policy.CostPerUnit = plan.TtsCostPerCharMedium;
+                else
+                    policy.CostPerUnit = plan.TtsCostPerChar;
+                    
                 policy.BlockSize = plan.TtsCharactersBlock;
             }
             else if (toolId == "voice-to-text")
@@ -132,7 +139,7 @@ namespace NexClone.Backend.Services
             return 1m;
         }
 
-        public async Task<PolicyValidationResult> EstimateCostAsync(Guid userId, string toolId, decimal usageAmountForLimits, decimal? usageAmountForCost = null)
+        public async Task<PolicyValidationResult> EstimateCostAsync(Guid userId, string toolId, decimal usageAmountForLimits, decimal? usageAmountForCost = null, string quality = "Standard")
         {
             var user = await _context.Users
                 .Include(u => u.Subscriptions)
@@ -159,7 +166,7 @@ namespace NexClone.Backend.Services
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "No active subscription found." };
             }
 
-            var toolPolicy = GetToolPolicy(targetPlan, toolId);
+            var toolPolicy = GetToolPolicy(targetPlan, toolId, quality);
             if (user.IsStaff) 
             {
                 toolPolicy.Enabled = true;

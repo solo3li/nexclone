@@ -92,50 +92,44 @@ namespace NexClone.Backend.Services.AI
                 return ("OpenAI", null);
             }
 
-            var sortedRules = config.RoutingRules.OrderBy(r => r.Priority).ToList();
+            var rule = config.RoutingRules.FirstOrDefault(r => r.QualityLevel == "Standard") ?? config.RoutingRules.First();
             var today = DateTime.UtcNow.Date;
             var now = DateTime.UtcNow.TimeOfDay;
-            var requestCount = await _dbContext.GenerationHistories
-                .CountAsync(h => h.Type == config.ToolName && h.CreatedAt >= today);
+            var oneMinuteAgo = DateTime.UtcNow.AddMinutes(-1);
 
-            int cumulativeQuota = 0;
-
-            foreach (var rule in sortedRules)
+            if (rule.ActiveFromTime.HasValue && rule.ActiveToTime.HasValue)
             {
-                bool isTimeValid = true;
-                bool isQuotaValid = true;
-
-                if (rule.ActiveFromTime.HasValue && rule.ActiveToTime.HasValue)
+                if (rule.ActiveFromTime <= rule.ActiveToTime)
                 {
-                    if (rule.ActiveFromTime <= rule.ActiveToTime)
-                    {
-                        if (now < rule.ActiveFromTime || now > rule.ActiveToTime)
-                            isTimeValid = false;
-                    }
-                    else
-                    {
-                        if (now < rule.ActiveFromTime && now > rule.ActiveToTime)
-                            isTimeValid = false;
-                    }
+                    if (now < rule.ActiveFromTime || now > rule.ActiveToTime)
+                        throw new Exception("The selected model is currently outside its active operating hours.");
                 }
-
-                if (rule.MaxDailyRequests.HasValue)
+                else
                 {
-                    cumulativeQuota += rule.MaxDailyRequests.Value;
-                    if (requestCount >= cumulativeQuota)
-                    {
-                        isQuotaValid = false;
-                    }
-                }
-
-                if (isTimeValid && isQuotaValid)
-                {
-                    return (rule.ProviderName, rule.ModelName);
+                    if (now < rule.ActiveFromTime && now > rule.ActiveToTime)
+                        throw new Exception("The selected model is currently outside its active operating hours.");
                 }
             }
 
-            var fallback = sortedRules.First();
-            return (fallback.ProviderName, fallback.ModelName);
+            if (rule.MaxDailyRequests.HasValue)
+            {
+                var dailyCount = await _dbContext.GenerationHistories
+                    .CountAsync(h => h.Type == config.ToolName && h.CreatedAt >= today);
+                
+                if (dailyCount >= rule.MaxDailyRequests.Value)
+                    throw new Exception("There is high demand on this tool, please try again later.");
+            }
+
+            if (rule.MaxRequestsPerMinute.HasValue)
+            {
+                var minuteCount = await _dbContext.GenerationHistories
+                    .CountAsync(h => h.Type == config.ToolName && h.CreatedAt >= oneMinuteAgo);
+
+                if (minuteCount >= rule.MaxRequestsPerMinute.Value)
+                    throw new Exception("There is high demand on this tool, please try again later.");
+            }
+
+            return (rule.ProviderName, rule.ModelName);
         }
 
         private async Task<string> CallWhisperApiAsync(byte[] audioData, string fileName, string contentType, string apiKey)

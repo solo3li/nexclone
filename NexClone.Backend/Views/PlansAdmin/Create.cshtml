@@ -81,9 +81,21 @@
                 <div class="bx--form__helper-text">Cost will be calculated per this amount</div>
             </div>
             <div class="bx--form-item">
-                <label for="TtsCostPerChar" class="bx--label">Cost per Block</label>
+                <label for="TtsCostPerChar" class="bx--label">Cost Standard (per Block)</label>
                 <div class="bx--text-input__field-wrapper">
                     <input id="TtsCostPerChar" type="number" class="bx--text-input" name="TtsCostPerChar" required min="0" step="0.0001" value="@(Model?.TtsCostPerChar ?? 1.0m)">
+                </div>
+            </div>
+            <div class="bx--form-item">
+                <label for="TtsCostPerCharMedium" class="bx--label">Cost Medium (per Block)</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="TtsCostPerCharMedium" type="number" class="bx--text-input" name="TtsCostPerCharMedium" required min="0" step="0.0001" value="1.0">
+                </div>
+            </div>
+            <div class="bx--form-item">
+                <label for="TtsCostPerCharHigh" class="bx--label">Cost High (per Block)</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="TtsCostPerCharHigh" type="number" class="bx--text-input" name="TtsCostPerCharHigh" required min="0" step="0.0001" value="1.0">
                 </div>
             </div>
             <div class="bx--form-item bx--checkbox-wrapper">

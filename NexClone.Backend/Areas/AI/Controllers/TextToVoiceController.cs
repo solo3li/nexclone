@@ -58,7 +58,7 @@ namespace NexClone.Backend.Areas.AI.Controllers
                 }
             }
 
-            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "text-to-voice", request.Text.Length);
+            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "text-to-voice", request.Text.Length, null, request.Quality);
             if (!policyResult.IsAllowed)
                 return BadRequest(new { error = policyResult.ErrorMessage });
 
@@ -70,7 +70,8 @@ namespace NexClone.Backend.Areas.AI.Controllers
                     request.Text,
                     request.Language,
                     request.VoiceName,
-                    request.StyleInstruction
+                    request.StyleInstruction,
+                    request.Quality
                 );
 
                 // Upload to MinIO
@@ -123,7 +124,7 @@ namespace NexClone.Backend.Areas.AI.Controllers
                 return Unauthorized();
             }
 
-            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "text-to-voice", request.Text.Length);
+            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "text-to-voice", request.Text.Length, null, request.Quality);
             if (!policyResult.IsAllowed)
             {
                 Console.WriteLine($"[ESTIMATE] Policy Denied: {policyResult.ErrorMessage}");
@@ -140,5 +141,6 @@ namespace NexClone.Backend.Areas.AI.Controllers
         public string? Language { get; set; } = "other"; // "arabic" or "other"
         public string? VoiceName { get; set; } = string.Empty;
         public string? StyleInstruction { get; set; } = string.Empty;
+        public string Quality { get; set; } = "Standard";
     }
 }
