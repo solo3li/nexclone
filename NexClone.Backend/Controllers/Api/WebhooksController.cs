@@ -76,7 +76,7 @@ namespace NexClone.Backend.Controllers.Api
 
                     // 5. Activate or Extend Subscription
                     var existingSub = await _context.Subscriptions
-                        .FirstOrDefaultAsync(s => s.UserId == user.Id && s.PlanId == plan.Id && s.Status == "Active");
+                        .FirstOrDefaultAsync(s => s.UserId == user.Id && s.PlanId == plan.Id && s.Status == "active");
 
                     if (existingSub != null)
                     {

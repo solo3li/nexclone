@@ -43,7 +43,7 @@ namespace NexClone.Backend.Services
             if (tool != null && !tool.IsActive) return false;
 
             var activeSubscription = user.Subscriptions
-                .FirstOrDefault(s => s.Status == "Active" && s.EndDate > DateTime.UtcNow);
+                .FirstOrDefault(s => s.Status == "active" && s.EndDate > DateTime.UtcNow);
 
             if (activeSubscription == null) return false;
 

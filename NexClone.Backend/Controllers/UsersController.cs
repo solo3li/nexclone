@@ -26,7 +26,7 @@ namespace NexClone.Backend.Controllers
             if (pageNumber < 1) pageNumber = 1;
 
             var query = _context.Users
-                .Include(u => u.Subscriptions.Where(s => s.Status == "active" || s.Status == "Active"))
+                .Include(u => u.Subscriptions.Where(s => s.Status == "active" || s.Status == "active"))
                     .ThenInclude(s => s.Plan)
                 .AsQueryable();
 
@@ -41,7 +41,7 @@ namespace NexClone.Backend.Controllers
 
             if (planId.HasValue)
             {
-                query = query.Where(u => u.Subscriptions.Any(s => (s.Status == "active" || s.Status == "Active") && s.PlanId == planId.Value));
+                query = query.Where(u => u.Subscriptions.Any(s => (s.Status == "active" || s.Status == "active") && s.PlanId == planId.Value));
             }
 
             int totalItems = await query.CountAsync();
@@ -149,7 +149,7 @@ namespace NexClone.Backend.Controllers
 
             // Cancel any existing active subscriptions
             var activeSubscriptions = await _context.Subscriptions
-                .Where(s => s.UserId == userId && (s.Status == "active" || s.Status == "Active"))
+                .Where(s => s.UserId == userId && (s.Status == "active" || s.Status == "active"))
                 .ToListAsync();
 
             foreach (var sub in activeSubscriptions)
@@ -220,7 +220,7 @@ namespace NexClone.Backend.Controllers
             if (user == null) return NotFound();
 
             var activeSub = await _context.Subscriptions
-                .Where(s => s.UserId == userId && (s.Status == "active" || s.Status == "Active"))
+                .Where(s => s.UserId == userId && (s.Status == "active" || s.Status == "active"))
                 .OrderByDescending(s => s.EndDate)
                 .FirstOrDefaultAsync();
 

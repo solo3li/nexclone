@@ -420,8 +420,8 @@ export default function TextToVoicePage() {
                   </div>
                 </div>
 
-                {/* Free Account Notice - Only in Arabic Mode and if not premium */}
-                {languageMode === 'arabic' && !user?.activePlan && (
+                {/* Free Account Notice - Only in Arabic Mode and if on Free/No plan */}
+                {languageMode === 'arabic' && (!user?.activePlan || user.activePlan.name?.toLowerCase() === 'free') && (
                 <div className="bg-violet-500/10 border border-violet-500/20 rounded-xl p-2 flex flex-col gap-1">
                   <div className="flex gap-2 items-start">
                     <Info className="w-3.5 h-3.5 text-violet-400 shrink-0 mt-0.5" />

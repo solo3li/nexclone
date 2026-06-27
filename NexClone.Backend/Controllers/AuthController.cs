@@ -474,7 +474,7 @@ namespace NexClone.Backend.Controllers
 
             var activeSub = await _context.Subscriptions
                 .Include(s => s.Plan)
-                .FirstOrDefaultAsync(s => s.UserId == user.Id && s.Status == "Active" && s.EndDate > DateTime.UtcNow);
+                .FirstOrDefaultAsync(s => s.UserId == user.Id && s.Status == "active" && s.EndDate > DateTime.UtcNow);
 
             string? imageUrl = null;
             if (!string.IsNullOrEmpty(user.ImageUrl))
