@@ -123,11 +123,14 @@ namespace NexClone.Backend.Services.AI
             var client = _httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Add("Authorization", $"Bearer {config.ApiKey}");
 
+            var validOpenAiVoices = new[] { "alloy", "echo", "fable", "onyx", "nova", "shimmer" };
+            var safeVoiceName = string.IsNullOrWhiteSpace(voiceName) || !validOpenAiVoices.Contains(voiceName.ToLower()) ? "alloy" : voiceName.ToLower();
+
             var payload = new
             {
                 model = string.IsNullOrWhiteSpace(customModelName) ? "tts-1" : customModelName,
                 input = text,
-                voice = string.IsNullOrWhiteSpace(voiceName) ? "alloy" : voiceName,
+                voice = safeVoiceName,
                 response_format = "mp3"
             };
 

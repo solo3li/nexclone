@@ -102,7 +102,7 @@ namespace NexClone.Backend.Areas.AI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Error generating audio", details = ex.Message });
+                return StatusCode(500, new { error = "Error generating audio: " + ex.Message });
             }
         }
 
