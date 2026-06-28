@@ -11,15 +11,29 @@ namespace NexClone.Backend.Controllers
     {
         public async Task<IActionResult> Index()
         {
-            var logFilePath = Path.Combine(Directory.GetCurrentDirectory(), "logs", "system.log");
+            var logsDir = Path.Combine(Directory.GetCurrentDirectory(), "logs");
             string logs = "Log file not found or empty.";
+            string logFilePath = null;
 
-            if (System.IO.File.Exists(logFilePath))
+            if (Directory.Exists(logsDir))
+            {
+                var files = Directory.GetFiles(logsDir, "system*.log");
+                if (files.Length > 0)
+                {
+                    logFilePath = files.OrderByDescending(f => System.IO.File.GetLastWriteTime(f)).First();
+                }
+            }
+
+            if (logFilePath != null && System.IO.File.Exists(logFilePath))
             {
                 try
                 {
                     // Read last 1000 lines
-                    var lines = await System.IO.File.ReadAllLinesAsync(logFilePath);
+                    using var stream = new FileStream(logFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                    using var reader = new StreamReader(stream);
+                    var allText = await reader.ReadToEndAsync();
+                    var lines = allText.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                    
                     if (lines.Length > 1000)
                     {
                         logs = string.Join("\n", lines[^1000..]);
@@ -41,14 +55,18 @@ namespace NexClone.Backend.Controllers
         [HttpPost]
         public IActionResult ClearLogs()
         {
-            var logFilePath = Path.Combine(Directory.GetCurrentDirectory(), "logs", "system.log");
-            if (System.IO.File.Exists(logFilePath))
+            var logsDir = Path.Combine(Directory.GetCurrentDirectory(), "logs");
+            if (Directory.Exists(logsDir))
             {
-                try
+                var files = Directory.GetFiles(logsDir, "system*.log");
+                foreach (var file in files)
                 {
-                    System.IO.File.WriteAllText(logFilePath, string.Empty);
+                    try
+                    {
+                        using var stream = new FileStream(file, FileMode.Truncate, FileAccess.Write, FileShare.ReadWrite);
+                    }
+                    catch { }
                 }
-                catch { }
             }
             return RedirectToAction(nameof(Index));
         }
