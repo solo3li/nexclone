@@ -56,6 +56,7 @@ export default function TextToVoicePage() {
   const [selectedOtherLanguage, setSelectedOtherLanguage] = useState<string>("English");
   
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [estimatedCost, setEstimatedCost] = useState<number | null>(null);
@@ -198,14 +199,33 @@ export default function TextToVoicePage() {
     }
   };
 
-  const downloadAudio = () => {
+  const downloadAudio = async () => {
     if (!audioUrl) return;
-    const element = document.createElement("a");
-    element.href = audioUrl;
-    element.download = "generated_audio.mp3";
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+    try {
+      setIsDownloading(true);
+      const response = await fetch(audioUrl);
+      const blob = await response.blob();
+      const localUrl = URL.createObjectURL(blob);
+      const element = document.createElement("a");
+      element.href = localUrl;
+      element.download = "generated_audio.mp3";
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+      URL.revokeObjectURL(localUrl);
+    } catch (err) {
+      console.error("Error downloading audio:", err);
+      // Fallback if fetch fails due to CORS
+      const element = document.createElement("a");
+      element.href = audioUrl;
+      element.target = "_blank";
+      element.download = "generated_audio.mp3";
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   const filteredVoices = voices.filter(v => {
@@ -335,9 +355,9 @@ export default function TextToVoicePage() {
                       <Volume2 className="w-5 h-5 text-violet-400" />
                       {t('result')}
                     </h3>
-                    <button onClick={downloadAudio} className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-full text-white text-sm transition-all font-medium">
-                      <Download className="w-4 h-4" />
-                      {t('download')}
+                    <button onClick={downloadAudio} disabled={isDownloading} className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed rounded-full text-white text-sm transition-all font-medium">
+                      {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                      {isDownloading ? (isRtl ? "جاري التحميل..." : "Downloading...") : t('download')}
                     </button>
                   </div>
                   <audio controls src={audioUrl} className="w-full mt-2" />
