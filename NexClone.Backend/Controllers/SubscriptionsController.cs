@@ -21,6 +21,7 @@ namespace NexClone.Backend.Controllers
             var subscriptions = await _context.Subscriptions
                 .Include(s => s.Plan)
                 .Include(s => s.User)
+                .Where(s => s.Plan.PriceUsd > 0 && !s.Plan.IsDefaultRegistrationPlan)
                 .OrderByDescending(s => s.CreatedAt)
                 .ToListAsync();
 

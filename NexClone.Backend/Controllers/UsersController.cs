@@ -26,7 +26,7 @@ namespace NexClone.Backend.Controllers
             if (pageNumber < 1) pageNumber = 1;
 
             var query = _context.Users
-                .Include(u => u.Subscriptions.Where(s => s.Status == "active" || s.Status == "active"))
+                .Include(u => u.Subscriptions.Where(s => s.Status == "active" && s.Plan.PriceUsd > 0 && !s.Plan.IsDefaultRegistrationPlan))
                     .ThenInclude(s => s.Plan)
                 .AsQueryable();
 
@@ -41,7 +41,7 @@ namespace NexClone.Backend.Controllers
 
             if (planId.HasValue)
             {
-                query = query.Where(u => u.Subscriptions.Any(s => (s.Status == "active" || s.Status == "active") && s.PlanId == planId.Value));
+                query = query.Where(u => u.Subscriptions.Any(s => s.Status == "active" && s.PlanId == planId.Value && s.Plan.PriceUsd > 0 && !s.Plan.IsDefaultRegistrationPlan));
             }
 
             int totalItems = await query.CountAsync();
@@ -53,7 +53,7 @@ namespace NexClone.Backend.Controllers
                 .Take(pageSize)
                 .ToListAsync();
 
-            ViewBag.Plans = new SelectList(await _context.Plans.ToListAsync(), "Id", "Name");
+            ViewBag.Plans = new SelectList(await _context.Plans.Where(p => p.PriceUsd > 0 && !p.IsDefaultRegistrationPlan).ToListAsync(), "Id", "Name");
             ViewBag.CurrentSearch = searchString;
             ViewBag.CurrentPlanId = planId;
             ViewBag.PageNumber = pageNumber;
@@ -65,7 +65,7 @@ namespace NexClone.Backend.Controllers
         public async Task<IActionResult> Details(Guid id)
         {
             var user = await _context.Users
-                .Include(u => u.Subscriptions)
+                .Include(u => u.Subscriptions.Where(s => s.Plan.PriceUsd > 0 && !s.Plan.IsDefaultRegistrationPlan))
                     .ThenInclude(s => s.Plan)
                 .FirstOrDefaultAsync(u => u.Id == id);
                 
@@ -77,7 +77,7 @@ namespace NexClone.Backend.Controllers
                 .ToListAsync();
 
             ViewData["Title"] = $"User Details - {user.Email}";
-            ViewBag.Plans = new SelectList(await _context.Plans.ToListAsync(), "Id", "Name");
+            ViewBag.Plans = new SelectList(await _context.Plans.Where(p => p.PriceUsd > 0 && !p.IsDefaultRegistrationPlan).ToListAsync(), "Id", "Name");
             ViewBag.Devices = devices;
             return View(user);
         }

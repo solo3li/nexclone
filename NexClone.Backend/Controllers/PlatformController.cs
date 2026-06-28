@@ -24,7 +24,10 @@ namespace NexClone.Backend.Controllers
         public async Task<IActionResult> GetStats()
         {
             var userCount = await _context.Users.CountAsync();
-            var subCount = await _context.Subscriptions.CountAsync();
+            var subCount = await _context.Subscriptions
+                .Include(s => s.Plan)
+                .Where(s => s.Status == "active" && s.Plan.PriceUsd > 0 && !s.Plan.IsDefaultRegistrationPlan)
+                .CountAsync();
 
             return Ok(new
             {

@@ -29,7 +29,8 @@ namespace NexClone.Backend.Controllers;
 
         // 2. Active Subscriptions
         model.ActiveSubscriptions = await _context.Subscriptions
-            .Where(s => s.Status == "active")
+            .Include(s => s.Plan)
+            .Where(s => s.Status == "active" && s.Plan.PriceUsd > 0 && !s.Plan.IsDefaultRegistrationPlan)
             .CountAsync();
 
         // 3. Total Revenue
