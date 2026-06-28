@@ -429,7 +429,13 @@ namespace NexClone.Backend.Controllers
 
             if (!string.IsNullOrEmpty(user.PhoneNumber))
             {
-                return BadRequest(new { Message = "رقم الهاتف مسجل بالفعل." });
+                return BadRequest(new { Message = "لقد قمت بإضافة رقم هاتف مسبقاً." });
+            }
+
+            var phoneExists = await _userManager.Users.AnyAsync(u => u.PhoneNumber == request.PhoneNumber);
+            if (phoneExists)
+            {
+                return BadRequest(new { Message = "رقم الهاتف مسجل بالفعل لحساب آخر." });
             }
 
             user.PhoneNumber = request.PhoneNumber;
@@ -437,19 +443,18 @@ namespace NexClone.Backend.Controllers
             var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
             var fingerprint = request.DeviceFingerprint ?? string.Empty;
 
-            bool hasClaimedFreeTrial = false;
-
-            if (!string.IsNullOrEmpty(fingerprint))
+            // Log the device fingerprint
+            _context.DeviceFingerprints.Add(new DeviceFingerprint
             {
-                hasClaimedFreeTrial = await _context.DeviceFingerprints.AnyAsync(df => df.FingerprintHash == fingerprint && df.UserId != user.Id);
-            }
+                UserId = user.Id,
+                IpAddress = ipAddress,
+                UserAgent = Request.Headers["User-Agent"].ToString() ?? "Unknown",
+                FingerprintHash = fingerprint
+            });
 
-            if (!hasClaimedFreeTrial)
-            {
-                hasClaimedFreeTrial = await _context.DeviceFingerprints.AnyAsync(df => df.IpAddress == ipAddress && df.UserId != user.Id);
-            }
-
-            if (!hasClaimedFreeTrial)
+            // Assign default plan if they don't already have one
+            var hasActiveSub = await _context.Subscriptions.AnyAsync(s => s.UserId == user.Id && s.Status == "active");
+            if (!hasActiveSub)
             {
                 var targetPlan = await _context.Plans.FirstOrDefaultAsync(p => p.IsDefaultRegistrationPlan) 
                               ?? await _context.Plans.FirstOrDefaultAsync(p => p.IsFreeTrial);
@@ -463,7 +468,7 @@ namespace NexClone.Backend.Controllers
                         PlanId = targetPlan.Id,
                         StartDate = DateTime.UtcNow,
                         EndDate = DateTime.UtcNow.AddDays(targetPlan.DurationDays),
-                        Status = "Active"
+                        Status = "active"
                     });
                 }
             }
