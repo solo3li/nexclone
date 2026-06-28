@@ -58,6 +58,7 @@
                         <tr>
                             <th><span class="bx--table-header-label">Email</span></th>
                             <th><span class="bx--table-header-label">Phone</span></th>
+                            <th><span class="bx--table-header-label">Status</span></th>
                             <th><span class="bx--table-header-label">Country</span></th>
                             <th><span class="bx--table-header-label">Credits</span></th>
                             <th><span class="bx--table-header-label">Current Plan</span></th>
@@ -83,6 +84,16 @@
                                 <tr>
                                     <td>@user.Email</td>
                                     <td>@(string.IsNullOrEmpty(user.PhoneNumber) ? "N/A" : user.PhoneNumber)</td>
+                                    <td>
+                                        @if (user.EmailConfirmed || user.IsVerified)
+                                        {
+                                            <span class="bx--tag bx--tag--green">Verified</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="bx--tag bx--tag--red">Unverified</span>
+                                        }
+                                    </td>
                                     <td>@user.Country</td>
                                     <td>@user.AvailableCredits</td>
                                     <td>

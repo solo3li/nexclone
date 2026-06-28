@@ -55,6 +55,17 @@
                     <div><strong>Country:</strong> @(string.IsNullOrEmpty(Model.Country) ? "N/A" : Model.Country)</div>
                     <div><strong>Joined:</strong> @Model.CreatedAt.ToString("MMM dd, yyyy")</div>
                     <div><strong>Available Credits:</strong> @Model.AvailableCredits</div>
+                    <div>
+                        <strong>Status:</strong> 
+                        @if (Model.EmailConfirmed || Model.IsVerified)
+                        {
+                            <span class="bx--tag bx--tag--green">Verified</span>
+                        }
+                        else
+                        {
+                            <span class="bx--tag bx--tag--red">Unverified</span>
+                        }
+                    </div>
                     <div style="grid-column: span 2;">
                         <strong>Current Plan:</strong> 
                         @if (currentSub?.Plan != null)
