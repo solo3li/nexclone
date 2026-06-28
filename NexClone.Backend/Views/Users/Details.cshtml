@@ -43,6 +43,7 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
                     <div><strong>Name:</strong> @(string.IsNullOrEmpty(Model.FullName) ? "N/A" : Model.FullName)</div>
                     <div><strong>Email:</strong> @Model.Email</div>
+                    <div><strong>Phone:</strong> @(string.IsNullOrEmpty(Model.PhoneNumber) ? "N/A" : Model.PhoneNumber)</div>
                     <div><strong>Country:</strong> @(string.IsNullOrEmpty(Model.Country) ? "N/A" : Model.Country)</div>
                     <div><strong>Joined:</strong> @Model.CreatedAt.ToString("MMM dd, yyyy")</div>
                     <div><strong>Available Credits:</strong> @Model.AvailableCredits</div>
