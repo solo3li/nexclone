@@ -1,5 +1,3 @@
-BEGIN;
-
 UPDATE "AspNetUsers" SET "PhoneNumber" = '+201278476041', "PhoneNumberConfirmed" = true WHERE "Id" = '6c705aa1-f613-49ef-97a9-82dd03d1bb9a';
 INSERT INTO "PhoneNumbers" ("Id", "PhoneNumber", "TermsAccepted", "TermsAcceptedAt", "CreatedAt", "UserId") 
 VALUES ('0fdb0b28-27b8-43ec-aa10-7ba600737098', '+201278476041', true, '2025-11-04 14:36:57', '2025-11-04 14:36:57', '6c705aa1-f613-49ef-97a9-82dd03d1bb9a') 
@@ -5220,4 +5218,3 @@ INSERT INTO "PhoneNumbers" ("Id", "PhoneNumber", "TermsAccepted", "TermsAccepted
 VALUES ('301fd9c9-ed78-4e81-a061-283b59a3b2aa', '+966574266753', true, '2026-06-23 17:34:28', '2026-06-23 17:34:28', '618b7250-c10c-4f86-bf79-f7d634b694f3') 
 ON CONFLICT ("UserId") DO UPDATE SET "PhoneNumber" = EXCLUDED."PhoneNumber";
 
-COMMIT;

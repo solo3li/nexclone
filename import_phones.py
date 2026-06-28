@@ -7,7 +7,7 @@ def process_csv(csv_path, sql_path):
         reader = csv.DictReader(f)
         
         with open(sql_path, 'w', encoding='utf-8-sig') as sql_file:
-            sql_file.write("BEGIN;\n\n")
+            
             
             for row in reader:
                 user_id = row['User ID']
@@ -26,7 +26,7 @@ def process_csv(csv_path, sql_path):
 VALUES ('{phone_record_id}', '{phone_number}', true, '{created_at}', '{created_at}', '{user_id}') 
 ON CONFLICT ("UserId") DO UPDATE SET "PhoneNumber" = EXCLUDED."PhoneNumber";\n\n""")
                 
-            sql_file.write("COMMIT;\n")
+            
 
 if __name__ == '__main__':
     process_csv('phone_numbers_export (6).csv', 'import_phones.sql')
