@@ -106,8 +106,12 @@
                                         }
                                     </td>
                                     <td>@user.CreatedAt.ToString("MMM dd, yyyy")</td>
-                                    <td>
-                                        <a href="@Url.Action("Details", new { id = user.Id })" class="bx--btn bx--btn--ghost bx--btn--sm">View Details</a>
+                                    <td style="display: flex; gap: 0.5rem; align-items: center;">
+                                        <a href="@Url.Action("Details", new { id = user.Id })" class="bx--btn bx--btn--ghost bx--btn--sm">View</a>
+                                        <a href="@Url.Action("Edit", new { id = user.Id })" class="bx--btn bx--btn--primary bx--btn--sm">Edit</a>
+                                        <form asp-action="Delete" asp-route-id="@user.Id" method="post" onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.');" style="margin: 0;">
+                                            <button type="submit" class="bx--btn bx--btn--danger bx--btn--sm">Delete</button>
+                                        </form>
                                     </td>
                                 </tr>
                             }

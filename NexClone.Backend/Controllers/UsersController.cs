@@ -268,7 +268,62 @@ namespace NexClone.Backend.Controllers
 
             return RedirectToAction(nameof(Details), new { id = userId });
         }
+        [HttpGet]
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound();
+            return View(user);
+        }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,FullName,Email,PhoneNumber,Country,IsStaff")] ApplicationUser updatedUser)
+        {
+            if (id != updatedUser.Id) return NotFound();
+
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound();
+
+            user.FullName = updatedUser.FullName;
+            user.Email = updatedUser.Email;
+            user.UserName = updatedUser.Email; // Keep UserName sync
+            user.PhoneNumber = updatedUser.PhoneNumber;
+            user.Country = updatedUser.Country;
+            user.IsStaff = updatedUser.IsStaff;
+
+            try
+            {
+                _context.Update(user);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "User details updated successfully.";
+                return RedirectToAction(nameof(Details), new { id = user.Id });
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!UserExists(user.Id)) return NotFound();
+                else throw;
+            }
+        }
+
+        private bool UserExists(Guid id)
+        {
+            return _context.Users.Any(e => e.Id == id);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user != null)
+            {
+                _context.Users.Remove(user);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "User deleted successfully.";
+            }
+            return RedirectToAction(nameof(Index));
+        }
         [HttpGet("seed")]
         public async Task<IActionResult> Seed([FromServices] Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> userManager)
         {
