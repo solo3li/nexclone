@@ -318,9 +318,23 @@ namespace NexClone.Backend.Controllers
             var user = await _context.Users.FindAsync(id);
             if (user != null)
             {
+                var blogComments = await _context.BlogComments.Where(b => b.UserId == id).ToListAsync();
+                if (blogComments.Any()) _context.BlogComments.RemoveRange(blogComments);
+
+                var ticketMessages = await _context.TicketMessages.Where(m => m.SenderId == id).ToListAsync();
+                if (ticketMessages.Any()) _context.TicketMessages.RemoveRange(ticketMessages);
+
                 _context.Users.Remove(user);
-                await _context.SaveChangesAsync();
-                TempData["Success"] = "User deleted successfully.";
+                
+                try
+                {
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = "User deleted successfully.";
+                }
+                catch (Exception ex)
+                {
+                    TempData["Error"] = "Could not delete user because they have associated records that prevent deletion. " + (ex.InnerException?.Message ?? ex.Message);
+                }
             }
             return RedirectToAction(nameof(Index));
         }
