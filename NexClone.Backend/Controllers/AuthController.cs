@@ -276,10 +276,11 @@ namespace NexClone.Backend.Controllers
                 return Ok(new { Message = "If an account with this email exists, a password reset link has been sent." });
             }
 
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var rawToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var token = Microsoft.AspNetCore.WebUtilities.WebEncoders.Base64UrlEncode(System.Text.Encoding.UTF8.GetBytes(rawToken));
             
             var origin = Request.Headers["Origin"].FirstOrDefault() ?? "http://178.62.192.74:3000";
-            var resetLink = $"{origin}/reset-password?email={Uri.EscapeDataString(request.Email)}&token={Uri.EscapeDataString(token)}";
+            var resetLink = $"{origin}/reset-password?email={Uri.EscapeDataString(request.Email)}&token={token}";
 
             string emailHtml = $@"
 <div style='font-family: Arial, sans-serif; background-color: #0a0015; color: #ffffff; padding: 40px; text-align: center; border-radius: 8px;'>
@@ -307,7 +308,19 @@ namespace NexClone.Backend.Controllers
                 return BadRequest(new { Message = "Invalid request." });
             }
 
-            var result = await _userManager.ResetPasswordAsync(user, request.Token, request.NewPassword);
+            string rawToken = request.Token;
+            try
+            {
+                // Try Base64UrlDecode for new tokens
+                rawToken = System.Text.Encoding.UTF8.GetString(Microsoft.AspNetCore.WebUtilities.WebEncoders.Base64UrlDecode(request.Token));
+            }
+            catch
+            {
+                // Fallback for old tokens (replace spaces that were incorrectly decoded back to +)
+                rawToken = request.Token.Replace(" ", "+");
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, rawToken, request.NewPassword);
 
             if (result.Succeeded)
             {
