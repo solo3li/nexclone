@@ -141,8 +141,18 @@ export default function VoiceToTextPage() {
         const durationMinutes = duration / 60;
         const res = await api.post("/api/ai/voice-to-text/estimate", { fileSizeBytes, durationMinutes });
         setEstimatedCost(res.data.estimatedCost);
-      } catch (err) {
-        console.error("Failed to estimate:", err);
+      } catch (err: any) {
+        if (err.response?.status !== 400) {
+          console.error(err);
+        }
+        
+        if (err.response?.status === 400) {
+          setError(isRtl ? "رصيدك غير كافٍ لإتمام هذه العملية." : "Insufficient credits for this operation.");
+        } else {
+          setError(err.response?.data?.error || (isRtl ? "فشل في حساب التكلفة التقديرية" : "Error calculating estimate."));
+        }
+        
+        setEstimatedCost(null);
       } finally {
         setIsEstimating(false);
       }

@@ -143,8 +143,15 @@ export default function TextToVoicePage() {
       setPendingCost(cost);
       setShowConfirmModal(true);
     } catch (err: any) {
-      console.error("Estimation error:", err);
-      setError(err.response?.data?.error || t('error'));
+      if (err.response?.status !== 400) {
+        console.error("Estimation error:", err);
+      }
+      
+      if (err.response?.status === 400) {
+        setError(isRtl ? "رصيدك غير كافٍ لإتمام هذه العملية." : "Insufficient credits for this operation.");
+      } else {
+        setError(err.response?.data?.error || t('error'));
+      }
     } finally {
       setIsEstimating(false);
     }
