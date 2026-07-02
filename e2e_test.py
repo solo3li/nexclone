@@ -2,6 +2,8 @@ import requests
 
 BASE_URL = "http://localhost:8080/api"
 
+
+
 print("1. Registering User...")
 register_data = {
     "username": "testuser",
