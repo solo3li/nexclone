@@ -73,6 +73,7 @@ namespace NexClone.Backend.Controllers
         {
             var sub = await _context.Subscriptions
                 .Include(s => s.Plan)
+                .Include(s => s.User)
                 .FirstOrDefaultAsync(s => s.Id == id);
 
             if (sub != null)
@@ -94,6 +95,10 @@ namespace NexClone.Backend.Controllers
                         else
                         {
                             sub.Status = "expired";
+                            if (sub.User != null)
+                            {
+                                sub.User.AvailableCredits = 0;
+                            }
                         }
                     }
                     else

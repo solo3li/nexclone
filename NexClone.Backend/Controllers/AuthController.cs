@@ -495,10 +495,44 @@ namespace NexClone.Backend.Controllers
 
             var activeSub = await _context.Subscriptions
                 .Include(s => s.Plan)
-                .OrderBy(s => s.Status) // "active" comes before "freeze"
+                .OrderByDescending(s => s.Status == "active")
+                .ThenByDescending(s => s.Status == "freeze")
+                .ThenByDescending(s => s.Status == "expired")
                 .ThenByDescending(s => s.EndDate)
-                .FirstOrDefaultAsync(s => s.UserId == user.Id && 
-                    ((s.Status == "active" && s.EndDate > DateTime.UtcNow) || s.Status == "freeze"));
+                .FirstOrDefaultAsync(s => s.UserId == user.Id);
+
+            if (activeSub != null)
+            {
+                bool needsSave = false;
+
+                if (activeSub.Status == "active" && activeSub.EndDate <= DateTime.UtcNow)
+                {
+                    var freezeEndDate = activeSub.EndDate.AddDays(activeSub.Plan.GracePeriodDays);
+                    if (DateTime.UtcNow > freezeEndDate)
+                    {
+                        activeSub.Status = "expired";
+                        user.AvailableCredits = 0;
+                    }
+                    else
+                    {
+                        activeSub.Status = "freeze";
+                    }
+                    needsSave = true;
+                }
+                else if (activeSub.Status == "freeze" && activeSub.EndDate.AddDays(activeSub.Plan.GracePeriodDays) < DateTime.UtcNow)
+                {
+                    activeSub.Status = "expired";
+                    user.AvailableCredits = 0;
+                    needsSave = true;
+                }
+
+                if (needsSave)
+                {
+                    _context.Subscriptions.Update(activeSub);
+                    _context.Users.Update(user);
+                    await _context.SaveChangesAsync();
+                }
+            }
 
             string? imageUrl = null;
             if (!string.IsNullOrEmpty(user.ImageUrl))
