@@ -146,6 +146,9 @@ builder.Services.AddScoped<NexClone.Backend.Services.CreditManagerService>();
 // Register Usage Policy Service
 builder.Services.AddScoped<NexClone.Backend.Services.UsagePolicyService>();
 
+// Register Background Services
+builder.Services.AddHostedService<NexClone.Backend.Services.SubscriptionStatusService>();
+
 // Add Rate Limiting
 builder.Services.AddRateLimiter(options =>
 {

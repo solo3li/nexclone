@@ -11,5 +11,14 @@ namespace NexClone.Backend.Services
             DateTime endDate, 
             decimal monthlyCredits, 
             decimal amountPaid = 0m);
+
+        string GetGracePeriodEmail(
+            string userName, 
+            string planName, 
+            int gracePeriodDays);
+
+        string GetSubscriptionExpiredEmail(
+            string userName, 
+            string planName);
     }
 }
