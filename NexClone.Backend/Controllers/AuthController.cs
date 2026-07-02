@@ -495,7 +495,10 @@ namespace NexClone.Backend.Controllers
 
             var activeSub = await _context.Subscriptions
                 .Include(s => s.Plan)
-                .FirstOrDefaultAsync(s => s.UserId == user.Id && s.Status == "active" && s.EndDate > DateTime.UtcNow);
+                .OrderBy(s => s.Status) // "active" comes before "freeze"
+                .ThenByDescending(s => s.EndDate)
+                .FirstOrDefaultAsync(s => s.UserId == user.Id && 
+                    ((s.Status == "active" && s.EndDate > DateTime.UtcNow) || s.Status == "freeze"));
 
             string? imageUrl = null;
             if (!string.IsNullOrEmpty(user.ImageUrl))
