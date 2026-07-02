@@ -228,9 +228,11 @@ export default function ToolsSection() {
         </div>
 
         {/* Tools Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="flex flex-wrap justify-center gap-6 max-w-5xl mx-auto">
           {tools.map((tool, index) => (
-            <ToolCard key={tool.title} tool={tool} index={index} />
+            <div key={tool.title} className="w-full sm:w-[calc(50%-12px)] max-w-[400px]">
+              <ToolCard tool={tool} index={index} />
+            </div>
           ))}
         </div>
 

@@ -1,15 +1,15 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import Navbar from "../../../src/components/Navbar";
 import Footer from "../../../src/components/Footer";
 import MobileBottomNav from "../../../src/components/MobileBottomNav";
 import {
-  Activity, Crown, History, FileText, User as UserIcon, Lock,
-  Image as ImageIcon, Loader2, Save, Upload
+  Activity, Crown, History, User as UserIcon, Lock,
+  Image as ImageIcon, Loader2, Save, Upload, LifeBuoy, MessageSquarePlus
 } from "lucide-react";
 import api from "../../../src/utils/api";
 import { useAppStore } from "../../../src/store/useAppStore";
@@ -21,9 +21,11 @@ export default function ProfilePage() {
   const router = useRouter();
   
   const user = useAppStore(state => state.user);
-  const setUser = useAppStore(state => state.setUser);
+  const isAuthenticated = useAppStore(state => state.isAuthenticated);
   
   const [historyCount, setHistoryCount] = useState(0);
+  const [isReady, setIsReady] = useState(false);
+
   
   // Settings State
   const [fullName, setFullName] = useState(user?.fullName || "");
@@ -38,6 +40,7 @@ export default function ProfilePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    setIsReady(true);
     if (user && !fullName) {
       setFullName(user.fullName || "");
       setImagePreview(user.imageUrl || null);
@@ -46,6 +49,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const fetchHistory = async () => {
+      if (!user) return;
       try {
         const res = await api.get("/api/history");
         setHistoryCount(res.data.length);
@@ -53,8 +57,10 @@ export default function ProfilePage() {
         console.error("Failed to fetch history count:", err);
       }
     };
-    fetchHistory();
-  }, []);
+    if (isReady) {
+      fetchHistory();
+    }
+  }, [user, isReady]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -107,6 +113,31 @@ export default function ProfilePage() {
       setSavingPassword(false);
     }
   };
+
+  if (isReady && !isAuthenticated && !user) {
+    return (
+      <div className="relative min-h-screen bg-[#0a0015] flex flex-col selection:bg-violet-500/30">
+        <Navbar />
+        <main className="flex-1 container mx-auto px-4 pt-32 pb-20 relative z-10 flex items-center justify-center">
+           <div className="text-center p-10 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl max-w-md w-full relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-violet-500/20 blur-3xl rounded-full" />
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-fuchsia-500/20 blur-3xl rounded-full" />
+              <div className="w-20 h-20 bg-white/5 rounded-2xl mx-auto flex items-center justify-center mb-6 border border-white/10 shadow-xl relative z-10">
+                 <Lock className="w-10 h-10 text-violet-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-4 relative z-10">{isRtl ? "سجل الدخول للمتابعة" : "Login to continue"}</h2>
+              <p className="text-white/60 mb-8 relative z-10">{isRtl ? "يجب عليك تسجيل الدخول أو إنشاء حساب جديد للوصول إلى هذه الصفحة." : "You need to login or create a new account to access this page."}</p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
+                 <button onClick={() => router.push(`/${locale}/login`)} className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold transition-all w-full">{isRtl ? "تسجيل الدخول" : "Login"}</button>
+                 <button onClick={() => router.push(`/${locale}/register`)} className="px-6 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-violet-500/25 w-full">{isRtl ? "انضم الآن" : "Join Now"}</button>
+              </div>
+           </div>
+        </main>
+        <Footer />
+        <MobileBottomNav />
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen bg-[#0a0015] flex flex-col selection:bg-violet-500/30">
@@ -169,22 +200,61 @@ export default function ProfilePage() {
                 </div>
                 <div className="flex justify-between items-center pb-4 border-b border-white/5">
                   <span className="text-white/60">{t('subscription.status')}</span>
-                  <span className="text-emerald-400 font-medium text-sm flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400" /> {user?.activePlan ? user.activePlan.status : "Active"}
-                  </span>
+                  {(() => {
+                    const status = (user?.activePlan?.status || "Active").toLowerCase();
+                    let color = "text-emerald-400";
+                    let bgColor = "bg-emerald-400";
+                    let text = isRtl ? "نشط" : "Active";
+                    
+                    if (status === "freeze") {
+                      color = "text-amber-400";
+                      bgColor = "bg-amber-400";
+                      text = isRtl ? "فترة السماح" : "Grace Period";
+                    } else if (status === "expired") {
+                      color = "text-rose-400";
+                      bgColor = "bg-rose-400";
+                      text = isRtl ? "منتهي" : "Expired";
+                    }
+
+                    return (
+                      <span className={`${color} font-medium text-sm flex items-center gap-1`}>
+                        <span className={`w-2 h-2 rounded-full ${bgColor}`} /> {text}
+                      </span>
+                    );
+                  })()}
                 </div>
                 <div className="flex justify-between items-center pb-4 border-b border-white/5">
                   <span className="text-white/60">{isRtl ? "تاريخ الانتهاء" : "Expiration Date"}</span>
-                  <span className="text-white font-medium text-sm">
-                    {user?.activePlan?.endDate 
-                      ? new Date(user.activePlan.endDate).toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })
-                      : (isRtl ? "بدون تاريخ انتهاء (مجاني)" : "No expiration (Free)")
-                    }
-                  </span>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="text-white font-medium text-sm">
+                      {user?.activePlan?.endDate 
+                        ? new Date(user.activePlan.endDate).toLocaleString(locale === "ar" ? "ar-EG" : "en-US", {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true
+                          })
+                        : (isRtl ? "بدون تاريخ انتهاء (مجاني)" : "No expiration (Free)")
+                      }
+                    </span>
+                    {user?.activePlan?.endDate && (
+                      <span className="text-xs text-white/50">
+                        {(() => {
+                          const diffTime = new Date(user.activePlan.endDate).getTime() - new Date().getTime();
+                          const diffDays = Math.ceil(Math.abs(diffTime) / (1000 * 60 * 60 * 24));
+                          if (diffTime < 0) {
+                            if (diffDays <= 1) return isRtl ? "(انتهى اليوم)" : "(Expired today)";
+                            return isRtl ? `(انتهى منذ ${diffDays} أيام)` : `(Expired ${diffDays} days ago)`;
+                          } else {
+                            if (diffDays === 0) return isRtl ? "(ينتهي اليوم)" : "(Expires today)";
+                            return isRtl ? `(متبقي ${diffDays} يوم)` : `(${diffDays} days left)`;
+                          }
+                        })()}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <button onClick={() => router.push(`/${locale}/pricing`)} className="w-full py-3 mt-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white font-medium transition-all hover:border-white/20">
                   {t('subscription.upgrade')}
@@ -215,6 +285,34 @@ export default function ProfilePage() {
                   <p className="text-xs text-white/50 mt-1">{isRtl ? "كريدت متاح" : "Available Credits"}</p>
                 </div>
               </div>
+            </motion.div>
+
+            {/* Support Tickets Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
+              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 relative overflow-hidden"
+            >
+              <div className="absolute bottom-0 left-0 w-40 h-40 bg-gradient-to-tr from-violet-600/10 to-transparent blur-2xl" />
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center border border-violet-500/30">
+                  <LifeBuoy className="w-5 h-5 text-violet-400" />
+                </div>
+                <h2 className="text-xl font-bold text-white">
+                  {isRtl ? "تذاكر الدعم" : "Support Tickets"}
+                </h2>
+              </div>
+              <p className="text-white/50 text-sm mb-5 leading-relaxed">
+                {isRtl
+                  ? "هل واجهت مشكلة أو لديك سؤال؟ تواصل مع فريق الدعم مباشرة."
+                  : "Having an issue or a question? Contact our support team directly."}
+              </p>
+              <button
+                onClick={() => router.push(`/${locale}/profile/tickets`)}
+                className="w-full py-3 flex items-center justify-center gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-violet-500/20"
+              >
+                <MessageSquarePlus className="w-5 h-5" />
+                {isRtl ? "تذاكري" : "My Tickets"}
+              </button>
             </motion.div>
 
           </div>

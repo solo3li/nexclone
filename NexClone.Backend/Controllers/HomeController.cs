@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,7 +10,8 @@ using NexClone.Backend.Models.ViewModels;
 
 namespace NexClone.Backend.Controllers;
 
-public class HomeController : Controller
+[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Admin")]
+    public class HomeController : Controller
 {
     private readonly ApplicationDbContext _context;
 
@@ -26,7 +29,8 @@ public class HomeController : Controller
 
         // 2. Active Subscriptions
         model.ActiveSubscriptions = await _context.Subscriptions
-            .Where(s => s.Status == "active")
+            .Include(s => s.Plan)
+            .Where(s => s.Status == "active" && s.Plan.PriceUsd > 0 && !s.Plan.IsDefaultRegistrationPlan)
             .CountAsync();
 
         // 3. Total Revenue
@@ -73,6 +77,7 @@ public class HomeController : Controller
         return View();
     }
 
+    [AllowAnonymous]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {

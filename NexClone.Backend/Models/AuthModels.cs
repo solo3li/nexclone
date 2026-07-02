@@ -67,4 +67,24 @@ namespace NexClone.Backend.Models
 
         public string? DeviceFingerprint { get; set; }
     }
+
+    public class AddPhoneRequest
+    {
+        [Required]
+        [MinLength(8)]
+        [MaxLength(20)]
+        public string PhoneNumber { get; set; } = string.Empty;
+
+        public string? DeviceFingerprint { get; set; }
+    }
+
+    public class VerifyEmailRequest
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+
+        [Required]
+        public string Token { get; set; } = string.Empty;
+    }
 }

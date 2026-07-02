@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Home, Wrench, DollarSign, Star, User } from "lucide-react";
+import { Home, Wrench, DollarSign, User } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "../i18n/routing";
 
@@ -12,9 +12,8 @@ export default function MobileBottomNav() {
 
   const tabs = [
     { icon: Home, label: t('home'), href: "/" },
-    { icon: Wrench, label: t('tools'), href: "/#tools" },
+    { icon: Wrench, label: t('tools'), href: "/tools" },
     { icon: DollarSign, label: t('pricing'), href: "/pricing" },
-    { icon: Star, label: t('reviews'), href: "/#testimonials" },
     { icon: User, label: t('account'), href: "/profile" },
   ];
 

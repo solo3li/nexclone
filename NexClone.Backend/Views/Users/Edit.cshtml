@@ -1,0 +1,70 @@
+@model NexClone.Backend.Models.ApplicationUser
+
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<div class="bx--grid bx--grid--full-width">
+    <div class="bx--row" style="margin-bottom: 2rem;">
+        <div class="bx--col" style="display: flex; justify-content: space-between; align-items: center;">
+            <h1 class="bx--type-productive-heading-05">Edit User: @Model.Email</h1>
+            <a href="@Url.Action("Details", new { id = Model.Id })" class="bx--btn bx--btn--secondary">
+                Back to Details
+            </a>
+        </div>
+    </div>
+
+    <div class="bx--row">
+        <div class="bx--col-lg-8">
+            <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0;">
+                <form asp-action="Edit" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    
+                    <div class="bx--form-item" style="margin-bottom: 1rem;">
+                        <label asp-for="FullName" class="bx--label">Full Name</label>
+                        <div class="bx--text-input__field-wrapper">
+                            <input asp-for="FullName" class="bx--text-input" placeholder="e.g. John Doe">
+                        </div>
+                        <span asp-validation-for="FullName" class="bx--form-requirement"></span>
+                    </div>
+
+                    <div class="bx--form-item" style="margin-bottom: 1rem;">
+                        <label asp-for="Email" class="bx--label">Email Address</label>
+                        <div class="bx--text-input__field-wrapper">
+                            <input asp-for="Email" type="email" class="bx--text-input" required>
+                        </div>
+                        <span asp-validation-for="Email" class="bx--form-requirement"></span>
+                    </div>
+
+                    <div class="bx--form-item" style="margin-bottom: 1rem;">
+                        <label asp-for="PhoneNumber" class="bx--label">Phone Number</label>
+                        <div class="bx--text-input__field-wrapper">
+                            <input asp-for="PhoneNumber" class="bx--text-input" placeholder="e.g. +201000000000">
+                        </div>
+                        <span asp-validation-for="PhoneNumber" class="bx--form-requirement"></span>
+                    </div>
+
+                    <div class="bx--form-item" style="margin-bottom: 1rem;">
+                        <label asp-for="Country" class="bx--label">Country</label>
+                        <div class="bx--text-input__field-wrapper">
+                            <input asp-for="Country" class="bx--text-input" placeholder="e.g. Egypt">
+                        </div>
+                        <span asp-validation-for="Country" class="bx--form-requirement"></span>
+                    </div>
+
+                    <div class="bx--form-item" style="margin-bottom: 2rem;">
+                        <div class="bx--checkbox-wrapper">
+                            <input asp-for="IsStaff" type="checkbox" class="bx--checkbox" id="isStaffCheckbox">
+                            <label for="isStaffCheckbox" class="bx--checkbox-label">Is Admin / Staff Member</label>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="submit" class="bx--btn bx--btn--primary">Save Changes</button>
+                        <a href="@Url.Action("Details", new { id = Model.Id })" class="bx--btn bx--btn--secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -41,7 +41,7 @@
                                 <td>$@item.PriceUsd</td>
                                 <td>EGP @item.PriceEgp</td>
                                 <td>@item.MonthlyCredits</td>
-                                <td><small>TTS: @(item.TtsEnabled ? $"Cost: {item.TtsCostPerChar} per {item.TtsCharactersBlock} chars" : "Off") | <strong>STT:</strong> @(item.SttEnabled ? "Yes" : "No") | Max Size: @(item.SttMaxFileSizeMb == -1 ? "Unl." : item.SttMaxFileSizeMb + "MB") | Cost: $@item.SttCostPerMinute / Min</small></td>
+                                <td><small>TTS: @(item.TtsEnabled ? $"Std: ${item.TtsCostPerChar} | High: ${item.TtsCostPerCharHigh} (per {item.TtsCharactersBlock} chars)" : "Off") | <strong>STT:</strong> @(item.SttEnabled ? "Yes" : "No") | Cost: $@item.SttCostPerMinute / Min</small></td>
                                 <td>
                                     <div style="display: flex; gap: 0.5rem;">
                                         <a href="@Url.Action("Edit", new { id = item.Id })" class="bx--btn bx--btn--sm bx--btn--ghost">Edit</a>

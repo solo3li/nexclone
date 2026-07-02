@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Linq;
 using System;
+using NexClone.Backend.Services;
 
 namespace NexClone.Backend.Controllers.Api
 {
@@ -15,10 +16,14 @@ namespace NexClone.Backend.Controllers.Api
     public class WebhooksController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEmailService _emailService;
+        private readonly IEmailTemplateService _emailTemplateService;
 
-        public WebhooksController(ApplicationDbContext context)
+        public WebhooksController(ApplicationDbContext context, IEmailService emailService, IEmailTemplateService emailTemplateService)
         {
             _context = context;
+            _emailService = emailService;
+            _emailTemplateService = emailTemplateService;
         }
 
         [HttpPost("paymob")]
@@ -76,7 +81,7 @@ namespace NexClone.Backend.Controllers.Api
 
                     // 5. Activate or Extend Subscription
                     var existingSub = await _context.Subscriptions
-                        .FirstOrDefaultAsync(s => s.UserId == user.Id && s.PlanId == plan.Id && s.Status == "Active");
+                        .FirstOrDefaultAsync(s => s.UserId == user.Id && s.PlanId == plan.Id && s.Status == "active");
 
                     if (existingSub != null)
                     {
@@ -115,24 +120,46 @@ namespace NexClone.Backend.Controllers.Api
                     user.AvailableCredits += plan.MonthlyCredits;
                     _context.Users.Update(user);
 
-                    // 6. Record Payment Transaction
                     int orderId = obj.TryGetProperty("id", out var idProp) ? idProp.GetInt32() : 0;
                     int amountCents = obj.TryGetProperty("amount_cents", out var amountProp) ? amountProp.GetInt32() : 0;
+                    decimal amountEgp = amountCents / 100m;
 
                     var payment = new Payment
                     {
                         UserId = user.Id,
                         PlanId = plan.Id,
-                        PaymentId = orderId.ToString(),
-                        Amount = amountCents / 100m,
+                        SubscriptionId = existingSub != null ? existingSub.Id : (await _context.Subscriptions.OrderByDescending(s => s.Id).FirstOrDefaultAsync(s => s.UserId == user.Id && s.PlanId == plan.Id))?.Id,
+                        Amount = amountEgp,
                         Currency = "EGP",
                         Method = "Paymob",
+                        PaymentId = orderId.ToString(),
                         Status = "Completed",
                         CreatedAt = DateTime.UtcNow
                     };
                     _context.Payments.Add(payment);
-
                     await _context.SaveChangesAsync();
+
+                    // Send Email Receipt
+                    try
+                    {
+                        var sub = existingSub ?? await _context.Subscriptions.OrderByDescending(s => s.Id).FirstOrDefaultAsync(s => s.UserId == user.Id && s.PlanId == plan.Id);
+                        if (sub != null && !string.IsNullOrEmpty(user.Email))
+                        {
+                            var htmlBody = _emailTemplateService.GetSubscriptionReceiptEmail(
+                                user.FullName ?? user.Email,
+                                plan.NameAr ?? plan.Name,
+                                sub.StartDate,
+                                sub.EndDate,
+                                plan.MonthlyCredits,
+                                amountEgp);
+                            
+                            await _emailService.SendEmailAsync(user.Email, user.FullName ?? "", "تم تفعيل اشتراكك بنجاح - NexMedia AI", htmlBody);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Failed to send webhook email: " + ex.Message);
+                    }
 
                     return Ok(new { success = true, message = "Subscription activated successfully." });
                 }

@@ -21,51 +21,145 @@ namespace NexClone.Backend.Services.AI
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<(Stream AudioStream, string ContentType, string FileExtension)> GenerateAudioAsync(
+        public async Task<(Stream AudioStream, string ContentType, string FileExtension, string ProviderName, string ModelName)> GenerateAudioAsync(
             string text, 
             string language, 
             string voiceName, 
-            string styleInstruction)
+            string styleInstruction,
+            string quality = "Standard")
         {
             if (string.IsNullOrWhiteSpace(text))
                 throw new ArgumentException("Text cannot be empty.");
 
-            var toolConfig = await _dbContext.ToolConfigurations.FirstOrDefaultAsync(t => t.ToolName == "text-to-voice" && t.IsActive);
+            var toolConfig = await _dbContext.ToolConfigurations
+                .Include(t => t.RoutingRules)
+                .FirstOrDefaultAsync(t => t.ToolName == "text-to-voice" && t.IsActive);
             
-            // Default logic if no ToolConfiguration is set
-            string providerName = "OpenAI"; 
-            if (toolConfig == null)
-            {
-                if (language?.ToLower() == "arabic")
-                {
-                    bool hasGemini = await _dbContext.ApiConfigurations.AnyAsync(c => c.ProviderName == "Gemini" && c.IsActive);
-                    providerName = hasGemini ? "Gemini" : "Darijat";
-                }
-            }
-            else
-            {
-                providerName = toolConfig.ProviderName;
-            }
+            var (providerName, customModelName) = await ResolveProviderAsync(toolConfig, language, quality);
 
             var apiConfig = await _dbContext.ApiConfigurations.FirstOrDefaultAsync(c => c.ProviderName == providerName && c.IsActive);
             if (apiConfig == null)
                 throw new Exception($"No active configuration found for provider '{providerName}'.");
 
-            string customModelName = toolConfig?.ModelName;
-
             if (providerName.Equals("Gemini", StringComparison.OrdinalIgnoreCase))
             {
-                return await GenerateGeminiAudioAsync(text, voiceName, styleInstruction, apiConfig, customModelName);
+                var result = await GenerateGeminiAudioAsync(text, voiceName, styleInstruction, apiConfig, customModelName);
+                return (result.Item1, result.Item2, result.Item3, providerName, customModelName ?? "gemini-2.5-flash-preview-tts");
             }
             else if (providerName.Equals("Darijat", StringComparison.OrdinalIgnoreCase))
             {
-                return await GenerateDarijatAudioAsync(text, voiceName, styleInstruction, apiConfig);
+                var result = await GenerateDarijatAudioAsync(text, voiceName, styleInstruction, apiConfig);
+                return (result.Item1, result.Item2, result.Item3, providerName, customModelName ?? "darijat-voice");
             }
             else
             {
                 // Default to OpenAI
-                return await GenerateOpenAiAudioAsync(text, voiceName, apiConfig, customModelName);
+                var result = await GenerateOpenAiAudioAsync(text, voiceName, apiConfig, customModelName);
+                return (result.Item1, result.Item2, result.Item3, providerName, customModelName ?? "tts-1");
             }
+        }
+
+        private async Task<(string ProviderName, string ModelName)> ResolveProviderAsync(ToolConfiguration config, string language, string quality)
+        {
+            var isArabic = language?.ToLower() == "arabic";
+            var hasGemini = await _dbContext.ApiConfigurations.AnyAsync(c => c.ProviderName == "Gemini" && c.IsActive);
+            
+            // Hardcoded logic for High Quality as requested by user
+            if (quality == "High" && hasGemini && isArabic)
+            {
+                var currentDate = DateTime.UtcNow.Date;
+                var toolName = config?.ToolName ?? "text-to-voice";
+                
+                var model1 = "gemini-3.1-flash-tts-preview";
+                var count1 = await _dbContext.GenerationHistories.CountAsync(h => h.Type == toolName && h.ResultText == model1 && h.CreatedAt >= currentDate);
+                
+                if (count1 < 95) 
+                {
+                    return ("Gemini", model1);
+                }
+
+                var model2 = "gemini-2.5-pro-tts";
+                var count2 = await _dbContext.GenerationHistories.CountAsync(h => h.Type == toolName && h.ResultText == model2 && h.CreatedAt >= currentDate);
+                
+                if (count2 < 95) 
+                {
+                    return ("Gemini", model2);
+                }
+
+                throw new Exception("يوجد ضغط حاليا الرجاء التحويل لجودة اخرى او الانتظار حتى يقل الضغط");
+            }
+
+            if (config == null || config.RoutingRules == null || !config.RoutingRules.Any())
+            {
+                // Default logic if no ToolConfiguration or rules are set
+                string provider = "OpenAI";
+                if (isArabic)
+                {
+                    provider = hasGemini ? "Gemini" : "Darijat";
+                }
+                return (provider, provider == "Gemini" ? "gemini-2.5-flash-preview-tts" : null);
+            }
+
+            var rules = config.RoutingRules
+                .Where(r => r.QualityLevel == quality)
+                .OrderBy(r => r.Id)
+                .ToList();
+
+            if (!rules.Any())
+            {
+                // Fallback to Standard or first available rule if requested quality doesn't exist
+                var fallbackRule = config.RoutingRules.FirstOrDefault(r => r.QualityLevel == "Standard") ?? config.RoutingRules.FirstOrDefault();
+                if (fallbackRule != null)
+                {
+                    rules.Add(fallbackRule);
+                }
+            }
+
+            var today = DateTime.UtcNow.Date;
+            var now = DateTime.UtcNow.TimeOfDay;
+            var oneMinuteAgo = DateTime.UtcNow.AddMinutes(-1);
+
+            foreach (var rule in rules)
+            {
+                // Time check
+                if (rule.ActiveFromTime.HasValue && rule.ActiveToTime.HasValue)
+                {
+                    if (rule.ActiveFromTime <= rule.ActiveToTime)
+                    {
+                        if (now < rule.ActiveFromTime || now > rule.ActiveToTime)
+                            continue;
+                    }
+                    else // wraps around midnight
+                    {
+                        if (now < rule.ActiveFromTime && now > rule.ActiveToTime)
+                            continue;
+                    }
+                }
+
+                // Quota Check
+                if (rule.MaxDailyRequests.HasValue)
+                {
+                    // Match the model exactly to allow fallback sequence for same tool
+                    var dailyCount = await _dbContext.GenerationHistories
+                        .CountAsync(h => h.Type == config.ToolName && h.ResultText == rule.ModelName && h.CreatedAt >= today);
+                    
+                    if (dailyCount >= rule.MaxDailyRequests.Value)
+                        continue;
+                }
+
+                if (rule.MaxRequestsPerMinute.HasValue)
+                {
+                    var minuteCount = await _dbContext.GenerationHistories
+                        .CountAsync(h => h.Type == config.ToolName && h.ResultText == rule.ModelName && h.CreatedAt >= oneMinuteAgo);
+
+                    if (minuteCount >= rule.MaxRequestsPerMinute.Value)
+                        continue;
+                }
+
+                return (rule.ProviderName, rule.ModelName);
+            }
+
+            throw new Exception("يوجد ضغط حاليا الرجاء التحويل لجودة اخرى او الانتظار حتى يقل الضغط");
         }
 
         private async Task<(Stream, string, string)> GenerateOpenAiAudioAsync(string text, string voiceName, ApiConfiguration config, string customModelName = null)
@@ -73,11 +167,14 @@ namespace NexClone.Backend.Services.AI
             var client = _httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Add("Authorization", $"Bearer {config.ApiKey}");
 
+            var validOpenAiVoices = new[] { "alloy", "echo", "fable", "onyx", "nova", "shimmer" };
+            var safeVoiceName = string.IsNullOrWhiteSpace(voiceName) || !validOpenAiVoices.Contains(voiceName.ToLower()) ? "alloy" : voiceName.ToLower();
+
             var payload = new
             {
                 model = string.IsNullOrWhiteSpace(customModelName) ? "tts-1" : customModelName,
                 input = text,
-                voice = string.IsNullOrWhiteSpace(voiceName) ? "alloy" : voiceName,
+                voice = safeVoiceName,
                 response_format = "mp3"
             };
 
@@ -165,82 +262,102 @@ namespace NexClone.Backend.Services.AI
             var client = _httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Add("x-goog-api-key", config.ApiKey);
 
-            var modelName = string.IsNullOrWhiteSpace(customModelName) ? "gemini-2.5-flash-preview-tts" : customModelName; 
+            var modelNamesStr = string.IsNullOrWhiteSpace(customModelName) ? "gemini-2.5-flash-preview-tts" : customModelName; 
             if (string.IsNullOrWhiteSpace(customModelName) && !string.IsNullOrEmpty(config.AdditionalSettings))
             {
                 try
                 {
                     using var doc = JsonDocument.Parse(config.AdditionalSettings);
                     if (doc.RootElement.TryGetProperty("gemini_model", out var mElement))
-                        modelName = mElement.GetString() ?? modelName;
+                        modelNamesStr = mElement.GetString() ?? modelNamesStr;
                 }
                 catch { }
             }
 
-            var url = $"https://generativelanguage.googleapis.com/v1beta/models/{modelName}:generateContent";
-            
-            var payload = new
+            var modelNames = modelNamesStr.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(m => m.Trim()).ToArray();
+            Exception lastException = null;
+
+            foreach (var modelName in modelNames)
             {
-                contents = new[]
+                var url = $"https://generativelanguage.googleapis.com/v1beta/models/{modelName}:generateContent";
+                
+                var payload = new
                 {
-                    new { parts = new[] { new { text = prompt } } }
-                },
-                generationConfig = new
-                {
-                    responseModalities = new[] { "AUDIO" },
-                    speechConfig = new
+                    contents = new[]
                     {
-                        voiceConfig = new
+                        new { parts = new[] { new { text = prompt } } }
+                    },
+                    generationConfig = new
+                    {
+                        responseModalities = new[] { "AUDIO" },
+                        speechConfig = new
                         {
-                            prebuiltVoiceConfig = new { voiceName = geminiVoice }
+                            voiceConfig = new
+                            {
+                                prebuiltVoiceConfig = new { voiceName = geminiVoice }
+                            }
                         }
                     }
-                }
-            };
+                };
 
-            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-            var response = await client.PostAsync(url, content);
+                var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+                var response = await client.PostAsync(url, content);
 
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Gemini API Error: {error}");
-            }
-
-            var jsonResponse = await response.Content.ReadAsStringAsync();
-            using var jsonDoc = JsonDocument.Parse(jsonResponse);
-            
-            try
-            {
-                var inlineData = jsonDoc.RootElement
-                    .GetProperty("candidates")[0]
-                    .GetProperty("content")
-                    .GetProperty("parts")[0]
-                    .GetProperty("inlineData");
-                
-                var base64Audio = inlineData.GetProperty("data").GetString();
-                if (string.IsNullOrEmpty(base64Audio))
-                    throw new Exception("Gemini API returned empty audio data.");
-
-                var audioBytes = Convert.FromBase64String(base64Audio);
-                
-                // Add minimal WAV header for PCM data if needed, or just return bytes
-                // For simplicity, returning raw bytes wrapped in MemoryStream
-                // Production code should wrap PCM in WAV header like the old Python code did.
-                var mimeType = inlineData.GetProperty("mimeType").GetString() ?? "";
-                
-                if (mimeType.ToLowerInvariant().Contains("audio/l16") || mimeType.ToLowerInvariant().Contains("pcm"))
+                if (!response.IsSuccessStatusCode)
                 {
-                    var wavBytes = PcmToWav(audioBytes, 24000, 1, 16);
-                    return (new MemoryStream(wavBytes), "audio/wav", "wav");
+                    var error = await response.Content.ReadAsStringAsync();
+                    lastException = new Exception($"Gemini API Error ({modelName}): {error}");
+                    continue; // Try next fallback model
                 }
+
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                using var jsonDoc = JsonDocument.Parse(jsonResponse);
                 
-                return (new MemoryStream(audioBytes), "audio/mpeg", "mp3");
+                try
+                {
+                    var inlineData = jsonDoc.RootElement
+                        .GetProperty("candidates")[0]
+                        .GetProperty("content")
+                        .GetProperty("parts")[0]
+                        .GetProperty("inlineData");
+                    
+                    var base64Audio = inlineData.GetProperty("data").GetString();
+                    if (string.IsNullOrEmpty(base64Audio))
+                        throw new Exception("Gemini API returned empty audio data.");
+
+                    var audioBytes = Convert.FromBase64String(base64Audio);
+                    
+                    var mimeType = inlineData.GetProperty("mimeType").GetString() ?? "";
+                    
+                    if (mimeType.ToLowerInvariant().Contains("audio/l16") || mimeType.ToLowerInvariant().Contains("pcm"))
+                    {
+                        var wavBytes = PcmToWav(audioBytes, 24000, 1, 16);
+                        return (new MemoryStream(wavBytes), "audio/wav", "wav");
+                    }
+                    else if (mimeType.ToLowerInvariant().Contains("ogg"))
+                    {
+                        return (new MemoryStream(audioBytes), "audio/ogg", "ogg");
+                    }
+                    else if (mimeType.ToLowerInvariant().Contains("wav"))
+                    {
+                        return (new MemoryStream(audioBytes), "audio/wav", "wav");
+                    }
+                    else if (mimeType.ToLowerInvariant().Contains("mpeg") || mimeType.ToLowerInvariant().Contains("mp3"))
+                    {
+                        return (new MemoryStream(audioBytes), "audio/mpeg", "mp3");
+                    }
+                    
+                    string ext = mimeType.Split('/').LastOrDefault()?.Split(';').FirstOrDefault() ?? "bin";
+                    return (new MemoryStream(audioBytes), mimeType, ext);
+                }
+                catch (Exception ex)
+                {
+                    lastException = new Exception($"Error parsing Gemini response from model {modelName}: {ex.Message}");
+                    continue; // Try next fallback model on parse error
+                }
             }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error parsing Gemini response: {ex.Message}");
-            }
+
+            throw lastException ?? new Exception("Gemini API failed with all available fallback models.");
         }
 
         private static byte[] PcmToWav(byte[] pcmData, int sampleRate, int channels, int bitsPerSample)

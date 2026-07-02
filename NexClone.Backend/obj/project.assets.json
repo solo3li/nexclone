@@ -15,17 +15,63 @@
           }
         }
       },
-      "Humanizer.Core/2.14.1": {
+      "Google.Apis/1.68.0": {
         "type": "package",
+        "dependencies": {
+          "Google.Apis.Core": "1.68.0"
+        },
         "compile": {
-          "lib/net6.0/_._": {
-            "related": ".xml"
+          "lib/net6.0/Google.Apis.dll": {
+            "related": ".pdb;.xml"
           }
         },
         "runtime": {
-          "lib/net6.0/Humanizer.dll": {
-            "related": ".xml"
+          "lib/net6.0/Google.Apis.dll": {
+            "related": ".pdb;.xml"
           }
+        }
+      },
+      "Google.Apis.Auth/1.68.0": {
+        "type": "package",
+        "dependencies": {
+          "Google.Apis": "1.68.0",
+          "Google.Apis.Core": "1.68.0",
+          "System.Management": "7.0.2"
+        },
+        "compile": {
+          "lib/net6.0/Google.Apis.Auth.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/Google.Apis.Auth.dll": {
+            "related": ".pdb;.xml"
+          }
+        }
+      },
+      "Google.Apis.Core/1.68.0": {
+        "type": "package",
+        "dependencies": {
+          "Newtonsoft.Json": "13.0.3"
+        },
+        "compile": {
+          "lib/net6.0/Google.Apis.Core.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/Google.Apis.Core.dll": {
+            "related": ".pdb;.xml"
+          }
+        }
+      },
+      "Humanizer.Core/2.14.1": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/_._": {}
+        },
+        "runtime": {
+          "lib/net6.0/Humanizer.dll": {}
         }
       },
       "Microsoft.AspNetCore.Authentication.JwtBearer/10.0.9": {
@@ -46,6 +92,22 @@
         "frameworkReferences": [
           "Microsoft.AspNetCore.App"
         ]
+      },
+      "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore/10.0.9": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore": "10.0.9"
+        },
+        "compile": {
+          "lib/net10.0/Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.dll": {
+            "related": ".xml"
+          }
+        }
       },
       "Microsoft.AspNetCore.Identity.EntityFrameworkCore/10.0.9": {
         "type": "package",
@@ -69,10 +131,14 @@
           "Microsoft.OpenApi": "2.0.0"
         },
         "compile": {
-          "lib/net10.0/Microsoft.AspNetCore.OpenApi.dll": {}
+          "lib/net10.0/Microsoft.AspNetCore.OpenApi.dll": {
+            "related": ".xml"
+          }
         },
         "runtime": {
-          "lib/net10.0/Microsoft.AspNetCore.OpenApi.dll": {}
+          "lib/net10.0/Microsoft.AspNetCore.OpenApi.dll": {
+            "related": ".xml"
+          }
         },
         "frameworkReferences": [
           "Microsoft.AspNetCore.App"
@@ -84,13 +150,11 @@
       "Microsoft.Build.Framework/18.0.2": {
         "type": "package",
         "compile": {
-          "ref/net10.0/_._": {
-            "related": ".xml"
-          }
+          "ref/net10.0/_._": {}
         },
         "runtime": {
           "lib/net10.0/Microsoft.Build.Framework.dll": {
-            "related": ".pdb;.xml"
+            "related": ".pdb"
           }
         }
       },
@@ -108,12 +172,12 @@
         },
         "compile": {
           "lib/net9.0/_._": {
-            "related": ".pdb;.xml"
+            "related": ".pdb"
           }
         },
         "runtime": {
           "lib/net9.0/Microsoft.CodeAnalysis.dll": {
-            "related": ".pdb;.xml"
+            "related": ".pdb"
           }
         },
         "resource": {
@@ -166,12 +230,12 @@
         },
         "compile": {
           "lib/net9.0/_._": {
-            "related": ".pdb;.xml"
+            "related": ".pdb"
           }
         },
         "runtime": {
           "lib/net9.0/Microsoft.CodeAnalysis.CSharp.dll": {
-            "related": ".pdb;.xml"
+            "related": ".pdb"
           }
         },
         "resource": {
@@ -228,12 +292,12 @@
         },
         "compile": {
           "lib/net9.0/_._": {
-            "related": ".pdb;.xml"
+            "related": ".pdb"
           }
         },
         "runtime": {
           "lib/net9.0/Microsoft.CodeAnalysis.CSharp.Workspaces.dll": {
-            "related": ".pdb;.xml"
+            "related": ".pdb"
           }
         },
         "resource": {
@@ -288,12 +352,12 @@
         },
         "compile": {
           "lib/net9.0/_._": {
-            "related": ".pdb;.xml"
+            "related": ".pdb"
           }
         },
         "runtime": {
           "lib/net9.0/Microsoft.CodeAnalysis.Workspaces.dll": {
-            "related": ".pdb;.xml"
+            "related": ".pdb"
           }
         },
         "resource": {
@@ -355,7 +419,7 @@
         "runtime": {
           "lib/net9.0/Microsoft.CodeAnalysis.ExternalAccess.RazorCompiler.dll": {},
           "lib/net9.0/Microsoft.CodeAnalysis.Workspaces.MSBuild.dll": {
-            "related": ".pdb;.xml"
+            "related": ".pdb"
           }
         },
         "resource": {
@@ -414,14 +478,10 @@
           "Microsoft.EntityFrameworkCore.Analyzers": "10.0.9"
         },
         "compile": {
-          "lib/net10.0/Microsoft.EntityFrameworkCore.dll": {
-            "related": ".xml"
-          }
+          "lib/net10.0/Microsoft.EntityFrameworkCore.dll": {}
         },
         "runtime": {
-          "lib/net10.0/Microsoft.EntityFrameworkCore.dll": {
-            "related": ".xml"
-          }
+          "lib/net10.0/Microsoft.EntityFrameworkCore.dll": {}
         },
         "build": {
           "buildTransitive/net10.0/Microsoft.EntityFrameworkCore.props": {}
@@ -430,14 +490,10 @@
       "Microsoft.EntityFrameworkCore.Abstractions/10.0.9": {
         "type": "package",
         "compile": {
-          "lib/net10.0/Microsoft.EntityFrameworkCore.Abstractions.dll": {
-            "related": ".xml"
-          }
+          "lib/net10.0/Microsoft.EntityFrameworkCore.Abstractions.dll": {}
         },
         "runtime": {
-          "lib/net10.0/Microsoft.EntityFrameworkCore.Abstractions.dll": {
-            "related": ".xml"
-          }
+          "lib/net10.0/Microsoft.EntityFrameworkCore.Abstractions.dll": {}
         }
       },
       "Microsoft.EntityFrameworkCore.Analyzers/10.0.9": {
@@ -476,27 +532,19 @@
           "Microsoft.EntityFrameworkCore": "10.0.9"
         },
         "compile": {
-          "lib/net10.0/Microsoft.EntityFrameworkCore.Relational.dll": {
-            "related": ".xml"
-          }
+          "lib/net10.0/Microsoft.EntityFrameworkCore.Relational.dll": {}
         },
         "runtime": {
-          "lib/net10.0/Microsoft.EntityFrameworkCore.Relational.dll": {
-            "related": ".xml"
-          }
+          "lib/net10.0/Microsoft.EntityFrameworkCore.Relational.dll": {}
         }
       },
       "Microsoft.Extensions.DependencyModel/10.0.9": {
         "type": "package",
         "compile": {
-          "lib/net10.0/Microsoft.Extensions.DependencyModel.dll": {
-            "related": ".xml"
-          }
+          "lib/net10.0/Microsoft.Extensions.DependencyModel.dll": {}
         },
         "runtime": {
-          "lib/net10.0/Microsoft.Extensions.DependencyModel.dll": {
-            "related": ".xml"
-          }
+          "lib/net10.0/Microsoft.Extensions.DependencyModel.dll": {}
         },
         "build": {
           "buildTransitive/net8.0/_._": {}
@@ -505,14 +553,10 @@
       "Microsoft.IdentityModel.Abstractions/8.0.1": {
         "type": "package",
         "compile": {
-          "lib/net9.0/Microsoft.IdentityModel.Abstractions.dll": {
-            "related": ".xml"
-          }
+          "lib/net9.0/Microsoft.IdentityModel.Abstractions.dll": {}
         },
         "runtime": {
-          "lib/net9.0/Microsoft.IdentityModel.Abstractions.dll": {
-            "related": ".xml"
-          }
+          "lib/net9.0/Microsoft.IdentityModel.Abstractions.dll": {}
         }
       },
       "Microsoft.IdentityModel.JsonWebTokens/8.0.1": {
@@ -521,14 +565,10 @@
           "Microsoft.IdentityModel.Tokens": "8.0.1"
         },
         "compile": {
-          "lib/net9.0/Microsoft.IdentityModel.JsonWebTokens.dll": {
-            "related": ".xml"
-          }
+          "lib/net9.0/Microsoft.IdentityModel.JsonWebTokens.dll": {}
         },
         "runtime": {
-          "lib/net9.0/Microsoft.IdentityModel.JsonWebTokens.dll": {
-            "related": ".xml"
-          }
+          "lib/net9.0/Microsoft.IdentityModel.JsonWebTokens.dll": {}
         }
       },
       "Microsoft.IdentityModel.Logging/8.0.1": {
@@ -537,14 +577,10 @@
           "Microsoft.IdentityModel.Abstractions": "8.0.1"
         },
         "compile": {
-          "lib/net9.0/Microsoft.IdentityModel.Logging.dll": {
-            "related": ".xml"
-          }
+          "lib/net9.0/Microsoft.IdentityModel.Logging.dll": {}
         },
         "runtime": {
-          "lib/net9.0/Microsoft.IdentityModel.Logging.dll": {
-            "related": ".xml"
-          }
+          "lib/net9.0/Microsoft.IdentityModel.Logging.dll": {}
         }
       },
       "Microsoft.IdentityModel.Protocols/8.0.1": {
@@ -553,14 +589,10 @@
           "Microsoft.IdentityModel.Tokens": "8.0.1"
         },
         "compile": {
-          "lib/net9.0/Microsoft.IdentityModel.Protocols.dll": {
-            "related": ".xml"
-          }
+          "lib/net9.0/Microsoft.IdentityModel.Protocols.dll": {}
         },
         "runtime": {
-          "lib/net9.0/Microsoft.IdentityModel.Protocols.dll": {
-            "related": ".xml"
-          }
+          "lib/net9.0/Microsoft.IdentityModel.Protocols.dll": {}
         }
       },
       "Microsoft.IdentityModel.Protocols.OpenIdConnect/8.0.1": {
@@ -570,14 +602,10 @@
           "System.IdentityModel.Tokens.Jwt": "8.0.1"
         },
         "compile": {
-          "lib/net9.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll": {
-            "related": ".xml"
-          }
+          "lib/net9.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll": {}
         },
         "runtime": {
-          "lib/net9.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll": {
-            "related": ".xml"
-          }
+          "lib/net9.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll": {}
         }
       },
       "Microsoft.IdentityModel.Tokens/8.0.1": {
@@ -586,14 +614,10 @@
           "Microsoft.IdentityModel.Logging": "8.0.1"
         },
         "compile": {
-          "lib/net9.0/Microsoft.IdentityModel.Tokens.dll": {
-            "related": ".xml"
-          }
+          "lib/net9.0/Microsoft.IdentityModel.Tokens.dll": {}
         },
         "runtime": {
-          "lib/net9.0/Microsoft.IdentityModel.Tokens.dll": {
-            "related": ".xml"
-          }
+          "lib/net9.0/Microsoft.IdentityModel.Tokens.dll": {}
         }
       },
       "Microsoft.OpenApi/2.0.0": {
@@ -612,14 +636,10 @@
       "Microsoft.VisualStudio.SolutionPersistence/1.0.52": {
         "type": "package",
         "compile": {
-          "lib/net8.0/_._": {
-            "related": ".xml"
-          }
+          "lib/net8.0/_._": {}
         },
         "runtime": {
-          "lib/net8.0/Microsoft.VisualStudio.SolutionPersistence.dll": {
-            "related": ".xml"
-          }
+          "lib/net8.0/Microsoft.VisualStudio.SolutionPersistence.dll": {}
         }
       },
       "Minio/6.0.5": {
@@ -658,7 +678,7 @@
       "Newtonsoft.Json/13.0.3": {
         "type": "package",
         "compile": {
-          "lib/net6.0/_._": {
+          "lib/net6.0/Newtonsoft.Json.dll": {
             "related": ".xml"
           }
         },
@@ -671,14 +691,10 @@
       "Npgsql/10.0.3": {
         "type": "package",
         "compile": {
-          "lib/net10.0/Npgsql.dll": {
-            "related": ".xml"
-          }
+          "lib/net10.0/Npgsql.dll": {}
         },
         "runtime": {
-          "lib/net10.0/Npgsql.dll": {
-            "related": ".xml"
-          }
+          "lib/net10.0/Npgsql.dll": {}
         }
       },
       "Npgsql.EntityFrameworkCore.PostgreSQL/10.0.2": {
@@ -896,20 +912,20 @@
           }
         }
       },
-      "System.CodeDom/6.0.0": {
+      "System.CodeDom/7.0.0": {
         "type": "package",
         "compile": {
-          "lib/net6.0/_._": {
+          "lib/net7.0/System.CodeDom.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net6.0/System.CodeDom.dll": {
+          "lib/net7.0/System.CodeDom.dll": {
             "related": ".xml"
           }
         },
         "build": {
-          "buildTransitive/netcoreapp3.1/_._": {}
+          "buildTransitive/net6.0/_._": {}
         }
       },
       "System.Composition/9.0.0": {
@@ -934,14 +950,10 @@
       "System.Composition.AttributedModel/9.0.0": {
         "type": "package",
         "compile": {
-          "lib/net9.0/_._": {
-            "related": ".xml"
-          }
+          "lib/net9.0/_._": {}
         },
         "runtime": {
-          "lib/net9.0/System.Composition.AttributedModel.dll": {
-            "related": ".xml"
-          }
+          "lib/net9.0/System.Composition.AttributedModel.dll": {}
         },
         "build": {
           "buildTransitive/net8.0/_._": {}
@@ -953,14 +965,10 @@
           "System.Composition.AttributedModel": "9.0.0"
         },
         "compile": {
-          "lib/net9.0/_._": {
-            "related": ".xml"
-          }
+          "lib/net9.0/_._": {}
         },
         "runtime": {
-          "lib/net9.0/System.Composition.Convention.dll": {
-            "related": ".xml"
-          }
+          "lib/net9.0/System.Composition.Convention.dll": {}
         },
         "build": {
           "buildTransitive/net8.0/_._": {}
@@ -972,14 +980,10 @@
           "System.Composition.Runtime": "9.0.0"
         },
         "compile": {
-          "lib/net9.0/_._": {
-            "related": ".xml"
-          }
+          "lib/net9.0/_._": {}
         },
         "runtime": {
-          "lib/net9.0/System.Composition.Hosting.dll": {
-            "related": ".xml"
-          }
+          "lib/net9.0/System.Composition.Hosting.dll": {}
         },
         "build": {
           "buildTransitive/net8.0/_._": {}
@@ -988,14 +992,10 @@
       "System.Composition.Runtime/9.0.0": {
         "type": "package",
         "compile": {
-          "lib/net9.0/_._": {
-            "related": ".xml"
-          }
+          "lib/net9.0/_._": {}
         },
         "runtime": {
-          "lib/net9.0/System.Composition.Runtime.dll": {
-            "related": ".xml"
-          }
+          "lib/net9.0/System.Composition.Runtime.dll": {}
         },
         "build": {
           "buildTransitive/net8.0/_._": {}
@@ -1009,14 +1009,10 @@
           "System.Composition.Runtime": "9.0.0"
         },
         "compile": {
-          "lib/net9.0/_._": {
-            "related": ".xml"
-          }
+          "lib/net9.0/_._": {}
         },
         "runtime": {
-          "lib/net9.0/System.Composition.TypedParts.dll": {
-            "related": ".xml"
-          }
+          "lib/net9.0/System.Composition.TypedParts.dll": {}
         },
         "build": {
           "buildTransitive/net8.0/_._": {}
@@ -1029,14 +1025,10 @@
           "Microsoft.IdentityModel.Tokens": "8.0.1"
         },
         "compile": {
-          "lib/net9.0/System.IdentityModel.Tokens.Jwt.dll": {
-            "related": ".xml"
-          }
+          "lib/net9.0/System.IdentityModel.Tokens.Jwt.dll": {}
         },
         "runtime": {
-          "lib/net9.0/System.IdentityModel.Tokens.Jwt.dll": {
-            "related": ".xml"
-          }
+          "lib/net9.0/System.IdentityModel.Tokens.Jwt.dll": {}
         }
       },
       "System.IO.Hashing/10.0.2": {
@@ -1053,6 +1045,31 @@
         },
         "build": {
           "buildTransitive/net8.0/_._": {}
+        }
+      },
+      "System.Management/7.0.2": {
+        "type": "package",
+        "dependencies": {
+          "System.CodeDom": "7.0.0"
+        },
+        "compile": {
+          "lib/net7.0/System.Management.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net7.0/System.Management.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net6.0/_._": {}
+        },
+        "runtimeTargets": {
+          "runtimes/win/lib/net7.0/System.Management.dll": {
+            "assetType": "runtime",
+            "rid": "win"
+          }
         }
       },
       "System.Reactive/6.0.1": {
@@ -1105,6 +1122,72 @@
         "lib/netstandard2.1/CommunityToolkit.HighPerformance.pdb"
       ]
     },
+    "Google.Apis/1.68.0": {
+      "sha512": "s2MymhdpH+ybZNBeZ2J5uFgFHApBp+QXf9FjZSdM1lk/vx5VqIknJwnaWiuAzXxPrLEkesX0Q+UsiWn39yZ9zw==",
+      "type": "package",
+      "path": "google.apis/1.68.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE",
+        "NuGetIcon.png",
+        "google.apis.1.68.0.nupkg.sha512",
+        "google.apis.nuspec",
+        "lib/net462/Google.Apis.dll",
+        "lib/net462/Google.Apis.pdb",
+        "lib/net462/Google.Apis.xml",
+        "lib/net6.0/Google.Apis.dll",
+        "lib/net6.0/Google.Apis.pdb",
+        "lib/net6.0/Google.Apis.xml",
+        "lib/netstandard2.0/Google.Apis.dll",
+        "lib/netstandard2.0/Google.Apis.pdb",
+        "lib/netstandard2.0/Google.Apis.xml"
+      ]
+    },
+    "Google.Apis.Auth/1.68.0": {
+      "sha512": "hFx8Qz5bZ4w0hpnn4tSmZaaFpjAMsgVElZ+ZgVLUZ2r9i+AKcoVgwiNfv1pruNS5cCvpXqhKECbruBCfRezPHA==",
+      "type": "package",
+      "path": "google.apis.auth/1.68.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE",
+        "NuGetIcon.png",
+        "google.apis.auth.1.68.0.nupkg.sha512",
+        "google.apis.auth.nuspec",
+        "lib/net462/Google.Apis.Auth.dll",
+        "lib/net462/Google.Apis.Auth.pdb",
+        "lib/net462/Google.Apis.Auth.xml",
+        "lib/net6.0/Google.Apis.Auth.dll",
+        "lib/net6.0/Google.Apis.Auth.pdb",
+        "lib/net6.0/Google.Apis.Auth.xml",
+        "lib/netstandard2.0/Google.Apis.Auth.dll",
+        "lib/netstandard2.0/Google.Apis.Auth.pdb",
+        "lib/netstandard2.0/Google.Apis.Auth.xml"
+      ]
+    },
+    "Google.Apis.Core/1.68.0": {
+      "sha512": "pAqwa6pfu53UXCR2b7A/PAPXeuVg6L1OFw38WckN27NU2+mf+KTjoEg2YGv/f0UyKxzz7DxF1urOTKg/6dTP9g==",
+      "type": "package",
+      "path": "google.apis.core/1.68.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE",
+        "NuGetIcon.png",
+        "google.apis.core.1.68.0.nupkg.sha512",
+        "google.apis.core.nuspec",
+        "lib/net462/Google.Apis.Core.dll",
+        "lib/net462/Google.Apis.Core.pdb",
+        "lib/net462/Google.Apis.Core.xml",
+        "lib/net6.0/Google.Apis.Core.dll",
+        "lib/net6.0/Google.Apis.Core.pdb",
+        "lib/net6.0/Google.Apis.Core.xml",
+        "lib/netstandard2.0/Google.Apis.Core.dll",
+        "lib/netstandard2.0/Google.Apis.Core.pdb",
+        "lib/netstandard2.0/Google.Apis.Core.xml"
+      ]
+    },
     "Humanizer.Core/2.14.1": {
       "sha512": "lQKvtaTDOXnoVJ20ibTuSIOf2i0uO0MPbDhd1jm238I+U/2ZnRENj0cktKZhtchBMtCUSRQ5v4xBCUbKNmyVMw==",
       "type": "package",
@@ -1115,11 +1198,8 @@
         "humanizer.core.2.14.1.nupkg.sha512",
         "humanizer.core.nuspec",
         "lib/net6.0/Humanizer.dll",
-        "lib/net6.0/Humanizer.xml",
         "lib/netstandard1.0/Humanizer.dll",
-        "lib/netstandard1.0/Humanizer.xml",
         "lib/netstandard2.0/Humanizer.dll",
-        "lib/netstandard2.0/Humanizer.xml",
         "logo.png"
       ]
     },
@@ -1137,6 +1217,22 @@
         "lib/net10.0/Microsoft.AspNetCore.Authentication.JwtBearer.xml",
         "microsoft.aspnetcore.authentication.jwtbearer.10.0.9.nupkg.sha512",
         "microsoft.aspnetcore.authentication.jwtbearer.nuspec"
+      ]
+    },
+    "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore/10.0.9": {
+      "sha512": "RVbqubLZLstduJDSNV9syFOdKhzUAtgtLlKDtgdccD0oPDTr4ii6XyEuKS3pxE1erFKLsxGwaXbBLgd5IHnT2A==",
+      "type": "package",
+      "path": "microsoft.aspnetcore.dataprotection.entityframeworkcore/10.0.9",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "PACKAGE.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/net10.0/Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.dll",
+        "lib/net10.0/Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.xml",
+        "microsoft.aspnetcore.dataprotection.entityframeworkcore.10.0.9.nupkg.sha512",
+        "microsoft.aspnetcore.dataprotection.entityframeworkcore.nuspec"
       ]
     },
     "Microsoft.AspNetCore.Identity.EntityFrameworkCore/10.0.9": {
@@ -1168,6 +1264,7 @@
         "analyzers/dotnet/cs/Microsoft.AspNetCore.OpenApi.SourceGenerators.dll",
         "build/Microsoft.AspNetCore.OpenApi.targets",
         "lib/net10.0/Microsoft.AspNetCore.OpenApi.dll",
+        "lib/net10.0/Microsoft.AspNetCore.OpenApi.xml",
         "microsoft.aspnetcore.openapi.10.0.9.nupkg.sha512",
         "microsoft.aspnetcore.openapi.nuspec"
       ]
@@ -1183,19 +1280,14 @@
         "README.md",
         "lib/net10.0/Microsoft.Build.Framework.dll",
         "lib/net10.0/Microsoft.Build.Framework.pdb",
-        "lib/net10.0/Microsoft.Build.Framework.xml",
         "lib/net472/Microsoft.Build.Framework.dll",
         "lib/net472/Microsoft.Build.Framework.pdb",
-        "lib/net472/Microsoft.Build.Framework.xml",
         "microsoft.build.framework.18.0.2.nupkg.sha512",
         "microsoft.build.framework.nuspec",
         "notices/THIRDPARTYNOTICES.txt",
         "ref/net10.0/Microsoft.Build.Framework.dll",
-        "ref/net10.0/Microsoft.Build.Framework.xml",
         "ref/net472/Microsoft.Build.Framework.dll",
-        "ref/net472/Microsoft.Build.Framework.xml",
-        "ref/netstandard2.0/Microsoft.Build.Framework.dll",
-        "ref/netstandard2.0/Microsoft.Build.Framework.xml"
+        "ref/netstandard2.0/Microsoft.Build.Framework.dll"
       ]
     },
     "Microsoft.CodeAnalysis.Analyzers/3.11.0": {
@@ -1911,7 +2003,6 @@
         "ThirdPartyNotices.rtf",
         "lib/net8.0/Microsoft.CodeAnalysis.dll",
         "lib/net8.0/Microsoft.CodeAnalysis.pdb",
-        "lib/net8.0/Microsoft.CodeAnalysis.xml",
         "lib/net8.0/cs/Microsoft.CodeAnalysis.resources.dll",
         "lib/net8.0/de/Microsoft.CodeAnalysis.resources.dll",
         "lib/net8.0/es/Microsoft.CodeAnalysis.resources.dll",
@@ -1927,7 +2018,6 @@
         "lib/net8.0/zh-Hant/Microsoft.CodeAnalysis.resources.dll",
         "lib/net9.0/Microsoft.CodeAnalysis.dll",
         "lib/net9.0/Microsoft.CodeAnalysis.pdb",
-        "lib/net9.0/Microsoft.CodeAnalysis.xml",
         "lib/net9.0/cs/Microsoft.CodeAnalysis.resources.dll",
         "lib/net9.0/de/Microsoft.CodeAnalysis.resources.dll",
         "lib/net9.0/es/Microsoft.CodeAnalysis.resources.dll",
@@ -1943,7 +2033,6 @@
         "lib/net9.0/zh-Hant/Microsoft.CodeAnalysis.resources.dll",
         "lib/netstandard2.0/Microsoft.CodeAnalysis.dll",
         "lib/netstandard2.0/Microsoft.CodeAnalysis.pdb",
-        "lib/netstandard2.0/Microsoft.CodeAnalysis.xml",
         "lib/netstandard2.0/cs/Microsoft.CodeAnalysis.resources.dll",
         "lib/netstandard2.0/de/Microsoft.CodeAnalysis.resources.dll",
         "lib/netstandard2.0/es/Microsoft.CodeAnalysis.resources.dll",
@@ -1972,7 +2061,6 @@
         "ThirdPartyNotices.rtf",
         "lib/net8.0/Microsoft.CodeAnalysis.CSharp.dll",
         "lib/net8.0/Microsoft.CodeAnalysis.CSharp.pdb",
-        "lib/net8.0/Microsoft.CodeAnalysis.CSharp.xml",
         "lib/net8.0/cs/Microsoft.CodeAnalysis.CSharp.resources.dll",
         "lib/net8.0/de/Microsoft.CodeAnalysis.CSharp.resources.dll",
         "lib/net8.0/es/Microsoft.CodeAnalysis.CSharp.resources.dll",
@@ -1988,7 +2076,6 @@
         "lib/net8.0/zh-Hant/Microsoft.CodeAnalysis.CSharp.resources.dll",
         "lib/net9.0/Microsoft.CodeAnalysis.CSharp.dll",
         "lib/net9.0/Microsoft.CodeAnalysis.CSharp.pdb",
-        "lib/net9.0/Microsoft.CodeAnalysis.CSharp.xml",
         "lib/net9.0/cs/Microsoft.CodeAnalysis.CSharp.resources.dll",
         "lib/net9.0/de/Microsoft.CodeAnalysis.CSharp.resources.dll",
         "lib/net9.0/es/Microsoft.CodeAnalysis.CSharp.resources.dll",
@@ -2004,7 +2091,6 @@
         "lib/net9.0/zh-Hant/Microsoft.CodeAnalysis.CSharp.resources.dll",
         "lib/netstandard2.0/Microsoft.CodeAnalysis.CSharp.dll",
         "lib/netstandard2.0/Microsoft.CodeAnalysis.CSharp.pdb",
-        "lib/netstandard2.0/Microsoft.CodeAnalysis.CSharp.xml",
         "lib/netstandard2.0/cs/Microsoft.CodeAnalysis.CSharp.resources.dll",
         "lib/netstandard2.0/de/Microsoft.CodeAnalysis.CSharp.resources.dll",
         "lib/netstandard2.0/es/Microsoft.CodeAnalysis.CSharp.resources.dll",
@@ -2033,7 +2119,6 @@
         "ThirdPartyNotices.rtf",
         "lib/net8.0/Microsoft.CodeAnalysis.CSharp.Workspaces.dll",
         "lib/net8.0/Microsoft.CodeAnalysis.CSharp.Workspaces.pdb",
-        "lib/net8.0/Microsoft.CodeAnalysis.CSharp.Workspaces.xml",
         "lib/net8.0/cs/Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll",
         "lib/net8.0/de/Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll",
         "lib/net8.0/es/Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll",
@@ -2049,7 +2134,6 @@
         "lib/net8.0/zh-Hant/Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll",
         "lib/net9.0/Microsoft.CodeAnalysis.CSharp.Workspaces.dll",
         "lib/net9.0/Microsoft.CodeAnalysis.CSharp.Workspaces.pdb",
-        "lib/net9.0/Microsoft.CodeAnalysis.CSharp.Workspaces.xml",
         "lib/net9.0/cs/Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll",
         "lib/net9.0/de/Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll",
         "lib/net9.0/es/Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll",
@@ -2065,7 +2149,6 @@
         "lib/net9.0/zh-Hant/Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll",
         "lib/netstandard2.0/Microsoft.CodeAnalysis.CSharp.Workspaces.dll",
         "lib/netstandard2.0/Microsoft.CodeAnalysis.CSharp.Workspaces.pdb",
-        "lib/netstandard2.0/Microsoft.CodeAnalysis.CSharp.Workspaces.xml",
         "lib/netstandard2.0/cs/Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll",
         "lib/netstandard2.0/de/Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll",
         "lib/netstandard2.0/es/Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll",
@@ -2094,7 +2177,6 @@
         "ThirdPartyNotices.rtf",
         "lib/net8.0/Microsoft.CodeAnalysis.Workspaces.dll",
         "lib/net8.0/Microsoft.CodeAnalysis.Workspaces.pdb",
-        "lib/net8.0/Microsoft.CodeAnalysis.Workspaces.xml",
         "lib/net8.0/cs/Microsoft.CodeAnalysis.Workspaces.resources.dll",
         "lib/net8.0/de/Microsoft.CodeAnalysis.Workspaces.resources.dll",
         "lib/net8.0/es/Microsoft.CodeAnalysis.Workspaces.resources.dll",
@@ -2110,7 +2192,6 @@
         "lib/net8.0/zh-Hant/Microsoft.CodeAnalysis.Workspaces.resources.dll",
         "lib/net9.0/Microsoft.CodeAnalysis.Workspaces.dll",
         "lib/net9.0/Microsoft.CodeAnalysis.Workspaces.pdb",
-        "lib/net9.0/Microsoft.CodeAnalysis.Workspaces.xml",
         "lib/net9.0/cs/Microsoft.CodeAnalysis.Workspaces.resources.dll",
         "lib/net9.0/de/Microsoft.CodeAnalysis.Workspaces.resources.dll",
         "lib/net9.0/es/Microsoft.CodeAnalysis.Workspaces.resources.dll",
@@ -2126,7 +2207,6 @@
         "lib/net9.0/zh-Hant/Microsoft.CodeAnalysis.Workspaces.resources.dll",
         "lib/netstandard2.0/Microsoft.CodeAnalysis.Workspaces.dll",
         "lib/netstandard2.0/Microsoft.CodeAnalysis.Workspaces.pdb",
-        "lib/netstandard2.0/Microsoft.CodeAnalysis.Workspaces.xml",
         "lib/netstandard2.0/cs/Microsoft.CodeAnalysis.Workspaces.resources.dll",
         "lib/netstandard2.0/de/Microsoft.CodeAnalysis.Workspaces.resources.dll",
         "lib/netstandard2.0/es/Microsoft.CodeAnalysis.Workspaces.resources.dll",
@@ -2201,7 +2281,6 @@
         "lib/net472/Microsoft.CodeAnalysis.ExternalAccess.RazorCompiler.dll",
         "lib/net472/Microsoft.CodeAnalysis.Workspaces.MSBuild.dll",
         "lib/net472/Microsoft.CodeAnalysis.Workspaces.MSBuild.pdb",
-        "lib/net472/Microsoft.CodeAnalysis.Workspaces.MSBuild.xml",
         "lib/net472/cs/Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll",
         "lib/net472/de/Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll",
         "lib/net472/es/Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll",
@@ -2218,7 +2297,6 @@
         "lib/net8.0/Microsoft.CodeAnalysis.ExternalAccess.RazorCompiler.dll",
         "lib/net8.0/Microsoft.CodeAnalysis.Workspaces.MSBuild.dll",
         "lib/net8.0/Microsoft.CodeAnalysis.Workspaces.MSBuild.pdb",
-        "lib/net8.0/Microsoft.CodeAnalysis.Workspaces.MSBuild.xml",
         "lib/net8.0/cs/Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll",
         "lib/net8.0/de/Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll",
         "lib/net8.0/es/Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll",
@@ -2235,7 +2313,6 @@
         "lib/net9.0/Microsoft.CodeAnalysis.ExternalAccess.RazorCompiler.dll",
         "lib/net9.0/Microsoft.CodeAnalysis.Workspaces.MSBuild.dll",
         "lib/net9.0/Microsoft.CodeAnalysis.Workspaces.MSBuild.pdb",
-        "lib/net9.0/Microsoft.CodeAnalysis.Workspaces.MSBuild.xml",
         "lib/net9.0/cs/Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll",
         "lib/net9.0/de/Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll",
         "lib/net9.0/es/Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll",
@@ -2264,7 +2341,6 @@
         "PACKAGE.md",
         "buildTransitive/net10.0/Microsoft.EntityFrameworkCore.props",
         "lib/net10.0/Microsoft.EntityFrameworkCore.dll",
-        "lib/net10.0/Microsoft.EntityFrameworkCore.xml",
         "microsoft.entityframeworkcore.10.0.9.nupkg.sha512",
         "microsoft.entityframeworkcore.nuspec"
       ]
@@ -2279,7 +2355,6 @@
         "Icon.png",
         "PACKAGE.md",
         "lib/net10.0/Microsoft.EntityFrameworkCore.Abstractions.dll",
-        "lib/net10.0/Microsoft.EntityFrameworkCore.Abstractions.xml",
         "microsoft.entityframeworkcore.abstractions.10.0.9.nupkg.sha512",
         "microsoft.entityframeworkcore.abstractions.nuspec"
       ]
@@ -2324,7 +2399,6 @@
         "Icon.png",
         "PACKAGE.md",
         "lib/net10.0/Microsoft.EntityFrameworkCore.Relational.dll",
-        "lib/net10.0/Microsoft.EntityFrameworkCore.Relational.xml",
         "microsoft.entityframeworkcore.relational.10.0.9.nupkg.sha512",
         "microsoft.entityframeworkcore.relational.nuspec"
       ]
@@ -2344,15 +2418,10 @@
         "buildTransitive/net8.0/_._",
         "buildTransitive/netcoreapp2.0/Microsoft.Extensions.DependencyModel.targets",
         "lib/net10.0/Microsoft.Extensions.DependencyModel.dll",
-        "lib/net10.0/Microsoft.Extensions.DependencyModel.xml",
         "lib/net462/Microsoft.Extensions.DependencyModel.dll",
-        "lib/net462/Microsoft.Extensions.DependencyModel.xml",
         "lib/net8.0/Microsoft.Extensions.DependencyModel.dll",
-        "lib/net8.0/Microsoft.Extensions.DependencyModel.xml",
         "lib/net9.0/Microsoft.Extensions.DependencyModel.dll",
-        "lib/net9.0/Microsoft.Extensions.DependencyModel.xml",
         "lib/netstandard2.0/Microsoft.Extensions.DependencyModel.dll",
-        "lib/netstandard2.0/Microsoft.Extensions.DependencyModel.xml",
         "microsoft.extensions.dependencymodel.10.0.9.nupkg.sha512",
         "microsoft.extensions.dependencymodel.nuspec",
         "useSharedDesignerContext.txt"
@@ -2366,17 +2435,11 @@
         ".nupkg.metadata",
         ".signature.p7s",
         "lib/net462/Microsoft.IdentityModel.Abstractions.dll",
-        "lib/net462/Microsoft.IdentityModel.Abstractions.xml",
         "lib/net472/Microsoft.IdentityModel.Abstractions.dll",
-        "lib/net472/Microsoft.IdentityModel.Abstractions.xml",
         "lib/net6.0/Microsoft.IdentityModel.Abstractions.dll",
-        "lib/net6.0/Microsoft.IdentityModel.Abstractions.xml",
         "lib/net8.0/Microsoft.IdentityModel.Abstractions.dll",
-        "lib/net8.0/Microsoft.IdentityModel.Abstractions.xml",
         "lib/net9.0/Microsoft.IdentityModel.Abstractions.dll",
-        "lib/net9.0/Microsoft.IdentityModel.Abstractions.xml",
         "lib/netstandard2.0/Microsoft.IdentityModel.Abstractions.dll",
-        "lib/netstandard2.0/Microsoft.IdentityModel.Abstractions.xml",
         "microsoft.identitymodel.abstractions.8.0.1.nupkg.sha512",
         "microsoft.identitymodel.abstractions.nuspec"
       ]
@@ -2389,17 +2452,11 @@
         ".nupkg.metadata",
         ".signature.p7s",
         "lib/net462/Microsoft.IdentityModel.JsonWebTokens.dll",
-        "lib/net462/Microsoft.IdentityModel.JsonWebTokens.xml",
         "lib/net472/Microsoft.IdentityModel.JsonWebTokens.dll",
-        "lib/net472/Microsoft.IdentityModel.JsonWebTokens.xml",
         "lib/net6.0/Microsoft.IdentityModel.JsonWebTokens.dll",
-        "lib/net6.0/Microsoft.IdentityModel.JsonWebTokens.xml",
         "lib/net8.0/Microsoft.IdentityModel.JsonWebTokens.dll",
-        "lib/net8.0/Microsoft.IdentityModel.JsonWebTokens.xml",
         "lib/net9.0/Microsoft.IdentityModel.JsonWebTokens.dll",
-        "lib/net9.0/Microsoft.IdentityModel.JsonWebTokens.xml",
         "lib/netstandard2.0/Microsoft.IdentityModel.JsonWebTokens.dll",
-        "lib/netstandard2.0/Microsoft.IdentityModel.JsonWebTokens.xml",
         "microsoft.identitymodel.jsonwebtokens.8.0.1.nupkg.sha512",
         "microsoft.identitymodel.jsonwebtokens.nuspec"
       ]
@@ -2412,17 +2469,11 @@
         ".nupkg.metadata",
         ".signature.p7s",
         "lib/net462/Microsoft.IdentityModel.Logging.dll",
-        "lib/net462/Microsoft.IdentityModel.Logging.xml",
         "lib/net472/Microsoft.IdentityModel.Logging.dll",
-        "lib/net472/Microsoft.IdentityModel.Logging.xml",
         "lib/net6.0/Microsoft.IdentityModel.Logging.dll",
-        "lib/net6.0/Microsoft.IdentityModel.Logging.xml",
         "lib/net8.0/Microsoft.IdentityModel.Logging.dll",
-        "lib/net8.0/Microsoft.IdentityModel.Logging.xml",
         "lib/net9.0/Microsoft.IdentityModel.Logging.dll",
-        "lib/net9.0/Microsoft.IdentityModel.Logging.xml",
         "lib/netstandard2.0/Microsoft.IdentityModel.Logging.dll",
-        "lib/netstandard2.0/Microsoft.IdentityModel.Logging.xml",
         "microsoft.identitymodel.logging.8.0.1.nupkg.sha512",
         "microsoft.identitymodel.logging.nuspec"
       ]
@@ -2435,17 +2486,11 @@
         ".nupkg.metadata",
         ".signature.p7s",
         "lib/net462/Microsoft.IdentityModel.Protocols.dll",
-        "lib/net462/Microsoft.IdentityModel.Protocols.xml",
         "lib/net472/Microsoft.IdentityModel.Protocols.dll",
-        "lib/net472/Microsoft.IdentityModel.Protocols.xml",
         "lib/net6.0/Microsoft.IdentityModel.Protocols.dll",
-        "lib/net6.0/Microsoft.IdentityModel.Protocols.xml",
         "lib/net8.0/Microsoft.IdentityModel.Protocols.dll",
-        "lib/net8.0/Microsoft.IdentityModel.Protocols.xml",
         "lib/net9.0/Microsoft.IdentityModel.Protocols.dll",
-        "lib/net9.0/Microsoft.IdentityModel.Protocols.xml",
         "lib/netstandard2.0/Microsoft.IdentityModel.Protocols.dll",
-        "lib/netstandard2.0/Microsoft.IdentityModel.Protocols.xml",
         "microsoft.identitymodel.protocols.8.0.1.nupkg.sha512",
         "microsoft.identitymodel.protocols.nuspec"
       ]
@@ -2458,17 +2503,11 @@
         ".nupkg.metadata",
         ".signature.p7s",
         "lib/net462/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll",
-        "lib/net462/Microsoft.IdentityModel.Protocols.OpenIdConnect.xml",
         "lib/net472/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll",
-        "lib/net472/Microsoft.IdentityModel.Protocols.OpenIdConnect.xml",
         "lib/net6.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll",
-        "lib/net6.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.xml",
         "lib/net8.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll",
-        "lib/net8.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.xml",
         "lib/net9.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll",
-        "lib/net9.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.xml",
         "lib/netstandard2.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll",
-        "lib/netstandard2.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.xml",
         "microsoft.identitymodel.protocols.openidconnect.8.0.1.nupkg.sha512",
         "microsoft.identitymodel.protocols.openidconnect.nuspec"
       ]
@@ -2481,17 +2520,11 @@
         ".nupkg.metadata",
         ".signature.p7s",
         "lib/net462/Microsoft.IdentityModel.Tokens.dll",
-        "lib/net462/Microsoft.IdentityModel.Tokens.xml",
         "lib/net472/Microsoft.IdentityModel.Tokens.dll",
-        "lib/net472/Microsoft.IdentityModel.Tokens.xml",
         "lib/net6.0/Microsoft.IdentityModel.Tokens.dll",
-        "lib/net6.0/Microsoft.IdentityModel.Tokens.xml",
         "lib/net8.0/Microsoft.IdentityModel.Tokens.dll",
-        "lib/net8.0/Microsoft.IdentityModel.Tokens.xml",
         "lib/net9.0/Microsoft.IdentityModel.Tokens.dll",
-        "lib/net9.0/Microsoft.IdentityModel.Tokens.xml",
         "lib/netstandard2.0/Microsoft.IdentityModel.Tokens.dll",
-        "lib/netstandard2.0/Microsoft.IdentityModel.Tokens.xml",
         "microsoft.identitymodel.tokens.8.0.1.nupkg.sha512",
         "microsoft.identitymodel.tokens.nuspec"
       ]
@@ -2521,10 +2554,8 @@
         ".signature.p7s",
         "NOTICE",
         "lib/net472/Microsoft.VisualStudio.SolutionPersistence.dll",
-        "lib/net472/Microsoft.VisualStudio.SolutionPersistence.xml",
         "lib/net472/manifest.spdx.json",
         "lib/net8.0/Microsoft.VisualStudio.SolutionPersistence.dll",
-        "lib/net8.0/Microsoft.VisualStudio.SolutionPersistence.xml",
         "lib/net8.0/manifest.spdx.json",
         "microsoft.visualstudio.solutionpersistence.1.0.52.nupkg.sha512",
         "microsoft.visualstudio.solutionpersistence.nuspec"
@@ -2604,11 +2635,8 @@
         ".signature.p7s",
         "README.md",
         "lib/net10.0/Npgsql.dll",
-        "lib/net10.0/Npgsql.xml",
         "lib/net8.0/Npgsql.dll",
-        "lib/net8.0/Npgsql.xml",
         "lib/net9.0/Npgsql.dll",
-        "lib/net9.0/Npgsql.xml",
         "npgsql.10.0.3.nupkg.sha512",
         "npgsql.nuspec",
         "postgresql.png"
@@ -2910,25 +2938,29 @@
         "stackexchange.redis.nuspec"
       ]
     },
-    "System.CodeDom/6.0.0": {
-      "sha512": "CPc6tWO1LAer3IzfZufDBRL+UZQcj5uS207NHALQzP84Vp/z6wF0Aa0YZImOQY8iStY0A2zI/e3ihKNPfUm8XA==",
+    "System.CodeDom/7.0.0": {
+      "sha512": "GLltyqEsE5/3IE+zYRP5sNa1l44qKl9v+bfdMcwg+M9qnQf47wK3H0SUR/T+3N4JEQXF3vV4CSuuo0rsg+nq2A==",
       "type": "package",
-      "path": "system.codedom/6.0.0",
+      "path": "system.codedom/7.0.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "Icon.png",
         "LICENSE.TXT",
         "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/net461/System.CodeDom.targets",
+        "buildTransitive/net462/_._",
+        "buildTransitive/net6.0/_._",
         "buildTransitive/netcoreapp2.0/System.CodeDom.targets",
-        "buildTransitive/netcoreapp3.1/_._",
-        "lib/net461/System.CodeDom.dll",
-        "lib/net461/System.CodeDom.xml",
+        "lib/net462/System.CodeDom.dll",
+        "lib/net462/System.CodeDom.xml",
         "lib/net6.0/System.CodeDom.dll",
         "lib/net6.0/System.CodeDom.xml",
+        "lib/net7.0/System.CodeDom.dll",
+        "lib/net7.0/System.CodeDom.xml",
         "lib/netstandard2.0/System.CodeDom.dll",
         "lib/netstandard2.0/System.CodeDom.xml",
-        "system.codedom.6.0.0.nupkg.sha512",
+        "system.codedom.7.0.0.nupkg.sha512",
         "system.codedom.nuspec",
         "useSharedDesignerContext.txt"
       ]
@@ -2972,13 +3004,9 @@
         "buildTransitive/net8.0/_._",
         "buildTransitive/netcoreapp2.0/System.Composition.AttributedModel.targets",
         "lib/net462/System.Composition.AttributedModel.dll",
-        "lib/net462/System.Composition.AttributedModel.xml",
         "lib/net8.0/System.Composition.AttributedModel.dll",
-        "lib/net8.0/System.Composition.AttributedModel.xml",
         "lib/net9.0/System.Composition.AttributedModel.dll",
-        "lib/net9.0/System.Composition.AttributedModel.xml",
         "lib/netstandard2.0/System.Composition.AttributedModel.dll",
-        "lib/netstandard2.0/System.Composition.AttributedModel.xml",
         "system.composition.attributedmodel.9.0.0.nupkg.sha512",
         "system.composition.attributedmodel.nuspec",
         "useSharedDesignerContext.txt"
@@ -3000,13 +3028,9 @@
         "buildTransitive/net8.0/_._",
         "buildTransitive/netcoreapp2.0/System.Composition.Convention.targets",
         "lib/net462/System.Composition.Convention.dll",
-        "lib/net462/System.Composition.Convention.xml",
         "lib/net8.0/System.Composition.Convention.dll",
-        "lib/net8.0/System.Composition.Convention.xml",
         "lib/net9.0/System.Composition.Convention.dll",
-        "lib/net9.0/System.Composition.Convention.xml",
         "lib/netstandard2.0/System.Composition.Convention.dll",
-        "lib/netstandard2.0/System.Composition.Convention.xml",
         "system.composition.convention.9.0.0.nupkg.sha512",
         "system.composition.convention.nuspec",
         "useSharedDesignerContext.txt"
@@ -3028,13 +3052,9 @@
         "buildTransitive/net8.0/_._",
         "buildTransitive/netcoreapp2.0/System.Composition.Hosting.targets",
         "lib/net462/System.Composition.Hosting.dll",
-        "lib/net462/System.Composition.Hosting.xml",
         "lib/net8.0/System.Composition.Hosting.dll",
-        "lib/net8.0/System.Composition.Hosting.xml",
         "lib/net9.0/System.Composition.Hosting.dll",
-        "lib/net9.0/System.Composition.Hosting.xml",
         "lib/netstandard2.0/System.Composition.Hosting.dll",
-        "lib/netstandard2.0/System.Composition.Hosting.xml",
         "system.composition.hosting.9.0.0.nupkg.sha512",
         "system.composition.hosting.nuspec",
         "useSharedDesignerContext.txt"
@@ -3056,13 +3076,9 @@
         "buildTransitive/net8.0/_._",
         "buildTransitive/netcoreapp2.0/System.Composition.Runtime.targets",
         "lib/net462/System.Composition.Runtime.dll",
-        "lib/net462/System.Composition.Runtime.xml",
         "lib/net8.0/System.Composition.Runtime.dll",
-        "lib/net8.0/System.Composition.Runtime.xml",
         "lib/net9.0/System.Composition.Runtime.dll",
-        "lib/net9.0/System.Composition.Runtime.xml",
         "lib/netstandard2.0/System.Composition.Runtime.dll",
-        "lib/netstandard2.0/System.Composition.Runtime.xml",
         "system.composition.runtime.9.0.0.nupkg.sha512",
         "system.composition.runtime.nuspec",
         "useSharedDesignerContext.txt"
@@ -3084,13 +3100,9 @@
         "buildTransitive/net8.0/_._",
         "buildTransitive/netcoreapp2.0/System.Composition.TypedParts.targets",
         "lib/net462/System.Composition.TypedParts.dll",
-        "lib/net462/System.Composition.TypedParts.xml",
         "lib/net8.0/System.Composition.TypedParts.dll",
-        "lib/net8.0/System.Composition.TypedParts.xml",
         "lib/net9.0/System.Composition.TypedParts.dll",
-        "lib/net9.0/System.Composition.TypedParts.xml",
         "lib/netstandard2.0/System.Composition.TypedParts.dll",
-        "lib/netstandard2.0/System.Composition.TypedParts.xml",
         "system.composition.typedparts.9.0.0.nupkg.sha512",
         "system.composition.typedparts.nuspec",
         "useSharedDesignerContext.txt"
@@ -3104,17 +3116,11 @@
         ".nupkg.metadata",
         ".signature.p7s",
         "lib/net462/System.IdentityModel.Tokens.Jwt.dll",
-        "lib/net462/System.IdentityModel.Tokens.Jwt.xml",
         "lib/net472/System.IdentityModel.Tokens.Jwt.dll",
-        "lib/net472/System.IdentityModel.Tokens.Jwt.xml",
         "lib/net6.0/System.IdentityModel.Tokens.Jwt.dll",
-        "lib/net6.0/System.IdentityModel.Tokens.Jwt.xml",
         "lib/net8.0/System.IdentityModel.Tokens.Jwt.dll",
-        "lib/net8.0/System.IdentityModel.Tokens.Jwt.xml",
         "lib/net9.0/System.IdentityModel.Tokens.Jwt.dll",
-        "lib/net9.0/System.IdentityModel.Tokens.Jwt.xml",
         "lib/netstandard2.0/System.IdentityModel.Tokens.Jwt.dll",
-        "lib/netstandard2.0/System.IdentityModel.Tokens.Jwt.xml",
         "system.identitymodel.tokens.jwt.8.0.1.nupkg.sha512",
         "system.identitymodel.tokens.jwt.nuspec"
       ]
@@ -3145,6 +3151,34 @@
         "lib/netstandard2.0/System.IO.Hashing.xml",
         "system.io.hashing.10.0.2.nupkg.sha512",
         "system.io.hashing.nuspec",
+        "useSharedDesignerContext.txt"
+      ]
+    },
+    "System.Management/7.0.2": {
+      "sha512": "/qEUN91mP/MUQmJnM5y5BdT7ZoPuVrtxnFlbJ8a3kBJGhe2wCzBfnPFtK2wTtEEcf3DMGR9J00GZZfg6HRI6yA==",
+      "type": "package",
+      "path": "system.management/7.0.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/net6.0/_._",
+        "buildTransitive/netcoreapp2.0/System.Management.targets",
+        "lib/net462/_._",
+        "lib/net6.0/System.Management.dll",
+        "lib/net6.0/System.Management.xml",
+        "lib/net7.0/System.Management.dll",
+        "lib/net7.0/System.Management.xml",
+        "lib/netstandard2.0/System.Management.dll",
+        "lib/netstandard2.0/System.Management.xml",
+        "runtimes/win/lib/net6.0/System.Management.dll",
+        "runtimes/win/lib/net6.0/System.Management.xml",
+        "runtimes/win/lib/net7.0/System.Management.dll",
+        "runtimes/win/lib/net7.0/System.Management.xml",
+        "system.management.7.0.2.nupkg.sha512",
+        "system.management.nuspec",
         "useSharedDesignerContext.txt"
       ]
     },
@@ -3189,7 +3223,9 @@
   },
   "projectFileDependencyGroups": {
     "net10.0": [
+      "Google.Apis.Auth >= 1.68.0",
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 10.0.9",
+      "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore >= 10.0.9",
       "Microsoft.AspNetCore.Identity.EntityFrameworkCore >= 10.0.9",
       "Microsoft.AspNetCore.OpenApi >= 10.0.9",
       "Microsoft.EntityFrameworkCore.Design >= 10.0.9",
@@ -3247,7 +3283,15 @@
         "framework": "net10.0",
         "targetAlias": "net10.0",
         "dependencies": {
+          "Google.Apis.Auth": {
+            "target": "Package",
+            "version": "[1.68.0, )"
+          },
           "Microsoft.AspNetCore.Authentication.JwtBearer": {
+            "target": "Package",
+            "version": "[10.0.9, )"
+          },
+          "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore": {
             "target": "Package",
             "version": "[10.0.9, )"
           },
@@ -3730,5 +3774,17 @@
         }
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc",
+      "libraryId": "Microsoft.OpenApi",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    }
+  ]
 }

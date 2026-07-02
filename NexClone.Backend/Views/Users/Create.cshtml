@@ -1,0 +1,42 @@
+@{
+    ViewData["Title"] = "Create New User";
+}
+
+<div class="bx--grid bx--grid--full-width">
+    <div class="bx--row">
+        <div class="bx--col">
+            <h1 class="bx--type-productive-heading-05" style="margin-bottom: 2rem;">Create New User</h1>
+        </div>
+    </div>
+    
+    <div class="bx--row">
+        <div class="bx--col-lg-8">
+            <div style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0;">
+                <form method="post" action="@Url.Action("Create")">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="bx--form-requirement"></div>
+
+                    <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+                        <label for="fullName" class="bx--label">Full Name</label>
+                        <input id="fullName" name="fullName" type="text" class="bx--text-input" placeholder="Enter user's full name" required>
+                    </div>
+
+                    <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+                        <label for="email" class="bx--label">Email Address</label>
+                        <input id="email" name="email" type="email" class="bx--text-input" placeholder="Enter email address" required>
+                    </div>
+
+                    <div class="bx--form-item" style="margin-bottom: 2rem;">
+                        <label for="password" class="bx--label">Password</label>
+                        <input id="password" name="password" type="password" class="bx--text-input" placeholder="Enter initial password" required>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="submit" class="bx--btn bx--btn--primary">Create User</button>
+                        <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

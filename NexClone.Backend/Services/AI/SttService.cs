@@ -35,17 +35,32 @@ namespace NexClone.Backend.Services.AI
 
         public async Task<SttResult> TranscribeAudioAsync(byte[] audioData, string fileName, string contentType, bool translate, string targetLanguage)
         {
-            var openAiConfig = await _dbContext.ApiConfigurations
-                .FirstOrDefaultAsync(c => c.ProviderName == "OpenAI" && c.IsActive);
+            var toolConfig = await _dbContext.ToolConfigurations
+                .Include(t => t.RoutingRules)
+                .FirstOrDefaultAsync(t => t.ToolName == "voice-to-text" && t.IsActive);
+            var (providerName, modelName) = await ResolveProviderAsync(toolConfig);
 
-            if (openAiConfig == null || string.IsNullOrWhiteSpace(openAiConfig.ApiKey))
+            var apiConfig = await _dbContext.ApiConfigurations.FirstOrDefaultAsync(c => c.ProviderName == providerName && c.IsActive);
+
+            if (apiConfig == null || string.IsNullOrWhiteSpace(apiConfig.ApiKey))
             {
-                return new SttResult { Success = false, ErrorMessage = "No active configuration found for OpenAI." };
+                return new SttResult { Success = false, ErrorMessage = $"No active configuration found for provider '{providerName}'." };
             }
 
             try
             {
-                string originalText = await CallWhisperApiAsync(audioData, fileName, contentType, openAiConfig.ApiKey);
+                string originalText = "";
+                
+                // Currently only Whisper/OpenAI is implemented for STT
+                if (providerName.Equals("OpenAI", StringComparison.OrdinalIgnoreCase))
+                {
+                    originalText = await CallWhisperApiAsync(audioData, fileName, contentType, apiConfig.ApiKey);
+                }
+                else
+                {
+                    // Fallback to OpenAI if other providers aren't implemented for STT yet
+                    originalText = await CallWhisperApiAsync(audioData, fileName, contentType, apiConfig.ApiKey);
+                }
                 
                 var result = new SttResult
                 {
@@ -56,7 +71,7 @@ namespace NexClone.Backend.Services.AI
                 if (translate)
                 {
                     string targetLangName = _languageNames.ContainsKey(targetLanguage) ? _languageNames[targetLanguage] : targetLanguage;
-                    string translatedText = await CallTranslateApiAsync(originalText, targetLangName, openAiConfig.ApiKey);
+                    string translatedText = await CallTranslateApiAsync(originalText, targetLangName, apiConfig.ApiKey);
                     
                     result.TranslatedText = translatedText;
                     result.TargetLanguage = targetLanguage;
@@ -68,6 +83,53 @@ namespace NexClone.Backend.Services.AI
             {
                 return new SttResult { Success = false, ErrorMessage = ex.Message };
             }
+        }
+
+        private async Task<(string ProviderName, string ModelName)> ResolveProviderAsync(ToolConfiguration config)
+        {
+            if (config == null || config.RoutingRules == null || !config.RoutingRules.Any())
+            {
+                return ("OpenAI", null);
+            }
+
+            var rule = config.RoutingRules.FirstOrDefault(r => r.QualityLevel == "Standard") ?? config.RoutingRules.First();
+            var today = DateTime.UtcNow.Date;
+            var now = DateTime.UtcNow.TimeOfDay;
+            var oneMinuteAgo = DateTime.UtcNow.AddMinutes(-1);
+
+            if (rule.ActiveFromTime.HasValue && rule.ActiveToTime.HasValue)
+            {
+                if (rule.ActiveFromTime <= rule.ActiveToTime)
+                {
+                    if (now < rule.ActiveFromTime || now > rule.ActiveToTime)
+                        throw new Exception("The selected model is currently outside its active operating hours.");
+                }
+                else
+                {
+                    if (now < rule.ActiveFromTime && now > rule.ActiveToTime)
+                        throw new Exception("The selected model is currently outside its active operating hours.");
+                }
+            }
+
+            if (rule.MaxDailyRequests.HasValue)
+            {
+                var dailyCount = await _dbContext.GenerationHistories
+                    .CountAsync(h => h.Type == config.ToolName && h.CreatedAt >= today);
+                
+                if (dailyCount >= rule.MaxDailyRequests.Value)
+                    throw new Exception("There is high demand on this tool, please try again later.");
+            }
+
+            if (rule.MaxRequestsPerMinute.HasValue)
+            {
+                var minuteCount = await _dbContext.GenerationHistories
+                    .CountAsync(h => h.Type == config.ToolName && h.CreatedAt >= oneMinuteAgo);
+
+                if (minuteCount >= rule.MaxRequestsPerMinute.Value)
+                    throw new Exception("There is high demand on this tool, please try again later.");
+            }
+
+            return (rule.ProviderName, rule.ModelName);
         }
 
         private async Task<string> CallWhisperApiAsync(byte[] audioData, string fileName, string contentType, string apiKey)
@@ -83,7 +145,7 @@ namespace NexClone.Backend.Services.AI
             content.Add(streamContent, "file", fileName);
             
             // Add model
-            content.Add(new StringContent("whisper-1"), "model");
+            content.Add(new StringContent("gpt-4o-mini-transcribe"), "model");
             // Add response format
             content.Add(new StringContent("text"), "response_format");
             // Add prompt

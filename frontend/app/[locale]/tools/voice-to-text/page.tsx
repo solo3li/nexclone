@@ -7,26 +7,73 @@ import Navbar from "../../../../src/components/Navbar";
 import Footer from "../../../../src/components/Footer";
 import {
   UploadCloud, Mic, Square, Play, Pause, Copy, Download,
-  Loader2, FileAudio, CheckCircle2, X, Volume2, Zap
+  Loader2, FileAudio, CheckCircle2, X, Volume2, Zap, AudioWaveform
 } from "lucide-react";
 import { uploadDirectToMinio } from "../../../../src/utils/upload";
 import api from "../../../../src/utils/api";
+import { useAppStore } from "../../../../src/store/useAppStore";
+import { useRouter, Link } from "../../../../src/i18n/routing";
+import { ArrowLeft, ArrowRight, Wallet } from "lucide-react";
 
 const LANGUAGES = [
-  { code: 'auto', name: 'Auto-Detect' },
+  { code: 'auto', name: 'لغة الصوت الأصلية (Auto-Detect)' },
+  { code: 'af', name: 'Afrikaans - الأفريكانية' },
   { code: 'ar', name: 'Arabic - العربية' },
-  { code: 'en', name: 'English' },
-  { code: 'es', name: 'Spanish - Español' },
-  { code: 'fr', name: 'French - Français' },
-  { code: 'de', name: 'German - Deutsch' },
-  { code: 'it', name: 'Italian - Italiano' },
-  { code: 'pt', name: 'Portuguese - Português' },
-  { code: 'ru', name: 'Russian - Русский' },
-  { code: 'zh', name: 'Chinese - 中文' },
-  { code: 'ja', name: 'Japanese - 日本語' },
-  { code: 'ko', name: 'Korean - 한국어' },
-  { code: 'hi', name: 'Hindi - हिन्दी' },
-  { code: 'tr', name: 'Turkish - Türkçe' },
+  { code: 'hy', name: 'Armenian - الأرمنية' },
+  { code: 'az', name: 'Azerbaijani - الأذربيجانية' },
+  { code: 'be', name: 'Belarusian - البيلاروسية' },
+  { code: 'bs', name: 'Bosnian - البوسنية' },
+  { code: 'bg', name: 'Bulgarian - البلغارية' },
+  { code: 'ca', name: 'Catalan - الكتالونية' },
+  { code: 'zh', name: 'Chinese - الصينية' },
+  { code: 'hr', name: 'Croatian - الكرواتية' },
+  { code: 'cs', name: 'Czech - التشيكية' },
+  { code: 'da', name: 'Danish - الدنماركية' },
+  { code: 'nl', name: 'Dutch - الهولندية' },
+  { code: 'en', name: 'English - الإنجليزية' },
+  { code: 'et', name: 'Estonian - الإستونية' },
+  { code: 'fi', name: 'Finnish - الفنلندية' },
+  { code: 'fr', name: 'French - الفرنسية' },
+  { code: 'gl', name: 'Galician - الجاليكية' },
+  { code: 'de', name: 'German - الألمانية' },
+  { code: 'el', name: 'Greek - اليونانية' },
+  { code: 'he', name: 'Hebrew - العبرية' },
+  { code: 'hi', name: 'Hindi - الهندية' },
+  { code: 'hu', name: 'Hungarian - المجرية' },
+  { code: 'is', name: 'Icelandic - الأيسلندية' },
+  { code: 'id', name: 'Indonesian - الإندونيسية' },
+  { code: 'it', name: 'Italian - الإيطالية' },
+  { code: 'ja', name: 'Japanese - اليابانية' },
+  { code: 'kn', name: 'Kannada - الكانادا' },
+  { code: 'kk', name: 'Kazakh - الكازاخستانية' },
+  { code: 'ko', name: 'Korean - الكورية' },
+  { code: 'lv', name: 'Latvian - اللاتفية' },
+  { code: 'lt', name: 'Lithuanian - الليتوانية' },
+  { code: 'mk', name: 'Macedonian - المقدونية' },
+  { code: 'ms', name: 'Malay - الماليزية' },
+  { code: 'mr', name: 'Marathi - الماراثية' },
+  { code: 'mi', name: 'Maori - الماورية' },
+  { code: 'ne', name: 'Nepali - النيبالية' },
+  { code: 'no', name: 'Norwegian - النرويجية' },
+  { code: 'fa', name: 'Persian - الفارسية' },
+  { code: 'pl', name: 'Polish - البولندية' },
+  { code: 'pt', name: 'Portuguese - البرتغالية' },
+  { code: 'ro', name: 'Romanian - الرومانية' },
+  { code: 'ru', name: 'Russian - الروسية' },
+  { code: 'sr', name: 'Serbian - الصربية' },
+  { code: 'sk', name: 'Slovak - السلوفاكية' },
+  { code: 'sl', name: 'Slovenian - السلوفينية' },
+  { code: 'es', name: 'Spanish - الإسبانية' },
+  { code: 'sw', name: 'Swahili - السواحيلية' },
+  { code: 'sv', name: 'Swedish - السويدية' },
+  { code: 'tl', name: 'Tagalog - التاغالوغية' },
+  { code: 'ta', name: 'Tamil - التاميلية' },
+  { code: 'th', name: 'Thai - التايلاندية' },
+  { code: 'tr', name: 'Turkish - التركية' },
+  { code: 'uk', name: 'Ukrainian - الأوكرانية' },
+  { code: 'ur', name: 'Urdu - الأردية' },
+  { code: 'vi', name: 'Vietnamese - الفيتنامية' },
+  { code: 'cy', name: 'Welsh - الويلزية' },
 ];
 
 type Stage = 'idle' | 'uploading' | 'transcribing' | 'done' | 'error';
@@ -41,6 +88,9 @@ export default function VoiceToTextPage() {
   const t = useTranslations("VoiceToText");
   const locale = useLocale();
   const isRtl = locale === 'ar';
+  const { user, isAuthenticated, hasPhoneNumber, setUser } = useAppStore();
+  const router = useRouter();
+  const ArrowIcon = locale === 'ar' ? ArrowRight : ArrowLeft;
 
   const [file, setFile] = useState<File | Blob | null>(null);
   const [mode, setMode] = useState("transcribe");
@@ -54,6 +104,7 @@ export default function VoiceToTextPage() {
   const [estimatedCost, setEstimatedCost] = useState<number | null>(null);
   const [isEstimating, setIsEstimating] = useState(false);
   const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
+  const [uploadedFileId, setUploadedFileId] = useState<string | null>(null);
 
   // Audio preview player state
   const [audioPreviewUrl, setAudioPreviewUrl] = useState<string | null>(null);
@@ -90,8 +141,18 @@ export default function VoiceToTextPage() {
         const durationMinutes = duration / 60;
         const res = await api.post("/api/ai/voice-to-text/estimate", { fileSizeBytes, durationMinutes });
         setEstimatedCost(res.data.estimatedCost);
-      } catch (err) {
-        console.error("Failed to estimate:", err);
+      } catch (err: any) {
+        if (err.response?.status !== 400) {
+          console.error(err);
+        }
+        
+        if (err.response?.status === 400) {
+          setError(isRtl ? "رصيدك غير كافٍ لإتمام هذه العملية." : "Insufficient credits for this operation.");
+        } else {
+          setError(err.response?.data?.error || (isRtl ? "فشل في حساب التكلفة التقديرية" : "Error calculating estimate."));
+        }
+        
+        setEstimatedCost(null);
       } finally {
         setIsEstimating(false);
       }
@@ -156,6 +217,7 @@ export default function VoiceToTextPage() {
     setStage('idle');
     setUploadProgress(0);
     setError("");
+    setUploadedFileId(null);
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -184,6 +246,7 @@ export default function VoiceToTextPage() {
     setIsPlaying(false);
     setCurrentTime(0);
     setDuration(0);
+    setUploadedFileId(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -213,32 +276,55 @@ export default function VoiceToTextPage() {
   };
 
   const processAudio = async () => {
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
     if (!file) return;
     setError("");
     setResult("");
 
     try {
-      // Stage 1: Upload
-      setStage('uploading');
-      setUploadProgress(0);
-      const audioFile = file instanceof File
-        ? file
-        : new File([file], "recording.webm", { type: "audio/webm" });
+      // Stage 1: Pre-flight check
+      const fileSizeBytes = file instanceof File ? file.size : file.size; // file.size works for both File and Blob
+      const durationMinutes = duration > 0 ? duration / 60 : 0.01;
+      const estimateRes = await api.post("/api/ai/voice-to-text/estimate", { fileSizeBytes, durationMinutes });
+      
+      const cost = estimateRes.data.estimatedCost;
+      if (user && user.availableCredits < cost) {
+        setError(isRtl ? "رصيدك غير كافٍ لإتمام هذه العملية." : "Insufficient credits for this operation.");
+        return;
+      }
 
-      const fileId = await uploadDirectToMinio(audioFile, 'voice-to-text', (percent) => {
-        setUploadProgress(percent);
-      });
+      // Stage 2: Upload
+      let fileId = uploadedFileId;
+      if (!fileId) {
+        setStage('uploading');
+        setUploadProgress(0);
+        const audioFile = file instanceof File
+          ? file
+          : new File([file], "recording.webm", { type: "audio/webm" });
 
-      // Stage 2: Transcribe
+        fileId = await uploadDirectToMinio(audioFile, 'voice-to-text', (percent) => {
+          setUploadProgress(percent);
+        });
+        setUploadedFileId(fileId);
+      }
+
+      // Stage 3: Transcribe
       setStage('transcribing');
       const res = await api.post("/api/ai/voice-to-text/transcribe", {
         fileId,
-        translate: mode === "translate",
+        translate: language !== "auto",
         targetLanguage: language,
       });
 
       setResult(res.data.translated_text || res.data.original_text);
       setStage('done');
+      // Refresh user profile to update credits dynamically
+      api.get("/api/auth/me").then(res => {
+        if (res.data) setUser(res.data);
+      }).catch(err => console.error("Failed to update user profile", err));
     } catch (err) {
       setError(t('error'));
       setStage('error');
@@ -269,11 +355,32 @@ export default function VoiceToTextPage() {
 
   return (
     <div className="relative min-h-screen bg-[#0a0015] flex flex-col">
-      <div className="fixed top-1/4 left-1/4 w-[60%] h-[500px] bg-violet-600/10 blur-[150px] pointer-events-none z-0 rounded-full" />
+      <div className="absolute top-1/4 right-1/4 w-[60%] h-[500px] bg-fuchsia-600/10 blur-[150px] pointer-events-none z-0 rounded-full" />
+      
+      {/* Minimal Header */}
+      <header className="fixed top-0 left-0 right-0 h-16 bg-[#0a0015]/80 backdrop-blur-md border-b border-white/5 z-50 flex items-center justify-between px-4 lg:px-8" dir={isRtl ? 'rtl' : 'ltr'}>
+        <div className="flex items-center gap-4">
+          <Link href="/tools" className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors text-white/70 hover:text-white">
+            <ArrowIcon className="w-5 h-5" />
+          </Link>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-fuchsia-600 to-pink-600 flex items-center justify-center">
+              <AudioWaveform className="w-4 h-4 text-white" />
+            </div>
+            <h1 className="text-white font-bold text-sm lg:text-base hidden sm:block">{t('title')}</h1>
+          </div>
+        </div>
+        
+        {isAuthenticated && (
+          <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5">
+            <Wallet className="w-4 h-4 text-fuchsia-400" />
+            <span className="text-white font-bold text-sm">{user?.availableCredits || 0}</span>
+            <span className="text-white/50 text-xs ml-1 rtl:mr-1">{isRtl ? 'رصيد' : 'Credits'}</span>
+          </div>
+        )}
+      </header>
 
-      <Navbar />
-
-      <main className="flex-1 container mx-auto px-4 pt-32 pb-20 relative z-10 max-w-5xl">
+      <main className="flex-1 container mx-auto px-4 pt-20 pb-10 relative z-10 max-w-6xl">
         {isMaintenanceMode ? (
           <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
             <div className="w-20 h-20 bg-violet-600/20 rounded-full flex items-center justify-center mb-6">
@@ -284,42 +391,18 @@ export default function VoiceToTextPage() {
           </div>
         ) : (
           <>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center mb-12"
-            >
-          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4">{t('title')}</h1>
-          <p className="text-lg text-white/60">{t('subtitle')}</p>
-        </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
           {/* Controls & Input */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 flex flex-col gap-6"
+            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex flex-col gap-4"
           >
-            {/* Mode Selection */}
-            <div className="flex gap-4 p-1 bg-white/5 rounded-xl border border-white/10" dir={isRtl ? 'rtl' : 'ltr'}>
-              <button
-                onClick={() => setMode("transcribe")}
-                className={`flex-1 py-3 rounded-lg text-sm font-medium transition-all ${mode === "transcribe" ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg" : "text-white/60 hover:text-white"}`}
-              >
-                {t('transcribe')}
-              </button>
-              <button
-                onClick={() => {
-                  setMode("translate");
-                  if (language === 'auto') setLanguage('en');
-                }}
-                className={`flex-1 py-3 rounded-lg text-sm font-medium transition-all ${mode === "translate" ? "bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white shadow-lg" : "text-white/60 hover:text-white"}`}
-              >
-                {t('translate')}
-              </button>
-            </div>
+            {/* Mode Selection Removed */}
 
             {/* Language Selection */}
             <div dir={isRtl ? 'rtl' : 'ltr'}>
@@ -560,7 +643,7 @@ export default function VoiceToTextPage() {
                   </AnimatePresence>
 
                   {/* Process Button */}
-                  {!isProcessing && stage !== 'done' && (
+                  {!isProcessing && (
                     <div className="px-4 pb-4">
                       {estimatedCost !== null && (
                         <div className="flex justify-center items-center pb-3 text-sm">
@@ -604,7 +687,7 @@ export default function VoiceToTextPage() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 flex flex-col"
+            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex flex-col h-auto min-h-[300px]"
           >
             <div className="flex items-center justify-between mb-4" dir={isRtl ? 'rtl' : 'ltr'}>
               <h2 className="text-lg font-bold text-white">{t('result')}</h2>
@@ -620,7 +703,7 @@ export default function VoiceToTextPage() {
               )}
             </div>
 
-            <div className={`flex-1 w-full bg-[#0a0015]/50 border border-white/5 rounded-2xl p-4 min-h-[300px] overflow-y-auto ${!result && !isProcessing ? 'flex items-center justify-center' : ''}`}>
+            <div className={`flex-1 w-full bg-[#0a0015]/50 border border-white/5 rounded-2xl p-4 min-h-[150px] overflow-y-auto ${!result && !isProcessing ? 'flex items-center justify-center' : ''}`}>
               <AnimatePresence mode="wait">
                 {stage === 'transcribing' ? (
                   <motion.div
@@ -666,13 +749,12 @@ export default function VoiceToTextPage() {
               </AnimatePresence>
             </div>
           </motion.div>
-
         </div>
           </>
         )}
       </main>
 
-      <Footer />
+
     </div>
   );
 }

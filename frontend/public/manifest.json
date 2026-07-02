@@ -1,0 +1,56 @@
+{
+  "name": "NexMedia - AI Tools Platform",
+  "short_name": "NexMedia",
+  "description": "Advanced AI tools platform - Text to Voice, Voice to Text, and more",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0015",
+  "theme_color": "#7c3aed",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "تحويل النص لصوت",
+      "short_name": "TTS",
+      "description": "تحويل النص إلى كلام بالذكاء الاصطناعي",
+      "url": "/ar/tools/text-to-voice",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "تحويل الصوت لنص",
+      "short_name": "STT",
+      "description": "تحويل الكلام إلى نص بالذكاء الاصطناعي",
+      "url": "/ar/tools/voice-to-text",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}

@@ -2,6 +2,9 @@ using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using NexClone.Backend.Models;
@@ -11,6 +14,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace NexClone.Backend.Controllers
@@ -24,14 +28,16 @@ namespace NexClone.Backend.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IMediaService _mediaService;
         private readonly IEmailService _emailService;
+        private readonly IEmailTemplateService _emailTemplateService;
 
-        public AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration, ApplicationDbContext context, IMediaService mediaService, IEmailService emailService)
+        public AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration, ApplicationDbContext context, IMediaService mediaService, IEmailService emailService, IEmailTemplateService emailTemplateService)
         {
             _userManager = userManager;
             _configuration = configuration;
             _context = context;
             _mediaService = mediaService;
             _emailService = emailService;
+            _emailTemplateService = emailTemplateService;
         }
 
         private static readonly HttpClient _httpClient = new HttpClient();
@@ -40,7 +46,10 @@ namespace NexClone.Backend.Controllers
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            {
+                var modelErrors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                return BadRequest(new { Errors = modelErrors });
+            }
 
             // 1. Check for disposable email
             var domain = request.Email.Split('@').LastOrDefault()?.ToLower();
@@ -110,33 +119,23 @@ namespace NexClone.Backend.Controllers
                 FingerprintHash = fingerprint
             });
 
-            if (!hasClaimedFreeTrial)
-            {
-                var freeTrialPlan = await _context.Plans.FirstOrDefaultAsync(p => p.IsFreeTrial);
 
-                if (freeTrialPlan != null)
-                {
-                    user.AvailableCredits = freeTrialPlan.MonthlyCredits;
-                    _context.Subscriptions.Add(new Subscription
-                    {
-                        UserId = user.Id,
-                        PlanId = freeTrialPlan.Id,
-                        StartDate = DateTime.UtcNow,
-                        EndDate = DateTime.UtcNow.AddDays(freeTrialPlan.DurationDays),
-                        Status = "Active"
-                    });
-                }
-            }
             await _context.SaveChangesAsync();
 
-            var token = GenerateJwtToken(user);
-            SetTokenCookie(token);
+            var verificationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var origin = Request.Headers["Origin"].FirstOrDefault() ?? "http://178.62.192.74:3000";
+            var verifyLink = $"{origin}/ar/verify-email?email={Uri.EscapeDataString(user.Email)}&token={Uri.EscapeDataString(verificationToken)}";
 
-            return Ok(new AuthResponse
-            {
-                Email = user.Email,
-                IsVerified = user.IsVerified
-            });
+            string emailHtml = $@"
+<div style='font-family: Arial, sans-serif; background-color: #0a0015; color: #ffffff; padding: 40px; text-align: center; border-radius: 8px;'>
+    <h2 style='color: #8b5cf6;'>تأكيد البريد الإلكتروني</h2>
+    <p style='color: #d1d5db; font-size: 16px; margin-bottom: 30px;'>مرحباً بك في NexMedia! يرجى الضغط على الزر أدناه لتأكيد بريدك الإلكتروني وتفعيل حسابك.</p>
+    <a href='{verifyLink}' style='background-color: #8b5cf6; color: #ffffff; text-decoration: none; padding: 15px 30px; font-size: 16px; font-weight: bold; border-radius: 50px; display: inline-block;'>تفعيل الحساب</a>
+</div>";
+
+            await _emailService.SendEmailAsync(user.Email, user.FullName ?? user.UserName ?? "User", "تفعيل الحساب - NexMedia", emailHtml);
+
+            return Ok(new { Message = "تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني لتفعيل الحساب." });
         }
 
         [HttpPost("login")]
@@ -147,7 +146,10 @@ namespace NexClone.Backend.Controllers
 
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
-                return Unauthorized(new { Message = "Invalid email or password." });
+                return Unauthorized(new { Message = "كلمة المرور أو البريد الإلكتروني غير صحيح." });
+
+            if (!user.IsVerified)
+                return Unauthorized(new { Message = "الرجاء تأكيد بريدك الإلكتروني أولاً قبل تسجيل الدخول.", RequiresVerification = true });
 
             var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
             var userAgent = Request.Headers["User-Agent"].ToString() ?? "Unknown";
@@ -245,23 +247,6 @@ namespace NexClone.Backend.Controllers
                     hasClaimedFreeTrial = await _context.DeviceFingerprints.AnyAsync(df => df.IpAddress == ipAddress);
                 }
 
-                if (!hasClaimedFreeTrial)
-                {
-                    var freeTrialPlan = await _context.Plans.FirstOrDefaultAsync(p => p.IsFreeTrial);
-
-                    if (freeTrialPlan != null)
-                    {
-                        user.AvailableCredits = freeTrialPlan.MonthlyCredits;
-                        _context.Subscriptions.Add(new Subscription
-                        {
-                            UserId = user.Id,
-                            PlanId = freeTrialPlan.Id,
-                            StartDate = DateTime.UtcNow,
-                            EndDate = DateTime.UtcNow.AddDays(freeTrialPlan.DurationDays),
-                            Status = "Active"
-                        });
-                    }
-                }
             }
 
             _context.DeviceFingerprints.Add(new DeviceFingerprint
@@ -297,10 +282,11 @@ namespace NexClone.Backend.Controllers
                 return Ok(new { Message = "If an account with this email exists, a password reset link has been sent." });
             }
 
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var rawToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var token = Microsoft.AspNetCore.WebUtilities.WebEncoders.Base64UrlEncode(System.Text.Encoding.UTF8.GetBytes(rawToken));
             
             var origin = Request.Headers["Origin"].FirstOrDefault() ?? "http://178.62.192.74:3000";
-            var resetLink = $"{origin}/reset-password?email={Uri.EscapeDataString(request.Email)}&token={Uri.EscapeDataString(token)}";
+            var resetLink = $"{origin}/reset-password?email={Uri.EscapeDataString(request.Email)}&token={token}";
 
             string emailHtml = $@"
 <div style='font-family: Arial, sans-serif; background-color: #0a0015; color: #ffffff; padding: 40px; text-align: center; border-radius: 8px;'>
@@ -328,7 +314,19 @@ namespace NexClone.Backend.Controllers
                 return BadRequest(new { Message = "Invalid request." });
             }
 
-            var result = await _userManager.ResetPasswordAsync(user, request.Token, request.NewPassword);
+            string rawToken = request.Token;
+            try
+            {
+                // Try Base64UrlDecode for new tokens
+                rawToken = System.Text.Encoding.UTF8.GetString(Microsoft.AspNetCore.WebUtilities.WebEncoders.Base64UrlDecode(request.Token));
+            }
+            catch
+            {
+                // Fallback for old tokens (replace spaces that were incorrectly decoded back to +)
+                rawToken = request.Token.Replace(" ", "+");
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, rawToken, request.NewPassword);
 
             if (result.Succeeded)
             {
@@ -342,6 +340,30 @@ namespace NexClone.Backend.Controllers
             }
 
             return BadRequest(new { Errors = errors });
+        }
+
+        [HttpPost("verify-email")]
+        public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user == null)
+            {
+                return BadRequest(new { Message = "طلب غير صالح." });
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, request.Token);
+
+            if (result.Succeeded)
+            {
+                user.IsVerified = true;
+                await _userManager.UpdateAsync(user);
+                return Ok(new { Message = "تم تفعيل البريد الإلكتروني بنجاح." });
+            }
+
+            return BadRequest(new { Message = "رابط التفعيل غير صالح أو منتهي الصلاحية." });
         }
 
         private string GenerateJwtToken(ApplicationUser user)
@@ -364,7 +386,7 @@ namespace NexClone.Backend.Controllers
                 issuer: issuer,
                 audience: audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddDays(7),
+                expires: DateTime.UtcNow.AddDays(15),
                 signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
@@ -372,12 +394,14 @@ namespace NexClone.Backend.Controllers
 
         private void SetTokenCookie(string token)
         {
+            var isHttps = Request.IsHttps || Request.Headers["X-Forwarded-Proto"] == "https";
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None,
-                Expires = DateTime.UtcNow.AddDays(7)
+                Secure = isHttps,
+                SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
+                Expires = DateTime.UtcNow.AddDays(15),
+                Path = "/"
             };
             Response.Cookies.Append("jwt", token, cookieOptions);
         }
@@ -385,13 +409,100 @@ namespace NexClone.Backend.Controllers
         [HttpPost("logout")]
         public IActionResult Logout()
         {
-            Response.Cookies.Delete("jwt", new CookieOptions
+            var isHttps = Request.IsHttps || Request.Headers["X-Forwarded-Proto"] == "https";
+            Response.Cookies.Append("jwt", "", new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None
+                Secure = isHttps,
+                SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
+                Expires = DateTime.UtcNow.AddDays(-10),
+                Path = "/"
             });
             return Ok(new { Message = "Logged out" });
+        }
+
+        [HttpPost("add-phone")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> AddPhone([FromBody] AddPhoneRequest request)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return Unauthorized();
+
+            if (!string.IsNullOrEmpty(user.PhoneNumber))
+            {
+                return BadRequest(new { Message = "لقد قمت بإضافة رقم هاتف مسبقاً." });
+            }
+
+            var phoneExists = await _userManager.Users.AnyAsync(u => u.PhoneNumber == request.PhoneNumber);
+            if (phoneExists)
+            {
+                return BadRequest(new { Message = "رقم الهاتف مسجل بالفعل لحساب آخر." });
+            }
+
+            user.PhoneNumber = request.PhoneNumber;
+
+            var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+            var fingerprint = request.DeviceFingerprint ?? string.Empty;
+
+            // Log the device fingerprint
+            _context.DeviceFingerprints.Add(new DeviceFingerprint
+            {
+                UserId = user.Id,
+                IpAddress = ipAddress,
+                UserAgent = Request.Headers["User-Agent"].ToString() ?? "Unknown",
+                FingerprintHash = fingerprint
+            });
+
+            // Assign default plan if they don't already have one
+            var hasActiveSub = await _context.Subscriptions.AnyAsync(s => s.UserId == user.Id && s.Status == "active");
+            if (!hasActiveSub)
+            {
+                var targetPlan = await _context.Plans.FirstOrDefaultAsync(p => p.IsDefaultRegistrationPlan) 
+                              ?? await _context.Plans.FirstOrDefaultAsync(p => p.IsFreeTrial);
+
+                if (targetPlan != null)
+                {
+                    user.AvailableCredits += targetPlan.MonthlyCredits;
+                    var sub = new Subscription
+                    {
+                        UserId = user.Id,
+                        PlanId = targetPlan.Id,
+                        StartDate = DateTime.UtcNow,
+                        EndDate = DateTime.UtcNow.AddDays(targetPlan.DurationDays),
+                        Status = "active"
+                    };
+                    _context.Subscriptions.Add(sub);
+                    
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(user.Email))
+                        {
+                            var htmlBody = _emailTemplateService.GetSubscriptionReceiptEmail(
+                                user.FullName ?? user.Email,
+                                targetPlan.NameAr ?? targetPlan.Name,
+                                sub.StartDate,
+                                sub.EndDate,
+                                targetPlan.MonthlyCredits,
+                                targetPlan.PriceEgp);
+                            
+                            await _emailService.SendEmailAsync(user.Email, user.FullName ?? "", "تم تفعيل اشتراكك بنجاح - NexMedia AI", htmlBody);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Failed to send free plan email: " + ex.Message);
+                    }
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Message = "تم تسجيل رقم الهاتف بنجاح." });
         }
 
         [HttpGet("me")]
@@ -408,7 +519,44 @@ namespace NexClone.Backend.Controllers
 
             var activeSub = await _context.Subscriptions
                 .Include(s => s.Plan)
-                .FirstOrDefaultAsync(s => s.UserId == user.Id && s.Status == "Active" && s.EndDate > DateTime.UtcNow);
+                .OrderByDescending(s => s.Status == "active")
+                .ThenByDescending(s => s.Status == "freeze")
+                .ThenByDescending(s => s.Status == "expired")
+                .ThenByDescending(s => s.EndDate)
+                .FirstOrDefaultAsync(s => s.UserId == user.Id);
+
+            if (activeSub != null)
+            {
+                bool needsSave = false;
+
+                if (activeSub.Status == "active" && activeSub.EndDate <= DateTime.UtcNow)
+                {
+                    var freezeEndDate = activeSub.EndDate.AddDays(activeSub.Plan.GracePeriodDays);
+                    if (DateTime.UtcNow > freezeEndDate)
+                    {
+                        activeSub.Status = "expired";
+                        user.AvailableCredits = 0;
+                    }
+                    else
+                    {
+                        activeSub.Status = "freeze";
+                    }
+                    needsSave = true;
+                }
+                else if (activeSub.Status == "freeze" && activeSub.EndDate.AddDays(activeSub.Plan.GracePeriodDays) < DateTime.UtcNow)
+                {
+                    activeSub.Status = "expired";
+                    user.AvailableCredits = 0;
+                    needsSave = true;
+                }
+
+                if (needsSave)
+                {
+                    _context.Subscriptions.Update(activeSub);
+                    _context.Users.Update(user);
+                    await _context.SaveChangesAsync();
+                }
+            }
 
             string? imageUrl = null;
             if (!string.IsNullOrEmpty(user.ImageUrl))
@@ -430,6 +578,7 @@ namespace NexClone.Backend.Controllers
                 Country = user.Country,
                 ImageUrl = imageUrl,
                 IsVerified = user.IsVerified,
+                HasPhoneNumber = !string.IsNullOrEmpty(user.PhoneNumber),
                 AvailableCredits = user.AvailableCredits,
                 IsStaff = user.IsStaff,
                 ActivePlan = activeSub != null ? new {

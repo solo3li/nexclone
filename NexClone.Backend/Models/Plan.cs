@@ -39,6 +39,7 @@ namespace NexClone.Backend.Models
         public int TtsMaxCharsPerRequest { get; set; } = 3000;
         public int TtsCharactersBlock { get; set; } = 1;
         public decimal TtsCostPerChar { get; set; } = 0.001m;
+        public decimal TtsCostPerCharHigh { get; set; } = 0.01m;
         public bool TtsCustomInstructionsEnabled { get; set; } = false;
 
         // Voice-To-Text (STT) Settings
@@ -48,6 +49,12 @@ namespace NexClone.Backend.Models
 
         // Free Trial Flag
         public bool IsFreeTrial { get; set; } = false;
+
+        // TTS Allowed Voices (Comma separated VoiceNames)
+        public string? AllowedVoices { get; set; }
+
+        // Default Registration Plan
+        public bool IsDefaultRegistrationPlan { get; set; } = false;
 
         // Navigation
         public ICollection<Subscription> Subscriptions { get; set; } = new List<Subscription>();

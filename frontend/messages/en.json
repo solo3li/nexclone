@@ -333,29 +333,21 @@
       "title": "Products",
       "links": [
         "Audio to Text",
-        "Background Removal",
-        "Smart Translation",
-        "Music Generation",
-        "API"
+        "Text to Audio"
       ]
     },
     "company": {
       "title": "Company",
       "links": [
         "About Us",
-        "Careers",
         "Blog",
-        "Contact Us",
-        "Partners"
+        "Contact Us"
       ]
     },
     "legal": {
       "title": "Legal",
       "links": [
-        "Terms of Service",
-        "Privacy Policy",
-        "Cookie Policy",
-        "Usage Guidelines"
+        "Privacy Policy"
       ]
     },
     "rights": "All rights reserved. NexMedia AI"
@@ -437,7 +429,7 @@
     "languageMode": "Language Mode",
     "arabic": "Arabic",
     "otherLangs": "Other Languages",
-    "freeAccountNotice": "Free Account - up to 150 chars and free voices only",
+    "freeAccountNotice": "Free Account - up to {maxChars} chars and free voices only",
     "upgradeNow": "Upgrade Now",
     "chooseVoice": "Choose Voice",
     "all": "All",
@@ -451,10 +443,11 @@
     "emotion": "Emotion",
     "performanceStyle": "Performance Style",
     "customInstructions": "Custom Instructions",
+    "customInstructionsPlaceholder": "Enter custom voice directions...",
     "recentConversions": "Recent Conversions",
     "refresh": "Refresh",
     "noConversions": "No conversions yet",
-    "textPlaceholder": "Enter text here (max 150 characters)",
+    "textPlaceholder": "Enter text here (max {maxChars} characters)",
     "processing": "Generating...",
     "process": "Generate Voice",
     "result": "Result",

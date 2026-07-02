@@ -9,8 +9,6 @@ export default function CTASection() {
   const t = useTranslations("CTA");
   const locale = useLocale();
   const ArrowIcon = locale === 'ar' ? ArrowLeft : ArrowRight;
-  const features = t.raw('features');
-
   return (
     <section className="relative py-28 bg-[#0a0015] overflow-hidden" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
       {/* Background glows */}
@@ -67,23 +65,7 @@ export default function CTASection() {
           </div>
         </AnimatedReveal>
 
-        {/* Trust badges */}
-        <AnimatedReveal delay={0.5} className="mt-12">
-          <div className="flex flex-wrap items-center justify-center gap-6 text-white/30 text-sm">
-            {features.map((feature: string, i: number) => {
-              const colors = ['emerald', 'blue', 'violet', 'fuchsia'];
-              const color = colors[i % colors.length];
-              return (
-                <span key={i} className="flex items-center gap-1.5">
-                  <div className={`w-4 h-4 rounded-full border border-${color}-500/50 flex items-center justify-center`}>
-                    <div className={`w-2 h-2 rounded-full bg-${color}-500/60`} />
-                  </div>
-                  {feature}
-                </span>
-              )
-            })}
-          </div>
-        </AnimatedReveal>
+        {/* Trust badges removed */}
       </div>
     </section>
   );

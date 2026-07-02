@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NexClone.Backend.Models;
@@ -7,6 +9,7 @@ using System.Collections.Generic;
 
 namespace NexClone.Backend.Controllers
 {
+    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Admin")]
     public class SettingsAdminController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -28,7 +31,7 @@ namespace NexClone.Backend.Controllers
             {
                 if (!toolConfigs.Any(t => t.ToolName == defaultTool))
                 {
-                    var newConfig = new ToolConfiguration { ToolName = defaultTool, ProviderName = "System", ModelName = "Default", IsActive = true, IsMaintenanceMode = false };
+                    var newConfig = new ToolConfiguration { ToolName = defaultTool, IsActive = true, IsMaintenanceMode = false };
                     _context.ToolConfigurations.Add(newConfig);
                     toolConfigs.Add(newConfig);
                     changesMade = true;

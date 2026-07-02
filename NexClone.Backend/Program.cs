@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using NexClone.Backend.Models;
@@ -10,6 +11,7 @@ using Minio;
 using Scalar.AspNetCore;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +28,11 @@ builder.Host.UseSerilog();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddSignalR();
+
+// Persist DataProtection keys to DB so antiforgery tokens survive container restarts
+builder.Services.AddDataProtection()
+    .PersistKeysToDbContext<ApplicationDbContext>();
 
 // Setup CORS for Next.js
 builder.Services.AddCors(options =>
@@ -41,7 +48,10 @@ builder.Services.AddCors(options =>
 
 // Setup PostgreSQL Database (Identity)
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.ConfigureWarnings(warnings => warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+});
 
 // Setup Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options => {
@@ -63,6 +73,24 @@ builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddCookie(Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme, options =>
+{
+    options.LoginPath = "/AdminAuth/Login";
+    options.AccessDeniedPath = "/AdminAuth/AccessDenied";
+    options.Cookie.Name = "AdminAuthCookie";
+    options.Cookie.HttpOnly = true;
+    options.ExpireTimeSpan = TimeSpan.FromDays(7);
+    options.Events.OnRedirectToLogin = context =>
+    {
+        if (context.Request.Path.StartsWithSegments("/api"))
+        {
+            context.Response.StatusCode = 401;
+            return Task.CompletedTask;
+        }
+        context.Response.Redirect(context.RedirectUri);
+        return Task.CompletedTask;
+    };
 })
 .AddJwtBearer(options =>
 {
@@ -102,10 +130,11 @@ builder.Services.AddScoped<NexClone.Backend.Services.AI.ISttService, NexClone.Ba
 
 
 // Register Media Service
-builder.Services.AddScoped<NexClone.Backend.Services.IMediaService, NexClone.Backend.Services.MinioMediaService>();
+builder.Services.AddScoped<NexClone.Backend.Services.IMediaService, NexClone.Backend.Services.S3MediaService>();
 
 // Register Email Service
 builder.Services.AddScoped<NexClone.Backend.Services.IEmailService, NexClone.Backend.Services.BrevoEmailService>();
+builder.Services.AddScoped<NexClone.Backend.Services.IEmailTemplateService, NexClone.Backend.Services.EmailTemplateService>();
 
 // Register Payment Service
 builder.Services.AddHttpClient();
@@ -116,6 +145,9 @@ builder.Services.AddScoped<NexClone.Backend.Services.CreditManagerService>();
 
 // Register Usage Policy Service
 builder.Services.AddScoped<NexClone.Backend.Services.UsagePolicyService>();
+
+// Register Background Services
+builder.Services.AddHostedService<NexClone.Backend.Services.SubscriptionStatusService>();
 
 // Add Rate Limiting
 builder.Services.AddRateLimiter(options =>
@@ -130,11 +162,20 @@ builder.Services.AddRateLimiter(options =>
     });
 });
 
-// Add Swagger
+// Add OpenAPI (net10.0)
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 using (var scope = app.Services.CreateScope())
 {
@@ -146,11 +187,7 @@ using (var scope = app.Services.CreateScope())
     {
         new NexClone.Backend.Models.AppSetting { Key = "Site.MaintenanceMode", Value = "false", Description = "Global maintenance mode toggle (true/false)" },
         new NexClone.Backend.Models.AppSetting { Key = "Site.MaintenanceEndDate", Value = "", Description = "Optional end date for maintenance (ISO 8601 string)" },
-        new NexClone.Backend.Models.AppSetting { Key = "Origin.AllowedOrigins", Value = "http://localhost:3000,http://localhost:3001,https://nexclone.com", Description = "Comma-separated list of allowed origins for CORS" },
-        new NexClone.Backend.Models.AppSetting { Key = "Minio.Endpoint", Value = "minio:9000", Description = "Minio endpoint address" },
-        new NexClone.Backend.Models.AppSetting { Key = "Minio.AccessKey", Value = "minioadmin", Description = "Minio access key" },
-        new NexClone.Backend.Models.AppSetting { Key = "Minio.SecretKey", Value = "minioadmin", Description = "Minio secret key" },
-        new NexClone.Backend.Models.AppSetting { Key = "Minio.BucketName", Value = "nexmedia", Description = "Minio bucket name" }
+        new NexClone.Backend.Models.AppSetting { Key = "Origin.AllowedOrigins", Value = "http://localhost:3000,http://localhost:3001,https://nexclone.com", Description = "Comma-separated list of allowed origins for CORS" }
     };
 
     foreach (var setting in defaultSettings)
@@ -173,7 +210,8 @@ if (!app.Environment.IsDevelopment())
 app.MapOpenApi();
 app.MapScalarApiReference();
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection(); // Commented out to prevent warnings since Railway handles HTTPS termination
+app.UseStaticFiles();
 app.UseRouting();
 app.UseCors("AllowNextjs");
 app.UseRateLimiter();
@@ -191,5 +229,7 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
+
+app.MapHub<NexClone.Backend.Hubs.TicketHub>("/hubs/ticket");
 
 app.Run();

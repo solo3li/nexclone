@@ -1,0 +1,50 @@
+@model NexClone.Backend.Models.CustomPage
+
+<div class="bx--grid" style="padding-left: 0; padding-right: 0;">
+    <div class="bx--row">
+        <div class="bx--col-lg-12">
+            <div class="bx--tile" style="background-color: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <form method="post" action="/CustomPagesAdmin/Edit/@Model.Id">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="Id" value="@Model.Id" />
+                    
+                    <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+                        <label class="bx--label" style="font-weight: 600;">Slug</label>
+                        <select name="Slug" required class="bx--select-input" style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px; background: white;">
+                            <option value="about-us" selected="@(Model.Slug == "about-us")">About Us (من نحن)</option>
+                            <option value="privacy-policy" selected="@(Model.Slug == "privacy-policy")">Privacy Policy (سياسة الخصوصية)</option>
+                            <option value="contact-us" selected="@(Model.Slug == "contact-us")">Contact Us (تواصل معنا)</option>
+                            <option value="terms-of-service" selected="@(Model.Slug == "terms-of-service")">Terms of Service (شروط الخدمة)</option>
+                        </select>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                        <div class="bx--form-item" style="flex: 1;">
+                            <label class="bx--label" style="font-weight: 600;">Title (English)</label>
+                            <input type="text" class="bx--text-input" name="TitleEn" value="@Model.TitleEn" required style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;" />
+                        </div>
+                        <div class="bx--form-item" style="flex: 1;">
+                            <label class="bx--label" style="font-weight: 600;">Title (Arabic)</label>
+                            <input type="text" class="bx--text-input" name="TitleAr" value="@Model.TitleAr" required style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;" />
+                        </div>
+                    </div>
+
+                    <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+                        <label class="bx--label" style="font-weight: 600;">Content (English)</label>
+                        <textarea class="bx--text-area" name="ContentEn" rows="15" style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;">@Model.ContentEn</textarea>
+                    </div>
+
+                    <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+                        <label class="bx--label" style="font-weight: 600;">Content (Arabic)</label>
+                        <textarea class="bx--text-area" name="ContentAr" rows="15" style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;" dir="rtl">@Model.ContentAr</textarea>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="submit" class="bx--btn bx--btn--primary" style="background-color: #0f62fe; color: white; padding: 0.875rem 2rem; border: none; cursor: pointer; border-radius: 4px; font-weight: 600;">Save Changes</button>
+                        <a href="/CustomPagesAdmin" class="bx--btn bx--btn--secondary" style="background-color: #e0e0e0; color: #161616; padding: 0.875rem 2rem; text-decoration: none; border-radius: 4px; font-weight: 600;">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

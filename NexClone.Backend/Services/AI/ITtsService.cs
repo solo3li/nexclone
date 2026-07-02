@@ -5,10 +5,11 @@ namespace NexClone.Backend.Services.AI
 {
     public interface ITtsService
     {
-        Task<(Stream AudioStream, string ContentType, string FileExtension)> GenerateAudioAsync(
+        Task<(Stream AudioStream, string ContentType, string FileExtension, string ProviderName, string ModelName)> GenerateAudioAsync(
             string text, 
             string language, 
             string voiceName, 
-            string styleInstruction);
+            string styleInstruction,
+            string quality);
     }
 }

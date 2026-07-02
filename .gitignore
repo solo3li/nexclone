@@ -2,3 +2,6 @@
 data_old_website.sql
 migration_new_users.sql
 data_db/
+.backend.env
+.front.env
+railway_dump.sql

@@ -1,0 +1,44 @@
+@model IEnumerable<NexClone.Backend.Models.BlogPost>
+
+<div class="bx--grid" style="padding-left: 0; padding-right: 0;">
+    <div class="bx--row" style="margin-bottom: 2rem;">
+        <div class="bx--col">
+            <a href="/BlogAdmin/Create" class="bx--btn bx--btn--primary" style="background-color: #0f62fe; color: white; padding: 0.875rem 2rem; text-decoration: none; border-radius: 4px; font-weight: 600;">Create New Post</a>
+        </div>
+    </div>
+    
+    <div class="bx--row">
+        <div class="bx--col">
+            <div class="bx--data-table-container">
+                <table class="bx--data-table" style="width: 100%; text-align: left; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                    <thead style="background-color: #f4f4f4;">
+                        <tr>
+                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">Title</th>
+                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">Status</th>
+                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">Date</th>
+                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr style="border-bottom: 1px solid #e0e0e0;">
+                                <td style="padding: 1rem;">@item.Title</td>
+                                <td style="padding: 1rem;">@(item.IsPublished ? "Published" : "Draft")</td>
+                                <td style="padding: 1rem;">@item.CreatedAt.ToLocalTime().ToString("g")</td>
+                                <td style="padding: 1rem; display: flex; gap: 0.5rem;">
+                                    <a href="/BlogAdmin/Comments/@item.Id" class="bx--btn bx--btn--sm bx--btn--primary" style="background-color: #0f62fe; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; font-size: 0.875rem;">Comments</a>
+                                    <a href="/BlogAdmin/Edit/@item.Id" class="bx--btn bx--btn--sm bx--btn--secondary" style="background-color: #393939; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; font-size: 0.875rem;">Edit</a>
+                                    <form method="post" action="/BlogAdmin/Delete/@item.Id" onsubmit="return confirm('Are you sure?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="bx--btn bx--btn--sm bx--btn--danger" style="background-color: #da1e28; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; font-size: 0.875rem; cursor: pointer;">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

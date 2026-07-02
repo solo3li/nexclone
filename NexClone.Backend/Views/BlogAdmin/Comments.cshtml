@@ -1,0 +1,60 @@
+@model NexClone.Backend.Models.BlogPost
+
+<div class="bx--grid" style="padding-left: 0; padding-right: 0;">
+    <div class="bx--row" style="margin-bottom: 2rem;">
+        <div class="bx--col">
+            <a href="/BlogAdmin" class="bx--btn bx--btn--secondary" style="background-color: #393939; color: white; padding: 0.875rem 2rem; text-decoration: none; border-radius: 4px; font-weight: 600;">Back to Posts</a>
+        </div>
+    </div>
+    
+    <div class="bx--row">
+        <div class="bx--col-lg-8">
+            <div class="bx--tile" style="background-color: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1.5rem; font-weight: 600;">Add Admin Reply</h3>
+                <form method="post" action="/BlogAdmin/ReplyComment">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="postId" value="@Model.Id" />
+                    
+                    <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+                        <textarea class="bx--text-area" name="content" rows="4" required placeholder="Type your reply here..." style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;"></textarea>
+                    </div>
+
+                    <button type="submit" class="bx--btn bx--btn--primary" style="background-color: #0f62fe; color: white; padding: 0.875rem 2rem; border: none; cursor: pointer; border-radius: 4px; font-weight: 600;">Post Reply</button>
+                </form>
+            </div>
+
+            <div class="bx--tile" style="background-color: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <h3 style="margin-bottom: 1.5rem; font-weight: 600;">Comments (@Model.Comments.Count)</h3>
+                
+                @if(!Model.Comments.Any())
+                {
+                    <p style="color: #525252;">No comments yet.</p>
+                }
+                else
+                {
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        @foreach (var comment in Model.Comments.OrderBy(c => c.CreatedAt))
+                        {
+                            <div style="padding: 1rem; border-left: 4px solid @(comment.IsAdminReply ? "#0f62fe" : "#e0e0e0"); background-color: #f4f4f4; border-radius: 4px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                    <strong style="color: @(comment.IsAdminReply ? "#0f62fe" : "#161616");">
+                                        @(comment.IsAdminReply ? "Admin" : comment.User?.Email ?? "Unknown User")
+                                    </strong>
+                                    <span style="font-size: 0.75rem; color: #8d8d8d;">@comment.CreatedAt.ToLocalTime().ToString("g")</span>
+                                </div>
+                                <p style="margin-bottom: 1rem; color: #161616; white-space: pre-wrap;">@comment.Content</p>
+                                
+                                <form method="post" action="/BlogAdmin/DeleteComment" onsubmit="return confirm('Delete this comment?');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@comment.Id" />
+                                    <input type="hidden" name="postId" value="@Model.Id" />
+                                    <button type="submit" class="bx--btn bx--btn--sm bx--btn--danger" style="background-color: transparent; color: #da1e28; padding: 0; border: none; font-size: 0.875rem; cursor: pointer; text-decoration: underline;">Delete</button>
+                                </form>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

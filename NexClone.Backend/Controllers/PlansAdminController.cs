@@ -1,11 +1,15 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NexClone.Backend.Models;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace NexClone.Backend.Controllers
 {
+    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Admin")]
     public class PlansAdminController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -22,19 +26,31 @@ namespace NexClone.Backend.Controllers
             return View(plans);
         }
 
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             ViewData["Title"] = "Create Plan";
+            ViewBag.AllVoices = await _context.Voices.Where(v => v.IsActive).ToListAsync();
             return View(new Plan());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Plan plan)
+        public async Task<IActionResult> Create(Plan plan, [FromForm] List<string> selectedVoices)
         {
             // Set defaults for missing fields from the form
             if (string.IsNullOrEmpty(plan.NameAr)) plan.NameAr = plan.Name;
             
+            if (selectedVoices != null && selectedVoices.Any())
+            {
+                plan.AllowedVoices = string.Join(",", selectedVoices);
+            }
+
+            if (plan.IsDefaultRegistrationPlan)
+            {
+                var otherDefaults = await _context.Plans.Where(p => p.IsDefaultRegistrationPlan).ToListAsync();
+                foreach(var p in otherDefaults) p.IsDefaultRegistrationPlan = false;
+            }
+
             _context.Add(plan);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
@@ -48,12 +64,13 @@ namespace NexClone.Backend.Controllers
             if (plan == null) return NotFound();
 
             ViewData["Title"] = $"Edit Plan - {plan.Name}";
+            ViewBag.AllVoices = await _context.Voices.Where(v => v.IsActive).ToListAsync();
             return View(plan);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Plan plan)
+        public async Task<IActionResult> Edit(int id, Plan plan, [FromForm] List<string> selectedVoices)
         {
             if (id != plan.Id) return NotFound();
 
@@ -76,6 +93,7 @@ namespace NexClone.Backend.Controllers
                 existingPlan.TtsMaxCharsPerRequest = plan.TtsMaxCharsPerRequest;
                 existingPlan.TtsCharactersBlock = plan.TtsCharactersBlock;
                 existingPlan.TtsCostPerChar = plan.TtsCostPerChar;
+                existingPlan.TtsCostPerCharHigh = plan.TtsCostPerCharHigh;
                 existingPlan.TtsCustomInstructionsEnabled = plan.TtsCustomInstructionsEnabled;
 
                 existingPlan.SttEnabled = plan.SttEnabled;
@@ -83,6 +101,22 @@ namespace NexClone.Backend.Controllers
                 existingPlan.SttCostPerMinute = plan.SttCostPerMinute;
 
                 existingPlan.IsFreeTrial = plan.IsFreeTrial;
+                
+                existingPlan.IsDefaultRegistrationPlan = plan.IsDefaultRegistrationPlan;
+                if (existingPlan.IsDefaultRegistrationPlan)
+                {
+                    var otherDefaults = await _context.Plans.Where(p => p.IsDefaultRegistrationPlan && p.Id != existingPlan.Id).ToListAsync();
+                    foreach (var p in otherDefaults) p.IsDefaultRegistrationPlan = false;
+                }
+
+                if (selectedVoices != null && selectedVoices.Any())
+                {
+                    existingPlan.AllowedVoices = string.Join(",", selectedVoices);
+                }
+                else
+                {
+                    existingPlan.AllowedVoices = null;
+                }
 
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));

@@ -3,12 +3,9 @@
 
 import Navbar from "../../src/components/Navbar";
 import HeroSection from "../../src/components/HeroSection";
-import MarqueeBanner from "../../src/components/MarqueeBanner";
 import ToolsSection from "../../src/components/ToolsSection";
 import HowItWorks from "../../src/components/HowItWorks";
 import FeaturesSection from "../../src/components/FeaturesSection";
-import PricingSection from "../../src/components/PricingSection";
-import TestimonialsSection from "../../src/components/TestimonialsSection";
 import CTASection from "../../src/components/CTASection";
 import Footer from "../../src/components/Footer";
 import MobileBottomNav from "../../src/components/MobileBottomNav";
@@ -33,7 +30,6 @@ export default function Page() {
         <Navbar />
         <main>
           <HeroSection />
-          <MarqueeBanner />
           <ToolsSection />
           <HowItWorks />
           <FeaturesSection />

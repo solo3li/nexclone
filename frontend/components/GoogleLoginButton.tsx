@@ -21,7 +21,8 @@ export function GoogleLoginButton() {
             });
             
             if (res.status === 200) {
-              setUser(res.data);
+              const meRes = await api.get('/api/auth/me');
+              setUser(meRes.data);
               router.push('/profile');
             }
           } catch (error) {
@@ -35,7 +36,7 @@ export function GoogleLoginButton() {
         }}
         theme="outline"
         size="large"
-        width="100%"
+        width="320"
         text="continue_with"
         shape="rectangular"
       />

@@ -33,7 +33,7 @@ namespace NexClone.Backend.Services
             _context = context;
         }
 
-        public async Task<PolicyValidationResult> ValidateAndChargeAsync(Guid userId, string toolId, decimal usageAmountForLimits, decimal? usageAmountForCost = null)
+        public async Task<PolicyValidationResult> ValidateAndChargeAsync(Guid userId, string toolId, decimal usageAmountForLimits, decimal? usageAmountForCost = null, string quality = "Standard")
         {
             var user = await _context.Users
                 .Include(u => u.Subscriptions)
@@ -51,23 +51,12 @@ namespace NexClone.Backend.Services
             {
                 targetPlan = activeSubscription.Plan;
             }
-            else if (user.IsStaff)
-            {
-                // Fallback for staff without subscription so they can still test but get charged
-                targetPlan = await _context.Plans.FirstOrDefaultAsync() ?? new Plan();
-            }
             else
             {
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "No active subscription found." };
             }
 
-            var toolPolicy = GetToolPolicy(targetPlan, toolId);
-            if (user.IsStaff) 
-            {
-                toolPolicy.Enabled = true;
-                toolPolicy.MaxCharsPerRequest = -1;
-                toolPolicy.MaxFileSizeMb = -1;
-            }
+            var toolPolicy = GetToolPolicy(targetPlan, toolId, quality);
 
             if (!toolPolicy.Enabled)
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Your current plan does not have access to this tool." };
@@ -105,7 +94,7 @@ namespace NexClone.Backend.Services
             return new PolicyValidationResult { IsAllowed = true, TotalCost = totalCost };
         }
 
-        public ToolPolicy GetToolPolicy(Plan plan, string toolId)
+        public ToolPolicy GetToolPolicy(Plan plan, string toolId, string quality = "Standard")
         {
             var policy = new ToolPolicy();
             if (plan == null) return policy;
@@ -114,7 +103,12 @@ namespace NexClone.Backend.Services
             {
                 policy.Enabled = plan.TtsEnabled;
                 policy.MaxCharsPerRequest = plan.TtsMaxCharsPerRequest;
-                policy.CostPerUnit = plan.TtsCostPerChar;
+                
+                if (quality == "High")
+                    policy.CostPerUnit = plan.TtsCostPerCharHigh;
+                else
+                    policy.CostPerUnit = plan.TtsCostPerChar;
+                    
                 policy.BlockSize = plan.TtsCharactersBlock;
             }
             else if (toolId == "voice-to-text")
@@ -132,7 +126,7 @@ namespace NexClone.Backend.Services
             return 1m;
         }
 
-        public async Task<PolicyValidationResult> EstimateCostAsync(Guid userId, string toolId, decimal usageAmountForLimits, decimal? usageAmountForCost = null)
+        public async Task<PolicyValidationResult> EstimateCostAsync(Guid userId, string toolId, decimal usageAmountForLimits, decimal? usageAmountForCost = null, string quality = "Standard")
         {
             var user = await _context.Users
                 .Include(u => u.Subscriptions)
@@ -150,22 +144,12 @@ namespace NexClone.Backend.Services
             {
                 targetPlan = activeSubscription.Plan;
             }
-            else if (user.IsStaff)
-            {
-                targetPlan = await _context.Plans.FirstOrDefaultAsync() ?? new Plan();
-            }
             else
             {
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "No active subscription found." };
             }
 
-            var toolPolicy = GetToolPolicy(targetPlan, toolId);
-            if (user.IsStaff) 
-            {
-                toolPolicy.Enabled = true;
-                toolPolicy.MaxCharsPerRequest = -1;
-                toolPolicy.MaxFileSizeMb = -1;
-            }
+            var toolPolicy = GetToolPolicy(targetPlan, toolId, quality);
 
             if (!toolPolicy.Enabled)
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Your current plan does not have access to this tool." };
@@ -186,6 +170,11 @@ namespace NexClone.Backend.Services
                 amountForCost = amountForCost / toolPolicy.BlockSize;
 
             decimal totalCost = amountForCost * costPerUnit;
+
+            if (user.AvailableCredits < totalCost)
+            {
+                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Insufficient credits. This requires {totalCost:F2} credits." };
+            }
 
             return new PolicyValidationResult { IsAllowed = true, TotalCost = totalCost };
         }

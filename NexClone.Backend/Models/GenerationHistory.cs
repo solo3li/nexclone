@@ -43,6 +43,11 @@ namespace NexClone.Backend.Models
 
         public decimal CreditsUsed { get; set; } = 0;
 
+        public bool IsDeletedByUser { get; set; } = false;
+
+        [MaxLength(2000)]
+        public string? ErrorMessage { get; set; }
+
         [ForeignKey("UserId")]
         public virtual ApplicationUser User { get; set; } = null!;
     }

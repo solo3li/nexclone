@@ -1,12 +1,16 @@
 {
   "version": 2,
-  "dgSpecHash": "eGdgb/X+uNQ=",
+  "dgSpecHash": "GEhW0kWVNDE=",
   "success": true,
   "projectFilePath": "/app/NexClone.Backend/NexClone.Backend.csproj",
   "expectedPackageFiles": [
     "/root/.nuget/packages/communitytoolkit.highperformance/8.4.0/communitytoolkit.highperformance.8.4.0.nupkg.sha512",
+    "/root/.nuget/packages/google.apis/1.68.0/google.apis.1.68.0.nupkg.sha512",
+    "/root/.nuget/packages/google.apis.auth/1.68.0/google.apis.auth.1.68.0.nupkg.sha512",
+    "/root/.nuget/packages/google.apis.core/1.68.0/google.apis.core.1.68.0.nupkg.sha512",
     "/root/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",
     "/root/.nuget/packages/microsoft.aspnetcore.authentication.jwtbearer/10.0.9/microsoft.aspnetcore.authentication.jwtbearer.10.0.9.nupkg.sha512",
+    "/root/.nuget/packages/microsoft.aspnetcore.dataprotection.entityframeworkcore/10.0.9/microsoft.aspnetcore.dataprotection.entityframeworkcore.10.0.9.nupkg.sha512",
     "/root/.nuget/packages/microsoft.aspnetcore.identity.entityframeworkcore/10.0.9/microsoft.aspnetcore.identity.entityframeworkcore.10.0.9.nupkg.sha512",
     "/root/.nuget/packages/microsoft.aspnetcore.openapi/10.0.9/microsoft.aspnetcore.openapi.10.0.9.nupkg.sha512",
     "/root/.nuget/packages/microsoft.build.framework/18.0.2/microsoft.build.framework.18.0.2.nupkg.sha512",
@@ -47,7 +51,7 @@
     "/root/.nuget/packages/serilog.sinks.debug/3.0.0/serilog.sinks.debug.3.0.0.nupkg.sha512",
     "/root/.nuget/packages/serilog.sinks.file/7.0.0/serilog.sinks.file.7.0.0.nupkg.sha512",
     "/root/.nuget/packages/stackexchange.redis/2.13.17/stackexchange.redis.2.13.17.nupkg.sha512",
-    "/root/.nuget/packages/system.codedom/6.0.0/system.codedom.6.0.0.nupkg.sha512",
+    "/root/.nuget/packages/system.codedom/7.0.0/system.codedom.7.0.0.nupkg.sha512",
     "/root/.nuget/packages/system.composition/9.0.0/system.composition.9.0.0.nupkg.sha512",
     "/root/.nuget/packages/system.composition.attributedmodel/9.0.0/system.composition.attributedmodel.9.0.0.nupkg.sha512",
     "/root/.nuget/packages/system.composition.convention/9.0.0/system.composition.convention.9.0.0.nupkg.sha512",
@@ -56,8 +60,22 @@
     "/root/.nuget/packages/system.composition.typedparts/9.0.0/system.composition.typedparts.9.0.0.nupkg.sha512",
     "/root/.nuget/packages/system.identitymodel.tokens.jwt/8.0.1/system.identitymodel.tokens.jwt.8.0.1.nupkg.sha512",
     "/root/.nuget/packages/system.io.hashing/10.0.2/system.io.hashing.10.0.2.nupkg.sha512",
+    "/root/.nuget/packages/system.management/7.0.2/system.management.7.0.2.nupkg.sha512",
     "/root/.nuget/packages/system.reactive/6.0.1/system.reactive.6.0.1.nupkg.sha512",
     "/root/.nuget/packages/taglibsharp/2.3.0/taglibsharp.2.3.0.nupkg.sha512"
   ],
-  "logs": []
+  "logs": [
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "message": "Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc",
+      "projectPath": "/app/NexClone.Backend/NexClone.Backend.csproj",
+      "warningLevel": 1,
+      "filePath": "/app/NexClone.Backend/NexClone.Backend.csproj",
+      "libraryId": "Microsoft.OpenApi",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    }
+  ]
 }

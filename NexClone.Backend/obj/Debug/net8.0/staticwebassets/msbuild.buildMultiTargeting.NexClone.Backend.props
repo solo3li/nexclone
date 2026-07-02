@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="../build/NexClone.Backend.props" />
+</Project>

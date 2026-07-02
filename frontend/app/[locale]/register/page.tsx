@@ -16,16 +16,21 @@ export default function RegisterPage() {
   const locale = useLocale();
   const ArrowIcon = locale === 'ar' ? ArrowLeft : ArrowRight;
   const router = useRouter();
-  const setUser = useAppStore(state => state.setUser);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [acceptedPolicy, setAcceptedPolicy] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!acceptedPolicy) {
+      setError(locale === 'ar' ? "يجب الموافقة على سياسة الخصوصية أولاً" : "You must agree to the privacy policy first");
+      return;
+    }
     setLoading(true);
     setError("");
     try {
@@ -35,15 +40,14 @@ export default function RegisterPage() {
       const result = await fp.get();
       const visitorId = result.visitorId;
 
-      const res = await api.post("/api/auth/register", {
+      await api.post("/api/auth/register", {
         fullName: name,
         email,
         password,
         country: "Unknown",
         deviceFingerprint: visitorId
       });
-      setUser(res.data);
-      router.push("/");
+      setIsSuccess(true);
     } catch (err: any) {
       setError(err.response?.data?.Message || err.response?.data?.Errors?.[0] || "Registration failed");
     } finally {
@@ -67,82 +71,129 @@ export default function RegisterPage() {
           
           <h1 className="text-3xl font-bold text-white mb-2 text-center">{t('register')}</h1>
           
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            {error && <div className="p-3 rounded-lg bg-red-500/20 border border-red-500/50 text-red-200 text-sm">{error}</div>}
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-2">{t('name')}</label>
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none rtl:left-auto rtl:right-0 rtl:pr-3">
-                    <User className="h-5 w-5 text-white/40 group-focus-within:text-pink-400 transition-colors" />
-                  </div>
-                  <input
-                    type="text"
-                    required
-                    value={name}
-                    onChange={e => setName(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-10 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 transition-all"
-                    placeholder="John Doe"
-                  />
-                </div>
+          {isSuccess ? (
+            <div className="mt-8 text-center space-y-6">
+              <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto border-2 border-emerald-500/50">
+                <Mail className="w-10 h-10 text-emerald-400" />
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-2">{t('email')}</label>
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none rtl:left-auto rtl:right-0 rtl:pr-3">
-                    <Mail className="h-5 w-5 text-white/40 group-focus-within:text-pink-400 transition-colors" />
+              <h2 className="text-2xl font-bold text-white">
+                {locale === 'ar' ? "تم إنشاء الحساب بنجاح!" : "Account Created Successfully!"}
+              </h2>
+              <p className="text-white/70 leading-relaxed text-sm">
+                {locale === 'ar' 
+                  ? "لقد أرسلنا رابط تفعيل إلى بريدك الإلكتروني. يرجى التحقق من البريد الوارد (أو مجلد الرسائل المزعجة) والضغط على الرابط لتفعيل حسابك قبل تسجيل الدخول للموقع." 
+                  : "We have sent an activation link to your email. Please check your inbox (or spam folder) and click the link to activate your account before logging in to the website."}
+              </p>
+              <button
+                onClick={() => router.push(`/${locale}/login`)}
+                className="w-full py-4 mt-6 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold transition-all border border-white/20"
+              >
+                {t('login')}
+              </button>
+            </div>
+          ) : (
+            <>
+              <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+                {error && <div className="p-3 rounded-lg bg-red-500/20 border border-red-500/50 text-red-200 text-sm">{error}</div>}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-2">{t('name')}</label>
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none rtl:left-auto rtl:right-0 rtl:pr-3">
+                        <User className="h-5 w-5 text-white/40 group-focus-within:text-pink-400 transition-colors" />
+                      </div>
+                      <input
+                        type="text"
+                        required
+                        value={name}
+                        onChange={e => setName(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-10 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 transition-all"
+                        placeholder="John Doe"
+                      />
+                    </div>
                   </div>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-10 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 transition-all"
-                    placeholder="user@example.com"
-                  />
-                </div>
-              </div>
 
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-2">{t('password')}</label>
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none rtl:left-auto rtl:right-0 rtl:pr-3">
-                    <Lock className="h-5 w-5 text-white/40 group-focus-within:text-pink-400 transition-colors" />
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-2">{t('email')}</label>
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none rtl:left-auto rtl:right-0 rtl:pr-3">
+                        <Mail className="h-5 w-5 text-white/40 group-focus-within:text-pink-400 transition-colors" />
+                      </div>
+                      <input
+                        type="email"
+                        required
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-10 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 transition-all"
+                        placeholder="user@example.com"
+                      />
+                    </div>
                   </div>
-                  <input
-                    type="password"
-                    required
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-10 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 transition-all"
-                    placeholder="••••••••"
-                  />
+
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-2">{t('password')}</label>
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none rtl:left-auto rtl:right-0 rtl:pr-3">
+                        <Lock className="h-5 w-5 text-white/40 group-focus-within:text-pink-400 transition-colors" />
+                      </div>
+                      <input
+                        type="password"
+                        required
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-10 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 transition-all"
+                        placeholder="••••••••"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 pt-2">
+                    <input
+                      type="checkbox"
+                      id="privacy"
+                      required
+                      checked={acceptedPolicy}
+                      onChange={(e) => setAcceptedPolicy(e.target.checked)}
+                      className="mt-1 w-4 h-4 rounded border-white/20 bg-white/5 text-pink-500 focus:ring-pink-500/50 cursor-pointer"
+                    />
+                    <label htmlFor="privacy" className="text-sm text-white/70 leading-relaxed cursor-pointer">
+                      {locale === 'ar' ? "لقد قرأت وأوافق على " : "I have read and agree to the "}
+                      <Link href="/privacy" target="_blank" className="text-pink-400 hover:text-pink-300 underline font-medium">
+                        {locale === 'ar' ? "سياسة الخصوصية" : "Privacy Policy"}
+                      </Link>
+                    </label>
+                  </div>
                 </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="group relative w-full flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-white font-bold text-lg overflow-hidden shadow-[0_0_20px_rgba(236,72,153,0.2)] hover:shadow-[0_0_30px_rgba(236,72,153,0.4)] transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-600 to-pink-600" />
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-white/10 transition-opacity duration-300" />
+                  <span className="relative">{loading ? "..." : t('submitRegister')}</span>
+                  <ArrowIcon className={`w-5 h-5 relative transition-transform duration-300 ${locale === 'ar' ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
+                </button>
+                
+                <div className="relative flex items-center py-2">
+                  <div className="flex-grow border-t border-white/10"></div>
+                  <span className="flex-shrink-0 mx-4 text-white/40 text-sm">أو</span>
+                  <div className="flex-grow border-t border-white/10"></div>
+                </div>
+
+                <div className="mt-4">
+                  <GoogleLoginButton />
+                </div>
+              </form>
+
+              <div className="mt-6 text-center">
+                <p className="text-white/50 text-sm">
+                  {t('haveAccount')} <Link href="/login" className="text-pink-400 hover:text-pink-300 font-medium ml-1 rtl:mr-1">{t('login')}</Link>
+                </p>
               </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-white font-bold text-lg overflow-hidden shadow-[0_0_20px_rgba(236,72,153,0.2)] hover:shadow-[0_0_30px_rgba(236,72,153,0.4)] transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-600 to-pink-600" />
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-white/10 transition-opacity duration-300" />
-              <span className="relative">{loading ? "..." : t('submitRegister')}</span>
-              <ArrowIcon className={`w-5 h-5 relative transition-transform duration-300 ${locale === 'ar' ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
-            </button>
-            
-            <div className="relative flex items-center py-2">
-              <div className="flex-grow border-t border-white/10"></div>
-              <span className="flex-shrink-0 mx-4 text-white/40 text-sm">أو</span>
-              <div className="flex-grow border-t border-white/10"></div>
-            </div>
-
-            <div className="mt-4">
-              <GoogleLoginButton />
-            </div>
-          </form>
+            </>
+          )}
 
           <div className="mt-6 text-center">
             <p className="text-white/50 text-sm">

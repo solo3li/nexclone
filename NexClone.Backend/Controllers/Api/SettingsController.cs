@@ -29,11 +29,21 @@ namespace NexClone.Backend.Controllers.Api
 
             var googleClientId = settings.FirstOrDefault(s => s.Key == "OAuth.GoogleClientId")?.Value;
 
+            var paymobMaintenance = settings.FirstOrDefault(s => s.Key == "Payment.Paymob.Maintenance")?.Value == "true";
+            var payPalMaintenance = settings.FirstOrDefault(s => s.Key == "Payment.PayPal.Maintenance")?.Value == "true";
+            var manualMaintenance = settings.FirstOrDefault(s => s.Key == "Payment.Manual.Maintenance")?.Value == "true";
+
             return Ok(new
             {
                 isMaintenanceMode,
                 maintenanceEndDate,
-                googleClientId = string.IsNullOrWhiteSpace(googleClientId) ? null : googleClientId
+                googleClientId = string.IsNullOrWhiteSpace(googleClientId) ? null : googleClientId,
+                paymentMaintenance = new
+                {
+                    paymob = paymobMaintenance,
+                    paypal = payPalMaintenance,
+                    manual = manualMaintenance
+                }
             });
         }
     }

@@ -44,7 +44,21 @@ namespace NexClone.Backend.Areas.AI.Controllers
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
-            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "text-to-voice", request.Text.Length);
+            var activeSubscription = await _dbContext.Subscriptions
+                .Include(s => s.Plan)
+                .Where(s => s.UserId == userId && s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow)
+                .FirstOrDefaultAsync();
+
+            if (activeSubscription != null && !string.IsNullOrEmpty(activeSubscription.Plan.AllowedVoices))
+            {
+                var allowedVoices = activeSubscription.Plan.AllowedVoices.Split(',').Select(v => v.Trim()).ToList();
+                if (!string.IsNullOrEmpty(request.VoiceName) && !allowedVoices.Contains(request.VoiceName))
+                {
+                    return BadRequest(new { error = $"The voice '{request.VoiceName}' is not allowed on your current plan." });
+                }
+            }
+
+            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "text-to-voice", request.Text.Length, null, request.Quality);
             if (!policyResult.IsAllowed)
                 return BadRequest(new { error = policyResult.ErrorMessage });
 
@@ -52,11 +66,12 @@ namespace NexClone.Backend.Areas.AI.Controllers
 
             try
             {
-                var (audioStream, contentType, fileExtension) = await _ttsService.GenerateAudioAsync(
+                var (audioStream, contentType, fileExtension, providerName, modelName) = await _ttsService.GenerateAudioAsync(
                     request.Text,
                     request.Language,
                     request.VoiceName,
-                    request.StyleInstruction
+                    request.StyleInstruction,
+                    request.Quality
                 );
 
                 // Upload to MinIO
@@ -76,6 +91,7 @@ namespace NexClone.Backend.Areas.AI.Controllers
                     Lang = request.Language,
                     Voice = request.VoiceName,
                     FileUrl = fileUrl,
+                    ResultText = modelName ?? "",
                     CreditsUsed = cost
                 };
                 _dbContext.GenerationHistories.Add(history);
@@ -87,7 +103,22 @@ namespace NexClone.Backend.Areas.AI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Error generating audio", details = ex.Message });
+                var history = new GenerationHistory
+                {
+                    UserId = userId,
+                    Type = "text-to-voice",
+                    Title = request.Text.Length > 30 ? request.Text.Substring(0, 30) + "..." : request.Text,
+                    InputText = request.Text,
+                    Status = "failed",
+                    ErrorMessage = ex.Message,
+                    Lang = request.Language ?? "Auto",
+                    Voice = request.VoiceName ?? "-",
+                    CreditsUsed = 0 // refund or 0
+                };
+                _dbContext.GenerationHistories.Add(history);
+                await _dbContext.SaveChangesAsync();
+
+                return StatusCode(500, new { error = "Error generating audio: " + ex.Message });
             }
         }
 
@@ -109,7 +140,7 @@ namespace NexClone.Backend.Areas.AI.Controllers
                 return Unauthorized();
             }
 
-            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "text-to-voice", request.Text.Length);
+            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "text-to-voice", request.Text.Length, null, request.Quality);
             if (!policyResult.IsAllowed)
             {
                 Console.WriteLine($"[ESTIMATE] Policy Denied: {policyResult.ErrorMessage}");
@@ -126,5 +157,6 @@ namespace NexClone.Backend.Areas.AI.Controllers
         public string? Language { get; set; } = "other"; // "arabic" or "other"
         public string? VoiceName { get; set; } = string.Empty;
         public string? StyleInstruction { get; set; } = string.Empty;
+        public string Quality { get; set; } = "Standard";
     }
 }

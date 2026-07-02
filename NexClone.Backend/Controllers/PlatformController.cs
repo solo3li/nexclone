@@ -24,7 +24,10 @@ namespace NexClone.Backend.Controllers
         public async Task<IActionResult> GetStats()
         {
             var userCount = await _context.Users.CountAsync();
-            var subCount = await _context.Subscriptions.CountAsync();
+            var subCount = await _context.Subscriptions
+                .Include(s => s.Plan)
+                .Where(s => s.Status == "active" && s.Plan.PriceUsd > 0 && !s.Plan.IsDefaultRegistrationPlan)
+                .CountAsync();
 
             return Ok(new
             {
@@ -38,7 +41,10 @@ namespace NexClone.Backend.Controllers
         [HttpGet("plans")]
         public async Task<IActionResult> GetPlans()
         {
-            var plans = await _context.Plans.OrderBy(p => p.PriceUsd).ToListAsync();
+            var plans = await _context.Plans
+                .Where(p => !p.IsDefaultRegistrationPlan)
+                .OrderBy(p => p.PriceUsd)
+                .ToListAsync();
             return Ok(plans);
         }
 
@@ -110,20 +116,13 @@ namespace NexClone.Backend.Controllers
         {
             int maxChars = 150; // Default
             bool customInstructionsEnabled = false;
+            List<string> allowedVoices = null;
 
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
                 var userIdStr = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
                 if (Guid.TryParse(userIdStr, out var userId))
                 {
-                    var user = await _context.Users.FindAsync(userId);
-                    if (user != null && user.IsStaff)
-                    {
-                        // Staff gets maximum features by default or we can check the db
-                        maxChars = 10000;
-                        customInstructionsEnabled = true;
-                    }
-
                     var activeSubscription = await _context.Subscriptions
                         .Include(s => s.Plan)
                         .Where(s => s.UserId == userId && s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow)
@@ -132,9 +131,12 @@ namespace NexClone.Backend.Controllers
 
                     if (activeSubscription?.Plan != null)
                     {
-                        // If they have a plan, it overrides defaults, even for staff (so staff can test limits)
                         maxChars = activeSubscription.Plan.TtsMaxCharsPerRequest;
                         customInstructionsEnabled = activeSubscription.Plan.TtsCustomInstructionsEnabled;
+                        if (!string.IsNullOrEmpty(activeSubscription.Plan.AllowedVoices))
+                        {
+                            allowedVoices = activeSubscription.Plan.AllowedVoices.Split(',').Select(v => v.Trim()).ToList();
+                        }
                     }
                 }
             }
@@ -144,7 +146,7 @@ namespace NexClone.Backend.Controllers
 
             bool isMaintenanceMode = activeToolConfig?.IsMaintenanceMode ?? false;
 
-            return Ok(new { maxChars = maxChars, customInstructionsEnabled = customInstructionsEnabled, isMaintenanceMode = isMaintenanceMode });
+            return Ok(new { maxChars = maxChars, customInstructionsEnabled = customInstructionsEnabled, isMaintenanceMode = isMaintenanceMode, allowedVoices = allowedVoices });
         }
 
         [HttpGet("vtt-config")]
@@ -156,6 +158,54 @@ namespace NexClone.Backend.Controllers
             bool isMaintenanceMode = activeToolConfig?.IsMaintenanceMode ?? false;
 
             return Ok(new { isMaintenanceMode = isMaintenanceMode });
+        }
+
+        [HttpGet("payment-methods")]
+        public async Task<IActionResult> GetPaymentMethods()
+        {
+            var settings = await _context.AppSettings.ToListAsync();
+            
+            bool paymobMaintenance = settings.FirstOrDefault(s => s.Key == "Payment.Paymob.Maintenance")?.Value == "true";
+            bool payPalMaintenance = settings.FirstOrDefault(s => s.Key == "Payment.PayPal.Maintenance")?.Value == "true";
+            bool manualMaintenance = settings.FirstOrDefault(s => s.Key == "Payment.Manual.Maintenance")?.Value == "true";
+
+            return Ok(new
+            {
+                PaymobMaintenance = paymobMaintenance,
+                PayPalMaintenance = payPalMaintenance,
+                ManualMaintenance = manualMaintenance
+            });
+        }
+
+        [HttpGet("social-links")]
+        public async Task<IActionResult> GetSocialLinks()
+        {
+            var settings = await _context.AppSettings
+                .Where(s => s.Key.StartsWith("Social."))
+                .ToListAsync();
+
+            var links = settings.ToDictionary(s => s.Key.Replace("Social.", ""), s => s.Value);
+            return Ok(links);
+        }
+
+        [HttpGet("custom-page/{slug}")]
+        public async Task<IActionResult> GetCustomPage(string slug)
+        {
+            var page = await _context.CustomPages.FirstOrDefaultAsync(p => p.Slug == slug);
+            if (page == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(new
+            {
+                page.Slug,
+                page.TitleEn,
+                page.TitleAr,
+                page.ContentEn,
+                page.ContentAr,
+                page.UpdatedAt
+            });
         }
     }
 }

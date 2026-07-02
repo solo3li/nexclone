@@ -32,7 +32,7 @@ namespace NexClone.Backend.Controllers.Api
                 return Unauthorized();
 
             var history = await _dbContext.GenerationHistories
-                .Where(h => h.UserId == userId)
+                .Where(h => h.UserId == userId && !h.IsDeletedByUser)
                 .OrderByDescending(h => h.CreatedAt)
                 .Select(h => new
                 {
@@ -61,7 +61,7 @@ namespace NexClone.Backend.Controllers.Api
                 return Unauthorized();
 
             var record = await _dbContext.GenerationHistories
-                .Where(h => h.Id == id && h.UserId == userId)
+                .Where(h => h.Id == id && h.UserId == userId && !h.IsDeletedByUser)
                 .Select(h => new
                 {
                     id = h.Id,
@@ -126,7 +126,7 @@ namespace NexClone.Backend.Controllers.Api
             if (record == null)
                 return NotFound();
 
-            _dbContext.GenerationHistories.Remove(record);
+            record.IsDeletedByUser = true;
             await _dbContext.SaveChangesAsync();
 
             return Ok(new { success = true });

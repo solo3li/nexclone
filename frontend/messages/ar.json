@@ -332,30 +332,22 @@
     "products": {
       "title": "المنتجات",
       "links": [
-        "تحويل الصوت لنص",
-        "إزالة الخلفية",
-        "الترجمة الذكية",
-        "توليد الموسيقى",
-        "المطورين (API)"
+        "تحويل الصوت إلى نص",
+        "تحويل النص إلى صوت"
       ]
     },
     "company": {
       "title": "الشركة",
       "links": [
         "من نحن",
-        "الوظائف",
         "المدونة",
-        "تواصل معنا",
-        "شركاء النجاح"
+        "تواصل معنا"
       ]
     },
     "legal": {
       "title": "قانوني",
       "links": [
-        "شروط الاستخدام",
-        "سياسة الخصوصية",
-        "سياسة ملفات الارتباط",
-        "إرشادات الاستخدام"
+        "سياسة الخصوصية"
       ]
     },
     "rights": "جميع الحقوق محفوظة. NexMedia AI"
@@ -437,7 +429,7 @@
     "languageMode": "وضع اللغة",
     "arabic": "العربية",
     "otherLangs": "لغات أخرى",
-    "freeAccountNotice": "الحساب المجاني - حتى 150 حرف والأصوات المجانية فقط",
+    "freeAccountNotice": "الحساب المجاني - حتى {maxChars} حرف والأصوات المجانية فقط",
     "upgradeNow": "ترقية الآن",
     "chooseVoice": "اختر الصوت",
     "all": "الكل",
@@ -451,10 +443,11 @@
     "emotion": "مستشعر",
     "performanceStyle": "أسلوب الأداء",
     "customInstructions": "إرشادات مخصصة",
+    "customInstructionsPlaceholder": "أدخل توجيهات إضافية للصوت...",
     "recentConversions": "Recent Conversions",
     "refresh": "Refresh",
     "noConversions": "No conversions yet",
-    "textPlaceholder": "أدخل النص هنا (الحد الأقصى 150 حرف)",
+    "textPlaceholder": "أدخل النص هنا (الحد الأقصى {maxChars} حرف)",
     "processing": "جاري التوليد...",
     "process": "إنشاء صوت",
     "result": "النتيجة",

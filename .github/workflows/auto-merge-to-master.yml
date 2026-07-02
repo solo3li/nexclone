@@ -1,0 +1,33 @@
+name: Auto Sync to Master
+
+on:
+  push:
+    branches:
+      - dev
+      - production
+
+jobs:
+  sync-to-master:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge to Master
+        run: |
+          git checkout master
+          git pull origin master
+          
+          # Merge the pushed branch into master
+          git merge origin/${{ github.ref_name }} --no-edit
+          
+          # Push changes to master
+          git push origin master

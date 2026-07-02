@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace NexClone.Backend.Controllers
 {
+    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Admin")]
     public class ToolConfigAdminController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -19,94 +22,79 @@ namespace NexClone.Backend.Controllers
 
         public async Task<IActionResult> Index()
         {
-            ViewData["Title"] = "Tool Configurations";
-            var configs = await _context.ToolConfigurations.OrderByDescending(c => c.UpdatedAt).ToListAsync();
-            return View(configs);
-        }
+            ViewData["Title"] = "Tool Settings";
+            
+            var allConfigs = await _context.ToolConfigurations.Include(c => c.RoutingRules).ToListAsync();
+            var providers = await _context.ApiConfigurations.Where(a => a.IsActive).Select(a => a.ProviderName).ToListAsync();
+            
+            ViewBag.Providers = new SelectList(providers);
 
-        public async Task<IActionResult> Create()
-        {
-            ViewData["Title"] = "Add Tool Configuration";
-            var toolNames = new List<string> { "text-to-voice", "voice-to-text" };
-            ViewBag.Tools = new SelectList(toolNames);
-            ViewBag.Plans = await _context.Plans.ToListAsync();
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ToolConfiguration config, Microsoft.AspNetCore.Http.IFormCollection form)
-        {
-            if (ModelState.IsValid)
+            var tools = new[] { "text-to-voice", "voice-to-text" };
+            
+            var toolConfigs = new Dictionary<string, ToolConfiguration>();
+            foreach (var t in tools)
             {
-                config.Id = Guid.NewGuid();
-                config.UpdatedAt = DateTime.UtcNow;
-                _context.Add(config);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            var toolNames = new List<string> { "text-to-voice", "voice-to-text" };
-            ViewBag.Tools = new SelectList(toolNames, config.ToolName);
-            ViewBag.Plans = await _context.Plans.ToListAsync();
-            return View(config);
-        }
-
-        public async Task<IActionResult> Edit(Guid? id)
-        {
-            if (id == null) return NotFound();
-
-            var config = await _context.ToolConfigurations.FindAsync(id);
-            if (config == null) return NotFound();
-
-            ViewData["Title"] = $"Edit Tool Configuration - {config.ToolName}";
-            var toolNames = new List<string> { "text-to-voice", "voice-to-text" };
-            ViewBag.Tools = new SelectList(toolNames, config.ToolName);
-            ViewBag.Plans = await _context.Plans.ToListAsync();
-            return View(config);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, ToolConfiguration config, Microsoft.AspNetCore.Http.IFormCollection form)
-        {
-            if (id != config.Id) return NotFound();
-
-            if (ModelState.IsValid)
-            {
-                try
+                var config = allConfigs.FirstOrDefault(c => c.ToolName == t);
+                if (config == null)
                 {
+                    config = new ToolConfiguration { ToolName = t, Id = Guid.NewGuid() };
+                }
+                toolConfigs[t] = config;
+            }
+
+            return View(toolConfigs);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveConfig(ToolConfiguration config)
+        {
+            if (ModelState.IsValid)
+            {
+                var existing = await _context.ToolConfigurations
+                    .Include(c => c.RoutingRules)
+                    .FirstOrDefaultAsync(c => c.ToolName == config.ToolName);
+
+                if (existing != null)
+                {
+                    existing.IsActive = config.IsActive;
+                    existing.IsMaintenanceMode = config.IsMaintenanceMode;
+                    existing.UpdatedAt = DateTime.UtcNow;
+
+                    _context.ToolRoutingRules.RemoveRange(existing.RoutingRules);
+                    
+                    if (config.RoutingRules != null)
+                    {
+                        foreach (var rule in config.RoutingRules)
+                        {
+                            rule.ToolConfigurationId = existing.Id;
+                            _context.ToolRoutingRules.Add(rule);
+                        }
+                    }
+
+                    _context.Update(existing);
+                }
+                else
+                {
+                    config.Id = Guid.NewGuid();
                     config.UpdatedAt = DateTime.UtcNow;
-                    _context.Update(config);
-                    await _context.SaveChangesAsync();
+                    if (config.RoutingRules != null)
+                    {
+                        foreach (var rule in config.RoutingRules)
+                        {
+                            rule.ToolConfigurationId = config.Id;
+                        }
+                    }
+                    _context.Add(config);
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ToolConfigurationExists(config.Id)) return NotFound();
-                    else throw;
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            var toolNames = new List<string> { "text-to-voice", "voice-to-text" };
-            ViewBag.Tools = new SelectList(toolNames, config.ToolName);
-            ViewBag.Plans = await _context.Plans.ToListAsync();
-            return View(config);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            var config = await _context.ToolConfigurations.FindAsync(id);
-            if (config != null)
-            {
-                _context.ToolConfigurations.Remove(config);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = $"{config.ToolName} settings saved successfully.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = $"Failed to save {config.ToolName} settings.";
             }
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool ToolConfigurationExists(Guid id)
-        {
-            return _context.ToolConfigurations.Any(e => e.Id == id);
         }
     }
 }
