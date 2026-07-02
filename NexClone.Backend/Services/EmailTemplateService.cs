@@ -44,7 +44,7 @@ namespace NexClone.Backend.Services
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
         }}
         .header {{
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            background-color: #161616;
             color: #ffffff;
             padding: 30px 20px;
             text-align: center;
@@ -99,7 +99,7 @@ namespace NexClone.Backend.Services
             font-size: 15px;
         }}
         .highlight {{
-            color: #2575fc;
+            color: #0f62fe;
         }}
         .footer {{
             background-color: #f8f9fa;
@@ -109,17 +109,7 @@ namespace NexClone.Backend.Services
             color: #6c757d;
             border-top: 1px solid #e9ecef;
         }}
-        .btn {{
-            display: inline-block;
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-            color: #ffffff !important;
-            text-decoration: none;
-            padding: 12px 25px;
-            border-radius: 6px;
-            font-weight: 600;
-            margin-top: 10px;
-            text-align: center;
-        }}
+
         @media only screen and (max-width: 600px) {{
             .container {{
                 margin: 20px 10px;
@@ -174,9 +164,6 @@ namespace NexClone.Backend.Services
                 إذا كان لديك أي استفسار أو احتجت إلى مساعدة، فريق الدعم الفني لدينا جاهز لخدمتك في أي وقت.
             </p>
 
-            <div style=""text-align: center; margin-top: 30px;"">
-                <a href=""https://nexmedia.com/profile"" class=""btn"">انتقل إلى حسابك الآن</a>
-            </div>
         </div>
         <div class=""footer"">
             <p>هذه رسالة تلقائية، يرجى عدم الرد عليها.</p>
