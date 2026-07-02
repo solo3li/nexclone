@@ -131,7 +131,6 @@ namespace NexClone.Backend.Controllers
 
                     if (activeSubscription?.Plan != null)
                     {
-                        // If they have a plan, it overrides defaults, even for staff (so staff can test limits)
                         maxChars = activeSubscription.Plan.TtsMaxCharsPerRequest;
                         customInstructionsEnabled = activeSubscription.Plan.TtsCustomInstructionsEnabled;
                         if (!string.IsNullOrEmpty(activeSubscription.Plan.AllowedVoices))
