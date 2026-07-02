@@ -200,9 +200,28 @@ export default function ProfilePage() {
                 </div>
                 <div className="flex justify-between items-center pb-4 border-b border-white/5">
                   <span className="text-white/60">{t('subscription.status')}</span>
-                  <span className="text-emerald-400 font-medium text-sm flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400" /> {user?.activePlan ? user.activePlan.status : "Active"}
-                  </span>
+                  {(() => {
+                    const status = (user?.activePlan?.status || "Active").toLowerCase();
+                    let color = "text-emerald-400";
+                    let bgColor = "bg-emerald-400";
+                    let text = isRtl ? "نشط" : "Active";
+                    
+                    if (status === "freeze") {
+                      color = "text-amber-400";
+                      bgColor = "bg-amber-400";
+                      text = isRtl ? "فترة السماح" : "Grace Period";
+                    } else if (status === "expired") {
+                      color = "text-rose-400";
+                      bgColor = "bg-rose-400";
+                      text = isRtl ? "منتهي" : "Expired";
+                    }
+
+                    return (
+                      <span className={`${color} font-medium text-sm flex items-center gap-1`}>
+                        <span className={`w-2 h-2 rounded-full ${bgColor}`} /> {text}
+                      </span>
+                    );
+                  })()}
                 </div>
                 <div className="flex justify-between items-center pb-4 border-b border-white/5">
                   <span className="text-white/60">{isRtl ? "تاريخ الانتهاء" : "Expiration Date"}</span>

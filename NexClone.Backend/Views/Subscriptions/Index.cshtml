@@ -73,14 +73,20 @@
                     <td>
                         <form asp-action="UpdateEndDate" method="post" style="display:flex; gap: 5px; align-items: center;">
                             <input type="hidden" name="id" value="@item.Id" />
-                            <input type="date" name="newEndDate" value="@item.EndDate.ToString("yyyy-MM-dd")" class="bx--text-input" style="height: 30px; font-size: 12px; padding: 0 5px;" required />
+                            <input type="datetime-local" name="newEndDate" value="@item.EndDate.ToString("yyyy-MM-ddTHH:mm")" class="bx--text-input" style="height: 30px; font-size: 12px; padding: 0 5px;" required />
                             <button type="submit" class="bx--btn bx--btn--primary bx--btn--sm" style="padding: 5px 10px; font-size: 12px; height: 30px; min-height: unset;">
                                 Update
                             </button>
                         </form>
                     </td>
                     <td>
-                        <span style="color: @(item.Status.ToLower() == "active" ? "green" : "gray"); font-weight: bold;">
+                        @{
+                            var statusColor = "gray";
+                            if (item.Status.ToLower() == "active") statusColor = "green";
+                            else if (item.Status.ToLower() == "freeze") statusColor = "orange";
+                            else if (item.Status.ToLower() == "expired") statusColor = "red";
+                        }
+                        <span style="color: @statusColor; font-weight: bold;">
                             @item.Status.ToUpper()
                         </span>
                     </td>

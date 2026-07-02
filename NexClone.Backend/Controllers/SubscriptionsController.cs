@@ -71,7 +71,10 @@ namespace NexClone.Backend.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateEndDate(int id, DateTime newEndDate)
         {
-            var sub = await _context.Subscriptions.FindAsync(id);
+            var sub = await _context.Subscriptions
+                .Include(s => s.Plan)
+                .FirstOrDefaultAsync(s => s.Id == id);
+
             if (sub != null)
             {
                 try 
@@ -79,12 +82,21 @@ namespace NexClone.Backend.Controllers
                     // PostgreSQL requires DateTimeKind.Utc
                     var utcEndDate = DateTime.SpecifyKind(newEndDate, DateTimeKind.Utc);
                     sub.EndDate = utcEndDate;
-                    // If the new end date is in the past, update the status to expired
+                    
+                    // If the new end date is in the past, calculate freeze/expired status
                     if (utcEndDate <= DateTime.UtcNow)
                     {
-                        sub.Status = "expired";
+                        var freezeEndDate = utcEndDate.AddDays(sub.Plan.GracePeriodDays);
+                        if (DateTime.UtcNow <= freezeEndDate)
+                        {
+                            sub.Status = "freeze";
+                        }
+                        else
+                        {
+                            sub.Status = "expired";
+                        }
                     }
-                    else if (sub.Status == "expired")
+                    else
                     {
                         sub.Status = "active";
                     }
@@ -93,9 +105,9 @@ namespace NexClone.Backend.Controllers
                     await _context.SaveChangesAsync();
                     TempData["SuccessMessage"] = "Subscription end date updated successfully.";
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    TempData["ErrorMessage"] = "Failed to update subscription end date.";
+                    TempData["ErrorMessage"] = "Failed to update subscription end date: " + ex.Message;
                 }
             }
             else 
