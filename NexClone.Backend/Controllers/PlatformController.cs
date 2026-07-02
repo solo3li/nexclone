@@ -123,14 +123,6 @@ namespace NexClone.Backend.Controllers
                 var userIdStr = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
                 if (Guid.TryParse(userIdStr, out var userId))
                 {
-                    var user = await _context.Users.FindAsync(userId);
-                    if (user != null && user.IsStaff)
-                    {
-                        // Staff gets maximum features by default or we can check the db
-                        maxChars = 10000;
-                        customInstructionsEnabled = true;
-                    }
-
                     var activeSubscription = await _context.Subscriptions
                         .Include(s => s.Plan)
                         .Where(s => s.UserId == userId && s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow)

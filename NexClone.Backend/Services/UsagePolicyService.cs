@@ -51,23 +51,12 @@ namespace NexClone.Backend.Services
             {
                 targetPlan = activeSubscription.Plan;
             }
-            else if (user.IsStaff)
-            {
-                // Fallback for staff without subscription so they can still test but get charged
-                targetPlan = await _context.Plans.FirstOrDefaultAsync() ?? new Plan();
-            }
             else
             {
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "No active subscription found." };
             }
 
             var toolPolicy = GetToolPolicy(targetPlan, toolId, quality);
-            if (user.IsStaff) 
-            {
-                toolPolicy.Enabled = true;
-                toolPolicy.MaxCharsPerRequest = -1;
-                toolPolicy.MaxFileSizeMb = -1;
-            }
 
             if (!toolPolicy.Enabled)
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Your current plan does not have access to this tool." };
