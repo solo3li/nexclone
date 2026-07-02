@@ -277,9 +277,6 @@ namespace NexClone.Backend.Services
             <p style=""line-height: 1.6;"">
                 للحفاظ على رصيدك والاستمرار في التمتع بخدمات الذكاء الاصطناعي، يرجى تسجيل الدخول وتجديد باقتك في أقرب وقت.
             </p>
-            <div style=""text-align: center; margin-top: 30px;"">
-                <a href=""https://nexmedia.com/pricing"" class=""btn"">تجديد الاشتراك الآن</a>
-            </div>
         </div>
         <div class=""footer"">
             <p>هذه رسالة تلقائية، يرجى عدم الرد عليها.</p>
@@ -390,9 +387,6 @@ namespace NexClone.Backend.Services
             <p style=""line-height: 1.6;"">
                 نأمل أن تكون قد استمتعت بخدماتنا. لا يزال بإمكانك العودة والاستمتاع بأدوات الذكاء الاصطناعي من خلال الاشتراك في إحدى باقاتنا المتاحة.
             </p>
-            <div style=""text-align: center; margin-top: 30px;"">
-                <a href=""https://nexmedia.com/pricing"" class=""btn"">اشترك الآن لتفعيل حسابك</a>
-            </div>
         </div>
         <div class=""footer"">
             <p>هذه رسالة تلقائية، يرجى عدم الرد عليها.</p>
