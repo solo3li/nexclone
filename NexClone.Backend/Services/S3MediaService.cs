@@ -152,7 +152,15 @@ namespace NexClone.Backend.Services
                     .WithObject(objectName)
                     .WithExpiry(60 * 60 * 24 * 7); // 7 days expiry
 
-                return await _minioClient.PresignedGetObjectAsync(presignedGetObjectArgs).ConfigureAwait(false);
+                string url = await _minioClient.PresignedGetObjectAsync(presignedGetObjectArgs).ConfigureAwait(false);
+                
+                var publicEndpoint = Environment.GetEnvironmentVariable("MINIO_PUBLIC_ENDPOINT");
+                if (!string.IsNullOrWhiteSpace(publicEndpoint) && !string.IsNullOrWhiteSpace(_endpoint))
+                {
+                    url = url.Replace(_endpoint, publicEndpoint);
+                }
+                
+                return url;
             }
             catch (Exception ex)
             {
@@ -180,7 +188,15 @@ namespace NexClone.Backend.Services
                 .WithObject(actualObjectName)
                 .WithExpiry(60 * 60); // 1 hour expiry
 
-            return await _minioClient.PresignedPutObjectAsync(presignedPutObjectArgs).ConfigureAwait(false);
+            string url = await _minioClient.PresignedPutObjectAsync(presignedPutObjectArgs).ConfigureAwait(false);
+            
+            var publicEndpoint = Environment.GetEnvironmentVariable("MINIO_PUBLIC_ENDPOINT");
+            if (!string.IsNullOrWhiteSpace(publicEndpoint) && !string.IsNullOrWhiteSpace(_endpoint))
+            {
+                url = url.Replace(_endpoint, publicEndpoint);
+            }
+            
+            return url;
         }
     }
 }

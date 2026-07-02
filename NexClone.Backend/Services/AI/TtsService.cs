@@ -61,16 +61,43 @@ namespace NexClone.Backend.Services.AI
 
         private async Task<(string ProviderName, string ModelName)> ResolveProviderAsync(ToolConfiguration config, string language, string quality)
         {
+            var isArabic = language?.ToLower() == "arabic";
+            var hasGemini = await _dbContext.ApiConfigurations.AnyAsync(c => c.ProviderName == "Gemini" && c.IsActive);
+            
+            // Hardcoded logic for High Quality as requested by user
+            if (quality == "High" && hasGemini && isArabic)
+            {
+                var currentDate = DateTime.UtcNow.Date;
+                var toolName = config?.ToolName ?? "text-to-voice";
+                
+                var model1 = "gemini-3.1-flash-tts-preview";
+                var count1 = await _dbContext.GenerationHistories.CountAsync(h => h.Type == toolName && h.ResultText == model1 && h.CreatedAt >= currentDate);
+                
+                if (count1 < 95) 
+                {
+                    return ("Gemini", model1);
+                }
+
+                var model2 = "gemini-2.5-pro-tts";
+                var count2 = await _dbContext.GenerationHistories.CountAsync(h => h.Type == toolName && h.ResultText == model2 && h.CreatedAt >= currentDate);
+                
+                if (count2 < 95) 
+                {
+                    return ("Gemini", model2);
+                }
+
+                throw new Exception("يوجد ضغط حاليا الرجاء التحويل لجودة اخرى او الانتظار حتى يقل الضغط");
+            }
+
             if (config == null || config.RoutingRules == null || !config.RoutingRules.Any())
             {
                 // Default logic if no ToolConfiguration or rules are set
                 string provider = "OpenAI";
-                if (language?.ToLower() == "arabic")
+                if (isArabic)
                 {
-                    bool hasGemini = await _dbContext.ApiConfigurations.AnyAsync(c => c.ProviderName == "Gemini" && c.IsActive);
                     provider = hasGemini ? "Gemini" : "Darijat";
                 }
-                return (provider, null);
+                return (provider, provider == "Gemini" ? "gemini-2.5-flash-preview-tts" : null);
             }
 
             var rules = config.RoutingRules
