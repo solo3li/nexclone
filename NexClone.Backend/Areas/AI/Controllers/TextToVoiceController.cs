@@ -103,6 +103,21 @@ namespace NexClone.Backend.Areas.AI.Controllers
             }
             catch (Exception ex)
             {
+                var history = new GenerationHistory
+                {
+                    UserId = userId,
+                    Type = "text-to-voice",
+                    Title = request.Text.Length > 30 ? request.Text.Substring(0, 30) + "..." : request.Text,
+                    InputText = request.Text,
+                    Status = "failed",
+                    ErrorMessage = ex.Message,
+                    Lang = request.Language ?? "Auto",
+                    Voice = request.VoiceName ?? "-",
+                    CreditsUsed = 0 // refund or 0
+                };
+                _dbContext.GenerationHistories.Add(history);
+                await _dbContext.SaveChangesAsync();
+
                 return StatusCode(500, new { error = "Error generating audio: " + ex.Message });
             }
         }

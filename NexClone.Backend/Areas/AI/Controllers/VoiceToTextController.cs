@@ -117,6 +117,20 @@ namespace NexClone.Backend.Areas.AI.Controllers
             }
             catch (Exception ex)
             {
+                var history = new GenerationHistory
+                {
+                    UserId = userId,
+                    Type = "voice-to-text",
+                    Title = request.FileId.Split('/').LastOrDefault() ?? "Audio File",
+                    FileUrl = request.FileId,
+                    Status = "failed",
+                    ErrorMessage = ex.Message,
+                    Lang = request.TargetLanguage ?? "Auto",
+                    CreditsUsed = 0 // refund or 0
+                };
+                _dbContext.GenerationHistories.Add(history);
+                await _dbContext.SaveChangesAsync();
+
                 return StatusCode(500, new { error = "Internal server error during transcription.", details = ex.Message });
             }
         }

@@ -45,6 +45,9 @@ namespace NexClone.Backend.Models
 
         public bool IsDeletedByUser { get; set; } = false;
 
+        [MaxLength(2000)]
+        public string? ErrorMessage { get; set; }
+
         [ForeignKey("UserId")]
         public virtual ApplicationUser User { get; set; } = null!;
     }

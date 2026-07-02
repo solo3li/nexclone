@@ -44,6 +44,14 @@
 
         <!-- Inputs / Outputs -->
         <div class="bx--col-lg-8" style="margin-bottom: 2rem;">
+            @if (Model.Status == "failed" && !string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div style="background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 1.5rem; margin-bottom: 2rem; color: #721c24;">
+                    <h4 style="margin-top: 0; margin-bottom: 0.5rem; font-weight: bold;">Error Details</h4>
+                    <p style="margin: 0; white-space: pre-wrap;">@Model.ErrorMessage</p>
+                </div>
+            }
+
             <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; height: 100%;">
                 <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">I/O Details</h3>
 
