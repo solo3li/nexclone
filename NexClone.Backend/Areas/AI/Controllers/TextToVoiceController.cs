@@ -66,7 +66,7 @@ namespace NexClone.Backend.Areas.AI.Controllers
 
             try
             {
-                var (audioStream, contentType, fileExtension) = await _ttsService.GenerateAudioAsync(
+                var (audioStream, contentType, fileExtension, providerName, modelName) = await _ttsService.GenerateAudioAsync(
                     request.Text,
                     request.Language,
                     request.VoiceName,
@@ -91,6 +91,7 @@ namespace NexClone.Backend.Areas.AI.Controllers
                     Lang = request.Language,
                     Voice = request.VoiceName,
                     FileUrl = fileUrl,
+                    ResultText = modelName ?? "",
                     CreditsUsed = cost
                 };
                 _dbContext.GenerationHistories.Add(history);

@@ -21,7 +21,7 @@ namespace NexClone.Backend.Services.AI
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<(Stream AudioStream, string ContentType, string FileExtension)> GenerateAudioAsync(
+        public async Task<(Stream AudioStream, string ContentType, string FileExtension, string ProviderName, string ModelName)> GenerateAudioAsync(
             string text, 
             string language, 
             string voiceName, 
@@ -43,16 +43,19 @@ namespace NexClone.Backend.Services.AI
 
             if (providerName.Equals("Gemini", StringComparison.OrdinalIgnoreCase))
             {
-                return await GenerateGeminiAudioAsync(text, voiceName, styleInstruction, apiConfig, customModelName);
+                var result = await GenerateGeminiAudioAsync(text, voiceName, styleInstruction, apiConfig, customModelName);
+                return (result.Item1, result.Item2, result.Item3, providerName, customModelName ?? "gemini-2.5-flash-preview-tts");
             }
             else if (providerName.Equals("Darijat", StringComparison.OrdinalIgnoreCase))
             {
-                return await GenerateDarijatAudioAsync(text, voiceName, styleInstruction, apiConfig);
+                var result = await GenerateDarijatAudioAsync(text, voiceName, styleInstruction, apiConfig);
+                return (result.Item1, result.Item2, result.Item3, providerName, customModelName ?? "darijat-voice");
             }
             else
             {
                 // Default to OpenAI
-                return await GenerateOpenAiAudioAsync(text, voiceName, apiConfig, customModelName);
+                var result = await GenerateOpenAiAudioAsync(text, voiceName, apiConfig, customModelName);
+                return (result.Item1, result.Item2, result.Item3, providerName, customModelName ?? "tts-1");
             }
         }
 
@@ -70,52 +73,66 @@ namespace NexClone.Backend.Services.AI
                 return (provider, null);
             }
 
-            var rule = config.RoutingRules.FirstOrDefault(r => r.QualityLevel == quality);
-            if (rule == null)
+            var rules = config.RoutingRules
+                .Where(r => r.QualityLevel == quality)
+                .OrderBy(r => r.Id)
+                .ToList();
+
+            if (!rules.Any())
             {
                 // Fallback to Standard or first available rule if requested quality doesn't exist
-                rule = config.RoutingRules.FirstOrDefault(r => r.QualityLevel == "Standard") ?? config.RoutingRules.First();
+                var fallbackRule = config.RoutingRules.FirstOrDefault(r => r.QualityLevel == "Standard") ?? config.RoutingRules.FirstOrDefault();
+                if (fallbackRule != null)
+                {
+                    rules.Add(fallbackRule);
+                }
             }
 
             var today = DateTime.UtcNow.Date;
             var now = DateTime.UtcNow.TimeOfDay;
             var oneMinuteAgo = DateTime.UtcNow.AddMinutes(-1);
 
-            // Time check
-            if (rule.ActiveFromTime.HasValue && rule.ActiveToTime.HasValue)
+            foreach (var rule in rules)
             {
-                if (rule.ActiveFromTime <= rule.ActiveToTime)
+                // Time check
+                if (rule.ActiveFromTime.HasValue && rule.ActiveToTime.HasValue)
                 {
-                    if (now < rule.ActiveFromTime || now > rule.ActiveToTime)
-                        throw new Exception("The selected quality model is currently outside its active operating hours.");
+                    if (rule.ActiveFromTime <= rule.ActiveToTime)
+                    {
+                        if (now < rule.ActiveFromTime || now > rule.ActiveToTime)
+                            continue;
+                    }
+                    else // wraps around midnight
+                    {
+                        if (now < rule.ActiveFromTime && now > rule.ActiveToTime)
+                            continue;
+                    }
                 }
-                else // wraps around midnight
+
+                // Quota Check
+                if (rule.MaxDailyRequests.HasValue)
                 {
-                    if (now < rule.ActiveFromTime && now > rule.ActiveToTime)
-                        throw new Exception("The selected quality model is currently outside its active operating hours.");
+                    // Match the model exactly to allow fallback sequence for same tool
+                    var dailyCount = await _dbContext.GenerationHistories
+                        .CountAsync(h => h.Type == config.ToolName && h.ResultText == rule.ModelName && h.CreatedAt >= today);
+                    
+                    if (dailyCount >= rule.MaxDailyRequests.Value)
+                        continue;
                 }
+
+                if (rule.MaxRequestsPerMinute.HasValue)
+                {
+                    var minuteCount = await _dbContext.GenerationHistories
+                        .CountAsync(h => h.Type == config.ToolName && h.ResultText == rule.ModelName && h.CreatedAt >= oneMinuteAgo);
+
+                    if (minuteCount >= rule.MaxRequestsPerMinute.Value)
+                        continue;
+                }
+
+                return (rule.ProviderName, rule.ModelName);
             }
 
-            // Quota Check
-            if (rule.MaxDailyRequests.HasValue)
-            {
-                var dailyCount = await _dbContext.GenerationHistories
-                    .CountAsync(h => h.Type == config.ToolName && h.CreatedAt >= today);
-                
-                if (dailyCount >= rule.MaxDailyRequests.Value)
-                    throw new Exception("There is high demand on this quality, please choose another quality.");
-            }
-
-            if (rule.MaxRequestsPerMinute.HasValue)
-            {
-                var minuteCount = await _dbContext.GenerationHistories
-                    .CountAsync(h => h.Type == config.ToolName && h.CreatedAt >= oneMinuteAgo);
-
-                if (minuteCount >= rule.MaxRequestsPerMinute.Value)
-                    throw new Exception("There is high demand on this quality, please choose another quality.");
-            }
-
-            return (rule.ProviderName, rule.ModelName);
+            throw new Exception("يوجد ضغط حاليا الرجاء التحويل لجودة اخرى او الانتظار حتى يقل الضغط");
         }
 
         private async Task<(Stream, string, string)> GenerateOpenAiAudioAsync(string text, string voiceName, ApiConfiguration config, string customModelName = null)
