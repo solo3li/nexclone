@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace NexClone.Backend.Controllers
@@ -27,14 +28,16 @@ namespace NexClone.Backend.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IMediaService _mediaService;
         private readonly IEmailService _emailService;
+        private readonly IEmailTemplateService _emailTemplateService;
 
-        public AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration, ApplicationDbContext context, IMediaService mediaService, IEmailService emailService)
+        public AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration, ApplicationDbContext context, IMediaService mediaService, IEmailService emailService, IEmailTemplateService emailTemplateService)
         {
             _userManager = userManager;
             _configuration = configuration;
             _context = context;
             _mediaService = mediaService;
             _emailService = emailService;
+            _emailTemplateService = emailTemplateService;
         }
 
         private static readonly HttpClient _httpClient = new HttpClient();
@@ -465,14 +468,35 @@ namespace NexClone.Backend.Controllers
                 if (targetPlan != null)
                 {
                     user.AvailableCredits += targetPlan.MonthlyCredits;
-                    _context.Subscriptions.Add(new Subscription
+                    var sub = new Subscription
                     {
                         UserId = user.Id,
                         PlanId = targetPlan.Id,
                         StartDate = DateTime.UtcNow,
                         EndDate = DateTime.UtcNow.AddDays(targetPlan.DurationDays),
                         Status = "active"
-                    });
+                    };
+                    _context.Subscriptions.Add(sub);
+                    
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(user.Email))
+                        {
+                            var htmlBody = _emailTemplateService.GetSubscriptionReceiptEmail(
+                                user.FullName ?? user.Email,
+                                targetPlan.NameAr ?? targetPlan.Name,
+                                sub.StartDate,
+                                sub.EndDate,
+                                targetPlan.MonthlyCredits,
+                                0m);
+                            
+                            await _emailService.SendEmailAsync(user.Email, user.FullName ?? "", "تم تفعيل اشتراكك بنجاح - NexMedia AI", htmlBody);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Failed to send free plan email: " + ex.Message);
+                    }
                 }
             }
 

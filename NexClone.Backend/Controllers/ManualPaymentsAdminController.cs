@@ -6,6 +6,7 @@ using NexClone.Backend.Models;
 using System.Linq;
 using System.Threading.Tasks;
 using System;
+using NexClone.Backend.Services;
 
 namespace NexClone.Backend.Controllers
 {
@@ -13,10 +14,14 @@ namespace NexClone.Backend.Controllers
     public class ManualPaymentsAdminController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEmailService _emailService;
+        private readonly IEmailTemplateService _emailTemplateService;
 
-        public ManualPaymentsAdminController(ApplicationDbContext context)
+        public ManualPaymentsAdminController(ApplicationDbContext context, IEmailService emailService, IEmailTemplateService emailTemplateService)
         {
             _context = context;
+            _emailService = emailService;
+            _emailTemplateService = emailTemplateService;
         }
 
         public async Task<IActionResult> Index()
@@ -105,6 +110,29 @@ namespace NexClone.Backend.Controllers
             _context.Users.Update(payment.User);
 
             await _context.SaveChangesAsync();
+
+            // Send Email Receipt
+            try
+            {
+                var sub = existingSub ?? await _context.Subscriptions.OrderByDescending(s => s.Id).FirstOrDefaultAsync(s => s.UserId == payment.UserId && s.PlanId == payment.Plan.Id);
+                if (sub != null && !string.IsNullOrEmpty(payment.User.Email))
+                {
+                    var htmlBody = _emailTemplateService.GetSubscriptionReceiptEmail(
+                        payment.User.FullName ?? payment.User.Email,
+                        payment.Plan.NameAr ?? payment.Plan.Name,
+                        sub.StartDate,
+                        sub.EndDate,
+                        payment.Plan.MonthlyCredits,
+                        payment.Amount);
+                    
+                    await _emailService.SendEmailAsync(payment.User.Email, payment.User.FullName ?? "", "تم تفعيل اشتراكك بنجاح - NexMedia AI", htmlBody);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed to send manual payment approval email: " + ex.Message);
+            }
+
             return RedirectToAction(nameof(Index));
         }
 

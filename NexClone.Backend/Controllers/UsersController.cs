@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using NexClone.Backend.Models;
-using System;
 using System.Threading.Tasks;
 using System.Linq;
+using NexClone.Backend.Services;
 
 namespace NexClone.Backend.Controllers
 {
@@ -14,10 +14,14 @@ namespace NexClone.Backend.Controllers
     public class UsersController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEmailService _emailService;
+        private readonly IEmailTemplateService _emailTemplateService;
 
-        public UsersController(ApplicationDbContext context)
+        public UsersController(ApplicationDbContext context, IEmailService emailService, IEmailTemplateService emailTemplateService)
         {
             _context = context;
+            _emailService = emailService;
+            _emailTemplateService = emailTemplateService;
         }
 
         public async Task<IActionResult> Index(string searchString, int? planId, int pageNumber = 1)
@@ -116,15 +120,36 @@ namespace NexClone.Backend.Controllers
                 if (targetPlan != null)
                 {
                     user.AvailableCredits = targetPlan.MonthlyCredits;
-                    _context.Subscriptions.Add(new Subscription
+                    var sub = new Subscription
                     {
                         UserId = user.Id,
                         PlanId = targetPlan.Id,
                         StartDate = DateTime.UtcNow,
                         EndDate = DateTime.UtcNow.AddDays(targetPlan.DurationDays),
                         Status = "Active"
-                    });
+                    };
+                    _context.Subscriptions.Add(sub);
                     await _context.SaveChangesAsync();
+
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(user.Email))
+                        {
+                            var htmlBody = _emailTemplateService.GetSubscriptionReceiptEmail(
+                                user.FullName ?? user.Email,
+                                targetPlan.NameAr ?? targetPlan.Name,
+                                sub.StartDate,
+                                sub.EndDate,
+                                targetPlan.MonthlyCredits,
+                                0m);
+                            
+                            await _emailService.SendEmailAsync(user.Email, user.FullName ?? "", "تم تفعيل اشتراكك بنجاح - NexMedia AI", htmlBody);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Failed to send plan assignment email (Create): " + ex.Message);
+                    }
                 }
 
                 return RedirectToAction(nameof(Index));
@@ -188,6 +213,27 @@ namespace NexClone.Backend.Controllers
             user.AvailableCredits += plan.MonthlyCredits;
 
             await _context.SaveChangesAsync();
+
+            // Send Email Receipt
+            try
+            {
+                if (!string.IsNullOrEmpty(user.Email))
+                {
+                    var htmlBody = _emailTemplateService.GetSubscriptionReceiptEmail(
+                        user.FullName ?? user.Email,
+                        plan.NameAr ?? plan.Name,
+                        newSub.StartDate,
+                        newSub.EndDate,
+                        plan.MonthlyCredits,
+                        0m);
+                    
+                    await _emailService.SendEmailAsync(user.Email, user.FullName ?? "", "تم تفعيل اشتراكك بنجاح - NexMedia AI", htmlBody);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed to send plan assignment email: " + ex.Message);
+            }
 
             return RedirectToAction(nameof(Details), new { id = userId });
         }

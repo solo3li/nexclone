@@ -134,6 +134,7 @@ builder.Services.AddScoped<NexClone.Backend.Services.IMediaService, NexClone.Bac
 
 // Register Email Service
 builder.Services.AddScoped<NexClone.Backend.Services.IEmailService, NexClone.Backend.Services.BrevoEmailService>();
+builder.Services.AddScoped<NexClone.Backend.Services.IEmailTemplateService, NexClone.Backend.Services.EmailTemplateService>();
 
 // Register Payment Service
 builder.Services.AddHttpClient();
