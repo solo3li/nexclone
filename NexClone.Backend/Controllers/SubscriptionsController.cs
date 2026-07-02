@@ -16,14 +16,52 @@ namespace NexClone.Backend.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? planId, string status, string datePeriod, DateTime? startDate, DateTime? endDate)
         {
-            var subscriptions = await _context.Subscriptions
+            var query = _context.Subscriptions
                 .Include(s => s.Plan)
                 .Include(s => s.User)
                 .Where(s => s.Plan.PriceUsd > 0 && !s.Plan.IsDefaultRegistrationPlan)
-                .OrderByDescending(s => s.CreatedAt)
-                .ToListAsync();
+                .AsQueryable();
+
+            if (planId.HasValue)
+            {
+                query = query.Where(s => s.PlanId == planId.Value);
+            }
+
+            if (!string.IsNullOrEmpty(status))
+            {
+                query = query.Where(s => s.Status.ToLower() == status.ToLower());
+            }
+
+            if (!string.IsNullOrEmpty(datePeriod))
+            {
+                var now = DateTime.UtcNow;
+                if (datePeriod == "last7days")
+                {
+                    var date = now.AddDays(-7);
+                    query = query.Where(s => s.CreatedAt >= date);
+                }
+                else if (datePeriod == "last30days")
+                {
+                    var date = now.AddDays(-30);
+                    query = query.Where(s => s.CreatedAt >= date);
+                }
+                else if (datePeriod == "last90days")
+                {
+                    var date = now.AddDays(-90);
+                    query = query.Where(s => s.CreatedAt >= date);
+                }
+                else if (datePeriod == "custom")
+                {
+                    if (startDate.HasValue)
+                        query = query.Where(s => s.CreatedAt >= startDate.Value.ToUniversalTime());
+                    if (endDate.HasValue)
+                        query = query.Where(s => s.CreatedAt <= endDate.Value.ToUniversalTime().AddDays(1).AddTicks(-1));
+                }
+            }
+
+            var subscriptions = await query.OrderByDescending(s => s.CreatedAt).ToListAsync();
 
             var userIds = subscriptions.Select(s => s.UserId).Distinct().ToList();
 
@@ -41,6 +79,14 @@ namespace NexClone.Backend.Controllers
             }
 
             ViewBag.LastUsedDates = lastUsedDates;
+            ViewBag.Plans = await _context.Plans.ToListAsync();
+            
+            // Preserve filter selections in ViewBag
+            ViewBag.SelectedPlanId = planId;
+            ViewBag.SelectedStatus = status;
+            ViewBag.SelectedDatePeriod = datePeriod;
+            ViewBag.SelectedStartDate = startDate?.ToString("yyyy-MM-dd");
+            ViewBag.SelectedEndDate = endDate?.ToString("yyyy-MM-dd");
 
             return View(subscriptions);
         }

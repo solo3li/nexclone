@@ -11,6 +11,106 @@
         <p class="bx--data-table-header__description">View and manage all active and past user subscriptions.</p>
     </div>
 
+    <!-- Advanced Filters Form -->
+    <div style="background-color: #f4f4f4; padding: 1.5rem; margin-bottom: 1.5rem; border-left: 4px solid #0f62fe;">
+        <h5 style="margin-bottom: 1rem; font-weight: 600;">Advanced Filters</h5>
+        <form method="get" action="@Url.Action("Index")">
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
+                
+                <!-- Plan Filter -->
+                <div class="bx--form-item" style="flex: 1; min-width: 200px;">
+                    <div class="bx--select">
+                        <label for="planId" class="bx--label">Plan Type</label>
+                        <div class="bx--select-input__wrapper">
+                            <select id="planId" name="planId" class="bx--select-input">
+                                <option class="bx--select-option" value="" selected="@(ViewBag.SelectedPlanId == null ? "selected" : null)">All Plans</option>
+                                @if(ViewBag.Plans != null)
+                                {
+                                    foreach(var plan in (IEnumerable<NexClone.Backend.Models.Plan>)ViewBag.Plans)
+                                    {
+                                        <option class="bx--select-option" value="@plan.Id" selected="@(ViewBag.SelectedPlanId != null && ViewBag.SelectedPlanId.ToString() == plan.Id.ToString() ? "selected" : null)">@plan.Name</option>
+                                    }
+                                }
+                            </select>
+                            <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bx--select__arrow" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 11L3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z"></path></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Filter -->
+                <div class="bx--form-item" style="flex: 1; min-width: 200px;">
+                    <div class="bx--select">
+                        <label for="status" class="bx--label">Status</label>
+                        <div class="bx--select-input__wrapper">
+                            <select id="status" name="status" class="bx--select-input">
+                                <option class="bx--select-option" value="" selected="@(string.IsNullOrEmpty(ViewBag.SelectedStatus) ? "selected" : null)">All Statuses</option>
+                                <option class="bx--select-option" value="active" selected="@(ViewBag.SelectedStatus == "active" ? "selected" : null)">Active</option>
+                                <option class="bx--select-option" value="expired" selected="@(ViewBag.SelectedStatus == "expired" ? "selected" : null)">Expired</option>
+                                <option class="bx--select-option" value="freeze" selected="@(ViewBag.SelectedStatus == "freeze" ? "selected" : null)">Freeze</option>
+                                <option class="bx--select-option" value="canceled" selected="@(ViewBag.SelectedStatus == "canceled" ? "selected" : null)">Canceled</option>
+                            </select>
+                            <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bx--select__arrow" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 11L3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z"></path></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Date Period Filter -->
+                <div class="bx--form-item" style="flex: 1; min-width: 200px;">
+                    <div class="bx--select">
+                        <label for="datePeriod" class="bx--label">Creation Period</label>
+                        <div class="bx--select-input__wrapper">
+                            <select id="datePeriod" name="datePeriod" class="bx--select-input" onchange="toggleCustomDates()">
+                                <option class="bx--select-option" value="" selected="@(string.IsNullOrEmpty(ViewBag.SelectedDatePeriod) ? "selected" : null)">All Time</option>
+                                <option class="bx--select-option" value="last7days" selected="@(ViewBag.SelectedDatePeriod == "last7days" ? "selected" : null)">Last 7 Days</option>
+                                <option class="bx--select-option" value="last30days" selected="@(ViewBag.SelectedDatePeriod == "last30days" ? "selected" : null)">Last 30 Days</option>
+                                <option class="bx--select-option" value="last90days" selected="@(ViewBag.SelectedDatePeriod == "last90days" ? "selected" : null)">Last 90 Days</option>
+                                <option class="bx--select-option" value="custom" selected="@(ViewBag.SelectedDatePeriod == "custom" ? "selected" : null)">Custom Date Range</option>
+                            </select>
+                            <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bx--select__arrow" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 11L3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z"></path></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Custom Dates -->
+                <div id="customDatesContainer" style="display: @(ViewBag.SelectedDatePeriod == "custom" ? "flex" : "none"); gap: 1rem; flex: 2; min-width: 300px;">
+                    <div class="bx--form-item" style="flex: 1;">
+                        <label for="startDate" class="bx--label">Start Date</label>
+                        <input id="startDate" type="date" name="startDate" class="bx--text-input" value="@ViewBag.SelectedStartDate">
+                    </div>
+                    <div class="bx--form-item" style="flex: 1;">
+                        <label for="endDate" class="bx--label">End Date</label>
+                        <input id="endDate" type="date" name="endDate" class="bx--text-input" value="@ViewBag.SelectedEndDate">
+                    </div>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="bx--form-item" style="display: flex; gap: 0.5rem; align-items: flex-end;">
+                    <button class="bx--btn bx--btn--primary" type="submit">
+                        Apply Filters
+                        <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" class="bx--btn__icon"><path d="M11.5 8.5H10v-3h1.5zM7.5 8.5H6v-3h1.5zM3.5 8.5H2v-3h1.5zM14 4v10H2V4h12m0-2H2a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2z"></path></svg>
+                    </button>
+                    <a href="@Url.Action("Index")" class="bx--btn bx--btn--ghost">
+                        Clear
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <script>
+        function toggleCustomDates() {
+            var period = document.getElementById('datePeriod').value;
+            var container = document.getElementById('customDatesContainer');
+            if (period === 'custom') {
+                container.style.display = 'flex';
+            } else {
+                container.style.display = 'none';
+                document.getElementById('startDate').value = '';
+                document.getElementById('endDate').value = '';
+            }
+        }
+    </script>
+
     @if (TempData["SuccessMessage"] != null)
     {
         <div data-notification class="bx--inline-notification bx--inline-notification--success" role="alert" style="margin-bottom: 1rem;">
