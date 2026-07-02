@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NexClone.Backend.Models;
+using NexClone.Backend.Services;
+using System;
+using System.Threading.Tasks;
 
 namespace NexClone.Backend.Controllers
 {
@@ -10,10 +13,17 @@ namespace NexClone.Backend.Controllers
     public class SubscriptionsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEmailService _emailService;
+        private readonly IEmailTemplateService _emailTemplateService;
 
-        public SubscriptionsController(ApplicationDbContext context)
+        public SubscriptionsController(
+            ApplicationDbContext context, 
+            IEmailService emailService, 
+            IEmailTemplateService emailTemplateService)
         {
             _context = context;
+            _emailService = emailService;
+            _emailTemplateService = emailTemplateService;
         }
 
         public async Task<IActionResult> Index(int? planId, string status, string datePeriod, DateTime? startDate, DateTime? endDate)
@@ -154,6 +164,36 @@ namespace NexClone.Backend.Controllers
 
                     _context.Subscriptions.Update(sub);
                     await _context.SaveChangesAsync();
+                    
+                    if (sub.User != null && !string.IsNullOrEmpty(sub.User.Email))
+                    {
+                        if (sub.Status == "freeze")
+                        {
+                            var htmlBody = _emailTemplateService.GetGracePeriodEmail(
+                                sub.User.FullName ?? sub.User.Email,
+                                sub.Plan.NameAr ?? sub.Plan.Name,
+                                sub.Plan.GracePeriodDays);
+
+                            await _emailService.SendEmailAsync(
+                                sub.User.Email, 
+                                sub.User.FullName ?? "", 
+                                "تنبيه: باقتك الآن في فترة السماح - NexMedia AI", 
+                                htmlBody);
+                        }
+                        else if (sub.Status == "expired")
+                        {
+                            var htmlBody = _emailTemplateService.GetSubscriptionExpiredEmail(
+                                sub.User.FullName ?? sub.User.Email,
+                                sub.Plan.NameAr ?? sub.Plan.Name);
+
+                            await _emailService.SendEmailAsync(
+                                sub.User.Email, 
+                                sub.User.FullName ?? "", 
+                                "تنبيه: انتهت صلاحية باقتك - NexMedia AI", 
+                                htmlBody);
+                        }
+                    }
+
                     TempData["SuccessMessage"] = "Subscription end date updated successfully.";
                 }
                 catch (Exception ex)
