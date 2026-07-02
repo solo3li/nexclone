@@ -104,6 +104,7 @@ export default function VoiceToTextPage() {
   const [estimatedCost, setEstimatedCost] = useState<number | null>(null);
   const [isEstimating, setIsEstimating] = useState(false);
   const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
+  const [uploadedFileId, setUploadedFileId] = useState<string | null>(null);
 
   // Audio preview player state
   const [audioPreviewUrl, setAudioPreviewUrl] = useState<string | null>(null);
@@ -206,6 +207,7 @@ export default function VoiceToTextPage() {
     setStage('idle');
     setUploadProgress(0);
     setError("");
+    setUploadedFileId(null);
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -234,6 +236,7 @@ export default function VoiceToTextPage() {
     setIsPlaying(false);
     setCurrentTime(0);
     setDuration(0);
+    setUploadedFileId(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -272,18 +275,33 @@ export default function VoiceToTextPage() {
     setResult("");
 
     try {
-      // Stage 1: Upload
-      setStage('uploading');
-      setUploadProgress(0);
-      const audioFile = file instanceof File
-        ? file
-        : new File([file], "recording.webm", { type: "audio/webm" });
+      // Stage 1: Pre-flight check
+      const fileSizeBytes = file instanceof File ? file.size : file.size; // file.size works for both File and Blob
+      const durationMinutes = duration > 0 ? duration / 60 : 0.01;
+      const estimateRes = await api.post("/api/ai/voice-to-text/estimate", { fileSizeBytes, durationMinutes });
+      
+      const cost = estimateRes.data.estimatedCost;
+      if (user && user.availableCredits < cost) {
+        setError(isRtl ? "رصيدك غير كافٍ لإتمام هذه العملية." : "Insufficient credits for this operation.");
+        return;
+      }
 
-      const fileId = await uploadDirectToMinio(audioFile, 'voice-to-text', (percent) => {
-        setUploadProgress(percent);
-      });
+      // Stage 2: Upload
+      let fileId = uploadedFileId;
+      if (!fileId) {
+        setStage('uploading');
+        setUploadProgress(0);
+        const audioFile = file instanceof File
+          ? file
+          : new File([file], "recording.webm", { type: "audio/webm" });
 
-      // Stage 2: Transcribe
+        fileId = await uploadDirectToMinio(audioFile, 'voice-to-text', (percent) => {
+          setUploadProgress(percent);
+        });
+        setUploadedFileId(fileId);
+      }
+
+      // Stage 3: Transcribe
       setStage('transcribing');
       const res = await api.post("/api/ai/voice-to-text/transcribe", {
         fileId,
@@ -615,7 +633,7 @@ export default function VoiceToTextPage() {
                   </AnimatePresence>
 
                   {/* Process Button */}
-                  {!isProcessing && stage !== 'done' && (
+                  {!isProcessing && (
                     <div className="px-4 pb-4">
                       {estimatedCost !== null && (
                         <div className="flex justify-center items-center pb-3 text-sm">

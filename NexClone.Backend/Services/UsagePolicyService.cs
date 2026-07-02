@@ -171,6 +171,11 @@ namespace NexClone.Backend.Services
 
             decimal totalCost = amountForCost * costPerUnit;
 
+            if (user.AvailableCredits < totalCost)
+            {
+                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Insufficient credits. This requires {totalCost:F2} credits." };
+            }
+
             return new PolicyValidationResult { IsAllowed = true, TotalCost = totalCost };
         }
     }
