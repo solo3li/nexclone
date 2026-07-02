@@ -225,16 +225,36 @@ export default function ProfilePage() {
                 </div>
                 <div className="flex justify-between items-center pb-4 border-b border-white/5">
                   <span className="text-white/60">{isRtl ? "تاريخ الانتهاء" : "Expiration Date"}</span>
-                  <span className="text-white font-medium text-sm">
-                    {user?.activePlan?.endDate 
-                      ? new Date(user.activePlan.endDate).toLocaleDateString(locale === "ar" ? "ar-EG" : "en-US", {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })
-                      : (isRtl ? "بدون تاريخ انتهاء (مجاني)" : "No expiration (Free)")
-                    }
-                  </span>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="text-white font-medium text-sm">
+                      {user?.activePlan?.endDate 
+                        ? new Date(user.activePlan.endDate).toLocaleString(locale === "ar" ? "ar-EG" : "en-US", {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true
+                          })
+                        : (isRtl ? "بدون تاريخ انتهاء (مجاني)" : "No expiration (Free)")
+                      }
+                    </span>
+                    {user?.activePlan?.endDate && (
+                      <span className="text-xs text-white/50">
+                        {(() => {
+                          const diffTime = new Date(user.activePlan.endDate).getTime() - new Date().getTime();
+                          const diffDays = Math.ceil(Math.abs(diffTime) / (1000 * 60 * 60 * 24));
+                          if (diffTime < 0) {
+                            if (diffDays <= 1) return isRtl ? "(انتهى اليوم)" : "(Expired today)";
+                            return isRtl ? `(انتهى منذ ${diffDays} أيام)` : `(Expired ${diffDays} days ago)`;
+                          } else {
+                            if (diffDays === 0) return isRtl ? "(ينتهي اليوم)" : "(Expires today)";
+                            return isRtl ? `(متبقي ${diffDays} يوم)` : `(${diffDays} days left)`;
+                          }
+                        })()}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <button onClick={() => router.push(`/${locale}/pricing`)} className="w-full py-3 mt-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white font-medium transition-all hover:border-white/20">
                   {t('subscription.upgrade')}
