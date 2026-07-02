@@ -43,7 +43,10 @@ namespace NexClone.Backend.Controllers
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            {
+                var modelErrors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                return BadRequest(new { Errors = modelErrors });
+            }
 
             // 1. Check for disposable email
             var domain = request.Email.Split('@').LastOrDefault()?.ToLower();
