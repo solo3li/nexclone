@@ -141,7 +141,7 @@ namespace NexClone.Backend.Controllers
                                 sub.StartDate,
                                 sub.EndDate,
                                 targetPlan.MonthlyCredits,
-                                0m);
+                                targetPlan.PriceEgp);
                             
                             await _emailService.SendEmailAsync(user.Email, user.FullName ?? "", "تم تفعيل اشتراكك بنجاح - NexMedia AI", htmlBody);
                         }
@@ -225,7 +225,7 @@ namespace NexClone.Backend.Controllers
                         newSub.StartDate,
                         newSub.EndDate,
                         plan.MonthlyCredits,
-                        0m);
+                        plan.PriceEgp);
                     
                     await _emailService.SendEmailAsync(user.Email, user.FullName ?? "", "تم تفعيل اشتراكك بنجاح - NexMedia AI", htmlBody);
                 }
