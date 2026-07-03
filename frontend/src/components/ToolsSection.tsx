@@ -7,7 +7,8 @@ import {
   Scissors,
   PenTool,
   ArrowLeft,
-  ArrowRight
+  ArrowRight,
+  Video
 } from "lucide-react";
 import { AnimatedText, AnimatedReveal } from "./AnimatedText";
 import { useTranslations, useLocale } from "next-intl";
@@ -192,6 +193,19 @@ export default function ToolsSection() {
       tags: t.raw('list.t2.tags'),
       image: "/images/tool-2.png",
       href: "/tools/text-to-voice"
+    },
+    {
+      icon: Video,
+      title: t('list.t10.title'),
+      desc: t('list.t10.desc'),
+      badge: t('list.t10.badge'),
+      badgeColor: "bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-500/30",
+      gradient: "from-fuchsia-600/20 to-pink-600/10",
+      iconBg: "from-fuchsia-500 to-pink-600",
+      glowColor: "shadow-fuchsia-500/20",
+      tags: t.raw('list.t10.tags'),
+      image: "/images/tool-1.png",
+      href: "/tools/image-to-video"
     }
   ];
 
