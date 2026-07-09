@@ -16,12 +16,18 @@ namespace NexClone.Backend.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IEmailService _emailService;
         private readonly IEmailTemplateService _emailTemplateService;
+        private readonly NexClone.Backend.Services.WalletService _walletService;
 
-        public ManualPaymentsAdminController(ApplicationDbContext context, IEmailService emailService, IEmailTemplateService emailTemplateService)
+        public ManualPaymentsAdminController(
+            ApplicationDbContext context, 
+            IEmailService emailService, 
+            IEmailTemplateService emailTemplateService,
+            NexClone.Backend.Services.WalletService walletService)
         {
             _context = context;
             _emailService = emailService;
             _emailTemplateService = emailTemplateService;
+            _walletService = walletService;
         }
 
         public async Task<IActionResult> Index()
@@ -96,18 +102,19 @@ namespace NexClone.Backend.Controllers
                 .OrderByDescending(s => s.EndDate)
                 .FirstOrDefaultAsync();
 
+            bool shouldReset = false;
             if (latestSub != null && latestSub.EndDate < DateTime.UtcNow)
             {
                 var graceEnds = latestSub.EndDate.AddDays(latestSub.Plan.GracePeriodDays);
                 if (DateTime.UtcNow > graceEnds)
                 {
-                    payment.User.AvailableCredits = 0;
+                    shouldReset = true;
                 }
             }
 
-            // Increment User Credits
-            payment.User.AvailableCredits += payment.Plan.MonthlyCredits;
             _context.Users.Update(payment.User);
+            await _context.SaveChangesAsync();
+            await _walletService.DistributePlanCreditsAsync(payment.User.Id, payment.Plan.Id, resetToZero: shouldReset);
 
             await _context.SaveChangesAsync();
 

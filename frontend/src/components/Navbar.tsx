@@ -129,7 +129,9 @@ export default function Navbar() {
                 </span>
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold text-sm hidden md:flex">
                   <Zap className="w-4 h-4" />
-                  {user?.availableCredits || 0}
+                  {user?.wallets 
+                    ? user.wallets.reduce((acc: number, w: any) => acc + w.balance, 0)
+                    : (user?.availableCredits || 0)}
                 </div>
                 <Link
                   href="/profile"

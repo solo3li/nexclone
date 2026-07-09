@@ -50,6 +50,7 @@ namespace NexClone.Backend.Services
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
             var emailTemplateService = scope.ServiceProvider.GetRequiredService<IEmailTemplateService>();
+            var walletService = scope.ServiceProvider.GetRequiredService<WalletService>();
 
             var now = DateTime.UtcNow;
 
@@ -98,7 +99,7 @@ namespace NexClone.Backend.Services
                         bool hasActiveSub = await context.Subscriptions.AnyAsync(s => s.UserId == sub.UserId && s.Id != sub.Id && s.Status == "active" && s.EndDate > now);
                         if (!hasActiveSub)
                         {
-                            sub.User.AvailableCredits = 0;
+                            await walletService.ResetAllWalletsAsync(sub.User.Id);
                         }
                         
                         if (!string.IsNullOrEmpty(sub.User.Email))

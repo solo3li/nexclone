@@ -29,8 +29,16 @@ namespace NexClone.Backend.Controllers
         private readonly IMediaService _mediaService;
         private readonly IEmailService _emailService;
         private readonly IEmailTemplateService _emailTemplateService;
+        private readonly WalletService _walletService;
 
-        public AuthController(UserManager<ApplicationUser> userManager, IConfiguration configuration, ApplicationDbContext context, IMediaService mediaService, IEmailService emailService, IEmailTemplateService emailTemplateService)
+        public AuthController(
+            UserManager<ApplicationUser> userManager, 
+            IConfiguration configuration, 
+            ApplicationDbContext context, 
+            IMediaService mediaService, 
+            IEmailService emailService, 
+            IEmailTemplateService emailTemplateService,
+            WalletService walletService)
         {
             _userManager = userManager;
             _configuration = configuration;
@@ -38,6 +46,7 @@ namespace NexClone.Backend.Controllers
             _mediaService = mediaService;
             _emailService = emailService;
             _emailTemplateService = emailTemplateService;
+            _walletService = walletService;
         }
 
         private static readonly HttpClient _httpClient = new HttpClient();
@@ -464,10 +473,8 @@ namespace NexClone.Backend.Controllers
             {
                 var targetPlan = await _context.Plans.FirstOrDefaultAsync(p => p.IsDefaultRegistrationPlan) 
                               ?? await _context.Plans.FirstOrDefaultAsync(p => p.IsFreeTrial);
-
                 if (targetPlan != null)
                 {
-                    user.AvailableCredits += targetPlan.MonthlyCredits;
                     var sub = new Subscription
                     {
                         UserId = user.Id,
@@ -477,6 +484,9 @@ namespace NexClone.Backend.Controllers
                         Status = "active"
                     };
                     _context.Subscriptions.Add(sub);
+                    await _context.SaveChangesAsync();
+                    
+                    await _walletService.DistributePlanCreditsAsync(user.Id, targetPlan.Id, resetToZero: true);
                     
                     try
                     {
@@ -514,7 +524,11 @@ namespace NexClone.Backend.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
 
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _context.Users
+                .Include(u => u.Wallets)
+                    .ThenInclude(w => w.WalletType)
+                .FirstOrDefaultAsync(u => u.Id == Guid.Parse(userId));
+                
             if (user == null) return Unauthorized();
 
             var activeSub = await _context.Subscriptions
@@ -528,6 +542,7 @@ namespace NexClone.Backend.Controllers
             if (activeSub != null)
             {
                 bool needsSave = false;
+                bool shouldResetWallets = false;
 
                 if (activeSub.Status == "active" && activeSub.EndDate <= DateTime.UtcNow)
                 {
@@ -535,7 +550,7 @@ namespace NexClone.Backend.Controllers
                     if (DateTime.UtcNow > freezeEndDate)
                     {
                         activeSub.Status = "expired";
-                        user.AvailableCredits = 0;
+                        shouldResetWallets = true;
                     }
                     else
                     {
@@ -546,7 +561,7 @@ namespace NexClone.Backend.Controllers
                 else if (activeSub.Status == "freeze" && activeSub.EndDate.AddDays(activeSub.Plan.GracePeriodDays) < DateTime.UtcNow)
                 {
                     activeSub.Status = "expired";
-                    user.AvailableCredits = 0;
+                    shouldResetWallets = true;
                     needsSave = true;
                 }
 
@@ -555,6 +570,11 @@ namespace NexClone.Backend.Controllers
                     _context.Subscriptions.Update(activeSub);
                     _context.Users.Update(user);
                     await _context.SaveChangesAsync();
+                }
+
+                if (shouldResetWallets)
+                {
+                    await _walletService.ResetAllWalletsAsync(user.Id);
                 }
             }
 
@@ -579,7 +599,8 @@ namespace NexClone.Backend.Controllers
                 ImageUrl = imageUrl,
                 IsVerified = user.IsVerified,
                 HasPhoneNumber = !string.IsNullOrEmpty(user.PhoneNumber),
-                AvailableCredits = user.AvailableCredits,
+                AvailableCredits = user.AvailableCredits, // Keep for backwards compatibility temporarily
+                Wallets = user.Wallets.Select(w => new { Code = w.WalletType.Code, Balance = w.Balance }),
                 IsStaff = user.IsStaff,
                 ActivePlan = activeSub != null ? new {
                     Name = activeSub.Plan.Name,

@@ -15,15 +15,18 @@ namespace NexClone.Backend.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IEmailService _emailService;
         private readonly IEmailTemplateService _emailTemplateService;
+        private readonly NexClone.Backend.Services.WalletService _walletService;
 
         public SubscriptionsController(
             ApplicationDbContext context, 
             IEmailService emailService, 
-            IEmailTemplateService emailTemplateService)
+            IEmailTemplateService emailTemplateService,
+            NexClone.Backend.Services.WalletService walletService)
         {
             _context = context;
             _emailService = emailService;
             _emailTemplateService = emailTemplateService;
+            _walletService = walletService;
         }
 
         public async Task<IActionResult> Index(int? planId, string status, string datePeriod, DateTime? startDate, DateTime? endDate)
@@ -153,7 +156,7 @@ namespace NexClone.Backend.Controllers
                             sub.Status = "expired";
                             if (sub.User != null)
                             {
-                                sub.User.AvailableCredits = 0;
+                                await _walletService.ResetAllWalletsAsync(sub.User.Id);
                             }
                         }
                     }

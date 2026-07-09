@@ -18,12 +18,18 @@ namespace NexClone.Backend.Controllers.Api
         private readonly ApplicationDbContext _context;
         private readonly IEmailService _emailService;
         private readonly IEmailTemplateService _emailTemplateService;
+        private readonly WalletService _walletService;
 
-        public WebhooksController(ApplicationDbContext context, IEmailService emailService, IEmailTemplateService emailTemplateService)
+        public WebhooksController(
+            ApplicationDbContext context, 
+            IEmailService emailService, 
+            IEmailTemplateService emailTemplateService,
+            WalletService walletService)
         {
             _context = context;
             _emailService = emailService;
             _emailTemplateService = emailTemplateService;
+            _walletService = walletService;
         }
 
         [HttpPost("paymob")]
@@ -107,18 +113,20 @@ namespace NexClone.Backend.Controllers.Api
                         .OrderByDescending(s => s.EndDate)
                         .FirstOrDefaultAsync();
 
+                    bool shouldReset = false;
                     if (latestSubForCredits != null && latestSubForCredits.EndDate < DateTime.UtcNow)
                     {
                         var graceEnds = latestSubForCredits.EndDate.AddDays(latestSubForCredits.Plan.GracePeriodDays);
                         if (DateTime.UtcNow > graceEnds)
                         {
-                            user.AvailableCredits = 0;
+                            shouldReset = true;
                         }
                     }
 
-                    // Increment user credits
-                    user.AvailableCredits += plan.MonthlyCredits;
                     _context.Users.Update(user);
+                    await _context.SaveChangesAsync();
+                    
+                    await _walletService.DistributePlanCreditsAsync(user.Id, plan.Id, resetToZero: shouldReset);
 
                     int orderId = obj.TryGetProperty("id", out var idProp) ? idProp.GetInt32() : 0;
                     int amountCents = obj.TryGetProperty("amount_cents", out var amountProp) ? amountProp.GetInt32() : 0;

@@ -54,30 +54,66 @@ namespace NexClone.Backend.Services
 
         public async Task<bool> HasEnoughCredits(Guid userId, string toolId, decimal cost)
         {
-            var user = await _context.Users.FindAsync(userId);
+            var user = await _context.Users.Include(u => u.Wallets).FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null) return false;
 
             if (user.IsStaff) return true; // Admins have unlimited credits
 
-            // For dynamic tools, we should also check if they are allowed on the current plan.
-            // But we keep separation of concerns. This method only checks balance.
-            return user.AvailableCredits >= cost;
+            var activeSubscription = await _context.Subscriptions
+                .FirstOrDefaultAsync(s => s.UserId == userId && s.Status == "active" && s.EndDate > DateTime.UtcNow);
+
+            var walletTypeId = await GetWalletTypeIdForTool(toolId, activeSubscription?.PlanId);
+
+            var userWallet = user.Wallets.FirstOrDefault(w => w.WalletTypeId == walletTypeId);
+            if (userWallet == null) return false;
+
+            return userWallet.Balance >= cost;
         }
 
-        public async Task<bool> DeductCreditsAsync(Guid userId, decimal cost)
+        public async Task<bool> DeductCreditsAsync(Guid userId, string toolId, decimal cost)
         {
-            var user = await _context.Users.FindAsync(userId);
+            var user = await _context.Users.Include(u => u.Wallets).FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null) return false;
 
-            if (user.IsStaff) return true; // Admins don't get deducted
+            if (user.IsStaff) return true;
 
-            if (user.AvailableCredits < cost) return false;
+            var activeSubscription = await _context.Subscriptions
+                .FirstOrDefaultAsync(s => s.UserId == userId && s.Status == "active" && s.EndDate > DateTime.UtcNow);
 
-            user.AvailableCredits -= cost;
-            _context.Users.Update(user);
+            var walletTypeId = await GetWalletTypeIdForTool(toolId, activeSubscription?.PlanId);
+
+            var userWallet = user.Wallets.FirstOrDefault(w => w.WalletTypeId == walletTypeId);
+            if (userWallet == null || userWallet.Balance < cost) return false;
+
+            userWallet.Balance -= cost;
+            userWallet.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
 
             return true;
+        }
+
+        private async Task<int> GetWalletTypeIdForTool(string toolName, int? planId)
+        {
+            var tool = await _context.ToolConfigurations.FirstOrDefaultAsync(t => t.ToolName == toolName);
+            if (tool != null && planId.HasValue)
+            {
+                var packageOverride = await _context.PackageToolWallets
+                    .FirstOrDefaultAsync(p => p.PlanId == planId.Value && p.ToolConfigurationId == tool.Id);
+                if (packageOverride != null)
+                {
+                    return packageOverride.WalletTypeId;
+                }
+            }
+
+            // Fallback to "GENERAL" wallet
+            var generalWallet = await _context.WalletTypes.FirstOrDefaultAsync(w => w.Code == "GENERAL");
+            if (generalWallet == null)
+            {
+                generalWallet = new WalletType { Name = "General Wallet", Code = "GENERAL" };
+                _context.WalletTypes.Add(generalWallet);
+                await _context.SaveChangesAsync();
+            }
+            return generalWallet.Id;
         }
     }
 }

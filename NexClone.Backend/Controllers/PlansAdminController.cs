@@ -128,6 +128,74 @@ namespace NexClone.Backend.Controllers
             }
         }
 
+        [HttpGet]
+        public async Task<IActionResult> ManageWallets(int id)
+        {
+            var plan = await _context.Plans
+                .Include(p => p.PackageWallets)
+                .Include(p => p.PackageToolWallets)
+                .FirstOrDefaultAsync(p => p.Id == id);
+            
+            if (plan == null) return NotFound();
+
+            ViewData["Title"] = $"Manage Wallets for {plan.Name}";
+            ViewBag.WalletTypes = await _context.WalletTypes.ToListAsync();
+            ViewBag.Tools = await _context.ToolConfigurations.ToListAsync();
+
+            return View(plan);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ManageWallets(int id, List<int> walletTypeIds, List<decimal> creditsAmounts, List<Guid> toolIds, List<int> toolWalletTypeIds)
+        {
+            var plan = await _context.Plans
+                .Include(p => p.PackageWallets)
+                .Include(p => p.PackageToolWallets)
+                .FirstOrDefaultAsync(p => p.Id == id);
+            
+            if (plan == null) return NotFound();
+
+            // Update Package Wallets (Base Balances)
+            _context.PackageWallets.RemoveRange(plan.PackageWallets);
+            if (walletTypeIds != null && creditsAmounts != null)
+            {
+                for (int i = 0; i < walletTypeIds.Count; i++)
+                {
+                    if (i < creditsAmounts.Count)
+                    {
+                        plan.PackageWallets.Add(new PackageWallet
+                        {
+                            PlanId = id,
+                            WalletTypeId = walletTypeIds[i],
+                            CreditsAmount = creditsAmounts[i]
+                        });
+                    }
+                }
+            }
+
+            // Update Package Tool Wallets (Overrides)
+            _context.PackageToolWallets.RemoveRange(plan.PackageToolWallets);
+            if (toolIds != null && toolWalletTypeIds != null)
+            {
+                for (int i = 0; i < toolIds.Count; i++)
+                {
+                    if (i < toolWalletTypeIds.Count)
+                    {
+                        plan.PackageToolWallets.Add(new PackageToolWallet
+                        {
+                            PlanId = id,
+                            ToolConfigurationId = toolIds[i],
+                            WalletTypeId = toolWalletTypeIds[i]
+                        });
+                    }
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {

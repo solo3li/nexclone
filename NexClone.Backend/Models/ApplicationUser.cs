@@ -23,5 +23,6 @@ namespace NexClone.Backend.Models
         public ICollection<EmailVerification> EmailVerifications { get; set; } = new List<EmailVerification>();
         public ICollection<Subscription> Subscriptions { get; set; } = new List<Subscription>();
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
+        public ICollection<UserWallet> Wallets { get; set; } = new List<UserWallet>();
     }
 }

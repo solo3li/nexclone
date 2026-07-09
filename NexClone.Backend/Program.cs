@@ -142,8 +142,7 @@ builder.Services.AddScoped<NexClone.Backend.Services.Payments.IPaymentService, N
 
 // Register Credit Manager
 builder.Services.AddScoped<NexClone.Backend.Services.CreditManagerService>();
-
-// Register Usage Policy Service
+builder.Services.AddScoped<NexClone.Backend.Services.WalletService>();
 builder.Services.AddScoped<NexClone.Backend.Services.UsagePolicyService>();
 
 // Register Background Services

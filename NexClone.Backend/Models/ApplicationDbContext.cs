@@ -32,6 +32,10 @@ namespace NexClone.Backend.Models
         public DbSet<BlogComment> BlogComments { get; set; } = null!;
         public DbSet<SupportTicket> SupportTickets { get; set; } = null!;
         public DbSet<TicketMessage> TicketMessages { get; set; } = null!;
+        public DbSet<WalletType> WalletTypes { get; set; } = null!;
+        public DbSet<UserWallet> UserWallets { get; set; } = null!;
+        public DbSet<PackageWallet> PackageWallets { get; set; } = null!;
+        public DbSet<PackageToolWallet> PackageToolWallets { get; set; } = null!;
 
         // DataProtection keys - persisted to DB to survive container restarts
         public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
@@ -91,6 +95,43 @@ namespace NexClone.Backend.Models
                 .WithMany()
                 .HasForeignKey(h => h.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Wallets mapping
+            builder.Entity<UserWallet>()
+                .HasOne(uw => uw.User)
+                .WithMany(u => u.Wallets)
+                .HasForeignKey(uw => uw.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<UserWallet>()
+                .HasOne(uw => uw.WalletType)
+                .WithMany(wt => wt.UserWallets)
+                .HasForeignKey(uw => uw.WalletTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<PackageWallet>()
+                .HasOne(pw => pw.Plan)
+                .WithMany(p => p.PackageWallets)
+                .HasForeignKey(pw => pw.PlanId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<PackageWallet>()
+                .HasOne(pw => pw.WalletType)
+                .WithMany(wt => wt.PackageWallets)
+                .HasForeignKey(pw => pw.WalletTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<PackageToolWallet>()
+                .HasOne(ptw => ptw.Plan)
+                .WithMany(p => p.PackageToolWallets)
+                .HasForeignKey(ptw => ptw.PlanId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<PackageToolWallet>()
+                .HasOne(ptw => ptw.WalletType)
+                .WithMany(wt => wt.PackageToolWallets)
+                .HasForeignKey(ptw => ptw.WalletTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

@@ -7,6 +7,7 @@ using NexClone.Backend.Models;
 using System.Threading.Tasks;
 using System.Linq;
 using NexClone.Backend.Services;
+using Microsoft.AspNetCore.Identity;
 
 namespace NexClone.Backend.Controllers
 {
@@ -16,12 +17,18 @@ namespace NexClone.Backend.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IEmailService _emailService;
         private readonly IEmailTemplateService _emailTemplateService;
+        private readonly WalletService _walletService;
 
-        public UsersController(ApplicationDbContext context, IEmailService emailService, IEmailTemplateService emailTemplateService)
+        public UsersController(
+            ApplicationDbContext context, 
+            IEmailService emailService,
+            IEmailTemplateService emailTemplateService,
+            WalletService walletService)
         {
             _context = context;
             _emailService = emailService;
             _emailTemplateService = emailTemplateService;
+            _walletService = walletService;
         }
 
         public async Task<IActionResult> Index(string searchString, int? planId, int pageNumber = 1)
@@ -119,7 +126,6 @@ namespace NexClone.Backend.Controllers
 
                 if (targetPlan != null)
                 {
-                    user.AvailableCredits = targetPlan.MonthlyCredits;
                     var sub = new Subscription
                     {
                         UserId = user.Id,
@@ -130,6 +136,8 @@ namespace NexClone.Backend.Controllers
                     };
                     _context.Subscriptions.Add(sub);
                     await _context.SaveChangesAsync();
+
+                    await _walletService.DistributePlanCreditsAsync(user.Id, targetPlan.Id, resetToZero: true);
 
                     try
                     {
@@ -200,19 +208,18 @@ namespace NexClone.Backend.Controllers
                 .OrderByDescending(s => s.EndDate)
                 .FirstOrDefaultAsync();
 
+            bool shouldReset = false;
             if (latestSubForCredits != null && latestSubForCredits.EndDate < DateTime.UtcNow)
             {
                 var graceEnds = latestSubForCredits.EndDate.AddDays(latestSubForCredits.Plan.GracePeriodDays);
                 if (DateTime.UtcNow > graceEnds)
                 {
-                    user.AvailableCredits = 0;
+                    shouldReset = true;
                 }
             }
 
-            // Optionally, top up user credits
-            user.AvailableCredits += plan.MonthlyCredits;
-
             await _context.SaveChangesAsync();
+            await _walletService.DistributePlanCreditsAsync(user.Id, plan.Id, resetToZero: shouldReset);
 
             // Send Email Receipt
             try
@@ -241,18 +248,35 @@ namespace NexClone.Backend.Controllers
         [HttpPost]
         public async Task<IActionResult> AdjustCredits(Guid userId, decimal amount, string operation)
         {
-            var user = await _context.Users.FindAsync(userId);
+            var user = await _context.Users.Include(u => u.Wallets).FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null) return NotFound();
+
+            var generalWalletType = await _context.WalletTypes.FirstOrDefaultAsync(w => w.Code == "GENERAL");
+            if (generalWalletType == null)
+            {
+                generalWalletType = new WalletType { Code = "GENERAL", Name = "General Wallet" };
+                _context.WalletTypes.Add(generalWalletType);
+                await _context.SaveChangesAsync();
+            }
+
+            var userWallet = user.Wallets.FirstOrDefault(w => w.WalletTypeId == generalWalletType.Id);
+            if (userWallet == null)
+            {
+                userWallet = new UserWallet { UserId = userId, WalletTypeId = generalWalletType.Id, Balance = 0 };
+                _context.UserWallets.Add(userWallet);
+                user.Wallets.Add(userWallet);
+            }
 
             if (operation == "add")
             {
-                user.AvailableCredits += amount;
+                userWallet.Balance += amount;
             }
             else if (operation == "remove")
             {
-                user.AvailableCredits -= amount;
-                if (user.AvailableCredits < 0) user.AvailableCredits = 0;
+                userWallet.Balance -= amount;
+                if (userWallet.Balance < 0) userWallet.Balance = 0;
             }
+            userWallet.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Details), new { id = userId });

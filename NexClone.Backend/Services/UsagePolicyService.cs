@@ -38,6 +38,7 @@ namespace NexClone.Backend.Services
             var user = await _context.Users
                 .Include(u => u.Subscriptions)
                     .ThenInclude(s => s.Plan)
+                .Include(u => u.Wallets)
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null) 
@@ -82,16 +83,44 @@ namespace NexClone.Backend.Services
 
             decimal totalCost = amountForCost * costPerUnit;
 
-            if (user.AvailableCredits < totalCost)
+            // Multi-Wallet Check
+            var walletTypeId = await GetWalletTypeIdForTool(toolId, targetPlan.Id);
+            var userWallet = user.Wallets?.FirstOrDefault(w => w.WalletTypeId == walletTypeId);
+
+            if (userWallet == null || userWallet.Balance < totalCost)
             {
-                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Insufficient credits. This requires {totalCost:F2} credits." };
+                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Insufficient credits in the required wallet. This requires {totalCost:F4} credits." };
             }
 
-            user.AvailableCredits -= totalCost;
+            userWallet.Balance -= totalCost;
+            userWallet.UpdatedAt = DateTime.UtcNow;
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
 
             return new PolicyValidationResult { IsAllowed = true, TotalCost = totalCost };
+        }
+
+        private async Task<int> GetWalletTypeIdForTool(string toolName, int planId)
+        {
+            var tool = await _context.ToolConfigurations.FirstOrDefaultAsync(t => t.ToolName == toolName);
+            if (tool != null)
+            {
+                var packageOverride = await _context.PackageToolWallets
+                    .FirstOrDefaultAsync(p => p.PlanId == planId && p.ToolConfigurationId == tool.Id);
+                if (packageOverride != null)
+                {
+                    return packageOverride.WalletTypeId;
+                }
+            }
+
+            var generalWallet = await _context.WalletTypes.FirstOrDefaultAsync(w => w.Code == "GENERAL");
+            if (generalWallet == null)
+            {
+                generalWallet = new WalletType { Name = "General Wallet", Code = "GENERAL" };
+                _context.WalletTypes.Add(generalWallet);
+                await _context.SaveChangesAsync();
+            }
+            return generalWallet.Id;
         }
 
         public ToolPolicy GetToolPolicy(Plan plan, string toolId, string quality = "Standard")
@@ -131,6 +160,7 @@ namespace NexClone.Backend.Services
             var user = await _context.Users
                 .Include(u => u.Subscriptions)
                     .ThenInclude(s => s.Plan)
+                .Include(u => u.Wallets)
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null) 
@@ -171,9 +201,13 @@ namespace NexClone.Backend.Services
 
             decimal totalCost = amountForCost * costPerUnit;
 
-            if (user.AvailableCredits < totalCost)
+            // Multi-Wallet Check
+            var walletTypeId = await GetWalletTypeIdForTool(toolId, targetPlan.Id);
+            var userWallet = user.Wallets?.FirstOrDefault(w => w.WalletTypeId == walletTypeId);
+
+            if (userWallet == null || userWallet.Balance < totalCost)
             {
-                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Insufficient credits. This requires {totalCost:F2} credits." };
+                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Insufficient credits in the required wallet. This requires {totalCost:F4} credits." };
             }
 
             return new PolicyValidationResult { IsAllowed = true, TotalCost = totalCost };

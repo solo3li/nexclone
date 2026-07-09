@@ -1,0 +1,191 @@
+@model NexClone.Backend.Models.Plan
+@{
+    ViewData["Title"] = "Manage Wallets for " + Model.Name;
+    var walletTypes = ViewBag.WalletTypes as List<NexClone.Backend.Models.WalletType> ?? new List<NexClone.Backend.Models.WalletType>();
+    var tools = ViewBag.Tools as List<NexClone.Backend.Models.ToolConfiguration> ?? new List<NexClone.Backend.Models.ToolConfiguration>();
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>@ViewData["Title"]</h2>
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </div>
+
+    <form asp-action="ManageWallets" method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Base Wallet Allocations</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Define how many credits this plan grants to each wallet type upon subscription.</p>
+                
+                <table class="table table-bordered" id="baseWalletsTable">
+                    <thead>
+                        <tr>
+                            <th>Wallet Type</th>
+                            <th>Credits Amount</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var pw in Model.PackageWallets)
+                        {
+                            <tr>
+                                <td>
+                                    <select name="walletTypeIds" class="form-select" required>
+                                        @foreach (var wt in walletTypes)
+                                        {
+                                            @if (wt.Id == pw.WalletTypeId)
+                                            {
+                                                <option value="@wt.Id" selected>@wt.Name (@wt.Code)</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@wt.Id">@wt.Name (@wt.Code)</option>
+                                            }
+                                        }
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="number" name="creditsAmounts" class="form-control" step="0.01" value="@pw.CreditsAmount" required />
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">Remove</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-success btn-sm" onclick="addBaseWalletRow()">Add Wallet Allocation</button>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">Tool-to-Wallet Overrides</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Specify which wallet a tool should deduct from. If not specified here, tools deduct from the 'GENERAL' wallet by default.</p>
+                
+                <table class="table table-bordered" id="toolWalletsTable">
+                    <thead>
+                        <tr>
+                            <th>Tool</th>
+                            <th>Target Wallet</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ptw in Model.PackageToolWallets)
+                        {
+                            <tr>
+                                <td>
+                                    <select name="toolIds" class="form-select" required>
+                                        @foreach (var t in tools)
+                                        {
+                                            @if (t.Id == ptw.ToolConfigurationId)
+                                            {
+                                                <option value="@t.Id" selected>@t.ToolName</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@t.Id">@t.ToolName</option>
+                                            }
+                                        }
+                                    </select>
+                                </td>
+                                <td>
+                                    <select name="toolWalletTypeIds" class="form-select" required>
+                                        @foreach (var wt in walletTypes)
+                                        {
+                                            @if (wt.Id == ptw.WalletTypeId)
+                                            {
+                                                <option value="@wt.Id" selected>@wt.Name (@wt.Code)</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@wt.Id">@wt.Name (@wt.Code)</option>
+                                            }
+                                        }
+                                    </select>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">Remove</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-success btn-sm" onclick="addToolWalletRow()">Add Tool Override</button>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </form>
+</div>
+
+<template id="baseWalletRowTemplate">
+    <tr>
+        <td>
+            <select name="walletTypeIds" class="form-select" required>
+                <option value="">Select Wallet...</option>
+                @foreach (var wt in walletTypes)
+                {
+                    <option value="@wt.Id">@wt.Name (@wt.Code)</option>
+                }
+            </select>
+        </td>
+        <td>
+            <input type="number" name="creditsAmounts" class="form-control" step="0.01" value="0" required />
+        </td>
+        <td>
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">Remove</button>
+        </td>
+    </tr>
+</template>
+
+<template id="toolWalletRowTemplate">
+    <tr>
+        <td>
+            <select name="toolIds" class="form-select" required>
+                <option value="">Select Tool...</option>
+                @foreach (var t in tools)
+                {
+                    <option value="@t.Id">@t.ToolName</option>
+                }
+            </select>
+        </td>
+        <td>
+            <select name="toolWalletTypeIds" class="form-select" required>
+                <option value="">Select Target Wallet...</option>
+                @foreach (var wt in walletTypes)
+                {
+                    <option value="@wt.Id">@wt.Name (@wt.Code)</option>
+                }
+            </select>
+        </td>
+        <td>
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">Remove</button>
+        </td>
+    </tr>
+</template>
+
+@section Scripts {
+    <script>
+        function removeRow(btn) {
+            $(btn).closest('tr').remove();
+        }
+
+        function addBaseWalletRow() {
+            var template = document.getElementById('baseWalletRowTemplate').innerHTML;
+            $('#baseWalletsTable tbody').append(template);
+        }
+
+        function addToolWalletRow() {
+            var template = document.getElementById('toolWalletRowTemplate').innerHTML;
+            $('#toolWalletsTable tbody').append(template);
+        }
+    </script>
+}
