@@ -147,22 +147,22 @@ export default function ToolsSidebar() {
               
               <div className="flex flex-col gap-1.5">
                 {user.wallets?.map((wallet: any, idx: number) => (
-                  <div key={idx} className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/5">
+                  <Link href="/wallets" key={idx} className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-pointer">
                     <span className="text-white/50 text-[10px] font-bold tracking-wider">{wallet.code}</span>
                     <div className="flex items-center gap-1.5">
                       <Wallet className="w-3 h-3 text-fuchsia-400" />
                       <span className="text-white/90 text-xs font-bold">{wallet.balance}</span>
                     </div>
-                  </div>
+                  </Link>
                 ))}
                 {(!user.wallets || user.wallets.length === 0) && (
-                  <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-fuchsia-500/10 border border-fuchsia-500/20">
+                  <Link href="/wallets" className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-fuchsia-500/10 border border-fuchsia-500/20 hover:bg-fuchsia-500/20 transition-colors cursor-pointer">
                     <span className="text-fuchsia-300/70 text-[10px] font-bold tracking-wider">GENERAL</span>
                     <div className="flex items-center gap-1.5">
                       <Wallet className="w-3 h-3 text-fuchsia-400" />
                       <span className="text-fuchsia-300 text-xs font-bold">{user.availableCredits || 0}</span>
                     </div>
-                  </div>
+                  </Link>
                 )}
               </div>
             </div>
