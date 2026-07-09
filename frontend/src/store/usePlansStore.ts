@@ -17,6 +17,10 @@ export interface Plan {
   sttEnabled: boolean;
   sttMaxFileSizeMb: number;
   sttCostPerMinute: number;
+  avatarVideoEnabled: boolean;
+  avatarVideoCostPerGeneration: number;
+  lipSyncEnabled: boolean;
+  lipSyncCostPerGeneration: number;
   isFreeTrial: boolean;
 }
 

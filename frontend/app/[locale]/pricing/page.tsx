@@ -171,9 +171,41 @@ export default function PricingPage() {
                               </li>
                               <li className="flex items-start gap-3">
                                 <Check className="w-5 h-5 text-emerald-400 shrink-0" />
-                                <span className="text-gray-300">Cost: ${plan.sttCostPerMinute}/min</span>
+                                <span className="text-gray-300">Cost: {plan.sttCostPerMinute} Credits/min</span>
                               </li>
                             </>
+                          )}
+                        </ul>
+                      </div>
+
+                      <div>
+                        <p className="text-sm text-gray-500 uppercase tracking-wider font-semibold mb-3">Avatar Video</p>
+                        <ul className="space-y-3">
+                          <li className="flex items-start gap-3">
+                            {plan.avatarVideoEnabled ? <Check className="w-5 h-5 text-emerald-400 shrink-0" /> : <X className="w-5 h-5 text-red-400 shrink-0" />}
+                            <span className="text-gray-300">Image-to-Video AI</span>
+                          </li>
+                          {plan.avatarVideoEnabled && (
+                            <li className="flex items-start gap-3">
+                              <Check className="w-5 h-5 text-emerald-400 shrink-0" />
+                              <span className="text-gray-300">Cost: {plan.avatarVideoCostPerGeneration} Credits/video</span>
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+
+                      <div>
+                        <p className="text-sm text-gray-500 uppercase tracking-wider font-semibold mb-3">Advanced Lip-Sync</p>
+                        <ul className="space-y-3">
+                          <li className="flex items-start gap-3">
+                            {plan.lipSyncEnabled ? <Check className="w-5 h-5 text-emerald-400 shrink-0" /> : <X className="w-5 h-5 text-red-400 shrink-0" />}
+                            <span className="text-gray-300">Audio-driven Lip-Sync AI</span>
+                          </li>
+                          {plan.lipSyncEnabled && (
+                            <li className="flex items-start gap-3">
+                              <Check className="w-5 h-5 text-emerald-400 shrink-0" />
+                              <span className="text-gray-300">Cost: {plan.lipSyncCostPerGeneration} Credits/sync</span>
+                            </li>
                           )}
                         </ul>
                       </div>
