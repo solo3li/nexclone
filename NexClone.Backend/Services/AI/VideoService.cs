@@ -55,7 +55,7 @@ namespace NexClone.Backend.Services.AI
         {
             try
             {
-                var (apiKey, modelName) = await GetToolConfigAsync("kling-avatar-image2video");
+                var (apiKey, modelName) = await GetToolConfigAsync("kling_avatar_image2video");
                 
                 // Upload image to our media service to get a public URL
                 string imageUrl = await _mediaService.UploadFileAsync(imageFile);
@@ -68,10 +68,9 @@ namespace NexClone.Backend.Services.AI
                 var payload = new
                 {
                     model = modelName,
-                    input = new
-                    {
-                        image = imageUrl
-                    }
+                    prompt = "Create a digital human avatar video from the provided image",
+                    n = 1,
+                    image = imageUrl
                 };
 
                 return await SubmitTaskAsync(payload, apiKey);
@@ -87,7 +86,7 @@ namespace NexClone.Backend.Services.AI
         {
             try
             {
-                var (apiKey, modelName) = await GetToolConfigAsync("kling-advanced-lip-syn");
+                var (apiKey, modelName) = await GetToolConfigAsync("kling_advanced_lip_sync");
                 
                 string imageUrl = await _mediaService.UploadFileAsync(imageFile);
                 if (!imageUrl.StartsWith("http")) imageUrl = await _mediaService.GetFileUrlAsync(imageUrl);
@@ -98,11 +97,10 @@ namespace NexClone.Backend.Services.AI
                 var payload = new
                 {
                     model = modelName,
-                    input = new
-                    {
-                        image = imageUrl,
-                        audio = audioUrl
-                    }
+                    prompt = "Generate a lip sync video from the provided image and audio",
+                    n = 1,
+                    image = imageUrl,
+                    audio = audioUrl
                 };
 
                 return await SubmitTaskAsync(payload, apiKey);
@@ -121,8 +119,11 @@ namespace NexClone.Backend.Services.AI
 
             var jsonContent = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
             
-            var response = await client.PostAsync("https://api.cometapi.com/v1/tasks", jsonContent);
+            // CometAPI uses /v1/images/generations for all async video tasks
+            var response = await client.PostAsync("https://api.cometapi.com/v1/images/generations", jsonContent);
             var responseString = await response.Content.ReadAsStringAsync();
+
+            _logger.LogInformation($"CometAPI submit response ({response.StatusCode}): {responseString}");
 
             if (!response.IsSuccessStatusCode)
             {
@@ -130,13 +131,22 @@ namespace NexClone.Backend.Services.AI
                 return (false, null, $"API Error: {responseString}");
             }
 
+            // Response format: { "code": 0, "message": "SUCCEED", "data": { "task_id": "...", "task_status": "submitted" } }
             using var doc = JsonDocument.Parse(responseString);
-            if (doc.RootElement.TryGetProperty("id", out var idElement))
+            var root = doc.RootElement;
+            
+            // Try CometAPI format: data.task_id
+            if (root.TryGetProperty("data", out var dataEl) && dataEl.TryGetProperty("task_id", out var taskIdEl))
+            {
+                return (true, taskIdEl.GetString(), null);
+            }
+            // Fallback: direct id field
+            if (root.TryGetProperty("id", out var idElement))
             {
                 return (true, idElement.GetString(), null);
             }
 
-            return (false, null, "Failed to parse task ID from response.");
+            return (false, null, $"Failed to parse task ID from response: {responseString}");
         }
 
         public async Task<(string Status, string OutputUrl, string ErrorMessage)> CheckTaskStatusAsync(string taskId)
@@ -144,14 +154,17 @@ namespace NexClone.Backend.Services.AI
             try
             {
                 // We just need the API key for status check, model name doesn't matter here
-                var (apiKey, _) = await GetToolConfigAsync("kling-avatar-image2video");
+                var (apiKey, _) = await GetToolConfigAsync("kling_avatar_image2video");
                 var client = _httpClientFactory.CreateClient();
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
 
-                var response = await client.GetAsync($"https://api.cometapi.com/v1/tasks/{taskId}");
-                var responseString = await response.Content.ReadAsStringAsync();
+                // CometAPI: query task status by submitting GET to /v1/images/generations with task_id
+                var statusResponse = await client.GetAsync($"https://api.cometapi.com/v1/images/generations?task_id={taskId}");
+                var responseString = await statusResponse.Content.ReadAsStringAsync();
+                
+                _logger.LogInformation($"CometAPI status response for {taskId} ({statusResponse.StatusCode}): {responseString}");
 
-                if (!response.IsSuccessStatusCode)
+                if (!statusResponse.IsSuccessStatusCode)
                 {
                     return ("failed", null, $"API Error: {responseString}");
                 }
@@ -159,36 +172,50 @@ namespace NexClone.Backend.Services.AI
                 using var doc = JsonDocument.Parse(responseString);
                 var root = doc.RootElement;
                 
-                string status = root.TryGetProperty("status", out var statusEl) ? statusEl.GetString()?.ToLower() : "processing";
-                
-                if (status == "succeeded" || status == "completed")
+                // CometAPI format: { "data": { "task_status": "succeed", "task_result": { "videos": [{"url": "..."}] } } }
+                JsonElement dataEl = root;
+                if (root.TryGetProperty("data", out var dataElInner))
+                    dataEl = dataElInner;
+
+                string rawStatus = "processing";
+                if (dataEl.TryGetProperty("task_status", out var statusEl))
+                    rawStatus = statusEl.GetString()?.ToLower() ?? "processing";
+                else if (root.TryGetProperty("status", out var statusEl2))
+                    rawStatus = statusEl2.GetString()?.ToLower() ?? "processing";
+
+                _logger.LogInformation($"Task {taskId} status: {rawStatus}");
+
+                if (rawStatus == "succeed" || rawStatus == "succeeded" || rawStatus == "completed")
                 {
                     string outputUrl = null;
-                    if (root.TryGetProperty("output", out var outputEl))
+                    
+                    // Try data.task_result.videos[0].url
+                    if (dataEl.TryGetProperty("task_result", out var taskResult))
                     {
-                        if (outputEl.ValueKind == JsonValueKind.Object && outputEl.TryGetProperty("video", out var videoEl))
+                        if (taskResult.TryGetProperty("videos", out var videosEl) && videosEl.ValueKind == JsonValueKind.Array)
                         {
-                            outputUrl = videoEl.GetString();
+                            var firstVideo = videosEl.EnumerateArray().FirstOrDefault();
+                            if (firstVideo.ValueKind != JsonValueKind.Undefined && firstVideo.TryGetProperty("url", out var urlEl))
+                                outputUrl = urlEl.GetString();
                         }
-                        else if (outputEl.ValueKind == JsonValueKind.Object && outputEl.TryGetProperty("url", out var urlEl))
-                        {
-                            outputUrl = urlEl.GetString();
-                        }
-                        else if (outputEl.ValueKind == JsonValueKind.String)
-                        {
-                            outputUrl = outputEl.GetString();
-                        }
+                        else if (taskResult.TryGetProperty("url", out var urlEl2))
+                            outputUrl = urlEl2.GetString();
                     }
+                    // Try data.url or output directly
+                    if (outputUrl == null && dataEl.TryGetProperty("url", out var urlEl3))
+                        outputUrl = urlEl3.GetString();
                     
                     return ("succeeded", outputUrl, null);
                 }
-                else if (status == "failed" || status == "error")
+                else if (rawStatus == "failed" || rawStatus == "error")
                 {
-                    string errorMsg = root.TryGetProperty("error", out var errorEl) ? errorEl.GetString() : "Unknown error";
+                    string errorMsg = "Unknown error";
+                    if (dataEl.TryGetProperty("task_status_msg", out var msgEl))
+                        errorMsg = msgEl.GetString();
                     return ("failed", null, errorMsg);
                 }
 
-                // processing, starting, queued, etc.
+                // submitted, processing, queued, etc.
                 return ("processing", null, null);
             }
             catch (Exception ex)
