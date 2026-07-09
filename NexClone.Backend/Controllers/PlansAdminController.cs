@@ -53,7 +53,9 @@ namespace NexClone.Backend.Controllers
 
             _context.Add(plan);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            
+            // Redirect to ManageWallets so the admin can configure wallet limits and tool overrides immediately
+            return RedirectToAction(nameof(ManageWallets), new { id = plan.Id });
         }
 
         public async Task<IActionResult> Edit(int? id)
