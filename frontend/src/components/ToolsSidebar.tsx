@@ -1,15 +1,18 @@
 "use client";
 
 import { useLocale } from "next-intl";
-import { Link, usePathname } from "../i18n/routing";
-import { Mic, FileAudio, Video, ChevronLeft, ChevronRight, Menu, X } from "lucide-react";
+import { Link, usePathname, useRouter } from "../i18n/routing";
+import { Mic, FileAudio, Video, Menu, X, Home, LogOut, Wallet } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAppStore } from "../store/useAppStore";
+import api from "../utils/api";
 
 export default function ToolsSidebar() {
   const locale = useLocale();
   const isRtl = locale === 'ar';
   const pathname = usePathname();
+  const router = useRouter();
   
   const tools = [
     {
@@ -20,6 +23,7 @@ export default function ToolsSidebar() {
       labelAr: "تحويل النص لصوت",
       color: "text-fuchsia-400",
       bg: "bg-fuchsia-500/10",
+      activeBorder: "border-fuchsia-500/30",
     },
     {
       id: "voice-to-text",
@@ -29,6 +33,7 @@ export default function ToolsSidebar() {
       labelAr: "تحويل الصوت لنص",
       color: "text-emerald-400",
       bg: "bg-emerald-500/10",
+      activeBorder: "border-emerald-500/30",
     },
     {
       id: "image-to-video",
@@ -38,6 +43,7 @@ export default function ToolsSidebar() {
       labelAr: "تحويل الصورة لفيديو",
       color: "text-blue-400",
       bg: "bg-blue-500/10",
+      activeBorder: "border-blue-500/30",
     },
     {
       id: "advanced-lip-sync",
@@ -47,8 +53,19 @@ export default function ToolsSidebar() {
       labelAr: "مزامنة الشفاه (متقدم)",
       color: "text-amber-400",
       bg: "bg-amber-500/10",
+      activeBorder: "border-amber-500/30",
     }
   ];
+
+  const { user, logout } = useAppStore();
+  
+  const handleLogout = async () => {
+    try {
+      await api.post('/api/auth/logout');
+    } catch {}
+    logout();
+    router.push('/login');
+  };
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -77,28 +94,75 @@ export default function ToolsSidebar() {
         )}
       </AnimatePresence>
 
-      {/* Sidebar Content */}
+      {/* Sidebar Content - Full height from top-0 */}
       <div
-        className={`fixed top-16 md:top-20 bottom-0 z-[60] lg:z-10 w-72 bg-[#0a0015]/95 lg:bg-[#0a0015]/30 backdrop-blur-xl border-white/5 transition-transform duration-300 flex flex-col
-          ${isRtl ? 'right-0 lg:border-l' : 'left-0 lg:border-r'}
+        className={`fixed top-0 bottom-0 z-[60] lg:z-10 w-72 bg-[#0a0015]/95 lg:bg-[#080012] backdrop-blur-xl transition-transform duration-300 flex flex-col
+          ${isRtl ? 'right-0 border-l border-white/5' : 'left-0 border-r border-white/5'}
           ${isOpen ? 'translate-x-0' : (isRtl ? 'translate-x-full lg:translate-x-0' : '-translate-x-full lg:translate-x-0')}
         `}
       >
-        <div className="p-4 flex items-center justify-between lg:hidden border-b border-white/5">
-          <span className="font-bold text-white text-lg">{isRtl ? 'أدوات الاستوديو' : 'Tools Studio'}</span>
-          <button onClick={() => setIsOpen(false)} className="text-white/50 hover:text-white p-2 bg-white/5 rounded-full">
-            <X className="w-5 h-5" />
-          </button>
+        {/* Studio Top Brand Bar */}
+        <div className={`flex items-center justify-between px-4 py-4 border-b border-white/5`} dir={isRtl ? 'rtl' : 'ltr'}>
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-fuchsia-900/30">
+              <span className="text-white font-black text-sm">N</span>
+            </div>
+            <span className="font-bold text-white/90 text-sm tracking-tight group-hover:text-white transition-colors">
+              NexMedia
+            </span>
+          </Link>
+          <div className="flex items-center gap-2">
+            {/* Go to Home */}
+            <Link 
+              href="/"
+              className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all"
+              title={isRtl ? 'الرئيسية' : 'Home'}
+            >
+              <Home className="w-4 h-4" />
+            </Link>
+            {/* Mobile close */}
+            <button 
+              onClick={() => setIsOpen(false)} 
+              className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all lg:hidden"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
+        {/* User Credits Badge */}
+        {user && (
+          <div className="px-4 py-3 border-b border-white/5" dir={isRtl ? 'rtl' : 'ltr'}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">
+                    {user.fullName?.charAt(0)?.toUpperCase() || 'U'}
+                  </span>
+                </div>
+                <span className="text-white/70 text-xs font-medium truncate max-w-[100px]">
+                  {user.fullName || user.email}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-fuchsia-500/10 border border-fuchsia-500/20">
+                <Wallet className="w-3 h-3 text-fuchsia-400" />
+                <span className="text-fuchsia-300 text-xs font-bold">
+                  {user.credits ?? 0}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tools List */}
         <div className="p-4 flex-1 overflow-y-auto">
-          <div className="text-xs font-bold text-white/30 uppercase tracking-wider mb-4 px-2 hidden lg:block">
-            {isRtl ? 'استوديو العمل' : 'Workspace Studio'}
+          <div className="text-xs font-bold text-white/25 uppercase tracking-widest mb-4 px-2">
+            {isRtl ? 'أدوات الاستوديو' : 'Studio Tools'}
           </div>
           
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1.5">
             {tools.map((tool) => {
-              const isActive = pathname.includes(tool.href);
+              const isActive = pathname.includes(tool.id);
               const Icon = tool.icon;
               
               return (
@@ -106,25 +170,42 @@ export default function ToolsSidebar() {
                   key={tool.id}
                   href={tool.href}
                   onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all group ${
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group border ${
                     isActive 
-                      ? 'bg-white/10 text-white shadow-inner border border-white/5' 
-                      : 'text-white/60 hover:bg-white/5 hover:text-white border border-transparent'
+                      ? `bg-white/8 text-white ${tool.activeBorder}` 
+                      : 'text-white/50 hover:bg-white/5 hover:text-white border-transparent'
                   }`}
                   dir={isRtl ? 'rtl' : 'ltr'}
                 >
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${
-                    isActive ? tool.bg : 'bg-white/5 group-hover:bg-white/10'
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${
+                    isActive ? tool.bg : 'bg-white/5 group-hover:bg-white/8'
                   }`}>
-                    <Icon className={`w-5 h-5 ${isActive ? tool.color : 'text-white/50 group-hover:text-white'}`} />
+                    <Icon className={`w-4.5 h-4.5 ${isActive ? tool.color : 'text-white/40 group-hover:text-white/70'}`} />
                   </div>
-                  <span className="font-medium text-sm">
+                  <span className="font-medium text-sm leading-tight">
                     {isRtl ? tool.labelAr : tool.labelEn}
                   </span>
+                  {isActive && (
+                    <div className={`w-1.5 h-1.5 rounded-full ${tool.color.replace('text-', 'bg-')} ${isRtl ? 'mr-auto' : 'ml-auto'} opacity-80`} />
+                  )}
                 </Link>
               );
             })}
           </div>
+        </div>
+
+        {/* Bottom: Logout */}
+        <div className="p-4 border-t border-white/5">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/40 hover:text-red-400 hover:bg-red-500/5 border border-transparent hover:border-red-500/10 transition-all group"
+            dir={isRtl ? 'rtl' : 'ltr'}
+          >
+            <div className="w-9 h-9 rounded-lg bg-white/5 group-hover:bg-red-500/10 flex items-center justify-center flex-shrink-0 transition-colors">
+              <LogOut className="w-4 h-4" />
+            </div>
+            <span className="font-medium text-sm">{isRtl ? 'تسجيل الخروج' : 'Logout'}</span>
+          </button>
         </div>
       </div>
     </>
