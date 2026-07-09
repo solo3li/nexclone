@@ -477,6 +477,8 @@
     "result": "Result",
     "download": "Download Video",
     "taskSettings": "Task Settings",
+    "videoPrompt": "Video Prompt (Optional)",
+    "promptPlaceholder": "Describe how the image should be animated (e.g., camera pans left, person smiles...)",
     "aspectRatio": "Aspect Ratio",
     "quality": "Quality",
     "estimatedCost": "Estimated Cost",

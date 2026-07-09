@@ -21,6 +21,7 @@ export default function ImageToVideoPage() {
   const ArrowIcon = locale === 'ar' ? ArrowRight : ArrowLeft;
 
   const [imageUrl, setImageUrl] = useState("");
+  const [prompt, setPrompt] = useState("");
   const [selectedQuality, setSelectedQuality] = useState<string>("High");
   const [aspectRatio, setAspectRatio] = useState<string>("16:9");
   
@@ -208,6 +209,17 @@ export default function ImageToVideoPage() {
                   onChange={(e) => setImageUrl(e.target.value)}
                   placeholder={isRtl ? "أو أدخل رابط الصورة هنا..." : "Or enter image URL here..."}
                   className="w-full bg-[#0a0015]/60 border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-1 focus:ring-fuchsia-500/50 transition-all placeholder:text-white/30 text-sm"
+                />
+              </div>
+
+              {/* Prompt Input */}
+              <div className="mt-4 flex flex-col gap-2" dir={isRtl ? 'rtl' : 'ltr'}>
+                <label className="text-white/80 font-semibold text-sm px-1">{t('videoPrompt')}</label>
+                <textarea
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  placeholder={t('promptPlaceholder')}
+                  className="w-full bg-[#0a0015]/60 border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-1 focus:ring-fuchsia-500/50 transition-all placeholder:text-white/30 text-sm min-h-[100px] resize-none"
                 />
               </div>
 
