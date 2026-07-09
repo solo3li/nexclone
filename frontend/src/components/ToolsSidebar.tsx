@@ -133,7 +133,7 @@ export default function ToolsSidebar() {
         {/* User Credits Badge */}
         {user && (
           <div className="px-4 py-3 border-b border-white/5" dir={isRtl ? 'rtl' : 'ltr'}>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3">
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
                   <span className="text-white text-xs font-bold">
@@ -144,11 +144,26 @@ export default function ToolsSidebar() {
                   {user.fullName || user.email}
                 </span>
               </div>
-              <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-fuchsia-500/10 border border-fuchsia-500/20">
-                <Wallet className="w-3 h-3 text-fuchsia-400" />
-                <span className="text-fuchsia-300 text-xs font-bold">
-                  {user.credits ?? 0}
-                </span>
+              
+              <div className="flex flex-col gap-1.5">
+                {user.wallets?.map((wallet: any, idx: number) => (
+                  <div key={idx} className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/5">
+                    <span className="text-white/50 text-[10px] font-bold tracking-wider">{wallet.code}</span>
+                    <div className="flex items-center gap-1.5">
+                      <Wallet className="w-3 h-3 text-fuchsia-400" />
+                      <span className="text-white/90 text-xs font-bold">{wallet.balance}</span>
+                    </div>
+                  </div>
+                ))}
+                {(!user.wallets || user.wallets.length === 0) && (
+                  <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-fuchsia-500/10 border border-fuchsia-500/20">
+                    <span className="text-fuchsia-300/70 text-[10px] font-bold tracking-wider">GENERAL</span>
+                    <div className="flex items-center gap-1.5">
+                      <Wallet className="w-3 h-3 text-fuchsia-400" />
+                      <span className="text-fuchsia-300 text-xs font-bold">{user.availableCredits || 0}</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
