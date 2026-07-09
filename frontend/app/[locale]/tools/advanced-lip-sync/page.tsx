@@ -1,25 +1,24 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
 import { 
-  Play, Download, Loader2, Wand2, 
+  Download, Loader2, Wand2, 
   Video, UploadCloud, Image as ImageIcon, 
-  Zap, Settings, ChevronDown, Wallet, ArrowLeft, ArrowRight,
+  Zap, Settings, Wallet,
   Monitor, Smartphone
 } from "lucide-react";
 import { useAppStore } from "../../../../src/store/useAppStore";
-import { useRouter, Link } from "../../../../src/i18n/routing";
+import { useRouter } from "../../../../src/i18n/routing";
 import api from "../../../../src/utils/api";
 
 export default function AdvancedLipSyncPage() {
   const t = useTranslations("ImageToVideo");
   const locale = useLocale();
   const isRtl = locale === 'ar';
-  const { user, isAuthenticated, hasPhoneNumber } = useAppStore();
+  const { isAuthenticated } = useAppStore();
   const router = useRouter();
-  const ArrowIcon = locale === 'ar' ? ArrowRight : ArrowLeft;
   const { setUser } = useAppStore();
 
   const [imageUrl, setImageUrl] = useState("");
@@ -31,6 +30,8 @@ export default function AdvancedLipSyncPage() {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [aspectRatio, setAspectRatio] = useState("16:9");
+  const [selectedQuality, setSelectedQuality] = useState("Standard");
   
   const estimatedCost = 5; // Fixed mock cost for now
 
