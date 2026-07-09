@@ -5,187 +5,262 @@
     var tools = ViewBag.Tools as List<NexClone.Backend.Models.ToolConfiguration> ?? new List<NexClone.Backend.Models.ToolConfiguration>();
 }
 
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>@ViewData["Title"]</h2>
-        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+<div class="bx--grid" style="padding-left: 0;">
+    
+    <!-- Page Header -->
+    <div class="bx--row" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h2 style="margin: 0; font-weight: 400; font-size: 1.5rem;">@ViewData["Title"]</h2>
+            <p style="color: #525252; margin: 0.25rem 0 0 0; font-size: 0.875rem;">Configure wallet credit allocations and tool-to-wallet routing for this plan.</p>
+        </div>
+        <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">Back to Plans</a>
     </div>
 
     <form asp-action="ManageWallets" method="post">
         <input type="hidden" asp-for="Id" />
 
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">Base Wallet Allocations</h5>
-            </div>
-            <div class="card-body">
-                <p class="text-muted">Define how many credits this plan grants to each wallet type upon subscription.</p>
-                
-                <table class="table table-bordered" id="baseWalletsTable">
-                    <thead>
-                        <tr>
-                            <th>Wallet Type</th>
-                            <th>Credits Amount</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var pw in Model.PackageWallets)
+        <!-- Section 1: Base Wallet Allocations -->
+        <div class="bx--row" style="margin-bottom: 2rem;">
+            <div class="bx--col">
+                <div style="background: #ffffff; border: 1px solid #e0e0e0;">
+                    <div style="background: #0f62fe; padding: 1rem 1.5rem;">
+                        <h3 style="color: white; margin: 0; font-size: 1rem; font-weight: 600;">
+                            1. Base Wallet Allocations
+                        </h3>
+                        <p style="color: rgba(255,255,255,0.75); margin: 0.25rem 0 0 0; font-size: 0.8rem;">
+                            Define how many credits this plan grants to each wallet type when a user subscribes.
+                        </p>
+                    </div>
+
+                    <div style="padding: 1.5rem;">
+                        @if (!walletTypes.Any())
                         {
-                            <tr>
-                                <td>
-                                    <select name="walletTypeIds" class="form-select" required>
-                                        @foreach (var wt in walletTypes)
-                                        {
-                                            @if (wt.Id == pw.WalletTypeId)
-                                            {
-                                                <option value="@wt.Id" selected>@wt.Name (@wt.Code)</option>
-                                            }
-                                            else
-                                            {
-                                                <option value="@wt.Id">@wt.Name (@wt.Code)</option>
-                                            }
-                                        }
-                                    </select>
-                                </td>
-                                <td>
-                                    <input type="number" name="creditsAmounts" class="form-control" step="0.01" value="@pw.CreditsAmount" required />
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">Remove</button>
-                                </td>
-                            </tr>
+                            <div style="padding: 1rem; background: #fff8e1; border-left: 4px solid #f59e0b; margin-bottom: 1rem; color: #78350f;">
+                                No Wallet Types found. Please create some from 
+                                <a href="@Url.Action("Index", "WalletTypesAdmin")" style="color: #0f62fe; font-weight: bold;">Wallet Types</a> first.
+                            </div>
                         }
-                    </tbody>
-                </table>
-                <button type="button" class="btn btn-success btn-sm" onclick="addBaseWalletRow()">Add Wallet Allocation</button>
+
+                        <div class="bx--data-table-container" style="margin-bottom: 1rem;">
+                            <table class="bx--data-table bx--data-table--zebra" style="width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th><span class="bx--table-header-label">Wallet Type</span></th>
+                                        <th><span class="bx--table-header-label">Credits to Grant on Subscription</span></th>
+                                        <th><span class="bx--table-header-label">Action</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="baseWalletsBody">
+                                    @foreach (var pw in Model.PackageWallets)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="bx--select">
+                                                    <select name="walletTypeIds" class="bx--select-input" required>
+                                                        @foreach (var wt in walletTypes)
+                                                        {
+                                                            if (wt.Id == pw.WalletTypeId)
+                                                            {
+                                                                <option value="@wt.Id" selected>@wt.Name (@wt.Code)</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="@wt.Id">@wt.Name (@wt.Code)</option>
+                                                            }
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <input type="number" name="creditsAmounts" class="bx--text-input" step="0.01" min="0" value="@pw.CreditsAmount" required style="max-width: 180px;" />
+                                            </td>
+                                            <td>
+                                                <button type="button" class="bx--btn bx--btn--sm bx--btn--danger" onclick="removeRow(this)">Remove</button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        @if (!Model.PackageWallets.Any())
+                        {
+                            <div id="baseWalletsEmpty" style="text-align: center; padding: 1.5rem; color: #8d8d8d; border: 1px dashed #e0e0e0; margin-bottom: 1rem;">
+                                No wallet allocations added yet. Click the button below to add one.
+                            </div>
+                        }
+                        <button type="button" class="bx--btn bx--btn--sm bx--btn--tertiary" onclick="addBaseWalletRow()">
+                            + Add Wallet Allocation
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="card mb-4">
-            <div class="card-header bg-warning text-dark">
-                <h5 class="mb-0">Tool-to-Wallet Overrides</h5>
-            </div>
-            <div class="card-body">
-                <p class="text-muted">Specify which wallet a tool should deduct from. If not specified here, tools deduct from the 'GENERAL' wallet by default.</p>
-                
-                <table class="table table-bordered" id="toolWalletsTable">
-                    <thead>
-                        <tr>
-                            <th>Tool</th>
-                            <th>Target Wallet</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var ptw in Model.PackageToolWallets)
+        <!-- Section 2: Tool-to-Wallet Routing -->
+        <div class="bx--row" style="margin-bottom: 2rem;">
+            <div class="bx--col">
+                <div style="background: #ffffff; border: 1px solid #e0e0e0;">
+                    <div style="background: #6929c4; padding: 1rem 1.5rem;">
+                        <h3 style="color: white; margin: 0; font-size: 1rem; font-weight: 600;">
+                            2. Tool-to-Wallet Routing
+                        </h3>
+                        <p style="color: rgba(255,255,255,0.75); margin: 0.25rem 0 0 0; font-size: 0.8rem;">
+                            Choose which wallet each tool deducts credits from. Tools not listed here will default to the GENERAL wallet.
+                        </p>
+                    </div>
+
+                    <div style="padding: 1.5rem;">
+                        @if (!tools.Any())
                         {
-                            <tr>
-                                <td>
-                                    <select name="toolIds" class="form-select" required>
-                                        @foreach (var t in tools)
-                                        {
-                                            @if (t.Id == ptw.ToolConfigurationId)
-                                            {
-                                                <option value="@t.Id" selected>@t.ToolName</option>
-                                            }
-                                            else
-                                            {
-                                                <option value="@t.Id">@t.ToolName</option>
-                                            }
-                                        }
-                                    </select>
-                                </td>
-                                <td>
-                                    <select name="toolWalletTypeIds" class="form-select" required>
-                                        @foreach (var wt in walletTypes)
-                                        {
-                                            @if (wt.Id == ptw.WalletTypeId)
-                                            {
-                                                <option value="@wt.Id" selected>@wt.Name (@wt.Code)</option>
-                                            }
-                                            else
-                                            {
-                                                <option value="@wt.Id">@wt.Name (@wt.Code)</option>
-                                            }
-                                        }
-                                    </select>
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">Remove</button>
-                                </td>
-                            </tr>
+                            <div style="padding: 1rem; background: #fff8e1; border-left: 4px solid #f59e0b; margin-bottom: 1rem; color: #78350f;">
+                                No Tools configured. Add tools from 
+                                <a href="@Url.Action("Index", "ToolConfigAdmin")" style="color: #0f62fe; font-weight: bold;">Tool Settings</a> first.
+                            </div>
                         }
-                    </tbody>
-                </table>
-                <button type="button" class="btn btn-success btn-sm" onclick="addToolWalletRow()">Add Tool Override</button>
+
+                        <div class="bx--data-table-container" style="margin-bottom: 1rem;">
+                            <table class="bx--data-table bx--data-table--zebra" style="width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th><span class="bx--table-header-label">Tool</span></th>
+                                        <th><span class="bx--table-header-label">Deduct Credits From Wallet</span></th>
+                                        <th><span class="bx--table-header-label">Action</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="toolWalletsBody">
+                                    @foreach (var ptw in Model.PackageToolWallets)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="bx--select">
+                                                    <select name="toolIds" class="bx--select-input" required>
+                                                        @foreach (var tool in tools)
+                                                        {
+                                                            if (tool.Id == ptw.ToolConfigurationId)
+                                                            {
+                                                                <option value="@tool.Id" selected>@tool.ToolName</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="@tool.Id">@tool.ToolName</option>
+                                                            }
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="bx--select">
+                                                    <select name="toolWalletTypeIds" class="bx--select-input" required>
+                                                        @foreach (var wt in walletTypes)
+                                                        {
+                                                            if (wt.Id == ptw.WalletTypeId)
+                                                            {
+                                                                <option value="@wt.Id" selected>@wt.Name (@wt.Code)</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="@wt.Id">@wt.Name (@wt.Code)</option>
+                                                            }
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <button type="button" class="bx--btn bx--btn--sm bx--btn--danger" onclick="removeRow(this)">Remove</button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        @if (!Model.PackageToolWallets.Any())
+                        {
+                            <div id="toolWalletsEmpty" style="text-align: center; padding: 1.5rem; color: #8d8d8d; border: 1px dashed #e0e0e0; margin-bottom: 1rem;">
+                                No tool routing rules added yet. Click the button below to assign a tool to a wallet.
+                            </div>
+                        }
+                        <button type="button" class="bx--btn bx--btn--sm bx--btn--tertiary" onclick="addToolWalletRow()">
+                            + Add Tool Routing Rule
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <!-- Save -->
+        <div class="bx--row">
+            <div class="bx--col">
+                <div style="display: flex; gap: 1rem;">
+                    <button type="submit" class="bx--btn bx--btn--primary">Save Wallet Configuration</button>
+                    <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">Cancel</a>
+                </div>
+            </div>
+        </div>
+
     </form>
 </div>
 
-<template id="baseWalletRowTemplate">
-    <tr>
-        <td>
-            <select name="walletTypeIds" class="form-select" required>
-                <option value="">Select Wallet...</option>
-                @foreach (var wt in walletTypes)
-                {
-                    <option value="@wt.Id">@wt.Name (@wt.Code)</option>
-                }
-            </select>
-        </td>
-        <td>
-            <input type="number" name="creditsAmounts" class="form-control" step="0.01" value="0" required />
-        </td>
-        <td>
-            <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">Remove</button>
-        </td>
-    </tr>
-</template>
-
-<template id="toolWalletRowTemplate">
-    <tr>
-        <td>
-            <select name="toolIds" class="form-select" required>
-                <option value="">Select Tool...</option>
-                @foreach (var t in tools)
-                {
-                    <option value="@t.Id">@t.ToolName</option>
-                }
-            </select>
-        </td>
-        <td>
-            <select name="toolWalletTypeIds" class="form-select" required>
-                <option value="">Select Target Wallet...</option>
-                @foreach (var wt in walletTypes)
-                {
-                    <option value="@wt.Id">@wt.Name (@wt.Code)</option>
-                }
-            </select>
-        </td>
-        <td>
-            <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">Remove</button>
-        </td>
-    </tr>
-</template>
-
 @section Scripts {
     <script>
+        // Build wallet type options HTML server-side data
+        var walletOptions = `@foreach (var wt in walletTypes) {<text><option value="@wt.Id">@wt.Name (@wt.Code)</option></text>}`;
+        var toolOptions = `@foreach (var tool in tools) {<text><option value="@tool.Id">@tool.ToolName</option></text>}`;
+
         function removeRow(btn) {
-            $(btn).closest('tr').remove();
+            btn.closest('tr').remove();
         }
 
         function addBaseWalletRow() {
-            var template = document.getElementById('baseWalletRowTemplate').innerHTML;
-            $('#baseWalletsTable tbody').append(template);
+            var tbody = document.getElementById('baseWalletsBody');
+            var tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>
+                    <div class="bx--select">
+                        <select name="walletTypeIds" class="bx--select-input" required>
+                            <option value="">-- Select Wallet Type --</option>
+                            ${walletOptions}
+                        </select>
+                    </div>
+                </td>
+                <td>
+                    <input type="number" name="creditsAmounts" class="bx--text-input" step="0.01" min="0" value="0" required style="max-width: 180px;" />
+                </td>
+                <td>
+                    <button type="button" class="bx--btn bx--btn--sm bx--btn--danger" onclick="removeRow(this)">Remove</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+            var emptyMsg = document.getElementById('baseWalletsEmpty');
+            if (emptyMsg) emptyMsg.style.display = 'none';
         }
 
         function addToolWalletRow() {
-            var template = document.getElementById('toolWalletRowTemplate').innerHTML;
-            $('#toolWalletsTable tbody').append(template);
+            var tbody = document.getElementById('toolWalletsBody');
+            var tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>
+                    <div class="bx--select">
+                        <select name="toolIds" class="bx--select-input" required>
+                            <option value="">-- Select Tool --</option>
+                            ${toolOptions}
+                        </select>
+                    </div>
+                </td>
+                <td>
+                    <div class="bx--select">
+                        <select name="toolWalletTypeIds" class="bx--select-input" required>
+                            <option value="">-- Select Wallet --</option>
+                            ${walletOptions}
+                        </select>
+                    </div>
+                </td>
+                <td>
+                    <button type="button" class="bx--btn bx--btn--sm bx--btn--danger" onclick="removeRow(this)">Remove</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+            var emptyMsg = document.getElementById('toolWalletsEmpty');
+            if (emptyMsg) emptyMsg.style.display = 'none';
         }
     </script>
 }
