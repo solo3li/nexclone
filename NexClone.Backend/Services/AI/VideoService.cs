@@ -30,24 +30,32 @@ namespace NexClone.Backend.Services.AI
             _logger = logger;
         }
 
-        private async Task<string> GetCometApiKeyAsync()
+        private async Task<(string ApiKey, string ModelName)> GetToolConfigAsync(string toolName)
         {
-            var config = await _dbContext.ApiConfigurations
-                .FirstOrDefaultAsync(c => c.ProviderName == "CometAPI" && c.IsActive);
-            
-            if (config == null || string.IsNullOrWhiteSpace(config.ApiKey))
-            {
-                throw new Exception("CometAPI configuration is missing or inactive.");
-            }
+            var toolConfig = await _dbContext.ToolConfigurations
+                .Include(t => t.RoutingRules)
+                .FirstOrDefaultAsync(t => t.ToolName == toolName && t.IsActive);
 
-            return config.ApiKey;
+            if (toolConfig == null)
+                throw new Exception($"Tool '{toolName}' is not active or not configured.");
+
+            var rule = toolConfig.RoutingRules.FirstOrDefault() 
+                ?? throw new Exception($"No routing rules configured for '{toolName}'.");
+
+            var apiConfig = await _dbContext.ApiConfigurations
+                .FirstOrDefaultAsync(c => c.ProviderName == rule.ProviderName && c.IsActive);
+
+            if (apiConfig == null || string.IsNullOrWhiteSpace(apiConfig.ApiKey))
+                throw new Exception($"API configuration for '{rule.ProviderName}' is missing or inactive.");
+
+            return (apiConfig.ApiKey, rule.ModelName ?? toolName);
         }
 
         public async Task<(bool Success, string TaskId, string ErrorMessage)> StartAvatarImageToVideoAsync(IFormFile imageFile)
         {
             try
             {
-                string apiKey = await GetCometApiKeyAsync();
+                var (apiKey, modelName) = await GetToolConfigAsync("kling-avatar-image2video");
                 
                 // Upload image to our media service to get a public URL
                 string imageUrl = await _mediaService.UploadFileAsync(imageFile);
@@ -59,7 +67,7 @@ namespace NexClone.Backend.Services.AI
 
                 var payload = new
                 {
-                    model = "kling-avatar-image2video",
+                    model = modelName,
                     input = new
                     {
                         image = imageUrl
@@ -79,7 +87,7 @@ namespace NexClone.Backend.Services.AI
         {
             try
             {
-                string apiKey = await GetCometApiKeyAsync();
+                var (apiKey, modelName) = await GetToolConfigAsync("kling-advanced-lip-syn");
                 
                 string imageUrl = await _mediaService.UploadFileAsync(imageFile);
                 if (!imageUrl.StartsWith("http")) imageUrl = await _mediaService.GetFileUrlAsync(imageUrl);
@@ -89,7 +97,7 @@ namespace NexClone.Backend.Services.AI
 
                 var payload = new
                 {
-                    model = "kling-advanced-lip-syn",
+                    model = modelName,
                     input = new
                     {
                         image = imageUrl,
@@ -135,7 +143,8 @@ namespace NexClone.Backend.Services.AI
         {
             try
             {
-                string apiKey = await GetCometApiKeyAsync();
+                // We just need the API key for status check, model name doesn't matter here
+                var (apiKey, _) = await GetToolConfigAsync("kling-avatar-image2video");
                 var client = _httpClientFactory.CreateClient();
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
 
