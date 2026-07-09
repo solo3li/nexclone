@@ -3,10 +3,8 @@
 
 import Navbar from "../../src/components/Navbar";
 import HeroSection from "../../src/components/HeroSection";
-import ToolsSection from "../../src/components/ToolsSection";
 import HowItWorks from "../../src/components/HowItWorks";
 import FeaturesSection from "../../src/components/FeaturesSection";
-import CTASection from "../../src/components/CTASection";
 import Footer from "../../src/components/Footer";
 import MobileBottomNav from "../../src/components/MobileBottomNav";
 import CursorGlow from "../../src/components/CursorGlow";
@@ -30,10 +28,8 @@ export default function Page() {
         <Navbar />
         <main>
           <HeroSection />
-          <ToolsSection />
           <HowItWorks />
           <FeaturesSection />
-          <CTASection />
         </main>
         <Footer />
         <MobileBottomNav />
