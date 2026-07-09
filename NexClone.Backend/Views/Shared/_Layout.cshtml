@@ -152,6 +152,23 @@
             margin: 0;
         }
 
+        /* Global Table & Layout Fixes (Applies to all screens) */
+        .bx--data-table-container {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid #e0e0e0;
+        }
+        .bx--data-table th, .bx--data-table td {
+            white-space: nowrap; /* Prevents text from breaking into multiple lines */
+        }
+        .bx--tag {
+            white-space: nowrap !important;
+            word-break: keep-all !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         /* Mobile Responsiveness */
         .mobile-menu-btn {
             display: none;
