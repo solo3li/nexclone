@@ -94,7 +94,12 @@ namespace NexClone.Backend.Services
                     sub.Status = "expired";
                     if (sub.User != null)
                     {
-                        sub.User.AvailableCredits = 0;
+                        // Check if the user has a valid active subscription before resetting credits
+                        bool hasActiveSub = await context.Subscriptions.AnyAsync(s => s.UserId == sub.UserId && s.Id != sub.Id && s.Status == "active" && s.EndDate > now);
+                        if (!hasActiveSub)
+                        {
+                            sub.User.AvailableCredits = 0;
+                        }
                         
                         if (!string.IsNullOrEmpty(sub.User.Email))
                         {

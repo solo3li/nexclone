@@ -174,7 +174,7 @@ namespace NexClone.Backend.Controllers
 
             // Cancel any existing active subscriptions
             var activeSubscriptions = await _context.Subscriptions
-                .Where(s => s.UserId == userId && (s.Status == "active" || s.Status == "active"))
+                .Where(s => s.UserId == userId && (s.Status == "active" || s.Status == "freeze"))
                 .ToListAsync();
 
             foreach (var sub in activeSubscriptions)
@@ -266,7 +266,7 @@ namespace NexClone.Backend.Controllers
             if (user == null) return NotFound();
 
             var activeSub = await _context.Subscriptions
-                .Where(s => s.UserId == userId && (s.Status == "active" || s.Status == "active"))
+                .Where(s => s.UserId == userId && (s.Status == "active" || s.Status == "freeze"))
                 .OrderByDescending(s => s.EndDate)
                 .FirstOrDefaultAsync();
 
@@ -283,7 +283,7 @@ namespace NexClone.Backend.Controllers
                 activeSub.EndDate = activeSub.EndDate.AddDays(extraDays);
                 if (activeSub.EndDate > DateTime.UtcNow)
                 {
-                    activeSub.Status = "Active";
+                    activeSub.Status = "active";
                 }
                 await _context.SaveChangesAsync();
                 TempData["Success"] = $"Extended subscription by {extraDays} days.";
