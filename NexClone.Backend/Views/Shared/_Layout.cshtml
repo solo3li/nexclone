@@ -151,12 +151,61 @@
             color: #161616;
             margin: 0;
         }
+
+        /* Mobile Responsiveness */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #161616;
+            padding: 0;
+            margin-right: 1rem;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        @@media (max-width: 768px) {
+            .modern-sidebar {
+                transform: translateX(-100%);
+            }
+            .modern-sidebar.open {
+                transform: translateX(0);
+            }
+            .bx--content {
+                margin-left: 0;
+                width: 100%;
+                padding: 1.5rem;
+            }
+            .mobile-menu-btn {
+                display: block;
+            }
+            .sidebar-overlay.active {
+                display: block;
+                opacity: 1;
+            }
+            .page-title {
+                font-size: 1.5rem;
+            }
+        }
     </style>
 </head>
 <body hx-boost="true">
     
+    <!-- Mobile Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
     <!-- Modern Dark Sidebar -->
-    <aside class="modern-sidebar">
+    <aside class="modern-sidebar" id="modern-sidebar">
         <div class="sidebar-header">
             <i class='bx bxl-xing'></i>
             <a href="/" class="sidebar-brand">NexClone</a>
@@ -283,7 +332,12 @@
     <!-- Main Content Area where HTMX will load pages -->
     <main class="bx--content" id="main-content">
         <div class="page-header">
-            <h1 class="page-title">@ViewData["Title"]</h1>
+            <div style="display: flex; align-items: center;">
+                <button id="mobile-menu-btn" class="mobile-menu-btn">
+                    <i class='bx bx-menu'></i>
+                </button>
+                <h1 class="page-title">@ViewData["Title"]</h1>
+            </div>
         </div>
         
         <!-- Flash messages or notifications could go here -->
@@ -322,6 +376,41 @@
                 }
             });
         });
+
+        // Mobile Sidebar Toggle Logic
+        (function() {
+            var mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            var sidebar = document.getElementById('modern-sidebar');
+            var overlay = document.getElementById('sidebar-overlay');
+
+            function toggleSidebar() {
+                if (sidebar) sidebar.classList.toggle('open');
+                if (overlay) overlay.classList.toggle('active');
+            }
+
+            function closeSidebar() {
+                if (sidebar) sidebar.classList.remove('open');
+                if (overlay) overlay.classList.remove('active');
+            }
+
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', toggleSidebar);
+            }
+            
+            if (overlay) {
+                overlay.addEventListener('click', closeSidebar);
+            }
+
+            if (!document.body.dataset.sidebarListenerAdded) {
+                document.body.addEventListener('htmx:afterOnLoad', function() {
+                    var s = document.getElementById('modern-sidebar');
+                    var o = document.getElementById('sidebar-overlay');
+                    if (s) s.classList.remove('open');
+                    if (o) o.classList.remove('active');
+                });
+                document.body.dataset.sidebarListenerAdded = "true";
+            }
+        })();
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
