@@ -38,6 +38,15 @@ export default function ToolsSidebar() {
       labelAr: "تحويل الصورة لفيديو",
       color: "text-blue-400",
       bg: "bg-blue-500/10",
+    },
+    {
+      id: "advanced-lip-sync",
+      href: "/tools/advanced-lip-sync",
+      icon: Video,
+      labelEn: "Advanced Lip Sync",
+      labelAr: "مزامنة الشفاه (متقدم)",
+      color: "text-amber-400",
+      bg: "bg-amber-500/10",
     }
   ];
 

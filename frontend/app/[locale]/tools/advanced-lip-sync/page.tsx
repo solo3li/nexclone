@@ -13,7 +13,7 @@ import { useAppStore } from "../../../../src/store/useAppStore";
 import { useRouter, Link } from "../../../../src/i18n/routing";
 import api from "../../../../src/utils/api";
 
-export default function ImageToVideoPage() {
+export default function AdvancedLipSyncPage() {
   const t = useTranslations("ImageToVideo");
   const locale = useLocale();
   const isRtl = locale === 'ar';
@@ -24,9 +24,7 @@ export default function ImageToVideoPage() {
 
   const [imageUrl, setImageUrl] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [prompt, setPrompt] = useState("");
-  const [selectedQuality, setSelectedQuality] = useState<string>("High");
-  const [aspectRatio, setAspectRatio] = useState<string>("16:9");
+  const [audioFile, setAudioFile] = useState<File | null>(null);
   
   const [isProcessing, setIsProcessing] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -43,14 +41,14 @@ export default function ImageToVideoPage() {
       router.push('/login');
       return;
     }
-    if (!imageUrl.trim()) return;
+    if (!imageFile || !audioFile) return;
     setError("");
     setShowConfirmModal(true);
   };
 
   const confirmGenerate = async () => {
     setShowConfirmModal(false);
-    if (!imageFile) return;
+    if (!imageFile || !audioFile) return;
     
     setIsProcessing(true);
     setError("");
@@ -59,8 +57,9 @@ export default function ImageToVideoPage() {
     try {
       const formData = new FormData();
       formData.append("image", imageFile);
+      formData.append("audio", audioFile);
 
-      const response = await api.post("/api/video/start-avatar", formData);
+      const response = await api.post("/api/video/start-lipsync", formData);
       const taskId = response.data.taskId;
       
       api.get("/api/auth/me").then(res => {
@@ -215,34 +214,43 @@ export default function ImageToVideoPage() {
                 )}
               </div>
 
-              {/* URL Input Fallback */}
-              <div className="mt-4" dir={isRtl ? 'rtl' : 'ltr'}>
-                <input
-                  type="text"
-                  value={imageUrl.startsWith('blob:') ? '' : imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder={isRtl ? "أو أدخل رابط الصورة هنا..." : "Or enter image URL here..."}
-                  className="w-full bg-[#0a0015]/60 border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-1 focus:ring-fuchsia-500/50 transition-all placeholder:text-white/30 text-sm"
-                />
-              </div>
-
-              {/* Prompt Input */}
-              <div className="mt-4 flex flex-col gap-2" dir={isRtl ? 'rtl' : 'ltr'}>
-                <label className="text-white/80 font-semibold text-sm px-1">{t('videoPrompt')}</label>
-                <textarea
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  placeholder={t('promptPlaceholder')}
-                  className="w-full bg-[#0a0015]/60 border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-1 focus:ring-fuchsia-500/50 transition-all placeholder:text-white/30 text-sm min-h-[100px] resize-none"
-                />
+              {/* Audio Input */}
+              <div className="mt-4">
+                <div className="relative min-h-[150px] border-2 border-dashed border-white/10 hover:border-amber-500/50 rounded-xl bg-[#0a0015]/60 flex flex-col items-center justify-center gap-4 transition-all overflow-hidden group/upload cursor-pointer">
+                  {audioFile ? (
+                    <div className="text-center p-4">
+                      <p className="text-amber-400 font-medium mb-1">{audioFile.name}</p>
+                      <p className="text-white/60 text-sm">{(audioFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center">
+                        <UploadCloud className="w-6 h-6 text-amber-400" />
+                      </div>
+                      <div className="text-center">
+                        <p className="text-white/80 font-medium mb-1">{isRtl ? "رفع الملف الصوتي" : "Upload Audio File"}</p>
+                        <p className="text-white/40 text-xs">MP3, WAV (Max 5MB)</p>
+                      </div>
+                    </>
+                  )}
+                  <input 
+                    type="file" 
+                    accept="audio/*" 
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) setAudioFile(file);
+                    }}
+                    className="absolute inset-0 opacity-0 cursor-pointer" 
+                  />
+                </div>
               </div>
 
               {error && <div className="text-red-400 text-sm p-3 bg-red-500/10 rounded-xl border border-red-500/20 mt-4 mx-2">{error}</div>}
 
               <button
                   onClick={handleProcessClick}
-                  disabled={isProcessing || !imageUrl}
-                  className="w-full mt-4 bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-500 hover:to-pink-500 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  disabled={isProcessing || !imageFile || !audioFile}
+                  className="w-full mt-4 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                 {isProcessing ? (
                   <>
