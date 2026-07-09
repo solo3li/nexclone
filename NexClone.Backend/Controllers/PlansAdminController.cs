@@ -100,6 +100,12 @@ namespace NexClone.Backend.Controllers
                 existingPlan.SttMaxFileSizeMb = plan.SttMaxFileSizeMb;
                 existingPlan.SttCostPerMinute = plan.SttCostPerMinute;
 
+                existingPlan.AvatarVideoEnabled = plan.AvatarVideoEnabled;
+                existingPlan.AvatarVideoCostPerGeneration = plan.AvatarVideoCostPerGeneration;
+
+                existingPlan.LipSyncEnabled = plan.LipSyncEnabled;
+                existingPlan.LipSyncCostPerGeneration = plan.LipSyncCostPerGeneration;
+
                 existingPlan.IsFreeTrial = plan.IsFreeTrial;
                 
                 existingPlan.IsDefaultRegistrationPlan = plan.IsDefaultRegistrationPlan;

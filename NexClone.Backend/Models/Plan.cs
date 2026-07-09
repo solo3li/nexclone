@@ -47,6 +47,14 @@ namespace NexClone.Backend.Models
         public int SttMaxFileSizeMb { get; set; } = 25;
         public decimal SttCostPerMinute { get; set; } = 1.0m;
 
+        // Avatar Image-to-Video Settings
+        public bool AvatarVideoEnabled { get; set; } = true;
+        public decimal AvatarVideoCostPerGeneration { get; set; } = 1.0m;
+
+        // Advanced Lip-Sync Settings
+        public bool LipSyncEnabled { get; set; } = true;
+        public decimal LipSyncCostPerGeneration { get; set; } = 1.0m;
+
         // Free Trial Flag
         public bool IsFreeTrial { get; set; } = false;
 
