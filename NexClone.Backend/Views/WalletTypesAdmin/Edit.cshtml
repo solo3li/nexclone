@@ -1,0 +1,49 @@
+@model NexClone.Backend.Models.WalletType
+
+<div class="bx--grid" style="padding-left: 0;">
+    <div class="bx--row" style="margin-bottom: 2rem;">
+        <div class="bx--col">
+            <h2 style="margin: 0; font-weight: 400; font-size: 1.5rem;">@ViewData["Title"]</h2>
+        </div>
+    </div>
+
+    <div class="bx--row">
+        <div class="bx--col" style="max-width: 600px;">
+            <form asp-action="Edit" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0;">
+                <input type="hidden" asp-for="Id" />
+                
+                <div class="bx--form-item">
+                    <label asp-for="Name" class="bx--label">Wallet Name</label>
+                    <div class="bx--text-input__field-wrapper">
+                        <input asp-for="Name" class="bx--text-input" required />
+                    </div>
+                    <span asp-validation-for="Name" class="bx--form-requirement"></span>
+                </div>
+
+                <div class="bx--form-item" style="margin-top: 1.5rem;">
+                    <label asp-for="Code" class="bx--label">Wallet Code (Unique Identifier)</label>
+                    <div class="bx--text-input__field-wrapper">
+                        <input asp-for="Code" class="bx--text-input" style="text-transform: uppercase;" required />
+                    </div>
+                    <span asp-validation-for="Code" class="bx--form-requirement"></span>
+                </div>
+
+                <div class="bx--form-item bx--checkbox-wrapper" style="margin-top: 1.5rem;">
+                    <input asp-for="IsActive" class="bx--checkbox" />
+                    <label asp-for="IsActive" class="bx--checkbox-label" title="Enable this wallet type">
+                        <span class="bx--checkbox-label-text">Is Active</span>
+                    </label>
+                </div>
+
+                <div style="margin-top: 2.5rem; display: flex; gap: 1rem;">
+                    <button type="submit" class="bx--btn bx--btn--primary">Save Changes</button>
+                    <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

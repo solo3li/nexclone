@@ -1,10 +1,10 @@
-@model IEnumerable<NexClone.Backend.Models.Plan>
+@model IEnumerable<NexClone.Backend.Models.WalletType>
 
 <div class="bx--grid" style="padding-left: 0;">
     <div class="bx--row" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
         <h2 style="margin: 0; font-weight: 400; font-size: 1.5rem;">@ViewData["Title"]</h2>
         <a href="@Url.Action("Create")" class="bx--btn bx--btn--primary">
-            Add New Plan
+            Add New Wallet Type
             <svg focusable="false" preserveAspectRatio="xMidYMid meet" style="will-change: transform;" xmlns="http://www.w3.org/2000/svg" class="bx--btn__icon" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M9 7L9 3 7 3 7 7 3 7 3 9 7 9 7 13 9 13 9 9 13 9 13 7z"></path></svg>
         </a>
     </div>
@@ -16,12 +16,9 @@
                     <thead>
                         <tr>
                             <th><span class="bx--table-header-label">Name</span></th>
-                            <th><span class="bx--table-header-label">Duration (Days)</span></th>
-                            <th><span class="bx--table-header-label">Grace Period</span></th>
-                            <th><span class="bx--table-header-label">Price (USD)</span></th>
-                            <th><span class="bx--table-header-label">Price (EGP)</span></th>
-                            <th><span class="bx--table-header-label">Monthly Credits</span></th>
-                            <th><span class="bx--table-header-label">Allowed Tools</span></th>
+                            <th><span class="bx--table-header-label">Code</span></th>
+                            <th><span class="bx--table-header-label">Status</span></th>
+                            <th><span class="bx--table-header-label">Created At</span></th>
                             <th><span class="bx--table-header-label">Actions</span></th>
                         </tr>
                     </thead>
@@ -29,24 +26,23 @@
                         @foreach (var item in Model)
                         {
                             <tr>
+                                <td><strong>@item.Name</strong></td>
+                                <td><code>@item.Code</code></td>
                                 <td>
-                                    <strong>@item.Name</strong>
-                                    @if (item.IsFreeTrial)
+                                    @if (item.IsActive)
                                     {
-                                        <span style="background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-left: 0.5rem;">Free Trial</span>
+                                        <span style="background: #defbe6; color: #198038; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold;">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span style="background: #fde8e8; color: #da1e28; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold;">Inactive</span>
                                     }
                                 </td>
-                                <td>@item.DurationDays</td>
-                                <td>@item.GracePeriodDays days</td>
-                                <td>$@item.PriceUsd</td>
-                                <td>EGP @item.PriceEgp</td>
-                                <td>@item.MonthlyCredits</td>
-                                <td><small>TTS: @(item.TtsEnabled ? $"Std: ${item.TtsCostPerChar} | High: ${item.TtsCostPerCharHigh} (per {item.TtsCharactersBlock} chars)" : "Off") | <strong>STT:</strong> @(item.SttEnabled ? "Yes" : "No") | Cost: $@item.SttCostPerMinute / Min</small></td>
+                                <td>@item.CreatedAt.ToString("MMM dd, yyyy")</td>
                                 <td>
-                                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                                        <a href="@Url.Action("ManageWallets", new { id = item.Id })" class="bx--btn bx--btn--sm bx--btn--tertiary">Wallets</a>
+                                    <div style="display: flex; gap: 0.5rem;">
                                         <a href="@Url.Action("Edit", new { id = item.Id })" class="bx--btn bx--btn--sm bx--btn--ghost">Edit</a>
-                                        <form action="@Url.Action("Delete", new { id = item.Id })" method="post" onsubmit="return confirm('Are you sure you want to delete this plan?');">
+                                        <form action="@Url.Action("Delete", new { id = item.Id })" method="post" onsubmit="return confirm('Are you sure you want to delete this Wallet Type? This might affect users and plans.');">
                                             <button type="submit" class="bx--btn bx--btn--sm bx--btn--danger">Delete</button>
                                         </form>
                                     </div>
@@ -58,7 +54,7 @@
                 @if (!Model.Any())
                 {
                     <div style="text-align: center; padding: 2rem; color: #525252; background: #ffffff; border-bottom: 1px solid #e0e0e0;">
-                        No plans found. Create one to get started.
+                        No wallet types found. Create one to get started.
                     </div>
                 }
             </div>
