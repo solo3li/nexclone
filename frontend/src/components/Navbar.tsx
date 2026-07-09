@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Zap, Menu, X, Globe } from "lucide-react";
+import { Zap, Menu, X, Globe, ChevronDown, Mic, FileAudio, Video } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link, usePathname, useRouter } from "../i18n/routing";
 import { useAppStore } from "../store/useAppStore";
@@ -46,11 +46,7 @@ export default function Navbar() {
     }
   }, [isAuthenticated, setUser]);
 
-  const navLinks = [
-    { label: t('home'), href: "/" },
-    { label: t('tools'), href: "/tools" },
-    { label: t('pricing'), href: "/pricing" },
-  ];
+
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -84,16 +80,42 @@ export default function Navbar() {
 
           {/* Desktop Links */}
           <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                className="text-white/70 hover:text-white text-sm font-medium transition-colors duration-200 relative group"
-              >
-                {link.label}
-                <span className={`absolute -bottom-0.5 ${locale === 'ar' ? 'right-0' : 'left-0'} w-full h-px bg-gradient-to-r from-violet-500 to-fuchsia-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ${locale === 'ar' ? 'origin-right' : 'origin-left'}`} />
-              </Link>
-            ))}
+            <Link href="/" className="text-white/70 hover:text-white text-sm font-medium transition-colors duration-200 relative group">
+              {t('home')}
+              <span className={`absolute -bottom-0.5 ${locale === 'ar' ? 'right-0' : 'left-0'} w-full h-px bg-gradient-to-r from-violet-500 to-fuchsia-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ${locale === 'ar' ? 'origin-right' : 'origin-left'}`} />
+            </Link>
+            
+            <div className="relative group">
+              <button className="flex items-center gap-1 text-white/70 hover:text-white text-sm font-medium transition-colors duration-200">
+                {t('tools')}
+                <ChevronDown className="w-4 h-4 opacity-70 group-hover:opacity-100 transition-transform group-hover:rotate-180" />
+              </button>
+              <div className="absolute top-full mt-4 w-64 rounded-2xl bg-[#0a0015]/95 backdrop-blur-xl border border-white/10 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 flex flex-col overflow-hidden pt-2 pb-2" style={{ [locale === 'ar' ? 'right' : 'left']: '-1rem' }}>
+                <Link href="/tools/text-to-voice" className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-fuchsia-500/10 flex items-center justify-center shrink-0">
+                    <Mic className="w-4 h-4 text-fuchsia-400" />
+                  </div>
+                  <span className="text-sm font-medium text-white/90">{locale === 'ar' ? 'تحويل النص لصوت' : 'Text to Voice'}</span>
+                </Link>
+                <Link href="/tools/voice-to-text" className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
+                    <FileAudio className="w-4 h-4 text-emerald-400" />
+                  </div>
+                  <span className="text-sm font-medium text-white/90">{locale === 'ar' ? 'تحويل الصوت لنص' : 'Voice to Text'}</span>
+                </Link>
+                <Link href="/tools/image-to-video" className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                    <Video className="w-4 h-4 text-blue-400" />
+                  </div>
+                  <span className="text-sm font-medium text-white/90">{locale === 'ar' ? 'تحويل الصورة لفيديو' : 'Image to Video'}</span>
+                </Link>
+              </div>
+            </div>
+
+            <Link href="/pricing" className="text-white/70 hover:text-white text-sm font-medium transition-colors duration-200 relative group">
+              {t('pricing')}
+              <span className={`absolute -bottom-0.5 ${locale === 'ar' ? 'right-0' : 'left-0'} w-full h-px bg-gradient-to-r from-violet-500 to-fuchsia-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ${locale === 'ar' ? 'origin-right' : 'origin-left'}`} />
+            </Link>
           </div>
 
           {/* CTA & Lang */}
@@ -177,16 +199,33 @@ export default function Navbar() {
             className="md:hidden bg-[#0d0020]/95 backdrop-blur-xl border-b border-white/10 overflow-hidden"
           >
             <div className="px-4 py-4 flex flex-col gap-4" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-              {navLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  onClick={() => setMenuOpen(false)}
-                  className="text-white/80 hover:text-white text-base font-medium py-2 border-b border-white/5 transition-colors"
-                >
-                  {link.label}
+              <Link href="/" onClick={() => setMenuOpen(false)} className="text-white/80 hover:text-white text-base font-medium py-2 border-b border-white/5 transition-colors">
+                {t('home')}
+              </Link>
+              <div className="flex flex-col py-2 border-b border-white/5">
+                <span className="text-white/50 text-xs font-bold uppercase mb-3 px-1">{t('tools')}</span>
+                <Link href="/tools/text-to-voice" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-2 text-white/80 hover:text-white transition-colors rounded-xl hover:bg-white/5">
+                  <div className="w-8 h-8 rounded-lg bg-fuchsia-500/10 flex items-center justify-center shrink-0">
+                    <Mic className="w-4 h-4 text-fuchsia-400" />
+                  </div>
+                  <span className="text-sm font-medium">{locale === 'ar' ? 'تحويل النص لصوت' : 'Text to Voice'}</span>
                 </Link>
-              ))}
+                <Link href="/tools/voice-to-text" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-2 text-white/80 hover:text-white transition-colors rounded-xl hover:bg-white/5">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
+                    <FileAudio className="w-4 h-4 text-emerald-400" />
+                  </div>
+                  <span className="text-sm font-medium">{locale === 'ar' ? 'تحويل الصوت لنص' : 'Voice to Text'}</span>
+                </Link>
+                <Link href="/tools/image-to-video" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-2 text-white/80 hover:text-white transition-colors rounded-xl hover:bg-white/5">
+                  <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                    <Video className="w-4 h-4 text-blue-400" />
+                  </div>
+                  <span className="text-sm font-medium">{locale === 'ar' ? 'تحويل الصورة لفيديو' : 'Image to Video'}</span>
+                </Link>
+              </div>
+              <Link href="/pricing" onClick={() => setMenuOpen(false)} className="text-white/80 hover:text-white text-base font-medium py-2 border-b border-white/5 transition-colors">
+                {t('pricing')}
+              </Link>
               {isAuthenticated ? (
                 <>
                   <Link

@@ -3,8 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
-import Navbar from "../../../../src/components/Navbar";
-import Footer from "../../../../src/components/Footer";
 import { 
   Play, Download, Loader2, Volume2, Wand2, Mic, 
   RefreshCw, Clock, Lock, ChevronDown, User, Users, Info, Edit3, Globe, Zap
@@ -259,34 +257,11 @@ export default function TextToVoicePage() {
   }, [filteredVoices, selectedVoice, allowedVoices]);
 
   return (
-    <div className="relative min-h-screen bg-[#0a0015] flex flex-col font-sans">
+    <>
       {/* Animated Orbs for consistent theme */}
       <div className="absolute top-1/4 left-1/4 w-[60%] h-[500px] bg-violet-600/10 blur-[150px] pointer-events-none z-0 rounded-full" />
-      
-      {/* Minimal Header */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-[#0a0015]/80 backdrop-blur-md border-b border-white/5 z-50 flex items-center justify-between px-4 lg:px-8" dir={isRtl ? 'rtl' : 'ltr'}>
-        <div className="flex items-center gap-4">
-          <Link href="/tools" className="p-2 bg-white/5 hover:bg-white/10 rounded-full transition-colors text-white/70 hover:text-white">
-            <ArrowIcon className="w-5 h-5" />
-          </Link>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-violet-600 to-fuchsia-600 flex items-center justify-center">
-              <Mic className="w-4 h-4 text-white" />
-            </div>
-            <h1 className="text-white font-bold text-sm lg:text-base hidden sm:block">{t('title')}</h1>
-          </div>
-        </div>
-        
-        {isAuthenticated && (
-          <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1.5">
-            <Wallet className="w-4 h-4 text-fuchsia-400" />
-            <span className="text-white font-bold text-sm">{user?.availableCredits || 0}</span>
-            <span className="text-white/50 text-xs ml-1 rtl:mr-1">{isRtl ? 'رصيد' : 'Credits'}</span>
-          </div>
-        )}
-      </header>
 
-      <main className="flex-1 container mx-auto px-4 pt-20 pb-10 relative z-10 max-w-6xl">
+      <div className="container mx-auto px-4 py-6 md:py-8 relative z-10 max-w-6xl">
         {isMaintenanceMode ? (
           <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
             <div className="w-20 h-20 bg-violet-600/20 rounded-full flex items-center justify-center mb-6">
@@ -711,7 +686,7 @@ export default function TextToVoicePage() {
         </div>
         </>
         )}
-      </main>
+      </div>
 
       {/* Confirmation Modal */}
       {showConfirmModal && (
@@ -753,8 +728,6 @@ export default function TextToVoicePage() {
           </motion.div>
         </div>
       )}
-      
-
-    </div>
+    </>
   );
 }
