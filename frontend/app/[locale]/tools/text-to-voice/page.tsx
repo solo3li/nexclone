@@ -111,11 +111,7 @@ export default function TextToVoicePage() {
     setEstimatedCost(null);
   }, [text]);
 
-  useEffect(() => {
-    if (isAuthenticated && !hasPhoneNumber) {
-      router.replace('/complete-profile');
-    }
-  }, [isAuthenticated, hasPhoneNumber, router]);
+
 
   const handleProcessClick = async () => {
     if (!isAuthenticated) {
