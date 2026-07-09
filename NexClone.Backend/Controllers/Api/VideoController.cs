@@ -37,7 +37,7 @@ namespace NexClone.Backend.Controllers.Api
             if (!Guid.TryParse(userIdString, out Guid userIdGuid)) return BadRequest(new { error = "Invalid user ID" });
 
             // We charge credits up front. If it fails later, we should ideally refund, but for simplicity we charge now.
-            var policyResult = await _usagePolicyService.ValidateAndChargeAsync(userIdGuid, "kling-avatar-image2video", 1);
+            var policyResult = await _usagePolicyService.ValidateAndChargeAsync(userIdGuid, "kling_avatar_image2video", 1);
             if (!policyResult.IsAllowed)
             {
                 return BadRequest(new { error = policyResult.ErrorMessage });
@@ -69,7 +69,7 @@ namespace NexClone.Backend.Controllers.Api
 
             if (!Guid.TryParse(userIdString, out Guid userIdGuid)) return BadRequest(new { error = "Invalid user ID" });
 
-            var policyResult = await _usagePolicyService.ValidateAndChargeAsync(userIdGuid, "kling-advanced-lip-syn", 1);
+            var policyResult = await _usagePolicyService.ValidateAndChargeAsync(userIdGuid, "kling_advanced_lip_sync", 1);
             if (!policyResult.IsAllowed)
             {
                 return BadRequest(new { error = policyResult.ErrorMessage });
