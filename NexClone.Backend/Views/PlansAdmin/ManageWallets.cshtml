@@ -1,8 +1,8 @@
-@model NexClone.Backend.Models.Plan
+@model NexClone.Backend.Core.Entities.Plan
 @{
     ViewData["Title"] = "Manage Wallets for " + Model.Name;
-    var walletTypes = ViewBag.WalletTypes as List<NexClone.Backend.Models.WalletType> ?? new List<NexClone.Backend.Models.WalletType>();
-    var tools = ViewBag.Tools as List<NexClone.Backend.Models.ToolConfiguration> ?? new List<NexClone.Backend.Models.ToolConfiguration>();
+    var walletTypes = ViewBag.WalletTypes as List<NexClone.Backend.Core.Entities.WalletType> ?? new List<NexClone.Backend.Core.Entities.WalletType>();
+    var tools = ViewBag.Tools as List<NexClone.Backend.Core.Entities.ToolConfiguration> ?? new List<NexClone.Backend.Core.Entities.ToolConfiguration>();
 }
 
 <div class="bx--grid" style="padding-left: 0;">

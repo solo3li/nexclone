@@ -1,4 +1,4 @@
-@model IEnumerable<NexClone.Backend.Models.Subscription>
+@model IEnumerable<NexClone.Backend.Core.Entities.Subscription>
 
 @{
     ViewData["Title"] = "User Subscriptions";
@@ -26,7 +26,7 @@
                                 <option class="bx--select-option" value="" selected="@(ViewBag.SelectedPlanId == null ? "selected" : null)">All Plans</option>
                                 @if(ViewBag.Plans != null)
                                 {
-                                    foreach(var plan in (IEnumerable<NexClone.Backend.Models.Plan>)ViewBag.Plans)
+                                    foreach(var plan in (IEnumerable<NexClone.Backend.Core.Entities.Plan>)ViewBag.Plans)
                                     {
                                         <option class="bx--select-option" value="@plan.Id" selected="@(ViewBag.SelectedPlanId != null && ViewBag.SelectedPlanId.ToString() == plan.Id.ToString() ? "selected" : null)">@plan.Name</option>
                                     }

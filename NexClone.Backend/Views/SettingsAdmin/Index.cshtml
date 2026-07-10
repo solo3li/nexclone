@@ -1,4 +1,4 @@
-@model IEnumerable<NexClone.Backend.Models.AppSetting>
+@model IEnumerable<NexClone.Backend.Core.Entities.AppSetting>
 
 <div class="bx--grid" style="padding-left: 0; max-width: 800px; margin-left: 0;">
     <div class="bx--row" style="margin-bottom: 2rem;">
@@ -45,7 +45,7 @@
 
         @if (ViewBag.ToolConfigurations != null)
         {
-            var tools = (IEnumerable<NexClone.Backend.Models.ToolConfiguration>)ViewBag.ToolConfigurations;
+            var tools = (IEnumerable<NexClone.Backend.Core.Entities.ToolConfiguration>)ViewBag.ToolConfigurations;
             foreach (var tool in tools)
             {
                 <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom: 1rem;">

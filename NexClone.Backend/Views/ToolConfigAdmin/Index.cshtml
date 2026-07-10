@@ -1,4 +1,4 @@
-@model Dictionary<string, NexClone.Backend.Models.ToolConfiguration>
+@model Dictionary<string, NexClone.Backend.Core.Entities.ToolConfiguration>
 
 @{
     ViewData["Title"] = "Tool Settings";
@@ -111,7 +111,7 @@
                         
                         <div id="rules-container-@toolName" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;">
                             @{
-                                var sortedRules = config.RoutingRules?.ToList() ?? new List<NexClone.Backend.Models.ToolRoutingRule>();
+                                var sortedRules = config.RoutingRules?.ToList() ?? new List<NexClone.Backend.Core.Entities.ToolRoutingRule>();
                             }
                             @for (int r = 0; r < sortedRules.Count; r++)
                             {

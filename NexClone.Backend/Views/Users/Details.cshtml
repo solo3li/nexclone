@@ -1,4 +1,4 @@
-@model NexClone.Backend.Models.ApplicationUser
+@model NexClone.Backend.Core.Entities.ApplicationUser
 
 @{
     ViewData["Title"] = "User Details";
@@ -212,7 +212,7 @@
                     <tbody>
                         @if (ViewBag.Devices != null)
                         {
-                            var devices = ViewBag.Devices as IEnumerable<NexClone.Backend.Models.DeviceFingerprint>;
+                            var devices = ViewBag.Devices as IEnumerable<NexClone.Backend.Core.Entities.DeviceFingerprint>;
                             if (devices != null && devices.Any())
                             {
                                 foreach (var device in devices)

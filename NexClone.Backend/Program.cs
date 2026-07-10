@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using NexClone.Backend.Models;
 using Serilog;
 using System;
 using System.Text;
@@ -65,7 +64,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options => {
 .AddDefaultTokenProviders();
 
 // Register custom password hasher for Django PBKDF2 backwards compatibility
-builder.Services.AddScoped<IPasswordHasher<ApplicationUser>, NexClone.Backend.Services.DjangoPasswordHasher>();
+builder.Services.AddScoped<IPasswordHasher<ApplicationUser>, NexClone.Backend.Infrastructure.ExternalServices.DjangoPasswordHasher>();
 
 // Setup JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not found");
@@ -125,29 +124,29 @@ builder.Services.AddHttpClient("AIGateway", client =>
     client.BaseAddress = new Uri("http://localhost:5000"); // Example port for Flask apps
 });
 
-builder.Services.AddScoped<NexClone.Backend.Services.AI.ITtsService, NexClone.Backend.Services.AI.TtsService>();
-builder.Services.AddScoped<NexClone.Backend.Services.AI.ISttService, NexClone.Backend.Services.AI.SttService>();
-builder.Services.AddScoped<NexClone.Backend.Services.AI.IVideoService, NexClone.Backend.Services.AI.VideoService>();
+builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.ITtsService, NexClone.Backend.Infrastructure.ExternalServices.AI.TtsService>();
+builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.ISttService, NexClone.Backend.Infrastructure.ExternalServices.AI.SttService>();
+builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IVideoService, NexClone.Backend.Infrastructure.ExternalServices.AI.VideoService>();
 
 
 // Register Media Service
-builder.Services.AddScoped<NexClone.Backend.Services.IMediaService, NexClone.Backend.Services.S3MediaService>();
+builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IMediaService, NexClone.Backend.Infrastructure.ExternalServices.S3MediaService>();
 
 // Register Email Service
-builder.Services.AddScoped<NexClone.Backend.Services.IEmailService, NexClone.Backend.Services.BrevoEmailService>();
-builder.Services.AddScoped<NexClone.Backend.Services.IEmailTemplateService, NexClone.Backend.Services.EmailTemplateService>();
+builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IEmailService, NexClone.Backend.Infrastructure.ExternalServices.BrevoEmailService>();
+builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IEmailTemplateService, NexClone.Backend.Application.Services.EmailTemplateService>();
 
 // Register Payment Service
 builder.Services.AddHttpClient();
-builder.Services.AddScoped<NexClone.Backend.Services.Payments.IPaymentService, NexClone.Backend.Services.Payments.PaymobPaymentService>();
+builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IPaymentService, NexClone.Backend.Infrastructure.ExternalServices.Payments.PaymobPaymentService>();
 
 // Register Credit Manager
-builder.Services.AddScoped<NexClone.Backend.Services.CreditManagerService>();
-builder.Services.AddScoped<NexClone.Backend.Services.WalletService>();
-builder.Services.AddScoped<NexClone.Backend.Services.UsagePolicyService>();
+builder.Services.AddScoped<NexClone.Backend.Application.Services.CreditManagerService>();
+builder.Services.AddScoped<NexClone.Backend.Application.Services.WalletService>();
+builder.Services.AddScoped<NexClone.Backend.Application.Services.UsagePolicyService>();
 
 // Register Background Services
-builder.Services.AddHostedService<NexClone.Backend.Services.SubscriptionStatusService>();
+builder.Services.AddHostedService<NexClone.Backend.Application.BackgroundJobs.SubscriptionStatusService>();
 
 // Add Rate Limiting
 builder.Services.AddRateLimiter(options =>
@@ -183,11 +182,11 @@ using (var scope = app.Services.CreateScope())
     dbContext.Database.Migrate();
 
     // Seed Default Settings
-    var defaultSettings = new List<NexClone.Backend.Models.AppSetting>
+    var defaultSettings = new List<AppSetting>
     {
-        new NexClone.Backend.Models.AppSetting { Key = "Site.MaintenanceMode", Value = "false", Description = "Global maintenance mode toggle (true/false)" },
-        new NexClone.Backend.Models.AppSetting { Key = "Site.MaintenanceEndDate", Value = "", Description = "Optional end date for maintenance (ISO 8601 string)" },
-        new NexClone.Backend.Models.AppSetting { Key = "Origin.AllowedOrigins", Value = "http://localhost:3000,http://localhost:3001,https://nexclone.com", Description = "Comma-separated list of allowed origins for CORS" }
+        new AppSetting { Key = "Site.MaintenanceMode", Value = "false", Description = "Global maintenance mode toggle (true/false)" },
+        new AppSetting { Key = "Site.MaintenanceEndDate", Value = "", Description = "Optional end date for maintenance (ISO 8601 string)" },
+        new AppSetting { Key = "Origin.AllowedOrigins", Value = "http://localhost:3000,http://localhost:3001,https://nexclone.com", Description = "Comma-separated list of allowed origins for CORS" }
     };
 
     foreach (var setting in defaultSettings)

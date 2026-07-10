@@ -1,7 +1,7 @@
-@model NexClone.Backend.Controllers.SendMailViewModel
+@model NexClone.Backend.API.Controllers.Admin.SendMailViewModel
 @{
     ViewData["Title"] = "Send Broadcast Email";
-    var templates = ViewBag.Templates as IEnumerable<NexClone.Backend.Models.EmailTemplate>;
+    var templates = ViewBag.Templates as IEnumerable<NexClone.Backend.Core.Entities.EmailTemplate>;
 }
 
 <div class="bx--grid">

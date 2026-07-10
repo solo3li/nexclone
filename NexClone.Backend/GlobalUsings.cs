@@ -1,0 +1,9 @@
+global using NexClone.Backend.Core.Entities;
+global using NexClone.Backend.Core.Interfaces;
+global using NexClone.Backend.Application.DTOs;
+global using NexClone.Backend.Application.Services;
+global using NexClone.Backend.Application.BackgroundJobs;
+global using NexClone.Backend.Infrastructure.Data;
+global using NexClone.Backend.Infrastructure.ExternalServices;
+global using NexClone.Backend.Application.DTOs.Payments;
+global using NexClone.Backend.Application.DTOs.ViewModels;

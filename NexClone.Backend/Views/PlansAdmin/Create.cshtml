@@ -1,4 +1,4 @@
-@model NexClone.Backend.Models.Plan
+@model NexClone.Backend.Core.Entities.Plan
 
 <div class="bx--grid" style="padding-left: 0; max-width: 800px; margin-left: 0;">
     <div class="bx--row" style="margin-bottom: 2rem;">
@@ -118,7 +118,7 @@
                 <div style="max-height: 200px; overflow-y: auto; border: 1px solid #e0e0e0; padding: 1rem; background: #fff; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
                     @if (ViewBag.AllVoices != null)
                     {
-                        foreach (var voice in ViewBag.AllVoices as List<NexClone.Backend.Models.Voice>)
+                        foreach (var voice in ViewBag.AllVoices as List<NexClone.Backend.Core.Entities.Voice>)
                         {
                             <div class="bx--checkbox-wrapper">
                                 <input type="checkbox" id="voice_@voice.VoiceName" name="selectedVoices" value="@voice.VoiceName" class="bx--checkbox" />
