@@ -169,17 +169,38 @@ export default function ToolsSidebar() {
                     exit={{ height: 0, opacity: 0 }}
                     className="overflow-hidden"
                   >
-                    <div className="flex flex-col gap-0.5 pt-1 pb-1">
-                      {user.wallets?.map((wallet: any, idx: number) => (
-                        <div key={idx} className="flex items-center justify-between px-2.5 py-1.5 rounded-lg hover:bg-white/5 transition-colors group/wallet">
-                          <span className="text-white/40 group-hover/wallet:text-white/70 text-[10px] font-bold tracking-wider transition-colors">{wallet.code}</span>
-                          <span className="text-white/70 group-hover/wallet:text-white text-[11px] font-bold transition-colors">{wallet.balance}</span>
+                    <div className="flex flex-col gap-1.5 pt-2 pb-1">
+                      {user.wallets?.map((wallet: any, idx: number) => {
+                        let displayName = wallet.code;
+                        if (wallet.code === 'GENERAL') displayName = isRtl ? 'المحفظة العامة' : 'General Wallet';
+                        else if (wallet.code.startsWith('AVATAR_WALLET')) displayName = isRtl ? 'محفظة الأفاتار' : 'Avatar Wallet';
+                        else if (wallet.code.startsWith('VOICE_WALLET')) displayName = isRtl ? 'محفظة الصوت' : 'Voice Wallet';
+                        else if (wallet.code.startsWith('IMAGE_WALLET')) displayName = isRtl ? 'محفظة الصور' : 'Image Wallet';
+                        
+                        return (
+                        <div key={idx} className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/[0.02] border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all group/wallet relative overflow-hidden">
+                          <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/0 via-fuchsia-500/0 to-fuchsia-500/[0.05] opacity-0 group-hover/wallet:opacity-100 transition-opacity" />
+                          <div className="flex items-center gap-2 relative z-10">
+                            <div className="w-1.5 h-1.5 rounded-full bg-fuchsia-400/50 group-hover/wallet:bg-fuchsia-400 group-hover/wallet:shadow-[0_0_8px_rgba(232,121,249,0.8)] transition-all" />
+                            <span className="text-white/60 group-hover/wallet:text-white/90 text-[11px] font-medium tracking-wide transition-colors">{displayName}</span>
+                          </div>
+                          <div className="flex items-center gap-1 relative z-10">
+                            <span className="text-white/90 group-hover/wallet:text-white text-[12px] font-bold transition-colors">{Number(wallet.balance).toFixed(1)}</span>
+                            <span className="text-fuchsia-400/50 text-[9px] font-bold uppercase tracking-wider">CR</span>
+                          </div>
                         </div>
-                      ))}
+                      )})}
                       {(!user.wallets || user.wallets.length === 0) && (
-                        <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg hover:bg-white/5 transition-colors group/wallet">
-                          <span className="text-fuchsia-300/50 group-hover/wallet:text-fuchsia-300/80 text-[10px] font-bold tracking-wider transition-colors">GENERAL</span>
-                          <span className="text-fuchsia-300/80 group-hover/wallet:text-fuchsia-300 text-[11px] font-bold transition-colors">{user.availableCredits || 0}</span>
+                        <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/[0.02] border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all group/wallet relative overflow-hidden">
+                          <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/0 via-fuchsia-500/0 to-fuchsia-500/[0.05] opacity-0 group-hover/wallet:opacity-100 transition-opacity" />
+                          <div className="flex items-center gap-2 relative z-10">
+                            <div className="w-1.5 h-1.5 rounded-full bg-fuchsia-400/50 group-hover/wallet:bg-fuchsia-400 group-hover/wallet:shadow-[0_0_8px_rgba(232,121,249,0.8)] transition-all" />
+                            <span className="text-white/60 group-hover/wallet:text-white/90 text-[11px] font-medium tracking-wide transition-colors">{isRtl ? 'المحفظة العامة' : 'General Wallet'}</span>
+                          </div>
+                          <div className="flex items-center gap-1 relative z-10">
+                            <span className="text-white/90 group-hover/wallet:text-white text-[12px] font-bold transition-colors">{Number(user.availableCredits || 0).toFixed(1)}</span>
+                            <span className="text-fuchsia-400/50 text-[9px] font-bold uppercase tracking-wider">CR</span>
+                          </div>
                         </div>
                       )}
 

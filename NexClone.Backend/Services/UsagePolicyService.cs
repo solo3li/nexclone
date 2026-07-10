@@ -22,6 +22,7 @@ namespace NexClone.Backend.Services
         public bool IsAllowed { get; set; }
         public string ErrorMessage { get; set; } = string.Empty;
         public decimal TotalCost { get; set; }
+        public int ChargedWalletTypeId { get; set; }
     }
 
     public class UsagePolicyService
@@ -89,7 +90,13 @@ namespace NexClone.Backend.Services
 
             if (userWallet == null || userWallet.Balance < totalCost)
             {
-                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Insufficient credits in the required wallet. This requires {totalCost:F4} credits." };
+                string debugInfo = $"Debug: ToolId={toolId}, RequiredWalletId={walletTypeId}, UserWalletsCount={user.Wallets?.Count ?? 0}, ";
+                if (user.Wallets != null) {
+                    foreach (var w in user.Wallets) {
+                        debugInfo += $"[W:{w.WalletTypeId}, Bal:{w.Balance}] ";
+                    }
+                }
+                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Insufficient credits. {debugInfo} Requires {totalCost:F4}." };
             }
 
             userWallet.Balance -= totalCost;
@@ -97,7 +104,7 @@ namespace NexClone.Backend.Services
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
 
-            return new PolicyValidationResult { IsAllowed = true, TotalCost = totalCost };
+            return new PolicyValidationResult { IsAllowed = true, TotalCost = totalCost, ChargedWalletTypeId = walletTypeId };
         }
 
         private async Task<int> GetWalletTypeIdForTool(string toolName, int planId)
@@ -217,10 +224,16 @@ namespace NexClone.Backend.Services
 
             if (userWallet == null || userWallet.Balance < totalCost)
             {
-                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Insufficient credits in the required wallet. This requires {totalCost:F4} credits." };
+                string debugInfo = $"Debug: ToolId={toolId}, RequiredWalletId={walletTypeId}, UserWalletsCount={user.Wallets?.Count ?? 0}, ";
+                if (user.Wallets != null) {
+                    foreach (var w in user.Wallets) {
+                        debugInfo += $"[W:{w.WalletTypeId}, Bal:{w.Balance}] ";
+                    }
+                }
+                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Insufficient credits. {debugInfo} Requires {totalCost:F4}." };
             }
 
-            return new PolicyValidationResult { IsAllowed = true, TotalCost = totalCost };
+            return new PolicyValidationResult { IsAllowed = true, TotalCost = totalCost, ChargedWalletTypeId = walletTypeId };
         }
     }
 }

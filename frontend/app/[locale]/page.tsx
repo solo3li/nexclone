@@ -3,8 +3,6 @@
 
 import Navbar from "../../src/components/Navbar";
 import HeroSection from "../../src/components/HeroSection";
-import HowItWorks from "../../src/components/HowItWorks";
-import FeaturesSection from "../../src/components/FeaturesSection";
 import Footer from "../../src/components/Footer";
 import MobileBottomNav from "../../src/components/MobileBottomNav";
 import CursorGlow from "../../src/components/CursorGlow";
@@ -28,8 +26,6 @@ export default function Page() {
         <Navbar />
         <main>
           <HeroSection />
-          <HowItWorks />
-          <FeaturesSection />
         </main>
         <Footer />
         <MobileBottomNav />

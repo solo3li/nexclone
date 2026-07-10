@@ -47,10 +47,10 @@ namespace NexClone.Backend.Controllers.Api
             if (!result.Success)
             {
                 // Refund
-                var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userIdGuid);
-                if (user != null) {
-                    var generalWallet = await _dbContext.UserWallets.FirstOrDefaultAsync(w => w.UserId == user.Id && w.WalletType.Code == "GENERAL");
-                    if (generalWallet != null) { generalWallet.Balance += 1; await _dbContext.SaveChangesAsync(); }
+                var refundWallet = await _dbContext.UserWallets.FirstOrDefaultAsync(w => w.UserId == userIdGuid && w.WalletTypeId == policyResult.ChargedWalletTypeId);
+                if (refundWallet != null) { 
+                    refundWallet.Balance += policyResult.TotalCost; 
+                    await _dbContext.SaveChangesAsync(); 
                 }
                 return StatusCode(500, new { error = result.ErrorMessage });
             }
@@ -78,10 +78,11 @@ namespace NexClone.Backend.Controllers.Api
             var result = await _videoService.StartLipSyncAsync(image, audio);
             if (!result.Success)
             {
-                var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userIdGuid);
-                if (user != null) {
-                    var generalWallet = await _dbContext.UserWallets.FirstOrDefaultAsync(w => w.UserId == user.Id && w.WalletType.Code == "GENERAL");
-                    if (generalWallet != null) { generalWallet.Balance += 1; await _dbContext.SaveChangesAsync(); }
+                // Refund
+                var refundWallet = await _dbContext.UserWallets.FirstOrDefaultAsync(w => w.UserId == userIdGuid && w.WalletTypeId == policyResult.ChargedWalletTypeId);
+                if (refundWallet != null) { 
+                    refundWallet.Balance += policyResult.TotalCost; 
+                    await _dbContext.SaveChangesAsync(); 
                 }
                 return StatusCode(500, new { error = result.ErrorMessage });
             }
