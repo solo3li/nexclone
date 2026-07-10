@@ -146,12 +146,12 @@ namespace NexClone.Backend.Services
                 policy.MaxFileSizeMb = plan.SttMaxFileSizeMb;
                 policy.CostPerUnit = plan.SttCostPerMinute;
             }
-            else if (toolId == "kling-avatar-image2video")
+            else if (toolId == "kling_avatar_image2video")
             {
                 policy.Enabled = plan.AvatarVideoEnabled;
                 policy.CostPerUnit = plan.AvatarVideoCostPerGeneration;
             }
-            else if (toolId == "kling-advanced-lip-syn")
+            else if (toolId == "kling_advanced_lip_sync")
             {
                 policy.Enabled = plan.LipSyncEnabled;
                 policy.CostPerUnit = plan.LipSyncCostPerGeneration;

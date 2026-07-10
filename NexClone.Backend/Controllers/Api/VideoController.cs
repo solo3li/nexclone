@@ -47,7 +47,7 @@ namespace NexClone.Backend.Controllers.Api
             if (!result.Success)
             {
                 // Refund
-                var user = await _dbContext.Users.FindAsync(userIdString);
+                var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userIdGuid);
                 if (user != null) {
                     var generalWallet = await _dbContext.UserWallets.FirstOrDefaultAsync(w => w.UserId == user.Id && w.WalletType.Code == "GENERAL");
                     if (generalWallet != null) { generalWallet.Balance += 1; await _dbContext.SaveChangesAsync(); }
@@ -78,7 +78,7 @@ namespace NexClone.Backend.Controllers.Api
             var result = await _videoService.StartLipSyncAsync(image, audio);
             if (!result.Success)
             {
-                var user = await _dbContext.Users.FindAsync(userIdString);
+                var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userIdGuid);
                 if (user != null) {
                     var generalWallet = await _dbContext.UserWallets.FirstOrDefaultAsync(w => w.UserId == user.Id && w.WalletType.Code == "GENERAL");
                     if (generalWallet != null) { generalWallet.Balance += 1; await _dbContext.SaveChangesAsync(); }
