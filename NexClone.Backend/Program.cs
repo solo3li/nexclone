@@ -197,6 +197,31 @@ using (var scope = app.Services.CreateScope())
         }
     }
     dbContext.SaveChanges();
+
+    // Seed Tools
+    var toolsToSeed = new[] { "kling_avatar_image2video", "kling_advanced_lip_sync" };
+    foreach (var tool in toolsToSeed)
+    {
+        if (!dbContext.ToolConfigurations.Any(t => t.ToolName == tool))
+        {
+            var config = new NexClone.Backend.Core.Entities.ToolConfiguration
+            {
+                ToolName = tool,
+                IsActive = true,
+                RoutingRules = new List<NexClone.Backend.Core.Entities.ToolRoutingRule>
+                {
+                    new NexClone.Backend.Core.Entities.ToolRoutingRule
+                    {
+                        ProviderName = "CometAPI",
+                        ModelName = tool == "kling_avatar_image2video" ? "kling-v1" : "kling-v1",
+                        QualityLevel = "Standard"
+                    }
+                }
+            };
+            dbContext.ToolConfigurations.Add(config);
+        }
+    }
+    dbContext.SaveChanges();
 }
 
 // Configure the HTTP request pipeline.
