@@ -32,7 +32,7 @@ namespace NexClone.Backend.API.Controllers.AI
         }
 
         [HttpPost("start-avatar")]
-        public async Task<IActionResult> StartAvatar(IFormFile image)
+        public async Task<IActionResult> StartAvatar(IFormFile image, [FromForm] IFormFile? audio = null, [FromForm] string prompt = "The speaker talks naturally to camera")
         {
             if (image == null || image.Length == 0)
                 return BadRequest(new { error = "Image is required." });
@@ -47,7 +47,7 @@ namespace NexClone.Backend.API.Controllers.AI
 
             try
             {
-                var result = await _videoService.StartAvatarImageToVideoAsync(image);
+                var result = await _videoService.StartAvatarImageToVideoAsync(image, audio, prompt);
 
                 if (result.Success)
                 {
@@ -80,10 +80,10 @@ namespace NexClone.Backend.API.Controllers.AI
         }
 
         [HttpPost("start-lipsync")]
-        public async Task<IActionResult> StartLipSync(IFormFile image, IFormFile audio)
+        public async Task<IActionResult> StartLipSync(IFormFile video, IFormFile audio)
         {
-            if (image == null || image.Length == 0 || audio == null || audio.Length == 0)
-                return BadRequest(new { error = "Image and Audio are required." });
+            if (video == null || video.Length == 0 || audio == null || audio.Length == 0)
+                return BadRequest(new { error = "Video and Audio are required." });
 
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
@@ -95,7 +95,7 @@ namespace NexClone.Backend.API.Controllers.AI
 
             try
             {
-                var result = await _videoService.StartLipSyncAsync(image, audio);
+                var result = await _videoService.StartLipSyncAsync(video, audio);
 
                 if (result.Success)
                 {

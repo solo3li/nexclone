@@ -50,7 +50,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
             return (apiConfig.ApiKey, rule.ModelName ?? toolName);
         }
 
-        public async Task<(bool Success, string TaskId, string ErrorMessage)> StartAvatarImageToVideoAsync(IFormFile imageFile)
+        public async Task<(bool Success, string TaskId, string ErrorMessage)> StartAvatarImageToVideoAsync(IFormFile imageFile, IFormFile? audioFile = null, string prompt = "The speaker talks naturally to camera")
         {
             try
             {
@@ -58,21 +58,25 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                 
                 // Upload image to our media service to get a public URL
                 string imageUrl = await _mediaService.UploadFileAsync(imageFile);
-                if (!imageUrl.StartsWith("http"))
+                if (!imageUrl.StartsWith("http")) imageUrl = await _mediaService.GetFileUrlAsync(imageUrl);
+
+                string? audioUrl = null;
+                if (audioFile != null)
                 {
-                    // If it's just an object name, get the URL
-                    imageUrl = await _mediaService.GetFileUrlAsync(imageUrl);
+                    audioUrl = await _mediaService.UploadFileAsync(audioFile);
+                    if (!audioUrl.StartsWith("http")) audioUrl = await _mediaService.GetFileUrlAsync(audioUrl);
                 }
 
                 var payload = new
                 {
                     model = modelName,
-                    prompt = "Create a digital human avatar video from the provided image",
-                    n = 1,
-                    image = imageUrl
+                    prompt = prompt,
+                    image = imageUrl,
+                    sound_file = audioUrl,
+                    mode = "std"
                 };
 
-                return await SubmitTaskAsync(payload, apiKey);
+                return await SubmitTaskAsync(payload, apiKey, "https://api.cometapi.com/kling/v1/videos/avatar/image2video");
             }
             catch (Exception ex)
             {
@@ -81,14 +85,14 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
             }
         }
 
-        public async Task<(bool Success, string TaskId, string ErrorMessage)> StartLipSyncAsync(IFormFile imageFile, IFormFile audioFile)
+        public async Task<(bool Success, string TaskId, string ErrorMessage)> StartLipSyncAsync(IFormFile videoFile, IFormFile audioFile)
         {
             try
             {
                 var (apiKey, modelName) = await GetToolConfigAsync("kling_advanced_lip_sync");
                 
-                string imageUrl = await _mediaService.UploadFileAsync(imageFile);
-                if (!imageUrl.StartsWith("http")) imageUrl = await _mediaService.GetFileUrlAsync(imageUrl);
+                string videoUrl = await _mediaService.UploadFileAsync(videoFile);
+                if (!videoUrl.StartsWith("http")) videoUrl = await _mediaService.GetFileUrlAsync(videoUrl);
 
                 string audioUrl = await _mediaService.UploadFileAsync(audioFile);
                 if (!audioUrl.StartsWith("http")) audioUrl = await _mediaService.GetFileUrlAsync(audioUrl);
@@ -96,13 +100,13 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                 var payload = new
                 {
                     model = modelName,
-                    prompt = "Generate a lip sync video from the provided image and audio",
-                    n = 1,
-                    image = imageUrl,
-                    audio = audioUrl
+                    video_url = videoUrl,
+                    video = videoUrl,
+                    audio = audioUrl,
+                    sound_file = audioUrl
                 };
 
-                return await SubmitTaskAsync(payload, apiKey);
+                return await SubmitTaskAsync(payload, apiKey, "https://api.cometapi.com/kling/v1/videos/lip-sync");
             }
             catch (Exception ex)
             {
@@ -111,15 +115,14 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
             }
         }
 
-        private async Task<(bool Success, string TaskId, string ErrorMessage)> SubmitTaskAsync(object payload, string apiKey)
+        private async Task<(bool Success, string TaskId, string ErrorMessage)> SubmitTaskAsync(object payload, string apiKey, string endpoint = "https://api.cometapi.com/v1/images/generations")
         {
             var client = _httpClientFactory.CreateClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
 
             var jsonContent = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
             
-            // CometAPI uses /v1/images/generations for all async video tasks
-            var response = await client.PostAsync("https://api.cometapi.com/v1/images/generations", jsonContent);
+            var response = await client.PostAsync(endpoint, jsonContent);
             var responseString = await response.Content.ReadAsStringAsync();
 
             _logger.LogInformation($"CometAPI submit response ({response.StatusCode}): {responseString}");

@@ -258,9 +258,9 @@ export default function ProfilePage() {
                 </div>
                 <div className="bg-white/5 rounded-2xl p-3 text-center">
                   <p className="text-2xl font-extrabold text-emerald-400">
-                    {user?.availableCredits || 0}
+                    {user?.wallets ? user.wallets.reduce((acc: number, w: any) => acc + w.balance, 0).toFixed(1) : Number(user?.availableCredits || 0).toFixed(1)}
                   </p>
-                  <p className="text-xs text-white/50 mt-1">{isRtl ? "كريدت متاح" : "Available Credits"}</p>
+                  <p className="text-xs text-white/50 mt-1">{isRtl ? "رصيد المحافظ" : "Wallets Balance"}</p>
                 </div>
               </div>
             </motion.div>

@@ -21,8 +21,8 @@ export default function AdvancedLipSyncPage() {
   const router = useRouter();
   const { setUser } = useAppStore();
 
-  const [imageUrl, setImageUrl] = useState("");
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [inputVideoUrl, setInputVideoUrl] = useState("");
+  const [videoFile, setVideoFile] = useState<File | null>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   
   const [isProcessing, setIsProcessing] = useState(false);
@@ -42,14 +42,14 @@ export default function AdvancedLipSyncPage() {
       router.push('/login');
       return;
     }
-    if (!imageFile || !audioFile) return;
+    if (!videoFile || !audioFile) return;
     setError("");
     setShowConfirmModal(true);
   };
 
   const confirmGenerate = async () => {
     setShowConfirmModal(false);
-    if (!imageFile || !audioFile) return;
+    if (!videoFile || !audioFile) return;
     
     setIsProcessing(true);
     setError("");
@@ -57,7 +57,7 @@ export default function AdvancedLipSyncPage() {
 
     try {
       const formData = new FormData();
-      formData.append("image", imageFile);
+      formData.append("video", videoFile);
       formData.append("audio", audioFile);
 
       const response = await api.post("/api/video/start-lipsync", formData);
@@ -128,10 +128,10 @@ export default function AdvancedLipSyncPage() {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith('image/')) {
+    if (file && file.type.startsWith('video/')) {
       const url = URL.createObjectURL(file);
-      setImageUrl(url);
-      setImageFile(file);
+      setInputVideoUrl(url);
+      setVideoFile(file);
     }
   };
 
@@ -157,8 +157,8 @@ export default function AdvancedLipSyncPage() {
               
               <div className="flex justify-between items-center px-2 mb-4" dir={isRtl ? 'rtl' : 'ltr'}>
                 <div className="flex items-center gap-2">
-                  <ImageIcon className="w-5 h-5 text-fuchsia-400" />
-                  <span className="text-white/80 font-semibold text-sm">{t('uploadImage')}</span>
+                  <Video className="w-5 h-5 text-fuchsia-400" />
+                  <span className="text-white/80 font-semibold text-sm">{isRtl ? "رفع الفيديو" : "Upload Video"}</span>
                 </div>
               </div>
 
@@ -168,23 +168,23 @@ export default function AdvancedLipSyncPage() {
                 onDragOver={handleDragOver}
                 className="relative min-h-[300px] border-2 border-dashed border-white/10 hover:border-fuchsia-500/50 rounded-xl bg-[#0a0015]/60 flex flex-col items-center justify-center gap-4 transition-all overflow-hidden group/upload cursor-pointer"
               >
-                {imageUrl ? (
+                {inputVideoUrl ? (
                   <>
-                    <img src={imageUrl} alt="Uploaded" className="absolute inset-0 w-full h-full object-contain p-2" />
+                    <video src={inputVideoUrl} className="absolute inset-0 w-full h-full object-contain p-2" controls={false} autoPlay loop muted />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/upload:opacity-100 transition-opacity flex items-center justify-center">
                       <p className="text-white font-medium flex items-center gap-2">
                         <UploadCloud className="w-5 h-5" />
-                        {isRtl ? "انقر لتغيير الصورة" : "Click to change image"}
+                        {isRtl ? "انقر لتغيير الفيديو" : "Click to change video"}
                       </p>
                     </div>
                     <input 
                       type="file" 
-                      accept="image/*" 
+                      accept="video/*" 
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
-                          setImageUrl(URL.createObjectURL(file));
-                          setImageFile(file);
+                          setInputVideoUrl(URL.createObjectURL(file));
+                          setVideoFile(file);
                         }
                       }}
                       className="absolute inset-0 opacity-0 cursor-pointer" 
@@ -193,20 +193,20 @@ export default function AdvancedLipSyncPage() {
                 ) : (
                   <>
                     <div className="w-16 h-16 rounded-full bg-fuchsia-500/10 flex items-center justify-center">
-                      <UploadCloud className="w-8 h-8 text-fuchsia-400" />
+                      <Video className="w-8 h-8 text-fuchsia-400" />
                     </div>
                     <div className="text-center">
-                      <p className="text-white/80 font-medium mb-1">{t('imagePlaceholder')}</p>
-                      <p className="text-white/40 text-xs">JPG, PNG, WEBP (Max 5MB)</p>
+                      <p className="text-white/80 font-medium mb-1">{isRtl ? "اسحب وأفلت الفيديو هنا" : "Drag and drop video here"}</p>
+                      <p className="text-white/40 text-xs">MP4, WEBM, MOV (Max 50MB)</p>
                     </div>
                     <input 
                       type="file" 
-                      accept="image/*" 
+                      accept="video/*" 
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
-                          setImageUrl(URL.createObjectURL(file));
-                          setImageFile(file);
+                          setInputVideoUrl(URL.createObjectURL(file));
+                          setVideoFile(file);
                         }
                       }}
                       className="absolute inset-0 opacity-0 cursor-pointer" 
@@ -250,7 +250,7 @@ export default function AdvancedLipSyncPage() {
 
               <button
                   onClick={handleProcessClick}
-                  disabled={isProcessing || !imageFile || !audioFile}
+                  disabled={isProcessing || !videoFile || !audioFile}
                   className="w-full mt-4 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                 {isProcessing ? (

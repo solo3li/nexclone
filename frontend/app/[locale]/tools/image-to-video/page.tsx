@@ -24,6 +24,7 @@ export default function ImageToVideoPage() {
 
   const [imageUrl, setImageUrl] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [audioFile, setAudioFile] = useState<File | null>(null);
   const [prompt, setPrompt] = useState("");
   const [selectedQuality, setSelectedQuality] = useState<string>("High");
   const [aspectRatio, setAspectRatio] = useState<string>("16:9");
@@ -59,6 +60,8 @@ export default function ImageToVideoPage() {
     try {
       const formData = new FormData();
       formData.append("image", imageFile);
+      if (audioFile) formData.append("audio", audioFile);
+      if (prompt) formData.append("prompt", prompt);
 
       const response = await api.post("/api/video/start-avatar", formData);
       const taskId = response.data.taskId;
@@ -224,6 +227,23 @@ export default function ImageToVideoPage() {
                   placeholder={isRtl ? "أو أدخل رابط الصورة هنا..." : "Or enter image URL here..."}
                   className="w-full bg-[#0a0015]/60 border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-1 focus:ring-fuchsia-500/50 transition-all placeholder:text-white/30 text-sm"
                 />
+              </div>
+
+              {/* Audio Input (Optional) */}
+              <div className="mt-4 flex flex-col gap-2" dir={isRtl ? 'rtl' : 'ltr'}>
+                <label className="text-white/80 font-semibold text-sm px-1">{isRtl ? "ملف صوتي (اختياري للـ Lip Sync)" : "Audio File (Optional for Lip Sync)"}</label>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="file"
+                    accept="audio/*"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        setAudioFile(e.target.files[0]);
+                      }
+                    }}
+                    className="w-full bg-[#0a0015]/60 border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-1 focus:ring-fuchsia-500/50 transition-all text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-fuchsia-500/10 file:text-fuchsia-400 hover:file:bg-fuchsia-500/20"
+                  />
+                </div>
               </div>
 
               {/* Prompt Input */}
