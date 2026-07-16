@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/app/NexClone.Backend/NexClone.Backend.csproj": {}
+    "/app/NexClone.Backend.csproj": {}
   },
   "projects": {
-    "/app/NexClone.Backend/NexClone.Backend.csproj": {
+    "/app/NexClone.Backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/app/NexClone.Backend/NexClone.Backend.csproj",
+        "projectUniqueName": "/app/NexClone.Backend.csproj",
         "projectName": "NexClone.Backend",
-        "projectPath": "/app/NexClone.Backend/NexClone.Backend.csproj",
+        "projectPath": "/app/NexClone.Backend.csproj",
         "packagesPath": "/root/.nuget/packages/",
-        "outputPath": "/app/NexClone.Backend/obj/",
+        "outputPath": "/app/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/root/.nuget/NuGet/NuGet.Config"
@@ -120,7 +120,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/10.0.301/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/10.0.302/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

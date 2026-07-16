@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "GEhW0kWVNDE=",
+  "dgSpecHash": "vFV9jBvT6nQ=",
   "success": true,
-  "projectFilePath": "/app/NexClone.Backend/NexClone.Backend.csproj",
+  "projectFilePath": "/app/NexClone.Backend.csproj",
   "expectedPackageFiles": [
     "/root/.nuget/packages/communitytoolkit.highperformance/8.4.0/communitytoolkit.highperformance.8.4.0.nupkg.sha512",
     "/root/.nuget/packages/google.apis/1.68.0/google.apis.1.68.0.nupkg.sha512",
@@ -69,9 +69,9 @@
       "code": "NU1903",
       "level": "Warning",
       "message": "Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc",
-      "projectPath": "/app/NexClone.Backend/NexClone.Backend.csproj",
+      "projectPath": "/app/NexClone.Backend.csproj",
       "warningLevel": 1,
-      "filePath": "/app/NexClone.Backend/NexClone.Backend.csproj",
+      "filePath": "/app/NexClone.Backend.csproj",
       "libraryId": "Microsoft.OpenApi",
       "targetGraphs": [
         "net10.0"
