@@ -1,0 +1,74 @@
+@model IEnumerable<dynamic>
+
+<div class="bx--grid" style="padding-left: 0; max-width: 1200px; margin-left: 0;">
+    <div class="bx--row" style="margin-bottom: 2rem;">
+        <h2 style="margin: 0; font-weight: 400; font-size: 1.5rem;">Cash Affiliates</h2>
+        <p style="color: #525252; margin-top: 0.5rem;">Manage your professional cash affiliates.</p>
+    </div>
+
+    <!-- Add New Affiliate -->
+    <div style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem;">
+        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">Grant Cash Affiliate Status</h3>
+        <form action="@Url.Action("SetCashAffiliate", "AffiliateAdmin")" method="post" style="display: flex; gap: 1rem; align-items: flex-end;">
+            @Html.AntiForgeryToken()
+            <div class="bx--form-item" style="flex: 1;">
+                <label for="userId" class="bx--label">Select User</label>
+                <select id="userId" name="userId" class="bx--select-input" required>
+                    <option value="">Select a user...</option>
+                    @if (ViewBag.AllUsers != null)
+                    {
+                        foreach (var user in ViewBag.AllUsers)
+                        {
+                            if (!user.IsCashAffiliate)
+                            {
+                                <option value="@user.Id">@user.Email</option>
+                            }
+                        }
+                    }
+                </select>
+            </div>
+            <input type="hidden" name="status" value="true" />
+            <button type="submit" class="bx--btn bx--btn--primary">Grant Status</button>
+        </form>
+    </div>
+
+    <!-- Affiliates Table -->
+    <div style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem;">
+        <table class="bx--data-table bx--data-table--sort">
+            <thead>
+                <tr>
+                    <th><span class="bx--table-header-label">Name</span></th>
+                    <th><span class="bx--table-header-label">Email</span></th>
+                    <th><span class="bx--table-header-label">Cash Balance</span></th>
+                    <th><span class="bx--table-header-label">Total Referrals</span></th>
+                    <th><span class="bx--table-header-label">Actions</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.FullName</td>
+                        <td>@item.Email</td>
+                        <td>@item.AffiliateCashBalance.ToString("0.00") EGP</td>
+                        <td>@item.TotalReferrals</td>
+                        <td>
+                            <form action="@Url.Action("SetCashAffiliate", "AffiliateAdmin")" method="post" style="display: inline;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="userId" value="@item.Id" />
+                                <input type="hidden" name="status" value="false" />
+                                <button type="submit" class="bx--btn bx--btn--danger bx--btn--sm" onclick="return confirm('Are you sure you want to revoke Cash Affiliate status from this user?');">Revoke</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 2rem;">No cash affiliates found.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

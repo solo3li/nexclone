@@ -9,7 +9,7 @@ import Footer from "../../../src/components/Footer";
 import MobileBottomNav from "../../../src/components/MobileBottomNav";
 import {
   Activity, Crown, History, User as UserIcon, Lock,
-  Image as ImageIcon, Loader2, Save, Upload, LifeBuoy, MessageSquarePlus
+  Image as ImageIcon, Loader2, Save, Upload, LifeBuoy, MessageSquarePlus, Share2
 } from "lucide-react";
 import api from "../../../src/utils/api";
 import { useAppStore } from "../../../src/store/useAppStore";
@@ -312,6 +312,34 @@ export default function ProfilePage() {
               >
                 <MessageSquarePlus className="w-5 h-5" />
                 {isRtl ? "تذاكري" : "My Tickets"}
+              </button>
+            </motion.div>
+
+            {/* Affiliate Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }}
+              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 relative overflow-hidden"
+            >
+              <div className="absolute bottom-0 right-0 w-40 h-40 bg-gradient-to-tr from-green-600/10 to-transparent blur-2xl" />
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center border border-green-500/30">
+                  <Share2 className="w-5 h-5 text-green-400" />
+                </div>
+                <h2 className="text-xl font-bold text-white">
+                  {isRtl ? "برنامج الإحالة والشركاء" : "Affiliate Program"}
+                </h2>
+              </div>
+              <p className="text-white/50 text-sm mb-5 leading-relaxed">
+                {isRtl
+                  ? "قم بدعوة أصدقائك واكسب أرصدة مجانية، أو اربح المال كمسوق محترف."
+                  : "Invite friends to earn free credits, or earn cash as a professional affiliate."}
+              </p>
+              <button
+                onClick={() => router.push(`/${locale}/profile/affiliate`)}
+                className="w-full py-3 flex items-center justify-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-green-500/20"
+              >
+                <Share2 className="w-5 h-5" />
+                {isRtl ? "لوحة المسوقين" : "Affiliate Dashboard"}
               </button>
             </motion.div>
 

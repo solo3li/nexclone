@@ -117,6 +117,8 @@ namespace NexClone.Backend.API.Controllers.Client
                 return BadRequest(new { Errors = errors });
             }
 
+            await ProcessAffiliateReferral(user, request.RefCode);
+
             // Log fingerprint
             _context.DeviceFingerprints.Add(new DeviceFingerprint
             {
@@ -233,6 +235,8 @@ namespace NexClone.Backend.API.Controllers.Client
                 {
                     return BadRequest(new { Message = "Could not create user account." });
                 }
+                
+                await ProcessAffiliateReferral(user, request.RefCode);
             }
 
             var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
@@ -608,6 +612,55 @@ namespace NexClone.Backend.API.Controllers.Client
                     TtsCustomInstructionsEnabled = activeSub.Plan.TtsCustomInstructionsEnabled
                 } : null
             });
+        }
+
+        private async Task ProcessAffiliateReferral(ApplicationUser user, string? refCode)
+        {
+            if (string.IsNullOrEmpty(refCode) || !Guid.TryParse(refCode, out var referrerId)) return;
+
+            var referrer = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == referrerId);
+            if (referrer == null || referrer.Id == user.Id) return;
+
+            user.ReferredById = referrerId;
+            await _userManager.UpdateAsync(user);
+            
+            _context.AffiliateReferrals.Add(new AffiliateReferral
+            {
+                ReferrerId = referrerId,
+                ReferredUserId = user.Id,
+                JoinedAt = DateTime.UtcNow,
+                Status = "Active"
+            });
+
+            var referrerRewardStr = await _context.AppSettings.Where(s => s.Key == "Affiliate.CreditRewardReferrer").Select(s => s.Value).FirstOrDefaultAsync() ?? "50";
+            var referredRewardStr = await _context.AppSettings.Where(s => s.Key == "Affiliate.CreditRewardReferred").Select(s => s.Value).FirstOrDefaultAsync() ?? "50";
+            
+            decimal referrerReward = decimal.TryParse(referrerRewardStr, out var r1) ? r1 : 50m;
+            decimal referredReward = decimal.TryParse(referredRewardStr, out var r2) ? r2 : 50m;
+
+            var generalWalletType = await _context.WalletTypes.FirstOrDefaultAsync(w => w.Code == "GENERAL");
+            if (generalWalletType == null)
+            {
+                generalWalletType = new WalletType { Code = "GENERAL", Name = "General Wallet" };
+                _context.WalletTypes.Add(generalWalletType);
+                await _context.SaveChangesAsync();
+            }
+
+            if (referrerReward > 0)
+            {
+                var referrerWallet = await _context.UserWallets.FirstOrDefaultAsync(w => w.UserId == referrerId && w.WalletTypeId == generalWalletType.Id);
+                if (referrerWallet == null)
+                {
+                    referrerWallet = new UserWallet { UserId = referrerId, WalletTypeId = generalWalletType.Id, Balance = 0 };
+                    _context.UserWallets.Add(referrerWallet);
+                }
+                referrerWallet.Balance += referrerReward;
+            }
+            if (referredReward > 0)
+            {
+                var referredWallet = new UserWallet { UserId = user.Id, WalletTypeId = generalWalletType.Id, Balance = referredReward };
+                _context.UserWallets.Add(referredWallet);
+            }
         }
     }
 }

@@ -234,5 +234,39 @@ namespace NexClone.Backend.Application.Services
 
             return new PolicyValidationResult { IsAllowed = true, TotalCost = totalCost, ChargedWalletTypeId = walletTypeId };
         }
+
+        public async Task RefundAsync(Guid userId, int walletTypeId, decimal amount)
+        {
+            if (amount <= 0) return;
+
+            var userWallet = await _context.UserWallets.FirstOrDefaultAsync(w => w.UserId == userId && w.WalletTypeId == walletTypeId);
+            if (userWallet != null)
+            {
+                userWallet.Balance += amount;
+                userWallet.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task RefundByToolAsync(Guid userId, string toolId, decimal amount)
+        {
+            if (amount <= 0) return;
+
+            var user = await _context.Users
+                .Include(u => u.Subscriptions)
+                    .ThenInclude(s => s.Plan)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null) return;
+
+            var activeSubscription = user.Subscriptions
+                .FirstOrDefault(s => s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow);
+
+            if (activeSubscription == null) return;
+
+            var walletTypeId = await GetWalletTypeIdForTool(toolId, activeSubscription.Plan.Id);
+            
+            await RefundAsync(userId, walletTypeId, amount);
+        }
     }
 }

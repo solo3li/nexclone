@@ -18,6 +18,8 @@ namespace NexClone.Backend.Core.Entities
         public string Country { get; set; } = "Unknown";
 
         public string? DeviceFingerprint { get; set; }
+        
+        public string? RefCode { get; set; }
     }
 
     public class LoginRequest
@@ -66,6 +68,8 @@ namespace NexClone.Backend.Core.Entities
         public string Token { get; set; } = string.Empty;
 
         public string? DeviceFingerprint { get; set; }
+
+        public string? RefCode { get; set; }
     }
 
     public class AddPhoneRequest

@@ -186,7 +186,10 @@ using (var scope = app.Services.CreateScope())
     {
         new AppSetting { Key = "Site.MaintenanceMode", Value = "false", Description = "Global maintenance mode toggle (true/false)" },
         new AppSetting { Key = "Site.MaintenanceEndDate", Value = "", Description = "Optional end date for maintenance (ISO 8601 string)" },
-        new AppSetting { Key = "Origin.AllowedOrigins", Value = "http://localhost:3000,http://localhost:3001,https://nexclone.com", Description = "Comma-separated list of allowed origins for CORS" }
+        new AppSetting { Key = "Origin.AllowedOrigins", Value = "http://localhost:3000,http://localhost:3001,https://nexclone.com", Description = "Comma-separated list of allowed origins for CORS" },
+        new AppSetting { Key = "Affiliate.CreditRewardReferrer", Value = "50", Description = "Credits given to the referrer" },
+        new AppSetting { Key = "Affiliate.CreditRewardReferred", Value = "50", Description = "Credits given to the referred user" },
+        new AppSetting { Key = "Affiliate.CashCommissionPercentage", Value = "20", Description = "Percentage of cash commission for affiliates (0-100)" }
     };
 
     foreach (var setting in defaultSettings)

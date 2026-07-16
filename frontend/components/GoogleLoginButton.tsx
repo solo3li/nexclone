@@ -5,7 +5,7 @@ import { useRouter } from '../src/i18n/routing';
 import api from '../src/utils/api';
 import { useAppStore } from '../src/store/useAppStore';
 
-export function GoogleLoginButton() {
+export function GoogleLoginButton({ refCode }: { refCode?: string }) {
   const router = useRouter();
   const setUser = useAppStore(state => state.setUser);
 
@@ -17,7 +17,8 @@ export function GoogleLoginButton() {
           try {
             // Post to our new backend endpoint
             const res = await api.post(`/api/auth/google-login`, {
-              token: credentialResponse.credential
+              token: credentialResponse.credential,
+              refCode: refCode
             });
             
             if (res.status === 200) {

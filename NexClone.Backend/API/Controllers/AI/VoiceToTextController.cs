@@ -87,6 +87,7 @@ namespace NexClone.Backend.API.Controllers.AI
 
                 if (!result.Success)
                 {
+                    await _usagePolicy.RefundAsync(userId, policyResult.ChargedWalletTypeId, cost);
                     return StatusCode(500, new { error = result.ErrorMessage });
                 }
 
@@ -114,6 +115,8 @@ namespace NexClone.Backend.API.Controllers.AI
             }
             catch (Exception ex)
             {
+                await _usagePolicy.RefundAsync(userId, policyResult.ChargedWalletTypeId, cost);
+
                 var history = new GenerationHistory
                 {
                     UserId = userId,
@@ -123,7 +126,7 @@ namespace NexClone.Backend.API.Controllers.AI
                     Status = "failed",
                     ErrorMessage = ex.Message,
                     Lang = request.TargetLanguage ?? "Auto",
-                    CreditsUsed = 0 // refund or 0
+                    CreditsUsed = 0
                 };
                 _dbContext.GenerationHistories.Add(history);
                 await _dbContext.SaveChangesAsync();

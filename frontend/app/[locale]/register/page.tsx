@@ -10,12 +10,15 @@ import api from "../../../src/utils/api";
 import { useRouter } from "../../../src/i18n/routing";
 import { useAppStore } from "../../../src/store/useAppStore";
 import { GoogleLoginButton } from "../../../components/GoogleLoginButton";
+import { useSearchParams } from "next/navigation";
 
 export default function RegisterPage() {
   const t = useTranslations("Auth");
   const locale = useLocale();
   const ArrowIcon = locale === 'ar' ? ArrowLeft : ArrowRight;
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const refCode = searchParams.get('ref') || undefined;
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -45,7 +48,8 @@ export default function RegisterPage() {
         email,
         password,
         country: "Unknown",
-        deviceFingerprint: visitorId
+        deviceFingerprint: visitorId,
+        refCode: refCode
       });
       setIsSuccess(true);
     } catch (err: any) {
@@ -183,7 +187,7 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="mt-4">
-                  <GoogleLoginButton />
+                  <GoogleLoginButton refCode={refCode} />
                 </div>
               </form>
 

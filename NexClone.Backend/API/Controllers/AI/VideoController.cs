@@ -67,7 +67,7 @@ namespace NexClone.Backend.API.Controllers.AI
             }
 
             // Refund if failed to start
-            await RefundCost(userId, policyResult.ChargedWalletTypeId, policyResult.TotalCost);
+            await _usagePolicy.RefundAsync(userId, policyResult.ChargedWalletTypeId, policyResult.TotalCost);
 
             return StatusCode(500, new { error = result.ErrorMessage });
         }
@@ -108,7 +108,7 @@ namespace NexClone.Backend.API.Controllers.AI
             }
 
             // Refund if failed to start
-            await RefundCost(userId, policyResult.ChargedWalletTypeId, policyResult.TotalCost);
+            await _usagePolicy.RefundAsync(userId, policyResult.ChargedWalletTypeId, policyResult.TotalCost);
 
             return StatusCode(500, new { error = result.ErrorMessage });
         }
@@ -137,9 +137,15 @@ namespace NexClone.Backend.API.Controllers.AI
                     else
                     {
                         history.ErrorMessage = result.ErrorMessage;
-                        // Optional: Refund the cost here since it failed asynchronously
-                        // We need the wallet ID, but we didn't save the charged wallet ID to history.
-                        // Let's assume refunding to the default general wallet is fine, or we can just refund WalletService.
+                        
+                        string toolName = history.Type == "image-to-video" ? "kling_avatar_image2video" : 
+                                          history.Type == "lip-sync" ? "kling_advanced_lip_sync" : "UNKNOWN";
+                        
+                        if (toolName != "UNKNOWN" && history.CreditsUsed > 0)
+                        {
+                            await _usagePolicy.RefundByToolAsync(userId, toolName, history.CreditsUsed);
+                            history.CreditsUsed = 0;
+                        }
                     }
                     await _dbContext.SaveChangesAsync();
                 }
@@ -148,16 +154,5 @@ namespace NexClone.Backend.API.Controllers.AI
             return Ok(new { status = result.Status, url = result.OutputUrl, error = result.ErrorMessage });
         }
 
-        private async Task RefundCost(Guid userId, int walletTypeId, decimal amount)
-        {
-            if (amount <= 0) return;
-            
-            var wallet = await _dbContext.UserWallets.FirstOrDefaultAsync(w => w.UserId == userId && w.WalletTypeId == walletTypeId);
-            if (wallet != null)
-            {
-                wallet.Balance += amount;
-                await _dbContext.SaveChangesAsync();
-            }
-        }
     }
 }
