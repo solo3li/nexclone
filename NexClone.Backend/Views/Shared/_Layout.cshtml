@@ -30,44 +30,44 @@
         }
         
         html[dir="rtl"] .modern-sidebar {
-            left: auto;
-            right: 0;
+            left: auto !important;
+            right: 0 !important;
             box-shadow: -4px 0 16px rgba(0,0,0,0.1);
         }
 
         html[dir="rtl"] .sidebar-menu-item a {
-            border-left: none;
-            border-right: 4px solid transparent;
-            padding: 1rem 1.5rem 1rem 1rem;
+            border-left: none !important;
+            border-right: 4px solid transparent !important;
+            padding: 1rem 1.5rem 1rem 1rem !important;
         }
 
         html[dir="rtl"] .sidebar-menu-item.active a {
-            border-right-color: var(--primary-color);
+            border-right-color: var(--primary-color) !important;
         }
 
         html[dir="rtl"] .sidebar-menu-item a i {
-            margin-right: 0;
-            margin-left: 1rem;
+            margin-right: 0 !important;
+            margin-left: 1rem !important;
         }
 
         html[dir="rtl"] .bx--content {
-            margin-left: 0;
-            margin-right: 256px;
-        }
-
-        html[dir="rtl"] .modern-sidebar.collapsed .sidebar-menu-item a i {
-            margin-left: 2rem;
-            margin-right: 0;
+            margin-left: 0 !important;
+            margin-right: 256px !important;
         }
         
-        html[dir="rtl"] .modern-sidebar.collapsed .sidebar-menu-item a {
-            padding-right: 1.5rem;
-            padding-left: 0;
+        html[dir="rtl"] .modern-sidebar.collapsed .sidebar-menu-item a i {
+            margin-left: 2rem !important;
+            margin-right: 0 !important;
+        }
+        
+        html[dir="rtl"] .sidebar-menu-item.collapsed a {
+            padding-right: 1.5rem !important;
+            padding-left: 0 !important;
         }
 
         html[dir="rtl"] .bx--content.expanded-content {
-            margin-left: 0;
-            margin-right: 72px;
+            margin-left: 0 !important;
+            margin-right: 72px !important;
         }
 
         html[dir="rtl"] #desktop-collapse-btn {
@@ -77,6 +77,57 @@
 
         html[dir="rtl"] .modern-sidebar.collapsed #desktop-collapse-btn {
             margin-right: 0;
+        }
+
+        /* Carbon Overrides for RTL */
+        html[dir="rtl"] .bx--data-table th, 
+        html[dir="rtl"] .bx--data-table td {
+            text-align: right;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        html[dir="rtl"] .bx--pagination {
+            flex-direction: row-reverse;
+        }
+
+        html[dir="rtl"] .bx--pagination__left {
+            margin-right: 0;
+            margin-left: auto;
+        }
+
+        html[dir="rtl"] .bx--pagination__right {
+            margin-left: 0;
+            margin-right: auto;
+            flex-direction: row-reverse;
+        }
+
+        html[dir="rtl"] .bx--btn {
+            flex-direction: row;
+        }
+        html[dir="rtl"] .bx--btn i {
+            margin-left: 0;
+            margin-right: 0.5rem;
+        }
+
+        html[dir="rtl"] .mobile-menu-btn {
+            margin-right: 0;
+            margin-left: 1rem;
+        }
+
+        @@media (max-width: 768px) {
+            html[dir="rtl"] .modern-sidebar {
+                transform: translateX(100%);
+            }
+            html[dir="rtl"] .modern-sidebar.open {
+                transform: translateX(0);
+            }
+            html[dir="rtl"] .bx--content {
+                margin-right: 0;
+            }
+            html[dir="rtl"] [style*="align-items: flex-start"] {
+                align-items: flex-end !important;
+            }
         }
 
         body { 
