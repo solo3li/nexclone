@@ -117,7 +117,7 @@ export default function HistoryDetailPage() {
         )}
 
         {/* Result Text (If Voice-to-Text or GPT) */}
-        {record.resultText && (
+        {record.resultText && record.type !== "text-to-voice" && (
           <div className="bg-white/5 rounded-3xl p-6 md:p-8 border border-white/10">
             <h3 className="text-emerald-400/80 font-medium mb-4 text-sm">
               {isRtl ? "النتيجة" : "Result"}
