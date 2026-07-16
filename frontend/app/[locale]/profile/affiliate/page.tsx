@@ -3,8 +3,12 @@ import { useEffect, useState } from "react";
 import api from "@/utils/api";
 import { useAppStore } from "@/store/useAppStore";
 import { motion } from "framer-motion";
+import { useLocale } from "next-intl";
+import { AlertCircle } from "lucide-react";
 
 export default function AffiliateDashboard() {
+  const locale = useLocale();
+  const isRtl = locale === "ar";
   const [stats, setStats] = useState<any>(null);
   const [referrals, setReferrals] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -124,6 +128,20 @@ export default function AffiliateDashboard() {
             {copied ? "Copied!" : "Copy Link"}
           </button>
         </div>
+        <div className="mt-6 p-4 rounded-xl bg-blue-900/20 border border-blue-500/20 flex gap-3 items-start">
+          <AlertCircle className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
+          <div>
+            <h4 className="text-blue-300 font-semibold mb-1">
+              {isRtl ? "ملاحظة هامة حول نظام الدعوات" : "Important Note on Referrals"}
+            </h4>
+            <p className="text-white/60 text-sm">
+              {isRtl 
+                ? "لحماية النظام من الاحتيال، لن يتم احتساب الإحالة إذا قام الشخص بالتسجيل من نفس جهازك أو من نفس شبكة الإنترنت (IP) التي تستخدمها."
+                : "To protect the system from fraud, referrals will not be counted if the person registers from the same device or IP address you are using."}
+            </p>
+          </div>
+        </div>
+
         {!stats?.isCashAffiliate && (
           <div className="mt-6 p-4 rounded-xl bg-violet-900/20 border border-violet-500/20">
             <h4 className="text-violet-300 font-semibold mb-1">Are you a content creator?</h4>
