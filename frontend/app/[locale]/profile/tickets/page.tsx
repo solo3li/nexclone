@@ -31,14 +31,20 @@ export default function TicketsList() {
     }
   };
 
+  const [creating, setCreating] = useState(false);
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (creating) return;
+    setCreating(true);
     try {
       const res = await api.post("/api/tickets", { subject, message });
       setShowCreate(false);
       router.push(`/profile/tickets/${res.data.id}` as any);
     } catch (err) {
       console.error(err);
+    } finally {
+      setCreating(false);
     }
   };
 

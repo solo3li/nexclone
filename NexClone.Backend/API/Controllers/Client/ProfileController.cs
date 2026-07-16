@@ -6,19 +6,19 @@ using System.Threading.Tasks;
 
 namespace NexClone.Backend.API.Controllers.Client
 {
-    [Route("api/[controller]")]
+    [Route("api/profile")]
     [ApiController]
     [Authorize]
-    public class AccountController : ControllerBase
+    public class ProfileController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public AccountController(UserManager<ApplicationUser> userManager)
+        public ProfileController(UserManager<ApplicationUser> userManager)
         {
             _userManager = userManager;
         }
 
-        [HttpPut("profile")]
+        [HttpPut]
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
