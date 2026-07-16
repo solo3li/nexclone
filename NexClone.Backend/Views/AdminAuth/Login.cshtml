@@ -1,3 +1,4 @@
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 @{
     Layout = null;
     ViewData["Title"] = "Admin Login";
@@ -76,8 +77,8 @@
 <body>
     <div class="login-container">
         <div class="login-header">
-            <h1>NexClone Admin</h1>
-            <p>Log in to access the control panel</p>
+            <h1>@Localizer["NexClone Admin"]</h1>
+            <p>@Localizer["Log in to access the control panel"]</p>
         </div>
 
         <form method="post" action="/AdminAuth/Login">
@@ -91,17 +92,17 @@
             }
 
             <div class="bx--form-item">
-                <label for="email" class="bx--label">Email Address</label>
+                <label for="email" class="bx--label">@Localizer["Email Address"]</label>
                 <input id="email" name="email" type="email" class="bx--text-input" placeholder="admin@example.com" required autofocus>
             </div>
             
             <div class="bx--form-item">
-                <label for="password" class="bx--label">Password</label>
+                <label for="password" class="bx--label">@Localizer["Password"]</label>
                 <input id="password" name="password" type="password" class="bx--text-input" placeholder="••••••••" required>
             </div>
 
             <button class="bx--btn bx--btn--primary" type="submit">
-                Log in
+                @Localizer["Log in"]
             </button>
         </form>
     </div>

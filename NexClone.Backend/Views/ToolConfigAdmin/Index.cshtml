@@ -1,4 +1,5 @@
 @model Dictionary<string, NexClone.Backend.Core.Entities.ToolConfiguration>
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 
 @{
     ViewData["Title"] = "Tool Settings";
@@ -8,8 +9,8 @@
 <div class="bx--grid bx--grid--full-width">
     <div class="bx--row" style="margin-bottom: 2rem;">
         <div class="bx--col">
-            <h1 class="bx--type-productive-heading-05">Advanced Tool Configurations</h1>
-            <p style="margin-top: 0.5rem; color: #525252;">Manage individual settings, scheduling, and fallbacks for each tool independently.</p>
+            <h1 class="bx--type-productive-heading-05">@Localizer["Advanced Tool Configurations"]</h1>
+            <p style="margin-top: 0.5rem; color: #525252;">@Localizer["Manage individual settings, scheduling, and fallbacks for each tool independently."]</p>
         </div>
     </div>
 
@@ -19,7 +20,7 @@
             <div class="bx--inline-notification__details">
                 <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bx--inline-notification__icon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M10,1c-4.9,0-9,4.1-9,9s4.1,9,9,9s9-4.1,9-9S14.9,1,10,1z M8.7,13.5l-3.2-3.2l1-1l2.2,2.2l4.8-4.8l1,1L8.7,13.5z"></path></svg>
                 <div class="bx--inline-notification__text-wrapper">
-                    <p class="bx--inline-notification__title">Success</p>
+                    <p class="bx--inline-notification__title">@Localizer["Success"]</p>
                     <p class="bx--inline-notification__subtitle">@TempData["SuccessMessage"]</p>
                 </div>
             </div>
@@ -32,7 +33,7 @@
             <div class="bx--inline-notification__details">
                 <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bx--inline-notification__icon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M10,1c-5,0-9,4-9,9s4,9,9,9s9-4,9-9S15,1,10,1z M13.5,14.5l-8-8l1-1l8,8L13.5,14.5z"></path></svg>
                 <div class="bx--inline-notification__text-wrapper">
-                    <p class="bx--inline-notification__title">Error</p>
+                    <p class="bx--inline-notification__title">@Localizer["Error"]</p>
                     <p class="bx--inline-notification__subtitle">@TempData["ErrorMessage"]</p>
                 </div>
             </div>
@@ -71,7 +72,7 @@
                         <input type="hidden" name="ToolName" value="@toolName" />
                         
                         <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem;">
-                            <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem;">General Settings</h3>
+                            <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem;">@Localizer["General Settings"]</h3>
                             
                             <div class="bx--form-item" style="margin-bottom: 1.5rem;">
                                 <div class="bx--toggle-c">
@@ -79,10 +80,10 @@
                                     <input type="hidden" name="IsActive" value="false">
                                     <label for="IsActive-@toolName" class="bx--toggle-input__label" aria-label="Toggle">
                                         <span class="bx--toggle__switch">
-                                            <span class="bx--toggle__text--left" aria-hidden="true">Off</span>
-                                            <span class="bx--toggle__text--right" aria-hidden="true">On</span>
+                                            <span class="bx--toggle__text--left" aria-hidden="true">@Localizer["Off"]</span>
+                                            <span class="bx--toggle__text--right" aria-hidden="true">@Localizer["On"]</span>
                                         </span>
-                                        <span style="margin-left: 1rem;">Is Active (Enable/Disable Tool)</span>
+                                        <span style="margin-left: 1rem;">@Localizer["Is Active (Enable/Disable Tool)"]</span>
                                     </label>
                                 </div>
                             </div>
@@ -93,19 +94,19 @@
                                     <input type="hidden" name="IsMaintenanceMode" value="false">
                                     <label for="IsMaintenanceMode-@toolName" class="bx--toggle-input__label" aria-label="Toggle">
                                         <span class="bx--toggle__switch">
-                                            <span class="bx--toggle__text--left" aria-hidden="true">Off</span>
-                                            <span class="bx--toggle__text--right" aria-hidden="true">On</span>
+                                            <span class="bx--toggle__text--left" aria-hidden="true">@Localizer["Off"]</span>
+                                            <span class="bx--toggle__text--right" aria-hidden="true">@Localizer["On"]</span>
                                         </span>
-                                        <span style="margin-left: 1rem;">Maintenance Mode</span>
+                                        <span style="margin-left: 1rem;">@Localizer["Maintenance Mode"]</span>
                                     </label>
                                 </div>
                             </div>
                         </div>
 
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                            <h3 class="bx--type-productive-heading-03">Routing Rules (Models)</h3>
+                            <h3 class="bx--type-productive-heading-03">@Localizer["Routing Rules (Models)"]</h3>
                             <button type="button" class="bx--btn bx--btn--sm bx--btn--secondary" onclick="addRule('@toolName')">
-                                + Add Model
+                                @Localizer["+ Add Model"]
                             </button>
                         </div>
                         
@@ -118,13 +119,13 @@
                                 var rule = sortedRules[r];
                                 <div class="rule-block" style="background: #ffffff; padding: 1.5rem; border: 1px solid #e0e0e0; border-left: 4px solid #0f62fe; position: relative;">
                                     <button type="button" class="bx--btn bx--btn--sm bx--btn--danger" style="position: absolute; top: 1rem; right: 1rem;" onclick="this.closest('.rule-block').remove(); updateRuleIndices('@toolName');">
-                                        Remove
+                                        @Localizer["Remove"]
                                     </button>
                                     
                                     @if (toolName == "text-to-voice")
                                     {
                                         <div class="bx--form-item" style="margin-bottom: 1rem;">
-                                            <label class="bx--label">Quality Level</label>
+                                            <label class="bx--label">@Localizer["Quality Level"]</label>
                                             <select name="RoutingRules[@r].QualityLevel" class="bx--select-input rule-quality-input" required>
                                                 <option value="Standard" selected="@(rule.QualityLevel == "Standard")">Standard</option>
                                                 <option value="High" selected="@(rule.QualityLevel == "High")">High</option>
@@ -138,7 +139,7 @@
                                     
                                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
                                         <div class="bx--form-item">
-                                            <label class="bx--label">Provider Name</label>
+                                            <label class="bx--label">@Localizer["Provider Name"]</label>
                                             <select name="RoutingRules[@r].ProviderName" class="bx--select-input" required>
                                                 <option value="">-- Select Provider --</option>
                                                 @if (providers != null)
@@ -151,26 +152,26 @@
                                             </select>
                                         </div>
                                         <div class="bx--form-item">
-                                            <label class="bx--label">Model Name (Optional)</label>
+                                            <label class="bx--label">@Localizer["Model Name (Optional)"]</label>
                                             <input type="text" name="RoutingRules[@r].ModelName" class="bx--text-input" value="@rule.ModelName" placeholder="e.g. tts-1 or gemini-2.0" />
                                         </div>
                                     </div>
                                     
                                     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
                                         <div class="bx--form-item">
-                                            <label class="bx--label">Max Daily Requests</label>
+                                            <label class="bx--label">@Localizer["Max Daily Requests"]</label>
                                             <input type="number" name="RoutingRules[@r].MaxDailyRequests" class="bx--text-input" value="@rule.MaxDailyRequests" placeholder="Unlimited" min="1" />
                                         </div>
                                         <div class="bx--form-item">
-                                            <label class="bx--label">Max Requests/Min</label>
+                                            <label class="bx--label">@Localizer["Max Requests/Min"]</label>
                                             <input type="number" name="RoutingRules[@r].MaxRequestsPerMinute" class="bx--text-input" value="@rule.MaxRequestsPerMinute" placeholder="Unlimited" min="1" />
                                         </div>
                                         <div class="bx--form-item">
-                                            <label class="bx--label">Active From Time</label>
+                                            <label class="bx--label">@Localizer["Active From Time"]</label>
                                             <input type="time" name="RoutingRules[@r].ActiveFromTime" class="bx--text-input" value="@(rule.ActiveFromTime.HasValue ? rule.ActiveFromTime.Value.ToString(@"hh\:mm") : "")" />
                                         </div>
                                         <div class="bx--form-item">
-                                            <label class="bx--label">Active To Time</label>
+                                            <label class="bx--label">@Localizer["Active To Time"]</label>
                                             <input type="time" name="RoutingRules[@r].ActiveToTime" class="bx--text-input" value="@(rule.ActiveToTime.HasValue ? rule.ActiveToTime.Value.ToString(@"hh\:mm") : "")" />
                                         </div>
                                     </div>
@@ -241,12 +242,12 @@
             const html = `
                 <div class="rule-block" style="background: #ffffff; padding: 1.5rem; border: 1px solid #e0e0e0; border-left: 4px solid #0f62fe; position: relative;">
                     <button type="button" class="bx--btn bx--btn--sm bx--btn--danger" style="position: absolute; top: 1rem; right: 1rem;" onclick="this.closest('.rule-block').remove(); updateRuleIndices('${toolName}');">
-                        Remove
+                        @Localizer["Remove"]
                     </button>
                     
                     ${toolName === "text-to-voice" ? `
                     <div class="bx--form-item" style="margin-bottom: 1rem;">
-                        <label class="bx--label">Quality Level</label>
+                        <label class="bx--label">@Localizer["Quality Level"]</label>
                         <select name="RoutingRules[${count}].QualityLevel" class="bx--select-input rule-quality-input" required>
                             <option value="Standard">Standard</option>
                             <option value="High">High</option>
@@ -256,32 +257,32 @@
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
                         <div class="bx--form-item">
-                            <label class="bx--label">Provider Name</label>
+                            <label class="bx--label">@Localizer["Provider Name"]</label>
                             <select name="RoutingRules[${count}].ProviderName" class="bx--select-input" required>
                                 ${optionsHtml}
                             </select>
                         </div>
                         <div class="bx--form-item">
-                            <label class="bx--label">Model Name (Optional)</label>
+                            <label class="bx--label">@Localizer["Model Name (Optional)"]</label>
                             <input type="text" name="RoutingRules[${count}].ModelName" class="bx--text-input" placeholder="e.g. tts-1 or gemini-2.0" />
                         </div>
                     </div>
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
                         <div class="bx--form-item">
-                            <label class="bx--label">Max Daily Requests</label>
+                            <label class="bx--label">@Localizer["Max Daily Requests"]</label>
                             <input type="number" name="RoutingRules[${count}].MaxDailyRequests" class="bx--text-input" placeholder="Unlimited" min="1" />
                         </div>
                         <div class="bx--form-item">
-                            <label class="bx--label">Max Requests/Min</label>
+                            <label class="bx--label">@Localizer["Max Requests/Min"]</label>
                             <input type="number" name="RoutingRules[${count}].MaxRequestsPerMinute" class="bx--text-input" placeholder="Unlimited" min="1" />
                         </div>
                         <div class="bx--form-item">
-                            <label class="bx--label">Active From Time</label>
+                            <label class="bx--label">@Localizer["Active From Time"]</label>
                             <input type="time" name="RoutingRules[${count}].ActiveFromTime" class="bx--text-input" />
                         </div>
                         <div class="bx--form-item">
-                            <label class="bx--label">Active To Time</label>
+                            <label class="bx--label">@Localizer["Active To Time"]</label>
                             <input type="time" name="RoutingRules[${count}].ActiveToTime" class="bx--text-input" />
                         </div>
                     </div>

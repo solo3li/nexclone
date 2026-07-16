@@ -1,4 +1,5 @@
 @model NexClone.Backend.Core.Entities.BlogPost
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 
 <div class="bx--grid" style="padding-left: 0; padding-right: 0;">
     <div class="bx--row">
@@ -8,20 +9,20 @@
                     @Html.AntiForgeryToken()
                     
                     <div class="bx--form-item" style="margin-bottom: 1.5rem;">
-                        <label class="bx--label" style="font-weight: 600;">Title</label>
+                        <label class="bx--label" style="font-weight: 600;">@Localizer["Title"]</label>
                         <input type="text" class="bx--text-input" name="Title" required style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;" />
                     </div>
 
                     <div class="bx--form-item" style="margin-bottom: 1.5rem;">
-                        <label class="bx--label" style="font-weight: 600;">Content (HTML/Markdown)</label>
+                        <label class="bx--label" style="font-weight: 600;">@Localizer["Content (HTML/Markdown)"]</label>
                         <textarea class="bx--text-area" name="Content" rows="15" required style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;"></textarea>
                     </div>
 
                     <div class="bx--form-item" style="margin-bottom: 0.5rem;">
-                        <label class="bx--label" style="font-weight: 600;">Media</label>
-                        <p style="font-size: 0.8rem; color: #6f6f6f; margin-bottom: 0.75rem;">Option 1: Upload a file (requires S3 configuration in Global Settings)</p>
+                        <label class="bx--label" style="font-weight: 600;">@Localizer["Media"]</label>
+                        <p style="font-size: 0.8rem; color: #6f6f6f; margin-bottom: 0.75rem;">@Localizer["Option 1: Upload a file (requires S3 configuration in Global Settings)"]</p>
                         <input type="file" name="MediaFile" style="display: block; margin-bottom: 1rem;" accept="image/*,video/*" />
-                        <p style="font-size: 0.8rem; color: #6f6f6f; margin-bottom: 0.5rem;">Option 2: Or enter a direct URL to an image/video</p>
+                        <p style="font-size: 0.8rem; color: #6f6f6f; margin-bottom: 0.5rem;">@Localizer["Option 2: Or enter a direct URL to an image/video"]</p>
                         <input type="url" name="MediaUrl" placeholder="https://example.com/image.jpg" style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;" />
                         <input type="hidden" name="MediaType" id="mediaTypeInput" value="" />
                     </div>
@@ -29,13 +30,13 @@
                     <div class="bx--form-item" style="margin-bottom: 1.5rem;">
                         <label class="bx--checkbox-wrapper">
                             <input type="checkbox" name="IsPublished" value="true" checked class="bx--checkbox" />
-                            <span class="bx--checkbox-label">Publish immediately</span>
+                            <span class="bx--checkbox-label">@Localizer["Publish immediately"]</span>
                         </label>
                     </div>
 
                     <div style="display: flex; gap: 1rem;">
-                        <button type="submit" class="bx--btn bx--btn--primary" style="background-color: #0f62fe; color: white; padding: 0.875rem 2rem; border: none; cursor: pointer; border-radius: 4px; font-weight: 600;">Create Post</button>
-                        <a href="/BlogAdmin" class="bx--btn bx--btn--secondary" style="background-color: #e0e0e0; color: #161616; padding: 0.875rem 2rem; text-decoration: none; border-radius: 4px; font-weight: 600;">Cancel</a>
+                        <button type="submit" class="bx--btn bx--btn--primary" style="background-color: #0f62fe; color: white; padding: 0.875rem 2rem; border: none; cursor: pointer; border-radius: 4px; font-weight: 600;">@Localizer["Create Post"]</button>
+                        <a href="/BlogAdmin" class="bx--btn bx--btn--secondary" style="background-color: #e0e0e0; color: #161616; padding: 0.875rem 2rem; text-decoration: none; border-radius: 4px; font-weight: 600;">@Localizer["Cancel"]</a>
                     </div>
                 </form>
             </div>

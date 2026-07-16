@@ -1,9 +1,10 @@
 @model IEnumerable<NexClone.Backend.Core.Entities.CustomPage>
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 
 <div class="bx--grid" style="padding-left: 0; padding-right: 0;">
     <div class="bx--row" style="margin-bottom: 2rem;">
         <div class="bx--col">
-            <a href="/CustomPagesAdmin/Create" class="bx--btn bx--btn--primary" style="background-color: #0f62fe; color: white; padding: 0.875rem 2rem; text-decoration: none; border-radius: 4px; font-weight: 600;">Create New Page</a>
+            <a href="/CustomPagesAdmin/Create" class="bx--btn bx--btn--primary" style="background-color: #0f62fe; color: white; padding: 0.875rem 2rem; text-decoration: none; border-radius: 4px; font-weight: 600;">@Localizer["Create New Page"]</a>
         </div>
     </div>
     
@@ -13,11 +14,11 @@
                 <table class="bx--data-table" style="width: 100%; text-align: left; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
                     <thead style="background-color: #f4f4f4;">
                         <tr>
-                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">Slug</th>
-                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">Title (EN)</th>
-                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">Title (AR)</th>
-                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">Last Updated</th>
-                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">Actions</th>
+                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">@Localizer["Slug"]</th>
+                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">@Localizer["Title (EN)"]</th>
+                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">@Localizer["Title (AR)"]</th>
+                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">@Localizer["Last Updated"]</th>
+                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">@Localizer["Actions"]</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -29,9 +30,9 @@
                                 <td style="padding: 1rem;">@item.TitleAr</td>
                                 <td style="padding: 1rem;">@item.UpdatedAt.ToLocalTime().ToString("g")</td>
                                 <td style="padding: 1rem; display: flex; gap: 0.5rem;">
-                                    <a href="/CustomPagesAdmin/Edit/@item.Id" class="bx--btn bx--btn--sm bx--btn--secondary" style="background-color: #393939; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; font-size: 0.875rem;">Edit</a>
+                                    <a href="/CustomPagesAdmin/Edit/@item.Id" class="bx--btn bx--btn--sm bx--btn--secondary" style="background-color: #393939; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; font-size: 0.875rem;">@Localizer["Edit"]</a>
                                     <form method="post" action="/CustomPagesAdmin/Delete/@item.Id" onsubmit="return confirm('Are you sure?');">
-                                        <button type="submit" class="bx--btn bx--btn--sm bx--btn--danger" style="background-color: #da1e28; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; font-size: 0.875rem; cursor: pointer;">Delete</button>
+                                        <button type="submit" class="bx--btn bx--btn--sm bx--btn--danger" style="background-color: #da1e28; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; font-size: 0.875rem; cursor: pointer;">@Localizer["Delete"]</button>
                                     </form>
                                 </td>
                             </tr>

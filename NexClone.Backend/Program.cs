@@ -26,7 +26,12 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddViewLocalization();
+
+builder.Services.AddSingleton<Microsoft.Extensions.Localization.IStringLocalizerFactory, NexClone.Backend.Infrastructure.Localization.JsonStringLocalizerFactory>();
+builder.Services.AddLocalization();
+
 builder.Services.AddSignalR();
 
 // Persist DataProtection keys to DB so antiforgery tokens survive container restarts
@@ -240,6 +245,21 @@ app.MapScalarApiReference();
 // app.UseHttpsRedirection(); // Commented out to prevent warnings since Railway handles HTTPS termination
 app.UseStaticFiles();
 app.UseRouting();
+
+var supportedCultures = new[] { "en", "ar" };
+var localizationOptions = new RequestLocalizationOptions()
+    .SetDefaultCulture(supportedCultures[0])
+    .AddSupportedCultures(supportedCultures)
+    .AddSupportedUICultures(supportedCultures);
+
+// Read from AdminLang cookie
+localizationOptions.RequestCultureProviders.Insert(0, new Microsoft.AspNetCore.Localization.CookieRequestCultureProvider
+{
+    CookieName = "AdminLang"
+});
+
+app.UseRequestLocalization(localizationOptions);
+
 app.UseCors("AllowNextjs");
 app.UseRateLimiter();
 

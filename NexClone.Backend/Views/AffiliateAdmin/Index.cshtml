@@ -1,9 +1,10 @@
 @model IEnumerable<dynamic>
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 
 <div class="bx--grid" style="padding-left: 0; max-width: 1200px; margin-left: 0;">
     <div class="bx--row" style="margin-bottom: 2rem;">
-        <h2 style="margin: 0; font-weight: 400; font-size: 1.5rem;">Cash Affiliates</h2>
-        <p style="color: #525252; margin-top: 0.5rem;">Manage your professional cash affiliates.</p>
+        <h2 style="margin: 0; font-weight: 400; font-size: 1.5rem;">@Localizer["Cash Affiliates"]</h2>
+        <p style="color: #525252; margin-top: 0.5rem;">@Localizer["Manage your professional cash affiliates."]</p>
     </div>
 
     <!-- Alerts -->
@@ -13,7 +14,7 @@
             <div class="bx--inline-notification__details">
                 <svg focusable="false" preserveAspectRatio="xMidYMid meet" style="will-change: transform;" xmlns="http://www.w3.org/2000/svg" class="bx--inline-notification__icon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M10,1c-4.9,0-9,4.1-9,9s4.1,9,9,9s9-4.1,9-9S14.9,1,10,1z M8.7,13.5l-3.2-3.2l1-1l2.2,2.2l4.8-4.8l1,1L8.7,13.5z"></path></svg>
                 <div class="bx--inline-notification__text-wrapper">
-                    <p class="bx--inline-notification__title">Success</p>
+                    <p class="bx--inline-notification__title">@Localizer["Success"]</p>
                     <p class="bx--inline-notification__subtitle">@TempData["SuccessMessage"]</p>
                 </div>
             </div>
@@ -25,7 +26,7 @@
             <div class="bx--inline-notification__details">
                 <svg focusable="false" preserveAspectRatio="xMidYMid meet" style="will-change: transform;" xmlns="http://www.w3.org/2000/svg" class="bx--inline-notification__icon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M10,1c-4.9,0-9,4.1-9,9s4.1,9,9,9s9-4.1,9-9S14.9,1,10,1z M13.8,13l-0.8,0.8L10,10.8L7,13.8L6.2,13l3-3l-3-3l0.8-0.8l3,3l3-3l0.8,0.8l-3,3L13.8,13z"></path></svg>
                 <div class="bx--inline-notification__text-wrapper">
-                    <p class="bx--inline-notification__title">Error</p>
+                    <p class="bx--inline-notification__title">@Localizer["Error"]</p>
                     <p class="bx--inline-notification__subtitle">@TempData["ErrorMessage"]</p>
                 </div>
             </div>
@@ -34,15 +35,15 @@
 
     <!-- Add New Affiliate -->
     <div style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem;">
-        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">Grant Cash Affiliate Status</h3>
+        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">@Localizer["Grant Cash Affiliate Status"]</h3>
         <form action="@Url.Action("SetCashAffiliate", "AffiliateAdmin")" method="post" style="display: flex; gap: 1rem; align-items: flex-end;">
             @Html.AntiForgeryToken()
             <div class="bx--form-item" style="flex: 1;">
-                <label for="email" class="bx--label">User Email</label>
+                <label for="email" class="bx--label">@Localizer["User Email"]</label>
                 <input id="email" name="email" type="email" class="bx--text-input" placeholder="Enter user's email address" required />
             </div>
             <input type="hidden" name="status" value="true" />
-            <button type="submit" class="bx--btn bx--btn--primary">Grant Status</button>
+            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Grant Status"]</button>
         </form>
     </div>
 
@@ -51,11 +52,11 @@
         <table class="bx--data-table bx--data-table--sort">
             <thead>
                 <tr>
-                    <th><span class="bx--table-header-label">Name</span></th>
-                    <th><span class="bx--table-header-label">Email</span></th>
-                    <th><span class="bx--table-header-label">Cash Balance</span></th>
-                    <th><span class="bx--table-header-label">Total Referrals</span></th>
-                    <th><span class="bx--table-header-label">Actions</span></th>
+                    <th><span class="bx--table-header-label">@Localizer["Name"]</span></th>
+                    <th><span class="bx--table-header-label">@Localizer["Email"]</span></th>
+                    <th><span class="bx--table-header-label">@Localizer["Cash Balance"]</span></th>
+                    <th><span class="bx--table-header-label">@Localizer["Total Referrals"]</span></th>
+                    <th><span class="bx--table-header-label">@Localizer["Actions"]</span></th>
                 </tr>
             </thead>
             <tbody>
@@ -71,7 +72,7 @@
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="userId" value="@item.Id" />
                                 <input type="hidden" name="status" value="false" />
-                                <button type="submit" class="bx--btn bx--btn--danger bx--btn--sm" onclick="return confirm('Are you sure you want to revoke Cash Affiliate status from this user?');">Revoke</button>
+                                <button type="submit" class="bx--btn bx--btn--danger bx--btn--sm" onclick="return confirm('Are you sure you want to revoke Cash Affiliate status from this user?');">@Localizer["Revoke"]</button>
                             </form>
                         </td>
                     </tr>
@@ -79,7 +80,7 @@
                 @if (!Model.Any())
                 {
                     <tr>
-                        <td colspan="5" style="text-align: center; padding: 2rem;">No cash affiliates found.</td>
+                        <td colspan="5" style="text-align: center; padding: 2rem;">@Localizer["No cash affiliates found."]</td>
                     </tr>
                 }
             </tbody>

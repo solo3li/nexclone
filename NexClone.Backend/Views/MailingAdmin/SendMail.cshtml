@@ -1,4 +1,5 @@
 @model NexClone.Backend.API.Controllers.Admin.SendMailViewModel
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 @{
     ViewData["Title"] = "Send Broadcast Email";
     var templates = ViewBag.Templates as IEnumerable<NexClone.Backend.Core.Entities.EmailTemplate>;
@@ -7,7 +8,7 @@
 <div class="bx--grid">
     <div class="bx--row">
         <div class="bx--col-lg-8">
-            <h2 class="mb-4">Send Mail / Broadcast</h2>
+            <h2 class="mb-4">@Localizer["Send Mail / Broadcast"]</h2>
 
             @if (TempData["SuccessMessage"] != null)
             {
@@ -15,7 +16,7 @@
                     <div class="bx--inline-notification__details">
                         <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bx--inline-notification__icon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M10,1c-4.9,0-9,4.1-9,9s4.1,9,9,9s9-4.1,9-9S14.9,1,10,1z M8.7,13.5l-3.2-3.2l1-1l2.2,2.2l4.8-4.8l1,1L8.7,13.5z"></path></svg>
                         <div class="bx--inline-notification__text-wrapper">
-                            <p class="bx--inline-notification__title">Success</p>
+                            <p class="bx--inline-notification__title">@Localizer["Success"]</p>
                             <p class="bx--inline-notification__subtitle">@TempData["SuccessMessage"]</p>
                         </div>
                     </div>
@@ -27,7 +28,7 @@
                     <div class="bx--inline-notification__details">
                         <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bx--inline-notification__icon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M10,1c-4.9,0-9,4.1-9,9s4.1,9,9,9s9-4.1,9-9S14.9,1,10,1z M10.8,13.5H9.2V12h1.6V13.5z M10.8,10.5H9.2V6.5h1.6V10.5z"></path></svg>
                         <div class="bx--inline-notification__text-wrapper">
-                            <p class="bx--inline-notification__title">Error</p>
+                            <p class="bx--inline-notification__title">@Localizer["Error"]</p>
                             <p class="bx--inline-notification__subtitle">@TempData["ErrorMessage"]</p>
                         </div>
                     </div>
@@ -36,7 +37,7 @@
 
             <form asp-action="SendMail" method="post" style="background: #fff; padding: 2rem; border-radius: 8px; border: 1px solid #e0e0e0;" id="sendMailForm">
                 <div class="bx--form-item mb-4">
-                    <label asp-for="TargetUserEmail" class="bx--label">Target User Email (Leave blank to send to ALL users)</label>
+                    <label asp-for="TargetUserEmail" class="bx--label">@Localizer["Target User Email (Leave blank to send to ALL users)"]</label>
                     <div class="bx--text-input__field-outer-wrapper">
                         <div class="bx--text-input__field-wrapper">
                             <input asp-for="TargetUserEmail" class="bx--text-input" placeholder="user@example.com" />
@@ -45,7 +46,7 @@
                 </div>
 
                 <div class="bx--form-item mb-4">
-                    <label asp-for="TemplateId" class="bx--label">Use Email Template (Optional)</label>
+                    <label asp-for="TemplateId" class="bx--label">@Localizer["Use Email Template (Optional)"]</label>
                     <div class="bx--select">
                         <select asp-for="TemplateId" class="bx--select-input" id="templateSelect">
                             <option value="">-- Custom Email --</option>
@@ -63,7 +64,7 @@
 
                 <div id="customEmailFields">
                     <div class="bx--form-item mb-4">
-                        <label asp-for="Subject" class="bx--label">Subject</label>
+                        <label asp-for="Subject" class="bx--label">@Localizer["Subject"]</label>
                         <div class="bx--text-input__field-outer-wrapper">
                             <div class="bx--text-input__field-wrapper">
                                 <input asp-for="Subject" class="bx--text-input" id="mailSubject" />
@@ -72,7 +73,7 @@
                     </div>
 
                     <div class="bx--form-item mb-4">
-                        <label asp-for="HtmlBody" class="bx--label">HTML Body</label>
+                        <label asp-for="HtmlBody" class="bx--label">@Localizer["HTML Body"]</label>
                         <div class="bx--text-area__wrapper">
                             <textarea asp-for="HtmlBody" class="bx--text-area" rows="8" id="mailBody"></textarea>
                         </div>
@@ -80,8 +81,8 @@
                 </div>
 
                 <div style="margin-top: 2rem; display: flex; gap: 1rem;">
-                    <button type="submit" class="bx--btn bx--btn--primary" onclick="return confirm('Are you sure you want to send this email?');">Send Email</button>
-                    <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">Back to Dashboard</a>
+                    <button type="submit" class="bx--btn bx--btn--primary" onclick="return confirm('Are you sure you want to send this email?');">@Localizer["Send Email"]</button>
+                    <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">@Localizer["Back to Dashboard"]</a>
                 </div>
             </form>
         </div>

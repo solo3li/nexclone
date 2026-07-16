@@ -1,4 +1,5 @@
 @model NexClone.Backend.Core.Entities.Plan
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 
 <div class="bx--grid" style="padding-left: 0; max-width: 800px; margin-left: 0;">
     <div class="bx--row" style="margin-bottom: 2rem;">
@@ -10,19 +11,19 @@
 
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
             <div class="bx--form-item">
-                <label for="Name" class="bx--label">Plan Name</label>
+                <label for="Name" class="bx--label">@Localizer["Plan Name"]</label>
                 <div class="bx--text-input__field-wrapper">
                     <input id="Name" type="text" class="bx--text-input" name="Name" required value="@Model?.Name">
                 </div>
             </div>
             <div class="bx--form-item">
-                <label for="DurationDays" class="bx--label">Duration (Days)</label>
+                <label for="DurationDays" class="bx--label">@Localizer["Duration (Days)"]</label>
                 <div class="bx--text-input__field-wrapper">
                     <input id="DurationDays" type="number" class="bx--text-input" name="DurationDays" required min="1" value="@(Model?.DurationDays ?? 30)">
                 </div>
             </div>
             <div class="bx--form-item">
-                <label for="GracePeriodDays" class="bx--label">Grace Period (Days)</label>
+                <label for="GracePeriodDays" class="bx--label">@Localizer["Grace Period (Days)"]</label>
                 <div class="bx--text-input__field-wrapper">
                     <input id="GracePeriodDays" type="number" class="bx--text-input" name="GracePeriodDays" required min="0" value="@(Model?.GracePeriodDays ?? 3)">
                 </div>
@@ -31,13 +32,13 @@
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
             <div class="bx--form-item">
-                <label for="PriceUsd" class="bx--label">Price (USD)</label>
+                <label for="PriceUsd" class="bx--label">@Localizer["Price (USD)"]</label>
                 <div class="bx--text-input__field-wrapper">
                     <input id="PriceUsd" type="number" class="bx--text-input" name="PriceUsd" required min="0" step="0.01" value="@(Model?.PriceUsd ?? 0)">
                 </div>
             </div>
             <div class="bx--form-item">
-                <label for="PriceEgp" class="bx--label">Price (EGP)</label>
+                <label for="PriceEgp" class="bx--label">@Localizer["Price (EGP)"]</label>
                 <div class="bx--text-input__field-wrapper">
                     <input id="PriceEgp" type="number" class="bx--text-input" name="PriceEgp" required min="0" step="0.01" value="@(Model?.PriceEgp ?? 0)">
                 </div>
@@ -51,49 +52,49 @@
             </p>
         </div>
 
-        <h4 style="margin-bottom: 1.5rem; font-weight: 400; font-size: 1.1rem;">Economy Limits</h4>
+        <h4 style="margin-bottom: 1.5rem; font-weight: 400; font-size: 1.1rem;">@Localizer["Economy Limits"]</h4>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem;">
             <div class="bx--form-item">
-                <label for="MonthlyCredits" class="bx--label">Monthly Credits</label>
+                <label for="MonthlyCredits" class="bx--label">@Localizer["Monthly Credits"]</label>
                 <div class="bx--text-input__field-wrapper">
                     <input id="MonthlyCredits" type="number" class="bx--text-input" name="MonthlyCredits" required min="0" value="@(Model?.MonthlyCredits ?? 0)">
                 </div>
-                <div class="bx--form__helper-text">Credits granted per month</div>
+                <div class="bx--form__helper-text">@Localizer["Credits granted per month"]</div>
             </div>
         </div>
 
-        <h4 style="margin-bottom: 1.5rem; font-weight: 400; font-size: 1.1rem;">Text-to-Voice (TTS) Settings</h4>
+        <h4 style="margin-bottom: 1.5rem; font-weight: 400; font-size: 1.1rem;">@Localizer["Text-to-Voice (TTS) Settings"]</h4>
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem; background: #f4f4f4; padding: 1.5rem;">
             <div class="bx--form-item bx--checkbox-wrapper">
                 <input type="checkbox" id="TtsEnabled" name="TtsEnabled" value="true" class="bx--checkbox" @(Model?.TtsEnabled != false ? "checked" : "") />
                 <label for="TtsEnabled" class="bx--checkbox-label" title="Enable TTS">
-                    <span class="bx--checkbox-label-text" style="font-weight: bold;">Enable TTS</span>
+                    <span class="bx--checkbox-label-text" style="font-weight: bold;">@Localizer["Enable TTS"]</span>
                 </label>
                 <input type="hidden" name="TtsEnabled" value="false" />
             </div>
             <div class="bx--form-item">
-                <label for="TtsMaxCharsPerRequest" class="bx--label">Max Chars per request</label>
+                <label for="TtsMaxCharsPerRequest" class="bx--label">@Localizer["Max Chars per request"]</label>
                 <div class="bx--text-input__field-wrapper">
                     <input id="TtsMaxCharsPerRequest" type="number" class="bx--text-input" name="TtsMaxCharsPerRequest" required min="-1" value="@(Model?.TtsMaxCharsPerRequest ?? 3000)">
                 </div>
-                <div class="bx--form__helper-text">-1 for unlimited</div>
+                <div class="bx--form__helper-text">@Localizer["-1 for unlimited"]</div>
             </div>
             <div class="bx--form-item">
-                <label for="TtsCharactersBlock" class="bx--label">Characters Block Size</label>
+                <label for="TtsCharactersBlock" class="bx--label">@Localizer["Characters Block Size"]</label>
                 <div class="bx--text-input__field-wrapper">
                     <input id="TtsCharactersBlock" type="number" class="bx--text-input" name="TtsCharactersBlock" required min="1" value="@(Model?.TtsCharactersBlock ?? 1000)">
                 </div>
-                <div class="bx--form__helper-text">Cost will be calculated per this amount</div>
+                <div class="bx--form__helper-text">@Localizer["Cost will be calculated per this amount"]</div>
             </div>
             <div class="bx--form-item">
-                <label for="TtsCostPerChar" class="bx--label">Cost Standard (per Block)</label>
+                <label for="TtsCostPerChar" class="bx--label">@Localizer["Cost Standard (per Block)"]</label>
                 <div class="bx--text-input__field-wrapper">
                     <input id="TtsCostPerChar" type="number" class="bx--text-input" name="TtsCostPerChar" required min="0" step="0.0001" value="@(Model?.TtsCostPerChar ?? 1.0m)">
                 </div>
             </div>
                 <!-- Removed Medium Cost -->
             <div class="bx--form-item">
-                <label for="TtsCostPerCharHigh" class="bx--label">Cost High (per Block)</label>
+                <label for="TtsCostPerCharHigh" class="bx--label">@Localizer["Cost High (per Block)"]</label>
                 <div class="bx--text-input__field-wrapper">
                     <input id="TtsCostPerCharHigh" type="number" class="bx--text-input" name="TtsCostPerCharHigh" required min="0" step="0.0001" value="1.0">
                 </div>
@@ -101,17 +102,17 @@
             <div class="bx--form-item bx--checkbox-wrapper">
                 <input type="checkbox" id="TtsCustomInstructionsEnabled" name="TtsCustomInstructionsEnabled" value="true" class="bx--checkbox" />
                 <label for="TtsCustomInstructionsEnabled" class="bx--checkbox-label" title="Enable Custom Instructions">
-                    <span class="bx--checkbox-label-text" style="font-weight: bold;">Enable Custom Instructions</span>
+                    <span class="bx--checkbox-label-text" style="font-weight: bold;">@Localizer["Enable Custom Instructions"]</span>
                 </label>
                 <input type="hidden" name="TtsCustomInstructionsEnabled" value="false" />
             </div>
             <div class="bx--form-item" style="grid-column: span 3;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                    <label class="bx--label" style="margin-bottom: 0;">Allowed Voices (Select multiple. Leave empty for all voices)</label>
+                    <label class="bx--label" style="margin-bottom: 0;">@Localizer["Allowed Voices (Select multiple. Leave empty for all voices)"]</label>
                     <div class="bx--checkbox-wrapper">
                         <input type="checkbox" id="selectAllVoices" class="bx--checkbox" />
                         <label for="selectAllVoices" class="bx--checkbox-label">
-                            <span class="bx--checkbox-label-text">Select All</span>
+                            <span class="bx--checkbox-label-text">@Localizer["Select All"]</span>
                         </label>
                     </div>
                 </div>
@@ -132,40 +133,40 @@
             </div>
         </div>
 
-        <h4 style="margin-bottom: 1.5rem; font-weight: 400; font-size: 1.1rem;">Voice-to-Text (STT) Settings</h4>
+        <h4 style="margin-bottom: 1.5rem; font-weight: 400; font-size: 1.1rem;">@Localizer["Voice-to-Text (STT) Settings"]</h4>
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem; background: #f4f4f4; padding: 1.5rem;">
             <div class="bx--form-item bx--checkbox-wrapper">
                 <input type="checkbox" id="SttEnabled" name="SttEnabled" value="true" class="bx--checkbox" @(Model?.SttEnabled != false ? "checked" : "") />
                 <label for="SttEnabled" class="bx--checkbox-label" title="Enable STT">
-                    <span class="bx--checkbox-label-text" style="font-weight: bold;">Enable STT</span>
+                    <span class="bx--checkbox-label-text" style="font-weight: bold;">@Localizer["Enable STT"]</span>
                 </label>
                 <input type="hidden" name="SttEnabled" value="false" />
             </div>
             <div class="bx--form-item">
-                <label for="SttMaxFileSizeMb" class="bx--label">Max File Size (MB)</label>
+                <label for="SttMaxFileSizeMb" class="bx--label">@Localizer["Max File Size (MB)"]</label>
                 <div class="bx--text-input__field-wrapper">
                     <input id="SttMaxFileSizeMb" type="number" class="bx--text-input" name="SttMaxFileSizeMb" required min="-1" value="@(Model?.SttMaxFileSizeMb ?? 25)">
                 </div>
-                <div class="bx--form__helper-text">-1 for unlimited</div>
+                <div class="bx--form__helper-text">@Localizer["-1 for unlimited"]</div>
             </div>
             <div class="bx--form-item">
-                <label for="SttCostPerMinute" class="bx--label">Cost Per Minute (Credits)</label>
+                <label for="SttCostPerMinute" class="bx--label">@Localizer["Cost Per Minute (Credits)"]</label>
                 <input id="SttCostPerMinute" name="SttCostPerMinute" type="number" step="0.0001" class="bx--text-input" value="@(Model?.SttCostPerMinute ?? 1.0m)" />
             </div>
         </div>
 
-        <h4 style="margin-bottom: 1.5rem; font-weight: 400; font-size: 1.1rem;">Avatar Video & Lip-Sync Settings</h4>
+        <h4 style="margin-bottom: 1.5rem; font-weight: 400; font-size: 1.1rem;">@Localizer["Avatar Video & Lip-Sync Settings"]</h4>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem; background: #f4f4f4; padding: 1.5rem;">
             <!-- Avatar Video -->
             <div class="bx--form-item bx--checkbox-wrapper">
                 <input type="checkbox" id="AvatarVideoEnabled" name="AvatarVideoEnabled" value="true" class="bx--checkbox" @(Model?.AvatarVideoEnabled != false ? "checked" : "") />
                 <label for="AvatarVideoEnabled" class="bx--checkbox-label" title="Enable Avatar Image-to-Video">
-                    <span class="bx--checkbox-label-text" style="font-weight: bold;">Enable Avatar Video</span>
+                    <span class="bx--checkbox-label-text" style="font-weight: bold;">@Localizer["Enable Avatar Video"]</span>
                 </label>
                 <input type="hidden" name="AvatarVideoEnabled" value="false" />
             </div>
             <div class="bx--form-item">
-                <label for="AvatarVideoCostPerGeneration" class="bx--label">Cost Per Generation (Credits)</label>
+                <label for="AvatarVideoCostPerGeneration" class="bx--label">@Localizer["Cost Per Generation (Credits)"]</label>
                 <input id="AvatarVideoCostPerGeneration" name="AvatarVideoCostPerGeneration" type="number" step="0.01" class="bx--text-input" value="@(Model?.AvatarVideoCostPerGeneration ?? 1.0m)" />
             </div>
 
@@ -173,12 +174,12 @@
             <div class="bx--form-item bx--checkbox-wrapper">
                 <input type="checkbox" id="LipSyncEnabled" name="LipSyncEnabled" value="true" class="bx--checkbox" @(Model?.LipSyncEnabled != false ? "checked" : "") />
                 <label for="LipSyncEnabled" class="bx--checkbox-label" title="Enable Advanced Lip-Sync">
-                    <span class="bx--checkbox-label-text" style="font-weight: bold;">Enable Advanced Lip-Sync</span>
+                    <span class="bx--checkbox-label-text" style="font-weight: bold;">@Localizer["Enable Advanced Lip-Sync"]</span>
                 </label>
                 <input type="hidden" name="LipSyncEnabled" value="false" />
             </div>
             <div class="bx--form-item">
-                <label for="LipSyncCostPerGeneration" class="bx--label">Cost Per Generation (Credits)</label>
+                <label for="LipSyncCostPerGeneration" class="bx--label">@Localizer["Cost Per Generation (Credits)"]</label>
                 <input id="LipSyncCostPerGeneration" name="LipSyncCostPerGeneration" type="number" step="0.01" class="bx--text-input" value="@(Model?.LipSyncCostPerGeneration ?? 1.0m)" />
             </div>
         </div>
@@ -187,24 +188,24 @@
             <div class="bx--form-item bx--checkbox-wrapper">
                 <input type="checkbox" id="IsDefaultRegistrationPlan" name="IsDefaultRegistrationPlan" value="true" class="bx--checkbox" />
                 <label for="IsDefaultRegistrationPlan" class="bx--checkbox-label" title="Set as Default Registration Plan">
-                    <span class="bx--checkbox-label-text" style="font-weight: bold;">Set as Default Registration Plan</span>
+                    <span class="bx--checkbox-label-text" style="font-weight: bold;">@Localizer["Set as Default Registration Plan"]</span>
                 </label>
                 <input type="hidden" name="IsDefaultRegistrationPlan" value="false" />
-                <div class="bx--form__helper-text">If checked, this plan will be automatically assigned to new users upon registration. Only one plan can be default.</div>
+                <div class="bx--form__helper-text">@Localizer["If checked, this plan will be automatically assigned to new users upon registration. Only one plan can be default."]</div>
             </div>
             
             <div class="bx--form-item bx--checkbox-wrapper">
                 <input type="checkbox" id="IsFreeTrial" name="IsFreeTrial" value="true" class="bx--checkbox" @(Model?.IsFreeTrial == true ? "checked" : "") />
                 <label for="IsFreeTrial" class="bx--checkbox-label" title="Is this a Free Trial plan?">
-                    <span class="bx--checkbox-label-text" style="font-weight: bold;">Is this a Free Trial plan?</span>
+                    <span class="bx--checkbox-label-text" style="font-weight: bold;">@Localizer["Is this a Free Trial plan?"]</span>
                 </label>
                 <input type="hidden" name="IsFreeTrial" value="false" />
             </div>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 1rem;">
-            <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">Cancel</a>
-            <button type="submit" class="bx--btn bx--btn--primary">Save Plan</button>
+            <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">@Localizer["Cancel"]</a>
+            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Plan"]</button>
         </div>
     </form>
 </div>

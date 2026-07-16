@@ -1,4 +1,5 @@
 @model NexClone.Backend.Core.Entities.ApplicationUser
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 
 @{
     ViewData["Title"] = "User Details";
@@ -13,7 +14,7 @@
                 <div class="bx--inline-notification bx--inline-notification--success" role="alert" style="margin-bottom: 1rem; width: 100%; max-width: none;">
                     <div class="bx--inline-notification__details">
                         <div class="bx--inline-notification__text-wrapper">
-                            <p class="bx--inline-notification__title">Success:</p>
+                            <p class="bx--inline-notification__title">@Localizer["Success:"]</p>
                             <p class="bx--inline-notification__subtitle">@TempData["Success"]</p>
                         </div>
                     </div>
@@ -24,7 +25,7 @@
                 <div class="bx--inline-notification bx--inline-notification--error" role="alert" style="margin-bottom: 1rem; width: 100%; max-width: none;">
                     <div class="bx--inline-notification__details">
                         <div class="bx--inline-notification__text-wrapper">
-                            <p class="bx--inline-notification__title">Error:</p>
+                            <p class="bx--inline-notification__title">@Localizer["Error:"]</p>
                             <p class="bx--inline-notification__subtitle">@TempData["Error"]</p>
                         </div>
                     </div>
@@ -33,9 +34,9 @@
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h1 class="bx--type-productive-heading-05">User Details: @Model.Email</h1>
                 <div style="display: flex; gap: 1rem;">
-                    <a href="@Url.Action("Edit", new { id = Model.Id })" class="bx--btn bx--btn--primary">Edit User</a>
+                    <a href="@Url.Action("Edit", new { id = Model.Id })" class="bx--btn bx--btn--primary">@Localizer["Edit User"]</a>
                     <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.');" style="margin: 0;">
-                        <button type="submit" class="bx--btn bx--btn--danger">Delete User</button>
+                        <button type="submit" class="bx--btn bx--btn--danger">@Localizer["Delete User"]</button>
                     </form>
                 </div>
             </div>
@@ -46,7 +47,7 @@
         <div class="bx--col-lg-8" style="margin-bottom: 2rem;">
             <!-- User Information Card -->
             <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0;">
-                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">Profile Information</h3>
+                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">@Localizer["Profile Information"]</h3>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
                     <div><strong>Name:</strong> @(string.IsNullOrEmpty(Model.FullName) ? "N/A" : Model.FullName)</div>
@@ -59,11 +60,11 @@
                         <strong>Status:</strong> 
                         @if (Model.EmailConfirmed || Model.IsVerified)
                         {
-                            <span class="bx--tag bx--tag--green">Verified</span>
+                            <span class="bx--tag bx--tag--green">@Localizer["Verified"]</span>
                         }
                         else
                         {
-                            <span class="bx--tag bx--tag--red">Unverified</span>
+                            <span class="bx--tag bx--tag--red">@Localizer["Unverified"]</span>
                         }
                     </div>
                     <div style="grid-column: span 2;">
@@ -86,7 +87,7 @@
                         }
                         else
                         {
-                            <span class="bx--tag bx--tag--gray">None</span>
+                            <span class="bx--tag bx--tag--gray">@Localizer["None"]</span>
                         }
                     </div>
                 </div>
@@ -94,20 +95,20 @@
 
             <!-- Change Password Section -->
             <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; margin-top: 2rem;">
-                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">Change Password</h3>
+                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">@Localizer["Change Password"]</h3>
                 
                 <form asp-action="ChangePassword" method="post">
                     <input type="hidden" name="userId" value="@Model.Id" />
                     
                     <div class="bx--form-item" style="margin-bottom: 1rem;">
-                        <label for="newPassword" class="bx--label">New Password</label>
+                        <label for="newPassword" class="bx--label">@Localizer["New Password"]</label>
                         <div class="bx--text-input__field-wrapper">
                             <input id="newPassword" type="password" class="bx--text-input" name="newPassword" required minlength="6" placeholder="Enter new password...">
                         </div>
                     </div>
 
                     <div>
-                        <button type="submit" class="bx--btn bx--btn--primary">Change Password</button>
+                        <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Change Password"]</button>
                     </div>
                 </form>
             </div>
@@ -116,36 +117,36 @@
         <div class="bx--col-lg-8">
             <!-- Extend Subscription Section -->
             <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem;">
-                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">Extend Active Subscription</h3>
+                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">@Localizer["Extend Active Subscription"]</h3>
                 <form asp-action="ExtendSubscription" method="post" style="display: flex; gap: 1rem; align-items: flex-end;">
                     <input type="hidden" name="userId" value="@Model.Id" />
                     <div class="bx--form-item">
-                        <label for="extraDays" class="bx--label">Extra Days</label>
+                        <label for="extraDays" class="bx--label">@Localizer["Extra Days"]</label>
                         <div class="bx--text-input__field-wrapper">
                             <input id="extraDays" type="number" class="bx--text-input" name="extraDays" required min="1" placeholder="e.g. 10">
                         </div>
                     </div>
                     <div>
-                        <button type="submit" class="bx--btn bx--btn--primary">Extend</button>
+                        <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Extend"]</button>
                     </div>
                 </form>
             </div>
             <!-- Manage Credits Section -->
             <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem;">
-                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">Manage Credits</h3>
+                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">@Localizer["Manage Credits"]</h3>
                 
                 <form asp-action="AdjustCredits" method="post">
                     <input type="hidden" name="userId" value="@Model.Id" />
                     
                     <div style="display: flex; gap: 1rem; align-items: flex-end; margin-bottom: 1rem;">
                         <div class="bx--form-item" style="flex: 1;">
-                            <label for="amount" class="bx--label">Amount</label>
+                            <label for="amount" class="bx--label">@Localizer["Amount"]</label>
                             <div class="bx--text-input__field-wrapper">
                                 <input id="amount" type="number" class="bx--text-input" name="amount" required min="0.01" step="0.01" placeholder="Enter amount...">
                             </div>
                         </div>
                         <div class="bx--form-item" style="flex: 1;">
-                            <label for="operation" class="bx--label">Operation</label>
+                            <label for="operation" class="bx--label">@Localizer["Operation"]</label>
                             <div class="bx--select">
                                 <select id="operation" name="operation" class="bx--select-input" required>
                                     <option value="add">Add (+)</option>
@@ -157,20 +158,20 @@
                     </div>
 
                     <div>
-                        <button type="submit" class="bx--btn bx--btn--primary">Update Credits</button>
+                        <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Update Credits"]</button>
                     </div>
                 </form>
             </div>
 
             <!-- Assign Plan Section -->
             <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; height: 100%;">
-                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">Assign New Plan</h3>
+                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">@Localizer["Assign New Plan"]</h3>
                 
                 <form asp-action="AssignPlan" method="post">
                     <input type="hidden" name="userId" value="@Model.Id" />
                     
                     <div class="bx--form-item" style="margin-bottom: 2rem;">
-                        <label for="planId" class="bx--label">Select a Plan (This will cancel the current active plan and apply the new one)</label>
+                        <label for="planId" class="bx--label">@Localizer["Select a Plan (This will cancel the current active plan and apply the new one)"]</label>
                         <div class="bx--select">
                             <select id="planId" name="planId" class="bx--select-input" required>
                                 <option value="" disabled selected hidden>Choose a new plan...</option>
@@ -187,8 +188,8 @@
                     </div>
 
                     <div style="display: flex; gap: 1rem;">
-                        <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">Back to Users</a>
-                        <button type="submit" class="bx--btn bx--btn--primary">Assign Selected Plan</button>
+                        <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">@Localizer["Back to Users"]</a>
+                        <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Assign Selected Plan"]</button>
                     </div>
                 </form>
             </div>
@@ -198,15 +199,15 @@
     <!-- Devices / Fingerprints Section -->
     <div class="bx--row" style="margin-top: 2rem;">
         <div class="bx--col">
-            <h3 class="bx--type-productive-heading-04" style="margin-bottom: 1rem;">Registered Devices & Logins</h3>
+            <h3 class="bx--type-productive-heading-04" style="margin-bottom: 1rem;">@Localizer["Registered Devices & Logins"]</h3>
             <div class="bx--data-table-container">
                 <table class="bx--data-table">
                     <thead>
                         <tr>
-                            <th><span class="bx--table-header-label">Date/Time</span></th>
-                            <th><span class="bx--table-header-label">IP Address</span></th>
-                            <th><span class="bx--table-header-label">Fingerprint Hash</span></th>
-                            <th><span class="bx--table-header-label">User Agent</span></th>
+                            <th><span class="bx--table-header-label">@Localizer["Date/Time"]</span></th>
+                            <th><span class="bx--table-header-label">@Localizer["IP Address"]</span></th>
+                            <th><span class="bx--table-header-label">@Localizer["Fingerprint Hash"]</span></th>
+                            <th><span class="bx--table-header-label">@Localizer["User Agent"]</span></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -228,7 +229,7 @@
                             else
                             {
                                 <tr>
-                                    <td colspan="4" style="text-align: center;">No device records found for this user.</td>
+                                    <td colspan="4" style="text-align: center;">@Localizer["No device records found for this user."]</td>
                                 </tr>
                             }
                         }

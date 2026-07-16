@@ -1,4 +1,5 @@
 @model NexClone.Backend.Core.Entities.ApplicationUser
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 
 @{
     ViewData["Title"] = "Edit User";
@@ -9,7 +10,7 @@
         <div class="bx--col" style="display: flex; justify-content: space-between; align-items: center;">
             <h1 class="bx--type-productive-heading-05">Edit User: @Model.Email</h1>
             <a href="@Url.Action("Details", new { id = Model.Id })" class="bx--btn bx--btn--secondary">
-                Back to Details
+                @Localizer["Back to Details"]
             </a>
         </div>
     </div>
@@ -21,7 +22,7 @@
                     <input type="hidden" asp-for="Id" />
                     
                     <div class="bx--form-item" style="margin-bottom: 1rem;">
-                        <label asp-for="FullName" class="bx--label">Full Name</label>
+                        <label asp-for="FullName" class="bx--label">@Localizer["Full Name"]</label>
                         <div class="bx--text-input__field-wrapper">
                             <input asp-for="FullName" class="bx--text-input" placeholder="e.g. John Doe">
                         </div>
@@ -29,7 +30,7 @@
                     </div>
 
                     <div class="bx--form-item" style="margin-bottom: 1rem;">
-                        <label asp-for="Email" class="bx--label">Email Address</label>
+                        <label asp-for="Email" class="bx--label">@Localizer["Email Address"]</label>
                         <div class="bx--text-input__field-wrapper">
                             <input asp-for="Email" type="email" class="bx--text-input" required>
                         </div>
@@ -37,7 +38,7 @@
                     </div>
 
                     <div class="bx--form-item" style="margin-bottom: 1rem;">
-                        <label asp-for="PhoneNumber" class="bx--label">Phone Number</label>
+                        <label asp-for="PhoneNumber" class="bx--label">@Localizer["Phone Number"]</label>
                         <div class="bx--text-input__field-wrapper">
                             <input asp-for="PhoneNumber" class="bx--text-input" placeholder="e.g. +201000000000">
                         </div>
@@ -45,7 +46,7 @@
                     </div>
 
                     <div class="bx--form-item" style="margin-bottom: 1rem;">
-                        <label asp-for="Country" class="bx--label">Country</label>
+                        <label asp-for="Country" class="bx--label">@Localizer["Country"]</label>
                         <div class="bx--text-input__field-wrapper">
                             <input asp-for="Country" class="bx--text-input" placeholder="e.g. Egypt">
                         </div>
@@ -55,13 +56,13 @@
                     <div class="bx--form-item" style="margin-bottom: 2rem;">
                         <div class="bx--checkbox-wrapper">
                             <input asp-for="IsStaff" type="checkbox" class="bx--checkbox" id="isStaffCheckbox">
-                            <label for="isStaffCheckbox" class="bx--checkbox-label">Is Admin / Staff Member</label>
+                            <label for="isStaffCheckbox" class="bx--checkbox-label">@Localizer["Is Admin / Staff Member"]</label>
                         </div>
                     </div>
 
                     <div style="display: flex; gap: 1rem;">
-                        <button type="submit" class="bx--btn bx--btn--primary">Save Changes</button>
-                        <a href="@Url.Action("Details", new { id = Model.Id })" class="bx--btn bx--btn--secondary">Cancel</a>
+                        <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Changes"]</button>
+                        <a href="@Url.Action("Details", new { id = Model.Id })" class="bx--btn bx--btn--secondary">@Localizer["Cancel"]</a>
                     </div>
                 </form>
             </div>

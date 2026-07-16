@@ -1,4 +1,5 @@
 @model NexClone.Backend.Core.Entities.CustomPage
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 
 <div class="bx--grid" style="padding-left: 0; padding-right: 0;">
     <div class="bx--row">
@@ -8,7 +9,7 @@
                     @Html.AntiForgeryToken()
                     
                     <div class="bx--form-item" style="margin-bottom: 1.5rem;">
-                        <label class="bx--label" style="font-weight: 600;">Slug (e.g. privacy-policy)</label>
+                        <label class="bx--label" style="font-weight: 600;">@Localizer["Slug (e.g. privacy-policy)"]</label>
                         <select name="Slug" required class="bx--select-input" style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px; background: white;">
                             <option value="">Select a page type...</option>
                             <option value="about-us">About Us (من نحن)</option>
@@ -20,28 +21,28 @@
 
                     <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
                         <div class="bx--form-item" style="flex: 1;">
-                            <label class="bx--label" style="font-weight: 600;">Title (English)</label>
+                            <label class="bx--label" style="font-weight: 600;">@Localizer["Title (English)"]</label>
                             <input type="text" class="bx--text-input" name="TitleEn" required style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;" />
                         </div>
                         <div class="bx--form-item" style="flex: 1;">
-                            <label class="bx--label" style="font-weight: 600;">Title (Arabic)</label>
+                            <label class="bx--label" style="font-weight: 600;">@Localizer["Title (Arabic)"]</label>
                             <input type="text" class="bx--text-input" name="TitleAr" required style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;" />
                         </div>
                     </div>
 
                     <div class="bx--form-item" style="margin-bottom: 1.5rem;">
-                        <label class="bx--label" style="font-weight: 600;">Content (English) - Supports HTML/Markdown</label>
+                        <label class="bx--label" style="font-weight: 600;">@Localizer["Content (English) - Supports HTML/Markdown"]</label>
                         <textarea class="bx--text-area" name="ContentEn" rows="10" style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;"></textarea>
                     </div>
 
                     <div class="bx--form-item" style="margin-bottom: 1.5rem;">
-                        <label class="bx--label" style="font-weight: 600;">Content (Arabic) - Supports HTML/Markdown</label>
+                        <label class="bx--label" style="font-weight: 600;">@Localizer["Content (Arabic) - Supports HTML/Markdown"]</label>
                         <textarea class="bx--text-area" name="ContentAr" rows="10" style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;" dir="rtl"></textarea>
                     </div>
 
                     <div style="display: flex; gap: 1rem;">
-                        <button type="submit" class="bx--btn bx--btn--primary" style="background-color: #0f62fe; color: white; padding: 0.875rem 2rem; border: none; cursor: pointer; border-radius: 4px; font-weight: 600;">Create Page</button>
-                        <a href="/CustomPagesAdmin" class="bx--btn bx--btn--secondary" style="background-color: #e0e0e0; color: #161616; padding: 0.875rem 2rem; text-decoration: none; border-radius: 4px; font-weight: 600;">Cancel</a>
+                        <button type="submit" class="bx--btn bx--btn--primary" style="background-color: #0f62fe; color: white; padding: 0.875rem 2rem; border: none; cursor: pointer; border-radius: 4px; font-weight: 600;">@Localizer["Create Page"]</button>
+                        <a href="/CustomPagesAdmin" class="bx--btn bx--btn--secondary" style="background-color: #e0e0e0; color: #161616; padding: 0.875rem 2rem; text-decoration: none; border-radius: 4px; font-weight: 600;">@Localizer["Cancel"]</a>
                     </div>
                 </form>
             </div>

@@ -1,16 +1,17 @@
 @model NexClone.Backend.Core.Entities.BlogPost
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 
 <div class="bx--grid" style="padding-left: 0; padding-right: 0;">
     <div class="bx--row" style="margin-bottom: 2rem;">
         <div class="bx--col">
-            <a href="/BlogAdmin" class="bx--btn bx--btn--secondary" style="background-color: #393939; color: white; padding: 0.875rem 2rem; text-decoration: none; border-radius: 4px; font-weight: 600;">Back to Posts</a>
+            <a href="/BlogAdmin" class="bx--btn bx--btn--secondary" style="background-color: #393939; color: white; padding: 0.875rem 2rem; text-decoration: none; border-radius: 4px; font-weight: 600;">@Localizer["Back to Posts"]</a>
         </div>
     </div>
     
     <div class="bx--row">
         <div class="bx--col-lg-8">
             <div class="bx--tile" style="background-color: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 2rem;">
-                <h3 style="margin-bottom: 1.5rem; font-weight: 600;">Add Admin Reply</h3>
+                <h3 style="margin-bottom: 1.5rem; font-weight: 600;">@Localizer["Add Admin Reply"]</h3>
                 <form method="post" action="/BlogAdmin/ReplyComment">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="postId" value="@Model.Id" />
@@ -19,7 +20,7 @@
                         <textarea class="bx--text-area" name="content" rows="4" required placeholder="Type your reply here..." style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;"></textarea>
                     </div>
 
-                    <button type="submit" class="bx--btn bx--btn--primary" style="background-color: #0f62fe; color: white; padding: 0.875rem 2rem; border: none; cursor: pointer; border-radius: 4px; font-weight: 600;">Post Reply</button>
+                    <button type="submit" class="bx--btn bx--btn--primary" style="background-color: #0f62fe; color: white; padding: 0.875rem 2rem; border: none; cursor: pointer; border-radius: 4px; font-weight: 600;">@Localizer["Post Reply"]</button>
                 </form>
             </div>
 
@@ -28,7 +29,7 @@
                 
                 @if(!Model.Comments.Any())
                 {
-                    <p style="color: #525252;">No comments yet.</p>
+                    <p style="color: #525252;">@Localizer["No comments yet."]</p>
                 }
                 else
                 {
@@ -48,7 +49,7 @@
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="id" value="@comment.Id" />
                                     <input type="hidden" name="postId" value="@Model.Id" />
-                                    <button type="submit" class="bx--btn bx--btn--sm bx--btn--danger" style="background-color: transparent; color: #da1e28; padding: 0; border: none; font-size: 0.875rem; cursor: pointer; text-decoration: underline;">Delete</button>
+                                    <button type="submit" class="bx--btn bx--btn--sm bx--btn--danger" style="background-color: transparent; color: #da1e28; padding: 0; border: none; font-size: 0.875rem; cursor: pointer; text-decoration: underline;">@Localizer["Delete"]</button>
                                 </form>
                             </div>
                         }

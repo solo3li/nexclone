@@ -94,5 +94,18 @@ namespace NexClone.Backend.API.Controllers.Admin
         {
             return View();
         }
+
+        [HttpGet("SwitchLang")]
+        public IActionResult SwitchLang(string lang, string returnUrl = "/")
+        {
+            var cookieOptions = new CookieOptions
+            {
+                Expires = DateTimeOffset.UtcNow.AddYears(1),
+                Path = "/"
+            };
+            Response.Cookies.Append("AdminLang", $"c={lang}|uic={lang}", cookieOptions);
+            
+            return LocalRedirect(returnUrl);
+        }
     }
 }

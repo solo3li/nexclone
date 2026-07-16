@@ -1,4 +1,5 @@
 @model IEnumerable<NexClone.Backend.Core.Entities.Payment>
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 
 @{
     ViewData["Title"] = "Pending Manual Payments";
@@ -7,24 +8,24 @@
 <div class="bx--data-table-container">
     <div class="bx--data-table-header">
         <h4 class="bx--data-table-header__title">@ViewData["Title"]</h4>
-        <p class="bx--data-table-header__description">Review and approve or reject manual bank/wallet transfers.</p>
+        <p class="bx--data-table-header__description">@Localizer["Review and approve or reject manual bank/wallet transfers."]</p>
     </div>
 
     @if (!Model.Any())
     {
-        <div class="alert alert-info mt-3">No pending payments at this time.</div>
+        <div class="alert alert-info mt-3">@Localizer["No pending payments at this time."]</div>
     }
     else
     {
         <table class="bx--data-table">
             <thead>
                 <tr>
-                    <th>User Email</th>
-                    <th>Plan</th>
-                    <th>Amount</th>
-                    <th>Date</th>
-                    <th>Receipt</th>
-                    <th>Actions</th>
+                    <th>@Localizer["User Email"]</th>
+                    <th>@Localizer["Plan"]</th>
+                    <th>@Localizer["Amount"]</th>
+                    <th>@Localizer["Date"]</th>
+                    <th>@Localizer["Receipt"]</th>
+                    <th>@Localizer["Actions"]</th>
                 </tr>
             </thead>
             <tbody>
@@ -38,11 +39,11 @@
                         <td>
                             @if (!string.IsNullOrEmpty(payment.ReceiptUrl))
                             {
-                                <span class="bx--tag bx--tag--green">Has Screenshot</span>
+                                <span class="bx--tag bx--tag--green">@Localizer["Has Screenshot"]</span>
                             }
                             else
                             {
-                                <span class="bx--tag bx--tag--gray">No Screenshot</span>
+                                <span class="bx--tag bx--tag--gray">@Localizer["No Screenshot"]</span>
                             }
                         </td>
                         <td>

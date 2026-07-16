@@ -1,4 +1,5 @@
 @model IEnumerable<NexClone.Backend.Core.Entities.GenerationHistory>
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 
 @{
     ViewData["Title"] = "Operations History";
@@ -6,23 +7,23 @@
 
 <div class="bx--data-table-container">
     <div class="bx--data-table-header">
-        <h4 class="bx--data-table-header__title">Operations History</h4>
-        <p class="bx--data-table-header__description">View the latest 500 AI operations performed by users.</p>
+        <h4 class="bx--data-table-header__title">@Localizer["Operations History"]</h4>
+        <p class="bx--data-table-header__description">@Localizer["View the latest 500 AI operations performed by users."]</p>
     </div>
 
     <div style="margin-bottom: 2rem; background: #f4f4f4; padding: 1rem; border: 1px solid #e0e0e0;">
         <form method="get" asp-action="Index" style="display: flex; gap: 1rem; align-items: flex-end;">
             <div class="bx--form-item" style="flex: 1; max-width: 400px;">
-                <label for="searchEmail" class="bx--label">Search by User Email</label>
+                <label for="searchEmail" class="bx--label">@Localizer["Search by User Email"]</label>
                 <div class="bx--text-input__field-wrapper">
                     <input id="searchEmail" type="text" name="searchEmail" class="bx--text-input" placeholder="e.g. user@example.com" value="@ViewBag.CurrentSearch">
                 </div>
             </div>
             <div>
-                <button type="submit" class="bx--btn bx--btn--primary">Search</button>
+                <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Search"]</button>
                 @if (!string.IsNullOrEmpty(ViewBag.CurrentSearch as string))
                 {
-                    <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">Clear</a>
+                    <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">@Localizer["Clear"]</a>
                 }
             </div>
         </form>
@@ -31,13 +32,13 @@
     <table class="bx--data-table bx--data-table--sort">
         <thead>
             <tr>
-                <th><span class="bx--table-header-label">User Email</span></th>
-                <th><span class="bx--table-header-label">Tool</span></th>
-                <th><span class="bx--table-header-label">Task</span></th>
-                <th><span class="bx--table-header-label">Status</span></th>
-                <th><span class="bx--table-header-label">Credits</span></th>
-                <th><span class="bx--table-header-label">Date</span></th>
-                <th><span class="bx--table-header-label">Actions</span></th>
+                <th><span class="bx--table-header-label">@Localizer["User Email"]</span></th>
+                <th><span class="bx--table-header-label">@Localizer["Tool"]</span></th>
+                <th><span class="bx--table-header-label">@Localizer["Task"]</span></th>
+                <th><span class="bx--table-header-label">@Localizer["Status"]</span></th>
+                <th><span class="bx--table-header-label">@Localizer["Credits"]</span></th>
+                <th><span class="bx--table-header-label">@Localizer["Date"]</span></th>
+                <th><span class="bx--table-header-label">@Localizer["Actions"]</span></th>
             </tr>
         </thead>
         <tbody>
@@ -70,7 +71,7 @@
     @if (!Model.Any())
     {
         <div style="text-align: center; padding: 2rem; color: #525252; background: #ffffff; border-bottom: 1px solid #e0e0e0;">
-            No operations found.
+            @Localizer["No operations found."]
         </div>
     }
 </div>

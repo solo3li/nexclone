@@ -1,3 +1,4 @@
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 @{
     ViewData["Title"] = "Secure Checkout";
     Layout = null; // We can use a clean layout or embed it inside the admin panel. Let's use a standalone clean page.
@@ -60,13 +61,13 @@
 
     <div class="checkout-container">
         <div class="header">
-            Secure Payment (Paymob)
+            @Localizer["Secure Payment (Paymob)"]
         </div>
         <div class="iframe-wrapper">
             <iframe id="paymob-iframe" src="@ViewData["CheckoutUrl"]" allow="payment *"></iframe>
         </div>
         <div class="footer">
-            <a href="/PlansAdmin" style="color: #0f62fe; text-decoration: none;">&larr; Back to Plans</a>
+            <a href="/PlansAdmin" style="color: #0f62fe; text-decoration: none;">@Localizer["&larr; Back to Plans"]</a>
             <br>
             Secured by Paymob &copy; 2026
         </div>

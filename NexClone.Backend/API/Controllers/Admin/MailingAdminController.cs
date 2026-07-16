@@ -81,7 +81,7 @@ namespace NexClone.Backend.API.Controllers.Admin
 
             await _context.SaveChangesAsync();
             
-            TempData["SuccessMessage"] = "Mailing settings saved successfully.";
+            TempData["SuccessMessage"] = HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource>>()["Mailing settings saved successfully."];
             return RedirectToAction(nameof(Settings));
         }
 

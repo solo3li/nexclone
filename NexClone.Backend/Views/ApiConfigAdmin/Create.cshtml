@@ -1,4 +1,5 @@
 @model NexClone.Backend.Core.Entities.ApiConfiguration
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 
 <div class="bx--grid" style="padding-left: 0; max-width: 600px; margin-left: 0;">
     <div class="bx--row" style="margin-bottom: 2rem;">
@@ -9,7 +10,7 @@
         @Html.AntiForgeryToken()
 
         <div class="bx--form-item" style="margin-bottom: 1.5rem;">
-            <label for="ProviderName" class="bx--label">Provider Name</label>
+            <label for="ProviderName" class="bx--label">@Localizer["Provider Name"]</label>
             <div class="bx--select">
                 <select id="ProviderName" class="bx--select-input" name="ProviderName" required>
                     <option class="bx--select-option" value="" disabled selected hidden>Select a Provider</option>
@@ -24,7 +25,7 @@
         </div>
 
         <div class="bx--form-item" style="margin-bottom: 1.5rem;">
-            <label for="ApiKey" class="bx--label">API Key</label>
+            <label for="ApiKey" class="bx--label">@Localizer["API Key"]</label>
             <div class="bx--text-input__field-wrapper">
                 <input id="ApiKey" type="text" class="bx--text-input" name="ApiKey" required value="@Model?.ApiKey">
             </div>
@@ -34,13 +35,13 @@
         <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom: 2rem;">
             <input id="IsActive" class="bx--checkbox" type="checkbox" value="true" name="IsActive" @(Model?.IsActive == true ? "checked" : "")>
             <label for="IsActive" class="bx--checkbox-label" title="Active Status">
-                <span class="bx--checkbox-label-text">Set as Active Configuration</span>
+                <span class="bx--checkbox-label-text">@Localizer["Set as Active Configuration"]</span>
             </label>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 1rem;">
-            <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">Cancel</a>
-            <button type="submit" class="bx--btn bx--btn--primary">Save API Key</button>
+            <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">@Localizer["Cancel"]</a>
+            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save API Key"]</button>
         </div>
     </form>
 </div>

@@ -87,11 +87,11 @@ namespace NexClone.Backend.API.Controllers.Admin
                     _context.Add(config);
                 }
                 await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = $"{config.ToolName} settings saved successfully.";
+                TempData["SuccessMessage"] = HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource>>()["Settings saved successfully."];
             }
             else
             {
-                TempData["ErrorMessage"] = $"Failed to save {config.ToolName} settings.";
+                TempData["ErrorMessage"] = HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource>>()["Failed to save settings."];
             }
             return RedirectToAction(nameof(Index));
         }

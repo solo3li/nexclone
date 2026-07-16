@@ -1,5 +1,10 @@
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
+@{
+    var lang = Context.Request.Cookies["AdminLang"]?.Contains("ar") == true ? "ar" : "en";
+    var dir = lang == "ar" ? "rtl" : "ltr";
+}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="@lang" dir="@dir">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -18,6 +23,60 @@
             --sidebar-text: #f4f4f4;
             --sidebar-hover: #393939;
             --primary-color: #0f62fe;
+        }
+
+        html[dir="rtl"] {
+            text-align: right;
+        }
+        
+        html[dir="rtl"] .modern-sidebar {
+            left: auto;
+            right: 0;
+            box-shadow: -4px 0 16px rgba(0,0,0,0.1);
+        }
+
+        html[dir="rtl"] .sidebar-menu-item a {
+            border-left: none;
+            border-right: 4px solid transparent;
+            padding: 1rem 1.5rem 1rem 1rem;
+        }
+
+        html[dir="rtl"] .sidebar-menu-item.active a {
+            border-right-color: var(--primary-color);
+        }
+
+        html[dir="rtl"] .sidebar-menu-item a i {
+            margin-right: 0;
+            margin-left: 1rem;
+        }
+
+        html[dir="rtl"] .bx--content {
+            margin-left: 0;
+            margin-right: 256px;
+        }
+
+        html[dir="rtl"] .modern-sidebar.collapsed .sidebar-menu-item a i {
+            margin-left: 2rem;
+            margin-right: 0;
+        }
+        
+        html[dir="rtl"] .modern-sidebar.collapsed .sidebar-menu-item a {
+            padding-right: 1.5rem;
+            padding-left: 0;
+        }
+
+        html[dir="rtl"] .bx--content.expanded-content {
+            margin-left: 0;
+            margin-right: 72px;
+        }
+
+        html[dir="rtl"] #desktop-collapse-btn {
+            margin-left: 0;
+            margin-right: auto;
+        }
+
+        html[dir="rtl"] .modern-sidebar.collapsed #desktop-collapse-btn {
+            margin-right: 0;
         }
 
         body { 
@@ -292,7 +351,7 @@
     <aside class="modern-sidebar" id="modern-sidebar">
         <div class="sidebar-header">
             <i class='bx bxl-xing'></i>
-            <a href="/" class="sidebar-brand">NexClone</a>
+            <a href="/" class="sidebar-brand">@Localizer["NexClone"]</a>
             <button id="desktop-collapse-btn" title="Toggle Sidebar">
                 <i class='bx bx-menu'></i>
             </button>
@@ -436,7 +495,7 @@
         </nav>
 
         <div class="sidebar-footer">
-            &copy; 2026 NexClone Admin
+            @Localizer["&copy; 2026 NexClone Admin"]
         </div>
     </aside>
 
@@ -448,6 +507,10 @@
                     <i class='bx bx-menu'></i>
                 </button>
                 <h1 class="page-title">@ViewData["Title"]</h1>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <a href="/AdminAuth/SwitchLang?lang=en" class="bx--btn bx--btn--ghost @(lang == "en" ? "bx--btn--primary" : "")" style="padding: 0.5rem; text-decoration: none; @(lang == "en" ? "color: white; background: var(--primary-color);" : "")">English</a>
+                <a href="/AdminAuth/SwitchLang?lang=ar" class="bx--btn bx--btn--ghost @(lang == "ar" ? "bx--btn--primary" : "")" style="padding: 0.5rem; text-decoration: none; @(lang == "ar" ? "color: white; background: var(--primary-color);" : "")">عربي</a>
             </div>
         </div>
         

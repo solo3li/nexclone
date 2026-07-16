@@ -1,4 +1,5 @@
 @model NexClone.Backend.Core.Entities.GenerationHistory
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 
 @{
     ViewData["Title"] = "Operation Details";
@@ -15,7 +16,7 @@
         <!-- Overview Card -->
         <div class="bx--col-lg-8" style="margin-bottom: 2rem;">
             <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; height: 100%;">
-                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">Overview</h3>
+                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">@Localizer["Overview"]</h3>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
                     <div><strong>User Email:</strong> @Model.User?.Email</div>
@@ -37,7 +38,7 @@
                 </div>
 
                 <div style="margin-top: 2rem;">
-                    <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">Back to History</a>
+                    <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">@Localizer["Back to History"]</a>
                 </div>
             </div>
         </div>
@@ -47,13 +48,13 @@
             @if (Model.Status == "failed" && !string.IsNullOrEmpty(Model.ErrorMessage))
             {
                 <div style="background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 1.5rem; margin-bottom: 2rem; color: #721c24;">
-                    <h4 style="margin-top: 0; margin-bottom: 0.5rem; font-weight: bold;">Error Details</h4>
+                    <h4 style="margin-top: 0; margin-bottom: 0.5rem; font-weight: bold;">@Localizer["Error Details"]</h4>
                     <p style="margin: 0; white-space: pre-wrap;">@Model.ErrorMessage</p>
                 </div>
             }
 
             <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; height: 100%;">
-                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">I/O Details</h3>
+                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">@Localizer["I/O Details"]</h3>
 
                 @if (!string.IsNullOrEmpty(Model.InputText))
                 {
@@ -89,7 +90,7 @@
                             }
                             
                             <div style="margin-top: 1rem;">
-                                <a href="@Model.FileUrl" target="_blank" class="bx--btn bx--btn--sm bx--btn--ghost">Open File</a>
+                                <a href="@Model.FileUrl" target="_blank" class="bx--btn bx--btn--sm bx--btn--ghost">@Localizer["Open File"]</a>
                             </div>
                         </div>
                     </div>
@@ -98,7 +99,7 @@
                 @if (string.IsNullOrEmpty(Model.InputText) && string.IsNullOrEmpty(Model.ResultText) && string.IsNullOrEmpty(Model.FileUrl))
                 {
                     <div class="alert alert-warning">
-                        No input/output data available for this operation.
+                        @Localizer["No input/output data available for this operation."]
                     </div>
                 }
             </div>

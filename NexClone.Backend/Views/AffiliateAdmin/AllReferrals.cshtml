@@ -1,9 +1,10 @@
-@model IEnumerable<NexClone.Backend.Infrastructure.Data.AffiliateReferral>
+@model IEnumerable<dynamic>
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 
 <div class="bx--grid" style="padding-left: 0; max-width: 1200px; margin-left: 0;">
     <div class="bx--row" style="margin-bottom: 2rem;">
-        <h2 style="margin: 0; font-weight: 400; font-size: 1.5rem;">All Referrals</h2>
-        <p style="color: #525252; margin-top: 0.5rem;">View all referrals across the system, including regular users and cash affiliates.</p>
+        <h2 style="margin: 0; font-weight: 400; font-size: 1.5rem;">@Localizer["All Referrals"]</h2>
+        <p style="color: #525252; margin-top: 0.5rem;">@Localizer["View all referrals across the system, including regular users and cash affiliates."]</p>
     </div>
 
     <!-- Referrals Table -->
@@ -11,11 +12,11 @@
         <table class="bx--data-table bx--data-table--sort">
             <thead>
                 <tr>
-                    <th><span class="bx--table-header-label">Referrer</span></th>
-                    <th><span class="bx--table-header-label">Referred User</span></th>
-                    <th><span class="bx--table-header-label">Joined At</span></th>
-                    <th><span class="bx--table-header-label">Status</span></th>
-                    <th><span class="bx--table-header-label">Reason</span></th>
+                    <th><span class="bx--table-header-label">@Localizer["Referrer"]</span></th>
+                    <th><span class="bx--table-header-label">@Localizer["Referred User"]</span></th>
+                    <th><span class="bx--table-header-label">@Localizer["Joined At"]</span></th>
+                    <th><span class="bx--table-header-label">@Localizer["Status"]</span></th>
+                    <th><span class="bx--table-header-label">@Localizer["Reason"]</span></th>
                 </tr>
             </thead>
             <tbody>
@@ -28,7 +29,7 @@
                                 @item.Referrer.Email
                                 @if (item.Referrer.IsCashAffiliate)
                                 {
-                                    <span class="bx--tag bx--tag--purple" style="margin-left: 8px;">Cash Affiliate</span>
+                                    <span class="bx--tag bx--tag--purple" style="margin-left: 8px;">@Localizer["Cash Affiliate"]</span>
                                 }
                             }
                         </td>
@@ -37,7 +38,7 @@
                         <td>
                             @if (item.Status == "Active")
                             {
-                                <span class="bx--tag bx--tag--green">Active</span>
+                                <span class="bx--tag bx--tag--green">@Localizer["Active"]</span>
                             }
                             else
                             {
@@ -50,7 +51,7 @@
                 @if (!Model.Any())
                 {
                     <tr>
-                        <td colspan="5" style="text-align: center; padding: 2rem;">No referrals found.</td>
+                        <td colspan="5" style="text-align: center; padding: 2rem;">@Localizer["No referrals found."]</td>
                     </tr>
                 }
             </tbody>

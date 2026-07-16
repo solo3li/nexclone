@@ -1,4 +1,5 @@
 @model NexClone.Backend.Core.Entities.Plan
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 @{
     ViewData["Title"] = "Manage Wallets for " + Model.Name;
     var walletTypes = ViewBag.WalletTypes as List<NexClone.Backend.Core.Entities.WalletType> ?? new List<NexClone.Backend.Core.Entities.WalletType>();
@@ -11,9 +12,9 @@
     <div class="bx--row" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
         <div>
             <h2 style="margin: 0; font-weight: 400; font-size: 1.5rem;">@ViewData["Title"]</h2>
-            <p style="color: #525252; margin: 0.25rem 0 0 0; font-size: 0.875rem;">Configure wallet credit allocations and tool-to-wallet routing for this plan.</p>
+            <p style="color: #525252; margin: 0.25rem 0 0 0; font-size: 0.875rem;">@Localizer["Configure wallet credit allocations and tool-to-wallet routing for this plan."]</p>
         </div>
-        <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">Back to Plans</a>
+        <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">@Localizer["Back to Plans"]</a>
     </div>
 
     <form asp-action="ManageWallets" method="post">
@@ -25,10 +26,10 @@
                 <div style="background: #ffffff; border: 1px solid #e0e0e0;">
                     <div style="background: #0f62fe; padding: 1rem 1.5rem;">
                         <h3 style="color: white; margin: 0; font-size: 1rem; font-weight: 600;">
-                            1. Base Wallet Allocations
+                            @Localizer["1. Base Wallet Allocations"]
                         </h3>
                         <p style="color: rgba(255,255,255,0.75); margin: 0.25rem 0 0 0; font-size: 0.8rem;">
-                            Define how many credits this plan grants to each wallet type when a user subscribes.
+                            @Localizer["Define how many credits this plan grants to each wallet type when a user subscribes."]
                         </p>
                     </div>
 
@@ -37,7 +38,7 @@
                         {
                             <div style="padding: 1rem; background: #fff8e1; border-left: 4px solid #f59e0b; margin-bottom: 1rem; color: #78350f;">
                                 No Wallet Types found. Please create some from 
-                                <a href="@Url.Action("Index", "WalletTypesAdmin")" style="color: #0f62fe; font-weight: bold;">Wallet Types</a> first.
+                                <a href="@Url.Action("Index", "WalletTypesAdmin")" style="color: #0f62fe; font-weight: bold;">@Localizer["Wallet Types"]</a> first.
                             </div>
                         }
 
@@ -45,9 +46,9 @@
                             <table class="bx--data-table bx--data-table--zebra" style="width: 100%;">
                                 <thead>
                                     <tr>
-                                        <th><span class="bx--table-header-label">Wallet Type</span></th>
-                                        <th><span class="bx--table-header-label">Credits to Grant on Subscription</span></th>
-                                        <th><span class="bx--table-header-label">Action</span></th>
+                                        <th><span class="bx--table-header-label">@Localizer["Wallet Type"]</span></th>
+                                        <th><span class="bx--table-header-label">@Localizer["Credits to Grant on Subscription"]</span></th>
+                                        <th><span class="bx--table-header-label">@Localizer["Action"]</span></th>
                                     </tr>
                                 </thead>
                                 <tbody id="baseWalletsBody">
@@ -75,7 +76,7 @@
                                                 <input type="number" name="creditsAmounts" class="bx--text-input" step="0.01" min="0" value="@pw.CreditsAmount" required style="max-width: 180px;" />
                                             </td>
                                             <td>
-                                                <button type="button" class="bx--btn bx--btn--sm bx--btn--danger" onclick="removeRow(this)">Remove</button>
+                                                <button type="button" class="bx--btn bx--btn--sm bx--btn--danger" onclick="removeRow(this)">@Localizer["Remove"]</button>
                                             </td>
                                         </tr>
                                     }
@@ -85,11 +86,11 @@
                         @if (!Model.PackageWallets.Any())
                         {
                             <div id="baseWalletsEmpty" style="text-align: center; padding: 1.5rem; color: #8d8d8d; border: 1px dashed #e0e0e0; margin-bottom: 1rem;">
-                                No wallet allocations added yet. Click the button below to add one.
+                                @Localizer["No wallet allocations added yet. Click the button below to add one."]
                             </div>
                         }
                         <button type="button" class="bx--btn bx--btn--sm bx--btn--tertiary" onclick="addBaseWalletRow()">
-                            + Add Wallet Allocation
+                            @Localizer["+ Add Wallet Allocation"]
                         </button>
                     </div>
                 </div>
@@ -102,10 +103,10 @@
                 <div style="background: #ffffff; border: 1px solid #e0e0e0;">
                     <div style="background: #6929c4; padding: 1rem 1.5rem;">
                         <h3 style="color: white; margin: 0; font-size: 1rem; font-weight: 600;">
-                            2. Tool-to-Wallet Routing
+                            @Localizer["2. Tool-to-Wallet Routing"]
                         </h3>
                         <p style="color: rgba(255,255,255,0.75); margin: 0.25rem 0 0 0; font-size: 0.8rem;">
-                            Choose which wallet each tool deducts credits from. Tools not listed here will default to the GENERAL wallet.
+                            @Localizer["Choose which wallet each tool deducts credits from. Tools not listed here will default to the GENERAL wallet."]
                         </p>
                     </div>
 
@@ -114,7 +115,7 @@
                         {
                             <div style="padding: 1rem; background: #fff8e1; border-left: 4px solid #f59e0b; margin-bottom: 1rem; color: #78350f;">
                                 No Tools configured. Add tools from 
-                                <a href="@Url.Action("Index", "ToolConfigAdmin")" style="color: #0f62fe; font-weight: bold;">Tool Settings</a> first.
+                                <a href="@Url.Action("Index", "ToolConfigAdmin")" style="color: #0f62fe; font-weight: bold;">@Localizer["Tool Settings"]</a> first.
                             </div>
                         }
 
@@ -122,9 +123,9 @@
                             <table class="bx--data-table bx--data-table--zebra" style="width: 100%;">
                                 <thead>
                                     <tr>
-                                        <th><span class="bx--table-header-label">Tool</span></th>
-                                        <th><span class="bx--table-header-label">Deduct Credits From Wallet</span></th>
-                                        <th><span class="bx--table-header-label">Action</span></th>
+                                        <th><span class="bx--table-header-label">@Localizer["Tool"]</span></th>
+                                        <th><span class="bx--table-header-label">@Localizer["Deduct Credits From Wallet"]</span></th>
+                                        <th><span class="bx--table-header-label">@Localizer["Action"]</span></th>
                                     </tr>
                                 </thead>
                                 <tbody id="toolWalletsBody">
@@ -166,7 +167,7 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <button type="button" class="bx--btn bx--btn--sm bx--btn--danger" onclick="removeRow(this)">Remove</button>
+                                                <button type="button" class="bx--btn bx--btn--sm bx--btn--danger" onclick="removeRow(this)">@Localizer["Remove"]</button>
                                             </td>
                                         </tr>
                                     }
@@ -176,11 +177,11 @@
                         @if (!Model.PackageToolWallets.Any())
                         {
                             <div id="toolWalletsEmpty" style="text-align: center; padding: 1.5rem; color: #8d8d8d; border: 1px dashed #e0e0e0; margin-bottom: 1rem;">
-                                No tool routing rules added yet. Click the button below to assign a tool to a wallet.
+                                @Localizer["No tool routing rules added yet. Click the button below to assign a tool to a wallet."]
                             </div>
                         }
                         <button type="button" class="bx--btn bx--btn--sm bx--btn--tertiary" onclick="addToolWalletRow()">
-                            + Add Tool Routing Rule
+                            @Localizer["+ Add Tool Routing Rule"]
                         </button>
                     </div>
                 </div>
@@ -191,8 +192,8 @@
         <div class="bx--row">
             <div class="bx--col">
                 <div style="display: flex; gap: 1rem;">
-                    <button type="submit" class="bx--btn bx--btn--primary">Save Wallet Configuration</button>
-                    <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">Cancel</a>
+                    <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Wallet Configuration"]</button>
+                    <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">@Localizer["Cancel"]</a>
                 </div>
             </div>
         </div>
@@ -226,7 +227,7 @@
                     <input type="number" name="creditsAmounts" class="bx--text-input" step="0.01" min="0" value="0" required style="max-width: 180px;" />
                 </td>
                 <td>
-                    <button type="button" class="bx--btn bx--btn--sm bx--btn--danger" onclick="removeRow(this)">Remove</button>
+                    <button type="button" class="bx--btn bx--btn--sm bx--btn--danger" onclick="removeRow(this)">@Localizer["Remove"]</button>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -255,7 +256,7 @@
                     </div>
                 </td>
                 <td>
-                    <button type="button" class="bx--btn bx--btn--sm bx--btn--danger" onclick="removeRow(this)">Remove</button>
+                    <button type="button" class="bx--btn bx--btn--sm bx--btn--danger" onclick="removeRow(this)">@Localizer["Remove"]</button>
                 </td>
             `;
             tbody.appendChild(tr);

@@ -1,4 +1,5 @@
 @model NexClone.Backend.Core.Entities.EmailTemplate
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 @{
     ViewData["Title"] = "Create Email Template";
 }
@@ -6,11 +7,11 @@
 <div class="bx--grid">
     <div class="bx--row">
         <div class="bx--col-lg-10">
-            <h2 class="mb-4">Create New Email Template</h2>
+            <h2 class="mb-4">@Localizer["Create New Email Template"]</h2>
 
             <form asp-action="CreateTemplate" method="post" style="background: #fff; padding: 2rem; border-radius: 8px; border: 1px solid #e0e0e0;">
                 <div class="bx--form-item mb-4">
-                    <label asp-for="Name" class="bx--label">Template Name</label>
+                    <label asp-for="Name" class="bx--label">@Localizer["Template Name"]</label>
                     <div class="bx--text-input__field-outer-wrapper">
                         <div class="bx--text-input__field-wrapper">
                             <input asp-for="Name" class="bx--text-input" placeholder="e.g. Welcome Email" required />
@@ -19,7 +20,7 @@
                 </div>
 
                 <div class="bx--form-item mb-4">
-                    <label asp-for="Subject" class="bx--label">Email Subject</label>
+                    <label asp-for="Subject" class="bx--label">@Localizer["Email Subject"]</label>
                     <div class="bx--text-input__field-outer-wrapper">
                         <div class="bx--text-input__field-wrapper">
                             <input asp-for="Subject" class="bx--text-input" placeholder="e.g. Welcome to NexMedia!" required />
@@ -28,15 +29,15 @@
                 </div>
 
                 <div class="bx--form-item mb-4">
-                    <label asp-for="HtmlBody" class="bx--label">HTML Content Body</label>
+                    <label asp-for="HtmlBody" class="bx--label">@Localizer["HTML Content Body"]</label>
                     <div class="bx--text-area__wrapper">
-                        <textarea asp-for="HtmlBody" class="bx--text-area" rows="10" placeholder="<p>Hello User,</p>" required></textarea>
+                        <textarea asp-for="HtmlBody" class="bx--text-area" rows="10" placeholder="<p>@Localizer["Hello User,"]</p>" required></textarea>
                     </div>
                 </div>
 
                 <div style="margin-top: 2rem; display: flex; gap: 1rem;">
-                    <button type="submit" class="bx--btn bx--btn--primary">Save Template</button>
-                    <a href="@Url.Action("Templates")" class="bx--btn bx--btn--secondary">Cancel</a>
+                    <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Template"]</button>
+                    <a href="@Url.Action("Templates")" class="bx--btn bx--btn--secondary">@Localizer["Cancel"]</a>
                 </div>
             </form>
         </div>

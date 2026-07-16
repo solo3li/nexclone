@@ -1,21 +1,22 @@
 @model IEnumerable<NexClone.Backend.Core.Entities.AffiliateTransaction>
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 
 <div class="bx--grid" style="padding-left: 0; max-width: 1200px; margin-left: 0;">
     <div class="bx--row" style="margin-bottom: 2rem;">
-        <h2 style="margin: 0; font-weight: 400; font-size: 1.5rem;">Affiliate Payout Requests</h2>
-        <p style="color: #525252; margin-top: 0.5rem;">Review and process payout requests from your cash affiliates.</p>
+        <h2 style="margin: 0; font-weight: 400; font-size: 1.5rem;">@Localizer["Affiliate Payout Requests"]</h2>
+        <p style="color: #525252; margin-top: 0.5rem;">@Localizer["Review and process payout requests from your cash affiliates."]</p>
     </div>
 
     <div style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem;">
         <table class="bx--data-table bx--data-table--sort">
             <thead>
                 <tr>
-                    <th><span class="bx--table-header-label">Date</span></th>
-                    <th><span class="bx--table-header-label">Affiliate</span></th>
-                    <th><span class="bx--table-header-label">Amount</span></th>
-                    <th><span class="bx--table-header-label">Notes/Details</span></th>
-                    <th><span class="bx--table-header-label">Status</span></th>
-                    <th><span class="bx--table-header-label">Actions</span></th>
+                    <th><span class="bx--table-header-label">@Localizer["Date"]</span></th>
+                    <th><span class="bx--table-header-label">@Localizer["Affiliate"]</span></th>
+                    <th><span class="bx--table-header-label">@Localizer["Amount"]</span></th>
+                    <th><span class="bx--table-header-label">@Localizer["Notes/Details"]</span></th>
+                    <th><span class="bx--table-header-label">@Localizer["Status"]</span></th>
+                    <th><span class="bx--table-header-label">@Localizer["Actions"]</span></th>
                 </tr>
             </thead>
             <tbody>
@@ -29,15 +30,15 @@
                         <td>
                             @if (item.Status == "Pending")
                             {
-                                <span class="bx--tag bx--tag--warning">Pending</span>
+                                <span class="bx--tag bx--tag--warning">@Localizer["Pending"]</span>
                             }
                             else if (item.Status == "Completed")
                             {
-                                <span class="bx--tag bx--tag--green">Completed</span>
+                                <span class="bx--tag bx--tag--green">@Localizer["Completed"]</span>
                             }
                             else if (item.Status == "Rejected")
                             {
-                                <span class="bx--tag bx--tag--red">Rejected</span>
+                                <span class="bx--tag bx--tag--red">@Localizer["Rejected"]</span>
                             }
                         </td>
                         <td>
@@ -47,13 +48,13 @@
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="id" value="@item.Id" />
                                     <input type="hidden" name="status" value="Completed" />
-                                    <button type="submit" class="bx--btn bx--btn--primary bx--btn--sm" onclick="return confirm('Mark as Paid?');">Mark Paid</button>
+                                    <button type="submit" class="bx--btn bx--btn--primary bx--btn--sm" onclick="return confirm('Mark as Paid?');">@Localizer["Mark Paid"]</button>
                                 </form>
                                 <form action="@Url.Action("UpdatePayoutStatus", "AffiliateAdmin")" method="post" style="display: inline; margin-left: 0.5rem;">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="id" value="@item.Id" />
                                     <input type="hidden" name="status" value="Rejected" />
-                                    <button type="submit" class="bx--btn bx--btn--danger bx--btn--sm" onclick="return confirm('Reject and refund balance?');">Reject</button>
+                                    <button type="submit" class="bx--btn bx--btn--danger bx--btn--sm" onclick="return confirm('Reject and refund balance?');">@Localizer["Reject"]</button>
                                 </form>
                             }
                         </td>
@@ -62,7 +63,7 @@
                 @if (!Model.Any())
                 {
                     <tr>
-                        <td colspan="6" style="text-align: center; padding: 2rem;">No payout requests found.</td>
+                        <td colspan="6" style="text-align: center; padding: 2rem;">@Localizer["No payout requests found."]</td>
                     </tr>
                 }
             </tbody>

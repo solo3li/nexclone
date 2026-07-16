@@ -1,4 +1,5 @@
 @model IEnumerable<NexClone.Backend.Core.Entities.SupportTicket>
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 
 <div class="bx--grid" style="padding-left: 0; padding-right: 0;">
     <div class="bx--row">
@@ -7,12 +8,12 @@
                 <table class="bx--data-table" style="width: 100%; text-align: left; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
                     <thead style="background-color: #f4f4f4;">
                         <tr>
-                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">ID</th>
-                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">User</th>
-                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">Subject</th>
-                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">Status</th>
-                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">Last Updated</th>
-                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">Actions</th>
+                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">@Localizer["ID"]</th>
+                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">@Localizer["User"]</th>
+                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">@Localizer["Subject"]</th>
+                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">@Localizer["Status"]</th>
+                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">@Localizer["Last Updated"]</th>
+                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">@Localizer["Actions"]</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -30,7 +31,7 @@
                                 </td>
                                 <td style="padding: 1rem;">@item.UpdatedAt.ToLocalTime().ToString("g")</td>
                                 <td style="padding: 1rem;">
-                                    <a href="/TicketsAdmin/Chat/@item.Id" class="bx--btn bx--btn--sm bx--btn--primary" style="background-color: #0f62fe; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; font-size: 0.875rem;">View Chat</a>
+                                    <a href="/TicketsAdmin/Chat/@item.Id" class="bx--btn bx--btn--sm bx--btn--primary" style="background-color: #0f62fe; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; font-size: 0.875rem;">@Localizer["View Chat"]</a>
                                 </td>
                             </tr>
                         }

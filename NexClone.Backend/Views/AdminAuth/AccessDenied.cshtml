@@ -1,3 +1,4 @@
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 @{
     Layout = null;
     ViewData["Title"] = "Access Denied";
@@ -45,11 +46,11 @@
 <body>
     <div class="error-container">
         <div class="error-header">
-            <h1>Access Denied</h1>
-            <p>You do not have permission to access the requested admin resource.</p>
+            <h1>@Localizer["Access Denied"]</h1>
+            <p>@Localizer["You do not have permission to access the requested admin resource."]</p>
         </div>
-        <a href="/" class="bx--btn bx--btn--primary">Return to Home</a>
-        <a href="/AdminAuth/Login" class="bx--btn bx--btn--secondary">Log in as Admin</a>
+        <a href="/" class="bx--btn bx--btn--primary">@Localizer["Return to Home"]</a>
+        <a href="/AdminAuth/Login" class="bx--btn bx--btn--secondary">@Localizer["Log in as Admin"]</a>
     </div>
 </body>
 </html>

@@ -1,4 +1,5 @@
 @model NexClone.Backend.Core.Entities.Payment
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 
 @{
     ViewData["Title"] = "Payment Details";
@@ -15,7 +16,7 @@
         <div class="bx--col-lg-8" style="margin-bottom: 2rem;">
             <!-- Payment Information -->
             <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; height: 100%;">
-                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">Payment Info</h3>
+                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">@Localizer["Payment Info"]</h3>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
                     <div><strong>User Email:</strong> @Model.User?.Email</div>
@@ -28,7 +29,7 @@
                 <!-- Approval Actions -->
                 @if (Model.Status == "Pending")
                 {
-                    <h3 class="bx--type-productive-heading-02" style="margin-bottom: 1rem; margin-top: 1rem;">Actions</h3>
+                    <h3 class="bx--type-productive-heading-02" style="margin-bottom: 1rem; margin-top: 1rem;">@Localizer["Actions"]</h3>
                     <div style="display: flex; gap: 1rem;">
                         <form method="post" asp-action="Approve" asp-route-id="@Model.Id" style="display: inline;">
                             <button type="submit" class="bx--btn bx--btn--primary" style="background-color: #24a148;">
@@ -50,7 +51,7 @@
                 }
 
                 <div style="margin-top: 2rem;">
-                    <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">Back to List</a>
+                    <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">@Localizer["Back to List"]</a>
                 </div>
             </div>
         </div>
@@ -58,7 +59,7 @@
         <div class="bx--col-lg-8" style="margin-bottom: 2rem;">
             <!-- Receipt / Screenshot Image -->
             <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; height: 100%;">
-                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">Receipt Screenshot</h3>
+                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">@Localizer["Receipt Screenshot"]</h3>
                 
                 @if (!string.IsNullOrEmpty(Model.ReceiptUrl))
                 {
@@ -66,13 +67,13 @@
                         <img src="@Model.ReceiptUrl" alt="Receipt Screenshot" style="max-width: 100%; max-height: 600px; object-fit: contain;" />
                     </div>
                     <div style="margin-top: 1rem; text-align: center;">
-                        <a href="@Model.ReceiptUrl" target="_blank" class="bx--btn bx--btn--ghost bx--btn--sm">Open Image in New Tab</a>
+                        <a href="@Model.ReceiptUrl" target="_blank" class="bx--btn bx--btn--ghost bx--btn--sm">@Localizer["Open Image in New Tab"]</a>
                     </div>
                 }
                 else
                 {
                     <div class="alert alert-warning">
-                        <p>No screenshot was provided by the user for this transaction.</p>
+                        <p>@Localizer["No screenshot was provided by the user for this transaction."]</p>
                     </div>
                 }
             </div>
