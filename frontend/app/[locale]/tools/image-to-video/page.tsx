@@ -44,7 +44,10 @@ export default function ImageToVideoPage() {
       router.push('/login');
       return;
     }
-    if (!imageUrl.trim()) return;
+    if (!imageFile || !audioFile) {
+      setError(isRtl ? "الصورة والملف الصوتي مطلوبان" : "Image and audio file are required");
+      return;
+    }
     setError("");
     setShowConfirmModal(true);
   };
@@ -231,7 +234,7 @@ export default function ImageToVideoPage() {
 
               {/* Audio Input (Optional) */}
               <div className="mt-4 flex flex-col gap-2" dir={isRtl ? 'rtl' : 'ltr'}>
-                <label className="text-white/80 font-semibold text-sm px-1">{isRtl ? "ملف صوتي (اختياري للـ Lip Sync)" : "Audio File (Optional for Lip Sync)"}</label>
+                <label className="text-white/80 font-semibold text-sm px-1">{isRtl ? "ملف صوتي (مطلوب للـ Lip Sync)" : "Audio File (Required for Lip Sync)"}</label>
                 <div className="flex items-center gap-4">
                   <input
                     type="file"
@@ -261,7 +264,7 @@ export default function ImageToVideoPage() {
 
               <button
                   onClick={handleProcessClick}
-                  disabled={isProcessing || !imageUrl}
+                  disabled={isProcessing || !imageFile || !audioFile}
                   className="w-full mt-4 bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-500 hover:to-pink-500 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                 {isProcessing ? (
