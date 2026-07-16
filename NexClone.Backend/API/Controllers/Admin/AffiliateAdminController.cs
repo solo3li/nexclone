@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
 using System;
-using NexClone.Backend.Infrastructure.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace NexClone.Backend.API.Controllers.Admin
 {
-    [Authorize(AuthenticationSchemes = Microsoft.AspNetCore.Authentication.Cookies.CookieAuthenticationDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Admin")]
     public class AffiliateAdminController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -37,6 +37,7 @@ namespace NexClone.Backend.API.Controllers.Admin
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> SetCashAffiliate(Guid? userId, string? email, bool status)
         {
             ApplicationUser user = null;
@@ -75,6 +76,7 @@ namespace NexClone.Backend.API.Controllers.Admin
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdatePayoutStatus(Guid id, string status)
         {
             var transaction = await _context.AffiliateTransactions

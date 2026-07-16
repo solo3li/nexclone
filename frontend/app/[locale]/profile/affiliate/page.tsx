@@ -87,23 +87,30 @@ export default function AffiliateDashboard() {
   return (
     <div className="space-y-8">
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-white/5 border border-white/10 p-6 rounded-3xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-violet-500/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
-          <h3 className="text-white/60 font-medium mb-2">Total Referrals</h3>
+          <h3 className="text-white/60 font-medium mb-2">{isRtl ? "إجمالي الإحالات" : "Total Referrals"}</h3>
           <p className="text-4xl font-bold text-white">{stats?.totalReferrals || 0}</p>
+          <p className="text-xs text-white/40 mt-1">{isRtl ? "جميع محاولات التسجيل" : "All registration attempts"}</p>
+        </div>
+        <div className="bg-white/5 border border-white/10 p-6 rounded-3xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
+          <h3 className="text-white/60 font-medium mb-2">{isRtl ? "إحالات ناجحة" : "Active Referrals"}</h3>
+          <p className="text-4xl font-bold text-emerald-400">{stats?.activeReferrals || 0}</p>
+          <p className="text-xs text-white/40 mt-1">{isRtl ? "المحتسبة فعلاً" : "Counted referrals"}</p>
         </div>
         <div className="bg-white/5 border border-white/10 p-6 rounded-3xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/20 rounded-full blur-3xl -mr-10 -mt-10"></div>
-          <h3 className="text-white/60 font-medium mb-2">Credits Earned</h3>
+          <h3 className="text-white/60 font-medium mb-2">{isRtl ? "الكريدت المكتسب" : "Credits Earned"}</h3>
           <p className="text-4xl font-bold text-white">{stats?.estimatedCreditsEarned || 0}</p>
-          <p className="text-xs text-white/40 mt-1">Estimated total credits from referrals.</p>
+          <p className="text-xs text-white/40 mt-1">{isRtl ? "إجمالي الكريدت من الإحالات الناجحة" : "From counted referrals only."}</p>
         </div>
         {stats?.isCashAffiliate && (
           <div className="bg-gradient-to-br from-violet-600/20 to-fuchsia-600/20 border border-violet-500/30 p-6 rounded-3xl relative overflow-hidden">
-            <h3 className="text-white/80 font-medium mb-2">Cash Balance</h3>
+            <h3 className="text-white/80 font-medium mb-2">{isRtl ? "الرصيد النقدي" : "Cash Balance"}</h3>
             <p className="text-4xl font-bold text-white">{stats?.cashBalance?.toFixed(2) || "0.00"} EGP</p>
-            <p className="text-xs text-violet-300 mt-1">Available for payout.</p>
+            <p className="text-xs text-violet-300 mt-1">{isRtl ? "متاح للسحب" : "Available for payout."}</p>
           </div>
         )}
       </div>

@@ -100,7 +100,7 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                             PlanId = plan.Id,
                             StartDate = DateTime.UtcNow,
                             EndDate = DateTime.UtcNow.AddDays(plan.DurationDays),
-                            Status = "Active"
+                            Status = "active"
                         };
                         _context.Subscriptions.Add(newSub);
                     }

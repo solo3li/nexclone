@@ -29,7 +29,7 @@ interface HistoryDetail {
 }
 
 /* ─── helpers ─── */
-const BACKEND = process.env.NEXT_PUBLIC_API_URL || "http://178.62.192.74:8080";
+const BACKEND = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 function absoluteUrl(path: string) {
   if (!path) return "";

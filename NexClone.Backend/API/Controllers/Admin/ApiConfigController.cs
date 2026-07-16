@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,7 @@ namespace NexClone.Backend.API.Controllers.Admin
     [Area("Admin")]
     [Route("api/admin/apiconfig")]
     [ApiController]
-    [Authorize] // You can add Roles = "Admin" if you have role-based auth
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
     public class ApiConfigController : ControllerBase
     {
         private readonly ApplicationDbContext _dbContext;

@@ -30,18 +30,20 @@ namespace NexClone.Backend.API.Controllers.Client
             if (user == null) return NotFound();
 
             var referralsCount = await _context.AffiliateReferrals.CountAsync(r => r.ReferrerId == userId);
+            var activeReferralsCount = await _context.AffiliateReferrals.CountAsync(r => r.ReferrerId == userId && r.Status == "Active");
             
             // For credits earned, we can estimate it based on the AppSetting at the time, 
             // or we could have stored it in AffiliateReferrals. For now, estimate based on current setting.
             var rewardStr = await _context.AppSettings.Where(s => s.Key == "Affiliate.CreditRewardReferrer").Select(s => s.Value).FirstOrDefaultAsync() ?? "50";
             decimal reward = decimal.TryParse(rewardStr, out var r1) ? r1 : 50m;
-            decimal creditsEarned = referralsCount * reward;
+            decimal creditsEarned = activeReferralsCount * reward;
 
             return Ok(new
             {
                 IsCashAffiliate = user.IsCashAffiliate,
                 CashBalance = user.AffiliateCashBalance,
                 TotalReferrals = referralsCount,
+                ActiveReferrals = activeReferralsCount,
                 EstimatedCreditsEarned = creditsEarned
             });
         }

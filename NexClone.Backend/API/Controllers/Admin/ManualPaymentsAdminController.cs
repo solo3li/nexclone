@@ -76,7 +76,7 @@ namespace NexClone.Backend.API.Controllers.Admin
             if (existingSub != null)
             {
                 existingSub.EndDate = (existingSub.EndDate > DateTime.UtcNow ? existingSub.EndDate : DateTime.UtcNow).AddDays(payment.Plan.DurationDays);
-                existingSub.Status = "Active";
+                existingSub.Status = "active";
                 payment.SubscriptionId = existingSub.Id;
             }
             else
@@ -87,7 +87,7 @@ namespace NexClone.Backend.API.Controllers.Admin
                     PlanId = payment.Plan.Id,
                     StartDate = DateTime.UtcNow,
                     EndDate = DateTime.UtcNow.AddDays(payment.Plan.DurationDays),
-                    Status = "Active"
+                    Status = "active"
                 };
                 _context.Subscriptions.Add(newSub);
                 await _context.SaveChangesAsync();

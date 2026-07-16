@@ -130,7 +130,7 @@ namespace NexClone.Backend.API.Controllers.Client
                         PlanId = targetPlan.Id,
                         StartDate = DateTime.UtcNow,
                         EndDate = DateTime.UtcNow.AddDays(targetPlan.DurationDays),
-                        Status = "Active"
+                        Status = "active"
                     };
                     _context.Subscriptions.Add(sub);
                     await _context.SaveChangesAsync();
