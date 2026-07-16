@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NexClone.Backend.Core.Entities
@@ -22,6 +23,7 @@ namespace NexClone.Backend.Core.Entities
         public bool IsCashAffiliate { get; set; } = false;
         
         [Column(TypeName = "decimal(18,4)")]
+        [ConcurrencyCheck]
         public decimal AffiliateCashBalance { get; set; } = 0;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

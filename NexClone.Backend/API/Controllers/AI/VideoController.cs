@@ -45,31 +45,38 @@ namespace NexClone.Backend.API.Controllers.AI
             if (!policyResult.IsAllowed)
                 return BadRequest(new { error = policyResult.ErrorMessage });
 
-            var result = await _videoService.StartAvatarImageToVideoAsync(image);
-
-            if (result.Success)
+            try
             {
-                // Save history
-                var history = new GenerationHistory
+                var result = await _videoService.StartAvatarImageToVideoAsync(image);
+
+                if (result.Success)
                 {
-                    UserId = userId,
-                    Type = "image-to-video",
-                    Title = "Avatar Video Generation",
-                    InputText = "Image Upload",
-                    Status = "processing",
-                    ResultText = result.TaskId,
-                    CreditsUsed = policyResult.TotalCost
-                };
-                _dbContext.GenerationHistories.Add(history);
-                await _dbContext.SaveChangesAsync();
+                    // Save history
+                    var history = new GenerationHistory
+                    {
+                        UserId = userId,
+                        Type = "image-to-video",
+                        Title = "Avatar Video Generation",
+                        InputText = "Image Upload",
+                        Status = "processing",
+                        ResultText = result.TaskId,
+                        CreditsUsed = policyResult.TotalCost
+                    };
+                    _dbContext.GenerationHistories.Add(history);
+                    await _dbContext.SaveChangesAsync();
 
-                return Ok(new { taskId = result.TaskId });
+                    return Ok(new { taskId = result.TaskId });
+                }
+
+                // Refund if failed to start (but no exception)
+                await _usagePolicy.RefundAsync(userId, policyResult.ChargedWalletTypeId, policyResult.TotalCost);
+                return StatusCode(500, new { error = result.ErrorMessage });
             }
-
-            // Refund if failed to start
-            await _usagePolicy.RefundAsync(userId, policyResult.ChargedWalletTypeId, policyResult.TotalCost);
-
-            return StatusCode(500, new { error = result.ErrorMessage });
+            catch (Exception ex)
+            {
+                await _usagePolicy.RefundAsync(userId, policyResult.ChargedWalletTypeId, policyResult.TotalCost);
+                return StatusCode(500, new { error = "An error occurred while communicating with the video service: " + ex.Message });
+            }
         }
 
         [HttpPost("start-lipsync")]
@@ -86,31 +93,38 @@ namespace NexClone.Backend.API.Controllers.AI
             if (!policyResult.IsAllowed)
                 return BadRequest(new { error = policyResult.ErrorMessage });
 
-            var result = await _videoService.StartLipSyncAsync(image, audio);
-
-            if (result.Success)
+            try
             {
-                // Save history
-                var history = new GenerationHistory
+                var result = await _videoService.StartLipSyncAsync(image, audio);
+
+                if (result.Success)
                 {
-                    UserId = userId,
-                    Type = "lip-sync",
-                    Title = "Lip Sync Generation",
-                    InputText = "Image and Audio Upload",
-                    Status = "processing",
-                    ResultText = result.TaskId,
-                    CreditsUsed = policyResult.TotalCost
-                };
-                _dbContext.GenerationHistories.Add(history);
-                await _dbContext.SaveChangesAsync();
+                    // Save history
+                    var history = new GenerationHistory
+                    {
+                        UserId = userId,
+                        Type = "lip-sync",
+                        Title = "Lip Sync Generation",
+                        InputText = "Image and Audio Upload",
+                        Status = "processing",
+                        ResultText = result.TaskId,
+                        CreditsUsed = policyResult.TotalCost
+                    };
+                    _dbContext.GenerationHistories.Add(history);
+                    await _dbContext.SaveChangesAsync();
 
-                return Ok(new { taskId = result.TaskId });
+                    return Ok(new { taskId = result.TaskId });
+                }
+
+                // Refund if failed to start (but no exception)
+                await _usagePolicy.RefundAsync(userId, policyResult.ChargedWalletTypeId, policyResult.TotalCost);
+                return StatusCode(500, new { error = result.ErrorMessage });
             }
-
-            // Refund if failed to start
-            await _usagePolicy.RefundAsync(userId, policyResult.ChargedWalletTypeId, policyResult.TotalCost);
-
-            return StatusCode(500, new { error = result.ErrorMessage });
+            catch (Exception ex)
+            {
+                await _usagePolicy.RefundAsync(userId, policyResult.ChargedWalletTypeId, policyResult.TotalCost);
+                return StatusCode(500, new { error = "An error occurred while communicating with the video service: " + ex.Message });
+            }
         }
 
         [HttpGet("status/{taskId}")]

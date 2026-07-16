@@ -91,29 +91,41 @@ namespace NexClone.Backend.API.Controllers.Client
             var user = await _context.Users.FindAsync(userId);
             if (user == null || !user.IsCashAffiliate) return Forbid();
 
-            if (request.Amount <= 0 || request.Amount > user.AffiliateCashBalance)
+            if (request.Amount < 50)
             {
-                return BadRequest(new { Message = "مبلغ السحب غير صالح أو يتجاوز الرصيد المتاح." });
+                return BadRequest(new { Message = "الحد الأدنى للسحب هو 50 دولار (أو ما يعادله)." });
             }
 
-            // Deduct balance and create pending transaction
-            user.AffiliateCashBalance -= request.Amount;
-            
-            var transaction = new AffiliateTransaction
+            if (request.Amount > user.AffiliateCashBalance)
             {
-                AffiliateId = user.Id,
-                Amount = request.Amount,
-                Type = "Payout",
-                Status = "Pending",
-                Notes = $"Payout requested via: {request.Method} - Details: {request.Details}",
-                CreatedAt = DateTime.UtcNow
-            };
+                return BadRequest(new { Message = "مبلغ السحب يتجاوز الرصيد المتاح." });
+            }
 
-            _context.AffiliateTransactions.Add(transaction);
-            _context.Users.Update(user);
-            await _context.SaveChangesAsync();
+            try
+            {
+                // Deduct balance and create pending transaction
+                user.AffiliateCashBalance -= request.Amount;
+                
+                var transaction = new AffiliateTransaction
+                {
+                    AffiliateId = user.Id,
+                    Amount = request.Amount,
+                    Type = "Payout",
+                    Status = "Pending",
+                    Notes = $"Payout requested via: {request.Method} - Details: {request.Details}",
+                    CreatedAt = DateTime.UtcNow
+                };
 
-            return Ok(new { Message = "تم إرسال طلب السحب بنجاح. قيد المراجعة." });
+                _context.AffiliateTransactions.Add(transaction);
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { Message = "تم إرسال طلب السحب بنجاح. قيد المراجعة." });
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return BadRequest(new { Message = "حدث خطأ أثناء معالجة طلبك، يرجى المحاولة مرة أخرى." });
+            }
         }
 
         private static string HideEmail(string? email)

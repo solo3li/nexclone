@@ -117,7 +117,7 @@ namespace NexClone.Backend.API.Controllers.Client
                 return BadRequest(new { Errors = errors });
             }
 
-            await ProcessAffiliateReferral(user, request.RefCode);
+            await ProcessAffiliateReferral(user, request.RefCode, ipAddress, fingerprint);
 
             // Log fingerprint
             _context.DeviceFingerprints.Add(new DeviceFingerprint
@@ -215,6 +215,10 @@ namespace NexClone.Backend.API.Controllers.Client
             var user = await _userManager.FindByEmailAsync(payload.Email);
             var isNewUser = false;
 
+            var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+            var userAgent = Request.Headers["User-Agent"].ToString() ?? "Unknown";
+            var fingerprint = request.DeviceFingerprint ?? string.Empty;
+
             if (user == null)
             {
                 isNewUser = true;
@@ -236,12 +240,8 @@ namespace NexClone.Backend.API.Controllers.Client
                     return BadRequest(new { Message = "Could not create user account." });
                 }
                 
-                await ProcessAffiliateReferral(user, request.RefCode);
+                await ProcessAffiliateReferral(user, request.RefCode, ipAddress, fingerprint);
             }
-
-            var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
-            var userAgent = Request.Headers["User-Agent"].ToString() ?? "Unknown";
-            var fingerprint = request.DeviceFingerprint ?? string.Empty;
 
             // Check trial eligibility if new user
             if (isNewUser)
@@ -614,12 +614,18 @@ namespace NexClone.Backend.API.Controllers.Client
             });
         }
 
-        private async Task ProcessAffiliateReferral(ApplicationUser user, string? refCode)
+        private async Task ProcessAffiliateReferral(ApplicationUser user, string? refCode, string ipAddress, string fingerprint)
         {
             if (string.IsNullOrEmpty(refCode) || !Guid.TryParse(refCode, out var referrerId)) return;
 
             var referrer = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == referrerId);
             if (referrer == null || referrer.Id == user.Id) return;
+
+            // Anti-Fraud: Prevent multiple referrals from the same IP or Device
+            var hasRegisteredBeforeFromThisDevice = await _context.DeviceFingerprints
+                .AnyAsync(df => df.IpAddress == ipAddress || (!string.IsNullOrEmpty(fingerprint) && df.FingerprintHash == fingerprint));
+            
+            if (hasRegisteredBeforeFromThisDevice) return;
 
             user.ReferredById = referrerId;
             await _userManager.UpdateAsync(user);

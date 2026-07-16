@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Threading;
 
 namespace NexClone.Backend.Application.Services
 {
@@ -98,10 +99,36 @@ namespace NexClone.Backend.Application.Services
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Insufficient credits. {debugInfo} Requires {totalCost:F4}." };
             }
 
-            userWallet.Balance -= totalCost;
-            userWallet.UpdatedAt = DateTime.UtcNow;
-            _context.Users.Update(user);
-            await _context.SaveChangesAsync();
+            // Retry loop for optimistic concurrency
+            int retries = 3;
+            bool saved = false;
+            while (retries > 0 && !saved)
+            {
+                try
+                {
+                    userWallet.Balance -= totalCost;
+                    userWallet.UpdatedAt = DateTime.UtcNow;
+                    _context.Users.Update(user);
+                    await _context.SaveChangesAsync();
+                    saved = true;
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    retries--;
+                    if (retries == 0)
+                    {
+                        return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "A system error occurred while processing your request. Please try again." };
+                    }
+                    
+                    // Reload the wallet from database
+                    await _context.Entry(userWallet).ReloadAsync();
+                    
+                    if (userWallet.Balance < totalCost)
+                    {
+                        return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Insufficient credits. Please top up your wallet." };
+                    }
+                }
+            }
 
             return new PolicyValidationResult { IsAllowed = true, TotalCost = totalCost, ChargedWalletTypeId = walletTypeId };
         }
@@ -239,12 +266,27 @@ namespace NexClone.Backend.Application.Services
         {
             if (amount <= 0) return;
 
-            var userWallet = await _context.UserWallets.FirstOrDefaultAsync(w => w.UserId == userId && w.WalletTypeId == walletTypeId);
-            if (userWallet != null)
+            int retries = 3;
+            bool saved = false;
+            while (retries > 0 && !saved)
             {
-                userWallet.Balance += amount;
-                userWallet.UpdatedAt = DateTime.UtcNow;
-                await _context.SaveChangesAsync();
+                try
+                {
+                    var userWallet = await _context.UserWallets.FirstOrDefaultAsync(w => w.UserId == userId && w.WalletTypeId == walletTypeId);
+                    if (userWallet != null)
+                    {
+                        userWallet.Balance += amount;
+                        userWallet.UpdatedAt = DateTime.UtcNow;
+                        await _context.SaveChangesAsync();
+                    }
+                    saved = true;
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    retries--;
+                    if (retries == 0) throw;
+                    // For refund, we just retry by looping again, which fetches the latest row state
+                }
             }
         }
 

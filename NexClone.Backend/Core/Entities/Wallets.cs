@@ -44,6 +44,7 @@ namespace NexClone.Backend.Core.Entities
         public WalletType WalletType { get; set; } = null!;
 
         [Column(TypeName = "decimal(18,4)")]
+        [ConcurrencyCheck]
         public decimal Balance { get; set; } = 0;
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
