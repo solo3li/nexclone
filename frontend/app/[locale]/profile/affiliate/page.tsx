@@ -43,7 +43,7 @@ export default function AffiliateDashboard() {
 
   const handleCopy = () => {
     if (user?.id) {
-      const link = `${window.location.origin}/auth/register?ref=${user.id}`;
+      const link = `${window.location.origin}/register?ref=${user.id}`;
       navigator.clipboard.writeText(link);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -112,7 +112,7 @@ export default function AffiliateDashboard() {
           <input
             type="text"
             readOnly
-            value={`${typeof window !== 'undefined' ? window.location.origin : ''}/auth/register?ref=${user?.id}`}
+            value={`${typeof window !== 'undefined' ? window.location.origin : ''}/register?ref=${user?.id}`}
             className="flex-1 bg-black/40 border border-white/10 rounded-xl p-4 text-white font-mono text-sm focus:outline-none"
           />
           <button
