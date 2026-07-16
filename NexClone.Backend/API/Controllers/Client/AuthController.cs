@@ -595,6 +595,7 @@ namespace NexClone.Backend.API.Controllers.Client
 
             return Ok(new
             {
+                Id = user.Id,
                 Email = user.Email,
                 FullName = user.FullName,
                 Country = user.Country,
