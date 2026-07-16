@@ -133,7 +133,28 @@
             padding: 2.5rem; 
             width: calc(100% - 256px);
             min-height: 100vh;
+            transition: all 0.3s ease;
         }
+
+        /* Collapse Sidebar Styles */
+        .modern-sidebar.collapsed { width: 72px; }
+        .modern-sidebar.collapsed .sidebar-brand { display: none; }
+        .modern-sidebar.collapsed .sidebar-header > i:first-child { display: none; }
+        .modern-sidebar.collapsed .sidebar-header { padding: 1.5rem; justify-content: center; }
+        .modern-sidebar.collapsed .sidebar-menu-item a { color: transparent; white-space: nowrap; overflow: hidden; padding-left: 1.5rem; }
+        .modern-sidebar.collapsed .sidebar-menu-item a i { color: #c6c6c6; margin-right: 2rem; font-size: 1.5rem; }
+        .modern-sidebar.collapsed .sidebar-menu-item.active a i,
+        .modern-sidebar.collapsed .sidebar-menu-item a:hover i { color: #ffffff; }
+        .modern-sidebar.collapsed .sidebar-footer { color: transparent; white-space: nowrap; overflow: hidden; }
+        
+        .bx--content.expanded-content { margin-left: 72px; width: calc(100% - 72px); }
+
+        #desktop-collapse-btn {
+            background: none; border: none; color: #c6c6c6; cursor: pointer; font-size: 1.5rem; padding: 0; margin-left: auto;
+            display: flex; align-items: center; justify-content: center;
+        }
+        #desktop-collapse-btn:hover { color: #ffffff; }
+
 
         /* Modernizing the Carbon Content */
         .page-header {
@@ -271,6 +292,9 @@
         <div class="sidebar-header">
             <i class='bx bxl-xing'></i>
             <a href="/" class="sidebar-brand">NexClone</a>
+            <button id="desktop-collapse-btn" title="Toggle Sidebar">
+                <i class='bx bx-menu'></i>
+            </button>
         </div>
         
         <nav class="sidebar-nav">
@@ -485,10 +509,34 @@
                 document.body.addEventListener('htmx:afterOnLoad', function() {
                     var s = document.getElementById('modern-sidebar');
                     var o = document.getElementById('sidebar-overlay');
-                    if (s) s.classList.remove('open');
-                    if (o) o.classList.remove('active');
+                    if (window.innerWidth <= 768) {
+                        if (s) s.classList.remove('open');
+                        if (o) o.classList.remove('active');
+                    }
                 });
                 document.body.dataset.sidebarListenerAdded = "true";
+            }
+
+            // Desktop Collapse Logic
+            var desktopCollapseBtn = document.getElementById('desktop-collapse-btn');
+            var mainContent = document.getElementById('main-content');
+            
+            // Check localStorage for saved state
+            if (localStorage.getItem('sidebar-collapsed') === 'true') {
+                if (sidebar) sidebar.classList.add('collapsed');
+                if (mainContent) mainContent.classList.add('expanded-content');
+            }
+
+            if (desktopCollapseBtn) {
+                desktopCollapseBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (sidebar) {
+                        sidebar.classList.toggle('collapsed');
+                        var isCollapsed = sidebar.classList.contains('collapsed');
+                        localStorage.setItem('sidebar-collapsed', isCollapsed);
+                    }
+                    if (mainContent) mainContent.classList.toggle('expanded-content');
+                });
             }
         })();
     </script>
