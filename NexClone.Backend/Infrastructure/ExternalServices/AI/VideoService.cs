@@ -100,13 +100,14 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                 var payload = new
                 {
                     model = modelName,
+                    prompt = "speak naturally",
                     video_url = videoUrl,
                     video = videoUrl,
                     audio = audioUrl,
                     sound_file = audioUrl
                 };
 
-                return await SubmitTaskAsync(payload, apiKey, "https://api.cometapi.com/kling/v1/videos/lip-sync");
+                return await SubmitTaskAsync(payload, apiKey);
             }
             catch (Exception ex)
             {
