@@ -377,5 +377,21 @@
     "You will be redirected to PayPal to complete your transaction securely.": "You will be redirected to PayPal to complete your transaction securely.",
     "&larr; Back to Plans": "&larr; Back to Plans",
     "Secure Payment (Paymob)": "Secure Payment (Paymob)",
-    "Mailing settings saved successfully.": "Mailing settings saved successfully."
+    "Mailing settings saved successfully.": "Mailing settings saved successfully.",
+    "Dashboard": "Dashboard",
+    "Subscriptions": "Subscriptions",
+    "Pricing &amp; Plans": "Pricing &amp; Plans",
+    "Global Settings": "Global Settings",
+    "Custom Pages": "Custom Pages",
+    "Communication Links": "Communication Links",
+    "Blog Posts": "Blog Posts",
+    "Support Tickets": "Support Tickets",
+    "System Logs": "System Logs",
+    "AI Voices": "AI Voices",
+    "Payment Gateways": "Payment Gateways",
+    "API Keys": "API Keys",
+    "Mailing &amp; Emails": "Mailing &amp; Emails",
+    "Pending Payments": "Pending Payments",
+    "Payment Methods": "Payment Methods",
+    "Affiliate Payouts": "Affiliate Payouts"
 }

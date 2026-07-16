@@ -377,5 +377,21 @@
     "You will be redirected to PayPal to complete your transaction securely.": "سيتم توجيهك إلى باي بال لإكمال العملية بأمان.",
     "&larr; Back to Plans": "&larr; العودة للباقات",
     "Secure Payment (Paymob)": "دفع آمن (بيموب)",
-    "Mailing settings saved successfully.": "Mailing settings saved successfully."
+    "Mailing settings saved successfully.": "Mailing settings saved successfully.",
+    "Dashboard": "لوحة القيادة",
+    "Subscriptions": "الاشتراكات",
+    "Pricing &amp; Plans": "باقات الأسعار",
+    "Global Settings": "الإعدادات العامة",
+    "Custom Pages": "الصفحات المخصصة",
+    "Communication Links": "روابط التواصل",
+    "Blog Posts": "منشورات المدونة",
+    "Support Tickets": "تذاكر الدعم",
+    "System Logs": "سجلات النظام",
+    "AI Voices": "أصوات الذكاء الاصطناعي",
+    "Payment Gateways": "بوابات الدفع",
+    "API Keys": "مفاتيح API",
+    "Mailing &amp; Emails": "المراسلة والبريد الإلكتروني",
+    "Pending Payments": "المدفوعات المعلقة",
+    "Payment Methods": "طرق الدفع",
+    "Affiliate Payouts": "المدفوعات للشركاء"
 }
