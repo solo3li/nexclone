@@ -32,20 +32,33 @@ namespace NexClone.Backend.API.Controllers.Admin
                 })
                 .ToListAsync();
 
-            ViewBag.AllUsers = await _context.Users.Select(u => new { u.Id, u.Email, u.IsCashAffiliate }).ToListAsync();
 
             return View(affiliates);
         }
 
         [HttpPost]
-        public async Task<IActionResult> SetCashAffiliate(Guid userId, bool status)
+        public async Task<IActionResult> SetCashAffiliate(Guid? userId, string? email, bool status)
         {
-            var user = await _context.Users.FindAsync(userId);
+            ApplicationUser user = null;
+            if (userId.HasValue && userId.Value != Guid.Empty)
+            {
+                user = await _context.Users.FindAsync(userId.Value);
+            }
+            else if (!string.IsNullOrEmpty(email))
+            {
+                user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
+            }
+
             if (user != null)
             {
                 user.IsCashAffiliate = status;
                 _context.Update(user);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = status ? $"Successfully granted Cash Affiliate status to {user.Email}." : $"Successfully revoked Cash Affiliate status from {user.Email}.";
+            }
+            else if (!string.IsNullOrEmpty(email))
+            {
+                TempData["ErrorMessage"] = $"User with email '{email}' not found.";
             }
             return RedirectToAction(nameof(Index));
         }
