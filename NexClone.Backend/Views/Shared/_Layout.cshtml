@@ -154,6 +154,7 @@
             display: flex; align-items: center; justify-content: center;
         }
         #desktop-collapse-btn:hover { color: #ffffff; }
+        .modern-sidebar.collapsed #desktop-collapse-btn { margin-left: 0; }
 
 
         /* Modernizing the Carbon Content */
@@ -411,6 +412,12 @@
                     <a href="/ManualPaymentMethodsAdmin">
                         <i class='bx bx-wallet'></i>
                         Payment Methods
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="@Url.Action("AllReferrals", "AffiliateAdmin")">
+                        <i class='bx bx-share-alt'></i>
+                        All Referrals
                     </a>
                 </li>
                 <li class="sidebar-menu-item">

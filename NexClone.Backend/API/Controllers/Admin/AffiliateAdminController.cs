@@ -101,8 +101,21 @@ namespace NexClone.Backend.API.Controllers.Admin
                 transaction.Status = status;
                 _context.Update(transaction);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = $"Payout status updated to {status}.";
             }
+
             return RedirectToAction(nameof(Payouts));
+        }
+
+        public async Task<IActionResult> AllReferrals()
+        {
+            var referrals = await _context.AffiliateReferrals
+                .Include(r => r.Referrer)
+                .Include(r => r.ReferredUser)
+                .OrderByDescending(r => r.JoinedAt)
+                .ToListAsync();
+
+            return View(referrals);
         }
     }
 }

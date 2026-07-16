@@ -1,0 +1,59 @@
+@model IEnumerable<NexClone.Backend.Infrastructure.Data.AffiliateReferral>
+
+<div class="bx--grid" style="padding-left: 0; max-width: 1200px; margin-left: 0;">
+    <div class="bx--row" style="margin-bottom: 2rem;">
+        <h2 style="margin: 0; font-weight: 400; font-size: 1.5rem;">All Referrals</h2>
+        <p style="color: #525252; margin-top: 0.5rem;">View all referrals across the system, including regular users and cash affiliates.</p>
+    </div>
+
+    <!-- Referrals Table -->
+    <div style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem;">
+        <table class="bx--data-table bx--data-table--sort">
+            <thead>
+                <tr>
+                    <th><span class="bx--table-header-label">Referrer</span></th>
+                    <th><span class="bx--table-header-label">Referred User</span></th>
+                    <th><span class="bx--table-header-label">Joined At</span></th>
+                    <th><span class="bx--table-header-label">Status</span></th>
+                    <th><span class="bx--table-header-label">Reason</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @if (item.Referrer != null)
+                            {
+                                @item.Referrer.Email
+                                @if (item.Referrer.IsCashAffiliate)
+                                {
+                                    <span class="bx--tag bx--tag--purple" style="margin-left: 8px;">Cash Affiliate</span>
+                                }
+                            }
+                        </td>
+                        <td>@(item.ReferredUser != null ? item.ReferredUser.Email : "Unknown")</td>
+                        <td>@item.JoinedAt.ToString("g")</td>
+                        <td>
+                            @if (item.Status == "Active")
+                            {
+                                <span class="bx--tag bx--tag--green">Active</span>
+                            }
+                            else
+                            {
+                                <span class="bx--tag bx--tag--red">@item.Status</span>
+                            }
+                        </td>
+                        <td style="max-width: 300px; white-space: normal;">@(string.IsNullOrEmpty(item.Reason) ? "-" : item.Reason)</td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 2rem;">No referrals found.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
