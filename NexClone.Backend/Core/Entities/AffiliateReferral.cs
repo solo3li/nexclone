@@ -18,7 +18,10 @@ namespace NexClone.Backend.Core.Entities
         public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
 
         [MaxLength(20)]
-        public string Status { get; set; } = "Active"; // Active, Suspended
+        public string Status { get; set; } = "Active"; // Active, Suspended, Rejected
+
+        [MaxLength(200)]
+        public string? Reason { get; set; }
 
         [ForeignKey("ReferrerId")]
         public virtual ApplicationUser Referrer { get; set; } = null!;

@@ -61,7 +61,8 @@ namespace NexClone.Backend.API.Controllers.Client
                     r.ReferredUser.FullName,
                     Email = HideEmail(r.ReferredUser.Email),
                     r.JoinedAt,
-                    r.Status
+                    r.Status,
+                    r.Reason
                 })
                 .ToListAsync();
 

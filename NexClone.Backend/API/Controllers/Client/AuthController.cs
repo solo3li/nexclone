@@ -626,18 +626,26 @@ namespace NexClone.Backend.API.Controllers.Client
             var hasRegisteredBeforeFromThisDevice = await _context.DeviceFingerprints
                 .AnyAsync(df => df.IpAddress == ipAddress || (!string.IsNullOrEmpty(fingerprint) && df.FingerprintHash == fingerprint));
             
-            if (hasRegisteredBeforeFromThisDevice) return;
-
-            user.ReferredById = referrerId;
-            await _userManager.UpdateAsync(user);
+            if (!hasRegisteredBeforeFromThisDevice)
+            {
+                user.ReferredById = referrerId;
+                await _userManager.UpdateAsync(user);
+            }
             
             _context.AffiliateReferrals.Add(new AffiliateReferral
             {
                 ReferrerId = referrerId,
                 ReferredUserId = user.Id,
                 JoinedAt = DateTime.UtcNow,
-                Status = "Active"
+                Status = hasRegisteredBeforeFromThisDevice ? "Rejected" : "Active",
+                Reason = hasRegisteredBeforeFromThisDevice ? "Registered from same device or IP address." : null
             });
+
+            if (hasRegisteredBeforeFromThisDevice)
+            {
+                await _context.SaveChangesAsync();
+                return;
+            }
 
             var referrerRewardStr = await _context.AppSettings.Where(s => s.Key == "Affiliate.CreditRewardReferrer").Select(s => s.Value).FirstOrDefaultAsync() ?? "50";
             var referredRewardStr = await _context.AppSettings.Where(s => s.Key == "Affiliate.CreditRewardReferred").Select(s => s.Value).FirstOrDefaultAsync() ?? "50";

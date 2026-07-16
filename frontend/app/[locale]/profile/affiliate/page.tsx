@@ -257,8 +257,23 @@ export default function AffiliateDashboard() {
                 {referrals.map((r, i) => (
                   <div key={i} className="p-4 flex justify-between items-center">
                     <div>
-                      <p className="text-white font-medium">{r.fullName || 'User'}</p>
+                      <p className="text-white font-medium flex items-center gap-2">
+                        {r.fullName || 'User'}
+                        {r.status === "Rejected" && (
+                          <span className="text-[10px] bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full border border-red-500/30">
+                            {isRtl ? "غير محتسب" : "Not Counted"}
+                          </span>
+                        )}
+                        {r.status === "Active" && (
+                          <span className="text-[10px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full border border-green-500/30">
+                            {isRtl ? "محتسب" : "Counted"}
+                          </span>
+                        )}
+                      </p>
                       <p className="text-xs text-white/40">{r.email}</p>
+                      {r.reason && (
+                        <p className="text-[10px] text-red-400/80 mt-1">{isRtl && r.reason.includes("same device") ? "تم التسجيل من نفس الجهاز أو الشبكة" : r.reason}</p>
+                      )}
                     </div>
                     <div className="text-right text-xs text-white/40">
                       Joined: {new Date(r.joinedAt).toLocaleDateString()}
