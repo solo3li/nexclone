@@ -35,6 +35,7 @@
 
         <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom: 2rem;">
             <input id="IsActive" class="bx--checkbox" type="checkbox" value="true" name="IsActive" @(Model.IsActive ? "checked" : "")>
+            <input type="hidden" name="IsActive" value="false" />
             <label for="IsActive" class="bx--checkbox-label" title="Active Status">
                 <span class="bx--checkbox-label-text">@Localizer["Set as Active Configuration"]</span>
             </label>

@@ -34,6 +34,9 @@ namespace NexClone.Backend.API.Controllers.Admin
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ApiConfiguration config)
         {
+            ModelState.Remove("Id");
+            ModelState.Remove("UpdatedAt");
+            
             if (ModelState.IsValid)
             {
                 config.Id = Guid.NewGuid();
@@ -61,6 +64,8 @@ namespace NexClone.Backend.API.Controllers.Admin
         public async Task<IActionResult> Edit(Guid id, ApiConfiguration config)
         {
             if (id != config.Id) return NotFound();
+
+            ModelState.Remove("UpdatedAt");
 
             if (ModelState.IsValid)
             {
