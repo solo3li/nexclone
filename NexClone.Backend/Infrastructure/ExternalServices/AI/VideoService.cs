@@ -161,8 +161,8 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                 var client = _httpClientFactory.CreateClient();
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
 
-                // CometAPI: query task status by submitting GET to /v1/images/generations with task_id
-                var statusResponse = await client.GetAsync($"https://api.cometapi.com/v1/images/generations?task_id={taskId}");
+                // CometAPI: query task status by submitting GET to /v1/images/generations/{taskId}
+                var statusResponse = await client.GetAsync($"https://api.cometapi.com/v1/images/generations/{taskId}");
                 var responseString = await statusResponse.Content.ReadAsStringAsync();
                 
                 _logger.LogInformation($"CometAPI status response for {taskId} ({statusResponse.StatusCode}): {responseString}");
