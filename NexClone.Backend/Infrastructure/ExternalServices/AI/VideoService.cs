@@ -91,7 +91,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
             }
         }
 
-        public void ProcessLipSyncBackgroundAsync(Guid historyId, string videoUrl, string audioUrl, Guid userId)
+        public void ProcessLipSyncBackgroundAsync(Guid historyId, byte[] videoBytes, string videoFileName, string videoContentType, byte[] audioBytes, string audioFileName, string audioContentType, Guid userId)
         {
             Task.Run(async () =>
             {
@@ -108,105 +108,30 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                 {
                     var (apiKey, modelName) = await GetToolConfigAsync("kling_advanced_lip_sync", dbContext);
                     var client = httpClientFactory.CreateClient();
-                    client.Timeout = TimeSpan.FromMinutes(5);
+                    client.Timeout = TimeSpan.FromMinutes(10);
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
 
-                    logger.LogInformation($"[LipSync Task {historyId}] Step 1: Submitting face detection...");
-                    logger.LogInformation($"[LipSync Task {historyId}] Video URL: {videoUrl}");
-                    logger.LogInformation($"[LipSync Task {historyId}] Audio URL: {audioUrl}");
+                    logger.LogInformation($"[LipSync Task {historyId}] Submitting lip sync directly with file bytes...");
 
-                    // Step 1: Detect Faces in Video automatically
-                    var detectPayload = new
-                    {
-                        model = "kling_identify_face",
-                        video_url = videoUrl,
-                        video = videoUrl,
-                        prompt = "Detect face in this video"
-                    };
+                    // Send video and audio directly as multipart/form-data to CometAPI
+                    using var formContent = new MultipartFormDataContent();
+                    formContent.Add(new StringContent("kling_advanced_lip_sync"), "model");
 
-                    var detectResponse = await client.PostAsJsonAsync("https://api.cometapi.com/v1/images/generations", detectPayload);
-                    var detectResponseString = await detectResponse.Content.ReadAsStringAsync();
+                    var videoContent = new ByteArrayContent(videoBytes);
+                    videoContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(videoContentType);
+                    formContent.Add(videoContent, "video", videoFileName);
 
-                    if (!detectResponse.IsSuccessStatusCode)
-                        throw new Exception($"Face detection submission failed: {detectResponseString}");
+                    var audioContent = new ByteArrayContent(audioBytes);
+                    audioContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(audioContentType);
+                    formContent.Add(audioContent, "audio", audioFileName);
 
-                    logger.LogInformation($"Face detect response: {detectResponseString}");
-
-                    using var detectDoc = JsonDocument.Parse(detectResponseString);
-                    var detectRoot = detectDoc.RootElement;
-                    string faceTaskId = "";
-
-                    if (detectRoot.TryGetProperty("data", out var detectData) && detectData.TryGetProperty("task_id", out var detectTaskIdEl))
-                    {
-                        faceTaskId = detectTaskIdEl.GetString();
-                    }
-                    else if (detectRoot.TryGetProperty("task_id", out var detectTaskIdEl2))
-                    {
-                        faceTaskId = detectTaskIdEl2.GetString();
-                    }
-
-                    if (string.IsNullOrEmpty(faceTaskId))
-                        throw new Exception($"Failed to get task_id for face detection. Response: {detectResponseString}");
-
-                    logger.LogInformation($"[LipSync Task {historyId}] Step 1 Submitted. Task ID: {faceTaskId}. Polling for faces...");
-
-                    // Poll Step 1
-                    string faceId = "";
-                    for (int i = 0; i < 30; i++) // Up to 5 minutes
-                    {
-                        await Task.Delay(10000);
-                        var pollResponse = await client.GetAsync($"https://api.cometapi.com/v1/images/generations/{faceTaskId}");
-                        var pollString = await pollResponse.Content.ReadAsStringAsync();
-                        
-                        if (pollResponse.StatusCode == System.Net.HttpStatusCode.BadRequest && pollString.Contains("task_not_exist"))
-                        {
-                            throw new Exception($"Face detection task failed instantly. CometAPI could not access the video. URL: {videoUrl}");
-                        }
-
-                        using var pollDoc = JsonDocument.Parse(pollString);
-                        var pollRoot = pollDoc.RootElement;
-                        var pollData = pollRoot.TryGetProperty("data", out var pData) ? pData : pollRoot;
-
-                        if (pollData.TryGetProperty("task_status", out var statusEl))
-                        {
-                            var status = statusEl.GetString()?.ToLower();
-                            if (status == "succeed" || status == "succeeded")
-                            {
-                                if (pollData.TryGetProperty("task_result", out var resultEl) && resultEl.TryGetProperty("faces", out var facesEl) && facesEl.GetArrayLength() > 0)
-                                {
-                                    faceId = facesEl[0].GetProperty("id").GetString();
-                                    break;
-                                }
-                            }
-                            else if (status == "failed" || status == "error")
-                            {
-                                throw new Exception($"Face detection task failed: {pollString}");
-                            }
-                        }
-                    }
-
-                    if (string.IsNullOrEmpty(faceId))
-                        throw new Exception($"Timed out waiting for face detection or no faces found.");
-
-                    logger.LogInformation($"[LipSync Task {historyId}] Step 1 Succeeded. Face ID: {faceId}. Submitting Lip Sync...");
-
-                    // Step 2: Submit Lip Sync
-                    var generatePayload = new
-                    {
-                        model = "kling_advanced_lip_sync",
-                        video_url = videoUrl,
-                        video = videoUrl,
-                        audio = audioUrl,
-                        sound_file = audioUrl,
-                        face_id = faceId,
-                        prompt = "Sync lip to audio"
-                    };
-
-                    var generateResponse = await client.PostAsJsonAsync("https://api.cometapi.com/v1/images/generations", generatePayload);
+                    var generateResponse = await client.PostAsync("https://api.cometapi.com/v1/images/generations", formContent);
                     var generateResponseString = await generateResponse.Content.ReadAsStringAsync();
 
+                    logger.LogInformation($"[LipSync Task {historyId}] CometAPI response ({generateResponse.StatusCode}): {generateResponseString}");
+
                     if (!generateResponse.IsSuccessStatusCode)
-                        throw new Exception($"Lip Sync submission failed: {generateResponseString}");
+                        throw new Exception($"Lip Sync submission failed ({generateResponse.StatusCode}): {generateResponseString}");
 
                     using var generateDoc = JsonDocument.Parse(generateResponseString);
                     var generateRoot = generateDoc.RootElement;
@@ -220,22 +145,22 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                     if (string.IsNullOrEmpty(lipSyncTaskId))
                         throw new Exception($"Failed to get task_id for lip sync. Response: {generateResponseString}");
 
-                    logger.LogInformation($"[LipSync Task {historyId}] Step 2 Submitted. Task ID: {lipSyncTaskId}. Polling for final video...");
-                    history.ResultText = lipSyncTaskId; // Update the DB just in case we need it, but polling relies on History.Id
+                    logger.LogInformation($"[LipSync Task {historyId}] Submitted. Task ID: {lipSyncTaskId}. Polling for final video...");
+                    history.ResultText = lipSyncTaskId;
                     await dbContext.SaveChangesAsync();
 
-                    // Poll Step 2
+                    // Poll for result
                     string outputVideoUrl = "";
-                    for (int i = 0; i < 40; i++) // Up to ~6.6 minutes
+                    for (int i = 0; i < 60; i++) // Up to 10 minutes
                     {
                         await Task.Delay(10000);
                         var pollResponse = await client.GetAsync($"https://api.cometapi.com/v1/images/generations/{lipSyncTaskId}");
                         var pollString = await pollResponse.Content.ReadAsStringAsync();
-                        
+
+                        logger.LogInformation($"[LipSync Task {historyId}] Poll {i+1}: {pollString.Substring(0, Math.Min(200, pollString.Length))}");
+
                         if (pollResponse.StatusCode == System.Net.HttpStatusCode.BadRequest && pollString.Contains("task_not_exist"))
-                        {
-                            throw new Exception($"Lip sync task failed instantly. CometAPI could not access the video/audio.");
-                        }
+                            throw new Exception($"Lip sync task failed instantly.");
 
                         using var pollDoc = JsonDocument.Parse(pollString);
                         var pollRoot = pollDoc.RootElement;
@@ -254,7 +179,8 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                             }
                             else if (status == "failed" || status == "error")
                             {
-                                throw new Exception($"Lip sync task failed: {pollString}");
+                                string errMsg = pollData.TryGetProperty("task_status_msg", out var msgEl) ? msgEl.GetString() : pollString;
+                                throw new Exception($"Lip sync task failed: {errMsg}");
                             }
                         }
                     }
@@ -278,6 +204,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                 }
             });
         }
+
 
         private async Task<(bool Success, string TaskId, string ErrorMessage)> SubmitTaskAsync(object payload, string apiKey, string endpoint = "https://api.cometapi.com/v1/images/generations")
         {

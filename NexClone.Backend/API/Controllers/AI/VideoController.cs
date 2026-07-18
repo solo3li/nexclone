@@ -91,19 +91,20 @@ namespace NexClone.Backend.API.Controllers.AI
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
-            // var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "kling_advanced_lip_sync", 1, null, "Standard");
-            // if (!policyResult.IsAllowed)
-            //     return BadRequest(new { error = policyResult.ErrorMessage });
             var policyResult = new NexClone.Backend.Application.Services.PolicyValidationResult { IsAllowed = true, TotalCost = 0 };
             
             try
             {
-                // Synchronous file upload
-                string videoUrl = await _mediaService.UploadFileAsync(video);
-                if (!videoUrl.StartsWith("http")) videoUrl = await _mediaService.GetFileUrlAsync(videoUrl);
+                // Read files into memory so background task can use them after the request ends
+                byte[] videoBytes;
+                byte[] audioBytes;
+                using (var ms = new MemoryStream()) { await video.CopyToAsync(ms); videoBytes = ms.ToArray(); }
+                using (var ms = new MemoryStream()) { await audio.CopyToAsync(ms); audioBytes = ms.ToArray(); }
 
-                string audioUrl = await _mediaService.UploadFileAsync(audio);
-                if (!audioUrl.StartsWith("http")) audioUrl = await _mediaService.GetFileUrlAsync(audioUrl);
+                string videoFileName = video.FileName;
+                string videoContentType = video.ContentType;
+                string audioFileName = audio.FileName;
+                string audioContentType = audio.ContentType;
 
                 // Save history
                 var history = new GenerationHistory
@@ -120,8 +121,8 @@ namespace NexClone.Backend.API.Controllers.AI
                 _dbContext.GenerationHistories.Add(history);
                 await _dbContext.SaveChangesAsync();
 
-                // Fire and forget background job
-                _videoService.ProcessLipSyncBackgroundAsync(history.Id, videoUrl, audioUrl, userId);
+                // Fire and forget background job - pass raw bytes directly
+                _videoService.ProcessLipSyncBackgroundAsync(history.Id, videoBytes, videoFileName, videoContentType, audioBytes, audioFileName, audioContentType, userId);
 
                 return Ok(new { taskId = history.Id.ToString() });
             }
@@ -131,6 +132,7 @@ namespace NexClone.Backend.API.Controllers.AI
                 return StatusCode(500, new { error = "An error occurred while uploading files: " + ex.Message });
             }
         }
+
 
         [HttpGet("status/{taskId}")]
         public async Task<IActionResult> CheckStatus(string taskId)

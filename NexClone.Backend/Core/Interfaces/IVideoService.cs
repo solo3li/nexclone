@@ -15,7 +15,7 @@ namespace NexClone.Backend.Core.Interfaces
         /// <summary>
         /// Processes the lip sync asynchronously in the background.
         /// </summary>
-        void ProcessLipSyncBackgroundAsync(Guid historyId, string videoUrl, string audioUrl, Guid userId);
+        void ProcessLipSyncBackgroundAsync(Guid historyId, byte[] videoBytes, string videoFileName, string videoContentType, byte[] audioBytes, string audioFileName, string audioContentType, Guid userId);
 
         /// <summary>
         /// Checks the status of a pending CometAPI task.
