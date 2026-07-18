@@ -56,8 +56,11 @@ export default function CompleteProfilePage() {
         deviceFingerprint: visitorId
       });
 
-      // Update store
-      setUser({ ...user, hasPhoneNumber: true });
+      // Fetch the updated user data to get the new wallets and active plan
+      const meRes = await api.get("/api/auth/me");
+      
+      // Update store with the complete updated user object
+      setUser(meRes.data);
       
       // Navigate to tools
       router.push("/tools");
