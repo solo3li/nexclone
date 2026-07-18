@@ -33,6 +33,16 @@ const nextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: '/nexmedia/:path*',
+          destination: 'http://minio:9000/nexmedia/:path*',
+        },
+      ],
+    };
+  },
 };
 
 export default withNextIntl(nextConfig);
