@@ -102,9 +102,8 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                 {
                     model = "kling_identify_face",
                     video_url = videoUrl,
-                    video = videoUrl
-                    // If CometAPI uses a specific parameter for face detection, it goes here:
-                    // mode = "detect_faces" 
+                    video = videoUrl,
+                    prompt = "Detect face in this video"
                 };
 
                 // Automatically extract the face ID in the backend
@@ -118,7 +117,8 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                     video = videoUrl,
                     audio = audioUrl,
                     sound_file = audioUrl,
-                    face_id = faceId // Automatic face assignment
+                    face_id = faceId, // Automatic face assignment
+                    prompt = "Sync lip to audio"
                 };
 
                 return await SubmitTaskAsync(generatePayload, apiKey);
@@ -136,6 +136,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
              _logger.LogInformation("Automatically extracting main face from video for Lip Sync.");
              
              var client = _httpClientFactory.CreateClient();
+             client.Timeout = TimeSpan.FromMinutes(5);
              client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
              
              var jsonContent = new StringContent(JsonSerializer.Serialize(detectPayload), Encoding.UTF8, "application/json");
@@ -174,6 +175,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
         private async Task<(bool Success, string TaskId, string ErrorMessage)> SubmitTaskAsync(object payload, string apiKey, string endpoint = "https://api.cometapi.com/v1/images/generations")
         {
             var client = _httpClientFactory.CreateClient();
+            client.Timeout = TimeSpan.FromMinutes(5);
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
 
             var jsonContent = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
