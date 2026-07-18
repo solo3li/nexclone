@@ -145,35 +145,7 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                     _context.Payments.Add(payment);
                     await _context.SaveChangesAsync();
 
-                    // --- Cash Affiliate Commission ---
-                    if (user.ReferredById.HasValue)
-                    {
-                        var referrer = await _context.Users.FirstOrDefaultAsync(u => u.Id == user.ReferredById.Value);
-                        if (referrer != null && referrer.IsCashAffiliate)
-                        {
-                            var commPercentStr = await _context.AppSettings.Where(s => s.Key == "Affiliate.CashCommissionPercentage").Select(s => s.Value).FirstOrDefaultAsync() ?? "20";
-                            if (decimal.TryParse(commPercentStr, out decimal commissionPercentage) && commissionPercentage > 0)
-                            {
-                                decimal commissionAmount = amountEgp * (commissionPercentage / 100m);
-                                
-                                referrer.AffiliateCashBalance += commissionAmount;
-                                
-                                var transaction = new AffiliateTransaction
-                                {
-                                    AffiliateId = referrer.Id,
-                                    Amount = commissionAmount,
-                                    Type = "Commission",
-                                    Status = "Completed",
-                                    Notes = $"Commission ({commissionPercentage}%) for payment {payment.Id}",
-                                    CreatedAt = DateTime.UtcNow
-                                };
-                                
-                                _context.AffiliateTransactions.Add(transaction);
-                                _context.Users.Update(referrer);
-                                await _context.SaveChangesAsync();
-                            }
-                        }
-                    }
+
 
                     // Send Email Receipt
                     try

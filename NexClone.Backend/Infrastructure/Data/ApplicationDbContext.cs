@@ -134,6 +134,7 @@ namespace NexClone.Backend.Infrastructure.Data
                 .HasForeignKey(ptw => ptw.WalletTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Affiliate mapping removed        }
+            // Affiliate mapping removed
+        }
     }
 }
