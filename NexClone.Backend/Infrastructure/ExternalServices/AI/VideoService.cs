@@ -127,17 +127,19 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                     logger.LogInformation($"[LipSync Task {historyId}] Audio URL: {audioUrl}");
 
                     // Submit lip sync with public URLs
-                    var payload = new
-                    {
-                        model = "kling_advanced_lip_sync",
-                        video_url = videoUrl,
-                        audio_url = audioUrl,
-                        video = videoUrl,
-                        audio = audioUrl
-                    };
+                    // Send video and audio directly as multipart/form-data to CometAPI
+                    using var formContent = new MultipartFormDataContent();
+                    formContent.Add(new StringContent("kling_advanced_lip_sync"), "model");
 
-                    var jsonContent = new StringContent(JsonSerializer.Serialize(payload), System.Text.Encoding.UTF8, "application/json");
-                    var generateResponse = await client.PostAsync("https://api.cometapi.com/v1/images/generations", jsonContent);
+                    var videoContent = new ByteArrayContent(videoBytes);
+                    videoContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(videoContentType);
+                    formContent.Add(videoContent, "video", videoFileName);
+
+                    var audioContent = new ByteArrayContent(audioBytes);
+                    audioContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(audioContentType);
+                    formContent.Add(audioContent, "audio", audioFileName);
+
+                    var generateResponse = await client.PostAsync("https://api.cometapi.com/v1/images/generations", formContent);
                     var generateResponseString = await generateResponse.Content.ReadAsStringAsync();
 
                     logger.LogInformation($"[LipSync Task {historyId}] CometAPI response ({generateResponse.StatusCode}): {generateResponseString}");
