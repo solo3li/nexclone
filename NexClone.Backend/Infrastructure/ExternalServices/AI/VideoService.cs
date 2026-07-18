@@ -166,7 +166,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                     for (int i = 0; i < 60; i++)
                     {
                         await Task.Delay(10000);
-                        var pollResponse = await client.GetAsync($"https://api.cometapi.com/v1/images/generations/{lipSyncTaskId}");
+                        var pollResponse = await client.GetAsync($"https://api.cometapi.com/v1/tasks/{lipSyncTaskId}");
                         var pollString = await pollResponse.Content.ReadAsStringAsync();
 
                         logger.LogInformation($"[LipSync Task {historyId}] Poll {i+1}: {pollString.Substring(0, Math.Min(300, pollString.Length))}");
@@ -260,8 +260,8 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                 var client = _httpClientFactory.CreateClient();
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
 
-                // CometAPI: query task status by submitting GET to /v1/images/generations/{taskId}
-                var statusResponse = await client.GetAsync($"https://api.cometapi.com/v1/images/generations/{taskId}");
+                // CometAPI: query task status by submitting GET to /v1/tasks/{taskId}
+                var statusResponse = await client.GetAsync($"https://api.cometapi.com/v1/tasks/{taskId}");
                 var responseString = await statusResponse.Content.ReadAsStringAsync();
                 
                 _logger.LogInformation($"CometAPI status response for {taskId} ({statusResponse.StatusCode}): {responseString}");
