@@ -112,25 +112,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             )}
           </GoogleAuthProviderWrapper>
         </NextIntlClientProvider>
-        {/* PWA Service Worker Registration */}
+        {/* Unregister Service Worker and Clear Cache */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               if ('serviceWorker' in navigator) {
-                window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js', { scope: '/' })
-                    .then(function(reg) {
-                      reg.addEventListener('updatefound', function() {
-                        var newWorker = reg.installing;
-                        newWorker.addEventListener('statechange', function() {
-                          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            newWorker.postMessage({ type: 'SKIP_WAITING' });
-                            window.location.reload();
-                          }
-                        });
-                      });
-                    })
-                    .catch(function(err) { console.log('SW registration failed:', err); });
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                  for(let registration of registrations) {
+                    registration.unregister();
+                  }
+                });
+              }
+              if ('caches' in window) {
+                caches.keys().then(function(names) {
+                  for (let name of names) caches.delete(name);
                 });
               }
             `,
