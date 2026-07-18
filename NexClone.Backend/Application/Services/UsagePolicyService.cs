@@ -301,14 +301,10 @@ namespace NexClone.Backend.Application.Services
 
             if (user == null) return;
 
-            var activeSubscription = user.Subscriptions
-                .FirstOrDefault(s => s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow);
-
-            if (activeSubscription == null) return;
-
-            var walletTypeId = await GetWalletTypeIdForTool(toolId, activeSubscription.Plan.Id);
+            var userWallet = user.Wallets.FirstOrDefault();
+            if (userWallet == null) return;
             
-            await RefundAsync(userId, walletTypeId, amount);
+            await RefundAsync(userId, userWallet.WalletTypeId, amount);
         }
     }
 }

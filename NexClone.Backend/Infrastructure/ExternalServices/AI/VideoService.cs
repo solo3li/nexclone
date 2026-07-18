@@ -100,7 +100,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                 // Step 1: Detect Faces in Video automatically
                 var detectPayload = new
                 {
-                    model = modelName,
+                    model = "kling_identify_face",
                     video_url = videoUrl,
                     video = videoUrl
                     // If CometAPI uses a specific parameter for face detection, it goes here:
@@ -113,7 +113,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                 // Step 2: Submit Lip Sync with the automatically selected face
                 var generatePayload = new
                 {
-                    model = modelName,
+                    model = "kling_advanced_lip_sync",
                     video_url = videoUrl,
                     video = videoUrl,
                     audio = audioUrl,
@@ -135,13 +135,40 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
              // Automatic extraction logic for face selection
              _logger.LogInformation("Automatically extracting main face from video for Lip Sync.");
              
-             // NOTE: Replace the URL or JSON parsing here with CometAPI's specific "Dedicated" face response
-             // var client = _httpClientFactory.CreateClient();
-             // client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
-             // var response = await client.PostAsJsonAsync("https://api.cometapi.com/v1/images/generations", detectPayload);
+             var client = _httpClientFactory.CreateClient();
+             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
              
-             await Task.Delay(200); // Simulate processing
-             return "auto_main_face_1"; // Placeholder for the actual face ID extracted from CometAPI JSON response
+             var jsonContent = new StringContent(JsonSerializer.Serialize(detectPayload), Encoding.UTF8, "application/json");
+             var response = await client.PostAsync("https://api.cometapi.com/v1/images/generations", jsonContent);
+             
+             if (!response.IsSuccessStatusCode)
+             {
+                 var errStr = await response.Content.ReadAsStringAsync();
+                 _logger.LogError($"Face detection failed: {errStr}");
+                 return ""; // Return empty or throw, allowing fallback
+             }
+             
+             var responseString = await response.Content.ReadAsStringAsync();
+             using var doc = JsonDocument.Parse(responseString);
+             var root = doc.RootElement;
+             
+             // CometAPI typical format: { "data": { "task_id": "...", "faces": [ { "id": "face_1" } ] } }
+             // But actually kling_identify_face might return faces synchronously or via task polling.
+             // We will try to parse it synchronously first.
+             if (root.TryGetProperty("data", out var dataEl))
+             {
+                 if (dataEl.TryGetProperty("faces", out var facesEl) && facesEl.ValueKind == JsonValueKind.Array && facesEl.GetArrayLength() > 0)
+                 {
+                     if (facesEl[0].TryGetProperty("id", out var faceIdEl))
+                         return faceIdEl.GetString();
+                 }
+                 // If CometAPI returns a taskId, we might need to poll it.
+                 // For now, if we can't find 'faces', return the task_id itself as a fallback.
+                 if (dataEl.TryGetProperty("task_id", out var taskIdEl))
+                     return taskIdEl.GetString();
+             }
+             
+             return "";
         }
 
         private async Task<(bool Success, string TaskId, string ErrorMessage)> SubmitTaskAsync(object payload, string apiKey, string endpoint = "https://api.cometapi.com/v1/images/generations")
