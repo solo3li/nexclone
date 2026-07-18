@@ -60,7 +60,11 @@ export default function AdvancedLipSyncPage() {
       formData.append("video", videoFile);
       formData.append("audio", audioFile);
 
-      const response = await api.post("/api/video/start-lipsync", formData);
+      const response = await api.post("/api/video/start-lipsync", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       const taskId = response.data.taskId;
       
       api.get("/api/auth/me").then(res => {
