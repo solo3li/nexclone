@@ -20,15 +20,18 @@ namespace NexClone.Backend.API.Controllers.AI
         private readonly IVideoService _videoService;
         private readonly ApplicationDbContext _dbContext;
         private readonly UsagePolicyService _usagePolicy;
+        private readonly IMediaService _mediaService;
 
         public VideoController(
             IVideoService videoService,
             ApplicationDbContext dbContext,
-            UsagePolicyService usagePolicy)
+            UsagePolicyService usagePolicy,
+            IMediaService mediaService)
         {
             _videoService = videoService;
             _dbContext = dbContext;
             _usagePolicy = usagePolicy;
+            _mediaService = mediaService;
         }
 
         [HttpPost("start-avatar")]
@@ -88,42 +91,44 @@ namespace NexClone.Backend.API.Controllers.AI
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
-            // Validate policy and deduct cost (1 generation flat cost)
-            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "kling_advanced_lip_sync", 1, null, "Standard");
-            if (!policyResult.IsAllowed)
-                return BadRequest(new { error = policyResult.ErrorMessage });
+            // var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "kling_advanced_lip_sync", 1, null, "Standard");
+            // if (!policyResult.IsAllowed)
+            //     return BadRequest(new { error = policyResult.ErrorMessage });
+            var policyResult = new NexClone.Backend.Application.Services.PolicyValidationResult { IsAllowed = true, TotalCost = 0 };
             
             try
             {
-                var result = await _videoService.StartLipSyncAsync(video, audio);
+                // Synchronous file upload
+                string videoUrl = await _mediaService.UploadFileAsync(video);
+                if (!videoUrl.StartsWith("http")) videoUrl = await _mediaService.GetFileUrlAsync(videoUrl);
 
-                if (result.Success)
+                string audioUrl = await _mediaService.UploadFileAsync(audio);
+                if (!audioUrl.StartsWith("http")) audioUrl = await _mediaService.GetFileUrlAsync(audioUrl);
+
+                // Save history
+                var history = new GenerationHistory
                 {
-                    // Save history
-                    var history = new GenerationHistory
-                    {
-                        UserId = userId,
-                        Type = "lip-sync",
-                        Title = "Lip Sync Generation",
-                        InputText = "Image and Audio Upload",
-                        Status = "processing",
-                        ResultText = result.TaskId,
-                        CreditsUsed = policyResult.TotalCost
-                    };
-                    _dbContext.GenerationHistories.Add(history);
-                    await _dbContext.SaveChangesAsync();
+                    UserId = userId,
+                    Type = "lip-sync",
+                    Title = "Lip Sync Generation",
+                    InputText = "Video and Audio Upload",
+                    Status = "processing",
+                    ResultText = "initializing",
+                    CreatedAt = DateTime.UtcNow,
+                    CreditsUsed = policyResult.TotalCost
+                };
+                _dbContext.GenerationHistories.Add(history);
+                await _dbContext.SaveChangesAsync();
 
-                    return Ok(new { taskId = result.TaskId });
-                }
+                // Fire and forget background job
+                _videoService.ProcessLipSyncBackgroundAsync(history.Id, videoUrl, audioUrl, userId);
 
-                // Refund if failed to start (but no exception)
-                await _usagePolicy.RefundAsync(userId, policyResult.ChargedWalletTypeId, policyResult.TotalCost);
-                return StatusCode(500, new { error = result.ErrorMessage });
+                return Ok(new { taskId = history.Id.ToString() });
             }
             catch (Exception ex)
             {
                 await _usagePolicy.RefundAsync(userId, policyResult.ChargedWalletTypeId, policyResult.TotalCost);
-                return StatusCode(500, new { error = "An error occurred while communicating with the video service: " + ex.Message });
+                return StatusCode(500, new { error = "An error occurred while uploading files: " + ex.Message });
             }
         }
 
@@ -133,9 +138,20 @@ namespace NexClone.Backend.API.Controllers.AI
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
+            if (Guid.TryParse(taskId, out var historyId))
+            {
+                var history = await _dbContext.GenerationHistories
+                    .FirstOrDefaultAsync(h => h.Id == historyId && h.UserId == userId);
+                
+                if (history != null)
+                {
+                    return Ok(new { status = history.Status, url = history.FileUrl, error = history.ErrorMessage });
+                }
+            }
+
+            // Fallback for older image-to-video tasks that might use CometAPI task id directly
             var result = await _videoService.CheckTaskStatusAsync(taskId);
 
-            // Update history if terminal state
             if (result.Status == "succeeded" || result.Status == "failed")
             {
                 var history = await _dbContext.GenerationHistories
@@ -158,7 +174,6 @@ namespace NexClone.Backend.API.Controllers.AI
                         if (toolName != "UNKNOWN" && history.CreditsUsed > 0)
                         {
                             await _usagePolicy.RefundByToolAsync(userId, toolName, history.CreditsUsed);
-                            history.CreditsUsed = 0;
                         }
                     }
                     await _dbContext.SaveChangesAsync();
@@ -167,6 +182,7 @@ namespace NexClone.Backend.API.Controllers.AI
 
             return Ok(new { status = result.Status, url = result.OutputUrl, error = result.ErrorMessage });
         }
+
 
     }
 }

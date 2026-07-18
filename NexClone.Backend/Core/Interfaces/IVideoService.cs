@@ -13,12 +13,9 @@ namespace NexClone.Backend.Core.Interfaces
         Task<(bool Success, string TaskId, string ErrorMessage)> StartAvatarImageToVideoAsync(IFormFile imageFile, IFormFile? audioFile = null, string prompt = "The speaker talks naturally to camera");
 
         /// <summary>
-        /// Starts the lip-sync task.
+        /// Processes the lip sync asynchronously in the background.
         /// </summary>
-        /// <param name="videoFile">The driving video.</param>
-        /// <param name="audioFile">The driving audio.</param>
-        /// <returns>A tuple indicating success, task ID, and error message if any.</returns>
-        Task<(bool Success, string TaskId, string ErrorMessage)> StartLipSyncAsync(IFormFile videoFile, IFormFile audioFile);
+        void ProcessLipSyncBackgroundAsync(Guid historyId, string videoUrl, string audioUrl, Guid userId);
 
         /// <summary>
         /// Checks the status of a pending CometAPI task.
