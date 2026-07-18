@@ -146,12 +146,12 @@ export default function AdvancedLipSyncPage() {
       <div className="container mx-auto px-4 py-6 md:py-8 relative z-10 max-w-6xl">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 relative">
           
-          {/* Left Column - Main Workspace */}
+          {/* Main Workspace */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
-            className="lg:col-span-8 flex flex-col gap-4 order-2 lg:order-1"
+            className="lg:col-span-12 max-w-4xl mx-auto w-full flex flex-col gap-4"
           >
             <div className="flex-1 bg-[#120822]/80 backdrop-blur-xl rounded-2xl border border-white/5 p-4 flex flex-col relative overflow-hidden group shadow-2xl transition-all duration-500 hover:border-fuchsia-500/30">
               
@@ -292,97 +292,7 @@ export default function AdvancedLipSyncPage() {
             </div>
           </motion.div>
 
-          {/* Right Column - Settings Sidebar */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className="lg:col-span-4 flex flex-col gap-4 order-1 lg:order-2"
-          >
-            <div className="bg-[#120822]/80 backdrop-blur-xl rounded-2xl border border-white/5 p-3 flex-shrink-0">
-              <div className="flex items-center gap-2 mb-4 px-1" dir={isRtl ? 'rtl' : 'ltr'}>
-                <Settings className="w-4 h-4 text-fuchsia-400" />
-                <h2 className="text-base font-bold text-white">{t('taskSettings')}</h2>
-              </div>
-              
-              <div className="space-y-3" dir={isRtl ? 'rtl' : 'ltr'}>
-                
-                {/* Aspect Ratio */}
-                <div className="bg-[#0a0015]/60 border border-white/5 rounded-xl p-3">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Monitor className="w-4 h-4 text-white/50" />
-                    <span className="text-white/80 text-xs font-semibold">{t('aspectRatio')}</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={() => setAspectRatio('16:9')}
-                      className={`flex-1 py-2 px-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5 ${
-                        aspectRatio === '16:9' 
-                          ? 'bg-fuchsia-600 text-white' 
-                          : 'bg-white/5 text-white/50 hover:text-white'
-                      }`}
-                    >
-                      <Monitor className="w-3.5 h-3.5" /> 16:9
-                    </button>
-                    <button 
-                      onClick={() => setAspectRatio('9:16')}
-                      className={`flex-1 py-2 px-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5 ${
-                        aspectRatio === '9:16' 
-                          ? 'bg-fuchsia-600 text-white' 
-                          : 'bg-white/5 text-white/50 hover:text-white'
-                      }`}
-                    >
-                      <Smartphone className="w-3.5 h-3.5" /> 9:16
-                    </button>
-                    <button 
-                      onClick={() => setAspectRatio('1:1')}
-                      className={`flex-1 py-2 px-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5 ${
-                        aspectRatio === '1:1' 
-                          ? 'bg-fuchsia-600 text-white' 
-                          : 'bg-white/5 text-white/50 hover:text-white'
-                      }`}
-                    >
-                      <div className="w-3.5 h-3.5 border-2 border-current rounded-sm" /> 1:1
-                    </button>
-                  </div>
-                </div>
 
-                {/* Quality Mode */}
-                <div className="bg-[#0a0015]/60 border border-white/5 rounded-xl p-3">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Zap className="w-4 h-4 text-white/50" />
-                    <span className="text-white/80 text-xs font-semibold">{t('quality')}</span>
-                  </div>
-                  
-                  <div className="flex bg-white/5 p-1 rounded-lg border border-white/5 gap-1">
-                    {['Standard', 'High'].map((q) => (
-                      <button
-                        key={q}
-                        onClick={() => setSelectedQuality(q)}
-                        className={`flex-1 py-1.5 rounded-md text-xs font-medium transition-all ${
-                          selectedQuality === q
-                            ? 'bg-white/10 text-white shadow-sm'
-                            : 'text-white/50 hover:text-white'
-                        }`}
-                      >
-                        {isRtl ? (q === 'Standard' ? 'عادية (720p)' : 'عالية (1080p)') : q}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                
-                {/* Cost Estimation */}
-                <div className="bg-fuchsia-500/10 border border-fuchsia-500/20 rounded-xl p-3 flex justify-between items-center">
-                  <span className="text-fuchsia-200/80 text-xs font-medium">{t('estimatedCost')}</span>
-                  <div className="flex items-center gap-1 text-fuchsia-400 font-bold">
-                    <Wallet className="w-4 h-4" />
-                    <span>{estimatedCost} {t('credits')}</span>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </motion.div>
 
         </div>
       </div>

@@ -112,7 +112,7 @@
         ]
       },
       "t10": {
-        "title": "Image to Video",
+        "title": "Avatar to Video",
         "desc": "Create stunning digital human videos from a single image using AI avatars.",
         "badge": "New",
         "tags": [
@@ -469,7 +469,7 @@
     "backHome": "Back to Home"
   },
   "ImageToVideo": {
-    "title": "Image to Video",
+    "title": "Avatar to Video",
     "uploadImage": "Upload Image",
     "imagePlaceholder": "Drag and drop or click to upload",
     "generate": "Generate Video",
