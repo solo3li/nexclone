@@ -53,12 +53,7 @@ export default function ProfileLayout({
       icon: History,
       exact: false
     },
-    {
-      name: isRtl ? "برنامج الشركاء" : "Affiliate",
-      href: `/profile/affiliate`,
-      icon: Share2,
-      exact: false
-    },
+
     {
       name: isRtl ? "تذاكر الدعم" : "Support Tickets",
       href: `/profile/tickets`,

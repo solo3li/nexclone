@@ -36,8 +36,7 @@ namespace NexClone.Backend.Infrastructure.Data
         public DbSet<UserWallet> UserWallets { get; set; } = null!;
         public DbSet<PackageWallet> PackageWallets { get; set; } = null!;
         public DbSet<PackageToolWallet> PackageToolWallets { get; set; } = null!;
-        public DbSet<AffiliateReferral> AffiliateReferrals { get; set; } = null!;
-        public DbSet<AffiliateTransaction> AffiliateTransactions { get; set; } = null!;
+        // Affiliate entities removed
 
         // DataProtection keys - persisted to DB to survive container restarts
         public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
@@ -135,24 +134,6 @@ namespace NexClone.Backend.Infrastructure.Data
                 .HasForeignKey(ptw => ptw.WalletTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Affiliate mapping
-            builder.Entity<AffiliateReferral>()
-                .HasOne(ar => ar.Referrer)
-                .WithMany()
-                .HasForeignKey(ar => ar.ReferrerId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.Entity<AffiliateReferral>()
-                .HasOne(ar => ar.ReferredUser)
-                .WithMany()
-                .HasForeignKey(ar => ar.ReferredUserId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            builder.Entity<AffiliateTransaction>()
-                .HasOne(at => at.Affiliate)
-                .WithMany()
-                .HasForeignKey(at => at.AffiliateId)
-                .OnDelete(DeleteBehavior.Cascade);
-        }
+            // Affiliate mapping removed        }
     }
 }

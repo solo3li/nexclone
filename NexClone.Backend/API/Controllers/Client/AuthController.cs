@@ -117,7 +117,6 @@ namespace NexClone.Backend.API.Controllers.Client
                 return BadRequest(new { Errors = errors });
             }
 
-            await ProcessAffiliateReferral(user, request.RefCode, ipAddress, fingerprint);
 
             // Log fingerprint
             _context.DeviceFingerprints.Add(new DeviceFingerprint
@@ -240,7 +239,6 @@ namespace NexClone.Backend.API.Controllers.Client
                     return BadRequest(new { Message = "Could not create user account." });
                 }
                 
-                await ProcessAffiliateReferral(user, request.RefCode, ipAddress, fingerprint);
             }
 
             // Check trial eligibility if new user
@@ -615,67 +613,5 @@ namespace NexClone.Backend.API.Controllers.Client
             });
         }
 
-        private async Task ProcessAffiliateReferral(ApplicationUser user, string? refCode, string ipAddress, string fingerprint)
-        {
-            if (string.IsNullOrEmpty(refCode) || !Guid.TryParse(refCode, out var referrerId)) return;
-
-            var referrer = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == referrerId);
-            if (referrer == null || referrer.Id == user.Id) return;
-
-            // Anti-Fraud: Prevent multiple referrals from the same IP or Device
-            var hasRegisteredBeforeFromThisDevice = await _context.DeviceFingerprints
-                .AnyAsync(df => df.IpAddress == ipAddress || (!string.IsNullOrEmpty(fingerprint) && df.FingerprintHash == fingerprint));
-            
-            if (!hasRegisteredBeforeFromThisDevice)
-            {
-                user.ReferredById = referrerId;
-                await _userManager.UpdateAsync(user);
-            }
-            
-            _context.AffiliateReferrals.Add(new AffiliateReferral
-            {
-                ReferrerId = referrerId,
-                ReferredUserId = user.Id,
-                JoinedAt = DateTime.UtcNow,
-                Status = hasRegisteredBeforeFromThisDevice ? "Rejected" : "Active",
-                Reason = hasRegisteredBeforeFromThisDevice ? "Registered from same device or IP address." : null
-            });
-
-            if (hasRegisteredBeforeFromThisDevice)
-            {
-                await _context.SaveChangesAsync();
-                return;
-            }
-
-            var referrerRewardStr = await _context.AppSettings.Where(s => s.Key == "Affiliate.CreditRewardReferrer").Select(s => s.Value).FirstOrDefaultAsync() ?? "50";
-            var referredRewardStr = await _context.AppSettings.Where(s => s.Key == "Affiliate.CreditRewardReferred").Select(s => s.Value).FirstOrDefaultAsync() ?? "50";
-            
-            decimal referrerReward = decimal.TryParse(referrerRewardStr, out var r1) ? r1 : 50m;
-            decimal referredReward = decimal.TryParse(referredRewardStr, out var r2) ? r2 : 50m;
-
-            var generalWalletType = await _context.WalletTypes.FirstOrDefaultAsync(w => w.Code == "GENERAL");
-            if (generalWalletType == null)
-            {
-                generalWalletType = new WalletType { Code = "GENERAL", Name = "General Wallet" };
-                _context.WalletTypes.Add(generalWalletType);
-                await _context.SaveChangesAsync();
-            }
-
-            if (referrerReward > 0)
-            {
-                var referrerWallet = await _context.UserWallets.FirstOrDefaultAsync(w => w.UserId == referrerId && w.WalletTypeId == generalWalletType.Id);
-                if (referrerWallet == null)
-                {
-                    referrerWallet = new UserWallet { UserId = referrerId, WalletTypeId = generalWalletType.Id, Balance = 0 };
-                    _context.UserWallets.Add(referrerWallet);
-                }
-                referrerWallet.Balance += referrerReward;
-            }
-            if (referredReward > 0)
-            {
-                var referredWallet = new UserWallet { UserId = user.Id, WalletTypeId = generalWalletType.Id, Balance = referredReward };
-                _context.UserWallets.Add(referredWallet);
-            }
-        }
     }
 }

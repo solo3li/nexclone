@@ -18,13 +18,8 @@ namespace NexClone.Backend.Core.Entities
         // Credits Economy
         public decimal AvailableCredits { get; set; } = 0;
 
-        // Affiliate System
-        public Guid? ReferredById { get; set; }
-        public bool IsCashAffiliate { get; set; } = false;
-        
-        [Column(TypeName = "decimal(18,4)")]
-        [ConcurrencyCheck]
-        public decimal AffiliateCashBalance { get; set; } = 0;
+        // Affiliate System (Removed)
+
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
