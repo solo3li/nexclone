@@ -5,6 +5,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
+        MINIO_PUBLIC_ENDPOINT: 156.216.75.180:3001
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     container_name: nexclone-frontend
     ports:
@@ -62,8 +63,8 @@ services:
     image: minio/minio:latest
     container_name: nexclone-minio
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "3001:9000"
+      - "3002:9001"
     env_file:
       - .env
     command: server /data --console-address ":9001"

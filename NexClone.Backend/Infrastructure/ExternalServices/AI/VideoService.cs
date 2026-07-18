@@ -98,6 +98,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                 using var scope = _serviceScopeFactory.CreateScope();
                 var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 var httpClientFactory = scope.ServiceProvider.GetRequiredService<IHttpClientFactory>();
+                var mediaService = scope.ServiceProvider.GetRequiredService<IMediaService>();
                 var usagePolicy = scope.ServiceProvider.GetRequiredService<UsagePolicyService>();
                 var logger = scope.ServiceProvider.GetRequiredService<ILogger<VideoService>>();
 
@@ -111,21 +112,32 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                     client.Timeout = TimeSpan.FromMinutes(10);
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
 
-                    logger.LogInformation($"[LipSync Task {historyId}] Submitting lip sync directly with file bytes...");
+                    logger.LogInformation($"[LipSync Task {historyId}] Uploading files to Minio...");
 
-                    // Send video and audio directly as multipart/form-data to CometAPI
-                    using var formContent = new MultipartFormDataContent();
-                    formContent.Add(new StringContent("kling_advanced_lip_sync"), "model");
+                    // Upload to Minio (now on public port 3001)
+                    using var videoStream = new MemoryStream(videoBytes);
+                    string videoKey = await mediaService.UploadFileAsync(videoStream, $"{Guid.NewGuid()}_{videoFileName}", videoContentType);
+                    string videoUrl = videoKey.StartsWith("http") ? videoKey : await mediaService.GetFileUrlAsync(videoKey);
 
-                    var videoContent = new ByteArrayContent(videoBytes);
-                    videoContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(videoContentType);
-                    formContent.Add(videoContent, "video", videoFileName);
+                    using var audioStream = new MemoryStream(audioBytes);
+                    string audioKey = await mediaService.UploadFileAsync(audioStream, $"{Guid.NewGuid()}_{audioFileName}", audioContentType);
+                    string audioUrl = audioKey.StartsWith("http") ? audioKey : await mediaService.GetFileUrlAsync(audioKey);
 
-                    var audioContent = new ByteArrayContent(audioBytes);
-                    audioContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(audioContentType);
-                    formContent.Add(audioContent, "audio", audioFileName);
+                    logger.LogInformation($"[LipSync Task {historyId}] Video URL: {videoUrl}");
+                    logger.LogInformation($"[LipSync Task {historyId}] Audio URL: {audioUrl}");
 
-                    var generateResponse = await client.PostAsync("https://api.cometapi.com/v1/images/generations", formContent);
+                    // Submit lip sync with public URLs
+                    var payload = new
+                    {
+                        model = "kling_advanced_lip_sync",
+                        video_url = videoUrl,
+                        audio_url = audioUrl,
+                        video = videoUrl,
+                        audio = audioUrl
+                    };
+
+                    var jsonContent = new StringContent(JsonSerializer.Serialize(payload), System.Text.Encoding.UTF8, "application/json");
+                    var generateResponse = await client.PostAsync("https://api.cometapi.com/v1/images/generations", jsonContent);
                     var generateResponseString = await generateResponse.Content.ReadAsStringAsync();
 
                     logger.LogInformation($"[LipSync Task {historyId}] CometAPI response ({generateResponse.StatusCode}): {generateResponseString}");
@@ -143,24 +155,21 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                         lipSyncTaskId = genTaskIdEl2.GetString();
 
                     if (string.IsNullOrEmpty(lipSyncTaskId))
-                        throw new Exception($"Failed to get task_id for lip sync. Response: {generateResponseString}");
+                        throw new Exception($"Failed to get task_id. Response: {generateResponseString}");
 
-                    logger.LogInformation($"[LipSync Task {historyId}] Submitted. Task ID: {lipSyncTaskId}. Polling for final video...");
+                    logger.LogInformation($"[LipSync Task {historyId}] Submitted. Task ID: {lipSyncTaskId}. Polling...");
                     history.ResultText = lipSyncTaskId;
                     await dbContext.SaveChangesAsync();
 
                     // Poll for result
                     string outputVideoUrl = "";
-                    for (int i = 0; i < 60; i++) // Up to 10 minutes
+                    for (int i = 0; i < 60; i++)
                     {
                         await Task.Delay(10000);
                         var pollResponse = await client.GetAsync($"https://api.cometapi.com/v1/images/generations/{lipSyncTaskId}");
                         var pollString = await pollResponse.Content.ReadAsStringAsync();
 
-                        logger.LogInformation($"[LipSync Task {historyId}] Poll {i+1}: {pollString.Substring(0, Math.Min(200, pollString.Length))}");
-
-                        if (pollResponse.StatusCode == System.Net.HttpStatusCode.BadRequest && pollString.Contains("task_not_exist"))
-                            throw new Exception($"Lip sync task failed instantly.");
+                        logger.LogInformation($"[LipSync Task {historyId}] Poll {i+1}: {pollString.Substring(0, Math.Min(300, pollString.Length))}");
 
                         using var pollDoc = JsonDocument.Parse(pollString);
                         var pollRoot = pollDoc.RootElement;
@@ -186,20 +195,19 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                     }
 
                     if (string.IsNullOrEmpty(outputVideoUrl))
-                        throw new Exception($"Timed out waiting for lip sync to complete.");
+                        throw new Exception("Timed out waiting for lip sync to complete.");
 
-                    logger.LogInformation($"[LipSync Task {historyId}] Completed successfully. URL: {outputVideoUrl}");
+                    logger.LogInformation($"[LipSync Task {historyId}] Completed. URL: {outputVideoUrl}");
                     history.Status = "succeeded";
                     history.FileUrl = outputVideoUrl;
                     await dbContext.SaveChangesAsync();
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, $"[LipSync Task {historyId}] Error processing Lip Sync background task");
+                    logger.LogError(ex, $"[LipSync Task {historyId}] Error");
                     history.Status = "failed";
                     history.ErrorMessage = ex.Message;
                     await dbContext.SaveChangesAsync();
-
                     await usagePolicy.RefundByToolAsync(userId, "kling_advanced_lip_sync", history.CreditsUsed);
                 }
             });
