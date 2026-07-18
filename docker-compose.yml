@@ -63,11 +63,11 @@ services:
     image: minio/minio:latest
     container_name: nexclone-minio
     ports:
-      - "9000:9000"
       - "9001:9001"
+      - "9002:9002"
     env_file:
       - .env
-    command: server /data --console-address ":9001"
+    command: server /data --address ":9001" --console-address ":9002"
     networks:
       - nexclone_network
     volumes:

@@ -126,19 +126,13 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                     logger.LogInformation($"[LipSync Task {historyId}] Video URL: {videoUrl}");
                     logger.LogInformation($"[LipSync Task {historyId}] Audio URL: {audioUrl}");
 
-                    string videoBase64 = Convert.ToBase64String(videoBytes);
-                    string videoDataUri = $"data:{videoContentType};base64,{videoBase64}";
-
-                    string audioBase64 = Convert.ToBase64String(audioBytes);
-                    string audioDataUri = $"data:{audioContentType};base64,{audioBase64}";
-
                     var payload = new
                     {
                         model = "kling_advanced_lip_sync",
-                        video = videoDataUri,
-                        audio = audioDataUri,
-                        video_url = videoDataUri,
-                        audio_url = audioDataUri
+                        video_url = videoUrl,
+                        audio_url = audioUrl,
+                        video = videoUrl,
+                        audio = audioUrl
                     };
 
                     var jsonContent = new StringContent(JsonSerializer.Serialize(payload), System.Text.Encoding.UTF8, "application/json");

@@ -38,7 +38,7 @@ const nextConfig = {
       beforeFiles: [
         {
           source: '/nexmedia/:path*',
-          destination: 'http://minio:9000/nexmedia/:path*',
+          destination: 'http://minio:9001/nexmedia/:path*',
         },
       ],
     };
