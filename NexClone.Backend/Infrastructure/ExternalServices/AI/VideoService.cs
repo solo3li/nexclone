@@ -129,6 +129,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                     var payload = new
                     {
                         model = "kling_advanced_lip_sync",
+                        prompt = "lip sync",
                         video_url = videoUrl,
                         audio_url = audioUrl,
                         video = videoUrl,
