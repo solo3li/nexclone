@@ -25,9 +25,9 @@ print(res.status_code, res.text)
 os.system(f'docker exec nexclone-postgres psql -U postgres -d nexclonedb -c "UPDATE \\"Wallets\\" SET \\"Balance\\" = 100 WHERE \\"UserId\\" = (SELECT \\"Id\\" FROM \\"AspNetUsers\\" WHERE \\"Email\\" = \'{email}\');"')
 
 print("Testing start-avatar...")
-with open('scratch/lenna.png', 'rb') as f_img, open('scratch/tiny.wav', 'rb') as f_audio:
+with open('scratch/face.jpg', 'rb') as f_img, open('scratch/tiny.wav', 'rb') as f_audio:
     files = {
-        'Image': ('lenna.png', f_img.read(), 'image/png'),
+        'Image': ('face.jpg', f_img.read(), 'image/jpeg'),
         'Audio': ('tiny.wav', f_audio.read(), 'audio/wav')
     }
     data = {'prompt': 'Testing E2E avatar'}
