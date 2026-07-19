@@ -26,8 +26,6 @@ export default function ImageToVideoPage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [prompt, setPrompt] = useState("");
-  const [selectedQuality, setSelectedQuality] = useState<string>("High");
-  const [aspectRatio, setAspectRatio] = useState<string>("16:9");
   
   const [isProcessing, setIsProcessing] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -320,70 +318,6 @@ export default function ImageToVideoPage() {
               </div>
               
               <div className="space-y-3" dir={isRtl ? 'rtl' : 'ltr'}>
-                
-                {/* Aspect Ratio */}
-                <div className="bg-[#0a0015]/60 border border-white/5 rounded-xl p-3">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Monitor className="w-4 h-4 text-white/50" />
-                    <span className="text-white/80 text-xs font-semibold">{t('aspectRatio')}</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={() => setAspectRatio('16:9')}
-                      className={`flex-1 py-2 px-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5 ${
-                        aspectRatio === '16:9' 
-                          ? 'bg-fuchsia-600 text-white' 
-                          : 'bg-white/5 text-white/50 hover:text-white'
-                      }`}
-                    >
-                      <Monitor className="w-3.5 h-3.5" /> 16:9
-                    </button>
-                    <button 
-                      onClick={() => setAspectRatio('9:16')}
-                      className={`flex-1 py-2 px-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5 ${
-                        aspectRatio === '9:16' 
-                          ? 'bg-fuchsia-600 text-white' 
-                          : 'bg-white/5 text-white/50 hover:text-white'
-                      }`}
-                    >
-                      <Smartphone className="w-3.5 h-3.5" /> 9:16
-                    </button>
-                    <button 
-                      onClick={() => setAspectRatio('1:1')}
-                      className={`flex-1 py-2 px-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5 ${
-                        aspectRatio === '1:1' 
-                          ? 'bg-fuchsia-600 text-white' 
-                          : 'bg-white/5 text-white/50 hover:text-white'
-                      }`}
-                    >
-                      <div className="w-3.5 h-3.5 border-2 border-current rounded-sm" /> 1:1
-                    </button>
-                  </div>
-                </div>
-
-                {/* Quality Mode */}
-                <div className="bg-[#0a0015]/60 border border-white/5 rounded-xl p-3">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Zap className="w-4 h-4 text-white/50" />
-                    <span className="text-white/80 text-xs font-semibold">{t('quality')}</span>
-                  </div>
-                  
-                  <div className="flex bg-white/5 p-1 rounded-lg border border-white/5 gap-1">
-                    {['Standard', 'High'].map((q) => (
-                      <button
-                        key={q}
-                        onClick={() => setSelectedQuality(q)}
-                        className={`flex-1 py-1.5 rounded-md text-xs font-medium transition-all ${
-                          selectedQuality === q
-                            ? 'bg-white/10 text-white shadow-sm'
-                            : 'text-white/50 hover:text-white'
-                        }`}
-                      >
-                        {isRtl ? (q === 'Standard' ? 'عادية (720p)' : 'عالية (1080p)') : q}
-                      </button>
-                    ))}
-                  </div>
-                </div>
                 
                 {/* Cost Estimation */}
                 <div className="bg-fuchsia-500/10 border border-fuchsia-500/20 rounded-xl p-3 flex justify-between items-center">
