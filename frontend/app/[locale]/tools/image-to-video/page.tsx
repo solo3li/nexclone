@@ -64,7 +64,11 @@ export default function ImageToVideoPage() {
       if (audioFile) formData.append("audio", audioFile);
       if (prompt) formData.append("prompt", prompt);
 
-      const response = await api.post("/api/video/start-avatar", formData);
+      const response = await api.post("/api/video/start-avatar", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
       const taskId = response.data.taskId;
       
       api.get("/api/auth/me").then(res => {
