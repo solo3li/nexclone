@@ -77,16 +77,27 @@
                     <div style="margin-bottom: 1.5rem;">
                         <strong>Generated / Input File:</strong>
                         <div style="margin-top: 0.5rem;">
-                            @if (Model.FileUrl.EndsWith(".mp3") || Model.FileUrl.EndsWith(".wav") || Model.Type.Contains("voice") || Model.Type.Contains("tts"))
+                            @if (Model.FileUrl.EndsWith(".mp4") || Model.Type.Contains("video") || Model.Type == "lip-sync" || Model.Type == "image-to-video")
+                            {
+                                <video controls style="width: 100%; max-height: 500px; background: #000;">
+                                    <source src="@Model.FileUrl" type="video/mp4">
+                                    Your browser does not support the video element.
+                                </video>
+                            }
+                            else if (Model.FileUrl.EndsWith(".mp3") || Model.FileUrl.EndsWith(".wav") || Model.Type.Contains("voice") || Model.Type.Contains("tts"))
                             {
                                 <audio controls style="width: 100%;">
                                     <source src="@Model.FileUrl" type="audio/mpeg">
                                     Your browser does not support the audio element.
                                 </audio>
                             }
-                            else if (Model.FileUrl.EndsWith(".png") || Model.FileUrl.EndsWith(".jpg") || Model.FileUrl.EndsWith(".jpeg") || Model.Type.Contains("img"))
+                            else if (Model.FileUrl.EndsWith(".png") || Model.FileUrl.EndsWith(".jpg") || Model.FileUrl.EndsWith(".jpeg") || Model.Type.Contains("img") || Model.Type.Contains("bg-remover"))
                             {
                                 <img src="@Model.FileUrl" style="max-width: 100%; border: 1px solid #ccc;" alt="Generated Image" />
+                            }
+                            else
+                            {
+                                <a href="@Model.FileUrl" target="_blank" class="bx--btn bx--btn--sm bx--btn--ghost">@Localizer["Download File"]</a>
                             }
                             
                             <div style="margin-top: 1rem;">

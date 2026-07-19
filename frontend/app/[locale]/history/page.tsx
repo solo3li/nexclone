@@ -10,7 +10,7 @@ import MobileBottomNav from "../../../src/components/MobileBottomNav";
 import {
   History, Mic, Volume2, FileText,
   Image, Loader2, Trash2, ChevronRight,
-  Clock, Zap, AlertCircle
+  Clock, Zap, AlertCircle, Video, Smile
 } from "lucide-react";
 import api from "../../../src/utils/api";
 import { useAppStore } from "../../../src/store/useAppStore";
@@ -34,6 +34,8 @@ const TOOL_ICONS: Record<string, any> = {
   "voice-to-text": Mic,
   "gpt": FileText,
   "bg-remover": Image,
+  "image-to-video": Video,
+  "lip-sync": Smile,
 };
 
 const TOOL_COLORS: Record<string, string> = {
@@ -41,6 +43,8 @@ const TOOL_COLORS: Record<string, string> = {
   "voice-to-text": "from-fuchsia-500/20 to-pink-500/20 border-fuchsia-500/30 text-fuchsia-400",
   "gpt": "from-blue-500/20 to-cyan-500/20 border-blue-500/30 text-blue-400",
   "bg-remover": "from-emerald-500/20 to-teal-500/20 border-emerald-500/30 text-emerald-400",
+  "image-to-video": "from-orange-500/20 to-amber-500/20 border-orange-500/30 text-orange-400",
+  "lip-sync": "from-rose-500/20 to-red-500/20 border-rose-500/30 text-rose-400",
 };
 
 const TOOL_LABELS: Record<string, string> = {
@@ -48,6 +52,8 @@ const TOOL_LABELS: Record<string, string> = {
   "voice-to-text": "صوت إلى نص",
   "gpt": "GPT",
   "bg-remover": "إزالة خلفية",
+  "image-to-video": "أفاتار إلى فيديو",
+  "lip-sync": "مزامنة الشفاه",
 };
 
 export default function HistoryPage() {

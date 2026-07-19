@@ -9,7 +9,7 @@ import Footer from "../../../../src/components/Footer";
 import MobileBottomNav from "../../../../src/components/MobileBottomNav";
 import {
   ArrowLeft, ArrowRight, Clock, Calendar, Zap, Play, FileText,
-  Volume2, Mic, CheckCircle, XCircle, AlertCircle
+  Volume2, Mic, CheckCircle, XCircle, AlertCircle, Video, Smile, Image
 } from "lucide-react";
 import api from "../../../../src/utils/api";
 
@@ -72,6 +72,10 @@ export default function HistoryDetailPage() {
       );
     }
 
+    const isVideo = record.type === "image-to-video" || record.type === "lip-sync";
+    const isAudio = record.type === "text-to-voice" || record.type === "voice-to-text";
+    const isImage = record.type === "bg-remover";
+
     return (
       <div className="space-y-8" dir={isRtl ? "rtl" : "ltr"}>
         {/* Header Summary */}
@@ -81,6 +85,8 @@ export default function HistoryDetailPage() {
               {record.type === "voice-to-text" && <Mic className="w-6 h-6 text-fuchsia-400" />}
               {record.type === "text-to-voice" && <Volume2 className="w-6 h-6 text-violet-400" />}
               {record.type === "gpt" && <FileText className="w-6 h-6 text-emerald-400" />}
+              {record.type === "image-to-video" && <Video className="w-6 h-6 text-orange-400" />}
+              {record.type === "lip-sync" && <Smile className="w-6 h-6 text-rose-400" />}
               {record.title}
             </h2>
             <div className="flex flex-wrap items-center gap-4 mt-4 text-sm text-white/50">
@@ -106,7 +112,7 @@ export default function HistoryDetailPage() {
           </div>
         </div>
 
-        {/* Input Text (If Text-to-Voice or GPT) */}
+        {/* Input Text (If Text-to-Voice or GPT or Image-to-Video Prompt) */}
         {record.inputText && (
           <div className="bg-white/5 rounded-3xl p-6 md:p-8 border border-white/10">
             <h3 className="text-white/50 font-medium mb-4 text-sm">
@@ -128,16 +134,29 @@ export default function HistoryDetailPage() {
           </div>
         )}
 
-        {/* Audio Player (If Audio File URL exists) */}
+        {/* Media Player (Video/Audio/Image) */}
         {record.fileUrl && (
           <div className="bg-gradient-to-r from-violet-600/20 to-fuchsia-600/20 rounded-3xl p-6 md:p-8 border border-fuchsia-500/20">
             <h3 className="text-fuchsia-300 font-medium mb-4 text-sm flex items-center gap-2">
               <Play className="w-4 h-4" />
-              {isRtl ? "الملف الصوتي" : "Audio File"}
+              {isRtl ? "النتيجة النهائية" : "Final Result"}
             </h3>
-            <audio controls className="w-full mt-2" src={record.fileUrl}>
-              Your browser does not support the audio element.
-            </audio>
+            
+            {isVideo && (
+              <video controls className="w-full mt-2 rounded-xl border border-white/10 bg-black/50" src={record.fileUrl}>
+                Your browser does not support the video element.
+              </video>
+            )}
+            
+            {isAudio && (
+              <audio controls className="w-full mt-2" src={record.fileUrl}>
+                Your browser does not support the audio element.
+              </audio>
+            )}
+
+            {isImage && (
+              <img src={record.fileUrl} alt="Result" className="w-full mt-2 rounded-xl border border-white/10" />
+            )}
           </div>
         )}
 
