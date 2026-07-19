@@ -62,23 +62,31 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
             {
                 var (apiKey, modelName) = await GetToolConfigAsync("kling_avatar_image2video");
                 
-                // Upload image to our media service to get a public URL
-                string imageUrl = await _mediaService.UploadFileAsync(imageFile);
-                if (!imageUrl.StartsWith("http")) imageUrl = await _mediaService.GetFileUrlAsync(imageUrl);
+                string imageData;
+                using (var ms = new MemoryStream())
+                {
+                    await imageFile.CopyToAsync(ms);
+                    string base64 = Convert.ToBase64String(ms.ToArray());
+                    imageData = $"data:{imageFile.ContentType};base64,{base64}";
+                }
 
-                string? audioUrl = null;
+                string audioData = null;
                 if (audioFile != null)
                 {
-                    audioUrl = await _mediaService.UploadFileAsync(audioFile);
-                    if (!audioUrl.StartsWith("http")) audioUrl = await _mediaService.GetFileUrlAsync(audioUrl);
+                    using (var ms = new MemoryStream())
+                    {
+                        await audioFile.CopyToAsync(ms);
+                        string base64 = Convert.ToBase64String(ms.ToArray());
+                        audioData = $"data:{audioFile.ContentType};base64,{base64}";
+                    }
                 }
 
                 var payload = new
                 {
-                    model = modelName,
+                    model = "kling-v1",
                     prompt = prompt,
-                    image = imageUrl,
-                    sound_file = audioUrl,
+                    image = imageData,
+                    sound_file = audioData,
                     mode = "std"
                 };
 
@@ -260,8 +268,8 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                 var client = _httpClientFactory.CreateClient();
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
 
-                // CometAPI: query task status by submitting GET to /v1/images/generations/{taskId}
-                var statusResponse = await client.GetAsync($"https://api.cometapi.com/v1/images/generations/{taskId}");
+                // CometAPI: query task status by submitting GET to the specific endpoint
+                var statusResponse = await client.GetAsync($"https://api.cometapi.com/kling/v1/videos/avatar/image2video/{taskId}");
                 var responseString = await statusResponse.Content.ReadAsStringAsync();
                 
                 _logger.LogInformation($"CometAPI status response for {taskId} ({statusResponse.StatusCode}): {responseString}");
