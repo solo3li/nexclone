@@ -104,32 +104,18 @@ export default function ImageToVideoPage() {
     }
   };
 
-  const downloadVideo = async () => {
+  const downloadVideo = () => {
     if (!videoUrl) return;
-    try {
-      setIsDownloading(true);
-      const response = await fetch(videoUrl);
-      const blob = await response.blob();
-      const localUrl = URL.createObjectURL(blob);
-      const element = document.createElement("a");
-      element.href = localUrl;
-      element.download = "generated_video.mp4";
-      document.body.appendChild(element);
-      element.click();
-      document.body.removeChild(element);
-      URL.revokeObjectURL(localUrl);
-    } catch (err) {
-      console.error("Error downloading video:", err);
-      const element = document.createElement("a");
-      element.href = videoUrl;
-      element.target = "_blank";
-      element.download = "generated_video.mp4";
-      document.body.appendChild(element);
-      element.click();
-      document.body.removeChild(element);
-    } finally {
-      setIsDownloading(false);
-    }
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5208';
+    const proxyUrl = `${apiUrl}/api/video/download-proxy?url=${encodeURIComponent(videoUrl)}`;
+    
+    const element = document.createElement("a");
+    element.href = proxyUrl;
+    element.target = "_blank";
+    element.download = "generated_video.mp4";
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
   };
 
   // Handle Drag and Drop
