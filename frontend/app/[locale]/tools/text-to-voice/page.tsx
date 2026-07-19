@@ -208,7 +208,7 @@ export default function TextToVoicePage() {
   const downloadAudio = () => {
     if (!audioUrl) return;
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5208';
-    const proxyUrl = `${apiUrl}/api/video/download-proxy?url=${encodeURIComponent(audioUrl)}`;
+    const proxyUrl = `${apiUrl}/api/video/download-proxy?url=${encodeURIComponent(audioUrl)}&type=audio`;
     
     const element = document.createElement("a");
     element.href = proxyUrl;

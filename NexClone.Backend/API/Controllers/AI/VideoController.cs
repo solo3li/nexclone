@@ -188,18 +188,22 @@ namespace NexClone.Backend.API.Controllers.AI
 
         [HttpGet("download-proxy")]
         [AllowAnonymous]
-        public async Task<IActionResult> DownloadProxy([FromQuery] string url)
+        public async Task<IActionResult> DownloadProxy([FromQuery] string url, [FromQuery] string type = "video")
         {
             if (string.IsNullOrEmpty(url)) return BadRequest("URL is required");
             try
             {
                 var client = new HttpClient();
                 var stream = await client.GetStreamAsync(url);
-                return File(stream, "video/mp4", "generated_video.mp4");
+                
+                string contentType = type == "audio" ? "audio/mpeg" : "video/mp4";
+                string filename = type == "audio" ? "generated_audio.mp3" : "generated_video.mp4";
+                
+                return File(stream, contentType, filename);
             }
             catch
             {
-                return BadRequest("Failed to download video");
+                return BadRequest("Failed to download file");
             }
         }
 
