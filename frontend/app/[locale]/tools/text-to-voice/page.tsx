@@ -205,33 +205,18 @@ export default function TextToVoicePage() {
     }
   };
 
-  const downloadAudio = async () => {
+  const downloadAudio = () => {
     if (!audioUrl) return;
-    try {
-      setIsDownloading(true);
-      const response = await fetch(audioUrl);
-      const blob = await response.blob();
-      const localUrl = URL.createObjectURL(blob);
-      const element = document.createElement("a");
-      element.href = localUrl;
-      element.download = "generated_audio.mp3";
-      document.body.appendChild(element);
-      element.click();
-      document.body.removeChild(element);
-      URL.revokeObjectURL(localUrl);
-    } catch (err) {
-      console.error("Error downloading audio:", err);
-      // Fallback if fetch fails due to CORS
-      const element = document.createElement("a");
-      element.href = audioUrl;
-      element.target = "_blank";
-      element.download = "generated_audio.mp3";
-      document.body.appendChild(element);
-      element.click();
-      document.body.removeChild(element);
-    } finally {
-      setIsDownloading(false);
-    }
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5208';
+    const proxyUrl = `${apiUrl}/api/video/download-proxy?url=${encodeURIComponent(audioUrl)}`;
+    
+    const element = document.createElement("a");
+    element.href = proxyUrl;
+    element.target = "_blank";
+    element.download = "generated_audio.mp3";
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
   };
 
   const filteredVoices = voices.filter(v => {
