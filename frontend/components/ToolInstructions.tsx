@@ -28,11 +28,11 @@ export default function ToolInstructions({ toolId, title, instructions }: ToolIn
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-500 hover:to-pink-500 text-white p-3 rounded-full shadow-lg shadow-fuchsia-500/30 transition-transform hover:scale-110 flex items-center justify-center group"
+        className={`fixed bottom-6 z-40 bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-500 hover:to-pink-500 text-white p-3 rounded-full shadow-lg shadow-fuchsia-500/30 transition-transform hover:scale-110 flex items-center justify-center group ${isRtl ? 'left-6' : 'right-6'}`}
         title={isRtl ? "كيف تستخدم الأداة؟" : "How to use?"}
       >
         <HelpCircle className="w-6 h-6" />
-        <span className="absolute right-full mr-3 whitespace-nowrap bg-black/80 text-white text-xs px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+        <span className={`absolute ${isRtl ? 'left-full ml-3' : 'right-full mr-3'} whitespace-nowrap bg-black/80 text-white text-xs px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none`}>
           {isRtl ? "كيف تستخدم الأداة؟" : "How to use?"}
         </span>
       </button>
