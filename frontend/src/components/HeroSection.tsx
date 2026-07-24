@@ -4,12 +4,34 @@ import { ArrowLeft, ArrowRight, PlayCircle } from "lucide-react";
 import { AnimatedText, GlowPulse } from "./AnimatedText";
 import Scene from "./Scene";
 import { useTranslations, useLocale } from "next-intl";
-import { Link } from "../i18n/routing";
+import { Link, useRouter } from "../i18n/routing";
+import { useAppStore } from "../store/useAppStore";
 
 export default function HeroSection() {
   const t = useTranslations("Hero");
   const locale = useLocale();
   const ArrowIcon = locale === 'ar' ? ArrowLeft : ArrowRight;
+  const router = useRouter();
+  const { user, isAuthenticated, hasPhoneNumber } = useAppStore();
+
+  const handleStartForFree = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    const isDesktop = window.innerWidth >= 768;
+    
+    if (isDesktop) {
+      if (isAuthenticated && !hasPhoneNumber) {
+        router.push("/complete-profile");
+      } else {
+        router.push("/tools/text-to-voice");
+      }
+    } else {
+      // Mobile: scroll to tools section
+      const toolsElement = document.getElementById("tools");
+      if (toolsElement) {
+        toolsElement.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  };
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -82,6 +104,7 @@ export default function HeroSection() {
         >
           <a
             href="#tools"
+            onClick={handleStartForFree}
             className="group relative w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-2xl text-white font-bold text-lg overflow-hidden shadow-[0_0_40px_rgba(139,92,246,0.3)] hover:shadow-[0_0_60px_rgba(139,92,246,0.5)] transition-all duration-300 hover:-translate-y-1"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-fuchsia-600 group-hover:from-violet-500 group-hover:to-fuchsia-500 transition-all duration-300" />

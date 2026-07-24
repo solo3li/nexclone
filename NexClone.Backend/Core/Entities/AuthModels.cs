@@ -9,7 +9,12 @@ namespace NexClone.Backend.Core.Entities
 
         [Required]
         [EmailAddress]
-        public string Email { get; set; } = string.Empty;
+        public string Email 
+        { 
+            get => _email; 
+            set => _email = value?.ToLowerInvariant() ?? string.Empty; 
+        }
+        private string _email = string.Empty;
 
         [Required]
         [MinLength(6)]
@@ -26,7 +31,12 @@ namespace NexClone.Backend.Core.Entities
     {
         [Required]
         [EmailAddress]
-        public string Email { get; set; } = string.Empty;
+        public string Email 
+        { 
+            get => _email; 
+            set => _email = value?.ToLowerInvariant() ?? string.Empty; 
+        }
+        private string _email = string.Empty;
 
         [Required]
         public string Password { get; set; } = string.Empty;
@@ -45,14 +55,24 @@ namespace NexClone.Backend.Core.Entities
     {
         [Required]
         [EmailAddress]
-        public string Email { get; set; } = string.Empty;
+        public string Email 
+        { 
+            get => _email; 
+            set => _email = value?.ToLowerInvariant() ?? string.Empty; 
+        }
+        private string _email = string.Empty;
     }
 
     public class ResetPasswordRequest
     {
         [Required]
         [EmailAddress]
-        public string Email { get; set; } = string.Empty;
+        public string Email 
+        { 
+            get => _email; 
+            set => _email = value?.ToLowerInvariant() ?? string.Empty; 
+        }
+        private string _email = string.Empty;
 
         [Required]
         public string Token { get; set; } = string.Empty;
@@ -86,7 +106,12 @@ namespace NexClone.Backend.Core.Entities
     {
         [Required]
         [EmailAddress]
-        public string Email { get; set; } = string.Empty;
+        public string Email 
+        { 
+            get => _email; 
+            set => _email = value?.ToLowerInvariant() ?? string.Empty; 
+        }
+        private string _email = string.Empty;
 
         [Required]
         public string Token { get; set; } = string.Empty;

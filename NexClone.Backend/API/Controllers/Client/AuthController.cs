@@ -58,7 +58,21 @@ namespace NexClone.Backend.API.Controllers.Client
                 return BadRequest(new { Errors = modelErrors });
             }
 
-            // 1. Check for disposable email
+            // 1. Check if email already exists
+            var existingUser = await _userManager.FindByEmailAsync(request.Email);
+            if (existingUser != null)
+            {
+                if (existingUser.IsVerified)
+                {
+                    return BadRequest(new { Errors = new[] { "هذا البريد مسجل بالفعل، يرجى تسجيل الدخول بدلاً من ذلك." } });
+                }
+                else
+                {
+                    return BadRequest(new { Errors = new[] { "هذا البريد مسجل لدينا ولكنه يحتاج إلى تفعيل. يرجى مراجعة صندوق الوارد الخاص بك أو تسجيل الدخول لإعادة إرسال رابط التفعيل." } });
+                }
+            }
+
+            // 2. Check for disposable email
             var domain = request.Email.Split('@').LastOrDefault()?.ToLower();
             if (!string.IsNullOrEmpty(domain))
             {

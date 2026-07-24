@@ -24,7 +24,7 @@ export function GoogleLoginButton({ refCode }: { refCode?: string }) {
             if (res.status === 200) {
               const meRes = await api.get('/api/auth/me');
               setUser(meRes.data);
-              router.push('/profile');
+              router.push('/');
             }
           } catch (error) {
             console.error("Login failed", error);

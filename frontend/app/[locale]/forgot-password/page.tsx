@@ -76,7 +76,7 @@ export default function ForgotPasswordPage() {
                     type="email"
                     required
                     value={email}
-                    onChange={e => setEmail(e.target.value)}
+                    onChange={e => setEmail(e.target.value.toLowerCase())}
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-10 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all"
                     placeholder="user@example.com"
                   />

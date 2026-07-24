@@ -158,6 +158,14 @@ export default function CompleteProfilePage() {
               <span className="relative">{loading ? "..." : (locale === 'ar' ? 'تأكيد' : 'Confirm')}</span>
               <ArrowIcon className={`w-5 h-5 relative transition-transform duration-300 ${locale === 'ar' ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
             </button>
+            
+            <button
+              type="button"
+              onClick={() => router.push("/tools")}
+              className="w-full mt-4 text-white/50 hover:text-white/80 transition-colors text-sm font-medium"
+            >
+              {locale === 'ar' ? 'تخطي هذه الخطوة (بدون تجربة مجانية)' : 'Skip this step (No free trial)'}
+            </button>
           </form>
         </motion.div>
       </main>
