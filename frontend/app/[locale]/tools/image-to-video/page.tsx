@@ -12,6 +12,7 @@ import {
 import { useAppStore } from "../../../../src/store/useAppStore";
 import { useRouter, Link } from "../../../../src/i18n/routing";
 import api from "../../../../src/utils/api";
+import ToolInstructions from "../../../../components/ToolInstructions";
 
 export default function ImageToVideoPage() {
   const t = useTranslations("ImageToVideo");
@@ -366,6 +367,21 @@ export default function ImageToVideoPage() {
         </div>
       )}
       
+      <ToolInstructions 
+        toolId="image_to_video"
+        title={isRtl ? "كيفية استخدام تحويل الصورة لفيديو" : "How to use Image to Video"}
+        instructions={isRtl ? [
+          "قم برفع صورة واضحة ترغب في تحويلها إلى فيديو.",
+          "يمكنك اختيارياً إضافة ملف صوتي ليقوم الذكاء الاصطناعي بمزامنة الشفاه مع الصوت.",
+          "اكتب وصفاً (Prompt) للمشهد الذي تريده أو اتركه للذكاء الاصطناعي.",
+          "اضغط على زر (توليد) وانتظر بضع ثوانٍ حتى يتم الانتهاء."
+        ] : [
+          "Upload a clear image you want to convert into a video.",
+          "Optionally add an audio file for AI lip-syncing.",
+          "Write a prompt describing the scene you want.",
+          "Click Generate and wait a few seconds for the output."
+        ]}
+      />
     </>
   );
 }

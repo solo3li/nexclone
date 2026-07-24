@@ -12,6 +12,7 @@ import api from "../../../../src/utils/api";
 import { useAppStore } from "../../../../src/store/useAppStore";
 import { useRouter, Link } from "../../../../src/i18n/routing";
 import { ArrowLeft, ArrowRight, Wallet } from "lucide-react";
+import ToolInstructions from "../../../../components/ToolInstructions";
 
 const LANGUAGES = [
   { code: 'auto', name: 'لغة الصوت الأصلية (Auto-Detect)' },
@@ -728,6 +729,22 @@ export default function VoiceToTextPage() {
           </>
         )}
       </div>
+      
+      <ToolInstructions 
+        toolId="voice_to_text"
+        title={isRtl ? "كيفية استخدام تحويل الصوت لنص" : "How to use Voice to Text"}
+        instructions={isRtl ? [
+          "قم برفع ملف صوتي أو استخدم الميكروفون للتسجيل مباشرة.",
+          "اختر اللغة الخاصة بالصوت، أو اتركها (Auto-Detect) للتعرف التلقائي.",
+          "اضغط على زر (تحليل) وانتظر قليلاً ليتم تفريغ الصوت إلى نص.",
+          "يمكنك نسخ النص الناتج أو تحميله كملف نصي (.txt) بسهولة."
+        ] : [
+          "Upload an audio file or use the microphone to record directly.",
+          "Select the audio's language, or leave it as Auto-Detect.",
+          "Click Process and wait for the transcription.",
+          "You can copy the generated text or download it as a .txt file."
+        ]}
+      />
     </>
   );
 }

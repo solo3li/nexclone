@@ -12,6 +12,7 @@ import {
 import { useAppStore } from "../../../../src/store/useAppStore";
 import { useRouter } from "../../../../src/i18n/routing";
 import api from "../../../../src/utils/api";
+import ToolInstructions from "../../../../components/ToolInstructions";
 
 export default function AdvancedLipSyncPage() {
   const t = useTranslations("ImageToVideo");
@@ -342,6 +343,21 @@ export default function AdvancedLipSyncPage() {
         </div>
       )}
       
+      <ToolInstructions 
+        toolId="advanced_lip_sync"
+        title={isRtl ? "كيفية استخدام مزامنة الشفاه المتقدمة" : "How to use Advanced Lip Sync"}
+        instructions={isRtl ? [
+          "قم برفع ملف فيديو واضح يحتوي على وجه شخص يتحدث.",
+          "قم برفع ملف صوتي ترغب في أن ينطق به الشخص في الفيديو.",
+          "تأكد من أن مدة الصوت تتناسب مع مدة الفيديو للحصول على أفضل نتيجة.",
+          "اضغط على (توليد) وانتظر الذكاء الاصطناعي لدمج الصوت مع حركة الشفاه."
+        ] : [
+          "Upload a clear video featuring a speaking person's face.",
+          "Upload the audio file you want the person to speak.",
+          "Ensure the audio duration matches the video for best results.",
+          "Click Generate and wait for the AI to sync the lips with the new audio."
+        ]}
+      />
     </>
   );
 }
