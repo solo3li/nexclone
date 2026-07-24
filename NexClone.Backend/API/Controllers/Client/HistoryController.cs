@@ -31,6 +31,7 @@ namespace NexClone.Backend.API.Controllers.Client
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
             var historyList = await _context.GenerationHistories
+                .AsNoTracking()
                 .Where(h => h.UserId == userId)
                 .OrderByDescending(h => h.CreatedAt)
                 .ToListAsync();
@@ -41,6 +42,14 @@ namespace NexClone.Backend.API.Controllers.Client
                 if (!string.IsNullOrEmpty(history.FileUrl) && !history.FileUrl.StartsWith("http"))
                 {
                     history.FileUrl = await _mediaService.GetFileUrlAsync(history.FileUrl);
+                }
+
+                // Hide sensitive data from the client
+                history.ErrorMessage = null;
+                
+                if (history.Type == "text-to-voice" || history.Type == "image-to-video" || history.Type == "lip-sync")
+                {
+                    history.ResultText = string.Empty;
                 }
             }
 
@@ -54,6 +63,7 @@ namespace NexClone.Backend.API.Controllers.Client
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
             var history = await _context.GenerationHistories
+                .AsNoTracking()
                 .FirstOrDefaultAsync(h => h.Id == id && h.UserId == userId);
 
             if (history == null) return NotFound(new { Message = "History record not found" });
@@ -61,6 +71,14 @@ namespace NexClone.Backend.API.Controllers.Client
             if (!string.IsNullOrEmpty(history.FileUrl) && !history.FileUrl.StartsWith("http"))
             {
                 history.FileUrl = await _mediaService.GetFileUrlAsync(history.FileUrl);
+            }
+
+            // Hide sensitive data from the client
+            history.ErrorMessage = null;
+            
+            if (history.Type == "text-to-voice" || history.Type == "image-to-video" || history.Type == "lip-sync")
+            {
+                history.ResultText = string.Empty;
             }
 
             return Ok(history);

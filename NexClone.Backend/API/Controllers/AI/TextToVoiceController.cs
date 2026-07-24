@@ -88,7 +88,7 @@ namespace NexClone.Backend.API.Controllers.AI
                     Lang = request.Language,
                     Voice = request.VoiceName,
                     FileUrl = fileUrl,
-                    ResultText = "",
+                    ResultText = modelName ?? "",
                     CreditsUsed = cost
                 };
                 _dbContext.GenerationHistories.Add(history);
