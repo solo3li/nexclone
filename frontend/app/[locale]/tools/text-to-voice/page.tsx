@@ -11,6 +11,7 @@ import api from "../../../../src/utils/api";
 import { useAppStore } from "../../../../src/store/useAppStore";
 import { useRouter, Link } from "../../../../src/i18n/routing";
 import { ArrowLeft, ArrowRight, Wallet } from "lucide-react";
+import { ToolTutorialButton, ToolTutorialModal, TutorialStep } from "../../../../src/components/ToolTutorial";
 
 interface VoiceProfile {
   id: number;
@@ -69,8 +70,43 @@ export default function TextToVoicePage() {
   const currentlyPlayingRef = useRef<HTMLAudioElement | null>(null);
   
   const [maxChars, setMaxChars] = useState(150);
+  
+  const [showTutorial, setShowTutorial] = useState(false);
+
+  const tutorialSteps: TutorialStep[] = [
+    {
+      title: isRtl ? "مرحباً بك في أداة تحويل النص إلى صوت" : "Welcome to Text-to-Voice",
+      description: isRtl 
+        ? "هذه الأداة تتيح لك تحويل أي نص مكتوب إلى صوت بشري واقعي بدقة عالية. دعنا نتعرف على خطوات الاستخدام." 
+        : "This tool allows you to convert any written text into a highly realistic human voice. Let's learn how to use it."
+    },
+    {
+      title: isRtl ? "1. أدخل النص" : "1. Enter Text",
+      description: isRtl
+        ? "قم بكتابة أو لصق النص الذي تريد تحويله في المربع المخصص. انتبه للحد الأقصى للحروف المسموح بها في باقتك."
+        : "Type or paste the text you want to convert in the text box. Pay attention to the maximum characters allowed by your plan."
+    },
+    {
+      title: isRtl ? "2. اختر الصوت واللغة" : "2. Choose Voice & Language",
+      description: isRtl
+        ? "يمكنك اختيار الصوت المناسب (ذكر أو أنثى) من القائمة الجانبية، وتحديد جودة الصوت واللغة التي تريدها."
+        : "Select the appropriate voice (male/female) from the sidebar, and choose your preferred audio quality and language."
+    },
+    {
+      title: isRtl ? "3. تحويل واستماع" : "3. Generate & Listen",
+      description: isRtl
+        ? "اضغط على زر 'تحويل النص' وانتظر قليلاً. سيظهر لك مشغل الصوت لتستمع للنتيجة ويمكنك تحميلها بسهولة."
+        : "Click 'Process Text' and wait a moment. The audio player will appear to let you listen to the result and download it."
+    }
+  ];
 
   useEffect(() => {
+    // Check if first time
+    const hasSeen = localStorage.getItem("has_seen_tutorial_text_to_voice");
+    if (!hasSeen) {
+      // Small delay to allow UI to mount properly before showing modal
+      setTimeout(() => setShowTutorial(true), 1000);
+    }
     const fetchVoices = async () => {
       try {
         const response = await api.get("/api/platform/voices");
@@ -118,7 +154,20 @@ export default function TextToVoicePage() {
       router.push('/login');
       return;
     }
-    if (!text.trim() || text.length > maxChars) return;
+    
+    if (!text.trim()) {
+      setError(isRtl ? "الرجاء إدخال نص أولاً." : "Please enter some text first.");
+      return;
+    }
+    if (text.length > maxChars) {
+      setError(isRtl ? `لقد تجاوزت الحد الأقصى المسموح به (${maxChars} حرف). يرجى تقليل النص أو ترقية باقتك.` : `Exceeded maximum characters (${maxChars}). Please reduce text or upgrade your plan.`);
+      return;
+    }
+    if (!selectedVoice) {
+      setError(isRtl ? "الرجاء اختيار صوت." : "Please select a voice.");
+      return;
+    }
+
     setIsEstimating(true);
     setError("");
     try {
@@ -162,7 +211,7 @@ export default function TextToVoicePage() {
 
   const confirmGenerate = async () => {
     setShowConfirmModal(false);
-    if (!text.trim() || text.length > maxChars) return;
+    if (!text.trim() || text.length > maxChars || !selectedVoice) return;
     setIsProcessing(true);
     setError("");
     setAudioUrl(null);
@@ -270,8 +319,11 @@ export default function TextToVoicePage() {
                   <Edit3 className="w-5 h-5 text-fuchsia-400" />
                   <span className="text-white/80 font-semibold text-sm">{t('enterText')}</span>
                 </div>
-                <div className="flex items-center gap-2 bg-violet-500/10 px-3 py-1 rounded-full text-xs font-medium text-violet-300 border border-violet-500/20">
-                  <span>{t('maxChars')} {maxChars}</span>
+                <div className="flex items-center gap-2">
+                  <ToolTutorialButton onClick={() => setShowTutorial(true)} />
+                  <div className="flex items-center gap-2 bg-violet-500/10 px-3 py-1 rounded-full text-xs font-medium text-violet-300 border border-violet-500/20">
+                    <span>{t('maxChars')} {maxChars}</span>
+                  </div>
                 </div>
               </div>
 
@@ -294,7 +346,7 @@ export default function TextToVoicePage() {
               {/* Generate Button */}
               <button
                   onClick={handleProcessClick}
-                  disabled={isProcessing || isEstimating || !text.trim() || text.length > maxChars}
+                  disabled={isProcessing || isEstimating}
                   className="w-full mt-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group relative overflow-hidden"
                 >
                 {isProcessing ? (
@@ -709,6 +761,14 @@ export default function TextToVoicePage() {
           </motion.div>
         </div>
       )}
+
+      {/* Tutorial Modal */}
+      <ToolTutorialModal 
+        toolKey="text_to_voice"
+        steps={tutorialSteps}
+        isOpen={showTutorial}
+        onClose={() => setShowTutorial(false)}
+      />
     </>
   );
 }
