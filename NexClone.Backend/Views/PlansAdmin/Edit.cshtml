@@ -171,6 +171,20 @@
                 <label for="AvatarVideoCostPerGeneration" class="bx--label">@Localizer["Cost Per Generation (Credits)"]</label>
                 <input id="AvatarVideoCostPerGeneration" name="AvatarVideoCostPerGeneration" type="number" step="0.01" class="bx--text-input" value="@Model.AvatarVideoCostPerGeneration" />
             </div>
+            <div class="bx--form-item">
+                <label for="AvatarVideoMaxFileSizeMb" class="bx--label">@Localizer["Max Audio Size (MB)"]</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="AvatarVideoMaxFileSizeMb" type="number" class="bx--text-input" name="AvatarVideoMaxFileSizeMb" required min="-1" value="@Model.AvatarVideoMaxFileSizeMb">
+                </div>
+                <div class="bx--form__helper-text">@Localizer["-1 for unlimited"]</div>
+            </div>
+            <div class="bx--form-item">
+                <label for="AvatarVideoMaxCharsPerRequest" class="bx--label">@Localizer["Max Prompt Characters"]</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="AvatarVideoMaxCharsPerRequest" type="number" class="bx--text-input" name="AvatarVideoMaxCharsPerRequest" required min="-1" value="@Model.AvatarVideoMaxCharsPerRequest">
+                </div>
+                <div class="bx--form__helper-text">@Localizer["-1 for unlimited"]</div>
+            </div>
 
             <!-- Lip-Sync -->
             <div class="bx--form-item bx--checkbox-wrapper">

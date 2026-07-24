@@ -44,7 +44,9 @@ namespace NexClone.Backend.API.Controllers.AI
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
             // Validate policy and deduct cost (1 generation flat cost)
-            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "kling_avatar_image2video", 1, null, "Standard");
+            decimal usageAmountForLimits = audio != null && audio.Length > 0 ? audio.Length : (string.IsNullOrWhiteSpace(prompt) ? 0 : -prompt.Length);
+            
+            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "kling_avatar_image2video", usageAmountForLimits, 1, "Standard");
             if (!policyResult.IsAllowed)
                 return BadRequest(new { error = policyResult.ErrorMessage });
 

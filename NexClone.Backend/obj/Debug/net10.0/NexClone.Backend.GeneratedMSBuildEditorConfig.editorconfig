@@ -39,14 +39,6 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW5BdXRoL0xvZ2luLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/src/Views/AffiliateAdmin/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWZmaWxpYXRlQWRtaW4vSW5kZXguY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
-[/src/Views/AffiliateAdmin/Payouts.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWZmaWxpYXRlQWRtaW4vUGF5b3V0cy5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
 [/src/Views/ApiConfigAdmin/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQXBpQ29uZmlnQWRtaW4vQ3JlYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 

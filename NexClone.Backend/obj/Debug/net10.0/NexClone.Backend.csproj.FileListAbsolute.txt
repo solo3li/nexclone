@@ -444,3 +444,5 @@
 /src/obj/Debug/net10.0/NexClone.Backend.pdb
 /src/obj/Debug/net10.0/NexClone.Backend.genruntimeconfig.cache
 /src/obj/Debug/net10.0/ref/NexClone.Backend.dll
+/src/bin/Debug/net10.0/Resources/ar.json
+/src/bin/Debug/net10.0/Resources/en.json

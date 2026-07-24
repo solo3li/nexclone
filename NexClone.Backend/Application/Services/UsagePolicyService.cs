@@ -69,6 +69,14 @@ namespace NexClone.Backend.Application.Services
             if (toolId == "voice-to-text" && toolPolicy.MaxFileSizeMb != -1 && usageAmountForLimits > (toolPolicy.MaxFileSizeMb * 1024 * 1024))
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"File too large. Maximum allowed size is {toolPolicy.MaxFileSizeMb}MB." };
 
+            if (toolId == "kling_avatar_image2video")
+            {
+                if (usageAmountForLimits > 0 && toolPolicy.MaxFileSizeMb != -1 && usageAmountForLimits > (toolPolicy.MaxFileSizeMb * 1024 * 1024))
+                    return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Audio file too large. Maximum allowed size is {toolPolicy.MaxFileSizeMb}MB." };
+                if (usageAmountForLimits < 0 && toolPolicy.MaxCharsPerRequest != -1 && Math.Abs((int)usageAmountForLimits) > toolPolicy.MaxCharsPerRequest)
+                    return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Prompt too long. Maximum allowed is {toolPolicy.MaxCharsPerRequest} characters." };
+            }
+
             decimal costPerUnit = toolPolicy.CostPerUnit ?? GetLegacyCostPerUnit(toolId);
             decimal amountForCost = usageAmountForCost ?? usageAmountForLimits;
             
@@ -183,6 +191,8 @@ namespace NexClone.Backend.Application.Services
             {
                 policy.Enabled = plan.AvatarVideoEnabled;
                 policy.CostPerUnit = plan.AvatarVideoCostPerGeneration;
+                policy.MaxFileSizeMb = plan.AvatarVideoMaxFileSizeMb;
+                policy.MaxCharsPerRequest = plan.AvatarVideoMaxCharsPerRequest;
             }
             else if (toolId == "kling_advanced_lip_sync")
             {
