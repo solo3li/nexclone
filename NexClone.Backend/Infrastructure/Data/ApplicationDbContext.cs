@@ -36,6 +36,7 @@ namespace NexClone.Backend.Infrastructure.Data
         public DbSet<UserWallet> UserWallets { get; set; } = null!;
         public DbSet<PackageWallet> PackageWallets { get; set; } = null!;
         public DbSet<PackageToolWallet> PackageToolWallets { get; set; } = null!;
+        public DbSet<SystemUpdate> SystemUpdates { get; set; } = null!;
         // Affiliate entities removed
 
         // DataProtection keys - persisted to DB to survive container restarts

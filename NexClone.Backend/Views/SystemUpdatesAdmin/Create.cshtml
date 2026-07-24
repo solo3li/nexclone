@@ -1,0 +1,39 @@
+@model NexClone.Backend.Core.Entities.SystemUpdate
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+
+@{
+    ViewData["Title"] = Localizer["Add System Update"];
+}
+
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h1 class="page-title" style="margin: 0; font-weight: 600;">@Localizer["Add System Update"]</h1>
+    <a asp-action="Index" class="bx--btn bx--btn--secondary" style="display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none;">
+        <i class='bx bx-arrow-back'></i>
+        @Localizer["Back to List"]
+    </a>
+</div>
+
+<div class="bx--data-table-container" style="padding: 2rem; background: #fff;">
+    <form asp-action="Create" method="post">
+        <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+            <label asp-for="Title" class="bx--label">@Localizer["Title"]</label>
+            <input asp-for="Title" class="bx--text-input" placeholder="@Localizer["Enter update title"]" required />
+            <span asp-validation-for="Title" class="text-danger" style="color: #da1e28; font-size: 0.875rem; margin-top: 0.25rem; display: block;"></span>
+        </div>
+
+        <div class="bx--form-item" style="margin-bottom: 2rem;">
+            <label asp-for="Description" class="bx--label">@Localizer["Description"]</label>
+            <textarea asp-for="Description" class="bx--text-area" rows="6" placeholder="@Localizer["Describe the update details..."]" required style="width: 100%; border: 1px solid #8d8d8d; padding: 1rem; font-family: inherit; font-size: 0.875rem; background-color: #f4f4f4; resize: vertical;"></textarea>
+            <span asp-validation-for="Description" class="text-danger" style="color: #da1e28; font-size: 0.875rem; margin-top: 0.25rem; display: block;"></span>
+            <div class="bx--form__helper-text">@Localizer["You can use multiple lines."]</div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end;">
+            <button type="submit" class="bx--btn bx--btn--primary" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                <i class='bx bx-save'></i>
+                @Localizer["Save Update"]
+            </button>
+        </div>
+    </form>
+</div>
