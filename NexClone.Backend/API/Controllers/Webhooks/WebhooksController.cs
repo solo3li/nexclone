@@ -85,15 +85,53 @@ namespace NexClone.Backend.API.Controllers.Webhooks
 
                     // 5. Activate or Extend Subscription
                     var existingSub = await _context.Subscriptions
-                        .FirstOrDefaultAsync(s => s.UserId == user.Id && s.PlanId == plan.Id && s.Status == "active");
+                        .Include(s => s.Plan)
+                        .FirstOrDefaultAsync(s => s.UserId == user.Id && s.PlanId == plan.Id && (s.Status == "active" || s.Status == "freeze"));
+
+                    Subscription currentSub = null;
+                    bool shouldReset = false;
 
                     if (existingSub != null)
                     {
-                        existingSub.EndDate = existingSub.EndDate.AddDays(plan.DurationDays);
+                        if (existingSub.EndDate < DateTime.UtcNow)
+                        {
+                            var graceEnds = existingSub.EndDate.AddDays(existingSub.Plan.GracePeriodDays);
+                            if (DateTime.UtcNow > graceEnds)
+                            {
+                                shouldReset = true;
+                            }
+                        }
+
+                        existingSub.EndDate = (existingSub.EndDate > DateTime.UtcNow ? existingSub.EndDate : DateTime.UtcNow).AddDays(plan.DurationDays);
+                        existingSub.Status = "active";
                         _context.Update(existingSub);
+                        currentSub = existingSub;
                     }
                     else
                     {
+                        var latestSubForCredits = await _context.Subscriptions
+                            .Include(s => s.Plan)
+                            .Where(s => s.UserId == user.Id && (s.Status == "active" || s.Status == "freeze"))
+                            .OrderByDescending(s => s.EndDate)
+                            .FirstOrDefaultAsync();
+
+                        if (latestSubForCredits != null && latestSubForCredits.EndDate < DateTime.UtcNow)
+                        {
+                            var graceEnds = latestSubForCredits.EndDate.AddDays(latestSubForCredits.Plan.GracePeriodDays);
+                            if (DateTime.UtcNow > graceEnds)
+                            {
+                                shouldReset = true;
+                            }
+                        }
+
+                        var activeSubscriptions = await _context.Subscriptions
+                            .Where(s => s.UserId == user.Id && (s.Status == "active" || s.Status == "freeze"))
+                            .ToListAsync();
+                        foreach(var sub in activeSubscriptions)
+                        {
+                            sub.Status = "canceled";
+                        }
+
                         var newSub = new Subscription
                         {
                             UserId = user.Id,
@@ -103,22 +141,7 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                             Status = "active"
                         };
                         _context.Subscriptions.Add(newSub);
-                    }
-
-                    var latestSubForCredits = await _context.Subscriptions
-                        .Include(s => s.Plan)
-                        .Where(s => s.UserId == user.Id)
-                        .OrderByDescending(s => s.EndDate)
-                        .FirstOrDefaultAsync();
-
-                    bool shouldReset = false;
-                    if (latestSubForCredits != null && latestSubForCredits.EndDate < DateTime.UtcNow)
-                    {
-                        var graceEnds = latestSubForCredits.EndDate.AddDays(latestSubForCredits.Plan.GracePeriodDays);
-                        if (DateTime.UtcNow > graceEnds)
-                        {
-                            shouldReset = true;
-                        }
+                        currentSub = newSub;
                     }
 
                     _context.Users.Update(user);
@@ -134,7 +157,7 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                     {
                         UserId = user.Id,
                         PlanId = plan.Id,
-                        SubscriptionId = existingSub != null ? existingSub.Id : (await _context.Subscriptions.OrderByDescending(s => s.Id).FirstOrDefaultAsync(s => s.UserId == user.Id && s.PlanId == plan.Id))?.Id,
+                        SubscriptionId = currentSub?.Id,
                         Amount = amountEgp,
                         Currency = "EGP",
                         Method = "Paymob",
@@ -150,7 +173,7 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                     // Send Email Receipt
                     try
                     {
-                        var sub = existingSub ?? await _context.Subscriptions.OrderByDescending(s => s.Id).FirstOrDefaultAsync(s => s.UserId == user.Id && s.PlanId == plan.Id);
+                        var sub = currentSub;
                         if (sub != null && !string.IsNullOrEmpty(user.Email))
                         {
                             var htmlBody = _emailTemplateService.GetSubscriptionReceiptEmail(

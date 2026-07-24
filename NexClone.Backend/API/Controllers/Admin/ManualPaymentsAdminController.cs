@@ -71,16 +71,52 @@ namespace NexClone.Backend.API.Controllers.Admin
             payment.UpdatedAt = DateTime.UtcNow;
 
             var existingSub = await _context.Subscriptions
-                .FirstOrDefaultAsync(s => s.UserId == payment.UserId && s.PlanId == payment.PlanId);
+                .Include(s => s.Plan)
+                .FirstOrDefaultAsync(s => s.UserId == payment.UserId && s.PlanId == payment.PlanId && (s.Status == "active" || s.Status == "freeze"));
+
+            bool shouldReset = false;
 
             if (existingSub != null)
             {
+                if (existingSub.EndDate < DateTime.UtcNow)
+                {
+                    var graceEnds = existingSub.EndDate.AddDays(existingSub.Plan.GracePeriodDays);
+                    if (DateTime.UtcNow > graceEnds)
+                    {
+                        shouldReset = true;
+                    }
+                }
+
                 existingSub.EndDate = (existingSub.EndDate > DateTime.UtcNow ? existingSub.EndDate : DateTime.UtcNow).AddDays(payment.Plan.DurationDays);
                 existingSub.Status = "active";
                 payment.SubscriptionId = existingSub.Id;
             }
             else
             {
+                var latestSub = await _context.Subscriptions
+                    .Include(s => s.Plan)
+                    .Where(s => s.UserId == payment.UserId && (s.Status == "active" || s.Status == "freeze"))
+                    .OrderByDescending(s => s.EndDate)
+                    .FirstOrDefaultAsync();
+
+                if (latestSub != null && latestSub.EndDate < DateTime.UtcNow)
+                {
+                    var graceEnds = latestSub.EndDate.AddDays(latestSub.Plan.GracePeriodDays);
+                    if (DateTime.UtcNow > graceEnds)
+                    {
+                        shouldReset = true;
+                    }
+                }
+
+                var activeSubscriptions = await _context.Subscriptions
+                    .Where(s => s.UserId == payment.UserId && (s.Status == "active" || s.Status == "freeze"))
+                    .ToListAsync();
+                
+                foreach(var sub in activeSubscriptions)
+                {
+                    sub.Status = "canceled";
+                }
+
                 var newSub = new Subscription
                 {
                     UserId = payment.UserId,
@@ -92,22 +128,6 @@ namespace NexClone.Backend.API.Controllers.Admin
                 _context.Subscriptions.Add(newSub);
                 await _context.SaveChangesAsync();
                 payment.SubscriptionId = newSub.Id;
-            }
-
-            var latestSub = await _context.Subscriptions
-                .Include(s => s.Plan)
-                .Where(s => s.UserId == payment.UserId)
-                .OrderByDescending(s => s.EndDate)
-                .FirstOrDefaultAsync();
-
-            bool shouldReset = false;
-            if (latestSub != null && latestSub.EndDate < DateTime.UtcNow)
-            {
-                var graceEnds = latestSub.EndDate.AddDays(latestSub.Plan.GracePeriodDays);
-                if (DateTime.UtcNow > graceEnds)
-                {
-                    shouldReset = true;
-                }
             }
 
             _context.Users.Update(payment.User);

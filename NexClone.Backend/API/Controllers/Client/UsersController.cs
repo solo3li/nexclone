@@ -178,42 +178,64 @@ namespace NexClone.Backend.API.Controllers.Client
 
             if (user == null || plan == null) return NotFound();
 
-            // Cancel any existing active subscriptions
-            var activeSubscriptions = await _context.Subscriptions
-                .Where(s => s.UserId == userId && (s.Status == "active" || s.Status == "freeze"))
-                .ToListAsync();
-
-            foreach (var sub in activeSubscriptions)
-            {
-                sub.Status = "canceled";
-            }
-
-            var newSub = new Subscription
-            {
-                UserId = userId,
-                PlanId = planId,
-                Status = "active",
-                StartDate = DateTime.UtcNow,
-                EndDate = DateTime.UtcNow.AddDays(plan.DurationDays),
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.Subscriptions.Add(newSub);
-            
-            var latestSubForCredits = await _context.Subscriptions
+            var existingSub = await _context.Subscriptions
                 .Include(s => s.Plan)
-                .Where(s => s.UserId == user.Id)
-                .OrderByDescending(s => s.EndDate)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(s => s.UserId == userId && s.PlanId == planId && (s.Status == "active" || s.Status == "freeze"));
 
+            Subscription newSub = null;
             bool shouldReset = false;
-            if (latestSubForCredits != null && latestSubForCredits.EndDate < DateTime.UtcNow)
+
+            if (existingSub != null)
             {
-                var graceEnds = latestSubForCredits.EndDate.AddDays(latestSubForCredits.Plan.GracePeriodDays);
-                if (DateTime.UtcNow > graceEnds)
+                if (existingSub.EndDate < DateTime.UtcNow)
                 {
-                    shouldReset = true;
+                    var graceEnds = existingSub.EndDate.AddDays(existingSub.Plan.GracePeriodDays);
+                    if (DateTime.UtcNow > graceEnds)
+                    {
+                        shouldReset = true;
+                    }
                 }
+
+                existingSub.EndDate = (existingSub.EndDate > DateTime.UtcNow ? existingSub.EndDate : DateTime.UtcNow).AddDays(plan.DurationDays);
+                existingSub.Status = "active";
+                newSub = existingSub;
+            }
+            else
+            {
+                var latestSubForCredits = await _context.Subscriptions
+                    .Include(s => s.Plan)
+                    .Where(s => s.UserId == user.Id && (s.Status == "active" || s.Status == "freeze"))
+                    .OrderByDescending(s => s.EndDate)
+                    .FirstOrDefaultAsync();
+
+                if (latestSubForCredits != null && latestSubForCredits.EndDate < DateTime.UtcNow)
+                {
+                    var graceEnds = latestSubForCredits.EndDate.AddDays(latestSubForCredits.Plan.GracePeriodDays);
+                    if (DateTime.UtcNow > graceEnds)
+                    {
+                        shouldReset = true;
+                    }
+                }
+
+                var activeSubscriptions = await _context.Subscriptions
+                    .Where(s => s.UserId == userId && (s.Status == "active" || s.Status == "freeze"))
+                    .ToListAsync();
+
+                foreach (var sub in activeSubscriptions)
+                {
+                    sub.Status = "canceled";
+                }
+
+                newSub = new Subscription
+                {
+                    UserId = userId,
+                    PlanId = planId,
+                    Status = "active",
+                    StartDate = DateTime.UtcNow,
+                    EndDate = DateTime.UtcNow.AddDays(plan.DurationDays),
+                    CreatedAt = DateTime.UtcNow
+                };
+                _context.Subscriptions.Add(newSub);
             }
 
             await _context.SaveChangesAsync();
