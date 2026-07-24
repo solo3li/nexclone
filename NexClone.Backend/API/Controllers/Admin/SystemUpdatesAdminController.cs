@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace NexClone.Backend.API.Controllers.Admin
 {
-    [Authorize(Roles = "Admin,SuperAdmin")]
+    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Admin")]
     public class SystemUpdatesAdminController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -70,8 +71,10 @@ namespace NexClone.Backend.API.Controllers.Admin
                     var existing = await _context.SystemUpdates.FindAsync(id);
                     if (existing == null) return NotFound();
 
-                    existing.Title = systemUpdate.Title;
-                    existing.Description = systemUpdate.Description;
+                    existing.TitleAr = systemUpdate.TitleAr;
+                    existing.DescriptionAr = systemUpdate.DescriptionAr;
+                    existing.TitleEn = systemUpdate.TitleEn;
+                    existing.DescriptionEn = systemUpdate.DescriptionEn;
                     
                     _context.Update(existing);
                     await _context.SaveChangesAsync();

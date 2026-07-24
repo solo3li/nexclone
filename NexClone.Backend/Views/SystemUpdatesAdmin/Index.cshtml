@@ -6,6 +6,123 @@
     ViewData["Title"] = Localizer["System Updates"];
 }
 
+<style>
+    .timeline-container {
+        position: relative;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem 0;
+    }
+
+    /* Vertical line */
+    .timeline-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 24px;
+        width: 2px;
+        background: #e0e0e0;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 3rem;
+        padding-left: 60px;
+    }
+
+    .timeline-item:last-child {
+        margin-bottom: 0;
+    }
+
+    /* Circle (Git commit style node) */
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: 17px;
+        top: 24px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #0f62fe; /* IBM Carbon Primary Blue */
+        border: 3px solid #ffffff;
+        box-shadow: 0 0 0 2px #0f62fe;
+        z-index: 1;
+    }
+
+    .timeline-card {
+        background: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        overflow: hidden;
+        position: relative;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .timeline-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .timeline-date {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 0.85rem;
+        color: #525252;
+        background: #f4f4f4;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-weight: 500;
+    }
+
+    .timeline-section {
+        padding: 1.5rem;
+    }
+
+    .timeline-section-ar {
+        direction: rtl;
+        text-align: right;
+    }
+
+    .timeline-section-en {
+        direction: ltr;
+        text-align: left;
+        background: #fcfcfc;
+        border-top: 1px dashed #e0e0e0;
+    }
+
+    .timeline-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #161616;
+        margin-bottom: 0.75rem;
+        padding-left: 8rem; /* Space for date in LTR */
+    }
+    
+    .timeline-section-ar .timeline-title {
+        padding-left: 0;
+        padding-right: 8rem; /* Space for date in RTL */
+    }
+
+    .timeline-description {
+        font-size: 0.95rem;
+        color: #393939;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .timeline-actions {
+        padding: 1rem 1.5rem;
+        background: #f4f4f4;
+        border-top: 1px solid #e0e0e0;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+    }
+</style>
+
 <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
     <h1 class="page-title" style="margin: 0; font-weight: 600;">@Localizer["System Updates"]</h1>
     <a asp-action="Create" class="bx--btn bx--btn--primary" style="display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none;">
@@ -14,50 +131,49 @@
     </a>
 </div>
 
-<div class="bx--data-table-container">
-    <div class="bx--data-table-header">
-        <h4 class="bx--data-table-header__title">@Localizer["Update History"]</h4>
-        <p class="bx--data-table-header__description">@Localizer["A log of system modifications and updates."]</p>
-    </div>
+<div class="timeline-container">
+    @if (!Model.Any())
+    {
+        <div style="text-align: center; padding: 4rem 2rem; color: #525252; background: #fff; border-radius: 8px; border: 1px dashed #c6c6c6;">
+            <i class='bx bx-time' style="font-size: 3rem; color: #a8a8a8; margin-bottom: 1rem;"></i>
+            <h4>@Localizer["No updates found."]</h4>
+            <p>@Localizer["Click 'Add Update' to create the first timeline entry."]</p>
+        </div>
+    }
     
-    <table class="bx--data-table bx--data-table--sort">
-        <thead>
-            <tr>
-                <th><span class="bx--table-header-label">@Localizer["Title"]</span></th>
-                <th><span class="bx--table-header-label">@Localizer["Description"]</span></th>
-                <th><span class="bx--table-header-label">@Localizer["Date"]</span></th>
-                <th><span class="bx--table-header-label">@Localizer["Actions"]</span></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td style="font-weight: 600;">@item.Title</td>
-                    <td>@Html.Raw(item.Description.Replace("\n", "<br/>"))</td>
-                    <td>@item.CreatedAt.ToString("MMM dd, yyyy HH:mm")</td>
-                    <td>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="bx--btn bx--btn--sm bx--btn--secondary" title="@Localizer["Edit"]">
-                                <i class='bx bx-edit-alt'></i>
-                            </a>
-                            <form asp-action="Delete" asp-route-id="@item.Id" method="post" onsubmit="return confirm('@Localizer["Are you sure you want to delete this update log?"]');" style="display:inline;">
-                                <button type="submit" class="bx--btn bx--btn--sm bx--btn--danger" title="@Localizer["Delete"]">
-                                    <i class='bx bx-trash'></i>
-                                </button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-            }
-            @if (!Model.Any())
-            {
-                <tr>
-                    <td colspan="4" style="text-align: center; padding: 2rem; color: #525252;">
-                        @Localizer["No updates found."]
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    @foreach (var item in Model)
+    {
+        <div class="timeline-item">
+            <div class="timeline-card">
+                <div class="timeline-date">
+                    <i class='bx bx-calendar' style="vertical-align: middle; margin-right: 2px;"></i>
+                    @item.CreatedAt.ToString("MMM dd, yyyy")
+                </div>
+
+                <!-- Arabic Section -->
+                <div class="timeline-section timeline-section-ar">
+                    <h3 class="timeline-title">@item.TitleAr</h3>
+                    <p class="timeline-description">@Html.Raw(item.DescriptionAr?.Replace("\n", "<br/>"))</p>
+                </div>
+
+                <!-- English Section -->
+                <div class="timeline-section timeline-section-en">
+                    <h3 class="timeline-title">@item.TitleEn</h3>
+                    <p class="timeline-description">@Html.Raw(item.DescriptionEn?.Replace("\n", "<br/>"))</p>
+                </div>
+
+                <!-- Actions -->
+                <div class="timeline-actions">
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="bx--btn bx--btn--sm bx--btn--secondary" title="@Localizer["Edit"]">
+                        <i class='bx bx-edit-alt'></i> @Localizer["Edit"]
+                    </a>
+                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" onsubmit="return confirm('@Localizer["Are you sure you want to delete this update?"]');" style="display:inline;">
+                        <button type="submit" class="bx--btn bx--btn--sm bx--btn--danger" title="@Localizer["Delete"]">
+                            <i class='bx bx-trash'></i> @Localizer["Delete"]
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
 </div>

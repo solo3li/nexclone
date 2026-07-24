@@ -19,16 +19,32 @@
         <input type="hidden" asp-for="Id" />
         <input type="hidden" asp-for="CreatedAt" />
 
+        <h4 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">@Localizer["Arabic Content"]</h4>
+
         <div class="bx--form-item" style="margin-bottom: 1.5rem;">
-            <label asp-for="Title" class="bx--label">@Localizer["Title"]</label>
-            <input asp-for="Title" class="bx--text-input" placeholder="@Localizer["Enter update title"]" required />
-            <span asp-validation-for="Title" class="text-danger" style="color: #da1e28; font-size: 0.875rem; margin-top: 0.25rem; display: block;"></span>
+            <label asp-for="TitleAr" class="bx--label">@Localizer["Title (Arabic)"]</label>
+            <input asp-for="TitleAr" class="bx--text-input" placeholder="@Localizer["Enter update title in Arabic"]" required dir="rtl" />
+            <span asp-validation-for="TitleAr" class="text-danger" style="color: #da1e28; font-size: 0.875rem; margin-top: 0.25rem; display: block;"></span>
         </div>
 
         <div class="bx--form-item" style="margin-bottom: 2rem;">
-            <label asp-for="Description" class="bx--label">@Localizer["Description"]</label>
-            <textarea asp-for="Description" class="bx--text-area" rows="6" placeholder="@Localizer["Describe the update details..."]" required style="width: 100%; border: 1px solid #8d8d8d; padding: 1rem; font-family: inherit; font-size: 0.875rem; background-color: #f4f4f4; resize: vertical;"></textarea>
-            <span asp-validation-for="Description" class="text-danger" style="color: #da1e28; font-size: 0.875rem; margin-top: 0.25rem; display: block;"></span>
+            <label asp-for="DescriptionAr" class="bx--label">@Localizer["Description (Arabic)"]</label>
+            <textarea asp-for="DescriptionAr" class="bx--text-area" rows="4" placeholder="@Localizer["Describe the update details in Arabic..."]" required dir="rtl" style="width: 100%; border: 1px solid #8d8d8d; padding: 1rem; font-family: inherit; font-size: 0.875rem; background-color: #f4f4f4; resize: vertical;"></textarea>
+            <span asp-validation-for="DescriptionAr" class="text-danger" style="color: #da1e28; font-size: 0.875rem; margin-top: 0.25rem; display: block;"></span>
+        </div>
+
+        <h4 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">@Localizer["English Content"]</h4>
+
+        <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+            <label asp-for="TitleEn" class="bx--label">@Localizer["Title (English)"]</label>
+            <input asp-for="TitleEn" class="bx--text-input" placeholder="@Localizer["Enter update title in English"]" required dir="ltr" />
+            <span asp-validation-for="TitleEn" class="text-danger" style="color: #da1e28; font-size: 0.875rem; margin-top: 0.25rem; display: block;"></span>
+        </div>
+
+        <div class="bx--form-item" style="margin-bottom: 2rem;">
+            <label asp-for="DescriptionEn" class="bx--label">@Localizer["Description (English)"]</label>
+            <textarea asp-for="DescriptionEn" class="bx--text-area" rows="4" placeholder="@Localizer["Describe the update details in English..."]" required dir="ltr" style="width: 100%; border: 1px solid #8d8d8d; padding: 1rem; font-family: inherit; font-size: 0.875rem; background-color: #f4f4f4; resize: vertical;"></textarea>
+            <span asp-validation-for="DescriptionEn" class="text-danger" style="color: #da1e28; font-size: 0.875rem; margin-top: 0.25rem; display: block;"></span>
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center;">
