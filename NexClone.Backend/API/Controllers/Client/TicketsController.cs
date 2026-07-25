@@ -46,6 +46,7 @@ namespace NexClone.Backend.API.Controllers.Client
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateTicket([FromBody] CreateTicketRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Subject) || string.IsNullOrWhiteSpace(request.Message))
@@ -93,7 +94,8 @@ namespace NexClone.Backend.API.Controllers.Client
 
             if (ticket == null) return NotFound();
 
-            // Map attachment URLs securely
+            // Map attachment URLs securely and hide sensitive sender info
+            var safeMessages = new System.Collections.Generic.List<object>();
             foreach (var msg in ticket.Messages)
             {
                 if (!string.IsNullOrEmpty(msg.AttachmentUrl) && !msg.AttachmentUrl.StartsWith("http"))
@@ -101,17 +103,32 @@ namespace NexClone.Backend.API.Controllers.Client
                     msg.AttachmentUrl = await _mediaService.GetFileUrlAsync(msg.AttachmentUrl);
                 }
                 
-                // Hide sensitive sender info if needed
-                if (msg.Sender != null)
-                {
-                    msg.Sender.PasswordHash = "";
-                }
+                safeMessages.Add(new {
+                    Id = msg.Id,
+                    Content = msg.Content,
+                    AttachmentUrl = msg.AttachmentUrl,
+                    CreatedAt = msg.CreatedAt,
+                    Sender = msg.Sender == null ? null : new {
+                        Id = msg.Sender.Id,
+                        FullName = msg.Sender.FullName,
+                        ImageUrl = msg.Sender.ImageUrl,
+                        IsStaff = msg.Sender.IsStaff
+                    }
+                });
             }
 
-            return Ok(ticket);
+            return Ok(new {
+                Id = ticket.Id,
+                Subject = ticket.Subject,
+                Status = ticket.Status,
+                CreatedAt = ticket.CreatedAt,
+                UpdatedAt = ticket.UpdatedAt,
+                Messages = safeMessages
+            });
         }
 
         [HttpPost("{id}/message")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddMessage(int id, [FromForm] string content, [FromForm] IFormFile? attachment)
         {
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);

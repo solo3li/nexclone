@@ -38,6 +38,7 @@ namespace NexClone.Backend.API.Controllers.Client
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> SubmitPayment([FromForm] int planId, [FromForm] IFormFile receiptImage)
         {
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);

@@ -32,6 +32,32 @@ namespace NexClone.Backend.API.Controllers.Client
             {
                 return BadRequest("FileName and ContentType are required.");
             }
+            
+            // Security: Enforce Content-Type and File Extension Whitelist
+            var allowedContentTypes = new System.Collections.Generic.HashSet<string>(System.StringComparer.OrdinalIgnoreCase) 
+            { 
+                "image/jpeg", "image/png", "image/webp", "image/gif",
+                "audio/mpeg", "audio/wav", "audio/mp3",
+                "video/mp4", "video/webm"
+            };
+            
+            if (!allowedContentTypes.Contains(request.ContentType))
+            {
+                return BadRequest(new { Message = "Unsupported ContentType. Allowed types: Images, Audio, Video." });
+            }
+            
+            var ext = System.IO.Path.GetExtension(request.FileName).ToLowerInvariant();
+            var allowedExtensions = new System.Collections.Generic.HashSet<string>(System.StringComparer.OrdinalIgnoreCase)
+            {
+                ".jpg", ".jpeg", ".png", ".webp", ".gif",
+                ".mp3", ".wav",
+                ".mp4", ".webm"
+            };
+            
+            if (!allowedExtensions.Contains(ext))
+            {
+                return BadRequest(new { Message = "Unsupported file extension." });
+            }
 
             var userIdStr = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userIdStr)) return Unauthorized();

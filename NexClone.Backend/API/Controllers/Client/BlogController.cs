@@ -58,18 +58,28 @@ namespace NexClone.Backend.API.Controllers.Client
                 post.MediaUrl = await _mediaService.GetFileUrlAsync(post.MediaUrl);
             }
 
-            // Remove sensitive info from users in comments
-            foreach (var comment in post.Comments)
-            {
-                if (comment.User != null)
-                {
-                    comment.User.PasswordHash = "";
-                    comment.User.Email = "";
-                    comment.User.NormalizedEmail = "";
+            // Remove sensitive info from users in comments by mapping to safe objects
+            var safeComments = post.Comments.Select(comment => new {
+                Id = comment.Id,
+                Content = comment.Content,
+                CreatedAt = comment.CreatedAt,
+                User = comment.User == null ? null : new {
+                    Id = comment.User.Id,
+                    FullName = comment.User.FullName,
+                    ImageUrl = comment.User.ImageUrl
                 }
-            }
+            }).ToList();
 
-            return Ok(post);
+            return Ok(new {
+                Id = post.Id,
+                Title = post.Title,
+                Content = post.Content,
+                Excerpt = post.Excerpt,
+                MediaUrl = post.MediaUrl,
+                MediaType = post.MediaType,
+                CreatedAt = post.CreatedAt,
+                Comments = safeComments
+            });
         }
 
         public class CommentRequest
