@@ -34,7 +34,7 @@
                                 <td>
                                     <div style="display: flex; gap: 0.5rem;">
                                         <a href="@Url.Action("EditTemplate", new { id = item.Id })" class="bx--btn bx--btn--ghost bx--btn--sm">@Localizer["Edit"]</a>
-                                        <form asp-action="DeleteTemplate" asp-route-id="@item.Id" method="post" onsubmit="return confirm('Are you sure you want to delete this template?');" style="display:inline;">
+                                        <form asp-action="DeleteTemplate" asp-route-id="@item.Id" method="post" data-confirm="Are you sure you want to delete this template?" style="display:inline;">
                                             <button type="submit" class="bx--btn bx--btn--danger bx--btn--sm">@Localizer["Delete"]</button>
                                         </form>
                                     </div>

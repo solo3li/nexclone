@@ -45,7 +45,7 @@
                                 </div>
                                 <p style="margin-bottom: 1rem; color: #161616; white-space: pre-wrap;">@comment.Content</p>
                                 
-                                <form method="post" action="/BlogAdmin/DeleteComment" onsubmit="return confirm('Delete this comment?');">
+                                <form method="post" action="/BlogAdmin/DeleteComment" data-confirm="Delete this comment?">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="id" value="@comment.Id" />
                                     <input type="hidden" name="postId" value="@Model.Id" />

@@ -568,6 +568,9 @@
     <!-- Carbon Design System JS -->
     <script src="https://unpkg.com/carbon-components/scripts/carbon-components.min.js"></script>
     
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <!-- Active Link Script -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -654,6 +657,66 @@
                     if (mainContent) mainContent.classList.toggle('expanded-content');
                 });
             }
+
+            // Global SweetAlert2 Confirmation for forms
+            document.addEventListener('submit', function(e) {
+                var form = e.target;
+                var submitter = e.submitter;
+                var confirmMsg = form.getAttribute('data-confirm') || (submitter ? submitter.getAttribute('data-confirm') : null);
+
+                if (confirmMsg) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: '@Localizer["Are you sure?"]',
+                        text: confirmMsg,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#da1e28',
+                        cancelButtonColor: '#393939',
+                        confirmButtonText: '@Localizer["Yes, proceed"]',
+                        cancelButtonText: '@Localizer["Cancel"]'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            if (form.hasAttribute('data-confirm')) form.removeAttribute('data-confirm');
+                            if (submitter && submitter.hasAttribute('data-confirm')) submitter.removeAttribute('data-confirm');
+                            
+                            if (submitter) {
+                                submitter.click();
+                            } else {
+                                form.submit();
+                            }
+                        }
+                    });
+                }
+            });
+
+            // Intercept clicks on links or non-submit buttons with data-confirm
+            document.addEventListener('click', function(e) {
+                var target = e.target.closest('[data-confirm]');
+                if (target && target.tagName !== 'FORM' && target.type !== 'submit') {
+                    e.preventDefault();
+                    var message = target.getAttribute('data-confirm');
+                    Swal.fire({
+                        title: '@Localizer["Are you sure?"]',
+                        text: message,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#da1e28',
+                        cancelButtonColor: '#393939',
+                        confirmButtonText: '@Localizer["Yes, proceed"]',
+                        cancelButtonText: '@Localizer["Cancel"]'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            target.removeAttribute('data-confirm');
+                            if (target.tagName === 'A') {
+                                window.location.href = target.href;
+                            } else {
+                                target.click();
+                            }
+                        }
+                    });
+                }
+            });
         })();
     </script>
     @await RenderSectionAsync("Scripts", required: false)

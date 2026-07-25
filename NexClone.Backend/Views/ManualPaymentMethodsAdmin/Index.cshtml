@@ -30,7 +30,7 @@
                         <td class="table-actions">
                             <a href="/ManualPaymentMethodsAdmin/Edit/@item.Id" class="btn btn-secondary btn-sm" hx-boost="true">@Localizer["Edit"]</a>
                             <form action="/ManualPaymentMethodsAdmin/Delete/@item.Id" method="post" style="display:inline;">
-                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this payment method?');">@Localizer["Delete"]</button>
+                                <button type="submit" class="btn btn-danger btn-sm" data-confirm="Are you sure you want to delete this payment method?">@Localizer["Delete"]</button>
                             </form>
                         </td>
                     </tr>
