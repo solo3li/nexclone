@@ -126,7 +126,7 @@ namespace NexClone.Backend.API.Controllers.Client
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateEndDate(int id, DateTime newEndDate)
+        public async Task<IActionResult> UpdateEndDate(int id, DateTime newEndDate, string returnUrl = null)
         {
             var sub = await _context.Subscriptions
                 .Include(s => s.Plan)
@@ -206,11 +206,15 @@ namespace NexClone.Backend.API.Controllers.Client
             {
                 TempData["ErrorMessage"] = "Subscription not found.";
             }
+            if (!string.IsNullOrEmpty(returnUrl))
+            {
+                return LocalRedirect(returnUrl);
+            }
             return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id, string returnUrl = null)
         {
             var sub = await _context.Subscriptions.FindAsync(id);
             if (sub != null)
@@ -229,6 +233,10 @@ namespace NexClone.Backend.API.Controllers.Client
             else 
             {
                 TempData["ErrorMessage"] = "Subscription not found.";
+            }
+            if (!string.IsNullOrEmpty(returnUrl))
+            {
+                return LocalRedirect(returnUrl);
             }
             return RedirectToAction(nameof(Index));
         }

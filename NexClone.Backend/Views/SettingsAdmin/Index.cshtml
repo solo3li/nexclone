@@ -145,6 +145,37 @@
         </div>
     </form>
 
+    <!-- FREE PLAN SETTINGS FORM -->
+    <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #0043ce;">
+        @Html.AntiForgeryToken()
+
+        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">@Localizer["Free Plan Limits (Device Fingerprint)"]</h3>
+        <p style="color: #525252; margin-bottom: 1rem; font-size: 0.875rem;">@Localizer["Restrict the free plan to a specific number of claims per device to prevent abuse."]</p>
+        
+        @{
+            bool fingerprintCheck = (Model.FirstOrDefault(s => s.Key == "FreePlan.FingerprintCheck")?.Value == "true");
+        }
+        
+        <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom: 1rem;">
+            <input type="hidden" name="settings[FreePlan.FingerprintCheck]" value="false" id="hidden_FreePlan_FingerprintCheck" />
+            <input id="FreePlan_FingerprintCheck" class="bx--checkbox" type="checkbox" name="settings[FreePlan.FingerprintCheck]" value="true" @(fingerprintCheck ? "checked" : "") onchange="document.getElementById('hidden_FreePlan_FingerprintCheck').disabled = this.checked;">
+            <label for="FreePlan_FingerprintCheck" class="bx--checkbox-label">
+                <span class="bx--checkbox-label-text">@Localizer["Enable Fingerprint Limit for Free Plans"]</span>
+            </label>
+            <script>document.getElementById('hidden_FreePlan_FingerprintCheck').disabled = document.getElementById('FreePlan_FingerprintCheck').checked;</script>
+        </div>
+
+        <div class="bx--form-item" style="margin-bottom: 1rem;">
+            <label for="FreePlan_MaxUsesPerDevice" class="bx--label">@Localizer["Max Uses Per Device"]</label>
+            <input id="FreePlan_MaxUsesPerDevice" type="number" class="bx--text-input" name="settings[FreePlan.MaxUsesPerDevice]" value="@Model.FirstOrDefault(s => s.Key == "FreePlan.MaxUsesPerDevice")?.Value" placeholder="1" min="1">
+            <div class="bx--form__helper-text">@Localizer["Number of accounts per device that can claim the free plan (e.g. 1)."]</div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
+            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Free Plan Settings"]</button>
+        </div>
+    </form>
+
     <!-- AFFILIATE SETTINGS FORM -->
     <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #8a3ffc;">
         @Html.AntiForgeryToken()

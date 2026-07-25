@@ -74,8 +74,10 @@ namespace NexClone.Backend.API.Controllers.Client
         public async Task<IActionResult> Details(Guid id)
         {
             var user = await _context.Users
-                .Include(u => u.Subscriptions.Where(s => s.Plan.PriceUsd > 0 && !s.Plan.IsDefaultRegistrationPlan))
+                .Include(u => u.Subscriptions)
                     .ThenInclude(s => s.Plan)
+                .Include(u => u.Subscriptions)
+                    .ThenInclude(s => s.Payments)
                 .FirstOrDefaultAsync(u => u.Id == id);
                 
             if (user == null) return NotFound();

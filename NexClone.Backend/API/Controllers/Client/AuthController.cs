@@ -489,37 +489,65 @@ namespace NexClone.Backend.API.Controllers.Client
                               ?? await _context.Plans.FirstOrDefaultAsync(p => p.IsFreeTrial);
                 if (targetPlan != null)
                 {
-                    var sub = new Subscription
+                    bool canClaimFreePlan = true;
+                    var enableFingerprintCheckStr = await _context.AppSettings.Where(s => s.Key == "FreePlan.FingerprintCheck").Select(s => s.Value).FirstOrDefaultAsync();
+                    if (bool.TryParse(enableFingerprintCheckStr, out bool enableFingerprintCheck) && enableFingerprintCheck && !string.IsNullOrEmpty(fingerprint))
                     {
-                        UserId = user.Id,
-                        PlanId = targetPlan.Id,
-                        StartDate = DateTime.UtcNow,
-                        EndDate = DateTime.UtcNow.AddDays(targetPlan.DurationDays),
-                        Status = "active"
-                    };
-                    _context.Subscriptions.Add(sub);
-                    await _context.SaveChangesAsync();
-                    
-                    await _walletService.DistributePlanCreditsAsync(user.Id, targetPlan.Id, resetToZero: true);
-                    
-                    try
-                    {
-                        if (!string.IsNullOrEmpty(user.Email))
-                        {
-                            var htmlBody = _emailTemplateService.GetSubscriptionReceiptEmail(
-                                user.FullName ?? user.Email,
-                                targetPlan.NameAr ?? targetPlan.Name,
-                                sub.StartDate,
-                                sub.EndDate,
-                                targetPlan.MonthlyCredits,
-                                targetPlan.PriceEgp);
+                        var maxUsesStr = await _context.AppSettings.Where(s => s.Key == "FreePlan.MaxUsesPerDevice").Select(s => s.Value).FirstOrDefaultAsync();
+                        int maxUses = int.TryParse(maxUsesStr, out int m) ? m : 1;
+                        
+                        var usersWithThisFingerprint = await _context.DeviceFingerprints
+                            .Where(df => df.FingerprintHash == fingerprint)
+                            .Select(df => df.UserId)
+                            .Distinct()
+                            .ToListAsync();
                             
-                            await _emailService.SendEmailAsync(user.Email, user.FullName ?? "", "تم تفعيل اشتراكك بنجاح - NexMedia AI", htmlBody);
+                        if (usersWithThisFingerprint.Any())
+                        {
+                            var timesClaimed = await _context.Subscriptions
+                                .CountAsync(s => s.PlanId == targetPlan.Id && usersWithThisFingerprint.Contains(s.UserId));
+                                
+                            if (timesClaimed >= maxUses)
+                            {
+                                canClaimFreePlan = false;
+                            }
                         }
                     }
-                    catch (Exception ex)
+
+                    if (canClaimFreePlan)
                     {
-                        Console.WriteLine("Failed to send free plan email: " + ex.Message);
+                        var sub = new Subscription
+                        {
+                            UserId = user.Id,
+                            PlanId = targetPlan.Id,
+                            StartDate = DateTime.UtcNow,
+                            EndDate = DateTime.UtcNow.AddDays(targetPlan.DurationDays),
+                            Status = "active"
+                        };
+                        _context.Subscriptions.Add(sub);
+                        await _context.SaveChangesAsync();
+                        
+                        await _walletService.DistributePlanCreditsAsync(user.Id, targetPlan.Id, resetToZero: true);
+                        
+                        try
+                        {
+                            if (!string.IsNullOrEmpty(user.Email))
+                            {
+                                var htmlBody = _emailTemplateService.GetSubscriptionReceiptEmail(
+                                    user.FullName ?? user.Email,
+                                    targetPlan.NameAr ?? targetPlan.Name,
+                                    sub.StartDate,
+                                    sub.EndDate,
+                                    targetPlan.MonthlyCredits,
+                                    targetPlan.PriceEgp);
+                                
+                                await _emailService.SendEmailAsync(user.Email, user.FullName ?? "", "تم تفعيل اشتراكك بنجاح - NexMedia AI", htmlBody);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("Failed to send free plan email: " + ex.Message);
+                        }
                     }
                 }
             }
