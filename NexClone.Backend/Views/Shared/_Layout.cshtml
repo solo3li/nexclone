@@ -685,6 +685,17 @@
                             } else {
                                 form.submit();
                             }
+                        } else if (result.dismiss === Swal.DismissReason.cancel) {
+                            Swal.fire({
+                                title: '@Localizer["Cancelled"]',
+                                text: '@Localizer["No changes were made."]',
+                                icon: 'info',
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true
+                            });
                         }
                     });
                 }
@@ -713,10 +724,50 @@
                             } else {
                                 target.click();
                             }
+                        } else if (result.dismiss === Swal.DismissReason.cancel) {
+                            Swal.fire({
+                                title: '@Localizer["Cancelled"]',
+                                text: '@Localizer["No changes were made."]',
+                                icon: 'info',
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true
+                            });
                         }
                     });
                 }
             });
+
+            // Global TempData Alerts
+            @if (TempData["SuccessMessage"] != null || TempData["Success"] != null)
+            {
+                var sMsg = (TempData["SuccessMessage"] as string ?? TempData["Success"] as string)?.Replace("'", "\\'").Replace("\n", " ").Replace("\r", "");
+                <text>
+                Swal.fire({
+                    title: '@Localizer["Success"]',
+                    text: '@Html.Raw(sMsg)',
+                    icon: 'success',
+                    confirmButtonColor: '#0f62fe',
+                    confirmButtonText: '@Localizer["OK"]'
+                });
+                </text>
+            }
+            
+            @if (TempData["ErrorMessage"] != null || TempData["Error"] != null)
+            {
+                var eMsg = (TempData["ErrorMessage"] as string ?? TempData["Error"] as string)?.Replace("'", "\\'").Replace("\n", " ").Replace("\r", "");
+                <text>
+                Swal.fire({
+                    title: '@Localizer["Error"]',
+                    text: '@Html.Raw(eMsg)',
+                    icon: 'error',
+                    confirmButtonColor: '#da1e28',
+                    confirmButtonText: '@Localizer["OK"]'
+                });
+                </text>
+            }
         })();
     </script>
     @await RenderSectionAsync("Scripts", required: false)

@@ -26,7 +26,10 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 // Add services to the container.
-builder.Services.AddControllersWithViews()
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<NexClone.Backend.Filters.CrudSuccessMessageFilter>();
+})
     .AddViewLocalization();
 
 builder.Services.AddSingleton<Microsoft.Extensions.Localization.IStringLocalizerFactory, NexClone.Backend.Infrastructure.Localization.JsonStringLocalizerFactory>();
