@@ -39,6 +39,13 @@ namespace NexClone.Backend.API.Controllers.AI
         {
             if (image == null || image.Length == 0)
                 return BadRequest(new { error = "Image is required." });
+                
+            // Security: File Size Limits (Image 5MB, Audio 15MB)
+            if (image.Length > 5 * 1024 * 1024)
+                return BadRequest(new { error = "Image file is too large. Maximum size is 5MB." });
+                
+            if (audio != null && audio.Length > 15 * 1024 * 1024)
+                return BadRequest(new { error = "Audio file is too large. Maximum size is 15MB." });
 
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
@@ -90,10 +97,22 @@ namespace NexClone.Backend.API.Controllers.AI
             if (video == null || video.Length == 0 || audio == null || audio.Length == 0)
                 return BadRequest(new { error = "Video and Audio are required." });
 
+            // Security: File Size Limits (Video 50MB, Audio 15MB)
+            if (video.Length > 50 * 1024 * 1024)
+                return BadRequest(new { error = "Video file is too large. Maximum size is 50MB." });
+                
+            if (audio.Length > 15 * 1024 * 1024)
+                return BadRequest(new { error = "Audio file is too large. Maximum size is 15MB." });
+
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
-            var policyResult = new NexClone.Backend.Application.Services.PolicyValidationResult { IsAllowed = true, TotalCost = 0 };
+            // Fix: Actually validate and charge instead of bypassing
+            decimal usageAmountForLimits = video.Length + audio.Length;
+            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "lipsync", usageAmountForLimits, 1, "Standard");
+            
+            if (!policyResult.IsAllowed)
+                return BadRequest(new { error = policyResult.ErrorMessage });
             
             try
             {

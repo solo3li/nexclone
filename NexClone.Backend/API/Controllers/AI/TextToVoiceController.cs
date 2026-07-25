@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
 namespace NexClone.Backend.API.Controllers.AI
 {
@@ -152,6 +153,8 @@ namespace NexClone.Backend.API.Controllers.AI
 
     public class TtsRequest
     {
+        [Required]
+        [MinLength(1, ErrorMessage = "Text cannot be empty")]
         public string Text { get; set; } = string.Empty;
         public string? Language { get; set; } = "other"; // "arabic" or "other"
         public string? VoiceName { get; set; } = string.Empty;

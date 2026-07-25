@@ -69,10 +69,10 @@ namespace NexClone.Backend.API.Controllers.AI
                 // Ensure at least 0.01 minutes
                 if (audioDurationMinutes <= 0) audioDurationMinutes = 0.01;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Fallback if audio format is unrecognized or invalid
-                audioDurationMinutes = 1.0;
+                // Security Fix: Do not fallback to 1.0 minute for unknown formats. Reject it to prevent cost bypass.
+                return BadRequest(new { error = "Audio format is unrecognized, invalid, or corrupted. Cannot determine audio duration for billing." });
             }
 
             var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "voice-to-text", audioData.Length, (decimal)audioDurationMinutes);

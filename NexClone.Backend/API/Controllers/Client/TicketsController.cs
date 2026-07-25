@@ -127,7 +127,15 @@ namespace NexClone.Backend.API.Controllers.Client
 
             if (attachment != null)
             {
-                var ext = System.IO.Path.GetExtension(attachment.FileName);
+                var ext = System.IO.Path.GetExtension(attachment.FileName).ToLowerInvariant();
+                
+                // Security: Prevent XSS by restricting allowed file extensions
+                string[] allowedExtensions = { ".jpg", ".jpeg", ".png", ".pdf", ".zip", ".rar" };
+                if (!allowedExtensions.Contains(ext))
+                {
+                    return BadRequest(new { Message = $"File type {ext} is not allowed. Allowed types: jpg, jpeg, png, pdf, zip, rar." });
+                }
+
                 string fileName = $"{Guid.NewGuid()}{ext}";
                 string objectKey = $"tickets/{id}/{fileName}";
                 using var stream = attachment.OpenReadStream();
