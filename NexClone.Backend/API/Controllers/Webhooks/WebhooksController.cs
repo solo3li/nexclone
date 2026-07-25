@@ -44,14 +44,21 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                     return BadRequest("Paymob configuration or HMAC Secret missing.");
                 }
 
-                // 2. Validate HMAC (Security Check)
+                // 2. Validate HMAC (Security Check) — Paymob signs requests with HMAC SHA512
+                if (string.IsNullOrEmpty(hmac))
+                {
+                    return Unauthorized("Missing HMAC signature.");
+                }
+
                 if (payload.TryGetProperty("obj", out var obj))
                 {
-                    // Note: We bypass full HMAC calculation here for simplicity to ensure it works smoothly for the user.
-                    // In a production environment with strict rules, we would stringify the payload properties
-                    // alphabetically and hash them using HMAC SHA512 against paymobConfig.HmacSecret.
-                    // If you want strict validation: bool isValid = VerifyPaymobHmac(obj, hmac, paymobConfig.HmacSecret);
-                    
+                    // Verify HMAC before trusting any payload data
+                    bool hmacValid = VerifyPaymobHmac(obj, hmac, paymobConfig.HmacSecret);
+                    if (!hmacValid)
+                    {
+                        return Unauthorized("Invalid HMAC signature.");
+                    }
+
                     bool success = obj.TryGetProperty("success", out var successProp) && successProp.GetBoolean();
                     if (!success)
                     {
@@ -74,8 +81,13 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                         return BadRequest("Missing user or plan data.");
                     }
 
-                    // 4. Find User and Plan
-                    var user = await _context.Users.FindAsync(Guid.Parse(userId));
+                    // 4. Find User and Plan — Guid.TryParse prevents crash on malformed input
+                    if (!Guid.TryParse(userId, out var userGuid))
+                    {
+                        return BadRequest("Invalid user ID format.");
+                    }
+
+                    var user = await _context.Users.FindAsync(userGuid);
                     var plan = await _context.Plans.FirstOrDefaultAsync(p => p.Name == planName);
 
                     if (user == null || plan == null)
@@ -168,8 +180,6 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                     _context.Payments.Add(payment);
                     await _context.SaveChangesAsync();
 
-
-
                     // Send Email Receipt
                     try
                     {
@@ -200,6 +210,60 @@ namespace NexClone.Backend.API.Controllers.Webhooks
             catch (Exception ex)
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Verifies Paymob HMAC SHA512 signature.
+        /// Paymob concatenates specific transaction fields in a fixed order and hashes with HMAC-SHA512.
+        /// Reference: https://docs.paymob.com/docs/hmac-calculation
+        /// </summary>
+        private static bool VerifyPaymobHmac(JsonElement obj, string receivedHmac, string secret)
+        {
+            try
+            {
+                // Paymob HMAC fields in the exact order specified by Paymob documentation
+                var fields = new[]
+                {
+                    "amount_cents", "created_at", "currency", "error_occured",
+                    "has_parent_transaction", "id", "integration_id", "is_3d_secure",
+                    "is_auth", "is_capture", "is_refunded", "is_standalone_payment",
+                    "is_voided", "order.id", "owner", "pending",
+                    "source_data.pan", "source_data.sub_type", "source_data.type",
+                    "success"
+                };
+
+                var concatenated = new StringBuilder();
+                foreach (var field in fields)
+                {
+                    string value = "";
+                    if (field.Contains('.'))
+                    {
+                        var parts = field.Split('.', 2);
+                        if (obj.TryGetProperty(parts[0], out var nested) && nested.TryGetProperty(parts[1], out var nestedVal))
+                            value = nestedVal.ToString();
+                    }
+                    else if (obj.TryGetProperty(field, out var val))
+                    {
+                        value = val.ToString();
+                    }
+                    concatenated.Append(value);
+                }
+
+                var keyBytes = Encoding.UTF8.GetBytes(secret);
+                var messageBytes = Encoding.UTF8.GetBytes(concatenated.ToString());
+
+                using var hmacSha512 = new HMACSHA512(keyBytes);
+                var hashBytes = hmacSha512.ComputeHash(messageBytes);
+                var computedHmac = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+
+                return CryptographicOperations.FixedTimeEquals(
+                    Encoding.UTF8.GetBytes(computedHmac),
+                    Encoding.UTF8.GetBytes(receivedHmac.ToLowerInvariant()));
+            }
+            catch
+            {
+                return false;
             }
         }
     }

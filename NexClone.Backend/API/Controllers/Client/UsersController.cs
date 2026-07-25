@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Hosting;
 
 namespace NexClone.Backend.API.Controllers.Client
 {
@@ -16,17 +17,20 @@ namespace NexClone.Backend.API.Controllers.Client
         private readonly IEmailService _emailService;
         private readonly IEmailTemplateService _emailTemplateService;
         private readonly WalletService _walletService;
+        private readonly IWebHostEnvironment _env;
 
         public UsersController(
             ApplicationDbContext context, 
             IEmailService emailService,
             IEmailTemplateService emailTemplateService,
-            WalletService walletService)
+            WalletService walletService,
+            IWebHostEnvironment env)
         {
             _context = context;
             _emailService = emailService;
             _emailTemplateService = emailTemplateService;
             _walletService = walletService;
+            _env = env;
         }
 
         public async Task<IActionResult> Index(string searchString, int? planId, int pageNumber = 1)
@@ -268,6 +272,7 @@ namespace NexClone.Backend.API.Controllers.Client
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AdjustCredits(Guid userId, decimal amount, string operation)
         {
             var user = await _context.Users.Include(u => u.Wallets).FirstOrDefaultAsync(u => u.Id == userId);
@@ -433,7 +438,11 @@ namespace NexClone.Backend.API.Controllers.Client
         [HttpGet("seed")]
         public async Task<IActionResult> Seed([FromServices] Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> userManager)
         {
-            // Seed Plans
+            // SECURITY: This endpoint is only available in Development environment
+            if (!_env.IsDevelopment())
+            {
+                return NotFound();
+            }
             if (!await _context.Plans.AnyAsync(p => p.Name == "Free Tier"))
             {
                 _context.Plans.Add(new Plan { 

@@ -14,6 +14,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace NexClone.Backend.API.Controllers.Client
 {
@@ -50,6 +51,7 @@ namespace NexClone.Backend.API.Controllers.Client
         private static readonly HttpClient _httpClient = new HttpClient();
 
         [HttpPost("register")]
+        [EnableRateLimiting("AuthPolicy")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
             if (!ModelState.IsValid)
@@ -161,6 +163,7 @@ namespace NexClone.Backend.API.Controllers.Client
         }
 
         [HttpPost("login")]
+        [EnableRateLimiting("AuthPolicy")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             if (!ModelState.IsValid)
@@ -255,7 +258,7 @@ namespace NexClone.Backend.API.Controllers.Client
                 
             }
 
-            // Check trial eligibility if new user
+            // Check trial eligibility if new user — gate free plan via fingerprint/IP check
             if (isNewUser)
             {
                 bool hasClaimedFreeTrial = false;
@@ -270,6 +273,54 @@ namespace NexClone.Backend.API.Controllers.Client
                     hasClaimedFreeTrial = await _context.DeviceFingerprints.AnyAsync(df => df.IpAddress == ipAddress);
                 }
 
+                if (!hasClaimedFreeTrial)
+                {
+                    // Assign the default free/trial plan
+                    var targetPlan = await _context.Plans.FirstOrDefaultAsync(p => p.IsDefaultRegistrationPlan) 
+                                  ?? await _context.Plans.FirstOrDefaultAsync(p => p.IsFreeTrial);
+
+                    if (targetPlan != null)
+                    {
+                        bool canClaimFreePlan = true;
+                        var enableFingerprintCheckStr = await _context.AppSettings
+                            .Where(s => s.Key == "FreePlan.FingerprintCheck").Select(s => s.Value).FirstOrDefaultAsync();
+
+                        if (bool.TryParse(enableFingerprintCheckStr, out bool enableFingerprintCheck) 
+                            && enableFingerprintCheck && !string.IsNullOrEmpty(fingerprint))
+                        {
+                            var maxUsesStr = await _context.AppSettings
+                                .Where(s => s.Key == "FreePlan.MaxUsesPerDevice").Select(s => s.Value).FirstOrDefaultAsync();
+                            int maxUses = int.TryParse(maxUsesStr, out int m) ? m : 1;
+
+                            var usersWithThisFingerprint = await _context.DeviceFingerprints
+                                .Where(df => df.FingerprintHash == fingerprint)
+                                .Select(df => df.UserId)
+                                .Distinct()
+                                .ToListAsync();
+
+                            if (usersWithThisFingerprint.Any())
+                            {
+                                var timesClaimed = await _context.Subscriptions
+                                    .CountAsync(s => s.PlanId == targetPlan.Id && usersWithThisFingerprint.Contains(s.UserId));
+                                if (timesClaimed >= maxUses)
+                                    canClaimFreePlan = false;
+                            }
+                        }
+
+                        if (canClaimFreePlan)
+                        {
+                            var sub = new Subscription
+                            {
+                                UserId = user.Id,
+                                PlanId = targetPlan.Id,
+                                StartDate = DateTime.UtcNow,
+                                EndDate = DateTime.UtcNow.AddDays(targetPlan.DurationDays),
+                                Status = "active"
+                            };
+                            _context.Subscriptions.Add(sub);
+                        }
+                    }
+                }
             }
 
             _context.DeviceFingerprints.Add(new DeviceFingerprint
@@ -292,7 +343,9 @@ namespace NexClone.Backend.API.Controllers.Client
             });
         }
 
+
         [HttpPost("forgot-password")]
+        [EnableRateLimiting("AuthPolicy")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
         {
             if (!ModelState.IsValid)

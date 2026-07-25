@@ -58,6 +58,7 @@ namespace NexClone.Backend.API.Controllers.Admin
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Approve(int id)
         {
             var payment = await _context.Payments
@@ -162,6 +163,7 @@ namespace NexClone.Backend.API.Controllers.Admin
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Reject(int id)
         {
             var payment = await _context.Payments.FindAsync(id);

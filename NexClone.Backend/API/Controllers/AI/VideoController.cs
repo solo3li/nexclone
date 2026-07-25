@@ -189,14 +189,34 @@ namespace NexClone.Backend.API.Controllers.AI
 
 
         [HttpGet("download-proxy")]
-        [AllowAnonymous]
         public async Task<IActionResult> DownloadProxy([FromQuery] string url, [FromQuery] string type = "video")
         {
             if (string.IsNullOrEmpty(url)) return BadRequest("URL is required");
+
+            // SSRF Protection: only allow URLs from trusted external AI/storage providers
+            var allowedHosts = new[]
+            {
+                "cdn.kling.ai",
+                "klingai.com",
+                "p16-klingai.com",
+                "p16-klingai.isgoodcdn.com",
+                "klingai-tos.bytedance.net",
+                "object.ksyun.com",
+                "storage.googleapis.com",
+                "amazonaws.com"
+            };
+
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var parsedUri)
+                || (parsedUri.Scheme != "https" && parsedUri.Scheme != "http")
+                || !allowedHosts.Any(h => parsedUri.Host.EndsWith(h, StringComparison.OrdinalIgnoreCase)))
+            {
+                return BadRequest(new { error = "URL not allowed." });
+            }
+
             try
             {
                 var client = new HttpClient();
-                var stream = await client.GetStreamAsync(url);
+                var stream = await client.GetStreamAsync(parsedUri);
                 
                 string contentType = type == "audio" ? "audio/mpeg" : "video/mp4";
                 string filename = type == "audio" ? "generated_audio.mp3" : "generated_video.mp4";

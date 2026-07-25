@@ -44,12 +44,41 @@ builder.Services.AddDataProtection()
 // Setup CORS for Next.js
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowNextjs", builder =>
+    options.AddPolicy("AllowNextjs", policyBuilder =>
     {
-        builder.SetIsOriginAllowed(origin => true)
-               .AllowAnyMethod()
-               .AllowAnyHeader()
-               .AllowCredentials();
+        try
+        {
+            var dbOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
+                .Options;
+                
+            using var context = new ApplicationDbContext(dbOptions);
+            var allowedOriginsSetting = context.AppSettings.FirstOrDefault(s => s.Key == "Origin.AllowedOrigins")?.Value;
+            
+            if (!string.IsNullOrWhiteSpace(allowedOriginsSetting))
+            {
+                var origins = allowedOriginsSetting.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(o => o.Trim()).ToArray();
+                policyBuilder.WithOrigins(origins)
+                       .AllowAnyMethod()
+                       .AllowAnyHeader()
+                       .AllowCredentials();
+            }
+            else
+            {
+                // Fallback to a safe default if not set in DB
+                policyBuilder.WithOrigins("http://localhost:3000", "http://178.62.192.74:3000")
+                       .AllowAnyMethod()
+                       .AllowAnyHeader()
+                       .AllowCredentials();
+            }
+        }
+        catch
+        {
+            policyBuilder.WithOrigins("http://localhost:3000", "http://178.62.192.74:3000")
+                   .AllowAnyMethod()
+                   .AllowAnyHeader()
+                   .AllowCredentials();
+        }
     });
 });
 
@@ -67,6 +96,10 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options => {
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireUppercase = false;
     options.Password.RequiredLength = 6;
+    // Brute Force Protection: lock account after 5 failed attempts for 15 minutes
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.AllowedForNewUsers = true;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
@@ -160,9 +193,18 @@ builder.Services.AddHostedService<NexClone.Backend.Application.BackgroundJobs.Su
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    // General API policy: 100 requests/minute
     options.AddFixedWindowLimiter("ApiPolicy", opt =>
     {
         opt.PermitLimit = 100;
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = 0;
+    });
+    // Strict auth policy: 10 requests/minute to prevent brute force on login/register/forgot-password
+    options.AddFixedWindowLimiter("AuthPolicy", opt =>
+    {
+        opt.PermitLimit = 10;
         opt.Window = TimeSpan.FromMinutes(1);
         opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
         opt.QueueLimit = 0;
