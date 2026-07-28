@@ -3,33 +3,112 @@
 
 @{
     ViewData["Title"] = "Operations History";
+
+    var toolMeta = new Dictionary<string, (string Label, string Color)>
+    {
+        ["text-to-voice"]   = ("نص إلى صوت",       "#8b5cf6"),
+        ["voice-to-text"]   = ("صوت إلى نص",       "#ec4899"),
+        ["lip-sync"]        = ("مزامنة الشفاه",     "#f43f5e"),
+        ["image-to-video"]  = ("صورة إلى فيديو",   "#f97316"),
+        ["bg-remover"]      = ("إزالة خلفية",       "#10b981"),
+        ["gpt"]             = ("GPT",               "#3b82f6"),
+    };
+
+    string GetToolLabel(string type)  => toolMeta.TryGetValue(type, out var m) ? m.Label : type;
+    string GetToolColor(string type)  => toolMeta.TryGetValue(type, out var m) ? m.Color : "#6b7280";
+
+    string GetStatusColor(string s) => s switch {
+        "completed"  => "#22c55e",
+        "failed"     => "#ef4444",
+        "processing" => "#f59e0b",
+        _            => "#6b7280"
+    };
 }
+
+<style>
+    .hist-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 2rem; }
+    .hist-stat  { background: #f4f4f4; border: 1px solid #e0e0e0; border-radius: 6px; padding: 1.25rem 1.5rem; text-align: center; }
+    .hist-stat__num  { font-size: 2rem; font-weight: 700; line-height: 1; }
+    .hist-stat__label{ font-size: 0.8rem; color: #6b7280; margin-top: 4px; }
+    .hist-filters { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: flex-end; margin-bottom: 1.5rem; background: #f4f4f4; padding: 1.25rem; border: 1px solid #e0e0e0; border-radius: 4px; }
+    .hist-filters .bx--form-item { flex: 1; min-width: 180px; }
+    .tool-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 600; color: #fff; }
+    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
+    .hist-table th { white-space: nowrap; }
+    .hist-table td { vertical-align: middle; }
+    @@media (max-width: 768px) { .hist-stats { grid-template-columns: repeat(2,1fr); } }
+</style>
+
+<!-- Stats Cards -->
+<div class="hist-stats">
+    <div class="hist-stat">
+        <div class="hist-stat__num" style="color:#3b82f6">@ViewBag.TotalCount</div>
+        <div class="hist-stat__label">@Localizer["Total Operations"]</div>
+    </div>
+    <div class="hist-stat">
+        <div class="hist-stat__num" style="color:#22c55e">@ViewBag.CompletedCount</div>
+        <div class="hist-stat__label">@Localizer["Completed"]</div>
+    </div>
+    <div class="hist-stat">
+        <div class="hist-stat__num" style="color:#f59e0b">@ViewBag.ProcessingCount</div>
+        <div class="hist-stat__label">@Localizer["Processing"]</div>
+    </div>
+    <div class="hist-stat">
+        <div class="hist-stat__num" style="color:#ef4444">@ViewBag.FailedCount</div>
+        <div class="hist-stat__label">@Localizer["Failed"]</div>
+    </div>
+</div>
 
 <div class="bx--data-table-container">
     <div class="bx--data-table-header">
         <h4 class="bx--data-table-header__title">@Localizer["Operations History"]</h4>
-        <p class="bx--data-table-header__description">@Localizer["View the latest 500 AI operations performed by users."]</p>
+        <p class="bx--data-table-header__description">@Localizer["View and filter AI operations performed by users."]</p>
     </div>
 
-    <div style="margin-bottom: 2rem; background: #f4f4f4; padding: 1rem; border: 1px solid #e0e0e0;">
-        <form method="get" asp-action="Index" style="display: flex; gap: 1rem; align-items: flex-end;">
-            <div class="bx--form-item" style="flex: 1; max-width: 400px;">
-                <label for="searchEmail" class="bx--label">@Localizer["Search by User Email"]</label>
-                <div class="bx--text-input__field-wrapper">
-                    <input id="searchEmail" type="text" name="searchEmail" class="bx--text-input" placeholder="e.g. user@example.com" value="@ViewBag.CurrentSearch">
-                </div>
+    <!-- Filters -->
+    <form method="get" asp-action="Index" class="hist-filters">
+        <div class="bx--form-item">
+            <label for="searchEmail" class="bx--label">@Localizer["User Email"]</label>
+            <div class="bx--text-input__field-wrapper">
+                <input id="searchEmail" type="text" name="searchEmail" class="bx--text-input"
+                       placeholder="user@example.com" value="@ViewBag.CurrentSearch">
             </div>
-            <div>
-                <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Search"]</button>
-                @if (!string.IsNullOrEmpty(ViewBag.CurrentSearch as string))
-                {
-                    <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">@Localizer["Clear"]</a>
-                }
-            </div>
-        </form>
-    </div>
+        </div>
 
-    <table class="bx--data-table bx--data-table--sort">
+        <div class="bx--form-item">
+            <label for="filterType" class="bx--label">@Localizer["Tool Type"]</label>
+            <div class="bx--select">
+                <select id="filterType" name="filterType" class="bx--select-input">
+                    <option value="all" selected="@(ViewBag.FilterType == null || ViewBag.FilterType == "all")">@Localizer["All Tools"]</option>
+                    <option value="text-to-voice"  selected="@(ViewBag.FilterType == "text-to-voice")">🎙️ نص إلى صوت</option>
+                    <option value="voice-to-text"  selected="@(ViewBag.FilterType == "voice-to-text")">🎤 صوت إلى نص</option>
+                    <option value="lip-sync"        selected="@(ViewBag.FilterType == "lip-sync")">💋 مزامنة الشفاه</option>
+                    <option value="image-to-video"  selected="@(ViewBag.FilterType == "image-to-video")">🎬 صورة إلى فيديو</option>
+                    <option value="bg-remover"      selected="@(ViewBag.FilterType == "bg-remover")">🖼️ إزالة خلفية</option>
+                    <option value="gpt"             selected="@(ViewBag.FilterType == "gpt")">🤖 GPT</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="bx--form-item">
+            <label for="filterStatus" class="bx--label">@Localizer["Status"]</label>
+            <div class="bx--select">
+                <select id="filterStatus" name="filterStatus" class="bx--select-input">
+                    <option value="all"        selected="@(ViewBag.FilterStatus == null || ViewBag.FilterStatus == "all")">@Localizer["All Statuses"]</option>
+                    <option value="completed"  selected="@(ViewBag.FilterStatus == "completed")">✅ Completed</option>
+                    <option value="processing" selected="@(ViewBag.FilterStatus == "processing")">⏳ Processing</option>
+                    <option value="failed"     selected="@(ViewBag.FilterStatus == "failed")">❌ Failed</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="display:flex;gap:.5rem;align-items:flex-end;">
+            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Search"]</button>
+            <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">@Localizer["Reset"]</a>
+        </div>
+    </form>
+
+    <table class="bx--data-table bx--data-table--sort hist-table">
         <thead>
             <tr>
                 <th><span class="bx--table-header-label">@Localizer["User Email"]</span></th>
@@ -37,6 +116,7 @@
                 <th><span class="bx--table-header-label">@Localizer["Task"]</span></th>
                 <th><span class="bx--table-header-label">@Localizer["Status"]</span></th>
                 <th><span class="bx--table-header-label">@Localizer["Credits"]</span></th>
+                <th><span class="bx--table-header-label">@Localizer["Output"]</span></th>
                 <th><span class="bx--table-header-label">@Localizer["Date"]</span></th>
                 <th><span class="bx--table-header-label">@Localizer["Actions"]</span></th>
             </tr>
@@ -45,20 +125,48 @@
             @foreach (var item in Model)
             {
                 <tr>
-                    <td>@item.User?.Email</td>
-                    <td><span style="background: #e0e0e0; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem;">@item.Type</span></td>
-                    <td>@item.Title</td>
+                    <td style="font-size:0.8rem">@item.User?.Email</td>
                     <td>
-                        @if (item.Status == "completed") {
-                            <span style="color: green; font-weight: bold;">@item.Status</span>
-                        } else if (item.Status == "failed") {
-                            <span style="color: red; font-weight: bold;">@item.Status</span>
-                        } else {
-                            <span style="color: orange; font-weight: bold;">@item.Status</span>
+                        <span class="tool-badge" style="background:@GetToolColor(item.Type)">
+                            @GetToolLabel(item.Type)
+                        </span>
+                    </td>
+                    <td style="font-size:0.82rem;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">@item.Title</td>
+                    <td>
+                        <span class="status-dot" style="background:@GetStatusColor(item.Status)"></span>
+                        <span style="font-weight:600;color:@GetStatusColor(item.Status)">@item.Status</span>
+                    </td>
+                    <td style="font-weight:600">@item.CreditsUsed</td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(item.FileUrl))
+                        {
+                            @if (item.Type == "lip-sync" || item.Type == "image-to-video")
+                            {
+                                <span style="background:#f97316;color:#fff;padding:2px 7px;border-radius:10px;font-size:0.72rem;font-weight:600">🎬 Video</span>
+                            }
+                            else if (item.Type == "text-to-voice")
+                            {
+                                <span style="background:#8b5cf6;color:#fff;padding:2px 7px;border-radius:10px;font-size:0.72rem;font-weight:600">🎵 Audio</span>
+                            }
+                            else if (item.Type == "bg-remover")
+                            {
+                                <span style="background:#10b981;color:#fff;padding:2px 7px;border-radius:10px;font-size:0.72rem;font-weight:600">🖼️ Image</span>
+                            }
+                            else
+                            {
+                                <span style="background:#6b7280;color:#fff;padding:2px 7px;border-radius:10px;font-size:0.72rem;font-weight:600">📄 File</span>
+                            }
+                        }
+                        else if (item.Status == "processing")
+                        {
+                            <span style="color:#f59e0b;font-size:0.75rem">⏳ Pending</span>
+                        }
+                        else
+                        {
+                            <span style="color:#9ca3af;font-size:0.75rem">—</span>
                         }
                     </td>
-                    <td>@item.CreditsUsed</td>
-                    <td>@item.CreatedAt.ToString("MMM dd, yyyy HH:mm")</td>
+                    <td style="font-size:0.8rem;white-space:nowrap">@item.CreatedAt.ToString("MMM dd, yyyy HH:mm")</td>
                     <td>
                         <a href="@Url.Action("Details", new { id = item.Id })" class="bx--btn bx--btn--sm bx--btn--secondary">
                             <i class='bx bx-detail'></i> Details
@@ -68,10 +176,18 @@
             }
         </tbody>
     </table>
+
     @if (!Model.Any())
     {
-        <div style="text-align: center; padding: 2rem; color: #525252; background: #ffffff; border-bottom: 1px solid #e0e0e0;">
-            @Localizer["No operations found."]
+        <div style="text-align:center;padding:3rem;color:#525252;background:#fff;border-bottom:1px solid #e0e0e0;">
+            <div style="font-size:3rem;margin-bottom:1rem">📭</div>
+            <div>@Localizer["No operations found."]</div>
+        </div>
+    }
+    else
+    {
+        <div style="padding:1rem;background:#f4f4f4;border:1px solid #e0e0e0;font-size:0.82rem;color:#525252;text-align:right;">
+            @Localizer["Showing"] @Model.Count() @Localizer["records"]
         </div>
     }
 </div>

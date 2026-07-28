@@ -17,23 +17,37 @@ namespace NexClone.Backend.API.Controllers.Admin
             _context = context;
         }
 
-        public async Task<IActionResult> Index(string searchEmail)
+        public async Task<IActionResult> Index(string searchEmail, string filterType, string filterStatus)
         {
             var query = _context.GenerationHistories
                 .Include(h => h.User)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(searchEmail))
-            {
                 query = query.Where(h => h.User.Email.ToLower().Contains(searchEmail.ToLower()));
-            }
+
+            if (!string.IsNullOrEmpty(filterType) && filterType != "all")
+                query = query.Where(h => h.Type == filterType);
+
+            if (!string.IsNullOrEmpty(filterStatus) && filterStatus != "all")
+                query = query.Where(h => h.Status == filterStatus);
 
             var history = await query
                 .OrderByDescending(h => h.CreatedAt)
-                .Take(500)
+                .Take(1000)
                 .ToListAsync();
 
+            // Stats
+            var allQuery = _context.GenerationHistories.AsQueryable();
+            ViewBag.TotalCount     = await allQuery.CountAsync();
+            ViewBag.CompletedCount = await allQuery.CountAsync(h => h.Status == "completed");
+            ViewBag.FailedCount    = await allQuery.CountAsync(h => h.Status == "failed");
+            ViewBag.ProcessingCount= await allQuery.CountAsync(h => h.Status == "processing");
+
             ViewBag.CurrentSearch = searchEmail;
+            ViewBag.FilterType    = filterType;
+            ViewBag.FilterStatus  = filterStatus;
+
             return View(history);
         }
 
