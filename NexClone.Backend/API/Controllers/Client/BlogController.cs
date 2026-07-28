@@ -74,7 +74,7 @@ namespace NexClone.Backend.API.Controllers.Client
                 Id = post.Id,
                 Title = post.Title,
                 Content = post.Content,
-                Excerpt = post.Excerpt,
+
                 MediaUrl = post.MediaUrl,
                 MediaType = post.MediaType,
                 CreatedAt = post.CreatedAt,
