@@ -42,7 +42,16 @@ namespace NexClone.Backend.API.Controllers.Client
                 .OrderByDescending(t => t.UpdatedAt)
                 .ToListAsync();
 
-            return Ok(tickets);
+            var result = tickets.Select(t => new
+            {
+                id = t.Id,
+                subject = t.Subject,
+                status = t.Status,
+                createdAt = t.CreatedAt,
+                updatedAt = t.UpdatedAt
+            });
+
+            return Ok(result);
         }
 
         public class CreateTicketRequest
@@ -84,7 +93,14 @@ namespace NexClone.Backend.API.Controllers.Client
             _context.TicketMessages.Add(message);
             await _context.SaveChangesAsync();
 
-            return Ok(ticket);
+            return Ok(new
+            {
+                id = ticket.Id,
+                subject = ticket.Subject,
+                status = ticket.Status,
+                createdAt = ticket.CreatedAt,
+                updatedAt = ticket.UpdatedAt
+            });
         }
 
         [HttpGet("{id}")]

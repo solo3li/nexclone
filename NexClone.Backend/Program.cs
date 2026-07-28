@@ -30,6 +30,10 @@ builder.Services.AddControllersWithViews(options =>
 {
     options.Filters.Add<NexClone.Backend.Filters.CrudSuccessMessageFilter>();
 })
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    })
     .AddViewLocalization();
 
 builder.Services.AddSingleton<Microsoft.Extensions.Localization.IStringLocalizerFactory, NexClone.Backend.Infrastructure.Localization.JsonStringLocalizerFactory>();
