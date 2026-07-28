@@ -249,15 +249,15 @@
             }
 
             if (!document.body.dataset.sidebarListenerAdded) {
-                document.body.addEventListener('htmx:afterOnLoad', function() {
-                    var s = document.getElementById('modern-sidebar');
-                    var o = document.getElementById('sidebar-overlay');
-                    if (window.innerWidth <= 768) {
-                        if (s) s.classList.remove('open');
-                        if (o) o.classList.remove('active');
-                    }
-                });
-                document.body.dataset.sidebarListenerAdded = "true";
+                var menuItems = document.querySelectorAll('.sidebar-menu-item');
+                menuItems.forEach(item => {
+                    item.addEventListener('click', () => {
+                        if (window.innerWidth <= 1024) {
+                            if (sidebar) sidebar.classList.remove('open');
+                            if (overlay) overlay.classList.remove('active');
+                        }
+                    });
+                });document.body.dataset.sidebarListenerAdded = "true";
             }
 
             // Desktop Collapse Logic
