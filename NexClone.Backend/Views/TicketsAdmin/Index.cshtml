@@ -1,43 +1,146 @@
 @model IEnumerable<NexClone.Backend.Core.Entities.SupportTicket>
 @inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 
-<div class="bx--grid" style="padding-left: 0; padding-right: 0;">
-    <div class="bx--row">
-        <div class="bx--col">
-            <div class="bx--data-table-container">
-                <table class="bx--data-table" style="width: 100%; text-align: left; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                    <thead style="background-color: #f4f4f4;">
+@{
+    ViewData["Title"] = "Support Tickets";
+    var openCount = Model.Count(t => t.Status == "Open");
+    var progressCount = Model.Count(t => t.Status == "InProgress");
+    var closedCount = Model.Count(t => t.Status == "Closed" || t.Status == "Resolved");
+}
+
+<style>
+    .tk-header { margin-bottom: 2rem; }
+    .tk-header h1 { font-size: 1.8rem; font-weight: 800; margin: 0; color: var(--admin-text-primary); display: flex; align-items: center; gap: 0.6rem; }
+    .tk-header h1 i { color: var(--admin-primary); }
+    .tk-header p { margin: 4px 0 0; color: var(--admin-text-secondary); font-size: 0.9rem; }
+
+    .tk-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2.5rem; }
+    .tk-stat { background: var(--admin-surface); border: 1px solid var(--admin-border-light); border-radius: var(--admin-radius-lg); padding: 1.5rem; display: flex; align-items: center; gap: 1.25rem; box-shadow: var(--shadow-soft); transition: var(--trans-smooth); }
+    .tk-stat:hover { transform: translateY(-3px); box-shadow: var(--shadow-float); }
+    .tk-stat__icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
+    .tk-stat__num { font-size: 1.9rem; font-weight: 800; line-height: 1; }
+    .tk-stat__label { font-size: 0.75rem; color: var(--admin-text-secondary); margin-top: 4px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .tk-table-card {
+        background: var(--admin-surface);
+        border: 1px solid var(--admin-border-light);
+        border-radius: var(--admin-radius-lg);
+        box-shadow: var(--shadow-soft);
+        overflow: hidden;
+    }
+    .tk-table-card .t-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--admin-border-light);
+        display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    }
+    .tk-table-card .t-header h4 { font-size: 1.05rem; font-weight: 700; margin: 0; color: var(--admin-text-primary); display: flex; align-items: center; gap: 0.5rem; }
+    .tk-table-card .t-header h4 i { color: var(--admin-primary); }
+
+    .tk-table-scroll { overflow-x: auto; }
+    .tk-table { width: 100%; border-collapse: collapse; min-width: 800px; }
+    .tk-table thead tr { background: rgba(139,92,246,.06); border-bottom: 2px solid var(--admin-border-light); }
+    .tk-table th { padding: 0.85rem 1rem; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--admin-text-secondary); white-space: nowrap; text-align: left; }
+    html[dir="rtl"] .tk-table th { text-align: right; }
+    .tk-table tbody tr { border-bottom: 1px solid var(--admin-border-light); transition: background 0.2s; }
+    .tk-table tbody tr:last-child { border-bottom: none; }
+    .tk-table tbody tr:hover { background: rgba(139,92,246,.04); }
+    .tk-table td { padding: 0.9rem 1rem; font-size: 0.88rem; color: var(--admin-text-primary); vertical-align: middle; white-space: nowrap; }
+
+    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+    .badge-dot { width: 7px; height: 7px; border-radius: 50%; }
+    .badge-red { background: rgba(239,68,68,.12); color: #dc2626; } .badge-red .badge-dot { background: #ef4444; }
+    .badge-yellow { background: rgba(234,179,8,.12); color: #ca8a04; } .badge-yellow .badge-dot { background: #eab308; }
+    .badge-green { background: rgba(34,197,94,.12); color: #16a34a; } .badge-green .badge-dot { background: #22c55e; box-shadow: 0 0 5px #22c55e; }
+    .badge-purple { background: rgba(139,92,246,.12); color: #7c3aed; }
+
+    .btn-chat {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 6px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 700;
+        background: rgba(139,92,246,.1); color: var(--admin-primary);
+        text-decoration: none; border: none; cursor: pointer; transition: var(--trans-smooth);
+    }
+    .btn-chat:hover { background: var(--admin-primary); color: #fff; transform: translateY(-1px); }
+
+    .empty-tk { text-align: center; padding: 3.5rem 1.5rem; color: var(--admin-text-secondary); }
+    .empty-tk i { font-size: 3.5rem; opacity: 0.3; display: block; margin-bottom: 0.75rem; }
+
+    @@media (max-width: 1024px) { .tk-stats { grid-template-columns: repeat(2, 1fr); } }
+    @@media (max-width: 768px) { .tk-stats { grid-template-columns: 1fr; } }
+</style>
+
+<div class="tk-header">
+    <h1><i class='bx bx-support'></i> @Localizer["Support Tickets"]</h1>
+    <p>@Localizer["Review user support inquiries, respond to chats, and track resolutions."]</p>
+</div>
+
+<div class="tk-stats">
+    <div class="tk-stat">
+        <div class="tk-stat__icon" style="background: rgba(139,92,246,.12);"><i class='bx bx-conversation' style="color: var(--admin-primary);"></i></div>
+        <div><div class="tk-stat__num" style="color: var(--admin-primary);">@Model.Count()</div><div class="tk-stat__label">Total Tickets</div></div>
+    </div>
+    <div class="tk-stat">
+        <div class="tk-stat__icon" style="background: rgba(239,68,68,.12);"><i class='bx bx-error-circle' style="color: #ef4444;"></i></div>
+        <div><div class="tk-stat__num" style="color: #ef4444;">@openCount</div><div class="tk-stat__label">Open</div></div>
+    </div>
+    <div class="tk-stat">
+        <div class="tk-stat__icon" style="background: rgba(234,179,8,.12);"><i class='bx bx-time' style="color: #eab308;"></i></div>
+        <div><div class="tk-stat__num" style="color: #eab308;">@progressCount</div><div class="tk-stat__label">In Progress</div></div>
+    </div>
+    <div class="tk-stat">
+        <div class="tk-stat__icon" style="background: rgba(34,197,94,.12);"><i class='bx bx-check-double' style="color: #22c55e;"></i></div>
+        <div><div class="tk-stat__num" style="color: #22c55e;">@closedCount</div><div class="tk-stat__label">Closed</div></div>
+    </div>
+</div>
+
+<div class="tk-table-card">
+    <div class="t-header">
+        <h4><i class='bx bx-message-square-dots'></i> @Localizer["All Support Inquiries"]</h4>
+        <span class="badge badge-purple">@Model.Count() @Localizer["tickets"]</span>
+    </div>
+    <div class="tk-table-scroll">
+        @if (Model.Any())
+        {
+            <table class="tk-table">
+                <thead>
+                    <tr>
+                        <th>@Localizer["ID"]</th>
+                        <th>@Localizer["User Email"]</th>
+                        <th>@Localizer["Subject"]</th>
+                        <th>@Localizer["Status"]</th>
+                        <th>@Localizer["Last Updated"]</th>
+                        <th>@Localizer["Actions"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var statusCls = item.Status switch {
+                            "Open"       => "badge-red",
+                            "InProgress" => "badge-yellow",
+                            _            => "badge-green"
+                        };
                         <tr>
-                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">@Localizer["ID"]</th>
-                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">@Localizer["User"]</th>
-                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">@Localizer["Subject"]</th>
-                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">@Localizer["Status"]</th>
-                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">@Localizer["Last Updated"]</th>
-                            <th style="padding: 1rem; border-bottom: 2px solid #e0e0e0;">@Localizer["Actions"]</th>
+                            <td><strong style="font-family: monospace;">#@item.Id</strong></td>
+                            <td><strong>@item.User?.Email</strong></td>
+                            <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis;">@item.Subject</td>
+                            <td><span class="badge @statusCls"><span class="badge-dot"></span>@item.Status</span></td>
+                            <td style="color: var(--admin-text-secondary);">@item.UpdatedAt.ToLocalTime().ToString("MMM dd, yyyy HH:mm")</td>
+                            <td>
+                                <a href="/TicketsAdmin/Chat/@item.Id" class="btn-chat">
+                                    <i class='bx bx-chat'></i> @Localizer["View Chat"]
+                                </a>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model)
-                        {
-                            <tr style="border-bottom: 1px solid #e0e0e0;">
-                                <td style="padding: 1rem;">#@item.Id</td>
-                                <td style="padding: 1rem;">@item.User.Email</td>
-                                <td style="padding: 1rem;">@item.Subject</td>
-                                <td style="padding: 1rem;">
-                                    @{
-                                        string badgeColor = item.Status == "Open" ? "#da1e28" : item.Status == "InProgress" ? "#f1c21b" : "#24a148";
-                                    }
-                                    <span style="background-color: @badgeColor; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">@item.Status</span>
-                                </td>
-                                <td style="padding: 1rem;">@item.UpdatedAt.ToLocalTime().ToString("g")</td>
-                                <td style="padding: 1rem;">
-                                    <a href="/TicketsAdmin/Chat/@item.Id" class="bx--btn bx--btn--sm bx--btn--primary" style="background-color: #0f62fe; color: white; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; font-size: 0.875rem;">@Localizer["View Chat"]</a>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="empty-tk">
+                <i class='bx bx-message-square-detail'></i>
+                <p>@Localizer["No support tickets found."]</p>
             </div>
-        </div>
+        }
     </div>
 </div>
