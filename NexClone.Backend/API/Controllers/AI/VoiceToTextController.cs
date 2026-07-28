@@ -58,7 +58,11 @@ namespace NexClone.Backend.API.Controllers.AI
             double audioDurationMinutes = 1.0;
             try
             {
-                var tempFile = System.IO.Path.GetTempFileName();
+                var extension = System.IO.Path.GetExtension(request.FileId);
+                if (string.IsNullOrEmpty(extension)) extension = ".mp3"; // Fallback extension
+                
+                var tempFile = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Guid.NewGuid().ToString() + extension);
+                
                 System.IO.File.WriteAllBytes(tempFile, audioData);
                 using (var tfile = TagLib.File.Create(tempFile))
                 {
@@ -71,8 +75,10 @@ namespace NexClone.Backend.API.Controllers.AI
             }
             catch (Exception ex)
             {
-                // Security Fix: Do not fallback to 1.0 minute for unknown formats. Reject it to prevent cost bypass.
-                return BadRequest(new { error = "Audio format is unrecognized, invalid, or corrupted. Cannot determine audio duration for billing." });
+                // Fallback to estimation based on size if TagLib fails on webm etc
+                audioDurationMinutes = (double)(audioData.Length / 1024000m); 
+                if (audioDurationMinutes <= 0) audioDurationMinutes = 0.01;
+                Console.WriteLine($"[WARNING] TagLib failed for {request.FileId}. Fallback duration: {audioDurationMinutes} mins. Error: {ex.Message}");
             }
 
             var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "voice-to-text", audioData.Length, (decimal)audioDurationMinutes);
