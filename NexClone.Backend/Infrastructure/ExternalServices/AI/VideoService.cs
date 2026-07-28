@@ -216,7 +216,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                     history.Status = "failed";
                     history.ErrorMessage = ex.Message;
                     await dbContext.SaveChangesAsync();
-                    await usagePolicy.RefundByToolAsync(userId, "kling_advanced_lip_sync", history.CreditsUsed);
+                    await usagePolicy.RefundByToolAsync(userId, "lipsync", history.CreditsUsed);
                 }
             });
         }

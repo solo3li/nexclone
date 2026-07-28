@@ -194,7 +194,7 @@ namespace NexClone.Backend.API.Controllers.AI
                         history.ErrorMessage = result.ErrorMessage;
                         
                         string toolName = history.Type == "image-to-video" ? "kling_avatar_image2video" : 
-                                          history.Type == "lip-sync" ? "kling_advanced_lip_sync" : "UNKNOWN";
+                                          history.Type == "lip-sync" ? "lipsync" : "UNKNOWN";
                         
                         if (toolName != "UNKNOWN" && history.CreditsUsed > 0)
                         {

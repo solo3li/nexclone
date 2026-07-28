@@ -21,7 +21,7 @@ namespace NexClone.Backend.API.Controllers.Admin
         public async Task<IActionResult> Index()
         {
             ViewData["Title"] = "Subscription Plans Management";
-            var plans = await _context.Plans.OrderBy(p => p.Id).ToListAsync();
+            var plans = await _context.Plans.Where(p => !p.IsDeleted).OrderBy(p => p.Id).ToListAsync();
             return View(plans);
         }
 
@@ -211,7 +211,8 @@ namespace NexClone.Backend.API.Controllers.Admin
             var plan = await _context.Plans.FindAsync(id);
             if (plan != null)
             {
-                _context.Plans.Remove(plan);
+                plan.IsDeleted = true;
+                _context.Plans.Update(plan);
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Index));

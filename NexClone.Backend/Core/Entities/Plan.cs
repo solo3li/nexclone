@@ -66,6 +66,9 @@ namespace NexClone.Backend.Core.Entities
         // Default Registration Plan
         public bool IsDefaultRegistrationPlan { get; set; } = false;
 
+        // Soft Delete
+        public bool IsDeleted { get; set; } = false;
+
         // Navigation
         public ICollection<Subscription> Subscriptions { get; set; } = new List<Subscription>();
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();

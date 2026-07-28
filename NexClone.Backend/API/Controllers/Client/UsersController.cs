@@ -66,7 +66,7 @@ namespace NexClone.Backend.API.Controllers.Client
                 .Take(pageSize)
                 .ToListAsync();
 
-            ViewBag.Plans = new SelectList(await _context.Plans.Where(p => p.PriceUsd > 0 && !p.IsDefaultRegistrationPlan).ToListAsync(), "Id", "Name");
+            ViewBag.Plans = new SelectList(await _context.Plans.Where(p => p.PriceUsd > 0 && !p.IsDefaultRegistrationPlan && !p.IsDeleted).ToListAsync(), "Id", "Name");
             ViewBag.CurrentSearch = searchString;
             ViewBag.CurrentPlanId = planId;
             ViewBag.PageNumber = pageNumber;
@@ -92,7 +92,7 @@ namespace NexClone.Backend.API.Controllers.Client
                 .ToListAsync();
 
             ViewData["Title"] = $"User Details - {user.Email}";
-            ViewBag.Plans = new SelectList(await _context.Plans.Where(p => p.PriceUsd > 0 && !p.IsDefaultRegistrationPlan).ToListAsync(), "Id", "Name");
+            ViewBag.Plans = new SelectList(await _context.Plans.Where(p => p.PriceUsd > 0 && !p.IsDefaultRegistrationPlan && !p.IsDeleted).ToListAsync(), "Id", "Name");
             ViewBag.Devices = devices;
             return View(user);
         }
@@ -125,8 +125,8 @@ namespace NexClone.Backend.API.Controllers.Client
             var result = await userManager.CreateAsync(user, password);
             if (result.Succeeded)
             {
-                var targetPlan = await _context.Plans.FirstOrDefaultAsync(p => p.IsDefaultRegistrationPlan) 
-                              ?? await _context.Plans.FirstOrDefaultAsync(p => p.IsFreeTrial);
+                var targetPlan = await _context.Plans.FirstOrDefaultAsync(p => p.IsDefaultRegistrationPlan && !p.IsDeleted) 
+                              ?? await _context.Plans.FirstOrDefaultAsync(p => p.IsFreeTrial && !p.IsDeleted);
 
                 if (targetPlan != null)
                 {

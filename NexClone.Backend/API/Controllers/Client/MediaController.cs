@@ -37,8 +37,8 @@ namespace NexClone.Backend.API.Controllers.Client
             var allowedContentTypes = new System.Collections.Generic.HashSet<string>(System.StringComparer.OrdinalIgnoreCase) 
             { 
                 "image/jpeg", "image/png", "image/webp", "image/gif",
-                "audio/mpeg", "audio/wav", "audio/mp3",
-                "video/mp4", "video/webm"
+                "audio/mpeg", "audio/wav", "audio/mp3", "audio/webm", "audio/ogg", "audio/x-m4a", "audio/aac", "audio/mp4",
+                "video/mp4", "video/webm", "video/ogg"
             };
             
             if (!allowedContentTypes.Contains(request.ContentType))
@@ -50,8 +50,8 @@ namespace NexClone.Backend.API.Controllers.Client
             var allowedExtensions = new System.Collections.Generic.HashSet<string>(System.StringComparer.OrdinalIgnoreCase)
             {
                 ".jpg", ".jpeg", ".png", ".webp", ".gif",
-                ".mp3", ".wav",
-                ".mp4", ".webm"
+                ".mp3", ".wav", ".webm", ".ogg", ".m4a", ".aac",
+                ".mp4"
             };
             
             if (!allowedExtensions.Contains(ext))

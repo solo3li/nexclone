@@ -521,6 +521,11 @@ namespace NexClone.Backend.API.Controllers.Client
             }
 
             user.PhoneNumber = request.PhoneNumber;
+            var updateResult = await _userManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
+            {
+                return BadRequest(new { Message = "فشل في حفظ رقم الهاتف، يرجى المحاولة مرة أخرى." });
+            }
 
             var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
             var fingerprint = request.DeviceFingerprint ?? string.Empty;
@@ -538,8 +543,8 @@ namespace NexClone.Backend.API.Controllers.Client
             var hasActiveSub = await _context.Subscriptions.AnyAsync(s => s.UserId == user.Id && s.Status == "active");
             if (!hasActiveSub)
             {
-                var targetPlan = await _context.Plans.FirstOrDefaultAsync(p => p.IsDefaultRegistrationPlan) 
-                              ?? await _context.Plans.FirstOrDefaultAsync(p => p.IsFreeTrial);
+                var targetPlan = await _context.Plans.FirstOrDefaultAsync(p => p.IsDefaultRegistrationPlan && !p.IsDeleted) 
+                              ?? await _context.Plans.FirstOrDefaultAsync(p => p.IsFreeTrial && !p.IsDeleted);
                 if (targetPlan != null)
                 {
                     bool canClaimFreePlan = true;
