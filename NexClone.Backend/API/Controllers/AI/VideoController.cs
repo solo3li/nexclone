@@ -41,19 +41,27 @@ namespace NexClone.Backend.API.Controllers.AI
             if (image == null || image.Length == 0)
                 return BadRequest(new { error = "Image is required." });
                 
-            // Security: File Size Limits (Image 5MB, Audio 15MB)
-            if (image.Length > 5 * 1024 * 1024)
-                return BadRequest(new { error = "Image file is too large. Maximum size is 5MB." });
-                
-            if (audio != null && audio.Length > 15 * 1024 * 1024)
-                return BadRequest(new { error = "Audio file is too large. Maximum size is 15MB." });
-
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
-            // Validate policy and deduct cost (1 generation flat cost)
-            decimal usageAmountForLimits = audio != null && audio.Length > 0 ? audio.Length : (string.IsNullOrWhiteSpace(prompt) ? 0 : -prompt.Length);
+            // Fetch policy for limits validation
+            var policy = await _usagePolicy.GetToolPolicyForUserAsync(userId, "kling_avatar_image2video");
             
+            if (!policy.Enabled)
+                return BadRequest(new { error = "Your current plan does not have access to this tool." });
+
+            // Validate Dynamic Limits from Plan
+            if (image.Length > policy.MaxImageFileSizeMb * 1024 * 1024)
+                return BadRequest(new { error = $"Image file is too large. Maximum size is {policy.MaxImageFileSizeMb}MB." });
+                
+            if (audio != null && audio.Length > policy.MaxAudioFileSizeMb * 1024 * 1024)
+                return BadRequest(new { error = $"Audio file is too large. Maximum size is {policy.MaxAudioFileSizeMb}MB." });
+                
+            if (!string.IsNullOrWhiteSpace(prompt) && prompt.Length > policy.MaxCharsPerRequest)
+                return BadRequest(new { error = $"Prompt too long. Maximum allowed is {policy.MaxCharsPerRequest} characters." });
+
+            // Just charge (validation is done above)
+            decimal usageAmountForLimits = 0; // Handled explicitly above
             var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "kling_avatar_image2video", usageAmountForLimits, 1, "Standard");
             if (!policyResult.IsAllowed)
                 return BadRequest(new { error = policyResult.ErrorMessage });
@@ -99,18 +107,24 @@ namespace NexClone.Backend.API.Controllers.AI
             if (video == null || video.Length == 0 || audio == null || audio.Length == 0)
                 return BadRequest(new { error = "Video and Audio are required." });
 
-            // Security: File Size Limits (Video 50MB, Audio 15MB)
-            if (video.Length > 50 * 1024 * 1024)
-                return BadRequest(new { error = "Video file is too large. Maximum size is 50MB." });
-                
-            if (audio.Length > 15 * 1024 * 1024)
-                return BadRequest(new { error = "Audio file is too large. Maximum size is 15MB." });
-
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
-            // Fix: Actually validate and charge instead of bypassing
-            decimal usageAmountForLimits = video.Length + audio.Length;
+            // Fetch policy for limits validation
+            var policy = await _usagePolicy.GetToolPolicyForUserAsync(userId, "lipsync");
+            
+            if (!policy.Enabled)
+                return BadRequest(new { error = "Your current plan does not have access to this tool." });
+
+            // Validate Dynamic Limits from Plan
+            if (video.Length > policy.MaxVideoFileSizeMb * 1024 * 1024)
+                return BadRequest(new { error = $"Video file is too large. Maximum size is {policy.MaxVideoFileSizeMb}MB." });
+                
+            if (audio.Length > policy.MaxAudioFileSizeMb * 1024 * 1024)
+                return BadRequest(new { error = $"Audio file is too large. Maximum size is {policy.MaxAudioFileSizeMb}MB." });
+
+            // Just charge (validation is done above)
+            decimal usageAmountForLimits = 0; // Handled explicitly above
             var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "lipsync", usageAmountForLimits, 1, "Standard");
             
             if (!policyResult.IsAllowed)

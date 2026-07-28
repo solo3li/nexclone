@@ -170,9 +170,16 @@
                 <input id="AvatarVideoCostPerGeneration" name="AvatarVideoCostPerGeneration" type="number" step="0.01" class="bx--text-input" value="@(Model?.AvatarVideoCostPerGeneration ?? 1.0m)" />
             </div>
             <div class="bx--form-item">
-                <label for="AvatarVideoMaxFileSizeMb" class="bx--label">@Localizer["Max Audio Size (MB)"]</label>
+                <label for="AvatarVideoMaxFileSizeMb" class="bx--label">@Localizer["Max Image Size (MB)"]</label>
                 <div class="bx--text-input__field-wrapper">
                     <input id="AvatarVideoMaxFileSizeMb" type="number" class="bx--text-input" name="AvatarVideoMaxFileSizeMb" required min="-1" value="@(Model?.AvatarVideoMaxFileSizeMb ?? 15)">
+                </div>
+                <div class="bx--form__helper-text">@Localizer["-1 for unlimited"]</div>
+            </div>
+            <div class="bx--form-item">
+                <label for="AvatarVideoMaxAudioFileSizeMb" class="bx--label">@Localizer["Max Audio Size (MB)"]</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="AvatarVideoMaxAudioFileSizeMb" type="number" class="bx--text-input" name="AvatarVideoMaxAudioFileSizeMb" required min="-1" value="@(Model?.AvatarVideoMaxAudioFileSizeMb ?? 15)">
                 </div>
                 <div class="bx--form__helper-text">@Localizer["-1 for unlimited"]</div>
             </div>
@@ -195,6 +202,20 @@
             <div class="bx--form-item">
                 <label for="LipSyncCostPerGeneration" class="bx--label">@Localizer["Cost Per Generation (Credits)"]</label>
                 <input id="LipSyncCostPerGeneration" name="LipSyncCostPerGeneration" type="number" step="0.01" class="bx--text-input" value="@(Model?.LipSyncCostPerGeneration ?? 1.0m)" />
+            </div>
+            <div class="bx--form-item">
+                <label for="LipSyncMaxVideoFileSizeMb" class="bx--label">@Localizer["Max Video Size (MB)"]</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="LipSyncMaxVideoFileSizeMb" type="number" class="bx--text-input" name="LipSyncMaxVideoFileSizeMb" required min="-1" value="@(Model?.LipSyncMaxVideoFileSizeMb ?? 50)">
+                </div>
+                <div class="bx--form__helper-text">@Localizer["-1 for unlimited"]</div>
+            </div>
+            <div class="bx--form-item">
+                <label for="LipSyncMaxAudioFileSizeMb" class="bx--label">@Localizer["Max Audio Size (MB)"]</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="LipSyncMaxAudioFileSizeMb" type="number" class="bx--text-input" name="LipSyncMaxAudioFileSizeMb" required min="-1" value="@(Model?.LipSyncMaxAudioFileSizeMb ?? 15)">
+                </div>
+                <div class="bx--form__helper-text">@Localizer["-1 for unlimited"]</div>
             </div>
         </div>
 

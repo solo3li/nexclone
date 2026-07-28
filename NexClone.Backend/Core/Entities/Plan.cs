@@ -51,11 +51,14 @@ namespace NexClone.Backend.Core.Entities
         public bool AvatarVideoEnabled { get; set; } = true;
         public decimal AvatarVideoCostPerGeneration { get; set; } = 1.0m;
         public int AvatarVideoMaxFileSizeMb { get; set; } = 15;
+        public int AvatarVideoMaxAudioFileSizeMb { get; set; } = 15;
         public int AvatarVideoMaxCharsPerRequest { get; set; } = 500;
 
         // Advanced Lip-Sync Settings
         public bool LipSyncEnabled { get; set; } = true;
         public decimal LipSyncCostPerGeneration { get; set; } = 1.0m;
+        public int LipSyncMaxVideoFileSizeMb { get; set; } = 50;
+        public int LipSyncMaxAudioFileSizeMb { get; set; } = 15;
 
         // Free Trial Flag
         public bool IsFreeTrial { get; set; } = false;

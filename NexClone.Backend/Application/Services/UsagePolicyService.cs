@@ -12,6 +12,12 @@ namespace NexClone.Backend.Application.Services
         // -1 means unlimited
         public int MaxCharsPerRequest { get; set; } = 150; 
         public long MaxFileSizeMb { get; set; } = 25;
+        
+        // Extended media limits
+        public long MaxImageFileSizeMb { get; set; } = 15;
+        public long MaxAudioFileSizeMb { get; set; } = 15;
+        public long MaxVideoFileSizeMb { get; set; } = 50;
+        
         // Cost per unit. If not set, we will fallback to LegacyDbContext
         public decimal? CostPerUnit { get; set; }
         public int BlockSize { get; set; } = 1;
@@ -32,6 +38,23 @@ namespace NexClone.Backend.Application.Services
         public UsagePolicyService(ApplicationDbContext context)
         {
             _context = context;
+        }
+
+        public async Task<ToolPolicy> GetToolPolicyForUserAsync(Guid userId, string toolId, string quality = "Standard")
+        {
+            var user = await _context.Users
+                .Include(u => u.Subscriptions)
+                    .ThenInclude(s => s.Plan)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null) return new ToolPolicy();
+
+            var activeSubscription = user.Subscriptions
+                .FirstOrDefault(s => s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow);
+
+            if (activeSubscription == null) return new ToolPolicy();
+
+            return GetToolPolicy(activeSubscription.Plan, toolId, quality);
         }
 
         public async Task<PolicyValidationResult> ValidateAndChargeAsync(Guid userId, string toolId, decimal usageAmountForLimits, decimal? usageAmountForCost = null, string quality = "Standard")
@@ -68,14 +91,6 @@ namespace NexClone.Backend.Application.Services
             
             if (toolId == "voice-to-text" && toolPolicy.MaxFileSizeMb != -1 && usageAmountForLimits > (toolPolicy.MaxFileSizeMb * 1024 * 1024))
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"File too large. Maximum allowed size is {toolPolicy.MaxFileSizeMb}MB." };
-
-            if (toolId == "kling_avatar_image2video")
-            {
-                if (usageAmountForLimits > 0 && toolPolicy.MaxFileSizeMb != -1 && usageAmountForLimits > (toolPolicy.MaxFileSizeMb * 1024 * 1024))
-                    return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Audio file too large. Maximum allowed size is {toolPolicy.MaxFileSizeMb}MB." };
-                if (usageAmountForLimits < 0 && toolPolicy.MaxCharsPerRequest != -1 && Math.Abs((int)usageAmountForLimits) > toolPolicy.MaxCharsPerRequest)
-                    return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Prompt too long. Maximum allowed is {toolPolicy.MaxCharsPerRequest} characters." };
-            }
 
             decimal costPerUnit = toolPolicy.CostPerUnit ?? GetLegacyCostPerUnit(toolId);
             decimal amountForCost = usageAmountForCost ?? usageAmountForLimits;
@@ -191,13 +206,16 @@ namespace NexClone.Backend.Application.Services
             {
                 policy.Enabled = plan.AvatarVideoEnabled;
                 policy.CostPerUnit = plan.AvatarVideoCostPerGeneration;
-                policy.MaxFileSizeMb = plan.AvatarVideoMaxFileSizeMb;
+                policy.MaxImageFileSizeMb = plan.AvatarVideoMaxFileSizeMb;
+                policy.MaxAudioFileSizeMb = plan.AvatarVideoMaxAudioFileSizeMb;
                 policy.MaxCharsPerRequest = plan.AvatarVideoMaxCharsPerRequest;
             }
-            else if (toolId == "kling_advanced_lip_sync")
+            else if (toolId == "kling_advanced_lip_sync" || toolId == "lipsync")
             {
                 policy.Enabled = plan.LipSyncEnabled;
                 policy.CostPerUnit = plan.LipSyncCostPerGeneration;
+                policy.MaxVideoFileSizeMb = plan.LipSyncMaxVideoFileSizeMb;
+                policy.MaxAudioFileSizeMb = plan.LipSyncMaxAudioFileSizeMb;
             }
 
             return policy;
