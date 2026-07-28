@@ -249,6 +249,14 @@ html[dir="rtl"] .bx--data-table td { text-align: right; }
     background-position: right 1.25rem center;
     background-size: 16px;
     padding-right: 3rem !important;
+    /* Fix text clipping */
+    height: auto !important;
+    min-height: 44px !important;
+    line-height: 1.5 !important;
+    overflow: visible !important;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    cursor: pointer;
 }
 
 html[dir="rtl"] .bx--select-input {
@@ -256,6 +264,23 @@ html[dir="rtl"] .bx--select-input {
     padding-left: 3rem !important;
     padding-right: 1.25rem !important;
 }
+
+/* Fix Carbon's hardcoded height on select wrapper */
+.bx--select,
+.bx--select-input__wrapper {
+    position: relative;
+    height: auto !important;
+}
+
+/* Fix text-input height consistency */
+.bx--text-input {
+    height: auto !important;
+    min-height: 44px !important;
+    line-height: 1.5 !important;
+}
+
+/* Hide Carbon's custom svg arrow (we use CSS background-image) */
+.bx--select__arrow { display: none !important; }
 
 /* ==========================================================================
    BUTTONS (Animated Gradients & Scaling)
