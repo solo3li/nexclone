@@ -144,7 +144,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
             content.Add(streamContent, "file", fileName);
             
             // Add model
-            content.Add(new StringContent("gpt-4o-mini-transcribe"), "model");
+            content.Add(new StringContent("whisper-1"), "model");
             // Add response format
             content.Add(new StringContent("text"), "response_format");
             // Add prompt
