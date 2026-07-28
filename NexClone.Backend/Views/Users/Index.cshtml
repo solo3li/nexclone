@@ -191,6 +191,19 @@
         transition: var(--trans-smooth);
         position: relative;
     }
+    /* Large submit buttons (filter form) */
+    .btn-submit {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 10px 20px; border-radius: 10px;
+        font-size: 0.85rem; font-weight: 700;
+        white-space: nowrap;
+        text-decoration: none; border: none; cursor: pointer;
+        transition: var(--trans-smooth);
+    }
+    .btn-submit-primary { background: rgba(139,92,246,.1); color: var(--admin-primary); }
+    .btn-submit-primary:hover { background: var(--admin-primary); color: #fff; transform: translateY(-2px); }
+    .btn-submit-danger { background: rgba(239,68,68,.1); color: #ef4444; }
+    .btn-submit-danger:hover { background: #ef4444; color: #fff; transform: translateY(-2px); }
     /* Tooltip */
     .btn-action[title]:hover::after {
         content: attr(title);
@@ -381,13 +394,13 @@
                     </select>
                 </div>
             </div>
-            <div style="display: flex; gap: 0.5rem; align-items: flex-end;">
-                <button type="submit" class="btn-action btn-view" style="padding: 10px 20px; border-radius: 10px;">
+            <div style="display: flex; gap: 0.5rem; align-items: flex-end; flex-shrink: 0;">
+                <button type="submit" class="btn-submit btn-submit-primary">
                     <i class='bx bx-search'></i> @Localizer["Search & Filter"]
                 </button>
                 @if (!string.IsNullOrEmpty(ViewBag.CurrentSearch as string) || ViewBag.CurrentPlanId != null)
                 {
-                    <a href="@Url.Action("Index")" class="btn-action btn-danger" style="padding: 10px 16px; border-radius: 10px;">
+                    <a href="@Url.Action("Index")" class="btn-submit btn-submit-danger">
                         <i class='bx bx-x'></i> @Localizer["Clear"]
                     </a>
                 }
