@@ -121,10 +121,28 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
     }
   };
 
+  /* ── Cross-browser Media Stream ── */
+  const getAudioStream = async (): Promise<MediaStream> => {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      return await navigator.mediaDevices.getUserMedia({ audio: true });
+    }
+    const legacy = (navigator as any).getUserMedia ||
+      (navigator as any).webkitGetUserMedia ||
+      (navigator as any).mozGetUserMedia ||
+      (navigator as any).msGetUserMedia;
+
+    if (legacy) {
+      return new Promise((resolve, reject) => {
+        legacy.call(navigator, { audio: true }, resolve, reject);
+      });
+    }
+    throw new Error("Microphone access requires HTTPS or localhost when using Chrome/Edge over IP.");
+  };
+
   /* ── Voice Recording Logic ── */
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await getAudioStream();
       mediaRecorderRef.current = new MediaRecorder(stream);
       audioChunksRef.current = [];
 
@@ -140,7 +158,7 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
         setRecordingTime((prev) => prev + 1);
       }, 1000);
     } catch (err: any) {
-      alert("Microphone permission denied or not available: " + err.message);
+      alert("Microphone Access Error:\n" + err.message + "\n\nNote: If accessing over plain HTTP IP, Chrome requires HTTPS or setting chrome://flags/#unsafely-treat-insecure-origin-as-secure for this IP.");
     }
   };
 
@@ -342,7 +360,7 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
                       href={formatMediaUrl(msg.attachmentUrl)}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-xl border border-white/10 hover:bg-white/20 text-sm text-sky-400 font-semibold"
+                      className="inline-block px-4 py-2 bg-white/10 rounded-xl border border-white/10 hover:bg-white/20 text-sm text-sky-400 font-semibold"
                     >
                       📎 Download File
                     </a>

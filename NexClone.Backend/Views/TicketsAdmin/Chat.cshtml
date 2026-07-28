@@ -464,6 +464,24 @@
             document.getElementById('reply-preview-bar').style.display = 'none';
         };
 
+        /* ── Cross-browser Secure Audio Stream Helper ── */
+        async function getAudioStream() {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                return await navigator.mediaDevices.getUserMedia({ audio: true });
+            }
+            const legacyGetUserMedia = navigator.getUserMedia ||
+                navigator.webkitGetUserMedia ||
+                navigator.mozGetUserMedia ||
+                navigator.msGetUserMedia;
+            
+            if (legacyGetUserMedia) {
+                return new Promise((resolve, reject) => {
+                    legacyGetUserMedia.call(navigator, { audio: true }, resolve, reject);
+                });
+            }
+            throw new Error("Microphone access requires HTTPS or localhost when accessed from modern browsers over IP.");
+        }
+
         /* ── Voice Recorder Engine ── */
         let mediaRecorder = null;
         let audioChunks = [];
@@ -478,7 +496,7 @@
             }
 
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const stream = await getAudioStream();
                 mediaRecorder = new MediaRecorder(stream);
                 audioChunks = [];
 
@@ -505,7 +523,7 @@
                 }, 1000);
 
             } catch (err) {
-                alert("Microphone permission denied or not available: " + err.message);
+                alert("Microphone Access Error:\n" + err.message + "\n\nNote: If accessing over HTTP IP, Chrome requires HTTPS or configuring chrome://flags/#unsafely-treat-insecure-origin-as-secure");
             }
         };
 
@@ -542,7 +560,6 @@
                 const form = document.getElementById('admin-reply-form');
                 const formData = new FormData(form);
 
-                // Create a File from recorded audio blob
                 const voiceFile = new File([recordedAudioBlob], `voice_note_${Date.now()}.webm`, { type: 'audio/webm' });
                 formData.set('attachment', voiceFile);
 
