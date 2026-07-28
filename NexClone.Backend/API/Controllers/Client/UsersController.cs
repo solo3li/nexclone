@@ -74,6 +74,12 @@ namespace NexClone.Backend.API.Controllers.Client
             ViewBag.PageNumber = pageNumber;
             ViewBag.TotalPages = totalPages;
 
+            // Stats for the dashboard cards
+            ViewBag.TotalUsers      = await _context.Users.CountAsync();
+            ViewBag.VerifiedUsers   = await _context.Users.CountAsync(u => u.EmailConfirmed || u.IsVerified);
+            ViewBag.UnverifiedUsers = await _context.Users.CountAsync(u => !u.EmailConfirmed && !u.IsVerified);
+            ViewBag.AdminUsers      = await _context.Users.CountAsync(u => u.IsStaff);
+
             return View(users);
         }
 
