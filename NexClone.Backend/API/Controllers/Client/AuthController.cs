@@ -103,6 +103,7 @@ namespace NexClone.Backend.API.Controllers.Client
 
             // Check if this fingerprint or IP has ever registered an account
             bool hasClaimedFreeTrial = false;
+            bool freeTrialAssigned = false;
             
             if (!string.IsNullOrEmpty(fingerprint))
             {
@@ -144,11 +145,32 @@ namespace NexClone.Backend.API.Controllers.Client
             });
 
 
+            // Assign free trial plan if eligible
+            if (!hasClaimedFreeTrial)
+            {
+                var targetPlan = await _context.Plans.FirstOrDefaultAsync(p => p.IsDefaultRegistrationPlan)
+                              ?? await _context.Plans.FirstOrDefaultAsync(p => p.IsFreeTrial);
+
+                if (targetPlan != null)
+                {
+                    _context.Subscriptions.Add(new Subscription
+                    {
+                        UserId = user.Id,
+                        PlanId = targetPlan.Id,
+                        StartDate = DateTime.UtcNow,
+                        EndDate = DateTime.UtcNow.AddDays(targetPlan.DurationDays),
+                        Status = "active"
+                    });
+                    freeTrialAssigned = true;
+                }
+            }
+
             await _context.SaveChangesAsync();
 
             var verificationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var origin = Request.Headers["Origin"].FirstOrDefault() ?? "http://178.62.192.74:3000";
-            var verifyLink = $"{origin}/ar/verify-email?email={Uri.EscapeDataString(user.Email)}&token={Uri.EscapeDataString(verificationToken)}";
+            var locale = origin.Contains("localhost") ? "ar" : "ar";
+            var verifyLink = $"{origin}/{locale}/verify-email?email={Uri.EscapeDataString(user.Email)}&token={Uri.EscapeDataString(verificationToken)}";
 
             string emailHtml = $@"
 <div style='font-family: Arial, sans-serif; background-color: #0a0015; color: #ffffff; padding: 40px; text-align: center; border-radius: 8px;'>
@@ -159,7 +181,7 @@ namespace NexClone.Backend.API.Controllers.Client
 
             await _emailService.SendEmailAsync(user.Email, user.FullName ?? user.UserName ?? "User", "تفعيل الحساب - NexMedia", emailHtml);
 
-            return Ok(new { Message = "تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني لتفعيل الحساب.", HasClaimedFreeTrial = hasClaimedFreeTrial });
+            return Ok(new { Message = "تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني لتفعيل الحساب.", FreeTrialAssigned = freeTrialAssigned });
 
         }
 

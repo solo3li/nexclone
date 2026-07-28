@@ -46,7 +46,7 @@ const strengthLabels = {
 // ── Framer Motion Variants ──────────────────────────────────────
 const errorVariants = {
   hidden: { opacity: 0, y: -6, height: 0 },
-  visible: { opacity: 1, y: 0, height: "auto", transition: { duration: 0.25, ease: "easeOut" } },
+  visible: { opacity: 1, y: 0, height: "auto", transition: { duration: 0.25, ease: "easeOut" as const } },
   exit: { opacity: 0, y: -4, height: 0, transition: { duration: 0.18 } },
 };
 
@@ -154,13 +154,13 @@ export default function RegisterPage() {
         refCode: refCode,
       });
 
-      const hasClaimedFreeTrial = res.data?.HasClaimedFreeTrial ?? false;
+      const freeTrialAssigned = res.data?.FreeTrialAssigned ?? false;
 
-      if (!hasClaimedFreeTrial) {
-        // First-time user → Free Trial page
-        router.push(`/${locale}/free-trial`);
+      if (freeTrialAssigned) {
+        // Got free trial → show free-trial page (router.push handles locale automatically)
+        router.push("/free-trial");
       } else {
-        // Already claimed → show email verification success screen
+        // No free trial (already used or plan doesn't exist) → show email verification screen
         setIsSuccess(true);
       }
     } catch (err: any) {
