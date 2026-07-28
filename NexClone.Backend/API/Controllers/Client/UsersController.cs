@@ -39,6 +39,8 @@ namespace NexClone.Backend.API.Controllers.Client
             if (pageNumber < 1) pageNumber = 1;
 
             var query = _context.Users
+                .Include(u => u.Wallets)
+                    .ThenInclude(w => w.WalletType)
                 .Include(u => u.Subscriptions.Where(s => s.Status == "active" && s.Plan.PriceUsd > 0 && !s.Plan.IsDefaultRegistrationPlan))
                     .ThenInclude(s => s.Plan)
                 .AsQueryable();
@@ -78,6 +80,8 @@ namespace NexClone.Backend.API.Controllers.Client
         public async Task<IActionResult> Details(Guid id)
         {
             var user = await _context.Users
+                .Include(u => u.Wallets)
+                    .ThenInclude(w => w.WalletType)
                 .Include(u => u.Subscriptions)
                     .ThenInclude(s => s.Plan)
                 .Include(u => u.Subscriptions)
@@ -502,6 +506,34 @@ namespace NexClone.Backend.API.Controllers.Client
             }
 
             return Content("Seeded");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddWalletCredits(Guid userId, int walletTypeId, decimal amount)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return NotFound();
+
+            var wallet = await _context.UserWallets.FirstOrDefaultAsync(w => w.UserId == userId && w.WalletTypeId == walletTypeId);
+            if (wallet != null)
+            {
+                wallet.Balance += amount;
+                wallet.UpdatedAt = DateTime.UtcNow;
+            }
+            else
+            {
+                _context.UserWallets.Add(new Core.Entities.UserWallet
+                {
+                    UserId = userId,
+                    WalletTypeId = walletTypeId,
+                    Balance = amount,
+                    UpdatedAt = DateTime.UtcNow
+                });
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Details), new { id = userId });
         }
     }
 }

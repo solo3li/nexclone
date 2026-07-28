@@ -131,36 +131,38 @@
                     </div>
                 </form>
             </div>
-            <!-- Manage Credits Section -->
+            <!-- User Wallets Section -->
             <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem;">
-                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">@Localizer["Manage Credits"]</h3>
+                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">@Localizer["User Wallets & Balances"]</h3>
                 
-                <form asp-action="AdjustCredits" method="post">
-                    <input type="hidden" name="userId" value="@Model.Id" />
-                    
-                    <div style="display: flex; gap: 1rem; align-items: flex-end; margin-bottom: 1rem;">
-                        <div class="bx--form-item" style="flex: 1;">
-                            <label for="amount" class="bx--label">@Localizer["Amount"]</label>
-                            <div class="bx--text-input__field-wrapper">
-                                <input id="amount" type="number" class="bx--text-input" name="amount" required min="0.01" step="0.01" placeholder="Enter amount...">
+                @if (Model.Wallets == null || !Model.Wallets.Any())
+                {
+                    <p style="color: #525252;">@Localizer["No wallets found for this user."]</p>
+                }
+                else
+                {
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
+                        @foreach(var wallet in Model.Wallets)
+                        {
+                            <div style="background: #ffffff; padding: 1.5rem; border: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong style="font-size: 1.1rem; color: #161616;">@wallet.WalletType.Name</strong>
+                                    <p style="font-size: 1.25rem; font-weight: bold; color: #0f62fe; margin-top: 0.5rem;">@wallet.Balance.ToString("0.00") <span style="font-size: 0.875rem; font-weight: normal; color: #525252;">Credits</span></p>
+                                </div>
+                                <form asp-action="AddWalletCredits" method="post" style="display: flex; gap: 0.5rem; align-items: flex-end; margin: 0;">
+                                    <input type="hidden" name="userId" value="@Model.Id" />
+                                    <input type="hidden" name="walletTypeId" value="@wallet.WalletTypeId" />
+                                    <div class="bx--form-item">
+                                        <div class="bx--text-input__field-wrapper">
+                                            <input type="number" class="bx--text-input" name="amount" required step="0.01" placeholder="+ or - amount" style="width: 120px;">
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="bx--btn bx--btn--primary bx--btn--sm">@Localizer["Add/Remove"]</button>
+                                </form>
                             </div>
-                        </div>
-                        <div class="bx--form-item" style="flex: 1;">
-                            <label for="operation" class="bx--label">@Localizer["Operation"]</label>
-                            <div class="bx--select">
-                                <select id="operation" name="operation" class="bx--select-input" required>
-                                    <option value="add">Add (+)</option>
-                                    <option value="remove">Remove (-)</option>
-                                </select>
-                                <svg focusable="false" preserveAspectRatio="xMidYMid meet" style="will-change: transform;" xmlns="http://www.w3.org/2000/svg" class="bx--select__arrow" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 11L3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z"></path></svg>
-                            </div>
-                        </div>
+                        }
                     </div>
-
-                    <div>
-                        <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Update Credits"]</button>
-                    </div>
-                </form>
+                }
             </div>
 
             <!-- Assign Plan Section -->

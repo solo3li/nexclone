@@ -96,7 +96,14 @@
                                         }
                                     </td>
                                     <td>@user.Country</td>
-                                    <td>@user.AvailableCredits</td>
+                                    <td>
+                                        @{
+                                            var walletsJson = System.Text.Json.JsonSerializer.Serialize(user.Wallets.Select(w => new { Name = w.WalletType.Name, Balance = w.Balance }));
+                                        }
+                                        <button class="bx--btn bx--btn--tertiary bx--btn--sm" onclick="showWalletsModal(this)" data-wallets="@walletsJson">
+                                            @Localizer["View Balances"]
+                                        </button>
+                                    </td>
                                     <td>
                                         @if (currentSub?.Plan != null)
                                         {
@@ -210,3 +217,43 @@
         </div>
     </div>
 </div>
+
+<div id="walletsModal" class="bx--modal" role="dialog" aria-modal="true" tabindex="-1">
+    <div class="bx--modal-container">
+        <div class="bx--modal-header">
+            <p class="bx--modal-header__label bx--type-delta">User Wallets</p>
+            <p class="bx--modal-header__heading bx--type-beta">Balances</p>
+            <button class="bx--modal-close" type="button" data-modal-close aria-label="close modal" onclick="closeWalletsModal()">
+                <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="16" height="16" viewBox="0 0 32 32" aria-hidden="true" class="bx--modal-close__icon"><path d="M24 9.4L22.6 8 16 14.6 9.4 8 8 9.4 14.6 16 8 22.6 9.4 24 16 17.4 22.6 24 24 22.6 17.4 16 24 9.4z"></path></svg>
+            </button>
+        </div>
+        <div class="bx--modal-content" id="walletsModalContent">
+            <!-- Wallets will be injected here -->
+        </div>
+    </div>
+</div>
+
+<script>
+function showWalletsModal(btn) {
+    var wallets = JSON.parse(btn.getAttribute('data-wallets'));
+    var content = document.getElementById('walletsModalContent');
+    content.innerHTML = '';
+    
+    if (wallets.length === 0) {
+        content.innerHTML = '<p style="margin-bottom: 1rem;">No wallets found for this user.</p>';
+    } else {
+        var table = '<table class="bx--data-table" style="margin-bottom: 2rem;"><thead><tr><th>Wallet</th><th>Balance</th></tr></thead><tbody>';
+        wallets.forEach(function(w) {
+            table += '<tr><td>' + w.Name + '</td><td>' + w.Balance.toFixed(2) + '</td></tr>';
+        });
+        table += '</tbody></table>';
+        content.innerHTML = table;
+    }
+    
+    document.getElementById('walletsModal').classList.add('is-visible');
+}
+
+function closeWalletsModal() {
+    document.getElementById('walletsModal').classList.remove('is-visible');
+}
+</script>
