@@ -103,6 +103,8 @@
         box-shadow: var(--shadow-soft);
         overflow: hidden;
     }
+    /* Scrollable table wrapper */
+    .users-table-scroll { overflow-x: auto; width: 100%; }
     .users-table-card .table-header {
         padding: 1.5rem 1.75rem;
         border-bottom: 1px solid var(--admin-border-light);
@@ -118,14 +120,14 @@
     .users-table-card .table-header p {
         font-size: 0.85rem; color: var(--admin-text-secondary); margin: 4px 0 0 0;
     }
-    .users-table-card table { width: 100%; border-collapse: collapse; }
+    .users-table-card table { width: 100%; border-collapse: collapse; min-width: 900px; }
     .users-table-card thead tr {
         background: var(--admin-surface-2, rgba(139,92,246,.06));
         border-bottom: 2px solid var(--admin-border-light);
     }
     .users-table-card th {
-        padding: 0.9rem 1.25rem;
-        font-size: 0.75rem; font-weight: 800;
+        padding: 0.75rem 0.85rem;
+        font-size: 0.72rem; font-weight: 800;
         text-transform: uppercase; letter-spacing: 0.06em;
         color: var(--admin-text-secondary);
         white-space: nowrap;
@@ -139,24 +141,25 @@
     .users-table-card tbody tr:last-child { border-bottom: none; }
     .users-table-card tbody tr:hover { background: rgba(139,92,246,.04); }
     .users-table-card td {
-        padding: 1rem 1.25rem;
-        font-size: 0.9rem;
+        padding: 0.75rem 0.85rem;
+        font-size: 0.85rem;
         color: var(--admin-text-primary);
         vertical-align: middle;
+        white-space: nowrap;
     }
 
     /* User avatar cell */
-    .user-avatar-cell { display: flex; align-items: center; gap: 0.75rem; }
+    .user-avatar-cell { display: flex; align-items: center; gap: 0.6rem; min-width: 160px; max-width: 220px; }
     .user-avatar {
-        width: 38px; height: 38px; border-radius: 50%;
+        width: 34px; height: 34px; border-radius: 50%;
         background: linear-gradient(135deg, var(--admin-primary) 0%, #a855f7 100%);
         display: flex; align-items: center; justify-content: center;
-        font-weight: 700; font-size: 0.85rem; color: #fff;
+        font-weight: 700; font-size: 0.8rem; color: #fff;
         flex-shrink: 0;
         box-shadow: 0 4px 12px rgba(139,92,246,.3);
     }
-    .user-email { font-weight: 600; font-size: 0.88rem; color: var(--admin-text-primary); }
-    .user-id { font-size: 0.72rem; color: var(--admin-text-secondary); margin-top: 2px; font-family: monospace; }
+    .user-email { font-weight: 600; font-size: 0.82rem; color: var(--admin-text-primary); overflow: hidden; text-overflow: ellipsis; max-width: 170px; }
+    .user-id { font-size: 0.68rem; color: var(--admin-text-secondary); margin-top: 1px; font-family: monospace; }
 
     /* Badges */
     .badge {
@@ -178,14 +181,26 @@
     .badge-orange { background: rgba(249,115,22,.12); color: #ea580c; }
     .badge-orange .badge-dot { background: #f97316; }
 
-    /* Action buttons */
-    .action-btns { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    /* Action buttons — icon-only with tooltip */
+    .action-btns { display: flex; gap: 0.35rem; align-items: center; }
     .btn-action {
-        display: inline-flex; align-items: center; gap: 5px;
-        padding: 6px 14px; border-radius: 8px;
-        font-size: 0.8rem; font-weight: 600;
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 32px; height: 32px; border-radius: 8px;
+        font-size: 1rem;
         text-decoration: none; border: none; cursor: pointer;
         transition: var(--trans-smooth);
+        position: relative;
+    }
+    /* Tooltip */
+    .btn-action[title]:hover::after {
+        content: attr(title);
+        position: absolute;
+        bottom: calc(100% + 6px);
+        left: 50%; transform: translateX(-50%);
+        background: #1e293b; color: #fff;
+        font-size: 0.7rem; font-weight: 600;
+        padding: 4px 8px; border-radius: 6px;
+        white-space: nowrap; pointer-events: none; z-index: 99;
     }
     .btn-action i { font-size: 1rem; }
     .btn-view   { background: rgba(139,92,246,.1); color: var(--admin-primary); }
@@ -393,6 +408,7 @@
         </div>
     </div>
 
+    <div class="users-table-scroll">
     <table>
         <thead>
             <tr>
@@ -456,8 +472,8 @@
                             @{
                                 var walletsJson = System.Text.Json.JsonSerializer.Serialize(user.Wallets.Select(w => new { Name = w.WalletType.Name, Balance = w.Balance }));
                             }
-                            <button class="btn-action btn-wallet" onclick="showWalletsModal(this)" data-wallets="@walletsJson">
-                                <i class='bx bx-wallet'></i> @Localizer["View Balances"]
+                        <button class="btn-action btn-wallet" onclick="showWalletsModal(this)" data-wallets="@walletsJson" title="View Balances">
+                                <i class='bx bx-wallet'></i>
                             </button>
                         </td>
                         <td>
@@ -491,17 +507,17 @@
                         </td>
                         <td>
                             <div class="action-btns">
-                                <a href="@Url.Action("Details", new { id = user.Id })" class="btn-action btn-view">
-                                    <i class='bx bx-show'></i>@Localizer["View"]
+                                <a href="@Url.Action("Details", new { id = user.Id })" class="btn-action btn-view" title="@Localizer["View"]">
+                                    <i class='bx bx-show'></i>
                                 </a>
-                                <a href="@Url.Action("Edit", new { id = user.Id })" class="btn-action btn-edit">
-                                    <i class='bx bx-edit'></i>@Localizer["Edit"]
+                                <a href="@Url.Action("Edit", new { id = user.Id })" class="btn-action btn-edit" title="@Localizer["Edit"]">
+                                    <i class='bx bx-edit'></i>
                                 </a>
                                 <form asp-action="Delete" asp-route-id="@user.Id" method="post"
                                       data-confirm="Are you sure you want to delete this user? This action cannot be undone."
                                       style="margin: 0;">
-                                    <button type="submit" class="btn-action btn-danger">
-                                        <i class='bx bx-trash'></i>@Localizer["Delete"]
+                                    <button type="submit" class="btn-action btn-danger" title="@Localizer["Delete"]">
+                                        <i class='bx bx-trash'></i>
                                     </button>
                                 </form>
                             </div>
@@ -511,6 +527,7 @@
             }
         </tbody>
     </table>
+    </div><!-- end users-table-scroll -->
 
     <!-- Pagination -->
     @if (ViewBag.TotalPages > 1)
