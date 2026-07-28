@@ -5,8 +5,8 @@ import { motion } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import {
-  Activity, Crown, History, User as UserIcon, Lock,
-  Image as ImageIcon, Loader2, Save, Upload, LifeBuoy, MessageSquarePlus, Share2
+  Activity, Crown, User as UserIcon, Lock,
+  Image as ImageIcon, Loader2, Save, Upload
 } from "lucide-react";
 import api from "../../../src/utils/api";
 import { useAppStore } from "../../../src/store/useAppStore";
@@ -265,33 +265,7 @@ export default function ProfilePage() {
               </div>
             </motion.div>
 
-            {/* Support Tickets Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
-              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 relative overflow-hidden"
-            >
-              <div className="absolute bottom-0 left-0 w-40 h-40 bg-gradient-to-tr from-violet-600/10 to-transparent blur-2xl" />
-              <div className="flex items-center gap-3 mb-5">
-                <div className="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center border border-violet-500/30">
-                  <LifeBuoy className="w-5 h-5 text-violet-400" />
-                </div>
-                <h2 className="text-xl font-bold text-white">
-                  {isRtl ? "تذاكر الدعم" : "Support Tickets"}
-                </h2>
-              </div>
-              <p className="text-white/50 text-sm mb-5 leading-relaxed">
-                {isRtl
-                  ? "هل واجهت مشكلة أو لديك سؤال؟ تواصل مع فريق الدعم مباشرة."
-                  : "Having an issue or a question? Contact our support team directly."}
-              </p>
-              <button
-                onClick={() => router.push(`/${locale}/profile/tickets`)}
-                className="w-full py-3 flex items-center justify-center gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-violet-500/20"
-              >
-                <MessageSquarePlus className="w-5 h-5" />
-                {isRtl ? "تذاكري" : "My Tickets"}
-              </button>
-            </motion.div>
+
 
 
 
