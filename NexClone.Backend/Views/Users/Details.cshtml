@@ -4,175 +4,358 @@
 @{
     ViewData["Title"] = "User Details";
     var currentSub = Model.Subscriptions?.FirstOrDefault(s => s.Status != null && s.Status.ToLower() == "active");
+    var initials = string.IsNullOrEmpty(Model.Email) ? "?" : Model.Email.Substring(0, 1).ToUpper();
 }
 
-<div class="bx--grid bx--grid--full-width">
-    <div class="bx--row" style="margin-bottom: 2rem;">
-        <div class="bx--col">
-            @if (TempData["Success"] != null)
-            {
-                <div class="bx--inline-notification bx--inline-notification--success" role="alert" style="margin-bottom: 1rem; width: 100%; max-width: none;">
-                    <div class="bx--inline-notification__details">
-                        <div class="bx--inline-notification__text-wrapper">
-                            <p class="bx--inline-notification__title">@Localizer["Success:"]</p>
-                            <p class="bx--inline-notification__subtitle">@TempData["Success"]</p>
-                        </div>
+<style>
+    /* ── User Details Premium UI ── */
+    .details-header {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem;
+    }
+    .details-header-left { display: flex; align-items: center; gap: 1.25rem; }
+    .details-avatar {
+        width: 64px; height: 64px; border-radius: 18px;
+        background: linear-gradient(135deg, var(--admin-primary) 0%, #a855f7 100%);
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 800; font-size: 1.8rem; color: #fff;
+        box-shadow: 0 8px 25px rgba(139,92,246,.4);
+        flex-shrink: 0;
+    }
+    .details-header-info h1 {
+        font-size: 1.6rem; font-weight: 800; margin: 0 0 4px 0;
+        color: var(--admin-text-primary);
+    }
+    .details-header-info p { margin: 0; color: var(--admin-text-secondary); font-size: 0.9rem; }
+    .details-header-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+    /* Notification */
+    .det-notif {
+        padding: 1rem 1.5rem; border-radius: 12px; margin-bottom: 1.5rem;
+        display: flex; align-items: center; gap: 0.75rem; font-weight: 600; font-size: 0.9rem;
+    }
+    .det-notif i { font-size: 1.3rem; }
+    .det-notif-success { background: rgba(34,197,94,.1); color: #16a34a; border: 1px solid rgba(34,197,94,.2); }
+    .det-notif-error   { background: rgba(239,68,68,.1);  color: #dc2626; border: 1px solid rgba(239,68,68,.2); }
+
+    /* Two-column grid */
+    .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+
+    /* Cards */
+    .det-card {
+        background: var(--admin-surface);
+        border: 1px solid var(--admin-border-light);
+        border-radius: var(--admin-radius-lg);
+        box-shadow: var(--shadow-soft);
+        overflow: hidden;
+    }
+    .det-card-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--admin-border-light);
+        display: flex; align-items: center; gap: 0.6rem;
+    }
+    .det-card-header h3 { font-size: 1rem; font-weight: 700; margin: 0; color: var(--admin-text-primary); }
+    .det-card-header i { color: var(--admin-primary); font-size: 1.2rem; }
+    .det-card-body { padding: 1.5rem; }
+
+    /* Info grid inside profile card */
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .info-item label {
+        display: block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.05em; color: var(--admin-text-secondary); margin-bottom: 4px;
+    }
+    .info-item .value { font-size: 0.92rem; font-weight: 600; color: var(--admin-text-primary); }
+    .info-item.full { grid-column: span 2; }
+
+    /* Subscription mini card */
+    .sub-mini {
+        background: rgba(139,92,246,.06);
+        border: 1px solid rgba(139,92,246,.2);
+        border-radius: 10px; padding: 1rem 1.25rem;
+        margin-top: 0.75rem;
+        display: flex; gap: 2rem; flex-wrap: wrap;
+    }
+    .sub-mini-item label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--admin-text-secondary); display: block; margin-bottom: 3px; }
+    .sub-mini-item span { font-size: 0.88rem; font-weight: 600; color: var(--admin-text-primary); }
+
+    /* Badges */
+    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+    .badge-dot { width: 7px; height: 7px; border-radius: 50%; }
+    .badge-green  { background: rgba(34,197,94,.12);  color: #16a34a; }
+    .badge-green .badge-dot  { background: #22c55e; box-shadow: 0 0 5px #22c55e; }
+    .badge-red    { background: rgba(239,68,68,.12);  color: #dc2626; }
+    .badge-red .badge-dot    { background: #ef4444; }
+    .badge-purple { background: rgba(139,92,246,.12); color: #7c3aed; }
+    .badge-yellow { background: rgba(234,179,8,.12);  color: #ca8a04; }
+    .badge-gray   { background: rgba(107,114,128,.1); color: #6b7280; }
+
+    /* Wallet items */
+    .wallet-row {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 1rem 1.25rem;
+        background: var(--admin-bg, #f8fafc);
+        border: 1px solid var(--admin-border-light);
+        border-radius: 12px; margin-bottom: 0.75rem; gap: 1rem; flex-wrap: wrap;
+    }
+    .wallet-row:last-child { margin-bottom: 0; }
+    .wallet-info { display: flex; align-items: center; gap: 0.75rem; }
+    .wallet-icon {
+        width: 42px; height: 42px; border-radius: 12px;
+        background: rgba(16,185,129,.12);
+        display: flex; align-items: center; justify-content: center;
+    }
+    .wallet-icon i { font-size: 1.3rem; color: #059669; }
+    .wallet-name { font-weight: 700; font-size: 0.9rem; color: var(--admin-text-primary); }
+    .wallet-balance { font-size: 1.4rem; font-weight: 800; color: var(--admin-primary); }
+    .wallet-add-form { display: flex; gap: 0.5rem; align-items: center; flex-shrink: 0; }
+
+    /* Buttons */
+    .btn-primary {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 10px 20px; border-radius: 10px;
+        background: linear-gradient(135deg, var(--admin-primary) 0%, #a855f7 100%);
+        color: #fff; font-weight: 700; font-size: 0.87rem;
+        text-decoration: none; border: none; cursor: pointer;
+        box-shadow: 0 4px 15px rgba(139,92,246,.3);
+        transition: var(--trans-bounce); white-space: nowrap;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(139,92,246,.4); color: #fff; }
+    .btn-secondary {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 10px 20px; border-radius: 10px;
+        background: rgba(139,92,246,.1); color: var(--admin-primary);
+        font-weight: 700; font-size: 0.87rem;
+        text-decoration: none; border: 1px solid rgba(139,92,246,.2); cursor: pointer;
+        transition: var(--trans-smooth); white-space: nowrap;
+    }
+    .btn-secondary:hover { background: var(--admin-primary); color: #fff; transform: translateY(-2px); }
+    .btn-danger {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 10px 20px; border-radius: 10px;
+        background: rgba(239,68,68,.1); color: #ef4444;
+        font-weight: 700; font-size: 0.87rem;
+        text-decoration: none; border: 1px solid rgba(239,68,68,.2); cursor: pointer;
+        transition: var(--trans-smooth); white-space: nowrap;
+    }
+    .btn-danger:hover { background: #ef4444; color: #fff; transform: translateY(-2px); }
+    .btn-sm { padding: 7px 14px; font-size: 0.8rem; border-radius: 8px; }
+    .btn-warning {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 7px 14px; border-radius: 8px;
+        background: rgba(234,179,8,.1); color: #ca8a04;
+        font-weight: 700; font-size: 0.8rem;
+        text-decoration: none; border: 1px solid rgba(234,179,8,.2); cursor: pointer;
+        transition: var(--trans-smooth); white-space: nowrap;
+    }
+    .btn-warning:hover { background: #eab308; color: #fff; }
+    .btn-success {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 7px 14px; border-radius: 8px;
+        background: rgba(16,185,129,.1); color: #059669;
+        font-weight: 700; font-size: 0.8rem;
+        text-decoration: none; border: 1px solid rgba(16,185,129,.2); cursor: pointer;
+        transition: var(--trans-smooth); white-space: nowrap;
+    }
+    .btn-success:hover { background: #059669; color: #fff; }
+
+    /* Tables */
+    .det-table-scroll { overflow-x: auto; }
+    .det-table { width: 100%; border-collapse: collapse; min-width: 700px; }
+    .det-table thead tr { background: rgba(139,92,246,.06); border-bottom: 2px solid var(--admin-border-light); }
+    .det-table th { padding: 0.75rem 1rem; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--admin-text-secondary); white-space: nowrap; text-align: left; }
+    html[dir="rtl"] .det-table th { text-align: right; }
+    .det-table tbody tr { border-bottom: 1px solid var(--admin-border-light); transition: background 0.2s; }
+    .det-table tbody tr:last-child { border-bottom: none; }
+    .det-table tbody tr:hover { background: rgba(139,92,246,.04); }
+    .det-table td { padding: 0.85rem 1rem; font-size: 0.88rem; color: var(--admin-text-primary); vertical-align: middle; }
+
+    /* Section title */
+    .section-title {
+        font-size: 1.1rem; font-weight: 800; color: var(--admin-text-primary);
+        margin: 2rem 0 1rem; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .section-title i { color: var(--admin-primary); }
+
+    @@media (max-width: 1024px) {
+        .details-grid { grid-template-columns: 1fr; }
+        .info-grid { grid-template-columns: 1fr; }
+        .info-item.full { grid-column: span 1; }
+    }
+    @@media (max-width: 768px) {
+        .details-header { flex-direction: column; align-items: flex-start; }
+        .details-header-actions { width: 100%; }
+    }
+</style>
+
+<!-- ─── Notifications ─── -->
+@if (TempData["Success"] != null)
+{
+    <div class="det-notif det-notif-success">
+        <i class='bx bx-check-circle'></i> @TempData["Success"]
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="det-notif det-notif-error">
+        <i class='bx bx-x-circle'></i> @TempData["Error"]
+    </div>
+}
+
+<!-- ─── Page Header ─── -->
+<div class="details-header">
+    <div class="details-header-left">
+        <div class="details-avatar">@initials</div>
+        <div class="details-header-info">
+            <h1>@(string.IsNullOrEmpty(Model.FullName) ? Model.Email : Model.FullName)</h1>
+            <p>@Model.Email &nbsp;•&nbsp; Joined @Model.CreatedAt.ToString("MMM dd, yyyy")</p>
+        </div>
+    </div>
+    <div class="details-header-actions">
+        <a href="@Url.Action("Index")" class="btn-secondary">
+            <i class='bx bx-arrow-back'></i> @Localizer["Back to Users"]
+        </a>
+        <a href="@Url.Action("Edit", new { id = Model.Id })" class="btn-primary">
+            <i class='bx bx-edit'></i> @Localizer["Edit User"]
+        </a>
+        <form asp-action="Delete" asp-route-id="@Model.Id" method="post"
+              data-confirm="Are you sure you want to delete this user? This action cannot be undone." style="margin:0;">
+            <button type="submit" class="btn-danger">
+                <i class='bx bx-trash'></i> @Localizer["Delete User"]
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- ─── Two-column grid ─── -->
+<div class="details-grid">
+
+    <!-- Left: Profile Info -->
+    <div class="det-card">
+        <div class="det-card-header">
+            <i class='bx bx-user-circle'></i>
+            <h3>@Localizer["Profile Information"]</h3>
+        </div>
+        <div class="det-card-body">
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>@Localizer["Full Name"]</label>
+                    <div class="value">@(string.IsNullOrEmpty(Model.FullName) ? "—" : Model.FullName)</div>
+                </div>
+                <div class="info-item">
+                    <label>@Localizer["Email"]</label>
+                    <div class="value">@Model.Email</div>
+                </div>
+                <div class="info-item">
+                    <label>@Localizer["Phone"]</label>
+                    <div class="value">@(string.IsNullOrEmpty(Model.PhoneNumber) ? "—" : Model.PhoneNumber)</div>
+                </div>
+                <div class="info-item">
+                    <label>@Localizer["Country"]</label>
+                    <div class="value">@(string.IsNullOrEmpty(Model.Country) ? "—" : Model.Country)</div>
+                </div>
+                <div class="info-item">
+                    <label>@Localizer["Status"]</label>
+                    <div class="value">
+                        @if (Model.EmailConfirmed || Model.IsVerified)
+                        {
+                            <span class="badge badge-green"><span class="badge-dot"></span>@Localizer["Verified"]</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-red"><span class="badge-dot"></span>@Localizer["Unverified"]</span>
+                        }
                     </div>
                 </div>
-            }
-            @if (TempData["Error"] != null)
-            {
-                <div class="bx--inline-notification bx--inline-notification--error" role="alert" style="margin-bottom: 1rem; width: 100%; max-width: none;">
-                    <div class="bx--inline-notification__details">
-                        <div class="bx--inline-notification__text-wrapper">
-                            <p class="bx--inline-notification__title">@Localizer["Error:"]</p>
-                            <p class="bx--inline-notification__subtitle">@TempData["Error"]</p>
-                        </div>
-                    </div>
+                <div class="info-item">
+                    <label>@Localizer["Joined"]</label>
+                    <div class="value">@Model.CreatedAt.ToString("MMM dd, yyyy HH:mm")</div>
                 </div>
-            }
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h1 class="bx--type-productive-heading-05">User Details: @Model.Email</h1>
-                <div style="display: flex; gap: 1rem;">
-                    <a href="@Url.Action("Edit", new { id = Model.Id })" class="bx--btn bx--btn--primary">@Localizer["Edit User"]</a>
-                    <form asp-action="Delete" asp-route-id="@Model.Id" method="post" data-confirm="Are you sure you want to delete this user? This action cannot be undone." style="margin: 0;">
-                        <button type="submit" class="bx--btn bx--btn--danger">@Localizer["Delete User"]</button>
-                    </form>
+                <div class="info-item full">
+                    <label>@Localizer["Current Plan"]</label>
+                    <div class="value">
+                        @if (currentSub?.Plan != null)
+                        {
+                            <span class="badge badge-purple"><i class='bx bx-crown' style="font-size:.9rem;"></i>@currentSub.Plan.Name</span>
+                            <div class="sub-mini">
+                                <div class="sub-mini-item">
+                                    <label>Started</label>
+                                    <span>@currentSub.StartDate.ToString("MMM dd, yyyy")</span>
+                                </div>
+                                <div class="sub-mini-item">
+                                    <label>Expires</label>
+                                    <span>@currentSub.EndDate.ToString("MMM dd, yyyy")</span>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="badge badge-gray">@Localizer["None"]</span>
+                        }
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="bx--row">
-        <div class="bx--col-lg-8" style="margin-bottom: 2rem;">
-            <!-- User Information Card -->
-            <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0;">
-                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">@Localizer["Profile Information"]</h3>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
-                    <div><strong>Name:</strong> @(string.IsNullOrEmpty(Model.FullName) ? "N/A" : Model.FullName)</div>
-                    <div><strong>Email:</strong> @Model.Email</div>
-                    <div><strong>Phone:</strong> @(string.IsNullOrEmpty(Model.PhoneNumber) ? "N/A" : Model.PhoneNumber)</div>
-                    <div><strong>Country:</strong> @(string.IsNullOrEmpty(Model.Country) ? "N/A" : Model.Country)</div>
-                    <div><strong>Joined:</strong> @Model.CreatedAt.ToString("MMM dd, yyyy")</div>
-                    <div><strong>Available Credits:</strong> @Model.AvailableCredits</div>
-                    <div>
-                        <strong>Status:</strong> 
-                        @if (Model.EmailConfirmed || Model.IsVerified)
-                        {
-                            <span class="bx--tag bx--tag--green">@Localizer["Verified"]</span>
-                        }
-                        else
-                        {
-                            <span class="bx--tag bx--tag--red">@Localizer["Unverified"]</span>
-                        }
-                    </div>
-                    <div style="grid-column: span 2;">
-                        <strong>Current Plan:</strong> 
-                        @if (currentSub?.Plan != null)
-                        {
-                            <span class="bx--tag bx--tag--green" style="margin-bottom: 0.5rem;">@currentSub.Plan.Name</span>
-                            <div style="background: #ffffff; padding: 1rem; border: 1px solid #e0e0e0; border-radius: 4px; display: inline-block; margin-top: 0.5rem; width: 100%;">
-                                <div style="display: flex; justify-content: space-between; gap: 2rem;">
-                                    <div>
-                                        <strong style="color: #525252; font-size: 0.875rem;">Started On:</strong><br/>
-                                        <span>@currentSub.StartDate.ToString("MMM dd, yyyy HH:mm")</span>
-                                    </div>
-                                    <div>
-                                        <strong style="color: #525252; font-size: 0.875rem;">Expires On:</strong><br/>
-                                        <span>@currentSub.EndDate.ToString("MMM dd, yyyy HH:mm")</span>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                        else
-                        {
-                            <span class="bx--tag bx--tag--gray">@Localizer["None"]</span>
-                        }
-                    </div>
-                </div>
-            </div>
+    <!-- Right column: stacked cards -->
+    <div style="display:flex; flex-direction:column; gap:1.5rem;">
 
-            <!-- Change Password Section -->
-            <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; margin-top: 2rem;">
-                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">@Localizer["Change Password"]</h3>
-                
+        <!-- Change Password -->
+        <div class="det-card">
+            <div class="det-card-header">
+                <i class='bx bx-lock-alt'></i>
+                <h3>@Localizer["Change Password"]</h3>
+            </div>
+            <div class="det-card-body">
                 <form asp-action="ChangePassword" method="post">
                     <input type="hidden" name="userId" value="@Model.Id" />
-                    
-                    <div class="bx--form-item" style="margin-bottom: 1rem;">
+                    <div class="bx--form-item" style="margin-bottom:1.25rem;">
                         <label for="newPassword" class="bx--label">@Localizer["New Password"]</label>
                         <div class="bx--text-input__field-wrapper">
-                            <input id="newPassword" type="password" class="bx--text-input" name="newPassword" required minlength="6" placeholder="Enter new password...">
+                            <input id="newPassword" type="password" class="bx--text-input" name="newPassword"
+                                   required minlength="6" placeholder="Enter new password...">
                         </div>
                     </div>
-
-                    <div>
-                        <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Change Password"]</button>
-                    </div>
+                    <button type="submit" class="btn-primary btn-sm">
+                        <i class='bx bx-key'></i> @Localizer["Change Password"]
+                    </button>
                 </form>
             </div>
         </div>
 
-        <div class="bx--col-lg-8">
-            <!-- Extend Subscription Section -->
-            <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem;">
-                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">@Localizer["Extend Active Subscription"]</h3>
-                <form asp-action="ExtendSubscription" method="post" style="display: flex; gap: 1rem; align-items: flex-end;">
+        <!-- Extend Subscription -->
+        <div class="det-card">
+            <div class="det-card-header">
+                <i class='bx bx-calendar-plus'></i>
+                <h3>@Localizer["Extend Active Subscription"]</h3>
+            </div>
+            <div class="det-card-body">
+                <form asp-action="ExtendSubscription" method="post">
                     <input type="hidden" name="userId" value="@Model.Id" />
-                    <div class="bx--form-item">
+                    <div class="bx--form-item" style="margin-bottom:1.25rem;">
                         <label for="extraDays" class="bx--label">@Localizer["Extra Days"]</label>
                         <div class="bx--text-input__field-wrapper">
-                            <input id="extraDays" type="number" class="bx--text-input" name="extraDays" required min="1" placeholder="e.g. 10">
+                            <input id="extraDays" type="number" class="bx--text-input" name="extraDays"
+                                   required min="1" placeholder="e.g. 10">
                         </div>
                     </div>
-                    <div>
-                        <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Extend"]</button>
-                    </div>
+                    <button type="submit" class="btn-primary btn-sm">
+                        <i class='bx bx-time-five'></i> @Localizer["Extend"]
+                    </button>
                 </form>
             </div>
-            <!-- User Wallets Section -->
-            <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem;">
-                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">@Localizer["User Wallets & Balances"]</h3>
-                
-                @if (Model.Wallets == null || !Model.Wallets.Any())
-                {
-                    <p style="color: #525252;">@Localizer["No wallets found for this user."]</p>
-                }
-                else
-                {
-                    <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
-                        @foreach(var wallet in Model.Wallets)
-                        {
-                            <div style="background: #ffffff; padding: 1.5rem; border: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center;">
-                                <div>
-                                    <strong style="font-size: 1.1rem; color: #161616;">@wallet.WalletType.Name</strong>
-                                    <p style="font-size: 1.25rem; font-weight: bold; color: #0f62fe; margin-top: 0.5rem;">@wallet.Balance.ToString("0.00") <span style="font-size: 0.875rem; font-weight: normal; color: #525252;">Credits</span></p>
-                                </div>
-                                <form asp-action="AddWalletCredits" method="post" style="display: flex; gap: 0.5rem; align-items: flex-end; margin: 0;">
-                                    <input type="hidden" name="userId" value="@Model.Id" />
-                                    <input type="hidden" name="walletTypeId" value="@wallet.WalletTypeId" />
-                                    <div class="bx--form-item">
-                                        <div class="bx--text-input__field-wrapper">
-                                            <input type="number" class="bx--text-input" name="amount" required step="0.01" placeholder="+ or - amount" style="width: 120px;">
-                                        </div>
-                                    </div>
-                                    <button type="submit" class="bx--btn bx--btn--primary bx--btn--sm">@Localizer["Add/Remove"]</button>
-                                </form>
-                            </div>
-                        }
-                    </div>
-                }
-            </div>
+        </div>
 
-            <!-- Assign Plan Section -->
-            <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; height: 100%;">
-                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">@Localizer["Assign New Plan"]</h3>
-                
+        <!-- Assign Plan -->
+        <div class="det-card">
+            <div class="det-card-header">
+                <i class='bx bx-layer'></i>
+                <h3>@Localizer["Assign New Plan"]</h3>
+            </div>
+            <div class="det-card-body">
                 <form asp-action="AssignPlan" method="post">
                     <input type="hidden" name="userId" value="@Model.Id" />
-                    
-                    <div class="bx--form-item" style="margin-bottom: 2rem;">
+                    <div class="bx--form-item" style="margin-bottom:1.25rem;">
                         <label for="planId" class="bx--label">@Localizer["Select a Plan (This will cancel the current active plan and apply the new one)"]</label>
                         <div class="bx--select">
                             <select id="planId" name="planId" class="bx--select-input" required>
@@ -185,183 +368,201 @@
                                     }
                                 }
                             </select>
-                            <svg focusable="false" preserveAspectRatio="xMidYMid meet" style="will-change: transform;" xmlns="http://www.w3.org/2000/svg" class="bx--select__arrow" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 11L3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z"></path></svg>
                         </div>
                     </div>
-
-                    <div style="display: flex; gap: 1rem;">
-                        <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">@Localizer["Back to Users"]</a>
-                        <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Assign Selected Plan"]</button>
-                    </div>
+                    <button type="submit" class="btn-primary btn-sm">
+                        <i class='bx bx-check'></i> @Localizer["Assign Selected Plan"]
+                    </button>
                 </form>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Subscriptions History Section -->
-    <div class="bx--row" style="margin-top: 2rem;">
-        <div class="bx--col">
-            <h3 class="bx--type-productive-heading-04" style="margin-bottom: 1rem;">@Localizer["Subscriptions History"]</h3>
-            <div class="bx--data-table-container">
-                <table class="bx--data-table">
-                    <thead>
+<!-- ─── Wallets ─── -->
+<div class="det-card" style="margin-bottom:1.5rem;">
+    <div class="det-card-header">
+        <i class='bx bx-wallet'></i>
+        <h3>@Localizer["User Wallets & Balances"]</h3>
+    </div>
+    <div class="det-card-body">
+        @if (Model.Wallets == null || !Model.Wallets.Any())
+        {
+            <p style="color:var(--admin-text-secondary); margin:0;">@Localizer["No wallets found for this user."]</p>
+        }
+        else
+        {
+            foreach (var wallet in Model.Wallets)
+            {
+                <div class="wallet-row">
+                    <div class="wallet-info">
+                        <div class="wallet-icon"><i class='bx bx-coin-stack'></i></div>
+                        <div>
+                            <div class="wallet-name">@wallet.WalletType.Name</div>
+                            <div class="wallet-balance">@wallet.Balance.ToString("0.00") <span style="font-size:.75rem;font-weight:600;color:var(--admin-text-secondary);">Credits</span></div>
+                        </div>
+                    </div>
+                    <form asp-action="AddWalletCredits" method="post" class="wallet-add-form" style="margin:0;">
+                        <input type="hidden" name="userId" value="@Model.Id" />
+                        <input type="hidden" name="walletTypeId" value="@wallet.WalletTypeId" />
+                        <div class="bx--text-input__field-wrapper">
+                            <input type="number" class="bx--text-input" name="amount" required step="0.01"
+                                   placeholder="+ or - amount" style="width:140px;">
+                        </div>
+                        <button type="submit" class="btn-success">
+                            <i class='bx bx-plus'></i> @Localizer["Add/Remove"]
+                        </button>
+                    </form>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<!-- ─── Subscriptions History ─── -->
+<div class="section-title"><i class='bx bx-history'></i> @Localizer["Subscriptions History"]</div>
+<div class="det-card" style="margin-bottom:1.5rem;">
+    <div class="det-table-scroll">
+        <table class="det-table">
+            <thead>
+                <tr>
+                    <th>@Localizer["Plan Name"]</th>
+                    <th>@Localizer["Status"]</th>
+                    <th>@Localizer["Start Date"]</th>
+                    <th>@Localizer["End Date"]</th>
+                    <th>@Localizer["Duration (Months)"]</th>
+                    <th>@Localizer["Payment Info"]</th>
+                    <th>@Localizer["Actions"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Subscriptions != null && Model.Subscriptions.Any())
+                {
+                    foreach (var sub in Model.Subscriptions.OrderByDescending(s => s.CreatedAt))
+                    {
+                        int durationMonths = (int)Math.Ceiling((sub.EndDate - sub.StartDate).TotalDays / 30.0);
+                        var paymentInfo = sub.Payments != null && sub.Payments.Any()
+                            ? string.Join(", ", sub.Payments.Select(p => $"{p.Amount} {p.Currency} ({p.Status})"))
+                            : "Manual/Free";
                         <tr>
-                            <th><span class="bx--table-header-label">@Localizer["Plan Name"]</span></th>
-                            <th><span class="bx--table-header-label">@Localizer["Status"]</span></th>
-                            <th><span class="bx--table-header-label">@Localizer["Start Date"]</span></th>
-                            <th><span class="bx--table-header-label">@Localizer["End Date"]</span></th>
-                            <th><span class="bx--table-header-label">@Localizer["Duration (Months)"]</span></th>
-                            <th><span class="bx--table-header-label">@Localizer["Payment Info"]</span></th>
-                            <th><span class="bx--table-header-label">@Localizer["Actions"]</span></th>
+                            <td><strong>@(sub.Plan?.Name ?? "Unknown Plan")</strong></td>
+                            <td>
+                                @if (sub.Status == "active")      { <span class="badge badge-green"><span class="badge-dot"></span>Active</span> }
+                                else if (sub.Status == "freeze")   { <span class="badge badge-yellow">Freeze</span> }
+                                else                               { <span class="badge badge-gray">@sub.Status</span> }
+                            </td>
+                            <td>@sub.StartDate.ToString("MMM dd, yyyy")</td>
+                            <td>@sub.EndDate.ToString("MMM dd, yyyy")</td>
+                            <td style="text-align:center;">@durationMonths</td>
+                            <td><span style="font-size:0.82rem;color:var(--admin-text-secondary);">@paymentInfo</span></td>
+                            <td>
+                                <div style="display:flex;gap:0.4rem;">
+                                    <button type="button" class="btn-warning edit-sub-btn"
+                                            data-sub-id="@sub.Id"
+                                            data-current-end="@sub.EndDate.ToString("yyyy-MM-ddTHH:mm")">
+                                        <i class='bx bx-calendar-edit'></i> @Localizer["Edit Date"]
+                                    </button>
+                                    <form action="/Subscriptions/Delete" method="post"
+                                          data-confirm="@Localizer["Are you sure you want to delete this subscription?"]"
+                                          style="margin:0;">
+                                        <input type="hidden" name="id" value="@sub.Id" />
+                                        <input type="hidden" name="returnUrl" value="@Url.Action("Details", "Users", new { id = Model.Id })" />
+                                        <button type="submit" class="btn-danger btn-sm">
+                                            <i class='bx bx-trash'></i> @Localizer["Delete"]
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @if (Model.Subscriptions != null && Model.Subscriptions.Any())
-                        {
-                            foreach (var sub in Model.Subscriptions.OrderByDescending(s => s.CreatedAt))
-                            {
-                                int durationMonths = (int)Math.Ceiling((sub.EndDate - sub.StartDate).TotalDays / 30.0);
-                                var paymentInfo = sub.Payments != null && sub.Payments.Any() 
-                                    ? string.Join(", ", sub.Payments.Select(p => $"{p.Amount} {p.Currency} ({p.Status})")) 
-                                    : "No Payment (Manual/Free)";
-                                <tr>
-                                    <td>@(sub.Plan?.Name ?? "Unknown Plan")</td>
-                                    <td>
-                                        @if (sub.Status == "active") { <span class="bx--tag bx--tag--green">Active</span> }
-                                        else if (sub.Status == "freeze") { <span class="bx--tag bx--tag--yellow">Freeze</span> }
-                                        else { <span class="bx--tag bx--tag--red">@sub.Status</span> }
-                                    </td>
-                                    <td>@sub.StartDate.ToString("MMM dd, yyyy")</td>
-                                    <td>@sub.EndDate.ToString("MMM dd, yyyy")</td>
-                                    <td>@durationMonths</td>
-                                    <td><span style="font-size: 0.875rem;">@paymentInfo</span></td>
-                                    <td>
-                                        <div style="display: flex; gap: 0.5rem;">
-                                            <button type="button" class="bx--btn bx--btn--sm bx--btn--secondary edit-sub-btn" data-sub-id="@sub.Id" data-current-end="@sub.EndDate.ToString("yyyy-MM-ddTHH:mm")">@Localizer["Edit Date"]</button>
-                                            <form action="/Subscriptions/Delete" method="post" data-confirm="@Localizer["Are you sure you want to delete this subscription?"]" style="margin: 0;">
-                                                <input type="hidden" name="id" value="@sub.Id" />
-                                                <input type="hidden" name="returnUrl" value="@Url.Action("Details", "Users", new { id = Model.Id })" />
-                                                <button type="submit" class="bx--btn bx--btn--sm bx--btn--danger">@Localizer["Delete"]</button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        }
-                        else
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" style="text-align:center;padding:2rem;color:var(--admin-text-secondary);">
+                            @Localizer["No subscriptions found for this user."]
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ─── Devices ─── -->
+<div class="section-title"><i class='bx bx-devices'></i> @Localizer["Registered Devices & Logins"]</div>
+<div class="det-card">
+    <div class="det-table-scroll">
+        <table class="det-table">
+            <thead>
+                <tr>
+                    <th>@Localizer["Date/Time"]</th>
+                    <th>@Localizer["IP Address"]</th>
+                    <th>@Localizer["Fingerprint Hash"]</th>
+                    <th>@Localizer["User Agent"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (ViewBag.Devices != null)
+                {
+                    var devices = ViewBag.Devices as IEnumerable<NexClone.Backend.Core.Entities.DeviceFingerprint>;
+                    if (devices != null && devices.Any())
+                    {
+                        foreach (var device in devices)
                         {
                             <tr>
-                                <td colspan="7" style="text-align: center;">@Localizer["No subscriptions found for this user."]</td>
+                                <td>@device.CreatedAt.ToString("MMM dd, yyyy HH:mm")</td>
+                                <td><code style="background:rgba(139,92,246,.08);padding:3px 8px;border-radius:6px;font-size:.82rem;color:var(--admin-primary);">@device.IpAddress</code></td>
+                                <td><code style="background:rgba(0,0,0,.05);padding:3px 8px;border-radius:6px;font-size:.78rem;">@device.FingerprintHash</code></td>
+                                <td><span style="display:inline-block;max-width:350px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.82rem;color:var(--admin-text-secondary);" title="@device.UserAgent">@device.UserAgent</span></td>
                             </tr>
                         }
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                    }
+                    else
+                    {
+                        <tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--admin-text-secondary);">@Localizer["No device records found for this user."]</td></tr>
+                    }
+                }
+            </tbody>
+        </table>
     </div>
+</div>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('.edit-sub-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                var subId = this.getAttribute('data-sub-id');
-                var currentEnd = this.getAttribute('data-current-end');
-                var returnUrl = '@Url.Action("Details", "Users", new { id = Model.Id })';
-                
-                Swal.fire({
-                    title: '@Localizer["Edit Subscription End Date"]',
-                    html: '<input type="datetime-local" id="swal-input-date" class="swal2-input" value="' + currentEnd + '">',
-                    showCancelButton: true,
-                    confirmButtonText: '@Localizer["Save"]',
-                    cancelButtonText: '@Localizer["Cancel"]',
-                    preConfirm: () => {
-                        var newDate = document.getElementById('swal-input-date').value;
-                        if (!newDate) {
-                            Swal.showValidationMessage('Date is required');
-                        }
-                        return newDate;
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        var form = document.createElement('form');
-                        form.method = 'POST';
-                        form.action = '/Subscriptions/UpdateEndDate';
-                        
-                        var inputId = document.createElement('input');
-                        inputId.type = 'hidden';
-                        inputId.name = 'id';
-                        inputId.value = subId;
-                        
-                        var inputDate = document.createElement('input');
-                        inputDate.type = 'hidden';
-                        inputDate.name = 'newEndDate';
-                        inputDate.value = result.value;
-                        
-                        var inputReturn = document.createElement('input');
-                        inputReturn.type = 'hidden';
-                        inputReturn.name = 'returnUrl';
-                        inputReturn.value = returnUrl;
-                        
-                        form.appendChild(inputId);
-                        form.appendChild(inputDate);
-                        form.appendChild(inputReturn);
-                        document.body.appendChild(form);
-                        form.submit();
-                    } else if (result.dismiss === Swal.DismissReason.cancel) {
-                        Swal.fire({
-                            title: '@Localizer["Cancelled"]',
-                            text: '@Localizer["No changes were made."]',
-                            icon: 'info',
-                            timer: 1500,
-                            showConfirmButton: false
-                        });
-                    }
-                });
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.edit-sub-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            var subId = this.getAttribute('data-sub-id');
+            var currentEnd = this.getAttribute('data-current-end');
+            var returnUrl = '@Url.Action("Details", "Users", new { id = Model.Id })';
+
+            Swal.fire({
+                title: '@Localizer["Edit Subscription End Date"]',
+                html: '<input type="datetime-local" id="swal-input-date" class="swal2-input" value="' + currentEnd + '">',
+                showCancelButton: true,
+                confirmButtonText: '@Localizer["Save"]',
+                cancelButtonText: '@Localizer["Cancel"]',
+                confirmButtonColor: 'var(--admin-primary)',
+                preConfirm: () => {
+                    var newDate = document.getElementById('swal-input-date').value;
+                    if (!newDate) { Swal.showValidationMessage('Date is required'); }
+                    return newDate;
+                }
+            }).then(result => {
+                if (result.isConfirmed) {
+                    var form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/Subscriptions/UpdateEndDate';
+                    [['id', subId], ['newEndDate', result.value], ['returnUrl', returnUrl]].forEach(([n,v]) => {
+                        var i = document.createElement('input');
+                        i.type = 'hidden'; i.name = n; i.value = v;
+                        form.appendChild(i);
+                    });
+                    document.body.appendChild(form);
+                    form.submit();
+                }
             });
         });
     });
-    </script>
-
-    <!-- Devices / Fingerprints Section -->
-    <div class="bx--row" style="margin-top: 2rem;">
-        <div class="bx--col">
-            <h3 class="bx--type-productive-heading-04" style="margin-bottom: 1rem;">@Localizer["Registered Devices & Logins"]</h3>
-            <div class="bx--data-table-container">
-                <table class="bx--data-table">
-                    <thead>
-                        <tr>
-                            <th><span class="bx--table-header-label">@Localizer["Date/Time"]</span></th>
-                            <th><span class="bx--table-header-label">@Localizer["IP Address"]</span></th>
-                            <th><span class="bx--table-header-label">@Localizer["Fingerprint Hash"]</span></th>
-                            <th><span class="bx--table-header-label">@Localizer["User Agent"]</span></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (ViewBag.Devices != null)
-                        {
-                            var devices = ViewBag.Devices as IEnumerable<NexClone.Backend.Core.Entities.DeviceFingerprint>;
-                            if (devices != null && devices.Any())
-                            {
-                                foreach (var device in devices)
-                                {
-                                    <tr>
-                                        <td>@device.CreatedAt.ToString("MMM dd, yyyy HH:mm")</td>
-                                        <td>@device.IpAddress</td>
-                                        <td><code style="background: #e5e5e5; padding: 2px 4px; border-radius: 4px;">@device.FingerprintHash</code></td>
-                                        <td><span style="display: inline-block; max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="@device.UserAgent">@device.UserAgent</span></td>
-                                    </tr>
-                                }
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td colspan="4" style="text-align: center;">@Localizer["No device records found for this user."]</td>
-                                </tr>
-                            }
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
+});
+</script>
