@@ -290,7 +290,11 @@ export default function VoiceToTextPage() {
       const estimateRes = await api.post("/api/ai/voice-to-text/estimate", { fileSizeBytes, durationMinutes });
       
       const cost = estimateRes.data.estimatedCost;
-      if (user && user.availableCredits < cost) {
+      const totalCredits = user?.wallets 
+        ? user.wallets.reduce((acc: number, w: any) => acc + w.balance, 0) 
+        : (user?.availableCredits || 0);
+
+      if (totalCredits < cost) {
         setError(isRtl ? "رصيدك غير كافٍ لإتمام هذه العملية." : "Insufficient credits for this operation.");
         return;
       }

@@ -111,15 +111,27 @@ namespace NexClone.Backend.Application.Services
             var walletTypeId = await GetWalletTypeIdForTool(toolId, targetPlan.Id);
             var userWallet = user.Wallets?.FirstOrDefault(w => w.WalletTypeId == walletTypeId);
 
+            var generalWalletType = await _context.WalletTypes.FirstOrDefaultAsync(w => w.Code == "GENERAL");
+            var generalWallet = generalWalletType != null ? user.Wallets?.FirstOrDefault(w => w.WalletTypeId == generalWalletType.Id) : null;
+
             if (userWallet == null || userWallet.Balance < totalCost)
             {
-                string debugInfo = $"Debug: ToolId={toolId}, RequiredWalletId={walletTypeId}, UserWalletsCount={user.Wallets?.Count ?? 0}, ";
-                if (user.Wallets != null) {
-                    foreach (var w in user.Wallets) {
-                        debugInfo += $"[W:{w.WalletTypeId}, Bal:{w.Balance}] ";
-                    }
+                // Fallback to General Wallet
+                if (generalWallet != null && generalWallet.Balance >= totalCost)
+                {
+                    userWallet = generalWallet;
+                    walletTypeId = generalWalletType.Id;
                 }
-                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Insufficient credits. {debugInfo} Requires {totalCost:F4}." };
+                else
+                {
+                    string debugInfo = $"Debug: ToolId={toolId}, RequiredWalletId={walletTypeId}, UserWalletsCount={user.Wallets?.Count ?? 0}, ";
+                    if (user.Wallets != null) {
+                        foreach (var w in user.Wallets) {
+                            debugInfo += $"[W:{w.WalletTypeId}, Bal:{w.Balance}] ";
+                        }
+                    }
+                    return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Insufficient credits. {debugInfo} Requires {totalCost:F4}." };
+                }
             }
 
             // Retry loop for optimistic concurrency
@@ -276,15 +288,27 @@ namespace NexClone.Backend.Application.Services
             var walletTypeId = await GetWalletTypeIdForTool(toolId, targetPlan.Id);
             var userWallet = user.Wallets?.FirstOrDefault(w => w.WalletTypeId == walletTypeId);
 
+            var generalWalletType = await _context.WalletTypes.FirstOrDefaultAsync(w => w.Code == "GENERAL");
+            var generalWallet = generalWalletType != null ? user.Wallets?.FirstOrDefault(w => w.WalletTypeId == generalWalletType.Id) : null;
+
             if (userWallet == null || userWallet.Balance < totalCost)
             {
-                string debugInfo = $"Debug: ToolId={toolId}, RequiredWalletId={walletTypeId}, UserWalletsCount={user.Wallets?.Count ?? 0}, ";
-                if (user.Wallets != null) {
-                    foreach (var w in user.Wallets) {
-                        debugInfo += $"[W:{w.WalletTypeId}, Bal:{w.Balance}] ";
-                    }
+                // Fallback to General Wallet
+                if (generalWallet != null && generalWallet.Balance >= totalCost)
+                {
+                    userWallet = generalWallet;
+                    walletTypeId = generalWalletType.Id;
                 }
-                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Insufficient credits. {debugInfo} Requires {totalCost:F4}." };
+                else
+                {
+                    string debugInfo = $"Debug: ToolId={toolId}, RequiredWalletId={walletTypeId}, UserWalletsCount={user.Wallets?.Count ?? 0}, ";
+                    if (user.Wallets != null) {
+                        foreach (var w in user.Wallets) {
+                            debugInfo += $"[W:{w.WalletTypeId}, Bal:{w.Balance}] ";
+                        }
+                    }
+                    return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Insufficient credits. {debugInfo} Requires {totalCost:F4}." };
+                }
             }
 
             return new PolicyValidationResult { IsAllowed = true, TotalCost = totalCost, ChargedWalletTypeId = walletTypeId };
