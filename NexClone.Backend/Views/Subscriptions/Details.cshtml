@@ -5,123 +5,249 @@
 @{
     ViewData["Title"] = "Subscription Details";
     var history = ViewBag.History as IEnumerable<GenerationHistory> ?? Enumerable.Empty<GenerationHistory>();
+    var initials = string.IsNullOrEmpty(Model.User?.Email) ? "?" : Model.User.Email.Substring(0, 1).ToUpper();
+    var daysLeft  = (int)(Model.EndDate - DateTime.UtcNow).TotalDays;
+    var totalDays = (int)(Model.EndDate - Model.StartDate).TotalDays;
+    var progress  = totalDays > 0 ? Math.Max(0, Math.Min(100, (int)(100.0 * (totalDays - daysLeft) / totalDays))) : 100;
 }
 
-<div class="bx--grid">
-    <div class="bx--row">
-        <div class="bx--col">
-            <h4 style="margin-bottom: 1rem;">@Localizer["Subscription Details"]</h4>
-            <a href="@Url.Action("Index", "Subscriptions")" class="bx--btn bx--btn--secondary" style="margin-bottom: 2rem;">@Localizer["Back to List"]</a>
+<style>
+    /* ── Subscription Details ── */
+    .sdet-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:2.5rem; flex-wrap:wrap; gap:1rem; }
+    .sdet-header-left { display:flex; align-items:center; gap:1.25rem; }
+    .sdet-avatar { width:60px; height:60px; border-radius:16px; background:linear-gradient(135deg, var(--admin-primary) 0%, #a855f7 100%); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.6rem; color:#fff; box-shadow:0 8px 25px rgba(139,92,246,.4); flex-shrink:0; }
+    .sdet-header h1 { font-size:1.5rem; font-weight:800; margin:0 0 4px; color:var(--admin-text-primary); }
+    .sdet-header p  { margin:0; color:var(--admin-text-secondary); font-size:.88rem; }
+    .sdet-actions { display:flex; gap:.75rem; flex-wrap:wrap; }
+
+    /* Notif */
+    .sdet-notif { padding:1rem 1.5rem; border-radius:12px; margin-bottom:1.5rem; display:flex; align-items:center; gap:.75rem; font-weight:600; font-size:.9rem; }
+    .sdet-notif i { font-size:1.3rem; }
+    .sdet-notif-ok  { background:rgba(34,197,94,.1);  color:#16a34a; border:1px solid rgba(34,197,94,.2); }
+    .sdet-notif-err { background:rgba(239,68,68,.1);  color:#dc2626; border:1px solid rgba(239,68,68,.2); }
+
+    /* Grid */
+    .sdet-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.5rem; margin-bottom:1.5rem; }
+
+    /* Cards */
+    .sdet-card { background:var(--admin-surface); border:1px solid var(--admin-border-light); border-radius:var(--admin-radius-lg); box-shadow:var(--shadow-soft); overflow:hidden; }
+    .sdet-card-header { padding:1.1rem 1.5rem; border-bottom:1px solid var(--admin-border-light); display:flex; align-items:center; gap:.6rem; }
+    .sdet-card-header h3 { font-size:.95rem; font-weight:700; margin:0; color:var(--admin-text-primary); }
+    .sdet-card-header i  { color:var(--admin-primary); font-size:1.1rem; }
+    .sdet-card-body { padding:1.5rem; }
+
+    /* Info rows */
+    .info-row { display:flex; justify-content:space-between; align-items:center; padding:.6rem 0; border-bottom:1px solid var(--admin-border-light); }
+    .info-row:last-child { border-bottom:none; padding-bottom:0; }
+    .info-row .label { font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--admin-text-secondary); }
+    .info-row .val   { font-size:.88rem; font-weight:600; color:var(--admin-text-primary); }
+
+    /* Progress bar */
+    .progress-bar-wrap { background:rgba(139,92,246,.1); border-radius:20px; height:8px; margin-top:1rem; overflow:hidden; }
+    .progress-bar-fill { height:100%; border-radius:20px; background:linear-gradient(90deg, var(--admin-primary), #a855f7); transition:width .6s ease; }
+    .progress-label { display:flex; justify-content:space-between; font-size:.75rem; margin-top:.5rem; color:var(--admin-text-secondary); font-weight:600; }
+
+    /* Badges */
+    .badge { display:inline-flex; align-items:center; gap:5px; padding:4px 12px; border-radius:20px; font-size:.75rem; font-weight:700; white-space:nowrap; }
+    .badge-dot { width:7px; height:7px; border-radius:50%; }
+    .badge-green  { background:rgba(34,197,94,.12);  color:#16a34a; } .badge-green  .badge-dot { background:#22c55e; box-shadow:0 0 5px #22c55e; }
+    .badge-red    { background:rgba(239,68,68,.12);  color:#dc2626; } .badge-red    .badge-dot { background:#ef4444; }
+    .badge-yellow { background:rgba(234,179,8,.12);  color:#ca8a04; } .badge-yellow .badge-dot { background:#eab308; }
+    .badge-gray   { background:rgba(107,114,128,.1); color:#6b7280; }
+    .badge-purple { background:rgba(139,92,246,.12); color:#7c3aed; }
+    .badge-orange { background:rgba(249,115,22,.12); color:#ea580c; }
+
+    /* Tool badge */
+    .tool-badge { display:inline-flex; align-items:center; padding:3px 10px; border-radius:12px; font-size:.72rem; font-weight:700; color:#fff; }
+
+    /* Buttons */
+    .btn-back    { display:inline-flex; align-items:center; gap:6px; padding:10px 20px; border-radius:10px; background:rgba(139,92,246,.1); color:var(--admin-primary); font-weight:700; font-size:.87rem; text-decoration:none; border:1px solid rgba(139,92,246,.2); transition:var(--trans-smooth); white-space:nowrap; }
+    .btn-back:hover    { background:var(--admin-primary); color:#fff; transform:translateY(-2px); }
+    .btn-primary-sm { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:9px; background:linear-gradient(135deg,var(--admin-primary) 0%,#a855f7 100%); color:#fff; font-weight:700; font-size:.82rem; border:none; cursor:pointer; box-shadow:0 4px 15px rgba(139,92,246,.3); transition:var(--trans-bounce); white-space:nowrap; }
+    .btn-primary-sm:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(139,92,246,.4); }
+    .btn-view-sm { display:inline-flex; align-items:center; gap:5px; padding:5px 12px; border-radius:7px; background:rgba(139,92,246,.1); color:var(--admin-primary); font-weight:700; font-size:.78rem; text-decoration:none; border:none; cursor:pointer; transition:var(--trans-smooth); white-space:nowrap; }
+    .btn-view-sm:hover { background:var(--admin-primary); color:#fff; }
+
+    /* History table */
+    .hist-table-scroll { overflow-x:auto; }
+    .hist-table { width:100%; border-collapse:collapse; min-width:650px; }
+    .hist-table thead tr { background:rgba(139,92,246,.06); border-bottom:2px solid var(--admin-border-light); }
+    .hist-table th { padding:.75rem 1rem; font-size:.72rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--admin-text-secondary); white-space:nowrap; text-align:left; }
+    html[dir="rtl"] .hist-table th { text-align:right; }
+    .hist-table tbody tr { border-bottom:1px solid var(--admin-border-light); transition:background .2s; }
+    .hist-table tbody tr:last-child { border-bottom:none; }
+    .hist-table tbody tr:hover { background:rgba(139,92,246,.04); }
+    .hist-table td { padding:.75rem 1rem; font-size:.87rem; color:var(--admin-text-primary); vertical-align:middle; }
+
+    /* Empty state */
+    .empty-hist { text-align:center; padding:3rem; color:var(--admin-text-secondary); }
+    .empty-hist i { font-size:3rem; opacity:.3; display:block; margin-bottom:.75rem; }
+    .empty-hist p { font-size:.95rem; font-weight:600; margin:0; }
+
+    @@media (max-width:1024px) { .sdet-grid { grid-template-columns:1fr 1fr; } }
+    @@media (max-width:768px)  { .sdet-grid { grid-template-columns:1fr; } .sdet-header { flex-direction:column; align-items:flex-start; } }
+</style>
+
+<!-- Notifications -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="sdet-notif sdet-notif-ok"><i class='bx bx-check-circle'></i> @TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="sdet-notif sdet-notif-err"><i class='bx bx-x-circle'></i> @TempData["ErrorMessage"]</div>
+}
+
+<!-- Header -->
+<div class="sdet-header">
+    <div class="sdet-header-left">
+        <div class="sdet-avatar">@initials</div>
+        <div>
+            <h1>@Localizer["Subscription Details"]</h1>
+            <p>@(Model.User?.Email ?? "Unknown User") &nbsp;•&nbsp; Plan: <strong>@(Model.Plan?.Name)</strong></p>
+        </div>
+    </div>
+    <div class="sdet-actions">
+        <a href="@Url.Action("Index", "Subscriptions")" class="btn-back">
+            <i class='bx bx-arrow-back'></i> @Localizer["Back to List"]
+        </a>
+    </div>
+</div>
+
+<!-- Info Grid -->
+<div class="sdet-grid">
+    <!-- User Info -->
+    <div class="sdet-card">
+        <div class="sdet-card-header"><i class='bx bx-user-circle'></i><h3>@Localizer["User Information"]</h3></div>
+        <div class="sdet-card-body">
+            <div class="info-row"><span class="label">Name</span><span class="val">@(Model.User?.FullName ?? "—")</span></div>
+            <div class="info-row"><span class="label">Email</span><span class="val" style="font-size:.82rem;">@(Model.User?.Email ?? "—")</span></div>
+            <div class="info-row">
+                <span class="label">Credits</span>
+                <span class="val" style="color:var(--admin-primary);font-size:1.1rem;font-weight:800;">@(Model.User?.AvailableCredits ?? 0)</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Joined</span>
+                <span class="val">@(Model.User?.CreatedAt.ToString("MMM dd, yyyy"))</span>
+            </div>
         </div>
     </div>
 
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div data-notification class="bx--inline-notification bx--inline-notification--success" role="alert" style="margin-bottom: 1rem;">
-            <div class="bx--inline-notification__details">
-                <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bx--inline-notification__icon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M10,1c-4.9,0-9,4.1-9,9s4.1,9,9,9s9-4.1,9-9S14.9,1,10,1z M8.7,13.5l-3.2-3.2l1-1l2.2,2.2l4.8-4.8l1,1L8.7,13.5z"></path></svg>
-                <div class="bx--inline-notification__text-wrapper">
-                    <p class="bx--inline-notification__title">@Localizer["Success"]</p>
-                    <p class="bx--inline-notification__subtitle">@TempData["SuccessMessage"]</p>
-                </div>
+    <!-- Subscription Info -->
+    <div class="sdet-card">
+        <div class="sdet-card-header"><i class='bx bx-layer'></i><h3>@Localizer["Subscription Info"]</h3></div>
+        <div class="sdet-card-body">
+            <div class="info-row">
+                <span class="label">Plan</span>
+                <span class="val"><span class="badge badge-purple"><i class='bx bx-crown' style="font-size:.85rem;"></i>@(Model.Plan?.Name)</span></span>
             </div>
-        </div>
-    }
-
-    @if (TempData["ErrorMessage"] != null)
-    {
-        <div data-notification class="bx--inline-notification bx--inline-notification--error" role="alert" style="margin-bottom: 1rem;">
-            <div class="bx--inline-notification__details">
-                <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bx--inline-notification__icon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M10,1c-5,0-9,4-9,9s4,9,9,9s9-4,9-9S15,1,10,1z M13.5,14.5l-8-8l1-1l8,8L13.5,14.5z"></path></svg>
-                <div class="bx--inline-notification__text-wrapper">
-                    <p class="bx--inline-notification__title">@Localizer["Error"]</p>
-                    <p class="bx--inline-notification__subtitle">@TempData["ErrorMessage"]</p>
-                </div>
+            <div class="info-row">
+                <span class="label">Status</span>
+                <span class="val">
+                    @{
+                        var sc = Model.Status?.ToLower() switch { "active" => "badge-green", "expired" => "badge-red", "freeze" => "badge-yellow", _ => "badge-gray" };
+                    }
+                    <span class="badge @sc"><span class="badge-dot"></span>@(Model.Status?.ToUpper() ?? "UNKNOWN")</span>
+                </span>
             </div>
-        </div>
-    }
-
-    <div class="bx--row" style="margin-bottom: 2rem;">
-        <!-- User Info -->
-        <div class="bx--col-md-4">
-            <div class="bx--tile">
-                <h5 style="margin-bottom: 1rem;">@Localizer["User Information"]</h5>
-                <p><strong>Name:</strong> @(Model.User?.FullName)</p>
-                <p><strong>Email:</strong> @(Model.User?.Email)</p>
-                <p><strong>Available Credits (Balance):</strong> @(Model.User?.AvailableCredits ?? 0)</p>
-                <p><strong>Joined:</strong> @(Model.User?.CreatedAt.ToString("g"))</p>
-            </div>
-        </div>
-
-        <!-- Subscription Info -->
-        <div class="bx--col-md-4">
-            <div class="bx--tile">
-                <h5 style="margin-bottom: 1rem;">@Localizer["Subscription Info"]</h5>
-                <p><strong>Plan Name:</strong> @(Model.Plan?.Name)</p>
-                <p><strong>Status:</strong> 
-                    <span class="bx--tag @(Model.Status == "active" ? "bx--tag--green" : "bx--tag--red")">
-                        @(Model.Status ?? "unknown")
-                    </span>
-                </p>
-                <p><strong>Start Date:</strong> @Model.StartDate.ToString("g")</p>
-                <p><strong>Current End Date:</strong> @Model.EndDate.ToString("g")</p>
-            </div>
-        </div>
-
-        <!-- Edit Subscription -->
-        <div class="bx--col-md-4">
-            <div class="bx--tile">
-                <h5 style="margin-bottom: 1rem;">@Localizer["Update Subscription"]</h5>
-                <form asp-action="UpdateEndDate" method="post">
-                    <input type="hidden" name="id" value="@Model.Id" />
-                    <div class="bx--form-item">
-                        <label class="bx--label">@Localizer["New End Date"]</label>
-                        <input type="datetime-local" name="newEndDate" class="bx--text-input" value="@Model.EndDate.ToString("yyyy-MM-ddTHH:mm")" required />
+            <div class="info-row"><span class="label">Start Date</span><span class="val">@Model.StartDate.ToString("MMM dd, yyyy")</span></div>
+            <div class="info-row"><span class="label">End Date</span><span class="val">@Model.EndDate.ToString("MMM dd, yyyy")</span></div>
+            @if (daysLeft >= 0)
+            {
+                <div style="margin-top:.75rem;">
+                    <div style="display:flex;justify-content:space-between;font-size:.75rem;font-weight:700;color:var(--admin-text-secondary);margin-bottom:4px;">
+                        <span>Progress</span><span>@daysLeft days left</span>
                     </div>
-                    <button type="submit" class="bx--btn bx--btn--primary" style="margin-top: 1rem;">@Localizer["Update Date"]</button>
-                </form>
-            </div>
+                    <div class="progress-bar-wrap">
+                        <div class="progress-bar-fill" style="width:@progress%"></div>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 
-    <!-- History Table -->
-    <div class="bx--row">
-        <div class="bx--col">
-            <h5 style="margin-bottom: 1rem;">@Localizer["User Generation History"]</h5>
-            @if (history.Any())
-            {
-                <table class="bx--data-table">
-                    <thead>
-                        <tr>
-                            <th>@Localizer["Tool Name"]</th>
-                            <th>@Localizer["Cost"]</th>
-                            <th>@Localizer["Prompt / Input"]</th>
-                            <th>@Localizer["Date"]</th>
-                            <th>@Localizer["Actions"]</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in history)
-                        {
-                            <tr>
-                                <td>@item.Type</td>
-                                <td>@item.CreditsUsed</td>
-                                <td>@(string.IsNullOrEmpty(item.InputText) ? "-" : (item.InputText.Length > 50 ? item.InputText.Substring(0, 50) + "..." : item.InputText))</td>
-                                <td>@item.CreatedAt.ToString("g")</td>
-                                <td>
-                                    <a href="@Url.Action("Details", "HistoryAdmin", new { id = item.Id })" class="bx--btn bx--btn--secondary bx--btn--sm" style="padding: 5px 10px; font-size: 12px; height: 30px; min-height: unset; text-decoration: none; display: inline-block;">
-                                        @Localizer["View Details"]
-                                    </a>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            }
-            else
-            {
-                <p>@Localizer["No generation history found for this user."]</p>
-            }
+    <!-- Update End Date -->
+    <div class="sdet-card">
+        <div class="sdet-card-header"><i class='bx bx-calendar-edit'></i><h3>@Localizer["Update Subscription"]</h3></div>
+        <div class="sdet-card-body">
+            <form asp-action="UpdateEndDate" method="post">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <div class="bx--form-item" style="margin-bottom:1.25rem;">
+                    <label class="bx--label">@Localizer["New End Date"]</label>
+                    <input type="datetime-local" name="newEndDate" class="bx--text-input"
+                           value="@Model.EndDate.ToString("yyyy-MM-ddTHH:mm")" required />
+                </div>
+                <button type="submit" class="btn-primary-sm">
+                    <i class='bx bx-save'></i> @Localizer["Update Date"]
+                </button>
+            </form>
         </div>
+    </div>
+</div>
+
+<!-- Generation History -->
+<div class="sdet-card">
+    <div class="sdet-card-header">
+        <i class='bx bx-history'></i>
+        <h3>@Localizer["User Generation History"]</h3>
+        <span class="badge badge-purple" style="margin-left:auto;font-size:.8rem;">@history.Count() @Localizer["records"]</span>
+    </div>
+    <div class="hist-table-scroll">
+        @if (history.Any())
+        {
+            <table class="hist-table">
+                <thead>
+                    <tr>
+                        <th>@Localizer["Tool Name"]</th>
+                        <th>@Localizer["Cost"]</th>
+                        <th>@Localizer["Status"]</th>
+                        <th>@Localizer["Prompt / Input"]</th>
+                        <th>@Localizer["Date"]</th>
+                        <th>@Localizer["Actions"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in history)
+                    {
+                        var toolColor = item.Type switch {
+                            "text-to-voice"  => "#8b5cf6",
+                            "voice-to-text"  => "#ec4899",
+                            "lip-sync"       => "#f43f5e",
+                            "image-to-video" => "#f97316",
+                            "bg-remover"     => "#10b981",
+                            "gpt"            => "#3b82f6",
+                            _                => "#6b7280"
+                        };
+                        var statusCls = item.Status switch {
+                            "completed"  => "badge-green",
+                            "failed"     => "badge-red",
+                            "processing" => "badge-yellow",
+                            _            => "badge-gray"
+                        };
+                        <tr>
+                            <td><span class="tool-badge" style="background:@toolColor;">@item.Type</span></td>
+                            <td><strong style="color:var(--admin-primary);">@item.CreditsUsed</strong> <span style="font-size:.75rem;color:var(--admin-text-secondary);">cr</span></td>
+                            <td><span class="badge @statusCls"><span class="badge-dot"></span>@item.Status</span></td>
+                            <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--admin-text-secondary);font-size:.82rem;">
+                                @(string.IsNullOrEmpty(item.InputText) ? "—" : (item.InputText.Length > 60 ? item.InputText.Substring(0, 60) + "…" : item.InputText))
+                            </td>
+                            <td style="color:var(--admin-text-secondary);font-size:.82rem;">@item.CreatedAt.ToString("MMM dd, yyyy HH:mm")</td>
+                            <td>
+                                <a href="@Url.Action("Details", "HistoryAdmin", new { id = item.Id })" class="btn-view-sm">
+                                    <i class='bx bx-show'></i> @Localizer["View Details"]
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="empty-hist">
+                <i class='bx bx-history'></i>
+                <p>@Localizer["No generation history found for this user."]</p>
+            </div>
+        }
     </div>
 </div>
