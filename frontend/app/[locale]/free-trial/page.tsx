@@ -155,7 +155,7 @@ export default function FreeTrialPage() {
             {/* CTA Button */}
             <motion.button
               variants={itemVariants}
-              onClick={() => router.push(`/${locale}/login`)}
+              onClick={() => router.push("/login")}
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
               className="group relative w-full flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-white font-bold text-base overflow-hidden shadow-[0_0_30px_rgba(139,92,246,0.3)] transition-all duration-300"
