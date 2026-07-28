@@ -26,17 +26,27 @@
 }
 
 <style>
-    .hist-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-bottom: 2rem; }
-    .hist-stat  { background: #f4f4f4; border: 1px solid #e0e0e0; border-radius: 6px; padding: 1.25rem 1.5rem; text-align: center; }
-    .hist-stat__num  { font-size: 2rem; font-weight: 700; line-height: 1; }
-    .hist-stat__label{ font-size: 0.8rem; color: #6b7280; margin-top: 4px; }
-    .hist-filters { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: flex-end; margin-bottom: 1.5rem; background: #f4f4f4; padding: 1.25rem; border: 1px solid #e0e0e0; border-radius: 4px; }
-    .hist-filters .bx--form-item { flex: 1; min-width: 180px; }
-    .tool-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 600; color: #fff; }
-    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
+    .hist-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 1.5rem; margin-bottom: 2.5rem; }
+    .hist-stat  { background: var(--admin-surface); border: 1px solid var(--admin-border-light); border-radius: var(--admin-radius-lg); padding: 1.5rem; text-align: center; box-shadow: var(--shadow-soft); transition: var(--trans-smooth); }
+    .hist-stat:hover { transform: translateY(-3px); box-shadow: var(--shadow-float); }
+    .hist-stat__num  { font-size: 2.5rem; font-weight: 800; line-height: 1; }
+    .hist-stat__label{ font-size: 0.85rem; color: var(--admin-text-secondary); margin-top: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    
+    .hist-filters { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: flex-end; }
+    .hist-filters .bx--form-item { flex: 1; min-width: 200px; margin-bottom: 0 !important; }
+    
+    .tool-badge { display: inline-flex; align-items: center; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; color: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; box-shadow: 0 0 5px currentColor; }
+    html[dir="rtl"] .status-dot { margin-right: 0; margin-left: 6px; }
+    
     .hist-table th { white-space: nowrap; }
     .hist-table td { vertical-align: middle; }
-    @@media (max-width: 768px) { .hist-stats { grid-template-columns: repeat(2,1fr); } }
+    
+    @@media (max-width: 1024px) { .hist-stats { grid-template-columns: repeat(2,1fr); } }
+    @@media (max-width: 768px) { 
+        .hist-stats { grid-template-columns: 1fr; } 
+        .hist-filters { flex-direction: column; align-items: stretch; } 
+    }
 </style>
 
 <!-- Stats Cards -->
@@ -59,12 +69,7 @@
     </div>
 </div>
 
-<div class="bx--data-table-container">
-    <div class="bx--data-table-header">
-        <h4 class="bx--data-table-header__title">@Localizer["Operations History"]</h4>
-        <p class="bx--data-table-header__description">@Localizer["View and filter AI operations performed by users."]</p>
-    </div>
-
+<div class="card" style="margin-bottom: 2rem;">
     <!-- Filters -->
     <form method="get" asp-action="Index" class="hist-filters">
         <div class="bx--form-item">
@@ -107,6 +112,13 @@
             <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">@Localizer["Reset"]</a>
         </div>
     </form>
+</div>
+
+<div class="bx--data-table-container">
+    <div class="bx--data-table-header">
+        <h4 class="bx--data-table-header__title">@Localizer["Operations History"]</h4>
+        <p class="bx--data-table-header__description" style="color: var(--admin-text-secondary); margin-top: 0.5rem;">@Localizer["View and filter AI operations performed by users."]</p>
+    </div>
 
     <table class="bx--data-table bx--data-table--sort hist-table">
         <thead>

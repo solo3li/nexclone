@@ -6,19 +6,12 @@
     var lastUsedDates = ViewBag.LastUsedDates as Dictionary<Guid, DateTime?> ?? new Dictionary<Guid, DateTime?>();
 }
 
-<div class="bx--data-table-container">
-    <div class="bx--data-table-header">
-        <h4 class="bx--data-table-header__title">@Localizer["Manage Subscriptions"]</h4>
-        <p class="bx--data-table-header__description">@Localizer["View and manage all active and past user subscriptions."]</p>
-    </div>
-
-    <!-- Advanced Filters Form -->
-    <div style="background-color: #f4f4f4; padding: 1.5rem; margin-bottom: 1.5rem; border-left: 4px solid #0f62fe;">
-        <h5 style="margin-bottom: 1rem; font-weight: 600;">@Localizer["Advanced Filters"]</h5>
-        <form method="get" action="@Url.Action("Index")">
-            <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
-                
-                <!-- Plan Filter -->
+<div class="card" style="margin-bottom: 2rem;">
+    <h5 style="margin-bottom: 1.5rem; font-weight: 700; font-size: 1.1rem;">@Localizer["Advanced Filters"]</h5>
+    <form method="get" action="@Url.Action("Index")">
+        <div style="display: flex; gap: 1.25rem; flex-wrap: wrap; align-items: flex-end;">
+            
+            <!-- Plan Filter -->
                 <div class="bx--form-item" style="flex: 1; min-width: 200px;">
                     <div class="bx--select">
                         <label for="planId" class="bx--label">@Localizer["Plan Type"]</label>
@@ -96,6 +89,13 @@
                 </div>
             </div>
         </form>
+    </div>
+</div>
+
+<div class="bx--data-table-container">
+    <div class="bx--data-table-header">
+        <h4 class="bx--data-table-header__title">@Localizer["Manage Subscriptions"]</h4>
+        <p class="bx--data-table-header__description" style="color: var(--admin-text-secondary); margin-top: 0.5rem;">@Localizer["View and manage all active and past user subscriptions."]</p>
     </div>
     
     <script>
