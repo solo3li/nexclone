@@ -159,7 +159,8 @@ namespace NexClone.Backend.API.Controllers.Client
 
             await _emailService.SendEmailAsync(user.Email, user.FullName ?? user.UserName ?? "User", "تفعيل الحساب - NexMedia", emailHtml);
 
-            return Ok(new { Message = "تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني لتفعيل الحساب." });
+            return Ok(new { Message = "تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني لتفعيل الحساب.", HasClaimedFreeTrial = hasClaimedFreeTrial });
+
         }
 
         [HttpPost("login")]
