@@ -25,13 +25,27 @@ namespace NexClone.Backend.API.Controllers.Admin
             _hubContext = hubContext;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchEmail, string status)
         {
             ViewData["Title"] = "Support Tickets";
-            var tickets = await _context.SupportTickets
-                .Include(t => t.User)
-                .OrderByDescending(t => t.UpdatedAt)
-                .ToListAsync();
+            var query = _context.SupportTickets.Include(t => t.User).AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchEmail))
+            {
+                var search = searchEmail.ToLower();
+                query = query.Where(t => (t.User != null && t.User.Email.ToLower().Contains(search)) || t.Subject.ToLower().Contains(search));
+            }
+
+            if (!string.IsNullOrEmpty(status) && status != "all")
+            {
+                query = query.Where(t => t.Status == status);
+            }
+
+            var tickets = await query.OrderByDescending(t => t.UpdatedAt).ToListAsync();
+
+            ViewBag.CurrentSearch = searchEmail;
+            ViewBag.CurrentStatus = status;
+
             return View(tickets);
         }
 

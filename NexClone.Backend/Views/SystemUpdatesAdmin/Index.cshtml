@@ -61,7 +61,6 @@
         border-radius: var(--admin-radius-lg);
         box-shadow: var(--shadow-soft);
         overflow: hidden;
-        position: relative;
         transition: var(--trans-smooth);
     }
 
@@ -70,34 +69,43 @@
         box-shadow: var(--shadow-float);
     }
 
+    .timeline-card-header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 1.25rem 1.5rem 0.5rem;
+        border-bottom: 1px solid var(--admin-border-light);
+    }
+
     .timeline-date {
-        position: absolute; top: 1.25rem; right: 1.25rem;
         font-size: 0.8rem; font-weight: 700;
         color: var(--admin-primary);
         background: rgba(139,92,246,0.1);
         padding: 0.35rem 0.85rem; border-radius: 20px;
-        display: flex; align-items: center; gap: 4px;
+        display: inline-flex; align-items: center; gap: 4px;
     }
 
-    .timeline-section { padding: 1.5rem 1.75rem; }
+    .timeline-tag {
+        font-size: 0.75rem; font-weight: 700;
+        color: var(--admin-text-secondary);
+        display: inline-flex; align-items: center; gap: 4px;
+    }
+
+    .timeline-section { padding: 1.25rem 1.5rem; }
     .timeline-section-ar { direction: rtl; text-align: right; }
     .timeline-section-en { direction: ltr; text-align: left; background: rgba(139,92,246,0.03); border-top: 1px dashed var(--admin-border-light); }
 
     .timeline-title {
         font-size: 1.2rem; font-weight: 800;
         color: var(--admin-text-primary);
-        margin-bottom: 0.75rem; padding-right: 9rem;
+        margin-bottom: 0.75rem;
     }
-
-    .timeline-section-ar .timeline-title { padding-right: 0; padding-left: 9rem; }
 
     .timeline-description {
         font-size: 0.92rem; color: var(--admin-text-secondary);
-        line-height: 1.65; margin: 0;
+        line-height: 1.65; margin: 0; white-space: pre-line;
     }
 
     .timeline-actions {
-        padding: 1rem 1.5rem;
+        padding: 0.85rem 1.5rem;
         background: rgba(0,0,0,0.02);
         border-top: 1px solid var(--admin-border-light);
         display: flex; justify-content: flex-end; gap: 0.5rem;
@@ -141,9 +149,15 @@
     {
         <div class="timeline-item">
             <div class="timeline-card">
-                <div class="timeline-date">
-                    <i class='bx bx-calendar'></i>
-                    @item.CreatedAt.ToString("MMM dd, yyyy")
+                <!-- Clean Flex Header with Date -->
+                <div class="timeline-card-header">
+                    <div class="timeline-tag">
+                        <i class='bx bx-rocket' style="color: var(--admin-primary);"></i> Update Entry
+                    </div>
+                    <div class="timeline-date">
+                        <i class='bx bx-calendar'></i>
+                        @item.CreatedAt.ToString("MMM dd, yyyy")
+                    </div>
                 </div>
 
                 <!-- Arabic Version -->
