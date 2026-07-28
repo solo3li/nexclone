@@ -231,6 +231,20 @@ using (var scope = app.Services.CreateScope())
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     dbContext.Database.Migrate();
 
+    try
+    {
+        dbContext.Database.ExecuteSqlRaw(@"
+            ALTER TABLE ""TicketMessages"" ADD COLUMN IF NOT EXISTS ""IsRead"" boolean NOT NULL DEFAULT false;
+            ALTER TABLE ""TicketMessages"" ADD COLUMN IF NOT EXISTS ""ReplyToMessageId"" integer NULL;
+            ALTER TABLE ""TicketMessages"" ADD COLUMN IF NOT EXISTS ""ReplyToSender"" text NULL;
+            ALTER TABLE ""TicketMessages"" ADD COLUMN IF NOT EXISTS ""ReplyToContent"" text NULL;
+        ");
+    }
+    catch (Exception ex)
+    {
+        Log.Warning("TicketMessages column migration check: {Message}", ex.Message);
+    }
+
     // Seed Default Settings
     var defaultSettings = new List<AppSetting>
     {

@@ -6,7 +6,6 @@ import { Link } from "@/i18n/routing";
 import * as signalR from "@microsoft/signalr";
 
 export default function TicketChat({ params }: { params: Promise<{ id: string }> }) {
-  // Next.js 15: params is a Promise
   const { id } = use(params);
 
   const [ticket, setTicket] = useState<any>(null);
@@ -14,10 +13,13 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
   const [message, setMessage] = useState("");
   const [attachment, setAttachment] = useState<File | null>(null);
   const [sending, setSending] = useState(false);
+  const [replyTo, setReplyTo] = useState<{ id: number; senderName: string; content: string } | null>(null);
+  const [isAdminTyping, setIsAdminTyping] = useState(false);
 
-  const { isAuthenticated } = useAppStore();
+  const { isAuthenticated, user } = useAppStore();
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [connection, setConnection] = useState<signalR.HubConnection | null>(null);
+  const typingTimeoutRef = useRef<any>(null);
 
   useEffect(() => {
     if (isAuthenticated && id) {
@@ -45,19 +47,37 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
           connection.invoke("JoinTicketGroup", id);
 
           connection.on("ReceiveMessage", (msg: any) => {
-            if (msg.senderName === "Admin") {
-              setTicket((prev: any) => {
-                if (!prev) return prev;
-                if (prev.messages.some((m: any) => m.id === msg.id)) return prev;
-                return {
-                  ...prev,
-                  messages: [...prev.messages, msg],
-                };
-              });
-            }
+            setTicket((prev: any) => {
+              if (!prev) return prev;
+              if (prev.messages.some((m: any) => m.id === msg.id)) return prev;
+              return {
+                ...prev,
+                messages: [...prev.messages, msg],
+              };
+            });
+          });
+
+          connection.on("UserTyping", (senderName: string) => {
+            if (senderName === "Admin") setIsAdminTyping(true);
+          });
+
+          connection.on("UserStoppedTyping", (senderName: string) => {
+            if (senderName === "Admin") setIsAdminTyping(false);
+          });
+
+          connection.on("MessagesMarkedRead", () => {
+            setTicket((prev: any) => {
+              if (!prev) return prev;
+              return {
+                ...prev,
+                messages: prev.messages.map((m: any) =>
+                  !m.isAdminMessage ? { ...m, isRead: true } : m
+                ),
+              };
+            });
           });
         })
-        .catch((e) => console.error("Connection failed: ", e));
+        .catch((e) => console.error("SignalR Connection failed: ", e));
 
       return () => {
         connection.invoke("LeaveTicketGroup", id).then(() => connection.stop());
@@ -67,7 +87,7 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [ticket?.messages]);
+  }, [ticket?.messages, isAdminTyping]);
 
   const fetchTicket = async () => {
     try {
@@ -80,6 +100,17 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
     }
   };
 
+  const handleInputChange = (val: string) => {
+    setMessage(val);
+    if (connection && user?.email) {
+      connection.invoke("SendTyping", id, user.email).catch(() => {});
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = setTimeout(() => {
+        connection.invoke("StopTyping", id, user.email).catch(() => {});
+      }, 2000);
+    }
+  };
+
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if ((!message.trim() && !attachment) || sending || ticket?.status === "Closed") return;
@@ -89,6 +120,7 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
       const formData = new FormData();
       if (message.trim()) formData.append("content", message);
       if (attachment) formData.append("attachment", attachment);
+      if (replyTo) formData.append("replyToMessageId", replyTo.id.toString());
 
       const res = await api.post(`/api/tickets/${id}/message`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -101,11 +133,23 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
 
       setMessage("");
       setAttachment(null);
+      setReplyTo(null);
+
+      if (connection && user?.email) {
+        connection.invoke("StopTyping", id, user.email).catch(() => {});
+      }
     } catch (err) {
       console.error(err);
     } finally {
       setSending(false);
     }
+  };
+
+  const formatMediaUrl = (url: string) => {
+    if (!url) return "";
+    if (url.startsWith("http")) return url;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+    return `${apiUrl}${url}`;
   };
 
   if (!isAuthenticated) return null;
@@ -130,7 +174,8 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
   }
 
   return (
-    <div className="bg-white/5 border border-white/10 p-6 md:p-8 rounded-3xl flex flex-col h-[calc(100vh-200px)] min-h-[500px] w-full">
+    <div className="bg-white/5 border border-white/10 p-6 md:p-8 rounded-3xl flex flex-col h-[calc(100vh-200px)] min-h-[550px] w-full">
+      {/* Header */}
       <div className="flex justify-between items-center mb-6 pb-6 border-b border-white/10">
         <div>
           <div className="flex items-center gap-3 mb-2">
@@ -155,64 +200,118 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto pr-2 space-y-6 mb-6">
+      {/* Messages Scroll Area */}
+      <div className="flex-1 overflow-y-auto pr-2 space-y-6 mb-4">
         {ticket.messages.map((msg: any) => (
           <div
             key={msg.id}
-            className={`flex flex-col ${msg.isAdminMessage ? "items-start" : "items-end"}`}
+            className={`flex flex-col group ${msg.isAdminMessage ? "items-start" : "items-end"}`}
           >
+            <div className="flex items-center gap-2 mb-1">
+              <span className={`text-xs font-bold ${msg.isAdminMessage ? "text-violet-400" : "text-white/80"}`}>
+                {msg.senderName || (msg.isAdminMessage ? "Admin" : "You")}
+              </span>
+              <span className="text-[10px] text-white/50">
+                {new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              </span>
+              <button
+                type="button"
+                onClick={() => setReplyTo({ id: msg.id, senderName: msg.senderName || (msg.isAdminMessage ? "Admin" : "User"), content: msg.content })}
+                className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-violet-400 hover:text-violet-300 ml-1"
+                title="Reply"
+              >
+                ↩
+              </button>
+            </div>
+
             <div
-              className={`max-w-[80%] rounded-2xl p-4 ${
-                msg.isAdminMessage ? "bg-white/10 rounded-tl-none" : "bg-violet-600 rounded-tr-none"
+              className={`max-w-[85%] md:max-w-[75%] rounded-2xl p-4 relative ${
+                msg.isAdminMessage ? "bg-white/10 rounded-tl-none border border-white/10" : "bg-violet-600 rounded-tr-none"
               }`}
             >
-              <div className="flex justify-between items-center gap-4 mb-2">
-                <span
-                  className={`text-xs font-bold ${
-                    msg.isAdminMessage ? "text-violet-400" : "text-white/80"
-                  }`}
-                >
-                  {msg.senderName}
-                </span>
-                <span className="text-[10px] text-white/50">
-                  {new Date(msg.createdAt).toLocaleTimeString()}
-                </span>
-              </div>
-
-              {msg.content && (
-                <p className="text-white text-sm whitespace-pre-wrap mb-2">{msg.content}</p>
+              {/* Quoted Box */}
+              {msg.replyToSender && (
+                <div className="bg-black/20 border-l-4 border-violet-400 p-2 rounded-lg mb-2 text-xs text-white/80">
+                  <div className="font-bold text-violet-300">↩ {msg.replyToSender}</div>
+                  <div className="truncate">{msg.replyToContent}</div>
+                </div>
               )}
 
+              {/* Text Content */}
+              {msg.content && (
+                <p className="text-white text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+              )}
+
+              {/* Media Attachments */}
               {msg.attachmentUrl && (
-                <div className="mt-2">
+                <div className="mt-3">
                   {msg.attachmentType === "image" ? (
-                    <a href={msg.attachmentUrl.startsWith('/') ? `${process.env.NEXT_PUBLIC_API_URL}${msg.attachmentUrl}` : msg.attachmentUrl} target="_blank" rel="noreferrer">
-                      <img 
-                        src={msg.attachmentUrl.startsWith('/') ? `${process.env.NEXT_PUBLIC_API_URL}${msg.attachmentUrl}` : msg.attachmentUrl}
-                        alt="Attachment" 
-                        className="max-w-xs rounded-xl border border-white/10"
+                    <a href={formatMediaUrl(msg.attachmentUrl)} target="_blank" rel="noreferrer">
+                      <img
+                        src={formatMediaUrl(msg.attachmentUrl)}
+                        alt="Attachment"
+                        className="max-w-xs md:max-w-sm rounded-xl border border-white/10 shadow-lg hover:scale-[1.01] transition-transform"
                       />
                     </a>
+                  ) : msg.attachmentType === "video" ? (
+                    <video
+                      src={formatMediaUrl(msg.attachmentUrl)}
+                      controls
+                      className="max-w-xs md:max-w-sm rounded-xl border border-white/10 shadow-lg"
+                    />
                   ) : msg.attachmentType === "audio" ? (
-                    <audio src={msg.attachmentUrl.startsWith('/') ? `${process.env.NEXT_PUBLIC_API_URL}${msg.attachmentUrl}` : msg.attachmentUrl} controls className="max-w-full h-10" />
+                    <audio
+                      src={formatMediaUrl(msg.attachmentUrl)}
+                      controls
+                      className="w-full max-w-sm rounded-lg"
+                    />
                   ) : (
                     <a
-                      href={msg.attachmentUrl.startsWith('/') ? `${process.env.NEXT_PUBLIC_API_URL}${msg.attachmentUrl}` : msg.attachmentUrl}
+                      href={formatMediaUrl(msg.attachmentUrl)}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-block px-4 py-2 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 text-sm text-blue-400"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-xl border border-white/10 hover:bg-white/20 text-sm text-sky-400 font-semibold"
                     >
-                      📎 View Attachment
+                      📎 Download File
                     </a>
                   )}
+                </div>
+              )}
+
+              {/* Read Checkmarks for User Messages */}
+              {!msg.isAdminMessage && (
+                <div className="text-right text-[11px] mt-1 text-white/60">
+                  {msg.isRead ? <span className="text-sky-300 font-bold">✓✓</span> : <span>✓</span>}
                 </div>
               )}
             </div>
           </div>
         ))}
+
+        {/* Typing Indicator */}
+        {isAdminTyping && (
+          <div className="flex items-center gap-2 text-violet-400 text-xs font-semibold px-2 animate-pulse">
+            <span className="w-2 h-2 rounded-full bg-violet-400 animate-bounce"></span>
+            Admin is typing...
+          </div>
+        )}
         <div ref={chatEndRef} />
       </div>
 
+      {/* Quoted Message Preview Bar */}
+      {replyTo && (
+        <div className="flex items-center justify-between px-4 py-2 bg-violet-500/20 border border-violet-500/30 rounded-xl mb-2 text-xs text-white/90">
+          <div className="truncate">
+            <span className="font-bold text-violet-400">↩ Replying to {replyTo.senderName}:</span>{" "}
+            <span>{replyTo.content || "[Attachment]"}</span>
+          </div>
+          <button onClick={() => setReplyTo(null)} className="text-red-400 hover:text-red-300 font-bold ml-2">
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Reply Input */}
       {ticket.status !== "Closed" ? (
         <form
           onSubmit={handleSend}
@@ -231,10 +330,11 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
             </div>
           )}
           <div className="flex items-center gap-3">
-            <label className="cursor-pointer p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-white/60 hover:text-white">
+            <label className="cursor-pointer p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-white/60 hover:text-white" title="Attach file">
               <input
                 type="file"
                 className="hidden"
+                accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.zip,.rar"
                 onChange={(e) => {
                   if (e.target.files && e.target.files.length > 0) {
                     setAttachment(e.target.files[0]);
@@ -247,13 +347,13 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
               type="text"
               placeholder="Type your message..."
               value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              onChange={(e) => handleInputChange(e.target.value)}
               className="flex-1 bg-transparent border-none text-white focus:outline-none text-sm placeholder-white/30"
             />
             <button
               type="submit"
               disabled={(!message.trim() && !attachment) || sending}
-              className="px-6 py-2 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white rounded-xl transition-colors text-sm font-semibold"
+              className="px-6 py-2.5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 disabled:opacity-50 text-white rounded-xl transition-all text-sm font-semibold shadow-lg shadow-violet-600/30"
             >
               {sending ? "..." : "Send"}
             </button>

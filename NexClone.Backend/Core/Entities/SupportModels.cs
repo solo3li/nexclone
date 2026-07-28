@@ -47,9 +47,15 @@ namespace NexClone.Backend.Core.Entities
         public string Content { get; set; } = string.Empty;
 
         public string AttachmentUrl { get; set; } = string.Empty;
-        public string AttachmentType { get; set; } = string.Empty; // "image", "audio", ""
+        public string AttachmentType { get; set; } = string.Empty; // "image", "video", "audio", "file"
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public bool IsAdminMessage { get; set; } = false;
+
+        public bool IsRead { get; set; } = false;
+
+        public int? ReplyToMessageId { get; set; }
+        public string? ReplyToSender { get; set; }
+        public string? ReplyToContent { get; set; }
     }
 }

@@ -3,12 +3,11 @@
 
 @{
     ViewData["Title"] = $"Ticket #{Model.Id}: {Model.Subject}";
-    var userInitials = string.IsNullOrEmpty(Model.User?.Email) ? "?" : Model.User.Email.Substring(0, 1).ToUpper();
 }
 
 <style>
     /* ── Ticket Chat Premium UI ── */
-    .tc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem; }
+    .tc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
     .tc-header-info h1 { font-size: 1.6rem; font-weight: 800; margin: 0 0 4px 0; color: var(--admin-text-primary); }
     .tc-header-info p { margin: 0; color: var(--admin-text-secondary); font-size: 0.9rem; }
     .tc-header-actions { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
@@ -40,7 +39,7 @@
         box-shadow: var(--shadow-soft);
         overflow: hidden;
         display: flex; flex-direction: column;
-        height: 600px;
+        height: 650px;
     }
     .chat-card-header {
         padding: 1.25rem 1.75rem;
@@ -53,6 +52,20 @@
     .live-dot { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 700; color: #16a34a; background: rgba(34,197,94,.1); padding: 4px 12px; border-radius: 20px; }
     .live-dot::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 6px #22c55e; }
 
+    /* Typing indicator */
+    .typing-bar {
+        padding: 6px 1.75rem; font-size: 0.8rem; font-weight: 700; color: var(--admin-primary);
+        background: rgba(139,92,246,0.06); display: none; align-items: center; gap: 8px;
+        border-bottom: 1px solid var(--admin-border-light);
+    }
+    .typing-dots span {
+        display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--admin-primary);
+        animation: typingBounce 1.4s infinite ease-in-out both;
+    }
+    .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+    @@keyframes typingBounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+
     /* Chat Messages Box */
     .chat-messages {
         flex: 1; overflow-y: auto;
@@ -62,7 +75,7 @@
     }
 
     /* Message Bubbles */
-    .msg-wrapper { display: flex; flex-direction: column; max-width: 75%; }
+    .msg-wrapper { display: flex; flex-direction: column; max-width: 75%; position: relative; }
     .msg-user { align-self: flex-start; }
     .msg-admin { align-self: flex-end; }
 
@@ -72,7 +85,7 @@
 
     .msg-bubble {
         padding: 1rem 1.25rem; border-radius: 16px; font-size: 0.92rem; line-height: 1.55;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.03); position: relative;
     }
     .msg-user .msg-bubble {
         background: var(--admin-surface);
@@ -86,13 +99,49 @@
         border-top-right-radius: 4px;
     }
 
+    /* Reply Quoted Container */
+    .quoted-box {
+        padding: 8px 12px; border-radius: 8px; margin-bottom: 8px; font-size: 0.8rem;
+        border-left: 3px solid var(--admin-primary);
+    }
+    .msg-user .quoted-box { background: rgba(139,92,246,0.08); color: var(--admin-text-primary); }
+    .msg-admin .quoted-box { background: rgba(255,255,255,0.2); color: #ffffff; border-left-color: #ffffff; }
+    .quoted-sender { font-weight: 800; font-size: 0.75rem; margin-bottom: 2px; }
+    .quoted-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 300px; }
+
+    /* Media players */
+    .media-preview-img { max-width: 280px; max-height: 250px; border-radius: 12px; margin-top: 6px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s; }
+    .media-preview-img:hover { transform: scale(1.02); }
+    .media-preview-video { max-width: 320px; max-height: 240px; border-radius: 12px; margin-top: 6px; outline: none; }
+    .media-preview-audio { width: 260px; height: 38px; margin-top: 6px; outline: none; border-radius: 20px; }
+
+    /* Read status checkmarks */
+    .read-status { font-size: 0.85rem; margin-left: 6px; vertical-align: middle; }
+    .read-status.read { color: #38bdf8; font-weight: 800; }
+    .read-status.unread { color: rgba(255,255,255,0.6); }
+
+    /* Reply action button */
+    .btn-reply-msg {
+        opacity: 0; transition: opacity 0.2s; background: none; border: none; cursor: pointer;
+        color: var(--admin-text-secondary); font-size: 1rem; padding: 2px 6px;
+    }
+    .msg-wrapper:hover .btn-reply-msg { opacity: 1; }
+
+    /* Reply preview bar above footer */
+    .reply-preview-bar {
+        display: none; align-items: center; justify-content: space-between;
+        padding: 8px 1.25rem; background: rgba(139,92,246,0.08);
+        border-top: 1px solid var(--admin-border-light); font-size: 0.82rem;
+    }
+    .reply-preview-title { font-weight: 700; color: var(--admin-primary); }
+
     /* Input Footer */
     .chat-footer {
-        padding: 1.25rem 1.75rem;
+        padding: 1rem 1.75rem;
         border-top: 1px solid var(--admin-border-light);
         background: var(--admin-surface);
     }
-    .chat-reply-form { display: flex; gap: 1rem; align-items: flex-end; }
+    .chat-reply-form { display: flex; gap: 0.75rem; align-items: flex-end; }
     .chat-textarea-wrap { flex: 1; }
     .chat-textarea {
         width: 100%; padding: 0.75rem 1rem;
@@ -120,13 +169,6 @@
         padding: 1rem; text-align: center; font-weight: 700; font-size: 0.9rem;
         color: #6b7280; background: rgba(107,114,128,.1); border-radius: 12px;
     }
-
-    /* Badges */
-    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
-    .badge-dot { width: 7px; height: 7px; border-radius: 50%; }
-    .badge-red { background: rgba(239,68,68,.12); color: #dc2626; } .badge-red .badge-dot { background: #ef4444; }
-    .badge-yellow { background: rgba(234,179,8,.12); color: #ca8a04; } .badge-yellow .badge-dot { background: #eab308; }
-    .badge-green { background: rgba(34,197,94,.12); color: #16a34a; } .badge-green .badge-dot { background: #22c55e; box-shadow: 0 0 5px #22c55e; }
 </style>
 
 <!-- Header -->
@@ -163,12 +205,18 @@
         <span class="live-dot">Live SignalR Active</span>
     </div>
 
+    <!-- Typing bar -->
+    <div id="typing-bar" class="typing-bar">
+        <div class="typing-dots"><span></span><span></span><span></span></div>
+        <span id="typing-text">User is typing...</span>
+    </div>
+
     <!-- Messages -->
     <div id="chat-messages" class="chat-messages">
         @foreach (var msg in Model.Messages.OrderBy(m => m.CreatedAt))
         {
             var isMsgAdmin = msg.IsAdminMessage;
-            <div class="msg-wrapper @(isMsgAdmin ? "msg-admin" : "msg-user")">
+            <div class="msg-wrapper @(isMsgAdmin ? "msg-admin" : "msg-user")" id="msg-block-@msg.Id">
                 <div class="msg-meta">
                     @if (isMsgAdmin)
                     {
@@ -179,51 +227,89 @@
                         <span><i class='bx bx-user'></i> @(Model.User?.Email ?? "User")</span>
                     }
                     <span>• @msg.CreatedAt.ToLocalTime().ToString("MMM dd, HH:mm")</span>
+                    <button type="button" class="btn-reply-msg" onclick="setReply('@msg.Id', '@(isMsgAdmin ? "Admin" : Model.User?.Email)', '@System.Net.WebUtility.HtmlEncode(msg.Content)')" title="Reply to message">
+                        <i class='bx bx-reply'></i>
+                    </button>
                 </div>
                 <div class="msg-bubble">
+                    <!-- Quoted Message -->
+                    @if (!string.IsNullOrEmpty(msg.ReplyToSender))
+                    {
+                        <div class="quoted-box">
+                            <div class="quoted-sender"><i class='bx bx-reply'></i> @msg.ReplyToSender</div>
+                            <div class="quoted-text">@msg.ReplyToContent</div>
+                        </div>
+                    }
+
+                    <!-- Content -->
                     @if (!string.IsNullOrEmpty(msg.Content))
                     {
                         <div style="white-space: pre-wrap;">@msg.Content</div>
                     }
+
+                    <!-- Media Attachments -->
                     @if (!string.IsNullOrEmpty(msg.AttachmentUrl))
                     {
                         <div style="margin-top: 0.5rem;">
                             @if (msg.AttachmentType == "image")
                             {
-                                <a href="@msg.AttachmentUrl" target="_blank"><img src="@msg.AttachmentUrl" style="max-width: 220px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.15);" /></a>
+                                <a href="@msg.AttachmentUrl" target="_blank"><img src="@msg.AttachmentUrl" class="media-preview-img" alt="attachment" /></a>
+                            }
+                            else if (msg.AttachmentType == "video")
+                            {
+                                <video src="@msg.AttachmentUrl" controls class="media-preview-video"></video>
                             }
                             else if (msg.AttachmentType == "audio")
                             {
-                                <audio controls src="@msg.AttachmentUrl" style="width: 220px; margin-top: 4px;"></audio>
+                                <audio src="@msg.AttachmentUrl" controls class="media-preview-audio"></audio>
                             }
                             else
                             {
-                                <a href="@msg.AttachmentUrl" target="_blank" style="color: @(isMsgAdmin ? "#fff" : "var(--admin-primary)"); font-weight: 700; text-decoration: underline;">
-                                    <i class='bx bx-paperclip'></i> @Localizer["View Attachment"]
+                                <a href="@msg.AttachmentUrl" target="_blank" style="color: @(isMsgAdmin ? "#fff" : "var(--admin-primary)"); font-weight: 700; text-decoration: underline; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i class='bx bx-paperclip'></i> @Localizer["Download Attachment"]
                                 </a>
                             }
                         </div>
+                    }
+
+                    <!-- Read Status Checkmarks for Admin Messages -->
+                    @if (isMsgAdmin)
+                    {
+                        <span class="read-status @(msg.IsRead ? "read" : "unread")" title="@(msg.IsRead ? "Read by user" : "Sent")">
+                            @(msg.IsRead ? "✓✓" : "✓")
+                        </span>
                     }
                 </div>
             </div>
         }
     </div>
 
+    <!-- Reply Preview Bar -->
+    <div id="reply-preview-bar" class="reply-preview-bar">
+        <div>
+            <span class="reply-preview-title"><i class='bx bx-reply'></i> Replying to <span id="reply-target-name"></span>:</span>
+            <span id="reply-target-text" style="margin-left: 8px; color: var(--admin-text-secondary);"></span>
+        </div>
+        <button type="button" onclick="cancelReply()" style="background: none; border: none; font-size: 1.1rem; cursor: pointer; color: #ef4444;">✕</button>
+    </div>
+
     <!-- Footer Reply -->
     <div class="chat-footer">
         @if (Model.Status != "Closed")
         {
-            <form method="post" action="/TicketsAdmin/SendMessage" enctype="multipart/form-data" class="chat-reply-form">
+            <form method="post" action="/TicketsAdmin/SendMessage" enctype="multipart/form-data" class="chat-reply-form" id="admin-reply-form">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="id" value="@Model.Id" />
+                <input type="hidden" name="replyToMessageId" id="input-reply-id" value="" />
+
                 <div class="chat-textarea-wrap">
-                    <textarea name="content" class="chat-textarea" rows="2" placeholder="Type your reply here..."></textarea>
+                    <textarea name="content" id="admin-chat-input" class="chat-textarea" rows="2" placeholder="Type your reply here..."></textarea>
                 </div>
-                <div style="align-self: center;">
+                <div style="align-self: center; display: flex; flex-direction: column; align-items: center;">
                     <label for="attachment-file" class="btn-back" style="cursor: pointer; margin: 0; padding: 0.75rem 1rem;">
                         <i class='bx bx-paperclip' style="font-size: 1.2rem;"></i> File
                     </label>
-                    <input id="attachment-file" type="file" name="attachment" accept="image/*,audio/*" style="display: none;" onchange="if(this.files[0]) alert('File selected: ' + this.files[0].name);" />
+                    <input id="attachment-file" type="file" name="attachment" accept="image/*,video/*,audio/*,.pdf,.zip,.doc,.docx" style="display: none;" onchange="if(this.files[0]) alert('Selected: ' + this.files[0].name);" />
                 </div>
                 <button type="submit" class="btn-send">
                     <i class='bx bx-send'></i> @Localizer["Send"]
@@ -245,49 +331,122 @@
         const chatMessages = document.getElementById('chat-messages');
         chatMessages.scrollTop = chatMessages.scrollHeight;
 
+        const ticketId = "@Model.Id";
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/hubs/ticket")
+            .withAutomaticReconnect()
             .build();
 
+        // SignalR: Receive live messages
         connection.on("ReceiveMessage", function (msg) {
             if (msg.senderName !== "Admin") {
-                const div = document.createElement("div");
-                div.className = "msg-wrapper msg-user";
-                
-                let html = `
-                    <div class="msg-meta">
-                        <span><i class='bx bx-user'></i> ${msg.senderName}</span>
-                        <span>• Just now</span>
-                    </div>
-                    <div class="msg-bubble">`;
-                
-                if (msg.content) {
-                    html += `<div style="white-space: pre-wrap;">${msg.content}</div>`;
-                }
-                if (msg.attachmentUrl) {
-                    html += `<div style="margin-top: 0.5rem;">`;
-                    if (msg.attachmentType === "image") {
-                        html += `<a href="${msg.attachmentUrl}" target="_blank"><img src="${msg.attachmentUrl}" style="max-width: 220px; border-radius: 8px;" /></a>`;
-                    } else if (msg.attachmentType === "audio") {
-                        html += `<audio controls src="${msg.attachmentUrl}" style="width: 220px;"></audio>`;
-                    } else {
-                        html += `<a href="${msg.attachmentUrl}" target="_blank" style="color: var(--admin-primary); font-weight: 700; text-decoration: underline;"><i class='bx bx-paperclip'></i> @Localizer["View Attachment"]</a>`;
-                    }
-                    html += `</div>`;
-                }
-                html += `</div>`;
-                div.innerHTML = html;
-                chatMessages.appendChild(div);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
+                renderIncomingMessage(msg);
+            }
+        });
+
+        // SignalR: Messages read by user
+        connection.on("MessagesMarkedRead", function (data) {
+            document.querySelectorAll('.read-status').forEach(el => {
+                el.className = 'read-status read';
+                el.innerText = '✓✓';
+                el.title = 'Read by user';
+            });
+        });
+
+        // SignalR: Realtime Typing
+        const typingBar = document.getElementById('typing-bar');
+        const typingText = document.getElementById('typing-text');
+
+        connection.on("UserTyping", function (senderName) {
+            if (senderName !== "Admin") {
+                typingText.innerText = `${senderName} is typing...`;
+                typingBar.style.display = 'flex';
+            }
+        });
+
+        connection.on("UserStoppedTyping", function (senderName) {
+            if (senderName !== "Admin") {
+                typingBar.style.display = 'none';
             }
         });
 
         connection.start().then(function () {
-            connection.invoke("JoinTicketGroup", "@Model.Id").catch(function (err) {
-                return console.error(err.toString());
+            connection.invoke("JoinTicketGroup", ticketId).catch(err => console.error(err.toString()));
+        }).catch(err => console.error(err.toString()));
+
+        // Admin Typing Event emitter
+        const adminInput = document.getElementById('admin-chat-input');
+        let typingTimeout = null;
+
+        if (adminInput) {
+            adminInput.addEventListener('input', function() {
+                connection.invoke("SendTyping", ticketId, "Admin").catch(() => {});
+                clearTimeout(typingTimeout);
+                typingTimeout = setTimeout(() => {
+                    connection.invoke("StopTyping", ticketId, "Admin").catch(() => {});
+                }, 2000);
             });
-        }).catch(function (err) {
-            return console.error(err.toString());
-        });
+        }
+
+        // Reply System helper
+        window.setReply = function(id, sender, text) {
+            document.getElementById('input-reply-id').value = id;
+            document.getElementById('reply-target-name').innerText = sender;
+            document.getElementById('reply-target-text').innerText = text || '[Attachment]';
+            document.getElementById('reply-preview-bar').style.display = 'flex';
+            adminInput.focus();
+        };
+
+        window.cancelReply = function() {
+            document.getElementById('input-reply-id').value = '';
+            document.getElementById('reply-preview-bar').style.display = 'none';
+        };
+
+        function renderIncomingMessage(msg) {
+            const div = document.createElement("div");
+            div.className = "msg-wrapper msg-user";
+            div.id = `msg-block-${msg.id}`;
+
+            let html = `
+                <div class="msg-meta">
+                    <span><i class='bx bx-user'></i> ${msg.senderName}</span>
+                    <span>• Just now</span>
+                    <button type="button" class="btn-reply-msg" onclick="setReply('${msg.id}', '${msg.senderName}', '${(msg.content || '').replace(/'/g, "\\'")}')">
+                        <i class='bx bx-reply'></i>
+                    </button>
+                </div>
+                <div class="msg-bubble">`;
+
+            if (msg.replyToSender) {
+                html += `
+                    <div class="quoted-box">
+                        <div class="quoted-sender"><i class='bx bx-reply'></i> ${msg.replyToSender}</div>
+                        <div class="quoted-text">${msg.replyToContent || ''}</div>
+                    </div>`;
+            }
+
+            if (msg.content) {
+                html += `<div style="white-space: pre-wrap;">${msg.content}</div>`;
+            }
+
+            if (msg.attachmentUrl) {
+                html += `<div style="margin-top: 0.5rem;">`;
+                if (msg.attachmentType === "image") {
+                    html += `<a href="${msg.attachmentUrl}" target="_blank"><img src="${msg.attachmentUrl}" class="media-preview-img" alt="attachment" /></a>`;
+                } else if (msg.attachmentType === "video") {
+                    html += `<video src="${msg.attachmentUrl}" controls class="media-preview-video"></video>`;
+                } else if (msg.attachmentType === "audio") {
+                    html += `<audio src="${msg.attachmentUrl}" controls class="media-preview-audio"></audio>`;
+                } else {
+                    html += `<a href="${msg.attachmentUrl}" target="_blank" style="color: var(--admin-primary); font-weight: 700; text-decoration: underline; display: inline-flex; align-items: center; gap: 4px;"><i class='bx bx-paperclip'></i> Download Attachment</a>`;
+                }
+                html += `</div>`;
+            }
+
+            html += `</div>`;
+            div.innerHTML = html;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
     </script>
 }

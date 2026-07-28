@@ -14,5 +14,15 @@ namespace NexClone.Backend.Hubs
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"ticket_{ticketId}");
         }
+
+        public async Task SendTyping(string ticketId, string senderName)
+        {
+            await Clients.OthersInGroup($"ticket_{ticketId}").SendAsync("UserTyping", senderName);
+        }
+
+        public async Task StopTyping(string ticketId, string senderName)
+        {
+            await Clients.OthersInGroup($"ticket_{ticketId}").SendAsync("UserStoppedTyping", senderName);
+        }
     }
 }
