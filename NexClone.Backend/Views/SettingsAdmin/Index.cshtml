@@ -1,208 +1,236 @@
 @model IEnumerable<NexClone.Backend.Core.Entities.AppSetting>
 @inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 
-<div class="bx--grid" style="padding-left: 0; max-width: 800px; margin-left: 0;">
-    <div class="bx--row" style="margin-bottom: 2rem;">
-        <h2 style="margin: 0; font-weight: 400; font-size: 1.5rem;">@ViewData["Title"]</h2>
-        <p style="color: #525252; margin-top: 0.5rem;">@Localizer["Manage site configurations, maintenance modes, and storage independently."]</p>
-    </div>
+@{
+    ViewData["Title"] = "Global Settings";
+}
 
+<style>
+    .gs-header { margin-bottom: 2rem; }
+    .gs-header h1 { font-size: 1.8rem; font-weight: 800; margin: 0; color: var(--admin-text-primary); display: flex; align-items: center; gap: 0.6rem; }
+    .gs-header h1 i { color: var(--admin-primary); }
+    .gs-header p { margin: 4px 0 0; color: var(--admin-text-secondary); font-size: 0.9rem; }
+
+    .gs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.75rem; margin-bottom: 2rem; }
+
+    .gs-card {
+        background: var(--admin-surface);
+        border: 1px solid var(--admin-border-light);
+        border-radius: var(--admin-radius-lg);
+        box-shadow: var(--shadow-soft);
+        overflow: hidden; display: flex; flex-direction: column;
+    }
+    .gs-card-top-bar { height: 4px; width: 100%; }
+    .gs-card-body { padding: 1.75rem; flex: 1; display: flex; flex-direction: column; }
+    .gs-card-title {
+        font-size: 1.1rem; font-weight: 800; color: var(--admin-text-primary);
+        margin: 0 0 0.5rem 0; display: flex; align-items: center; gap: 0.5rem;
+    }
+    .gs-card-desc { font-size: 0.85rem; color: var(--admin-text-secondary); margin: 0 0 1.5rem 0; }
+
+    .gs-form-group { margin-bottom: 1.25rem; }
+    .gs-checkbox-row {
+        display: flex; align-items: center; gap: 0.75rem;
+        background: var(--admin-bg, #f8fafc); padding: 0.85rem 1.1rem;
+        border-radius: 12px; border: 1px solid var(--admin-border-light);
+        margin-bottom: 0.85rem;
+    }
+    .gs-checkbox-row label { font-weight: 600; font-size: 0.88rem; color: var(--admin-text-primary); margin: 0; cursor: pointer; }
+
+    .btn-gs-save {
+        display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+        background: linear-gradient(135deg, var(--admin-primary) 0%, #a855f7 100%);
+        color: #fff; font-weight: 700; font-size: 0.85rem;
+        padding: 0.65rem 1.4rem; border-radius: 10px; border: none; cursor: pointer;
+        box-shadow: 0 4px 15px rgba(139,92,246,.3); transition: var(--trans-bounce);
+        margin-top: auto; align-self: flex-end;
+    }
+    .btn-gs-save:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(139,92,246,.4); color: #fff; }
+</style>
+
+<div class="gs-header">
+    <h1><i class='bx bx-cog'></i> @Localizer["Global System Settings"]</h1>
+    <p>@Localizer["Manage site configurations, maintenance modes, OAuth, and storage independently."]</p>
+</div>
+
+<div class="gs-grid">
     <!-- SITE SETTINGS FORM -->
-    <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #0f62fe;">
-        @Html.AntiForgeryToken()
+    <div class="gs-card">
+        <div class="gs-card-top-bar" style="background: var(--admin-primary);"></div>
+        <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" class="gs-card-body">
+            @Html.AntiForgeryToken()
+            <div class="gs-card-title"><i class='bx bx-globe' style="color: var(--admin-primary);"></i> @Localizer["Site Settings"]</div>
+            <div class="gs-card-desc">@Localizer["Control site-wide maintenance and availability."]</div>
 
-        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">@Localizer["Site Settings"]</h3>
-        
-        <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom: 1.5rem;">
             @{
                 var maintenanceModeStr = Model.FirstOrDefault(s => s.Key == "Site.MaintenanceMode")?.Value ?? "false";
                 bool isMaintenanceMode = bool.TryParse(maintenanceModeStr, out var m) && m;
             }
-            <input type="hidden" name="settings[Site.MaintenanceMode]" value="false" id="hidden_Site_MaintenanceMode" />
-            <input id="Site_MaintenanceMode" class="bx--checkbox" type="checkbox" value="true" name="settings[Site.MaintenanceMode]" @(isMaintenanceMode ? "checked" : "") onchange="document.getElementById('hidden_Site_MaintenanceMode').disabled = this.checked;">
-            <label for="Site_MaintenanceMode" class="bx--checkbox-label" title="Enable Global Maintenance Mode">
-                <span class="bx--checkbox-label-text">@Localizer["Enable Global Maintenance Mode (Will show maintenance screen to all users)"]</span>
-            </label>
-            <script>document.getElementById('hidden_Site_MaintenanceMode').disabled = document.getElementById('Site_MaintenanceMode').checked;</script>
-        </div>
+            <div class="gs-checkbox-row">
+                <input type="hidden" name="settings[Site.MaintenanceMode]" value="false" id="hidden_Site_MaintenanceMode" />
+                <input id="Site_MaintenanceMode" type="checkbox" value="true" name="settings[Site.MaintenanceMode]" @(isMaintenanceMode ? "checked" : "") style="width:18px;height:18px;cursor:pointer;" onchange="document.getElementById('hidden_Site_MaintenanceMode').disabled = this.checked;">
+                <label for="Site_MaintenanceMode">@Localizer["Global Maintenance Mode"]</label>
+                <script>document.getElementById('hidden_Site_MaintenanceMode').disabled = document.getElementById('Site_MaintenanceMode').checked;</script>
+            </div>
 
-        <div class="bx--form-item" style="margin-bottom: 1rem;">
-            <label for="Site_MaintenanceEndDate" class="bx--label">@Localizer["Maintenance End Date (Optional)"]</label>
-            <input id="Site_MaintenanceEndDate" type="datetime-local" class="bx--text-input" name="settings[Site.MaintenanceEndDate]" value="@Model.FirstOrDefault(s => s.Key == "Site.MaintenanceEndDate")?.Value" placeholder="YYYY-MM-DDTHH:MM">
-            <div class="bx--form__helper-text">@Localizer["Leave blank for indefinite maintenance."]</div>
-        </div>
+            <div class="gs-form-group">
+                <label for="Site_MaintenanceEndDate" class="bx--label">@Localizer["Maintenance End Date (Optional)"]</label>
+                <input id="Site_MaintenanceEndDate" type="datetime-local" class="bx--text-input" name="settings[Site.MaintenanceEndDate]" value="@Model.FirstOrDefault(s => s.Key == "Site.MaintenanceEndDate")?.Value">
+            </div>
 
-        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
-            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Site Settings"]</button>
-        </div>
-    </form>
+            <button type="submit" class="btn-gs-save"><i class='bx bx-save'></i> @Localizer["Save Site Settings"]</button>
+        </form>
+    </div>
 
     <!-- TOOLS MAINTENANCE FORM -->
-    <form action="@Url.Action("SaveToolsMaintenance", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #da1e28;">
-        @Html.AntiForgeryToken()
+    <div class="gs-card">
+        <div class="gs-card-top-bar" style="background: #ef4444;"></div>
+        <form action="@Url.Action("SaveToolsMaintenance", "SettingsAdmin")" method="post" class="gs-card-body">
+            @Html.AntiForgeryToken()
+            <div class="gs-card-title"><i class='bx bx-wrench' style="color: #ef4444;"></i> @Localizer["Tools Maintenance"]</div>
+            <div class="gs-card-desc">@Localizer["Enable maintenance mode for specific tools."]</div>
 
-        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">@Localizer["Tools Maintenance"]</h3>
-        <p style="color: #525252; margin-bottom: 1rem; font-size: 0.875rem;">@Localizer["Enable maintenance mode for specific tools. This will show a maintenance screen to users attempting to access them."]</p>
-
-        @if (ViewBag.ToolConfigurations != null)
-        {
-            var tools = (IEnumerable<NexClone.Backend.Core.Entities.ToolConfiguration>)ViewBag.ToolConfigurations;
-            foreach (var tool in tools)
+            @if (ViewBag.ToolConfigurations != null)
             {
-                <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom: 1rem;">
-                    <input id="toolMaintenance_@(tool.Id)" class="bx--checkbox" type="checkbox" name="toolMaintenance_@(tool.Id)" value="true" @(tool.IsMaintenanceMode ? "checked" : "")>
-                    <label for="toolMaintenance_@(tool.Id)" class="bx--checkbox-label" title="Enable Maintenance Mode for @tool.ToolName">
-                        <span class="bx--checkbox-label-text">@tool.ToolName</span>
-                    </label>
-                </div>
+                var tools = (IEnumerable<NexClone.Backend.Core.Entities.ToolConfiguration>)ViewBag.ToolConfigurations;
+                foreach (var tool in tools)
+                {
+                    <div class="gs-checkbox-row">
+                        <input id="toolMaintenance_@(tool.Id)" type="checkbox" name="toolMaintenance_@(tool.Id)" value="true" @(tool.IsMaintenanceMode ? "checked" : "") style="width:18px;height:18px;cursor:pointer;">
+                        <label for="toolMaintenance_@(tool.Id)">@tool.ToolName</label>
+                    </div>
+                }
             }
-        }
 
-        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
-            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Tools Maintenance"]</button>
-        </div>
-    </form>
+            <button type="submit" class="btn-gs-save" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);"><i class='bx bx-save'></i> @Localizer["Save Tools Maintenance"]</button>
+        </form>
+    </div>
 
     <!-- PAYMENT METHODS MAINTENANCE FORM -->
-    <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #f1c21b;">
-        @Html.AntiForgeryToken()
+    <div class="gs-card">
+        <div class="gs-card-top-bar" style="background: #eab308;"></div>
+        <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" class="gs-card-body">
+            @Html.AntiForgeryToken()
+            <div class="gs-card-title"><i class='bx bx-credit-card' style="color: #eab308;"></i> @Localizer["Payment Maintenance"]</div>
+            <div class="gs-card-desc">@Localizer["Disable specific gateways during maintenance."]</div>
 
-        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">@Localizer["Payment Methods Maintenance"]</h3>
-        <p style="color: #525252; margin-bottom: 1rem; font-size: 0.875rem;">@Localizer["Disable specific payment methods during maintenance. Users will see \"Under Maintenance\" in the checkout page."]</p>
+            @{
+                bool paymobMaintenance = (Model.FirstOrDefault(s => s.Key == "Payment.Paymob.Maintenance")?.Value == "true");
+                bool payPalMaintenance = (Model.FirstOrDefault(s => s.Key == "Payment.PayPal.Maintenance")?.Value == "true");
+                bool manualMaintenance = (Model.FirstOrDefault(s => s.Key == "Payment.Manual.Maintenance")?.Value == "true");
+            }
 
-        @{
-            bool paymobMaintenance = (Model.FirstOrDefault(s => s.Key == "Payment.Paymob.Maintenance")?.Value == "true");
-            bool payPalMaintenance = (Model.FirstOrDefault(s => s.Key == "Payment.PayPal.Maintenance")?.Value == "true");
-            bool manualMaintenance = (Model.FirstOrDefault(s => s.Key == "Payment.Manual.Maintenance")?.Value == "true");
-        }
+            <div class="gs-checkbox-row">
+                <input type="hidden" name="settings[Payment.Paymob.Maintenance]" value="false" id="hidden_Payment_Paymob_Maintenance" />
+                <input id="Payment_Paymob_Maintenance" type="checkbox" name="settings[Payment.Paymob.Maintenance]" value="true" @(paymobMaintenance ? "checked" : "") style="width:18px;height:18px;cursor:pointer;" onchange="document.getElementById('hidden_Payment_Paymob_Maintenance').disabled = this.checked;">
+                <label for="Payment_Paymob_Maintenance">@Localizer["Paymob Gateway"]</label>
+                <script>document.getElementById('hidden_Payment_Paymob_Maintenance').disabled = document.getElementById('Payment_Paymob_Maintenance').checked;</script>
+            </div>
 
-        <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom: 1rem;">
-            <input type="hidden" name="settings[Payment.Paymob.Maintenance]" value="false" id="hidden_Payment_Paymob_Maintenance" />
-            <input id="Payment_Paymob_Maintenance" class="bx--checkbox" type="checkbox" name="settings[Payment.Paymob.Maintenance]" value="true" @(paymobMaintenance ? "checked" : "") onchange="document.getElementById('hidden_Payment_Paymob_Maintenance').disabled = this.checked;">
-            <label for="Payment_Paymob_Maintenance" class="bx--checkbox-label">
-                <span class="bx--checkbox-label-text">@Localizer["Paymob"]</span>
-            </label>
-            <script>document.getElementById('hidden_Payment_Paymob_Maintenance').disabled = document.getElementById('Payment_Paymob_Maintenance').checked;</script>
-        </div>
+            <div class="gs-checkbox-row">
+                <input type="hidden" name="settings[Payment.PayPal.Maintenance]" value="false" id="hidden_Payment_PayPal_Maintenance" />
+                <input id="Payment_PayPal_Maintenance" type="checkbox" name="settings[Payment.PayPal.Maintenance]" value="true" @(payPalMaintenance ? "checked" : "") style="width:18px;height:18px;cursor:pointer;" onchange="document.getElementById('hidden_Payment_PayPal_Maintenance').disabled = this.checked;">
+                <label for="Payment_PayPal_Maintenance">@Localizer["PayPal Gateway"]</label>
+                <script>document.getElementById('hidden_Payment_PayPal_Maintenance').disabled = document.getElementById('Payment_PayPal_Maintenance').checked;</script>
+            </div>
 
-        <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom: 1rem;">
-            <input type="hidden" name="settings[Payment.PayPal.Maintenance]" value="false" id="hidden_Payment_PayPal_Maintenance" />
-            <input id="Payment_PayPal_Maintenance" class="bx--checkbox" type="checkbox" name="settings[Payment.PayPal.Maintenance]" value="true" @(payPalMaintenance ? "checked" : "") onchange="document.getElementById('hidden_Payment_PayPal_Maintenance').disabled = this.checked;">
-            <label for="Payment_PayPal_Maintenance" class="bx--checkbox-label">
-                <span class="bx--checkbox-label-text">@Localizer["PayPal"]</span>
-            </label>
-            <script>document.getElementById('hidden_Payment_PayPal_Maintenance').disabled = document.getElementById('Payment_PayPal_Maintenance').checked;</script>
-        </div>
+            <div class="gs-checkbox-row">
+                <input type="hidden" name="settings[Payment.Manual.Maintenance]" value="false" id="hidden_Payment_Manual_Maintenance" />
+                <input id="Payment_Manual_Maintenance" type="checkbox" name="settings[Payment.Manual.Maintenance]" value="true" @(manualMaintenance ? "checked" : "") style="width:18px;height:18px;cursor:pointer;" onchange="document.getElementById('hidden_Payment_Manual_Maintenance').disabled = this.checked;">
+                <label for="Payment_Manual_Maintenance">@Localizer["Manual Transfer"]</label>
+                <script>document.getElementById('hidden_Payment_Manual_Maintenance').disabled = document.getElementById('Payment_Manual_Maintenance').checked;</script>
+            </div>
 
-        <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom: 1rem;">
-            <input type="hidden" name="settings[Payment.Manual.Maintenance]" value="false" id="hidden_Payment_Manual_Maintenance" />
-            <input id="Payment_Manual_Maintenance" class="bx--checkbox" type="checkbox" name="settings[Payment.Manual.Maintenance]" value="true" @(manualMaintenance ? "checked" : "") onchange="document.getElementById('hidden_Payment_Manual_Maintenance').disabled = this.checked;">
-            <label for="Payment_Manual_Maintenance" class="bx--checkbox-label">
-                <span class="bx--checkbox-label-text">@Localizer["Manual Transfer"]</span>
-            </label>
-            <script>document.getElementById('hidden_Payment_Manual_Maintenance').disabled = document.getElementById('Payment_Manual_Maintenance').checked;</script>
-        </div>
-
-        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
-            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Payment Settings"]</button>
-        </div>
-    </form>
+            <button type="submit" class="btn-gs-save" style="background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);"><i class='bx bx-save'></i> @Localizer["Save Payment Settings"]</button>
+        </form>
+    </div>
 
     <!-- CORS SETTINGS FORM -->
-    <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #24a148;">
-        @Html.AntiForgeryToken()
+    <div class="gs-card">
+        <div class="gs-card-top-bar" style="background: #10b981;"></div>
+        <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" class="gs-card-body">
+            @Html.AntiForgeryToken()
+            <div class="gs-card-title"><i class='bx bx-network-chart' style="color: #10b981;"></i> @Localizer["CORS & Origins"]</div>
+            <div class="gs-card-desc">@Localizer["Configure allowed cross-origin domains."]</div>
 
-        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">@Localizer["Origin (CORS) Settings"]</h3>
-        
-        <div class="bx--form-item" style="margin-bottom: 1rem;">
-            <label for="Origin_AllowedOrigins" class="bx--label">@Localizer["Allowed Origins"]</label>
-            <input id="Origin_AllowedOrigins" type="text" class="bx--text-input" name="settings[Origin.AllowedOrigins]" value="@Model.FirstOrDefault(s => s.Key == "Origin.AllowedOrigins")?.Value" placeholder="http://localhost:3000,https://nexclone.com">
-            <div class="bx--form__helper-text">@Localizer["Comma-separated list of allowed origins. Use * to allow all (not recommended)."]</div>
-        </div>
+            <div class="gs-form-group">
+                <label for="Origin_AllowedOrigins" class="bx--label">@Localizer["Allowed Origins"]</label>
+                <input id="Origin_AllowedOrigins" type="text" class="bx--text-input" name="settings[Origin.AllowedOrigins]" value="@Model.FirstOrDefault(s => s.Key == "Origin.AllowedOrigins")?.Value" placeholder="http://localhost:3000,https://nexclone.com">
+                <div class="bx--form__helper-text" style="margin-top:4px;">@Localizer["Comma-separated list of allowed origins."]</div>
+            </div>
 
-        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
-            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Origin Settings"]</button>
-        </div>
-    </form>
-
-
+            <button type="submit" class="btn-gs-save" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);"><i class='bx bx-save'></i> @Localizer["Save Origin Settings"]</button>
+        </form>
+    </div>
 
     <!-- GOOGLE OAUTH SETTINGS FORM -->
-    <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #ea4335;">
-        @Html.AntiForgeryToken()
+    <div class="gs-card">
+        <div class="gs-card-top-bar" style="background: #3b82f6;"></div>
+        <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" class="gs-card-body">
+            @Html.AntiForgeryToken()
+            <div class="gs-card-title"><i class='bx bxl-google' style="color: #3b82f6;"></i> @Localizer["Google OAuth Settings"]</div>
+            <div class="gs-card-desc">@Localizer["Configure Google Login credentials."]</div>
 
-        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">@Localizer["Google OAuth Settings"]</h3>
-        <p style="color: #525252; margin-bottom: 1rem; font-size: 0.875rem;">@Localizer["Configure Google Login for your users."]</p>
-        
-        <div class="bx--form-item" style="margin-bottom: 1rem;">
-            <label for="OAuth_GoogleClientId" class="bx--label">@Localizer["Google Client ID"]</label>
-            <input id="OAuth_GoogleClientId" type="text" class="bx--text-input" name="settings[OAuth.GoogleClientId]" value="@Model.FirstOrDefault(s => s.Key == "OAuth.GoogleClientId")?.Value" placeholder="xxxx-xxxx.apps.googleusercontent.com">
-            <div class="bx--form__helper-text">Found in Google Cloud Console > APIs & Services > Credentials</div>
-        </div>
+            <div class="gs-form-group">
+                <label for="OAuth_GoogleClientId" class="bx--label">@Localizer["Google Client ID"]</label>
+                <input id="OAuth_GoogleClientId" type="text" class="bx--text-input" name="settings[OAuth.GoogleClientId]" value="@Model.FirstOrDefault(s => s.Key == "OAuth.GoogleClientId")?.Value" placeholder="xxxx-xxxx.apps.googleusercontent.com">
+            </div>
 
-        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
-            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Google OAuth Settings"]</button>
-        </div>
-    </form>
+            <button type="submit" class="btn-gs-save" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);"><i class='bx bx-save'></i> @Localizer["Save Google OAuth Settings"]</button>
+        </form>
+    </div>
 
     <!-- FREE PLAN SETTINGS FORM -->
-    <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #0043ce;">
-        @Html.AntiForgeryToken()
+    <div class="gs-card">
+        <div class="gs-card-top-bar" style="background: #06b6d4;"></div>
+        <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" class="gs-card-body">
+            @Html.AntiForgeryToken()
+            <div class="gs-card-title"><i class='bx bx-fingerprint' style="color: #06b6d4;"></i> @Localizer["Free Plan Anti-Abuse"]</div>
+            <div class="gs-card-desc">@Localizer["Device fingerprinting limits for free accounts."]</div>
 
-        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">@Localizer["Free Plan Limits (Device Fingerprint)"]</h3>
-        <p style="color: #525252; margin-bottom: 1rem; font-size: 0.875rem;">@Localizer["Restrict the free plan to a specific number of claims per device to prevent abuse."]</p>
-        
-        @{
-            bool fingerprintCheck = (Model.FirstOrDefault(s => s.Key == "FreePlan.FingerprintCheck")?.Value == "true");
-        }
-        
-        <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom: 1rem;">
-            <input type="hidden" name="settings[FreePlan.FingerprintCheck]" value="false" id="hidden_FreePlan_FingerprintCheck" />
-            <input id="FreePlan_FingerprintCheck" class="bx--checkbox" type="checkbox" name="settings[FreePlan.FingerprintCheck]" value="true" @(fingerprintCheck ? "checked" : "") onchange="document.getElementById('hidden_FreePlan_FingerprintCheck').disabled = this.checked;">
-            <label for="FreePlan_FingerprintCheck" class="bx--checkbox-label">
-                <span class="bx--checkbox-label-text">@Localizer["Enable Fingerprint Limit for Free Plans"]</span>
-            </label>
-            <script>document.getElementById('hidden_FreePlan_FingerprintCheck').disabled = document.getElementById('FreePlan_FingerprintCheck').checked;</script>
-        </div>
+            @{
+                bool fingerprintCheck = (Model.FirstOrDefault(s => s.Key == "FreePlan.FingerprintCheck")?.Value == "true");
+            }
+            <div class="gs-checkbox-row">
+                <input type="hidden" name="settings[FreePlan.FingerprintCheck]" value="false" id="hidden_FreePlan_FingerprintCheck" />
+                <input id="FreePlan_FingerprintCheck" type="checkbox" name="settings[FreePlan.FingerprintCheck]" value="true" @(fingerprintCheck ? "checked" : "") style="width:18px;height:18px;cursor:pointer;" onchange="document.getElementById('hidden_FreePlan_FingerprintCheck').disabled = this.checked;">
+                <label for="FreePlan_FingerprintCheck">@Localizer["Enable Device Fingerprint Limit"]</label>
+                <script>document.getElementById('hidden_FreePlan_FingerprintCheck').disabled = document.getElementById('FreePlan_FingerprintCheck').checked;</script>
+            </div>
 
-        <div class="bx--form-item" style="margin-bottom: 1rem;">
-            <label for="FreePlan_MaxUsesPerDevice" class="bx--label">@Localizer["Max Uses Per Device"]</label>
-            <input id="FreePlan_MaxUsesPerDevice" type="number" class="bx--text-input" name="settings[FreePlan.MaxUsesPerDevice]" value="@Model.FirstOrDefault(s => s.Key == "FreePlan.MaxUsesPerDevice")?.Value" placeholder="1" min="1">
-            <div class="bx--form__helper-text">@Localizer["Number of accounts per device that can claim the free plan (e.g. 1)."]</div>
-        </div>
+            <div class="gs-form-group">
+                <label for="FreePlan_MaxUsesPerDevice" class="bx--label">@Localizer["Max Uses Per Device"]</label>
+                <input id="FreePlan_MaxUsesPerDevice" type="number" class="bx--text-input" name="settings[FreePlan.MaxUsesPerDevice]" value="@Model.FirstOrDefault(s => s.Key == "FreePlan.MaxUsesPerDevice")?.Value" placeholder="1" min="1">
+            </div>
 
-        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
-            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Free Plan Settings"]</button>
-        </div>
-    </form>
+            <button type="submit" class="btn-gs-save" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);"><i class='bx bx-save'></i> @Localizer["Save Free Plan Settings"]</button>
+        </form>
+    </div>
 
     <!-- AFFILIATE SETTINGS FORM -->
-    <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #8a3ffc;">
-        @Html.AntiForgeryToken()
+    <div class="gs-card">
+        <div class="gs-card-top-bar" style="background: #a855f7;"></div>
+        <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" class="gs-card-body">
+            @Html.AntiForgeryToken()
+            <div class="gs-card-title"><i class='bx bx-share-alt' style="color: #a855f7;"></i> @Localizer["Affiliate & Referral"]</div>
+            <div class="gs-card-desc">@Localizer["Set referral credits & commission %."]</div>
 
-        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">@Localizer["Affiliate & Referral Settings"]</h3>
-        <p style="color: #525252; margin-bottom: 1rem; font-size: 0.875rem;">@Localizer["Configure rewards for the referral and cash affiliate program."]</p>
-        
-        <div class="bx--form-item" style="margin-bottom: 1rem;">
-            <label for="Affiliate_CreditRewardReferrer" class="bx--label">@Localizer["Credit Reward (Referrer)"]</label>
-            <input id="Affiliate_CreditRewardReferrer" type="number" class="bx--text-input" name="settings[Affiliate.CreditRewardReferrer]" value="@Model.FirstOrDefault(s => s.Key == "Affiliate.CreditRewardReferrer")?.Value" placeholder="50">
-            <div class="bx--form__helper-text">@Localizer["Amount of credits to give the person who shared their link."]</div>
-        </div>
+            <div class="gs-form-group">
+                <label for="Affiliate_CreditRewardReferrer" class="bx--label">@Localizer["Referrer Reward (Credits)"]</label>
+                <input id="Affiliate_CreditRewardReferrer" type="number" class="bx--text-input" name="settings[Affiliate.CreditRewardReferrer]" value="@Model.FirstOrDefault(s => s.Key == "Affiliate.CreditRewardReferrer")?.Value" placeholder="50">
+            </div>
 
-        <div class="bx--form-item" style="margin-bottom: 1rem;">
-            <label for="Affiliate_CreditRewardReferred" class="bx--label">@Localizer["Credit Reward (Referred User)"]</label>
-            <input id="Affiliate_CreditRewardReferred" type="number" class="bx--text-input" name="settings[Affiliate.CreditRewardReferred]" value="@Model.FirstOrDefault(s => s.Key == "Affiliate.CreditRewardReferred")?.Value" placeholder="50">
-            <div class="bx--form__helper-text">@Localizer["Amount of credits to give the new user who signed up using a link."]</div>
-        </div>
+            <div class="gs-form-group">
+                <label for="Affiliate_CreditRewardReferred" class="bx--label">@Localizer["Referred User Reward (Credits)"]</label>
+                <input id="Affiliate_CreditRewardReferred" type="number" class="bx--text-input" name="settings[Affiliate.CreditRewardReferred]" value="@Model.FirstOrDefault(s => s.Key == "Affiliate.CreditRewardReferred")?.Value" placeholder="50">
+            </div>
 
-        <div class="bx--form-item" style="margin-bottom: 1rem;">
-            <label for="Affiliate_CashCommissionPercentage" class="bx--label">@Localizer["Cash Affiliate Commission (%)"]</label>
-            <input id="Affiliate_CashCommissionPercentage" type="number" step="0.1" class="bx--text-input" name="settings[Affiliate.CashCommissionPercentage]" value="@Model.FirstOrDefault(s => s.Key == "Affiliate.CashCommissionPercentage")?.Value" placeholder="20">
-            <div class="bx--form__helper-text">@Localizer["Percentage of cash commission given to Cash Affiliates upon payments."]</div>
-        </div>
+            <div class="gs-form-group">
+                <label for="Affiliate_CashCommissionPercentage" class="bx--label">@Localizer["Cash Commission (%)"]</label>
+                <input id="Affiliate_CashCommissionPercentage" type="number" step="0.1" class="bx--text-input" name="settings[Affiliate.CashCommissionPercentage]" value="@Model.FirstOrDefault(s => s.Key == "Affiliate.CashCommissionPercentage")?.Value" placeholder="20">
+            </div>
 
-        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
-            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Affiliate Settings"]</button>
-        </div>
-    </form>
+            <button type="submit" class="btn-gs-save" style="background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);"><i class='bx bx-save'></i> @Localizer["Save Affiliate Settings"]</button>
+        </form>
+    </div>
 </div>

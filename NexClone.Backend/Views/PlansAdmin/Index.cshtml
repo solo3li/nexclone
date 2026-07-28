@@ -1,68 +1,149 @@
 @model IEnumerable<NexClone.Backend.Core.Entities.Plan>
 @inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 
-<div class="bx--grid" style="padding-left: 0;">
-    <div class="bx--row" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
-        <h2 style="margin: 0; font-weight: 400; font-size: 1.5rem;">@ViewData["Title"]</h2>
-        <a href="@Url.Action("Create")" class="bx--btn bx--btn--primary">
-            Add New Plan
-            <svg focusable="false" preserveAspectRatio="xMidYMid meet" style="will-change: transform;" xmlns="http://www.w3.org/2000/svg" class="bx--btn__icon" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M9 7L9 3 7 3 7 7 3 7 3 9 7 9 7 13 9 13 9 9 13 9 13 7z"></path></svg>
-        </a>
-    </div>
+@{
+    ViewData["Title"] = "Subscription Plans";
+}
 
-    <div class="bx--row">
-        <div class="bx--col">
-            <div class="bx--data-table-container">
-                <table class="bx--data-table bx--data-table--zebra">
-                    <thead>
+<style>
+    .plans-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+    .plans-header h1 { font-size: 1.8rem; font-weight: 800; margin: 0; color: var(--admin-text-primary); display: flex; align-items: center; gap: 0.6rem; }
+    .plans-header h1 i { color: var(--admin-primary); }
+    .plans-header p { margin: 4px 0 0; color: var(--admin-text-secondary); font-size: 0.9rem; }
+
+    .btn-create-plan {
+        display: inline-flex; align-items: center; gap: 0.5rem;
+        background: linear-gradient(135deg, var(--admin-primary) 0%, #a855f7 100%);
+        color: #fff; font-weight: 700; font-size: 0.88rem;
+        padding: 0.7rem 1.4rem; border-radius: 10px; text-decoration: none; border: none; cursor: pointer;
+        box-shadow: 0 4px 18px rgba(139,92,246,.35); transition: var(--trans-bounce);
+    }
+    .btn-create-plan:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(139,92,246,.45); color: #fff; }
+
+    .plans-table-card {
+        background: var(--admin-surface);
+        border: 1px solid var(--admin-border-light);
+        border-radius: var(--admin-radius-lg);
+        box-shadow: var(--shadow-soft);
+        overflow: hidden;
+    }
+    .plans-table-card .t-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--admin-border-light);
+        display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    }
+    .plans-table-card .t-header h4 { font-size: 1.05rem; font-weight: 700; margin: 0; color: var(--admin-text-primary); display: flex; align-items: center; gap: 0.5rem; }
+    .plans-table-card .t-header h4 i { color: var(--admin-primary); }
+
+    .plans-table-scroll { overflow-x: auto; }
+    .plans-table { width: 100%; border-collapse: collapse; min-width: 950px; }
+    .plans-table thead tr { background: rgba(139,92,246,.06); border-bottom: 2px solid var(--admin-border-light); }
+    .plans-table th { padding: 0.85rem 1rem; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: var(--admin-text-secondary); white-space: nowrap; text-align: left; }
+    html[dir="rtl"] .plans-table th { text-align: right; }
+    .plans-table tbody tr { border-bottom: 1px solid var(--admin-border-light); transition: background 0.2s; }
+    .plans-table tbody tr:last-child { border-bottom: none; }
+    .plans-table tbody tr:hover { background: rgba(139,92,246,.04); }
+    .plans-table td { padding: 0.9rem 1rem; font-size: 0.88rem; color: var(--admin-text-primary); vertical-align: middle; white-space: nowrap; }
+
+    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+    .badge-purple { background: rgba(139,92,246,.12); color: #7c3aed; }
+    .badge-blue { background: rgba(3,105,161,.12); color: #0369a1; }
+    .badge-green { background: rgba(34,197,94,.12); color: #16a34a; }
+
+    .plan-actions { display: flex; gap: 0.4rem; align-items: center; }
+    .plan-act-btn {
+        display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 700;
+        text-decoration: none; border: none; cursor: pointer; transition: var(--trans-smooth);
+    }
+    .plan-act-wallets { background: rgba(16,185,129,.1); color: #059669; }
+    .plan-act-wallets:hover { background: #059669; color: #fff; transform: translateY(-1px); }
+    .plan-act-edit { background: rgba(139,92,246,.1); color: var(--admin-primary); }
+    .plan-act-edit:hover { background: var(--admin-primary); color: #fff; transform: translateY(-1px); }
+    .plan-act-delete { background: rgba(239,68,68,.1); color: #ef4444; }
+    .plan-act-delete:hover { background: #ef4444; color: #fff; transform: translateY(-1px); }
+
+    .empty-plans { text-align: center; padding: 3.5rem 1.5rem; color: var(--admin-text-secondary); }
+    .empty-plans i { font-size: 3.5rem; opacity: 0.3; display: block; margin-bottom: 0.75rem; }
+</style>
+
+<div class="plans-header">
+    <div>
+        <h1><i class='bx bx-layer'></i> @Localizer["Subscription Plans"]</h1>
+        <p>@Localizer["Create, configure, and manage subscription packages for users."]</p>
+    </div>
+    <a href="@Url.Action("Create")" class="btn-create-plan">
+        <i class='bx bx-plus-circle'></i> @Localizer["Add New Plan"]
+    </a>
+</div>
+
+<div class="plans-table-card">
+    <div class="t-header">
+        <h4><i class='bx bx-list-check'></i> @Localizer["All Active Plans"]</h4>
+        <span class="badge badge-purple">@Model.Count() @Localizer["plans"]</span>
+    </div>
+    <div class="plans-table-scroll">
+        @if (Model.Any())
+        {
+            <table class="plans-table">
+                <thead>
+                    <tr>
+                        <th>@Localizer["Name"]</th>
+                        <th>@Localizer["Duration"]</th>
+                        <th>@Localizer["Grace Period"]</th>
+                        <th>@Localizer["Price (USD)"]</th>
+                        <th>@Localizer["Price (EGP)"]</th>
+                        <th>@Localizer["Monthly Credits"]</th>
+                        <th>@Localizer["Allowed Tools"]</th>
+                        <th>@Localizer["Actions"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
                         <tr>
-                            <th><span class="bx--table-header-label">@Localizer["Name"]</span></th>
-                            <th><span class="bx--table-header-label">@Localizer["Duration (Days)"]</span></th>
-                            <th><span class="bx--table-header-label">@Localizer["Grace Period"]</span></th>
-                            <th><span class="bx--table-header-label">@Localizer["Price (USD)"]</span></th>
-                            <th><span class="bx--table-header-label">@Localizer["Price (EGP)"]</span></th>
-                            <th><span class="bx--table-header-label">@Localizer["Monthly Credits"]</span></th>
-                            <th><span class="bx--table-header-label">@Localizer["Allowed Tools"]</span></th>
-                            <th><span class="bx--table-header-label">@Localizer["Actions"]</span></th>
+                            <td>
+                                <strong>@item.Name</strong>
+                                @if (item.IsFreeTrial)
+                                {
+                                    <span class="badge badge-blue" style="margin-left: 6px;">@Localizer["Free Trial"]</span>
+                                }
+                            </td>
+                            <td><strong>@item.DurationDays</strong> @Localizer["days"]</td>
+                            <td>@item.GracePeriodDays @Localizer["days"]</td>
+                            <td><strong style="color: var(--admin-primary);">$@item.PriceUsd</strong></td>
+                            <td><strong>EGP @item.PriceEgp</strong></td>
+                            <td><span class="badge badge-green">@item.MonthlyCredits @Localizer["Credits"]</span></td>
+                            <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis;">
+                                <span style="font-size: 0.8rem; color: var(--admin-text-secondary);">
+                                    TTS: @(item.TtsEnabled ? $"Std: ${item.TtsCostPerChar}" : "Off") | STT: @(item.SttEnabled ? $"${item.SttCostPerMinute}/m" : "Off")
+                                </span>
+                            </td>
+                            <td>
+                                <div class="plan-actions">
+                                    <a href="@Url.Action("ManageWallets", new { id = item.Id })" class="plan-act-btn plan-act-wallets" title="@Localizer["Wallets"]">
+                                        <i class='bx bx-wallet'></i> @Localizer["Wallets"]
+                                    </a>
+                                    <a href="@Url.Action("Edit", new { id = item.Id })" class="plan-act-btn plan-act-edit" title="@Localizer["Edit"]">
+                                        <i class='bx bx-edit'></i> @Localizer["Edit"]
+                                    </a>
+                                    <form action="@Url.Action("Delete", new { id = item.Id })" method="post" data-confirm="@Localizer["Are you sure you want to delete this plan?"]" style="margin: 0;">
+                                        <button type="submit" class="plan-act-btn plan-act-delete" title="@Localizer["Delete"]">
+                                            <i class='bx bx-trash'></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-                                <td>
-                                    <strong>@item.Name</strong>
-                                    @if (item.IsFreeTrial)
-                                    {
-                                        <span style="background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-left: 0.5rem;">@Localizer["Free Trial"]</span>
-                                    }
-                                </td>
-                                <td>@item.DurationDays</td>
-                                <td>@item.GracePeriodDays days</td>
-                                <td>$@item.PriceUsd</td>
-                                <td>EGP @item.PriceEgp</td>
-                                <td>@item.MonthlyCredits</td>
-                                <td><small>TTS: @(item.TtsEnabled ? $"Std: ${item.TtsCostPerChar} | High: ${item.TtsCostPerCharHigh} (per {item.TtsCharactersBlock} chars)" : "Off") | <strong>STT:</strong> @(item.SttEnabled ? "Yes" : "No") | Cost: $@item.SttCostPerMinute / Min</small></td>
-                                <td>
-                                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                                        <a href="@Url.Action("ManageWallets", new { id = item.Id })" class="bx--btn bx--btn--sm bx--btn--tertiary">@Localizer["Wallets"]</a>
-                                        <a href="@Url.Action("Edit", new { id = item.Id })" class="bx--btn bx--btn--sm bx--btn--ghost">@Localizer["Edit"]</a>
-                                        <form action="@Url.Action("Delete", new { id = item.Id })" method="post" data-confirm="Are you sure you want to delete this plan?">
-                                            <button type="submit" class="bx--btn bx--btn--sm bx--btn--danger">@Localizer["Delete"]</button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-                @if (!Model.Any())
-                {
-                    <div style="text-align: center; padding: 2rem; color: #525252; background: #ffffff; border-bottom: 1px solid #e0e0e0;">
-                        @Localizer["No plans found. Create one to get started."]
-                    </div>
-                }
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="empty-plans">
+                <i class='bx bx-layer-plus'></i>
+                <p>@Localizer["No plans found. Create one to get started."]</p>
             </div>
-        </div>
+        }
     </div>
 </div>
