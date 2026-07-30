@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
 import { 
@@ -40,13 +40,15 @@ function AdvancedLipSyncPage() {
   const [chargedWallet, setChargedWallet] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && user) {
       api.get("/api/video/estimate-lipsync").then(res => {
         if (res.data) {
           setEstimatedCost(res.data.estimatedCost);
           setChargedWallet(res.data.chargedWalletName);
         }
-      }).catch(err => console.error(err));
+      }).catch(err => {
+        console.warn("Failed to get estimated cost:", err.response?.data?.error || err.message);
+      });
     } else {
       setEstimatedCost(user?.activePlan?.lipSyncCostPerGeneration || 1);
       setChargedWallet(null);

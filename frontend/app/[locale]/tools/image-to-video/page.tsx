@@ -44,13 +44,15 @@ function ImageToVideoPage() {
   const [chargedWallet, setChargedWallet] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && user) {
       api.get("/api/video/estimate-avatar").then(res => {
         if (res.data) {
           setEstimatedCost(res.data.estimatedCost);
           setChargedWallet(res.data.chargedWalletName);
         }
-      }).catch(err => console.error(err));
+      }).catch(err => {
+        console.warn("Failed to get estimated cost:", err.response?.data?.error || err.message);
+      });
     } else {
       setEstimatedCost(user?.activePlan?.avatarVideoCostPerGeneration || 1);
       setChargedWallet(null);
