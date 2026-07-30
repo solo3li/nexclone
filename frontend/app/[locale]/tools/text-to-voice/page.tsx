@@ -68,6 +68,7 @@ export default function TextToVoicePage() {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
+  const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
   const currentlyPlayingRef = useRef<HTMLAudioElement | null>(null);
   
   const [maxChars, setMaxChars] = useState(150);
