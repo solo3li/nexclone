@@ -19,14 +19,14 @@ export function useAuth() {
   return context;
 }
 
-function useProtectedRoute(user: any) {
+function useProtectedRoute(user: any, isLoading: boolean) {
   const segments = useSegments();
   const router = useRouter();
 
   const rootNavigationState = useRootNavigationState();
 
   useEffect(() => {
-    if (!rootNavigationState?.key) return; // Wait for the Root Layout to mount
+    if (!rootNavigationState?.key || isLoading) return; // Wait for the Root Layout to mount and auth to load
 
     const inAuthGroup = segments[0] === '(auth)';
 
@@ -41,7 +41,7 @@ function useProtectedRoute(user: any) {
       // Redirect away from the sign-in page.
       router.replace('/(tabs)');
     }
-  }, [user, segments, rootNavigationState]);
+  }, [user, segments, rootNavigationState, isLoading]);
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -66,7 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  useProtectedRoute(user);
+  useProtectedRoute(user, isLoading);
 
   const signIn = async (token: string, email: string, isVerified: boolean) => {
     await setItemAsync('userToken', token);
