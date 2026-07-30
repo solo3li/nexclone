@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { setItemAsync, getItemAsync, deleteItemAsync } from '../utils/storage';
-import { useRouter, useSegments } from 'expo-router';
+import { useRouter, useSegments, useRootNavigationState } from 'expo-router';
 
 type AuthContextType = {
   signIn: (token: string, email: string, isVerified: boolean) => Promise<void>;
@@ -23,7 +23,11 @@ function useProtectedRoute(user: any) {
   const segments = useSegments();
   const router = useRouter();
 
+  const rootNavigationState = useRootNavigationState();
+
   useEffect(() => {
+    if (!rootNavigationState?.key) return; // Wait for the Root Layout to mount
+
     const inAuthGroup = segments[0] === '(auth)';
 
     if (
@@ -37,7 +41,7 @@ function useProtectedRoute(user: any) {
       // Redirect away from the sign-in page.
       router.replace('/(tabs)');
     }
-  }, [user, segments]);
+  }, [user, segments, rootNavigationState]);
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
