@@ -36,10 +36,14 @@ function useProtectedRoute(user: any, isLoading: boolean) {
       !inAuthGroup
     ) {
       // Redirect to the sign-in page.
-      router.replace('/(auth)/login');
+      setTimeout(() => {
+        router.replace('/(auth)/login');
+      }, 0);
     } else if (user && inAuthGroup) {
       // Redirect away from the sign-in page.
-      router.replace('/(tabs)');
+      setTimeout(() => {
+        router.replace('/(tabs)');
+      }, 0);
     }
   }, [user, segments, rootNavigationState, isLoading]);
 }
