@@ -77,7 +77,7 @@ export default function AdvancedLipSyncPage() {
           const statusRes = await api.get(`/api/video/status/${taskId}`);
           const data = statusRes.data;
           
-          if (data.status === "succeeded") {
+          if (data.status === "succeeded" || data.status === "completed") {
             setVideoUrl(data.url);
             setIsProcessing(false);
           } else if (data.status === "failed") {

@@ -29,23 +29,78 @@ export default function ImageToVideoPage() {
   const [prompt, setPrompt] = useState("");
   
   const [isProcessing, setIsProcessing] = useState(false);
+  const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
+
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   
   const estimatedCost = 5; // Fixed mock cost for now
 
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const res = await api.get("/api/settings/public");
+        setIsMaintenanceMode(res.data.isMaintenanceMode || false);
+      } catch (err) {
+        console.error("Failed to fetch config:", err);
+      }
+    };
+    fetchConfig();
+  }, []);
 
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    let pollInterval: NodeJS.Timeout;
 
-  const handleProcessClick = () => {
+    if (isProcessing) {
+      setElapsedSeconds(0);
+      timer = setInterval(() => {
+        setElapsedSeconds(prev => prev + 1);
+      }, 1000);
+
+      if (currentTaskId) {
+        pollInterval = setInterval(async () => {
+          try {
+            const res = await api.get(`/api/history/${currentTaskId}`);
+            if (res.data) {
+              if (res.data.status === 'completed') {
+                setVideoUrl(res.data.fileUrl);
+                setIsProcessing(false);
+                setCurrentTaskId(null);
+                api.get("/api/auth/me").then(userRes => {
+                  if (userRes.data) setUser(userRes.data);
+                }).catch(err => console.error(err));
+              } else if (res.data.status === 'failed') {
+                setError(res.data.errorMessage || 'Operation failed');
+                setIsProcessing(false);
+                setCurrentTaskId(null);
+              }
+            }
+          } catch(err) {
+            console.error("Polling error:", err);
+          }
+        }, 3000);
+      }
+    } else {
+      setElapsedSeconds(0);
+    }
+    return () => {
+      clearInterval(timer);
+      if (pollInterval) clearInterval(pollInterval);
+    };
+  }, [isProcessing, currentTaskId]);
+
+  const handleProcessClick = async () => {
     if (!isAuthenticated) {
       router.push('/login');
       return;
     }
-    if (!imageFile || !audioFile) {
-      setError(isRtl ? "الصورة والملف الصوتي مطلوبان" : "Image and audio file are required");
+    if (!imageFile) {
+      setError(isRtl ? "الرجاء رفع صورة الشخصية." : "Please upload an avatar image.");
       return;
     }
     setError("");
@@ -57,14 +112,10 @@ export default function ImageToVideoPage() {
     if (!imageFile) return;
     
     setIsProcessing(true);
+    setCurrentTaskId(null);
     setElapsedSeconds(0);
     setError("");
     setVideoUrl(null);
-
-    // Start timer
-    const timerInterval = setInterval(() => {
-      setElapsedSeconds(prev => prev + 1);
-    }, 1000);
 
     try {
       const formData = new FormData();
@@ -72,33 +123,27 @@ export default function ImageToVideoPage() {
       if (audioFile) formData.append("audio", audioFile);
       if (prompt) formData.append("prompt", prompt);
 
-      // The API now returns immediately since it publishes to RabbitMQ
-      await api.post("/api/video/start-avatar", formData, {
+      const response = await api.post("/api/video/start-avatar", formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
       
-      api.get("/api/auth/me").then(res => {
-        if (res.data) setUser(res.data);
-      }).catch(err => console.error(err));
-
-      // Do NOT poll. Just let the timer run until they leave the page.
-      // SignalR from the sidebar will show the floating notification when it's done.
+      if (response.data && response.data.taskId) {
+        setCurrentTaskId(response.data.taskId);
+        api.get("/api/auth/me").then(res => {
+          if (res.data) setUser(res.data);
+        }).catch(err => console.error(err));
+      } else {
+        throw new Error("No task ID returned");
+      }
     } catch (err: any) {
       console.error(err);
       setError(err.response?.data?.error || t('error'));
       setIsProcessing(false);
-      clearInterval(timerInterval);
+      setCurrentTaskId(null);
     }
   };
-
-  useEffect(() => {
-    return () => {
-       // Cleanup any running timers on unmount
-       setElapsedSeconds(0);
-    }
-  }, []);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);

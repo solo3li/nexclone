@@ -115,16 +115,45 @@ export default function TextToVoicePage() {
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
+    let pollInterval: NodeJS.Timeout;
+
     if (isProcessing) {
       setElapsedSeconds(0);
       timer = setInterval(() => {
         setElapsedSeconds(prev => prev + 1);
       }, 1000);
+
+      if (currentTaskId) {
+        pollInterval = setInterval(async () => {
+          try {
+            const res = await api.get(`/api/history/${currentTaskId}`);
+            if (res.data) {
+              if (res.data.status === 'completed') {
+                setAudioUrl(res.data.fileUrl);
+                setIsProcessing(false);
+                setCurrentTaskId(null);
+                api.get("/api/auth/me").then(userRes => {
+                  if (userRes.data) setUser(userRes.data);
+                }).catch(err => console.error(err));
+              } else if (res.data.status === 'failed') {
+                setError(res.data.errorMessage || 'Operation failed');
+                setIsProcessing(false);
+                setCurrentTaskId(null);
+              }
+            }
+          } catch(err) {
+            console.error("Polling error:", err);
+          }
+        }, 3000);
+      }
     } else {
       setElapsedSeconds(0);
     }
-    return () => clearInterval(timer);
-  }, [isProcessing]);
+    return () => {
+      clearInterval(timer);
+      if (pollInterval) clearInterval(pollInterval);
+    };
+  }, [isProcessing, currentTaskId]);
 
   const handleProcessClick = async () => {
     if (!isAuthenticated) {
@@ -194,6 +223,7 @@ export default function TextToVoicePage() {
     setShowConfirmModal(false);
     if (!text.trim() || text.length > maxChars || !selectedVoice) return;
     setIsProcessing(true);
+    setCurrentTaskId(null);
     setError("");
     setAudioUrl(null);
 
@@ -218,13 +248,13 @@ export default function TextToVoicePage() {
       });
 
       if (response.data && response.data.taskId) {
-        // Just returned processing task id, UI will show elapsed timer.
-        // We wait for the signalR notification to give us the final URL.
+        setCurrentTaskId(response.data.taskId);
         api.get("/api/auth/me").then(res => {
           if (res.data) setUser(res.data);
         }).catch(err => console.error("Failed to update user profile", err));
       } else if (response.data && response.data.audioUrl) {
         setAudioUrl(response.data.audioUrl);
+        setIsProcessing(false);
       } else {
         throw new Error("No audio URL or task ID returned");
       }
@@ -232,6 +262,7 @@ export default function TextToVoicePage() {
       console.error(err);
       setError(err.response?.data?.error || t('error'));
       setIsProcessing(false);
+      setCurrentTaskId(null);
     } finally {
       setPendingCost(null);
     }

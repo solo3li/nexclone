@@ -105,6 +105,7 @@ export default function VoiceToTextPage() {
   const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
   const [uploadedFileId, setUploadedFileId] = useState<string | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
 
   // Audio preview player state
   const [audioPreviewUrl, setAudioPreviewUrl] = useState<string | null>(null);
@@ -131,16 +132,45 @@ export default function VoiceToTextPage() {
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
+    let pollInterval: NodeJS.Timeout;
+
     if (stage === 'transcribing') {
       setElapsedSeconds(0);
       timer = setInterval(() => {
         setElapsedSeconds(prev => prev + 1);
       }, 1000);
+
+      if (currentTaskId) {
+        pollInterval = setInterval(async () => {
+          try {
+            const res = await api.get(`/api/history/${currentTaskId}`);
+            if (res.data) {
+              if (res.data.status === 'completed') {
+                setResult(res.data.resultText || res.data.fileUrl || "");
+                setStage('done');
+                setCurrentTaskId(null);
+                api.get("/api/auth/me").then(userRes => {
+                  if (userRes.data) setUser(userRes.data);
+                }).catch(err => console.error(err));
+              } else if (res.data.status === 'failed') {
+                setError(res.data.errorMessage || 'Operation failed');
+                setStage('error');
+                setCurrentTaskId(null);
+              }
+            }
+          } catch(err) {
+            console.error("Polling error:", err);
+          }
+        }, 3000);
+      }
     } else {
       setElapsedSeconds(0);
     }
-    return () => clearInterval(timer);
-  }, [stage]);
+    return () => {
+      clearInterval(timer);
+      if (pollInterval) clearInterval(pollInterval);
+    };
+  }, [stage, currentTaskId]);
 
   useEffect(() => {
     if (!file || duration <= 0) {
@@ -337,8 +367,7 @@ export default function VoiceToTextPage() {
       });
 
       if (res.data && res.data.taskId) {
-        // Just returned processing task id, UI will show elapsed timer.
-        // We wait for the signalR notification or user goes to history
+        setCurrentTaskId(res.data.taskId);
         api.get("/api/auth/me").then(res => {
           if (res.data) setUser(res.data);
         }).catch(err => console.error("Failed to update user profile", err));
