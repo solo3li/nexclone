@@ -19,34 +19,6 @@ export function useAuth() {
   return context;
 }
 
-function useProtectedRoute(user: any, isLoading: boolean) {
-  const segments = useSegments();
-  const router = useRouter();
-
-  const rootNavigationState = useRootNavigationState();
-
-  useEffect(() => {
-    if (!rootNavigationState?.key || isLoading) return; // Wait for the Root Layout to mount and auth to load
-
-    const inAuthGroup = segments[0] === '(auth)';
-
-    if (
-      // If the user is not signed in and the initial segment is not anything in the auth group.
-      !user &&
-      !inAuthGroup
-    ) {
-      // Redirect to the sign-in page.
-      setTimeout(() => {
-        router.replace('/(auth)/login');
-      }, 0);
-    } else if (user && inAuthGroup) {
-      // Redirect away from the sign-in page.
-      setTimeout(() => {
-        router.replace('/(tabs)');
-      }, 0);
-    }
-  }, [user, segments, rootNavigationState, isLoading]);
-}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<{ email: string; isVerified: boolean } | null>(null);
@@ -70,7 +42,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  useProtectedRoute(user, isLoading);
 
   const signIn = async (token: string, email: string, isVerified: boolean) => {
     await setItemAsync('userToken', token);
