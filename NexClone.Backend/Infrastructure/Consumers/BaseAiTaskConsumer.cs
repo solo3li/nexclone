@@ -118,7 +118,7 @@ namespace NexClone.Backend.Infrastructure.Consumers
                     "success", 
                     "/history");
 
-                if (history.ToolName != "text-to-voice" && history.ToolName != "voice-to-text")
+                if (history.Type != "text-to-voice" && history.Type != "voice-to-text")
                 {
                     try {
                         var htmlBody = $@"<div dir=""rtl"" style=""font-family:Arial,sans-serif;direction:rtl;text-align:right;"">
