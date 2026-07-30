@@ -62,7 +62,7 @@ namespace NexClone.Backend.API.Controllers.AI
             if (audio != null && audio.Length > policy.MaxAudioFileSizeMb * 1024 * 1024)
                 return BadRequest(new { error = $"Audio file is too large. Maximum size is {policy.MaxAudioFileSizeMb}MB." });
                 
-            if (!string.IsNullOrWhiteSpace(prompt) && prompt.Length > policy.MaxCharsPerRequest)
+            if (!string.IsNullOrWhiteSpace(prompt) && policy.MaxCharsPerRequest != -1 && prompt.Length > policy.MaxCharsPerRequest)
                 return BadRequest(new { error = $"Prompt too long. Maximum allowed is {policy.MaxCharsPerRequest} characters." });
 
             // Just charge (validation is done above)
