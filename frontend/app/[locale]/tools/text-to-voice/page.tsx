@@ -65,6 +65,7 @@ export default function TextToVoicePage() {
   const [customInstructionsEnabled, setCustomInstructionsEnabled] = useState(false);
   const [customInstruction, setCustomInstruction] = useState("");
   const [allowedVoices, setAllowedVoices] = useState<string[] | null>(null);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
   const currentlyPlayingRef = useRef<HTMLAudioElement | null>(null);
@@ -112,7 +113,18 @@ export default function TextToVoicePage() {
     setEstimatedCost(null);
   }, [text]);
 
-
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isProcessing) {
+      setElapsedSeconds(0);
+      timer = setInterval(() => {
+        setElapsedSeconds(prev => prev + 1);
+      }, 1000);
+    } else {
+      setElapsedSeconds(0);
+    }
+    return () => clearInterval(timer);
+  }, [isProcessing]);
 
   const handleProcessClick = async () => {
     if (!isAuthenticated) {
@@ -205,20 +217,22 @@ export default function TextToVoicePage() {
         quality: selectedQuality
       });
 
-      if (response.data && response.data.audioUrl) {
-        setAudioUrl(response.data.audioUrl);
-        // Refresh user profile to update credits dynamically
+      if (response.data && response.data.taskId) {
+        // Just returned processing task id, UI will show elapsed timer.
+        // We wait for the signalR notification to give us the final URL.
         api.get("/api/auth/me").then(res => {
           if (res.data) setUser(res.data);
         }).catch(err => console.error("Failed to update user profile", err));
+      } else if (response.data && response.data.audioUrl) {
+        setAudioUrl(response.data.audioUrl);
       } else {
-        throw new Error("No audio URL returned");
+        throw new Error("No audio URL or task ID returned");
       }
     } catch (err: any) {
       console.error(err);
       setError(err.response?.data?.error || t('error'));
-    } finally {
       setIsProcessing(false);
+    } finally {
       setPendingCost(null);
     }
   };
@@ -311,27 +325,45 @@ export default function TextToVoicePage() {
               {/* Error Message */}
               {error && <div className="text-red-400 text-sm p-3 bg-red-500/10 rounded-xl border border-red-500/20 mx-2">{error}</div>}
 
-              {/* Generate Button */}
-              <button
-                  onClick={handleProcessClick}
-                  disabled={isProcessing || isEstimating}
-                  className="w-full mt-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group relative overflow-hidden"
+              {/* Generate Button / Processing UI */}
+              {!isProcessing ? (
+                <button
+                    onClick={handleProcessClick}
+                    disabled={isEstimating}
+                    className="w-full mt-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group relative overflow-hidden"
+                  >
+                  <Wand2 className="w-5 h-5" />
+                  {t('process')}
+                </button>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-4 p-6 bg-[#0a0015]/60 border border-fuchsia-500/30 rounded-xl flex flex-col items-center justify-center gap-4 text-center"
                 >
-                {isProcessing ? (
-                  <>
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                    {t('processing')}
-                  </>
-                ) : (
-                  <>
-                    <Wand2 className="w-5 h-5" />
-                    {t('process')}
-                  </>
-                )}
-              </button>
+                  <div className="relative w-16 h-16 flex items-center justify-center">
+                    <div className="absolute inset-0 rounded-full border-4 border-white/10" />
+                    <div className="absolute inset-0 rounded-full border-4 border-fuchsia-500 border-t-transparent animate-spin" />
+                    <span className="text-sm font-bold text-white relative z-10">{elapsedSeconds}s</span>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white mb-2 text-lg">
+                      {isRtl ? 'جاري تحويل النص إلى صوت...' : 'Converting Text to Voice...'}
+                    </h3>
+                    <p className="text-white/60 text-sm max-w-sm">
+                      {isRtl 
+                        ? 'هذه العملية قد تستغرق بضع ثوانٍ. يمكنك ترك هذه الصفحة وسنرسل لك إشعاراً فور الانتهاء.'
+                        : 'This process might take a few seconds. You can leave this page and we will notify you when it is done.'}
+                    </p>
+                  </div>
+                  <Link href="/history" className="mt-2 px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full text-sm font-medium transition-colors">
+                    {isRtl ? 'الذهاب لسجل العمليات' : 'Go to History'}
+                  </Link>
+                </motion.div>
+              )}
 
               {/* Output Audio Player */}
-              {audioUrl && (
+              {audioUrl && !isProcessing && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}

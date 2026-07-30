@@ -3,8 +3,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using System;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using MassTransit;
+using NexClone.Backend.Core.Messages;
 
 namespace NexClone.Backend.API.Controllers.AI
 {
@@ -18,15 +21,16 @@ namespace NexClone.Backend.API.Controllers.AI
         private readonly ISttService _sttService;
         private readonly ApplicationDbContext _dbContext;
         private readonly UsagePolicyService _usagePolicy;
-
         private readonly IMediaService _mediaService;
+        private readonly IPublishEndpoint _publishEndpoint;
 
-        public VoiceToTextController(ISttService sttService, ApplicationDbContext dbContext, UsagePolicyService usagePolicy, IMediaService mediaService)
+        public VoiceToTextController(ISttService sttService, ApplicationDbContext dbContext, UsagePolicyService usagePolicy, IMediaService mediaService, IPublishEndpoint publishEndpoint)
         {
             _sttService = sttService;
             _dbContext = dbContext;
             _usagePolicy = usagePolicy;
             _mediaService = mediaService;
+            _publishEndpoint = publishEndpoint;
         }
 
         public class TranscribeRequest
@@ -89,55 +93,40 @@ namespace NexClone.Backend.API.Controllers.AI
 
             try
             {
-                var result = await _sttService.TranscribeAudioAsync(audioData, request.FileId, "audio/mpeg", request.Translate, request.TargetLanguage);
-
-                if (!result.Success)
-                {
-                    await _usagePolicy.RefundAsync(userId, policyResult.ChargedWalletTypeId, cost);
-                    return StatusCode(500, new { error = result.ErrorMessage });
-                }
-
                 var history = new GenerationHistory
                 {
                     UserId = userId,
                     Type = "voice-to-text",
                     Title = request.FileId.Split('/').LastOrDefault() ?? "Audio File",
                     FileUrl = request.FileId,
-                    Status = "completed",
+                    Status = "processing",
                     Lang = request.TargetLanguage,
-                    ResultText = request.Translate ? result.TranslatedText : result.OriginalText,
                     CreditsUsed = cost
                 };
                 _dbContext.GenerationHistories.Add(history);
                 await _dbContext.SaveChangesAsync();
 
+                await _publishEndpoint.Publish(new VoiceToTextMessage
+                {
+                    HistoryId = history.Id,
+                    UserId = userId,
+                    FileId = request.FileId,
+                    Translate = request.Translate,
+                    TargetLanguage = request.TargetLanguage,
+                    Cost = cost,
+                    ChargedWalletTypeId = policyResult.ChargedWalletTypeId
+                });
+
                 return Ok(new
                 {
-                    success = true,
-                    original_text = result.OriginalText,
-                    translated_text = result.TranslatedText,
-                    target_language = result.TargetLanguage
+                    taskId = history.Id,
+                    status = "processing"
                 });
             }
             catch (Exception ex)
             {
                 await _usagePolicy.RefundAsync(userId, policyResult.ChargedWalletTypeId, cost);
-
-                var history = new GenerationHistory
-                {
-                    UserId = userId,
-                    Type = "voice-to-text",
-                    Title = request.FileId.Split('/').LastOrDefault() ?? "Audio File",
-                    FileUrl = request.FileId,
-                    Status = "failed",
-                    ErrorMessage = ex.Message,
-                    Lang = request.TargetLanguage ?? "Auto",
-                    CreditsUsed = 0
-                };
-                _dbContext.GenerationHistories.Add(history);
-                await _dbContext.SaveChangesAsync();
-
-                return StatusCode(500, new { error = "Internal server error during transcription.", details = ex.Message });
+                return StatusCode(500, new { error = "Internal server error during queuing.", details = ex.Message });
             }
         }
         public class EstimateRequest

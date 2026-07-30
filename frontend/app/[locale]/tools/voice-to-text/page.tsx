@@ -104,6 +104,7 @@ export default function VoiceToTextPage() {
   const [isEstimating, setIsEstimating] = useState(false);
   const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
   const [uploadedFileId, setUploadedFileId] = useState<string | null>(null);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   // Audio preview player state
   const [audioPreviewUrl, setAudioPreviewUrl] = useState<string | null>(null);
@@ -127,6 +128,19 @@ export default function VoiceToTextPage() {
     };
     fetchConfig();
   }, []);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (stage === 'transcribing') {
+      setElapsedSeconds(0);
+      timer = setInterval(() => {
+        setElapsedSeconds(prev => prev + 1);
+      }, 1000);
+    } else {
+      setElapsedSeconds(0);
+    }
+    return () => clearInterval(timer);
+  }, [stage]);
 
   useEffect(() => {
     if (!file || duration <= 0) {
@@ -314,7 +328,7 @@ export default function VoiceToTextPage() {
         setUploadedFileId(fileId);
       }
 
-      // Stage 3: Transcribe
+      // Stage 3: Transcribe (Now queues in background)
       setStage('transcribing');
       const res = await api.post("/api/ai/voice-to-text/transcribe", {
         fileId,
@@ -322,12 +336,17 @@ export default function VoiceToTextPage() {
         targetLanguage: language,
       });
 
-      setResult(res.data.translated_text || res.data.original_text);
-      setStage('done');
-      // Refresh user profile to update credits dynamically
-      api.get("/api/auth/me").then(res => {
-        if (res.data) setUser(res.data);
-      }).catch(err => console.error("Failed to update user profile", err));
+      if (res.data && res.data.taskId) {
+        // Just returned processing task id, UI will show elapsed timer.
+        // We wait for the signalR notification or user goes to history
+        api.get("/api/auth/me").then(res => {
+          if (res.data) setUser(res.data);
+        }).catch(err => console.error("Failed to update user profile", err));
+      } else {
+        // Fallback in case it's synchronous
+        setResult(res.data.translated_text || res.data.original_text);
+        setStage('done');
+      }
     } catch (err) {
       setError(t('error'));
       setStage('error');
@@ -622,6 +641,35 @@ export default function VoiceToTextPage() {
                     )}
                   </AnimatePresence>
 
+                  {/* Wait/Leave UI when transcribing */}
+                  <AnimatePresence>
+                    {stage === 'transcribing' && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="px-4 pb-4 mt-2"
+                      >
+                        <div className="p-4 bg-fuchsia-500/10 border border-fuchsia-500/20 rounded-xl flex flex-col items-center justify-center gap-3 text-center">
+                          <div className="relative w-12 h-12 flex items-center justify-center">
+                            <div className="absolute inset-0 rounded-full border-2 border-white/10" />
+                            <div className="absolute inset-0 rounded-full border-2 border-fuchsia-500 border-t-transparent animate-spin" />
+                            <span className="text-xs font-bold text-white relative z-10">{elapsedSeconds}s</span>
+                          </div>
+                          <div>
+                            <p className="text-white/80 text-sm mb-2">
+                              {isRtl 
+                                ? 'العملية قيد المعالجة في الخلفية. يمكنك ترك هذه الصفحة وسنرسل لك إشعاراً فور الانتهاء.'
+                                : 'Processing in background. You can leave this page and we will notify you when it is done.'}
+                            </p>
+                            <Link href="/history" className="px-4 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-full text-xs font-medium transition-colors inline-block">
+                              {isRtl ? 'الذهاب لسجل العمليات' : 'Go to History'}
+                            </Link>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   {/* Process Button */}
                   {!isProcessing && (
                     <div className="px-4 pb-4">
@@ -704,7 +752,8 @@ export default function VoiceToTextPage() {
                         />
                       ))}
                     </div>
-                    <p className="text-sm">{isRtl ? 'جاري تحليل الصوت...' : 'Analyzing audio...'}</p>
+                    <p className="text-sm">{isRtl ? 'جاري تحليل الصوت في الخلفية...' : 'Analyzing audio in background...'}</p>
+                    <p className="text-xs text-white/40">{isRtl ? 'يمكنك تصفح الموقع وسنرسل لك إشعاراً عند الانتهاء.' : 'You can browse the site and we will notify you when done.'}</p>
                   </motion.div>
                 ) : result ? (
                   <motion.p

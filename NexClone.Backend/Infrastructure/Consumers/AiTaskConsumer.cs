@@ -17,7 +17,9 @@ namespace NexClone.Backend.Infrastructure.Consumers
 {
     public class AiTaskConsumer : 
         IConsumer<AvatarVideoMessage>,
-        IConsumer<LipSyncMessage>
+        IConsumer<LipSyncMessage>,
+        IConsumer<TextToVoiceMessage>,
+        IConsumer<VoiceToTextMessage>
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly IHttpClientFactory _httpClientFactory;
@@ -27,6 +29,8 @@ namespace NexClone.Backend.Infrastructure.Consumers
         private readonly ILogger<AiTaskConsumer> _logger;
         private readonly IEmailService _emailService;
         private readonly IEmailTemplateService _emailTemplateService;
+        private readonly ITtsService _ttsService;
+        private readonly ISttService _sttService;
 
         public AiTaskConsumer(
             ApplicationDbContext dbContext,
@@ -36,6 +40,8 @@ namespace NexClone.Backend.Infrastructure.Consumers
             IHubContext<NotificationHub> hubContext,
             IEmailService emailService,
             IEmailTemplateService emailTemplateService,
+            ITtsService ttsService,
+            ISttService sttService,
             ILogger<AiTaskConsumer> logger)
         {
             _dbContext = dbContext;
@@ -45,6 +51,8 @@ namespace NexClone.Backend.Infrastructure.Consumers
             _hubContext = hubContext;
             _emailService = emailService;
             _emailTemplateService = emailTemplateService;
+            _ttsService = ttsService;
+            _sttService = sttService;
             _logger = logger;
         }
 
@@ -209,6 +217,88 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 
                 if (history.CreditsUsed > 0)
                     await _usagePolicy.RefundByToolAsync(message.UserId, "lipsync", history.CreditsUsed);
+
+                await NotifyUserFailed(message.UserId, history, ex.Message);
+            }
+        }
+
+        public async Task Consume(ConsumeContext<TextToVoiceMessage> context)
+        {
+            var message = context.Message;
+            _logger.LogInformation($"[TextToVoice Task {message.HistoryId}] Started consumer.");
+
+            var history = await _dbContext.GenerationHistories.FindAsync(message.HistoryId);
+            if (history == null) return;
+
+            try
+            {
+                var (audioStream, contentType, fileExtension, providerName, modelName) = await _ttsService.GenerateAudioAsync(
+                    message.Text,
+                    message.Language,
+                    message.VoiceName,
+                    message.StyleInstruction,
+                    message.Quality
+                );
+
+                string fileName = $"{Guid.NewGuid()}.{fileExtension}";
+                string objectKey = $"text-to-voice/{message.UserId:N}/{DateTime.UtcNow:yyyy-MM}/{fileName}";
+                
+                audioStream.Position = 0;
+                string fileUrl = await _mediaService.UploadFileAsync(audioStream, objectKey, contentType);
+
+                history.Status = "completed";
+                history.FileUrl = fileUrl;
+                history.ResultText = modelName ?? "";
+                await _dbContext.SaveChangesAsync();
+
+                await NotifyUserSuccess(message.UserId, history);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"[TextToVoice Task {message.HistoryId}] Failed");
+                history.Status = "failed";
+                history.ErrorMessage = ex.Message;
+                await _dbContext.SaveChangesAsync();
+
+                if (message.Cost > 0)
+                    await _usagePolicy.RefundAsync(message.UserId, message.ChargedWalletTypeId, message.Cost);
+
+                await NotifyUserFailed(message.UserId, history, ex.Message);
+            }
+        }
+
+        public async Task Consume(ConsumeContext<VoiceToTextMessage> context)
+        {
+            var message = context.Message;
+            _logger.LogInformation($"[VoiceToText Task {message.HistoryId}] Started consumer.");
+
+            var history = await _dbContext.GenerationHistories.FindAsync(message.HistoryId);
+            if (history == null) return;
+
+            try
+            {
+                byte[] audioData = await _mediaService.DownloadFileAsync(message.FileId);
+
+                var result = await _sttService.TranscribeAudioAsync(audioData, message.FileId, "audio/mpeg", message.Translate, message.TargetLanguage);
+
+                if (!result.Success)
+                    throw new Exception(result.ErrorMessage);
+
+                history.Status = "completed";
+                history.ResultText = message.Translate ? result.TranslatedText : result.OriginalText;
+                await _dbContext.SaveChangesAsync();
+
+                await NotifyUserSuccess(message.UserId, history);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"[VoiceToText Task {message.HistoryId}] Failed");
+                history.Status = "failed";
+                history.ErrorMessage = ex.Message;
+                await _dbContext.SaveChangesAsync();
+
+                if (message.Cost > 0)
+                    await _usagePolicy.RefundAsync(message.UserId, message.ChargedWalletTypeId, message.Cost);
 
                 await NotifyUserFailed(message.UserId, history, ex.Message);
             }
