@@ -9,7 +9,7 @@ export default function DashboardScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <View style={styles.header}>
-        <Text style={styles.greeting}>Good Morning, Alex</Text>
+        <Text style={styles.greeting}>Good Morning</Text>
         <Text style={styles.subtitle}>Explore your AI workspace</Text>
       </View>
 
@@ -26,33 +26,39 @@ export default function DashboardScreen() {
             </SoftCard>
           </TouchableOpacity>
         </Link>
-        <TouchableOpacity style={styles.gridItem} activeOpacity={0.7}>
-          <SoftCard style={styles.card}>
-            <View style={[styles.iconContainer, { backgroundColor: '#e0e7ff' }]}>
-              <SymbolView name={{ ios: 'photo.fill', android: 'image', web: 'image' } as any} size={24} tintColor="#4f46e5" />
-            </View>
-            <Text style={styles.cardTitle}>Image Generator</Text>
-            <Text style={styles.cardSubtitle}>Generate visuals from text</Text>
-          </SoftCard>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.gridItem} activeOpacity={0.7}>
-          <SoftCard style={styles.card}>
-            <View style={[styles.iconContainer, { backgroundColor: '#fce7f3' }]}>
-              <SymbolView name={{ ios: 'waveform', android: 'graphic_eq', web: 'graphic_eq' } as any} size={24} tintColor="#db2777" />
-            </View>
-            <Text style={styles.cardTitle}>Lip Sync</Text>
-            <Text style={styles.cardSubtitle}>Synchronize audio to video</Text>
-          </SoftCard>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.gridItem} activeOpacity={0.7}>
-          <SoftCard style={styles.card}>
-            <View style={[styles.iconContainer, { backgroundColor: '#dcfce7' }]}>
-              <SymbolView name={{ ios: 'scissors', android: 'content_cut', web: 'content_cut' } as any} size={24} tintColor="#16a34a" />
-            </View>
-            <Text style={styles.cardTitle}>Background Remover</Text>
-            <Text style={styles.cardSubtitle}>Isolate subjects instantly</Text>
-          </SoftCard>
-        </TouchableOpacity>
+        <Link href="/tools/image-to-video" asChild>
+          <TouchableOpacity style={styles.gridItem} activeOpacity={0.7}>
+            <SoftCard style={styles.card}>
+              <View style={[styles.iconContainer, { backgroundColor: '#e0e7ff' }]}>
+                <SymbolView name={{ ios: 'photo.fill', android: 'image', web: 'image' } as any} size={24} tintColor="#4f46e5" />
+              </View>
+              <Text style={styles.cardTitle}>Image to Video</Text>
+              <Text style={styles.cardSubtitle}>Generate visuals from text</Text>
+            </SoftCard>
+          </TouchableOpacity>
+        </Link>
+        <Link href="/tools/advanced-lip-sync" asChild>
+          <TouchableOpacity style={styles.gridItem} activeOpacity={0.7}>
+            <SoftCard style={styles.card}>
+              <View style={[styles.iconContainer, { backgroundColor: '#fce7f3' }]}>
+                <SymbolView name={{ ios: 'waveform', android: 'graphic_eq', web: 'graphic_eq' } as any} size={24} tintColor="#db2777" />
+              </View>
+              <Text style={styles.cardTitle}>Lip Sync</Text>
+              <Text style={styles.cardSubtitle}>Synchronize audio to video</Text>
+            </SoftCard>
+          </TouchableOpacity>
+        </Link>
+        <Link href="/tools/voice-to-text" asChild>
+          <TouchableOpacity style={styles.gridItem} activeOpacity={0.7}>
+            <SoftCard style={styles.card}>
+              <View style={[styles.iconContainer, { backgroundColor: '#dcfce7' }]}>
+                <SymbolView name={{ ios: 'doc.text.viewfinder', android: 'document_scanner', web: 'document_scanner' } as any} size={24} tintColor="#16a34a" />
+              </View>
+              <Text style={styles.cardTitle}>Voice to Text</Text>
+              <Text style={styles.cardSubtitle}>Accurate transcription</Text>
+            </SoftCard>
+          </TouchableOpacity>
+        </Link>
       </View>
     </ScrollView>
   );

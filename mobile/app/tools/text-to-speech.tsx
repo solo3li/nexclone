@@ -1,18 +1,55 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, ScrollView, TextInput } from 'react-native';
-import { SymbolView } from 'expo-symbols';
+import { StyleSheet, View, Text, TextInput, ScrollView, Alert } from 'react-native';
+import Slider from '@react-native-community/slider';
 import { Stack } from 'expo-router';
 import Colors from '@/constants/Colors';
 import SoftCard from '@/components/SoftCard';
 import CustomButton from '@/components/CustomButton';
+import api from '@/services/api';
+import { useNotification } from '@/context/NotificationContext';
 
 export default function TextToSpeechScreen() {
   const [text, setText] = useState('');
+  const [speed, setSpeed] = useState(1);
+  const [pitch, setPitch] = useState(1); // Usually TTS handles this via style, but we map it to mock UI for now.
+  const [loading, setLoading] = useState(false);
+  const { isConnected } = useNotification();
+
+  const handleGenerate = async () => {
+    if (!text.trim()) {
+      Alert.alert('Error', 'Please enter some text');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await api.post('/TextToVoice/generate', {
+        text,
+        language: 'other',
+        voiceName: 'echo',
+        quality: 'Standard'
+      });
+      
+      Alert.alert('Success', 'Your request has been submitted. You will receive a notification once the audio is ready.');
+      setText('');
+    } catch (error: any) {
+      const msg = error.response?.data?.message || 'Failed to generate audio';
+      Alert.alert('Error', msg);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <Stack.Screen options={{ title: 'Speech AI' }} />
       
+      <Text style={styles.title}>Text to Speech</Text>
+      <Text style={styles.subtitle}>
+        Convert text to natural-sounding speech.
+        {isConnected ? ' (SignalR Connected)' : ' (Connecting...)'}
+      </Text>
+
       <Text style={styles.sectionTitle}>TEXT INPUT</Text>
       <SoftCard style={styles.inputCard}>
         <TextInput
@@ -26,7 +63,6 @@ export default function TextToSpeechScreen() {
         />
         <View style={styles.inputFooter}>
           <Text style={styles.charCount}>{text.length} / 5000</Text>
-          <SymbolView name={{ ios: 'mic.fill', android: 'mic', web: 'mic' } as any} size={18} tintColor={Colors.light.textSecondary} />
         </View>
       </SoftCard>
 
@@ -35,58 +71,52 @@ export default function TextToSpeechScreen() {
         <View style={styles.settingRow}>
           <Text style={styles.settingLabel}>Voice</Text>
           <View style={styles.settingValueContainer}>
-            <Text style={styles.settingValue}>Ava (Female, USA)</Text>
-            <SymbolView name={{ ios: 'chevron.up.chevron.down', android: 'unfold_more', web: 'unfold_more' } as any} size={16} tintColor={Colors.light.textSecondary} />
+            <Text style={styles.settingValue}>Echo (Male)</Text>
           </View>
         </View>
         <View style={styles.divider} />
         
         <View style={styles.sliderSection}>
           <View style={styles.sliderHeader}>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-               <SymbolView name={{ ios: 'speedometer', android: 'speed', web: 'speed' } as any} size={16} tintColor={Colors.light.text} />
-               <Text style={styles.sliderLabel}>SPEED</Text>
-            </View>
-            <Text style={styles.sliderValue}>1.0x</Text>
+            <Text style={styles.sliderLabel}>SPEED</Text>
+            <Text style={styles.sliderValue}>{speed.toFixed(1)}x</Text>
           </View>
-          {/* Mock Slider Track */}
-          <View style={styles.sliderTrack}>
-            <View style={[styles.sliderFill, { width: '50%' }]} />
-            <View style={styles.sliderThumb} />
-          </View>
-          <View style={styles.sliderLabels}>
-            <Text style={styles.sliderScale}>0.5x</Text>
-            <Text style={styles.sliderScale}>1.0x (Normal)</Text>
-            <Text style={styles.sliderScale}>2.0x</Text>
-          </View>
+          <Slider
+            style={{ width: '100%', height: 40 }}
+            minimumValue={0.5}
+            maximumValue={2.0}
+            step={0.1}
+            value={speed}
+            onValueChange={setSpeed}
+            minimumTrackTintColor={Colors.light.tint}
+            maximumTrackTintColor={Colors.light.border}
+          />
         </View>
 
         <View style={styles.divider} />
         
         <View style={styles.sliderSection}>
           <View style={styles.sliderHeader}>
-             <View style={{flexDirection: 'row', alignItems: 'center'}}>
-               <SymbolView name={{ ios: 'slider.vertical.3', android: 'tune', web: 'tune' } as any} size={16} tintColor={Colors.light.text} />
-               <Text style={styles.sliderLabel}>PITCH</Text>
-            </View>
-            <Text style={styles.sliderValue}>Neutral</Text>
+            <Text style={styles.sliderLabel}>PITCH</Text>
+            <Text style={styles.sliderValue}>{pitch.toFixed(1)}</Text>
           </View>
-          {/* Mock Slider Track */}
-          <View style={styles.sliderTrack}>
-            <View style={[styles.sliderFill, { width: '50%' }]} />
-            <View style={styles.sliderThumb} />
-          </View>
-          <View style={styles.sliderLabels}>
-            <Text style={styles.sliderScale}>Low</Text>
-            <Text style={styles.sliderScale}>Neutral</Text>
-            <Text style={styles.sliderScale}>High</Text>
-          </View>
+          <Slider
+            style={{ width: '100%', height: 40 }}
+            minimumValue={0.5}
+            maximumValue={2.0}
+            step={0.1}
+            value={pitch}
+            onValueChange={setPitch}
+            minimumTrackTintColor={Colors.light.tint}
+            maximumTrackTintColor={Colors.light.border}
+          />
         </View>
-
       </SoftCard>
 
       <CustomButton 
-        title="GENERATE SPEECH" 
+        title={loading ? "GENERATING..." : "GENERATE SPEECH"} 
+        onPress={handleGenerate}
+        disabled={loading}
         style={styles.generateBtn} 
         textStyle={styles.generateBtnText} 
       />
@@ -103,6 +133,17 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 40,
   },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: Colors.light.text,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: Colors.light.textSecondary,
+    marginBottom: 24,
+  },
   sectionTitle: {
     fontSize: 14,
     fontWeight: '700',
@@ -115,6 +156,7 @@ const styles = StyleSheet.create({
     padding: 0,
     height: 200,
     overflow: 'hidden',
+    marginBottom: 16,
   },
   textInput: {
     flex: 1,
@@ -135,7 +177,6 @@ const styles = StyleSheet.create({
   charCount: {
     fontSize: 12,
     color: Colors.light.textSecondary,
-    marginRight: 8,
   },
   settingsCard: {
     padding: 0,
@@ -164,7 +205,6 @@ const styles = StyleSheet.create({
   settingValue: {
     fontSize: 14,
     color: Colors.light.text,
-    marginRight: 8,
     fontWeight: '500',
   },
   divider: {
@@ -178,56 +218,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 8,
   },
   sliderLabel: {
     fontSize: 14,
     fontWeight: '600',
     color: Colors.light.text,
-    marginLeft: 6,
   },
   sliderValue: {
     fontSize: 14,
     fontWeight: '500',
     color: Colors.light.text,
-  },
-  sliderTrack: {
-    height: 6,
-    backgroundColor: '#e2e8f0',
-    borderRadius: 3,
-    flexDirection: 'row',
-    alignItems: 'center',
-    position: 'relative',
-    marginBottom: 12,
-  },
-  sliderFill: {
-    height: '100%',
-    backgroundColor: Colors.light.tint,
-    borderRadius: 3,
-  },
-  sliderThumb: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#fff',
-    borderWidth: 2,
-    borderColor: Colors.light.tint,
-    position: 'absolute',
-    left: '50%',
-    marginLeft: -10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  sliderLabels: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  sliderScale: {
-    fontSize: 12,
-    color: Colors.light.textSecondary,
   },
   generateBtn: {
     marginTop: 24,
