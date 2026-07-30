@@ -1,5 +1,7 @@
 "use client";
 
+import dynamic from 'next/dynamic';
+
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
@@ -14,7 +16,7 @@ import { useRouter } from "../../../../src/i18n/routing";
 import api from "../../../../src/utils/api";
 import ToolInstructions from "../../../../components/ToolInstructions";
 
-export default function AdvancedLipSyncPage() {
+function AdvancedLipSyncPage() {
   const t = useTranslations("ImageToVideo");
   const locale = useLocale();
   const isRtl = locale === 'ar';
@@ -378,3 +380,5 @@ export default function AdvancedLipSyncPage() {
     </>
   );
 }
+
+export default dynamic(() => Promise.resolve(AdvancedLipSyncPage), { ssr: false });

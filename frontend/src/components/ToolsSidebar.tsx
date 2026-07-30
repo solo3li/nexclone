@@ -76,6 +76,7 @@ export default function ToolsSidebar() {
   const [notifications, setNotifications] = useState<Array<{ id: number, title: string, message: string, type: string, url: string, time: Date }>>([]);
   const [hasUnread, setHasUnread] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
+  const walletRef = useRef<HTMLDivElement>(null);
 
   /**
    * Sanitize a notification URL from the backend into a clean relative path
@@ -126,6 +127,9 @@ export default function ToolsSidebar() {
     const handleClickOutside = (e: MouseEvent) => {
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
         setNotificationsOpen(false);
+      }
+      if (walletRef.current && !walletRef.current.contains(e.target as Node)) {
+        setWalletsExpanded(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -255,9 +259,9 @@ export default function ToolsSidebar() {
         {user && (
           <div className="px-4 py-3 border-b border-white/5" dir={isRtl ? 'rtl' : 'ltr'}>
             <div className="flex flex-col gap-2">
-              <div
+              <Link
+                href="/profile"
                 className="flex items-center justify-between cursor-pointer group"
-                onClick={() => setWalletsExpanded(!walletsExpanded)}
               >
                 <div className="flex items-center gap-2">
                   <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-md shadow-fuchsia-900/20">
@@ -267,6 +271,22 @@ export default function ToolsSidebar() {
                   </div>
                   <span className="text-white/80 group-hover:text-white text-xs font-semibold truncate max-w-[90px] transition-colors">
                     {user.fullName || user.email}
+                  </span>
+                </div>
+              </Link>
+            
+            {/* Credits / Wallet */}
+            <div className="relative" ref={walletRef}>
+              <div 
+                className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:bg-white/10 hover:border-white/20 transition-all group"
+                onClick={() => setWalletsExpanded(!walletsExpanded)}
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-fuchsia-500/20 to-violet-500/20 flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <Zap className="w-4 h-4 text-fuchsia-400" />
+                  </div>
+                  <span className="text-sm font-semibold text-white/90 group-hover:text-white transition-colors">
+                    {isRtl ? 'الرصيد' : 'Credits'}
                   </span>
                 </div>
 
@@ -284,12 +304,15 @@ export default function ToolsSidebar() {
               <AnimatePresence>
                 {walletsExpanded && (
                   <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: "auto", opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden"
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className={`absolute bottom-full mb-2 w-full bg-[#0d001a] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden ${isRtl ? 'left-0' : 'right-0'}`}
                   >
-                    <div className="flex flex-col gap-1.5 pt-2 pb-1">
+                    <div className="p-3 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                      <h3 className="font-bold text-sm text-white">{isRtl ? 'المحافظ' : 'Wallets'}</h3>
+                    </div>
+                    <div className="flex flex-col gap-1.5 p-2 max-h-80 overflow-y-auto">
                       {user.wallets?.map((wallet: any, idx: number) => {
                         let displayName = wallet.code;
                         if (wallet.code === 'GENERAL') displayName = isRtl ? 'المحفظة العامة' : 'General Wallet';
@@ -324,13 +347,11 @@ export default function ToolsSidebar() {
                         </div>
                       )}
 
-                      <Link href="/wallets" className="text-center text-[10px] text-fuchsia-400 hover:text-fuchsia-300 font-bold py-2 mt-1.5 border-t border-white/5 transition-colors block">
-                        {isRtl ? "عرض صفحة المحافظ" : "View Wallets Page"}
-                      </Link>
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
+            </div>
             </div>
           </div>
         )}

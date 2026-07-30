@@ -1,5 +1,7 @@
 "use client";
 
+import dynamic from 'next/dynamic';
+
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
@@ -30,7 +32,7 @@ interface OptionProfile {
   isPremium: boolean;
 }
 
-export default function TextToVoicePage() {
+function TextToVoicePage() {
   const t = useTranslations("TextToVoice");
   const locale = useLocale();
   const isRtl = locale === 'ar';
@@ -819,3 +821,5 @@ export default function TextToVoicePage() {
     </>
   );
 }
+
+export default dynamic(() => Promise.resolve(TextToVoicePage), { ssr: false });
