@@ -118,16 +118,19 @@ namespace NexClone.Backend.Infrastructure.Consumers
                     "success", 
                     "/history");
 
-                try {
-                    var htmlBody = $@"<div dir=""rtl"" style=""font-family:Arial,sans-serif;direction:rtl;text-align:right;"">
+                if (history.ToolName != "text-to-voice" && history.ToolName != "voice-to-text")
+                {
+                    try {
+                        var htmlBody = $@"<div dir=""rtl"" style=""font-family:Arial,sans-serif;direction:rtl;text-align:right;"">
 <p>مرحباً {System.Web.HttpUtility.HtmlEncode(user.FullName)}،</p>
 <p>لقد انتهينا من معالجة طلبك <strong>{System.Web.HttpUtility.HtmlEncode(history.Title)}</strong> بنجاح.</p>
 <p>يمكنك مشاهدة أو تحميل النتيجة من الرابط أدناه:</p>
 <p><a href=""{history.FileUrl}"">{history.FileUrl}</a></p>
 <p>أو يمكنك زيارة <a href=""https://nexmedia.com/history"">سجل العمليات</a> في لوحة التحكم.</p>
 </div>";
-                    await _emailService.SendEmailAsync(user.Email, user.FullName, $"عملية {history.Title} مكتملة", htmlBody);
-                } catch { /* Ignore email fail */ }
+                        await _emailService.SendEmailAsync(user.Email, user.FullName, $"عملية {history.Title} مكتملة", htmlBody);
+                    } catch { /* Ignore email fail */ }
+                }
             }
         }
 
