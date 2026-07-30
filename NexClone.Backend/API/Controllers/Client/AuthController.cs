@@ -121,7 +121,8 @@ namespace NexClone.Backend.API.Controllers.Client
                 Email = request.Email,
                 FullName = request.FullName,
                 Country = request.Country,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                LastVerificationEmailSentAt = DateTime.UtcNow
             };
 
             var result = await _userManager.CreateAsync(user, request.Password);
@@ -183,6 +184,71 @@ namespace NexClone.Backend.API.Controllers.Client
 
             return Ok(new { Message = "تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني لتفعيل الحساب.", FreeTrialAssigned = freeTrialAssigned });
 
+        }
+
+        [HttpGet("resend-cooldown")]
+        public async Task<IActionResult> GetResendCooldown([FromQuery] string email)
+        {
+            if (string.IsNullOrEmpty(email)) return BadRequest(new { Message = "البريد الإلكتروني مطلوب." });
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return NotFound(new { Message = "المستخدم غير موجود." });
+
+            if (user.IsVerified) return Ok(new { Allowed = false, Message = "تم تفعيل الحساب مسبقاً." });
+
+            if (user.LastVerificationEmailSentAt.HasValue)
+            {
+                var timeSinceLastEmail = DateTime.UtcNow - user.LastVerificationEmailSentAt.Value;
+                var cooldown = TimeSpan.FromMinutes(5);
+
+                if (timeSinceLastEmail < cooldown)
+                {
+                    var remainingSeconds = (int)(cooldown - timeSinceLastEmail).TotalSeconds;
+                    return Ok(new { Allowed = false, RemainingSeconds = remainingSeconds });
+                }
+            }
+
+            return Ok(new { Allowed = true, RemainingSeconds = 0 });
+        }
+
+        [HttpPost("resend-verification")]
+        [EnableRateLimiting("AuthPolicy")]
+        public async Task<IActionResult> ResendVerification([FromBody] VerifyEmailRequest request)
+        {
+            if (string.IsNullOrEmpty(request.Email)) return BadRequest(new { Message = "البريد الإلكتروني مطلوب." });
+
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user == null) return NotFound(new { Message = "المستخدم غير موجود." });
+
+            if (user.IsVerified) return BadRequest(new { Message = "تم تفعيل الحساب مسبقاً." });
+
+            if (user.LastVerificationEmailSentAt.HasValue)
+            {
+                var timeSinceLastEmail = DateTime.UtcNow - user.LastVerificationEmailSentAt.Value;
+                if (timeSinceLastEmail < TimeSpan.FromMinutes(5))
+                {
+                    return StatusCode(429, new { Message = "الرجاء الانتظار قبل طلب رسالة جديدة." });
+                }
+            }
+
+            user.LastVerificationEmailSentAt = DateTime.UtcNow;
+            await _userManager.UpdateAsync(user);
+
+            var verificationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var origin = Request.Headers["Origin"].FirstOrDefault() ?? "http://178.62.192.74:3000";
+            var locale = origin.Contains("localhost") ? "ar" : "ar";
+            var verifyLink = $"{origin}/{locale}/verify-email?email={Uri.EscapeDataString(user.Email)}&token={Uri.EscapeDataString(verificationToken)}";
+
+            string emailHtml = $@"
+<div style='font-family: Arial, sans-serif; background-color: #0a0015; color: #ffffff; padding: 40px; text-align: center; border-radius: 8px;'>
+    <h2 style='color: #8b5cf6;'>تأكيد البريد الإلكتروني</h2>
+    <p style='color: #d1d5db; font-size: 16px; margin-bottom: 30px;'>مرحباً بك مجدداً في NexMedia! يرجى الضغط على الزر أدناه لتأكيد بريدك الإلكتروني وتفعيل حسابك.</p>
+    <a href='{verifyLink}' style='background-color: #8b5cf6; color: #ffffff; text-decoration: none; padding: 15px 30px; font-size: 16px; font-weight: bold; border-radius: 50px; display: inline-block;'>تفعيل الحساب</a>
+</div>";
+
+            await _emailService.SendEmailAsync(user.Email, user.FullName ?? user.UserName ?? "User", "إعادة إرسال: تفعيل الحساب - NexMedia", emailHtml);
+
+            return Ok(new { Message = "تم إرسال رسالة التفعيل بنجاح." });
         }
 
         [HttpPost("login")]

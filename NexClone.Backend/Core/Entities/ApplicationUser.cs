@@ -11,6 +11,7 @@ namespace NexClone.Backend.Core.Entities
         public string FullName { get; set; } = string.Empty;
         public string Country { get; set; } = string.Empty;
         public bool IsVerified { get; set; } = false;
+        public DateTime? LastVerificationEmailSentAt { get; set; }
         public string? ImageUrl { get; set; }
         public bool IsActive { get; set; } = true;
         public bool IsStaff { get; set; } = false;

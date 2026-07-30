@@ -122,6 +122,10 @@ export default function LoginPage() {
 
       router.push("/");
     } catch (err: any) {
+      if (err.response?.data?.RequiresVerification) {
+        router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+        return;
+      }
       setError(err.response?.data?.Message || (isRtl ? "فشل تسجيل الدخول، يرجى المحاولة مرة أخرى" : "Login failed, please try again"));
     } finally {
       setLoading(false);

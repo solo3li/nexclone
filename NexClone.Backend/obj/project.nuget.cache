@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "ha5tzVXXkHQ=",
+  "dgSpecHash": "MSjqFnElrhg=",
   "success": true,
   "projectFilePath": "/root/nexmedia/nexclone/NexClone.Backend/NexClone.Backend.csproj",
   "expectedPackageFiles": [
@@ -9,9 +9,8 @@
     "/root/.nuget/packages/google.apis.auth/1.68.0/google.apis.auth.1.68.0.nupkg.sha512",
     "/root/.nuget/packages/google.apis.core/1.68.0/google.apis.core.1.68.0.nupkg.sha512",
     "/root/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",
-    "/root/.nuget/packages/masstransit/9.2.0/masstransit.9.2.0.nupkg.sha512",
-    "/root/.nuget/packages/masstransit.abstractions/9.2.0/masstransit.abstractions.9.2.0.nupkg.sha512",
-    "/root/.nuget/packages/masstransit.aspnetcore/9.2.0/masstransit.aspnetcore.9.2.0.nupkg.sha512",
+    "/root/.nuget/packages/masstransit/8.3.1/masstransit.8.3.1.nupkg.sha512",
+    "/root/.nuget/packages/masstransit.abstractions/8.3.1/masstransit.abstractions.8.3.1.nupkg.sha512",
     "/root/.nuget/packages/masstransit.rabbitmq/8.3.1/masstransit.rabbitmq.8.3.1.nupkg.sha512",
     "/root/.nuget/packages/microsoft.aspnetcore.authentication.jwtbearer/10.0.9/microsoft.aspnetcore.authentication.jwtbearer.10.0.9.nupkg.sha512",
     "/root/.nuget/packages/microsoft.aspnetcore.dataprotection.entityframeworkcore/10.0.9/microsoft.aspnetcore.dataprotection.entityframeworkcore.10.0.9.nupkg.sha512",
@@ -36,7 +35,7 @@
     "/root/.nuget/packages/microsoft.identitymodel.protocols/8.0.1/microsoft.identitymodel.protocols.8.0.1.nupkg.sha512",
     "/root/.nuget/packages/microsoft.identitymodel.protocols.openidconnect/8.0.1/microsoft.identitymodel.protocols.openidconnect.8.0.1.nupkg.sha512",
     "/root/.nuget/packages/microsoft.identitymodel.tokens/8.0.1/microsoft.identitymodel.tokens.8.0.1.nupkg.sha512",
-    "/root/.nuget/packages/microsoft.openapi/2.11.0/microsoft.openapi.2.11.0.nupkg.sha512",
+    "/root/.nuget/packages/microsoft.openapi/2.0.0/microsoft.openapi.2.0.0.nupkg.sha512",
     "/root/.nuget/packages/microsoft.visualstudio.solutionpersistence/1.0.52/microsoft.visualstudio.solutionpersistence.1.0.52.nupkg.sha512",
     "/root/.nuget/packages/minio/6.0.5/minio.6.0.5.nupkg.sha512",
     "/root/.nuget/packages/mono.texttemplating/3.0.0/mono.texttemplating.3.0.0.nupkg.sha512",
@@ -71,13 +70,13 @@
   ],
   "logs": [
     {
-      "code": "NU1603",
+      "code": "NU1903",
       "level": "Warning",
-      "message": "NexClone.Backend depends on MassTransit.AspNetCore (>= 8.3.1) but MassTransit.AspNetCore 8.3.1 was not found. MassTransit.AspNetCore 9.2.0 was resolved instead.",
+      "message": "Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc",
       "projectPath": "/root/nexmedia/nexclone/NexClone.Backend/NexClone.Backend.csproj",
       "warningLevel": 1,
       "filePath": "/root/nexmedia/nexclone/NexClone.Backend/NexClone.Backend.csproj",
-      "libraryId": "MassTransit.AspNetCore",
+      "libraryId": "Microsoft.OpenApi",
       "targetGraphs": [
         "net10.0"
       ]
