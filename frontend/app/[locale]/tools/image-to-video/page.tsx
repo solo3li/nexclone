@@ -44,9 +44,10 @@ export default function ImageToVideoPage() {
     const fetchConfig = async () => {
       try {
         const res = await api.get("/api/settings/public");
-        setIsMaintenanceMode(res.data.isMaintenanceMode || false);
-      } catch (err) {
-        console.error("Failed to fetch config:", err);
+        setIsMaintenanceMode(res.data?.isMaintenanceMode || false);
+      } catch {
+        // /api/settings/public may not be available — fail silently
+        // isMaintenanceMode defaults to false, so the page renders normally
       }
     };
     fetchConfig();
