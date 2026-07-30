@@ -38,8 +38,22 @@ export default function ImageToVideoPage() {
   const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   
-  const estimatedCost = user?.activePlan?.avatarVideoCostPerGeneration || 1;
+  const [estimatedCost, setEstimatedCost] = useState<number>(user?.activePlan?.avatarVideoCostPerGeneration || 1);
+  const [chargedWallet, setChargedWallet] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      api.get("/api/video/estimate-avatar").then(res => {
+        if (res.data) {
+          setEstimatedCost(res.data.estimatedCost);
+          setChargedWallet(res.data.chargedWalletName);
+        }
+      }).catch(err => console.error(err));
+    } else {
+      setEstimatedCost(user?.activePlan?.avatarVideoCostPerGeneration || 1);
+      setChargedWallet(null);
+    }
+  }, [isAuthenticated, user]);
   useEffect(() => {
     const fetchConfig = async () => {
       try {
@@ -400,7 +414,10 @@ export default function ImageToVideoPage() {
             
             <div className="bg-white/5 rounded-2xl p-4 mb-6 flex justify-between items-center">
               <span className="text-white/70 font-medium">{t('estimatedCost')}:</span>
-              <span className="text-fuchsia-400 font-bold text-xl">{estimatedCost} {t('credits')}</span>
+              <div className="flex flex-col items-end">
+                <span className="text-fuchsia-400 font-bold text-xl">{estimatedCost} {t('credits')}</span>
+                {chargedWallet && <span className="text-white/40 text-[10px]">({isRtl ? 'سيتم الخصم من' : 'Will be deducted from'}: {chargedWallet})</span>}
+              </div>
             </div>
 
             <div className="flex gap-3">

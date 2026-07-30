@@ -40,6 +40,30 @@ namespace NexClone.Backend.API.Controllers.AI
             _publishEndpoint = publishEndpoint;
         }
 
+        [HttpGet("estimate-avatar")]
+        public async Task<IActionResult> EstimateAvatar()
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+
+            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "avatar-video", 1);
+            if (!policyResult.IsAllowed) return BadRequest(new { error = policyResult.ErrorMessage });
+
+            return Ok(new { estimatedCost = policyResult.TotalCost, chargedWalletName = policyResult.ChargedWalletName });
+        }
+
+        [HttpGet("estimate-lipsync")]
+        public async Task<IActionResult> EstimateLipSync()
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+
+            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "advanced-lip-sync", 1);
+            if (!policyResult.IsAllowed) return BadRequest(new { error = policyResult.ErrorMessage });
+
+            return Ok(new { estimatedCost = policyResult.TotalCost, chargedWalletName = policyResult.ChargedWalletName });
+        }
+
         [HttpPost("start-avatar")]
         public async Task<IActionResult> StartAvatar(IFormFile image, [FromForm] IFormFile? audio = null, [FromForm] string prompt = "The speaker talks naturally to camera")
         {
