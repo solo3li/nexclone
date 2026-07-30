@@ -426,9 +426,16 @@ export default function TextToVoicePage() {
             className="lg:col-span-4 flex flex-col gap-4 order-1 lg:order-2"
           >
               <div className="bg-[#120822]/80 backdrop-blur-xl rounded-2xl border border-white/5 p-3 flex-shrink-0">
-              <div className="flex items-center gap-2 mb-2 px-1">
-                <Mic className="w-4 h-4 text-fuchsia-400" />
-                <h2 className="text-base font-bold text-white">{t('voiceSettings')}</h2>
+              <div className="flex items-center justify-between mb-2 px-1">
+                <div className="flex items-center gap-2">
+                  <Mic className="w-4 h-4 text-fuchsia-400" />
+                  <h2 className="text-base font-bold text-white">{t('voiceSettings')}</h2>
+                </div>
+                {user?.activePlan && (
+                  <div className="text-[10px] bg-fuchsia-500/10 text-fuchsia-300 px-2 py-0.5 rounded-full border border-fuchsia-500/20">
+                    {user.activePlan.ttsCostPerChar} {isRtl ? 'كريدت/حرف (مجاني)' : 'Credits/char (Free)'} | {user.activePlan.ttsCostPerCharHigh} {isRtl ? 'كريدت/حرف (بريميوم)' : 'Credits/char (Premium)'}
+                  </div>
+                )}
               </div>
               
               <div className="space-y-2">
