@@ -9,13 +9,37 @@
     <form action="@Url.Action("Create")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0;">
         @Html.AntiForgeryToken()
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
             <div class="bx--form-item">
                 <label for="Name" class="bx--label">@Localizer["Plan Name"]</label>
                 <div class="bx--text-input__field-wrapper">
                     <input id="Name" type="text" class="bx--text-input" name="Name" required value="@Model?.Name">
                 </div>
             </div>
+            <div class="bx--form-item">
+                <label for="NameAr" class="bx--label">@Localizer["Plan Name (Arabic)"]</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="NameAr" type="text" class="bx--text-input" name="NameAr" required value="@Model?.NameAr" dir="rtl">
+                </div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <div class="bx--form-item">
+                <label for="Description" class="bx--label">@Localizer["Description"]</label>
+                <div class="bx--text-input__field-wrapper">
+                    <textarea id="Description" class="bx--text-area" name="Description" rows="3">@Model?.Description</textarea>
+                </div>
+            </div>
+            <div class="bx--form-item">
+                <label for="DescriptionAr" class="bx--label">@Localizer["Description (Arabic)"]</label>
+                <div class="bx--text-input__field-wrapper">
+                    <textarea id="DescriptionAr" class="bx--text-area" name="DescriptionAr" rows="3" dir="rtl">@Model?.DescriptionAr</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
             <div class="bx--form-item">
                 <label for="DurationDays" class="bx--label">@Localizer["Duration (Days)"]</label>
                 <div class="bx--text-input__field-wrapper">

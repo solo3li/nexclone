@@ -152,6 +152,45 @@
         </div>
     </form>
 
+    <!-- CONCURRENCY LIMITS SETTINGS FORM -->
+    <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #ff832b;">
+        @Html.AntiForgeryToken()
+
+        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">@Localizer["Concurrent Requests Limits (Queues)"]</h3>
+        <p style="color: #525252; margin-bottom: 1rem; font-size: 0.875rem;">@Localizer["Configure how many requests can be processed at the same time for each tool. Requires queue to be enabled."]</p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1rem;">
+            <div class="bx--form-item">
+                <label for="Concurrency_tts" class="bx--label">@Localizer["Text-to-Voice (TTS)"]</label>
+                <input id="Concurrency_tts" type="number" class="bx--text-input" name="settings[Concurrency_tts]" value="@(Model.FirstOrDefault(s => s.Key == "Concurrency_tts")?.Value ?? "10")" placeholder="10" min="1">
+            </div>
+
+            <div class="bx--form-item">
+                <label for="Concurrency_vtt" class="bx--label">@Localizer["Voice-to-Text (STT)"]</label>
+                <input id="Concurrency_vtt" type="number" class="bx--text-input" name="settings[Concurrency_vtt]" value="@(Model.FirstOrDefault(s => s.Key == "Concurrency_vtt")?.Value ?? "10")" placeholder="10" min="1">
+            </div>
+
+            <div class="bx--form-item">
+                <label for="Concurrency_avatar2video" class="bx--label">@Localizer["Avatar Image-to-Video"]</label>
+                <input id="Concurrency_avatar2video" type="number" class="bx--text-input" name="settings[Concurrency_avatar2video]" value="@(Model.FirstOrDefault(s => s.Key == "Concurrency_avatar2video")?.Value ?? "10")" placeholder="10" min="1">
+            </div>
+
+            <div class="bx--form-item">
+                <label for="Concurrency_lipsync" class="bx--label">@Localizer["Advanced Lip-Sync"]</label>
+                <input id="Concurrency_lipsync" type="number" class="bx--text-input" name="settings[Concurrency_lipsync]" value="@(Model.FirstOrDefault(s => s.Key == "Concurrency_lipsync")?.Value ?? "10")" placeholder="10" min="1">
+            </div>
+
+            <div class="bx--form-item">
+                <label for="Concurrency_email" class="bx--label">@Localizer["System Emails"]</label>
+                <input id="Concurrency_email" type="number" class="bx--text-input" name="settings[Concurrency_email]" value="@(Model.FirstOrDefault(s => s.Key == "Concurrency_email")?.Value ?? "10")" placeholder="10" min="1">
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
+            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Concurrency Limits"]</button>
+        </div>
+    </form>
+
     <!-- GOOGLE OAUTH SETTINGS FORM -->
     <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #ea4335;">
         @Html.AntiForgeryToken()
