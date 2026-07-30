@@ -283,6 +283,7 @@ namespace NexClone.Backend.API.Controllers.Client
 
             return Ok(new AuthResponse
             {
+                Token = token,
                 Email = user.Email!,
                 IsVerified = user.IsVerified
             });
