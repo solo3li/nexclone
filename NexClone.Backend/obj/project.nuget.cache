@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "U2e3OiU7Wvg=",
+  "dgSpecHash": "LVt1sEIHNO4=",
   "success": true,
   "projectFilePath": "/root/nexmedia/nexclone/NexClone.Backend/NexClone.Backend.csproj",
   "expectedPackageFiles": [
@@ -9,6 +9,10 @@
     "/root/.nuget/packages/google.apis.auth/1.68.0/google.apis.auth.1.68.0.nupkg.sha512",
     "/root/.nuget/packages/google.apis.core/1.68.0/google.apis.core.1.68.0.nupkg.sha512",
     "/root/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",
+    "/root/.nuget/packages/masstransit/9.2.0/masstransit.9.2.0.nupkg.sha512",
+    "/root/.nuget/packages/masstransit.abstractions/9.2.0/masstransit.abstractions.9.2.0.nupkg.sha512",
+    "/root/.nuget/packages/masstransit.aspnetcore/9.2.0/masstransit.aspnetcore.9.2.0.nupkg.sha512",
+    "/root/.nuget/packages/masstransit.rabbitmq/9.2.0/masstransit.rabbitmq.9.2.0.nupkg.sha512",
     "/root/.nuget/packages/microsoft.aspnetcore.authentication.jwtbearer/10.0.9/microsoft.aspnetcore.authentication.jwtbearer.10.0.9.nupkg.sha512",
     "/root/.nuget/packages/microsoft.aspnetcore.dataprotection.entityframeworkcore/10.0.9/microsoft.aspnetcore.dataprotection.entityframeworkcore.10.0.9.nupkg.sha512",
     "/root/.nuget/packages/microsoft.aspnetcore.identity.entityframeworkcore/10.0.9/microsoft.aspnetcore.identity.entityframeworkcore.10.0.9.nupkg.sha512",
@@ -32,7 +36,7 @@
     "/root/.nuget/packages/microsoft.identitymodel.protocols/8.0.1/microsoft.identitymodel.protocols.8.0.1.nupkg.sha512",
     "/root/.nuget/packages/microsoft.identitymodel.protocols.openidconnect/8.0.1/microsoft.identitymodel.protocols.openidconnect.8.0.1.nupkg.sha512",
     "/root/.nuget/packages/microsoft.identitymodel.tokens/8.0.1/microsoft.identitymodel.tokens.8.0.1.nupkg.sha512",
-    "/root/.nuget/packages/microsoft.openapi/2.0.0/microsoft.openapi.2.0.0.nupkg.sha512",
+    "/root/.nuget/packages/microsoft.openapi/2.11.0/microsoft.openapi.2.11.0.nupkg.sha512",
     "/root/.nuget/packages/microsoft.visualstudio.solutionpersistence/1.0.52/microsoft.visualstudio.solutionpersistence.1.0.52.nupkg.sha512",
     "/root/.nuget/packages/minio/6.0.5/minio.6.0.5.nupkg.sha512",
     "/root/.nuget/packages/mono.texttemplating/3.0.0/mono.texttemplating.3.0.0.nupkg.sha512",
@@ -40,6 +44,7 @@
     "/root/.nuget/packages/npgsql/10.0.3/npgsql.10.0.3.nupkg.sha512",
     "/root/.nuget/packages/npgsql.entityframeworkcore.postgresql/10.0.2/npgsql.entityframeworkcore.postgresql.10.0.2.nupkg.sha512",
     "/root/.nuget/packages/pipelines.sockets.unofficial/2.2.16/pipelines.sockets.unofficial.2.2.16.nupkg.sha512",
+    "/root/.nuget/packages/rabbitmq.client/7.2.1/rabbitmq.client.7.2.1.nupkg.sha512",
     "/root/.nuget/packages/scalar.aspnetcore/1.2.76/scalar.aspnetcore.1.2.76.nupkg.sha512",
     "/root/.nuget/packages/serilog/4.3.0/serilog.4.3.0.nupkg.sha512",
     "/root/.nuget/packages/serilog.aspnetcore/10.0.0/serilog.aspnetcore.10.0.0.nupkg.sha512",
@@ -64,18 +69,5 @@
     "/root/.nuget/packages/system.reactive/6.0.1/system.reactive.6.0.1.nupkg.sha512",
     "/root/.nuget/packages/taglibsharp/2.3.0/taglibsharp.2.3.0.nupkg.sha512"
   ],
-  "logs": [
-    {
-      "code": "NU1903",
-      "level": "Warning",
-      "message": "Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc",
-      "projectPath": "/root/nexmedia/nexclone/NexClone.Backend/NexClone.Backend.csproj",
-      "warningLevel": 1,
-      "filePath": "/root/nexmedia/nexclone/NexClone.Backend/NexClone.Backend.csproj",
-      "libraryId": "Microsoft.OpenApi",
-      "targetGraphs": [
-        "net10.0"
-      ]
-    }
-  ]
+  "logs": []
 }

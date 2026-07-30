@@ -7,6 +7,9 @@ using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using MassTransit;
+using NexClone.Backend.Core.Messages;
+using System.IO;
 
 namespace NexClone.Backend.API.Controllers.AI
 {
@@ -21,17 +24,20 @@ namespace NexClone.Backend.API.Controllers.AI
         private readonly ApplicationDbContext _dbContext;
         private readonly UsagePolicyService _usagePolicy;
         private readonly IMediaService _mediaService;
+        private readonly IPublishEndpoint _publishEndpoint;
 
         public VideoController(
             IVideoService videoService,
             ApplicationDbContext dbContext,
             UsagePolicyService usagePolicy,
-            IMediaService mediaService)
+            IMediaService mediaService,
+            IPublishEndpoint publishEndpoint)
         {
             _videoService = videoService;
             _dbContext = dbContext;
             _usagePolicy = usagePolicy;
             _mediaService = mediaService;
+            _publishEndpoint = publishEndpoint;
         }
 
         [HttpPost("start-avatar")]
@@ -68,35 +74,53 @@ namespace NexClone.Backend.API.Controllers.AI
 
             try
             {
-                var result = await _videoService.StartAvatarImageToVideoAsync(image, audio, prompt);
+                // Read files into memory so background task can use them
+                byte[] imageBytes;
+                using (var ms = new MemoryStream()) { await image.CopyToAsync(ms); imageBytes = ms.ToArray(); }
+                string imageContentType = image.ContentType;
 
-                if (result.Success)
+                byte[] audioBytes = null;
+                string audioContentType = null;
+                if (audio != null)
                 {
-                    // Save history
-                    var history = new GenerationHistory
-                    {
-                        UserId = userId,
-                        Type = "image-to-video",
-                        Title = "Avatar Video Generation",
-                        InputText = "Image Upload",
-                        Status = "processing",
-                        ResultText = result.TaskId,
-                        CreditsUsed = policyResult.TotalCost
-                    };
-                    _dbContext.GenerationHistories.Add(history);
-                    await _dbContext.SaveChangesAsync();
-
-                    return Ok(new { taskId = result.TaskId });
+                    using (var ms = new MemoryStream()) { await audio.CopyToAsync(ms); audioBytes = ms.ToArray(); }
+                    audioContentType = audio.ContentType;
                 }
 
-                // Refund if failed to start (but no exception)
-                await _usagePolicy.RefundAsync(userId, policyResult.ChargedWalletTypeId, policyResult.TotalCost);
-                return StatusCode(500, new { error = result.ErrorMessage });
+                // Save history as processing
+                var history = new GenerationHistory
+                {
+                    UserId = userId,
+                    Type = "image-to-video",
+                    Title = "Avatar Video Generation",
+                    InputText = "Image Upload",
+                    Status = "processing",
+                    ResultText = "initializing",
+                    CreatedAt = DateTime.UtcNow,
+                    CreditsUsed = policyResult.TotalCost
+                };
+                _dbContext.GenerationHistories.Add(history);
+                await _dbContext.SaveChangesAsync();
+
+                // Publish to RabbitMQ
+                await _publishEndpoint.Publish(new AvatarVideoMessage
+                {
+                    HistoryId = history.Id,
+                    UserId = userId,
+                    ImageBytes = imageBytes,
+                    ImageContentType = imageContentType,
+                    AudioBytes = audioBytes,
+                    AudioContentType = audioContentType,
+                    Prompt = prompt
+                });
+
+                // Return OK immediately so frontend can show the Wait/Leave UI
+                return Ok(new { taskId = history.Id.ToString(), status = "processing", message = "Task has been added to the queue." });
             }
             catch (Exception ex)
             {
                 await _usagePolicy.RefundAsync(userId, policyResult.ChargedWalletTypeId, policyResult.TotalCost);
-                return StatusCode(500, new { error = "An error occurred while communicating with the video service: " + ex.Message });
+                return StatusCode(500, new { error = "An error occurred while queuing the video task: " + ex.Message });
             }
         }
 
@@ -158,10 +182,20 @@ namespace NexClone.Backend.API.Controllers.AI
                 _dbContext.GenerationHistories.Add(history);
                 await _dbContext.SaveChangesAsync();
 
-                // Fire and forget background job - pass raw bytes directly
-                _videoService.ProcessLipSyncBackgroundAsync(history.Id, videoBytes, videoFileName, videoContentType, audioBytes, audioFileName, audioContentType, userId);
+                // Publish to RabbitMQ instead of direct fire-and-forget
+                await _publishEndpoint.Publish(new LipSyncMessage
+                {
+                    HistoryId = history.Id,
+                    UserId = userId,
+                    VideoBytes = videoBytes,
+                    VideoFileName = videoFileName,
+                    VideoContentType = videoContentType,
+                    AudioBytes = audioBytes,
+                    AudioFileName = audioFileName,
+                    AudioContentType = audioContentType
+                });
 
-                return Ok(new { taskId = history.Id.ToString() });
+                return Ok(new { taskId = history.Id.ToString(), status = "processing", message = "Task has been added to the queue." });
             }
             catch (Exception ex)
             {

@@ -2,11 +2,12 @@
 
 import { useLocale } from "next-intl";
 import { Link, usePathname, useRouter } from "../i18n/routing";
-import { Mic, FileAudio, Video, Menu, X, Home, LogOut, Wallet, ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { Mic, FileAudio, Video, Menu, X, Home, LogOut, Wallet, ChevronDown, Bell } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppStore } from "../store/useAppStore";
 import api from "../utils/api";
+import { signalRNotificationService } from "../../lib/signalr-client";
 
 export default function ToolsSidebar() {
   const locale = useLocale();
@@ -70,6 +71,34 @@ export default function ToolsSidebar() {
   const [isOpen, setIsOpen] = useState(false);
   const [walletsExpanded, setWalletsExpanded] = useState(false);
 
+  // Notifications State
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Array<{ id: number, title: string, message: string, type: string, url: string, time: Date }>>([]);
+  const [hasUnread, setHasUnread] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Start SignalR
+    signalRNotificationService.startConnection();
+    signalRNotificationService.onNotification((title, message, type, url) => {
+      setNotifications(prev => [{ id: Date.now(), title, message, type, url, time: new Date() }, ...prev]);
+      setHasUnread(true);
+    });
+
+    // Click outside to close notifications
+    const handleClickOutside = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setNotificationsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      signalRNotificationService.stopConnection();
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <>
       {/* Mobile Toggle Button */}
@@ -121,6 +150,60 @@ export default function ToolsSidebar() {
             >
               <Home className="w-4 h-4" />
             </Link>
+
+            {/* Notifications Bell */}
+            <div className="relative" ref={notifRef}>
+              <button
+                onClick={() => { setNotificationsOpen(!notificationsOpen); setHasUnread(false); }}
+                className="relative w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all"
+                title={isRtl ? 'الإشعارات' : 'Notifications'}
+              >
+                <Bell className="w-4 h-4" />
+                {hasUnread && (
+                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+                )}
+              </button>
+
+              <AnimatePresence>
+                {notificationsOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className={`absolute top-full mt-2 w-72 bg-[#0d001a] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden ${isRtl ? 'left-0' : 'right-0'}`}
+                  >
+                    <div className="p-3 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                      <h3 className="font-bold text-sm text-white">{isRtl ? 'الإشعارات' : 'Notifications'}</h3>
+                    </div>
+                    <div className="max-h-80 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="p-6 text-center text-white/40 text-xs">
+                          {isRtl ? 'لا توجد إشعارات جديدة' : 'No new notifications'}
+                        </div>
+                      ) : (
+                        notifications.map((notif) => (
+                          <Link href={notif.url} key={notif.id} onClick={() => setNotificationsOpen(false)}>
+                            <div className="p-3 border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer group">
+                              <div className="flex items-start gap-2">
+                                <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${notif.type === 'success' ? 'bg-emerald-500' : notif.type === 'error' ? 'bg-red-500' : 'bg-fuchsia-500'}`} />
+                                <div>
+                                  <h4 className="text-sm font-semibold text-white/90 group-hover:text-white">{notif.title}</h4>
+                                  <p className="text-xs text-white/50 mt-1 leading-relaxed">{notif.message}</p>
+                                  <span className="text-[10px] text-white/30 mt-2 block">
+                                    {notif.time.toLocaleTimeString(isRtl ? 'ar-EG' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </Link>
+                        ))
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             {/* Mobile close */}
             <button
               onClick={() => setIsOpen(false)}

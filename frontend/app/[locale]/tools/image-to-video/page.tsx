@@ -29,6 +29,7 @@ export default function ImageToVideoPage() {
   const [prompt, setPrompt] = useState("");
   
   const [isProcessing, setIsProcessing] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -56,8 +57,14 @@ export default function ImageToVideoPage() {
     if (!imageFile) return;
     
     setIsProcessing(true);
+    setElapsedSeconds(0);
     setError("");
     setVideoUrl(null);
+
+    // Start timer
+    const timerInterval = setInterval(() => {
+      setElapsedSeconds(prev => prev + 1);
+    }, 1000);
 
     try {
       const formData = new FormData();
@@ -65,44 +72,38 @@ export default function ImageToVideoPage() {
       if (audioFile) formData.append("audio", audioFile);
       if (prompt) formData.append("prompt", prompt);
 
-      const response = await api.post("/api/video/start-avatar", formData, {
+      // The API now returns immediately since it publishes to RabbitMQ
+      await api.post("/api/video/start-avatar", formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
-      const taskId = response.data.taskId;
       
       api.get("/api/auth/me").then(res => {
         if (res.data) setUser(res.data);
       }).catch(err => console.error(err));
 
-      const pollTask = async () => {
-        try {
-          const statusRes = await api.get(`/api/video/status/${taskId}`);
-          const data = statusRes.data;
-          
-          if (data.status === "succeeded") {
-            setVideoUrl(data.url);
-            setIsProcessing(false);
-          } else if (data.status === "failed") {
-            setError(data.error || "Generation failed.");
-            setIsProcessing(false);
-          } else {
-            setTimeout(pollTask, 5000);
-          }
-        } catch (err: any) {
-          setError("Error checking status");
-          setIsProcessing(false);
-        }
-      };
-
-      setTimeout(pollTask, 5000);
-
+      // Do NOT poll. Just let the timer run until they leave the page.
+      // SignalR from the sidebar will show the floating notification when it's done.
     } catch (err: any) {
       console.error(err);
       setError(err.response?.data?.error || t('error'));
       setIsProcessing(false);
+      clearInterval(timerInterval);
     }
+  };
+
+  useEffect(() => {
+    return () => {
+       // Cleanup any running timers on unmount
+       setElapsedSeconds(0);
+    }
+  }, []);
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
   const downloadVideo = () => {
@@ -251,23 +252,30 @@ export default function ImageToVideoPage() {
 
               {error && <div className="text-red-400 text-sm p-3 bg-red-500/10 rounded-xl border border-red-500/20 mt-4 mx-2">{error}</div>}
 
-              <button
-                  onClick={handleProcessClick}
-                  disabled={isProcessing || !imageFile || !audioFile}
-                  className="w-full mt-4 bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-500 hover:to-pink-500 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                {isProcessing ? (
-                  <>
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                    {t('processing')}
-                  </>
-                ) : (
-                  <>
-                    <Wand2 className="w-5 h-5" />
-                    {t('generate')}
-                  </>
-                )}
-              </button>
+              {isProcessing && (
+                <div className="mt-4 p-4 bg-fuchsia-500/10 border border-fuchsia-500/30 rounded-xl flex flex-col items-center justify-center gap-3">
+                  <Loader2 className="w-8 h-8 text-fuchsia-400 animate-spin" />
+                  <div className="text-center">
+                    <h3 className="text-white font-bold mb-1">{isRtl ? "جاري المعالجة..." : "Processing..."}</h3>
+                    <p className="text-white/60 text-sm">{isRtl ? "تستغرق هذه العملية وقتاً طويلاً. يمكنك إغلاق هذه الصفحة، وسنرسل لك إشعاراً عند الانتهاء." : "This process takes some time. You can close this page, we will notify you when it's done."}</p>
+                    <div className="mt-2 text-2xl font-mono text-fuchsia-300 font-bold">{formatTime(elapsedSeconds)}</div>
+                  </div>
+                  <Link href="/history" className="mt-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-medium transition-colors">
+                     {isRtl ? "الذهاب لسجل العمليات" : "Go to History"}
+                  </Link>
+                </div>
+              )}
+
+              {!isProcessing && (
+                <button
+                    onClick={handleProcessClick}
+                    disabled={!imageFile || !audioFile}
+                    className="w-full mt-4 bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-500 hover:to-pink-500 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                  <Wand2 className="w-5 h-5" />
+                  {t('generate')}
+                </button>
+              )}
 
               {/* Output Video Player */}
               {videoUrl && (

@@ -11,6 +11,9 @@ using Scalar.AspNetCore;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.HttpOverrides;
+using MassTransit;
+using NexClone.Backend.Infrastructure.Consumers;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -189,6 +192,26 @@ builder.Services.AddScoped<NexClone.Backend.Application.Services.UsagePolicyServ
 // Register Background Services
 builder.Services.AddHostedService<NexClone.Backend.Application.BackgroundJobs.SubscriptionStatusService>();
 
+// Configure MassTransit with RabbitMQ
+builder.Services.AddMassTransit(x =>
+{
+    // Add Consumers here
+    x.AddConsumer<AiTaskConsumer>();
+
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        // By default connects to localhost, but we should use the docker service name if available
+        var rabbitMqHost = builder.Configuration["RabbitMQ:Host"] ?? "localhost";
+        cfg.Host(rabbitMqHost, "/", h => {
+            h.Username("guest");
+            h.Password("guest");
+        });
+
+        cfg.ConfigureEndpoints(context);
+    });
+});
+
+
 // Add Rate Limiting
 builder.Services.AddRateLimiter(options =>
 {
@@ -323,5 +346,7 @@ app.MapControllerRoute(
     .WithStaticAssets();
 
 app.MapHub<NexClone.Backend.Hubs.TicketHub>("/hubs/ticket");
+app.MapHub<NexClone.Backend.Hubs.NotificationHub>("/hubs/notification");
+
 
 app.Run();

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import api from "../../../src/utils/api";
 import { useAppStore } from "../../../src/store/useAppStore";
+import { signalRNotificationService } from "../../../lib/signalr-client";
 
 interface GenerationRecord {
   id: string;
@@ -79,6 +80,17 @@ export default function HistoryPage() {
       }
     };
     fetchHistory();
+
+    // Re-fetch on notification
+    signalRNotificationService.startConnection();
+    signalRNotificationService.onNotification(() => {
+      fetchHistory(); // Refresh the list
+    });
+
+    return () => {
+        // We don't stop the connection because other components might be using it, 
+        // but it's fine.
+    };
   }, []);
 
   const deleteRecord = async (id: string, e: React.MouseEvent) => {
@@ -220,7 +232,12 @@ export default function HistoryPage() {
                         }`}>
                           {record.status === "completed" ? (isRtl ? "مكتمل" : "Done") :
                            record.status === "failed" ? (isRtl ? "فشل" : "Failed") :
-                           (isRtl ? "جاري" : "Processing")}
+                           (
+                            <span className="flex items-center gap-1.5">
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                                {isRtl ? "جاري المعالجة" : "Processing"}
+                            </span>
+                           )}
                         </span>
                         
                         <div className="flex items-center gap-2">

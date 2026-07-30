@@ -36,6 +36,7 @@ services:
       - postgres
       - redis
       - minio
+      - rabbitmq
 
   postgres:
     image: postgres:15
@@ -73,6 +74,20 @@ services:
     volumes:
       - miniodata:/data
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: nexclone-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    networks:
+      - nexclone_network
+    volumes:
+      - rabbitmqdata:/var/lib/rabbitmq
+
 networks:
   nexclone_network:
     driver: bridge
@@ -81,3 +96,4 @@ volumes:
   pgdata:
   redisdata:
   miniodata:
+  rabbitmqdata:
