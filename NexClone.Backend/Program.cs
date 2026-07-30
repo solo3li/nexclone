@@ -177,7 +177,8 @@ builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IVideoService, NexCl
 builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IMediaService, NexClone.Backend.Infrastructure.ExternalServices.S3MediaService>();
 
 // Register Email Service
-builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IEmailService, NexClone.Backend.Infrastructure.ExternalServices.BrevoEmailService>();
+builder.Services.AddScoped<NexClone.Backend.Infrastructure.ExternalServices.BrevoEmailService>();
+builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IEmailService, NexClone.Backend.Infrastructure.ExternalServices.QueueEmailService>();
 builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IEmailTemplateService, NexClone.Backend.Application.Services.EmailTemplateService>();
 
 // Register Payment Service
@@ -192,11 +193,18 @@ builder.Services.AddScoped<NexClone.Backend.Application.Services.UsagePolicyServ
 // Register Background Services
 builder.Services.AddHostedService<NexClone.Backend.Application.BackgroundJobs.SubscriptionStatusService>();
 
+// Register Dynamic Concurrency Manager
+builder.Services.AddSingleton<NexClone.Backend.Core.Interfaces.IDynamicConcurrencyManager, NexClone.Backend.Application.Services.DynamicConcurrencyManager>();
+
 // Configure MassTransit with RabbitMQ
 builder.Services.AddMassTransit(x =>
 {
     // Add Consumers here
-    x.AddConsumer<AiTaskConsumer>();
+    x.AddConsumer<NexClone.Backend.Infrastructure.Consumers.AvatarVideoConsumer>();
+    x.AddConsumer<NexClone.Backend.Infrastructure.Consumers.LipSyncConsumer>();
+    x.AddConsumer<NexClone.Backend.Infrastructure.Consumers.TtsConsumer>();
+    x.AddConsumer<NexClone.Backend.Infrastructure.Consumers.VttConsumer>();
+    x.AddConsumer<NexClone.Backend.Infrastructure.Consumers.EmailConsumer>();
 
     x.UsingRabbitMq((context, cfg) =>
     {
@@ -207,7 +215,37 @@ builder.Services.AddMassTransit(x =>
             h.Password("guest");
         });
 
-        cfg.ConfigureEndpoints(context);
+        var concurrencyManager = context.GetRequiredService<NexClone.Backend.Core.Interfaces.IDynamicConcurrencyManager>();
+
+        cfg.ReceiveEndpoint("avatar_video_queue", e => {
+            e.PrefetchCount = 100;
+            e.UseFilter(new NexClone.Backend.Infrastructure.Consumers.Filters.DynamicConcurrencyFilter<NexClone.Backend.Core.Messages.AvatarVideoMessage>(concurrencyManager, "avatar2video"));
+            e.ConfigureConsumer<NexClone.Backend.Infrastructure.Consumers.AvatarVideoConsumer>(context);
+        });
+
+        cfg.ReceiveEndpoint("lipsync_queue", e => {
+            e.PrefetchCount = 100;
+            e.UseFilter(new NexClone.Backend.Infrastructure.Consumers.Filters.DynamicConcurrencyFilter<NexClone.Backend.Core.Messages.LipSyncMessage>(concurrencyManager, "lipsync"));
+            e.ConfigureConsumer<NexClone.Backend.Infrastructure.Consumers.LipSyncConsumer>(context);
+        });
+
+        cfg.ReceiveEndpoint("tts_queue", e => {
+            e.PrefetchCount = 100;
+            e.UseFilter(new NexClone.Backend.Infrastructure.Consumers.Filters.DynamicConcurrencyFilter<NexClone.Backend.Core.Messages.TextToVoiceMessage>(concurrencyManager, "tts"));
+            e.ConfigureConsumer<NexClone.Backend.Infrastructure.Consumers.TtsConsumer>(context);
+        });
+
+        cfg.ReceiveEndpoint("vtt_queue", e => {
+            e.PrefetchCount = 100;
+            e.UseFilter(new NexClone.Backend.Infrastructure.Consumers.Filters.DynamicConcurrencyFilter<NexClone.Backend.Core.Messages.VoiceToTextMessage>(concurrencyManager, "vtt"));
+            e.ConfigureConsumer<NexClone.Backend.Infrastructure.Consumers.VttConsumer>(context);
+        });
+
+        cfg.ReceiveEndpoint("email_queue", e => {
+            e.PrefetchCount = 100;
+            e.UseFilter(new NexClone.Backend.Infrastructure.Consumers.Filters.DynamicConcurrencyFilter<NexClone.Backend.Core.Messages.SendEmailMessage>(concurrencyManager, "email"));
+            e.ConfigureConsumer<NexClone.Backend.Infrastructure.Consumers.EmailConsumer>(context);
+        });
     });
 });
 
