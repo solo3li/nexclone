@@ -56,7 +56,7 @@ namespace NexClone.Backend.Infrastructure.Consumers
 
                 var payload = new
                 {
-                    model = "kling_advanced_lip_sync",
+                    model = modelName,
                     prompt = "lip sync",
                     video_url = videoUrl,
                     audio_url = audioUrl,

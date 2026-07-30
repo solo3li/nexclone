@@ -65,7 +65,7 @@ namespace NexClone.Backend.Infrastructure.Consumers
 
                 var payload = new
                 {
-                    model = "kling-v1",
+                    model = modelName,
                     prompt = message.Prompt ?? "lip sync",
                     image = imageUrl,
                     image_url = imageUrl,
