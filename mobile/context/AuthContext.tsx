@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import * as SecureStore from 'expo-secure-store';
+import { setItemAsync, getItemAsync, deleteItemAsync } from '../utils/storage';
 import { useRouter, useSegments } from 'expo-router';
 
 type AuthContextType = {
@@ -35,7 +35,7 @@ function useProtectedRoute(user: any) {
       router.replace('/(auth)/login');
     } else if (user && inAuthGroup) {
       // Redirect away from the sign-in page.
-      router.replace('/(tabs)/');
+      router.replace('/(tabs)');
     }
   }, [user, segments]);
 }
@@ -46,10 +46,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Check if token exists on app start
-    SecureStore.getItemAsync('userToken').then((token) => {
+    getItemAsync('userToken').then((token) => {
       if (token) {
-        SecureStore.getItemAsync('userEmail').then((email) => {
-          SecureStore.getItemAsync('userVerified').then((verified) => {
+        getItemAsync('userEmail').then((email) => {
+          getItemAsync('userVerified').then((verified) => {
             if (email) {
               setUser({ email, isVerified: verified === 'true' });
             }
@@ -65,16 +65,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useProtectedRoute(user);
 
   const signIn = async (token: string, email: string, isVerified: boolean) => {
-    await SecureStore.setItemAsync('userToken', token);
-    await SecureStore.setItemAsync('userEmail', email);
-    await SecureStore.setItemAsync('userVerified', isVerified.toString());
+    await setItemAsync('userToken', token);
+    await setItemAsync('userEmail', email);
+    await setItemAsync('userVerified', isVerified.toString());
     setUser({ email, isVerified });
   };
 
   const signOut = async () => {
-    await SecureStore.deleteItemAsync('userToken');
-    await SecureStore.deleteItemAsync('userEmail');
-    await SecureStore.deleteItemAsync('userVerified');
+    await deleteItemAsync('userToken');
+    await deleteItemAsync('userEmail');
+    await deleteItemAsync('userVerified');
     setUser(null);
   };
 

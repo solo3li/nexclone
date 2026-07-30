@@ -1,5 +1,5 @@
 import axios from 'axios';
-import * as SecureStore from 'expo-secure-store';
+import { getItemAsync } from '../utils/storage';
 
 // We use the backend URL seen in logs
 const API_URL = 'http://167.71.66.188:5208/api'; 
@@ -13,7 +13,7 @@ const api = axios.create({
 
 api.interceptors.request.use(async (config) => {
   try {
-    const token = await SecureStore.getItemAsync('userToken');
+    const token = await getItemAsync('userToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
