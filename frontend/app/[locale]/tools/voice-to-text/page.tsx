@@ -94,6 +94,8 @@ export default function VoiceToTextPage() {
   const [file, setFile] = useState<File | Blob | null>(null);
   const [mode, setMode] = useState("transcribe");
   const [language, setLanguage] = useState("auto");
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [chargedWallet, setChargedWallet] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [stage, setStage] = useState<Stage>('idle');
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -175,6 +177,7 @@ export default function VoiceToTextPage() {
   useEffect(() => {
     if (!file || duration <= 0) {
       setEstimatedCost(null);
+      setChargedWallet(null);
       return;
     }
     const fetchEstimate = async () => {
@@ -184,6 +187,7 @@ export default function VoiceToTextPage() {
         const durationMinutes = duration / 60;
         const res = await api.post("/api/ai/voice-to-text/estimate", { fileSizeBytes, durationMinutes });
         setEstimatedCost(res.data.estimatedCost);
+        setChargedWallet(res.data.chargedWalletName);
       } catch (err: any) {
         if (err.response?.status !== 400) {
           console.error(err);
@@ -196,6 +200,7 @@ export default function VoiceToTextPage() {
         }
         
         setEstimatedCost(null);
+        setChargedWallet(null);
       } finally {
         setIsEstimating(false);
       }
@@ -231,6 +236,8 @@ export default function VoiceToTextPage() {
       mediaRecorder.start();
       setIsRecording(true);
       setFile(null);
+      setEstimatedCost(null);
+      setChargedWallet(null);
       setResult("");
       setStage('idle');
     } catch (err) {
@@ -290,6 +297,8 @@ export default function VoiceToTextPage() {
     setCurrentTime(0);
     setDuration(0);
     setUploadedFileId(null);
+    setEstimatedCost(null);
+    setChargedWallet(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -714,10 +723,17 @@ export default function VoiceToTextPage() {
                           {isEstimating ? (
                             <span className="text-white/40 flex items-center gap-2"><Loader2 className="w-3 h-3 animate-spin" /> {isRtl ? "جاري حساب التكلفة..." : "Calculating cost..."}</span>
                           ) : (
-                            <span className="text-fuchsia-400 font-medium flex items-center gap-1.5 bg-fuchsia-500/10 px-3 py-1 rounded-full border border-fuchsia-500/20">
-                              <Zap className="w-4 h-4" />
-                              {isRtl ? "التكلفة المتوقعة:" : "Estimated Cost:"} {estimatedCost.toFixed(2)} {isRtl ? "كريدت" : "Credits"}
-                            </span>
+                            <div className="flex flex-col items-center gap-1">
+                              <span className="text-fuchsia-400 font-medium flex items-center gap-1.5 bg-fuchsia-500/10 px-3 py-1 rounded-full border border-fuchsia-500/20">
+                                <Zap className="w-4 h-4" />
+                                {isRtl ? "التكلفة المتوقعة:" : "Estimated Cost:"} {estimatedCost.toFixed(2)} {isRtl ? "كريدت" : "Credits"}
+                              </span>
+                              {chargedWallet && (
+                                <span className="text-[10px] text-white/40">
+                                  ({isRtl ? 'سيتم الخصم من' : 'Will be deducted from'}: {chargedWallet})
+                                </span>
+                              )}
+                            </div>
                           )}
                         </div>
                       )}

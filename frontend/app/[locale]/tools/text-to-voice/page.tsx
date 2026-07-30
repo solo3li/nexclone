@@ -59,6 +59,7 @@ export default function TextToVoicePage() {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [estimatedCost, setEstimatedCost] = useState<number | null>(null);
+  const [chargedWallet, setChargedWallet] = useState<string | null>(null);
   const [isEstimating, setIsEstimating] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingCost, setPendingCost] = useState<number | null>(null);
@@ -112,6 +113,7 @@ export default function TextToVoicePage() {
 
   useEffect(() => {
     setEstimatedCost(null);
+    setChargedWallet(null);
   }, [text]);
 
   useEffect(() => {
@@ -186,6 +188,8 @@ export default function TextToVoicePage() {
         quality: selectedQuality
       });
       const cost = response.data.estimatedCost;
+      setEstimatedCost(cost);
+      setChargedWallet(response.data.chargedWalletName);
       const totalCredits = user?.wallets 
         ? user.wallets.reduce((acc: number, w: any) => acc + w.balance, 0) 
         : (user?.availableCredits || 0);
@@ -780,7 +784,10 @@ export default function TextToVoicePage() {
             
             <div className="bg-white/5 rounded-2xl p-4 mb-6 flex justify-between items-center">
               <span className="text-white/70 font-medium">{isRtl ? "التكلفة المتوقعة:" : "Estimated Cost:"}</span>
-              <span className="text-fuchsia-400 font-bold text-xl">{pendingCost} {isRtl ? "كريدت" : "Credits"}</span>
+              <div className="flex flex-col items-end">
+                <span className="text-fuchsia-400 font-bold text-xl">{pendingCost} {isRtl ? "كريدت" : "Credits"}</span>
+                {chargedWallet && <span className="text-white/40 text-xs">({isRtl ? 'من محفظة' : 'from wallet'}: {chargedWallet})</span>}
+              </div>
             </div>
 
             <div className="flex gap-3">

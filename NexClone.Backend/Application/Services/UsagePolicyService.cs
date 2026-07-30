@@ -32,6 +32,7 @@ namespace NexClone.Backend.Application.Services
         public string ErrorMessage { get; set; } = string.Empty;
         public decimal TotalCost { get; set; }
         public int ChargedWalletTypeId { get; set; }
+        public string ChargedWalletName { get; set; } = string.Empty;
     }
 
     public class UsagePolicyService
@@ -181,7 +182,12 @@ namespace NexClone.Backend.Application.Services
                 }
             }
 
-            return new PolicyValidationResult { IsAllowed = true, TotalCost = totalCost, ChargedWalletTypeId = walletTypeId };
+            return new PolicyValidationResult { 
+                IsAllowed = true, 
+                TotalCost = totalCost, 
+                ChargedWalletTypeId = walletTypeId,
+                ChargedWalletName = userWallet?.WalletType?.Name ?? "General Wallet"
+            };
         }
 
         private async Task<int> GetWalletTypeIdForTool(string toolName, int planId)
@@ -327,7 +333,12 @@ namespace NexClone.Backend.Application.Services
                 }
             }
 
-            return new PolicyValidationResult { IsAllowed = true, TotalCost = totalCost, ChargedWalletTypeId = walletTypeId };
+            return new PolicyValidationResult { 
+                IsAllowed = true, 
+                TotalCost = totalCost, 
+                ChargedWalletTypeId = walletTypeId,
+                ChargedWalletName = userWallet?.WalletType?.Name ?? "General Wallet"
+            };
         }
 
         public async Task RefundAsync(Guid userId, int walletTypeId, decimal amount)

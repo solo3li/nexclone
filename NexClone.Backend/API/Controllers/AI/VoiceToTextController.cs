@@ -147,7 +147,7 @@ namespace NexClone.Backend.API.Controllers.AI
             if (!policyResult.IsAllowed)
                 return BadRequest(new { error = policyResult.ErrorMessage });
 
-            return Ok(new { estimatedCost = policyResult.TotalCost });
+            return Ok(new { estimatedCost = policyResult.TotalCost, chargedWalletName = policyResult.ChargedWalletName });
         }
     }
 }
