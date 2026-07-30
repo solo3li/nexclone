@@ -21,6 +21,8 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync();
 
 import { AuthProvider } from '@/context/AuthContext';
+import { NotificationProvider } from '@/context/NotificationContext';
+import { RootSiblingParent } from 'react-native-root-siblings';
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
@@ -43,9 +45,13 @@ export default function RootLayout() {
   }
 
   return (
-    <AuthProvider>
-      <RootLayoutNav />
-    </AuthProvider>
+    <RootSiblingParent>
+      <AuthProvider>
+        <NotificationProvider>
+          <RootLayoutNav />
+        </NotificationProvider>
+      </AuthProvider>
+    </RootSiblingParent>
   );
 }
 
