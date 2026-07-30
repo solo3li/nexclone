@@ -34,7 +34,7 @@ export default function AdvancedLipSyncPage() {
   const [aspectRatio, setAspectRatio] = useState("16:9");
   const [selectedQuality, setSelectedQuality] = useState("Standard");
   
-  const estimatedCost = 5; // Fixed mock cost for now
+  const estimatedCost = user?.activePlan?.lipSyncCostPerGeneration || 1;
 
 
 

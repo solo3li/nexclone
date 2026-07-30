@@ -797,7 +797,12 @@ namespace NexClone.Backend.API.Controllers.Client
                     NameAr = activeSub.Plan.NameAr,
                     Status = activeSub.Status,
                     EndDate = activeSub.EndDate,
-                    TtsCustomInstructionsEnabled = activeSub.Plan.TtsCustomInstructionsEnabled
+                    TtsCustomInstructionsEnabled = activeSub.Plan.TtsCustomInstructionsEnabled,
+                    AvatarVideoCostPerGeneration = activeSub.Plan.AvatarVideoCostPerGeneration,
+                    LipSyncCostPerGeneration = activeSub.Plan.LipSyncCostPerGeneration,
+                    SttCostPerMinute = activeSub.Plan.SttCostPerMinute,
+                    TtsCostPerChar = activeSub.Plan.TtsCostPerChar,
+                    TtsCostPerCharHigh = activeSub.Plan.TtsCostPerCharHigh
                 } : null
             });
         }

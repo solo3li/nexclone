@@ -38,7 +38,7 @@ export default function ImageToVideoPage() {
   const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   
-  const estimatedCost = 5; // Fixed mock cost for now
+  const estimatedCost = user?.activePlan?.avatarVideoCostPerGeneration || 1;
 
   useEffect(() => {
     const fetchConfig = async () => {
