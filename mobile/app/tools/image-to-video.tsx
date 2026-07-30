@@ -60,7 +60,7 @@ export default function ImageToVideoScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <Stack.Screen options={{ title: 'Video AI' }} />
+      <Stack.Screen options={{ title: 'Video AI', headerStyle: { backgroundColor: '#13131A' }, headerTintColor: '#F0F0FF' }} />
       
       <Text style={styles.title}>Image to Video</Text>
       <Text style={styles.subtitle}>
@@ -109,7 +109,7 @@ export default function ImageToVideoScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light.background,
+    backgroundColor: '#13131A',
   },
   contentContainer: {
     padding: 20,
@@ -118,18 +118,18 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: Colors.light.text,
+    color: '#F0F0FF',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: Colors.light.textSecondary,
+    color: '#8888AA',
     marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: Colors.light.text,
+    color: '#F0F0FF',
     marginTop: 16,
     marginBottom: 8,
     marginLeft: 4,
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
   },
   uploadLabel: {
     fontSize: 16,
-    color: Colors.light.text,
+    color: '#8888AA',
     marginBottom: 16,
     textAlign: 'center',
   },
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
   },
   textArea: {
     fontSize: 16,
-    color: Colors.light.text,
+    color: '#F0F0FF',
     minHeight: 60,
     textAlignVertical: 'top',
   },
@@ -168,10 +168,12 @@ const styles = StyleSheet.create({
     marginTop: 24,
     borderRadius: 12,
     paddingVertical: 16,
+    backgroundColor: '#4F46E5',
   },
   generateBtnText: {
     fontSize: 16,
     fontWeight: '700',
     letterSpacing: 0.5,
+    color: '#FFFFFF',
   },
 });

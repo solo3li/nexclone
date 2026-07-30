@@ -42,7 +42,7 @@ export default function TextToSpeechScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <Stack.Screen options={{ title: 'Speech AI' }} />
+      <Stack.Screen options={{ title: 'Speech AI', headerStyle: { backgroundColor: '#13131A' }, headerTintColor: '#F0F0FF' }} />
       
       <Text style={styles.title}>Text to Speech</Text>
       <Text style={styles.subtitle}>
@@ -88,8 +88,8 @@ export default function TextToSpeechScreen() {
             step={0.1}
             value={speed}
             onValueChange={setSpeed}
-            minimumTrackTintColor={Colors.light.tint}
-            maximumTrackTintColor={Colors.light.border}
+            minimumTrackTintColor="#9B51E0"
+            maximumTrackTintColor="rgba(255,255,255,0.1)"
           />
         </View>
 
@@ -107,8 +107,8 @@ export default function TextToSpeechScreen() {
             step={0.1}
             value={pitch}
             onValueChange={setPitch}
-            minimumTrackTintColor={Colors.light.tint}
-            maximumTrackTintColor={Colors.light.border}
+            minimumTrackTintColor="#9B51E0"
+            maximumTrackTintColor="rgba(255,255,255,0.1)"
           />
         </View>
       </SoftCard>
@@ -127,7 +127,7 @@ export default function TextToSpeechScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light.background,
+    backgroundColor: '#13131A',
   },
   contentContainer: {
     padding: 20,
@@ -136,18 +136,18 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: Colors.light.text,
+    color: '#F0F0FF',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: Colors.light.textSecondary,
+    color: '#8888AA',
     marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: Colors.light.text,
+    color: '#F0F0FF',
     marginTop: 16,
     marginBottom: 8,
     marginLeft: 4,
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingTop: 16,
     fontSize: 16,
-    color: Colors.light.text,
+    color: '#F0F0FF',
     textAlignVertical: 'top',
   },
   inputFooter: {
@@ -172,11 +172,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 12,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: 'rgba(255,255,255,0.06)',
   },
   charCount: {
     fontSize: 12,
-    color: Colors.light.textSecondary,
+    color: '#8888AA',
   },
   settingsCard: {
     padding: 0,
@@ -189,27 +189,27 @@ const styles = StyleSheet.create({
   },
   settingLabel: {
     fontSize: 16,
-    color: Colors.light.text,
+    color: '#F0F0FF',
     fontWeight: '500',
   },
   settingValueContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#13131A',
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: 'rgba(255,255,255,0.06)',
   },
   settingValue: {
     fontSize: 14,
-    color: Colors.light.text,
+    color: '#F0F0FF',
     fontWeight: '500',
   },
   divider: {
     height: 1,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: 'rgba(255,255,255,0.06)',
   },
   sliderSection: {
     padding: 16,
@@ -223,21 +223,23 @@ const styles = StyleSheet.create({
   sliderLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.light.text,
+    color: '#F0F0FF',
   },
   sliderValue: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.light.text,
+    color: '#F0F0FF',
   },
   generateBtn: {
     marginTop: 24,
     borderRadius: 12,
     paddingVertical: 16,
+    backgroundColor: '#9B51E0',
   },
   generateBtnText: {
     fontSize: 16,
     fontWeight: '700',
     letterSpacing: 0.5,
+    color: '#FFFFFF',
   },
 });
