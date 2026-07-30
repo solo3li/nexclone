@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, TouchableOpacityProps, ViewStyle, TextStyle } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, TouchableOpacityProps, ViewStyle, TextStyle, Platform } from 'react-native';
 import Colors from '../constants/Colors';
 
 interface CustomButtonProps extends TouchableOpacityProps {
@@ -24,14 +24,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: Colors.light.tint,
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    ...Platform.select({
+      web: {
+        boxShadow: `0px 4px 8px rgba(155, 81, 224, 0.3)`,
+      },
+      default: {
+        shadowColor: Colors.light.tint,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 4,
+      },
+    }),
   },
   buttonText: {
     color: '#fff',
