@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "LVt1sEIHNO4=",
+  "dgSpecHash": "ha5tzVXXkHQ=",
   "success": true,
   "projectFilePath": "/root/nexmedia/nexclone/NexClone.Backend/NexClone.Backend.csproj",
   "expectedPackageFiles": [
@@ -12,7 +12,7 @@
     "/root/.nuget/packages/masstransit/9.2.0/masstransit.9.2.0.nupkg.sha512",
     "/root/.nuget/packages/masstransit.abstractions/9.2.0/masstransit.abstractions.9.2.0.nupkg.sha512",
     "/root/.nuget/packages/masstransit.aspnetcore/9.2.0/masstransit.aspnetcore.9.2.0.nupkg.sha512",
-    "/root/.nuget/packages/masstransit.rabbitmq/9.2.0/masstransit.rabbitmq.9.2.0.nupkg.sha512",
+    "/root/.nuget/packages/masstransit.rabbitmq/8.3.1/masstransit.rabbitmq.8.3.1.nupkg.sha512",
     "/root/.nuget/packages/microsoft.aspnetcore.authentication.jwtbearer/10.0.9/microsoft.aspnetcore.authentication.jwtbearer.10.0.9.nupkg.sha512",
     "/root/.nuget/packages/microsoft.aspnetcore.dataprotection.entityframeworkcore/10.0.9/microsoft.aspnetcore.dataprotection.entityframeworkcore.10.0.9.nupkg.sha512",
     "/root/.nuget/packages/microsoft.aspnetcore.identity.entityframeworkcore/10.0.9/microsoft.aspnetcore.identity.entityframeworkcore.10.0.9.nupkg.sha512",
@@ -44,7 +44,7 @@
     "/root/.nuget/packages/npgsql/10.0.3/npgsql.10.0.3.nupkg.sha512",
     "/root/.nuget/packages/npgsql.entityframeworkcore.postgresql/10.0.2/npgsql.entityframeworkcore.postgresql.10.0.2.nupkg.sha512",
     "/root/.nuget/packages/pipelines.sockets.unofficial/2.2.16/pipelines.sockets.unofficial.2.2.16.nupkg.sha512",
-    "/root/.nuget/packages/rabbitmq.client/7.2.1/rabbitmq.client.7.2.1.nupkg.sha512",
+    "/root/.nuget/packages/rabbitmq.client/6.8.1/rabbitmq.client.6.8.1.nupkg.sha512",
     "/root/.nuget/packages/scalar.aspnetcore/1.2.76/scalar.aspnetcore.1.2.76.nupkg.sha512",
     "/root/.nuget/packages/serilog/4.3.0/serilog.4.3.0.nupkg.sha512",
     "/root/.nuget/packages/serilog.aspnetcore/10.0.0/serilog.aspnetcore.10.0.0.nupkg.sha512",
@@ -69,5 +69,18 @@
     "/root/.nuget/packages/system.reactive/6.0.1/system.reactive.6.0.1.nupkg.sha512",
     "/root/.nuget/packages/taglibsharp/2.3.0/taglibsharp.2.3.0.nupkg.sha512"
   ],
-  "logs": []
+  "logs": [
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "message": "NexClone.Backend depends on MassTransit.AspNetCore (>= 8.3.1) but MassTransit.AspNetCore 8.3.1 was not found. MassTransit.AspNetCore 9.2.0 was resolved instead.",
+      "projectPath": "/root/nexmedia/nexclone/NexClone.Backend/NexClone.Backend.csproj",
+      "warningLevel": 1,
+      "filePath": "/root/nexmedia/nexclone/NexClone.Backend/NexClone.Backend.csproj",
+      "libraryId": "MassTransit.AspNetCore",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    }
+  ]
 }

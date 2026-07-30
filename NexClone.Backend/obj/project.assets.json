@@ -128,19 +128,19 @@
           "build/MassTransit.AspNetCore.targets": {}
         }
       },
-      "MassTransit.RabbitMQ/9.2.0": {
+      "MassTransit.RabbitMQ/8.3.1": {
         "type": "package",
         "dependencies": {
-          "MassTransit": "9.2.0",
-          "RabbitMQ.Client": "7.2.1"
+          "MassTransit": "8.3.1",
+          "RabbitMQ.Client": "6.8.1"
         },
         "compile": {
-          "lib/net10.0/MassTransit.RabbitMqTransport.dll": {
+          "lib/net8.0/MassTransit.RabbitMqTransport.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net10.0/MassTransit.RabbitMqTransport.dll": {
+          "lib/net8.0/MassTransit.RabbitMqTransport.dll": {
             "related": ".xml"
           }
         }
@@ -767,15 +767,15 @@
           "lib/net9.0/Pipelines.Sockets.Unofficial.dll": {}
         }
       },
-      "RabbitMQ.Client/7.2.1": {
+      "RabbitMQ.Client/6.8.1": {
         "type": "package",
         "compile": {
-          "lib/net8.0/RabbitMQ.Client.dll": {
+          "lib/netstandard2.0/RabbitMQ.Client.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/net8.0/RabbitMQ.Client.dll": {
+          "lib/netstandard2.0/RabbitMQ.Client.dll": {
             "related": ".xml"
           }
         }
@@ -1276,25 +1276,23 @@
         "mt-logo-small.png"
       ]
     },
-    "MassTransit.RabbitMQ/9.2.0": {
-      "sha512": "cMrX2qKKhOGy0KclDoHOofvr/Mr0x0Rp1tA0NovexUzMRysCSaE5+OVXBxx57K0Xb4zX782X72l34lDTPul4tw==",
+    "MassTransit.RabbitMQ/8.3.1": {
+      "sha512": "L9TUHFQVN1sXMJBMBy02CDBlWzz14c8qWQ4nSSb5C3pb+w6E+9AzVi+tu0NoiJ8R6YyAUJU/gA7ZeyPbX/ch3Q==",
       "type": "package",
-      "path": "masstransit.rabbitmq/9.2.0",
+      "path": "masstransit.rabbitmq/8.3.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "NuGet.README.md",
-        "lib/net10.0/MassTransit.RabbitMqTransport.dll",
-        "lib/net10.0/MassTransit.RabbitMqTransport.xml",
         "lib/net472/MassTransit.RabbitMqTransport.dll",
         "lib/net472/MassTransit.RabbitMqTransport.xml",
+        "lib/net6.0/MassTransit.RabbitMqTransport.dll",
+        "lib/net6.0/MassTransit.RabbitMqTransport.xml",
         "lib/net8.0/MassTransit.RabbitMqTransport.dll",
         "lib/net8.0/MassTransit.RabbitMqTransport.xml",
-        "lib/net9.0/MassTransit.RabbitMqTransport.dll",
-        "lib/net9.0/MassTransit.RabbitMqTransport.xml",
         "lib/netstandard2.0/MassTransit.RabbitMqTransport.dll",
         "lib/netstandard2.0/MassTransit.RabbitMqTransport.xml",
-        "masstransit.rabbitmq.9.2.0.nupkg.sha512",
+        "masstransit.rabbitmq.8.3.1.nupkg.sha512",
         "masstransit.rabbitmq.nuspec",
         "mt-logo-small.png"
       ]
@@ -2759,20 +2757,20 @@
         "pipelines.sockets.unofficial.nuspec"
       ]
     },
-    "RabbitMQ.Client/7.2.1": {
-      "sha512": "YKXEfg9fVQiTKgZlvIhAfPSFaamEgi8DsQmisCH0IAsU4FYLrtoguDrDj6JtJVGUt40QPnBLRH6fTQcAC4qsOg==",
+    "RabbitMQ.Client/6.8.1": {
+      "sha512": "jNsmGgmCNw2S/NzskeN2ijtGywtH4Sk/G6jWUTD5sY9SrC27Xz6BsLIiB8hdsfjeyWCa4j4GvCIGkpE8wrjU1Q==",
       "type": "package",
-      "path": "rabbitmq.client/7.2.1",
+      "path": "rabbitmq.client/6.8.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "README.md",
         "icon.png",
-        "lib/net8.0/RabbitMQ.Client.dll",
-        "lib/net8.0/RabbitMQ.Client.xml",
+        "lib/net462/RabbitMQ.Client.dll",
+        "lib/net462/RabbitMQ.Client.xml",
         "lib/netstandard2.0/RabbitMQ.Client.dll",
         "lib/netstandard2.0/RabbitMQ.Client.xml",
-        "rabbitmq.client.7.2.1.nupkg.sha512",
+        "rabbitmq.client.6.8.1.nupkg.sha512",
         "rabbitmq.client.nuspec"
       ]
     },
@@ -3251,8 +3249,8 @@
   "projectFileDependencyGroups": {
     "net10.0": [
       "Google.Apis.Auth >= 1.68.0",
-      "MassTransit.AspNetCore >= 9.2.0",
-      "MassTransit.RabbitMQ >= 9.2.0",
+      "MassTransit.AspNetCore >= 8.3.1",
+      "MassTransit.RabbitMQ >= 8.3.1",
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 10.0.9",
       "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore >= 10.0.9",
       "Microsoft.AspNetCore.Identity.EntityFrameworkCore >= 10.0.9",
@@ -3317,11 +3315,11 @@
           },
           "MassTransit.AspNetCore": {
             "target": "Package",
-            "version": "[9.2.0, )"
+            "version": "[8.3.1, )"
           },
           "MassTransit.RabbitMQ": {
             "target": "Package",
-            "version": "[9.2.0, )"
+            "version": "[8.3.1, )"
           },
           "Microsoft.AspNetCore.Authentication.JwtBearer": {
             "target": "Package",
@@ -3810,5 +3808,17 @@
         }
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "NU1603",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "NexClone.Backend depends on MassTransit.AspNetCore (>= 8.3.1) but MassTransit.AspNetCore 8.3.1 was not found. MassTransit.AspNetCore 9.2.0 was resolved instead.",
+      "libraryId": "MassTransit.AspNetCore",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    }
+  ]
 }
