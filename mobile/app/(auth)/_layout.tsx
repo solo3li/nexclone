@@ -1,10 +1,15 @@
-import { Stack, Redirect } from 'expo-router';
+import { Stack, Redirect, useRootNavigationState } from 'expo-router';
 import { useAuth } from '@/context/AuthContext';
 
 export default function AuthLayout() {
   const { user, isLoading } = useAuth();
+  const rootNavigationState = useRootNavigationState();
 
-  if (!isLoading && user) {
+  if (!rootNavigationState?.key || isLoading) {
+    return null;
+  }
+
+  if (user) {
     return <Redirect href="/(tabs)" />;
   }
 

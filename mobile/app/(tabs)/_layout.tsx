@@ -1,5 +1,5 @@
 import { SymbolView } from 'expo-symbols';
-import { Link, Tabs, Redirect } from 'expo-router';
+import { Link, Tabs, Redirect, useRootNavigationState } from 'expo-router';
 import { Platform, Pressable } from 'react-native';
 
 import Colors from '@/constants/Colors';
@@ -10,8 +10,13 @@ import { useAuth } from '@/context/AuthContext';
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { user, isLoading } = useAuth();
+  const rootNavigationState = useRootNavigationState();
 
-  if (!isLoading && !user) {
+  if (!rootNavigationState?.key || isLoading) {
+    return null;
+  }
+
+  if (!user) {
     return <Redirect href="/(auth)/login" />;
   }
 
