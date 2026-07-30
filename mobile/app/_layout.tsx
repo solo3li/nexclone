@@ -57,26 +57,6 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
-  const { user, isLoading } = useAuth();
-  const segments = useSegments();
-  const router = useRouter();
-  const rootNavigationState = useRootNavigationState();
-
-  useEffect(() => {
-    if (!rootNavigationState?.key || isLoading) return;
-
-    const inAuthGroup = segments[0] === '(auth)';
-
-    if (!user && !inAuthGroup) {
-      setTimeout(() => {
-        router.replace('/(auth)/login');
-      }, 0);
-    } else if (user && inAuthGroup) {
-      setTimeout(() => {
-        router.replace('/(tabs)');
-      }, 0);
-    }
-  }, [user, segments, rootNavigationState, isLoading]);
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
