@@ -8,7 +8,7 @@ import { getItemAsync } from '../utils/storage';
 // 167.71.66.188:8080 — avoiding Chrome's Private Network Access CORS block
 // that prevents public-origin → localhost requests.
 // On Android emulator: 10.0.2.2 maps to the host machine's localhost.
-const getApiUrl = (): string => {
+export const getApiUrl = (): string => {
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
     const hostname = window.location.hostname;
     return `http://${hostname}:8080/api`;
@@ -19,6 +19,10 @@ const getApiUrl = (): string => {
   // iOS simulator / other
   return 'http://localhost:8080/api';
 };
+
+// Returns the base URL without the /api prefix (for SignalR hubs, etc.)
+export const getBaseUrl = (): string => getApiUrl().replace('/api', '');
+
 
 const API_URL = getApiUrl();
 

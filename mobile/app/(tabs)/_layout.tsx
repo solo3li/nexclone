@@ -11,6 +11,8 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { user, isLoading } = useAuth();
   const rootNavigationState = useRootNavigationState();
+  // Must be called unconditionally at the top level — not inside JSX props
+  const headerShown = useClientOnlyValue(false, true);
 
   if (!rootNavigationState?.key || isLoading) {
     return null;
@@ -26,7 +28,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors[colorScheme].tint,
         // Disable the static render of the header on web
         // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, true),
+        headerShown,
       }}>
       <Tabs.Screen
         name="index"

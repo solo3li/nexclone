@@ -1,8 +1,19 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import * as signalR from '@microsoft/signalr';
-import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
 import { useAuth } from './AuthContext';
 import Toast from 'react-native-root-toast';
+import { getBaseUrl } from '@/services/api';
+
+
+// expo-secure-store is not available on web. Use localStorage as a fallback.
+async function getToken(): Promise<string | null> {
+  if (Platform.OS === 'web') {
+    return localStorage.getItem('userToken');
+  }
+  const SecureStore = await import('expo-secure-store');
+  return SecureStore.getItemAsync('userToken');
+}
 
 type NotificationContextType = {
   isConnected: boolean;
@@ -32,10 +43,12 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     }
 
     const connectSignalR = async () => {
-      const token = await SecureStore.getItemAsync('userToken');
+      const token = await getToken();
       
+      const hubUrl = `${getBaseUrl()}/hubs/notification`;
+
       const newConnection = new signalR.HubConnectionBuilder()
-        .withUrl('http://167.71.66.188:8080/hubs/notification', {
+        .withUrl(hubUrl, {
           accessTokenFactory: () => token || '',
         })
         .withAutomaticReconnect()
