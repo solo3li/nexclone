@@ -18,7 +18,7 @@ export default function AdvancedLipSyncPage() {
   const t = useTranslations("ImageToVideo");
   const locale = useLocale();
   const isRtl = locale === 'ar';
-  const { isAuthenticated } = useAppStore();
+  const { user, isAuthenticated } = useAppStore();
   const router = useRouter();
   const { setUser } = useAppStore();
 
