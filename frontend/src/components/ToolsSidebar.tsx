@@ -77,6 +77,34 @@ export default function ToolsSidebar() {
   const [hasUnread, setHasUnread] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
 
+  /**
+   * Sanitize a notification URL from the backend into a clean relative path
+   * that next-intl's router can navigate to correctly.
+   *
+   * The backend may send:
+   *   - A full URL:           "http://example.com/ar/history/123"
+   *   - A locale-prefixed path:  "/ar/history/123"  or  "/en/history/123"
+   *   - A clean relative path:  "/history/123"
+   *   - An empty / null value
+   */
+  const sanitizeNotifUrl = (url: string): string => {
+    if (!url) return '/';
+    try {
+      // Strip domain if it's a full URL
+      let path = url;
+      if (/^https?:\/\//i.test(url)) {
+        path = new URL(url).pathname;
+      }
+      // Remove leading locale segment  (/ar/... or /en/...)
+      path = path.replace(/^\/(ar|en)(\/|$)/, '/');
+      // Ensure it starts with /
+      if (!path.startsWith('/')) path = '/' + path;
+      return path || '/';
+    } catch {
+      return '/';
+    }
+  };
+
   useEffect(() => {
     // Start SignalR
     signalRNotificationService.startConnection();
@@ -182,7 +210,7 @@ export default function ToolsSidebar() {
                         </div>
                       ) : (
                         notifications.map((notif) => (
-                          <Link href={notif.url} key={notif.id} onClick={() => setNotificationsOpen(false)}>
+                          <Link href={sanitizeNotifUrl(notif.url)} key={notif.id} onClick={() => setNotificationsOpen(false)}>
                             <div className="p-3 border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer group">
                               <div className="flex items-start gap-2">
                                 <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${notif.type === 'success' ? 'bg-emerald-500' : notif.type === 'error' ? 'bg-red-500' : 'bg-fuchsia-500'}`} />
