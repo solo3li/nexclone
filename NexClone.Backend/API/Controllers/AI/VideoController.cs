@@ -41,7 +41,6 @@ namespace NexClone.Backend.API.Controllers.AI
         }
 
         [HttpPost("start-avatar")]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> StartAvatar(IFormFile image, [FromForm] IFormFile? audio = null, [FromForm] string prompt = "The speaker talks naturally to camera")
         {
             if (image == null || image.Length == 0)
@@ -125,7 +124,6 @@ namespace NexClone.Backend.API.Controllers.AI
         }
 
         [HttpPost("start-lipsync")]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> StartLipSync(IFormFile video, IFormFile audio)
         {
             if (video == null || video.Length == 0 || audio == null || audio.Length == 0)
