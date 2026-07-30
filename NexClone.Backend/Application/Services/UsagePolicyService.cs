@@ -64,6 +64,12 @@ namespace NexClone.Backend.Application.Services
 
         public async Task<PolicyValidationResult> ValidateAndChargeAsync(Guid userId, string toolId, decimal usageAmountForLimits, decimal? usageAmountForCost = null, string quality = "Standard")
         {
+            var rabbitMqSetting = await _context.AppSettings.FirstOrDefaultAsync(s => s.Key == "Site.RabbitMqEnabled");
+            if (rabbitMqSetting != null && rabbitMqSetting.Value == "false")
+            {
+                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Background operations are temporarily paused by the administrator." };
+            }
+
             var user = await _context.Users
                 .Include(u => u.Subscriptions)
                     .ThenInclude(s => s.Plan)
