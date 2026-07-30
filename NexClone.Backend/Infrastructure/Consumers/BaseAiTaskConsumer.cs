@@ -116,15 +116,21 @@ namespace NexClone.Backend.Infrastructure.Consumers
                     "العملية مكتملة", 
                     $"تم الانتهاء من {history.Title} بنجاح.", 
                     "success", 
-                    "/ar/history");
+                    "/history");
 
-                // Note: we might want to publish an email message here instead of direct send, 
-                // but direct send inside a background task is mostly fine. We'll leave it as is for simplicity.
                 try {
-                    await _emailService.SendEmailAsync(user.Email, $"عملية {history.Title} مكتملة", $"مرحباً {user.FullName}،\n\nلقد انتهينا من معالجة طلبك بنجاح. يمكنك مشاهدة أو تحميل النتيجة من الرابط أدناه:\n\n{history.FileUrl}\n\nأو يمكنك زيارة سجل العمليات في لوحة التحكم.", "");
+                    var htmlBody = $@"<div dir=""rtl"" style=""font-family:Arial,sans-serif;direction:rtl;text-align:right;"">
+<p>مرحباً {System.Web.HttpUtility.HtmlEncode(user.FullName)}،</p>
+<p>لقد انتهينا من معالجة طلبك <strong>{System.Web.HttpUtility.HtmlEncode(history.Title)}</strong> بنجاح.</p>
+<p>يمكنك مشاهدة أو تحميل النتيجة من الرابط أدناه:</p>
+<p><a href=""{history.FileUrl}"">{history.FileUrl}</a></p>
+<p>أو يمكنك زيارة <a href=""https://nexmedia.com/history"">سجل العمليات</a> في لوحة التحكم.</p>
+</div>";
+                    await _emailService.SendEmailAsync(user.Email, user.FullName, $"عملية {history.Title} مكتملة", htmlBody);
                 } catch { /* Ignore email fail */ }
             }
         }
+
 
         protected async Task NotifyUserFailed(Guid userId, GenerationHistory history, string error)
         {
