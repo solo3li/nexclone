@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading;
 
+using Microsoft.AspNetCore.SignalR;
+using NexClone.Backend.Hubs;
+
 namespace NexClone.Backend.Application.Services
 {
     public class ToolPolicy
@@ -34,10 +37,12 @@ namespace NexClone.Backend.Application.Services
     public class UsagePolicyService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
-        public UsagePolicyService(ApplicationDbContext context)
+        public UsagePolicyService(ApplicationDbContext context, IHubContext<NotificationHub> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
         }
 
         public async Task<ToolPolicy> GetToolPolicyForUserAsync(Guid userId, string toolId, string quality = "Standard")
@@ -145,6 +150,11 @@ namespace NexClone.Backend.Application.Services
                     userWallet.UpdatedAt = DateTime.UtcNow;
                     _context.Users.Update(user);
                     await _context.SaveChangesAsync();
+                    
+                    if (_hubContext != null) {
+                        await _hubContext.Clients.User(userId.ToString()).SendAsync("ReceiveWalletUpdate");
+                    }
+                    
                     saved = true;
                 }
                 catch (DbUpdateConcurrencyException)
@@ -330,6 +340,10 @@ namespace NexClone.Backend.Application.Services
                         userWallet.Balance += amount;
                         userWallet.UpdatedAt = DateTime.UtcNow;
                         await _context.SaveChangesAsync();
+                        
+                        if (_hubContext != null) {
+                            await _hubContext.Clients.User(userId.ToString()).SendAsync("ReceiveWalletUpdate");
+                        }
                     }
                     saved = true;
                 }

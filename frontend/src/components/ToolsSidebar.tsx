@@ -58,7 +58,7 @@ export default function ToolsSidebar() {
     }
   ];
 
-  const { user, logout } = useAppStore();
+  const { user, setUser, logout } = useAppStore();
 
   const handleLogout = async () => {
     try {
@@ -111,6 +111,15 @@ export default function ToolsSidebar() {
     signalRNotificationService.onNotification((title, message, type, url) => {
       setNotifications(prev => [{ id: Date.now(), title, message, type, url, time: new Date() }, ...prev]);
       setHasUnread(true);
+    });
+
+    signalRNotificationService.onWalletUpdate(async () => {
+      try {
+        const res = await api.get('/api/auth/me');
+        setUser(res.data);
+      } catch (err) {
+        console.error("Failed to fetch updated wallet details", err);
+      }
     });
 
     // Click outside to close notifications

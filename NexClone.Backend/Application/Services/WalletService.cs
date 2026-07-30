@@ -4,15 +4,20 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
+using Microsoft.AspNetCore.SignalR;
+using NexClone.Backend.Hubs;
+
 namespace NexClone.Backend.Application.Services
 {
     public class WalletService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
-        public WalletService(ApplicationDbContext context)
+        public WalletService(ApplicationDbContext context, IHubContext<NotificationHub> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
         }
 
         /// <summary>
@@ -79,8 +84,11 @@ namespace NexClone.Backend.Application.Services
                     uw.UpdatedAt = DateTime.UtcNow;
                 }
             }
-
             await _context.SaveChangesAsync();
+
+            if (_hubContext != null) {
+                await _hubContext.Clients.User(userId.ToString()).SendAsync("ReceiveWalletUpdate");
+            }
         }
 
         public async Task ResetAllWalletsAsync(Guid userId)
@@ -97,6 +105,10 @@ namespace NexClone.Backend.Application.Services
                 wallet.UpdatedAt = DateTime.UtcNow;
             }
             await _context.SaveChangesAsync();
+
+            if (_hubContext != null) {
+                await _hubContext.Clients.User(userId.ToString()).SendAsync("ReceiveWalletUpdate");
+            }
         }
 
         private async Task<WalletType> GetOrCreateWalletTypeAsync(string code, string name)

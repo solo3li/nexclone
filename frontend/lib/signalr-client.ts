@@ -3,6 +3,7 @@ import * as signalR from "@microsoft/signalr";
 class SignalRService {
     private connection: signalR.HubConnection | null = null;
     private onNotificationReceivedCallback: ((title: string, message: string, type: string, url: string) => void) | null = null;
+    private onWalletUpdateReceivedCallback: (() => void) | null = null;
 
     public startConnection() {
         if (this.connection) return;
@@ -27,10 +28,20 @@ class SignalRService {
                 this.onNotificationReceivedCallback(title, message, type, url);
             }
         });
+
+        this.connection.on("ReceiveWalletUpdate", () => {
+            if (this.onWalletUpdateReceivedCallback) {
+                this.onWalletUpdateReceivedCallback();
+            }
+        });
     }
 
     public onNotification(callback: (title: string, message: string, type: string, url: string) => void) {
         this.onNotificationReceivedCallback = callback;
+    }
+
+    public onWalletUpdate(callback: () => void) {
+        this.onWalletUpdateReceivedCallback = callback;
     }
 
     public stopConnection() {
