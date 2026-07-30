@@ -2,7 +2,7 @@
 
 import { useLocale } from "next-intl";
 import { Link, usePathname, useRouter } from "../i18n/routing";
-import { Mic, FileAudio, Video, Menu, X, Home, LogOut, Wallet, ChevronDown, Bell } from "lucide-react";
+import { Mic, FileAudio, Video, Menu, X, Home, LogOut, Wallet, ChevronDown, Bell, Zap } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppStore } from "../store/useAppStore";
