@@ -50,7 +50,7 @@ namespace NexClone.Backend.Application.Services
 
             foreach (var pw in packageWallets)
             {
-                var userWallet = user.Wallets.FirstOrDefault(w => w.WalletTypeId == pw.WalletTypeId);
+                var userWallet = user.Wallets.FirstOrDefault(w => w.WalletTypeId == pw.WalletTypeId && w.SubscriptionId == subscriptionId);
                 if (userWallet == null)
                 {
                     userWallet = new UserWallet
@@ -79,7 +79,7 @@ namespace NexClone.Backend.Application.Services
             if (resetToZero)
             {
                 var activeWalletIds = packageWallets.Select(pw => pw.WalletTypeId).ToList();
-                foreach (var uw in user.Wallets.Where(w => !activeWalletIds.Contains(w.WalletTypeId)))
+                foreach (var uw in user.Wallets.Where(w => w.SubscriptionId == subscriptionId && !activeWalletIds.Contains(w.WalletTypeId)))
                 {
                     uw.Balance = 0;
                     uw.UpdatedAt = DateTime.UtcNow;
