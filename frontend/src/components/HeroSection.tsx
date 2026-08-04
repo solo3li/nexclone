@@ -43,10 +43,11 @@ export default function HeroSection() {
 
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0015]/40 to-[#0a0015] pointer-events-none" />
 
-      {/* Animated Orbs */}
-      <GlowPulse className="w-96 h-96 bg-violet-600/10 blur-3xl top-1/4 right-1/4" />
-      <GlowPulse className="w-72 h-72 bg-fuchsia-600/5 blur-3xl bottom-1/3 left-1/4" />
-      <GlowPulse className="w-64 h-64 bg-purple-700/10 blur-3xl top-1/3 left-1/3" />
+      {/* Animated Orbs - Desktop only, mobile uses MobileBackground */}
+      <GlowPulse className="hidden md:block w-96 h-96 bg-violet-600/10 blur-3xl top-1/4 right-1/4" />
+      <GlowPulse className="hidden md:block w-72 h-72 bg-fuchsia-600/5 blur-3xl bottom-1/3 left-1/4" />
+      <GlowPulse className="hidden md:block w-64 h-64 bg-purple-700/10 blur-3xl top-1/3 left-1/3" />
+
 
       {/* Content */}
       <div className="relative z-10 max-w-5xl mx-auto px-4 pt-32 pb-20 text-center flex flex-col justify-center min-h-screen">
