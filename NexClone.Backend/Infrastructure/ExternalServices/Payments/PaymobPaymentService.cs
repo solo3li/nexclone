@@ -58,6 +58,12 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
                 return new PaymentResult { IsSuccess = false, ErrorMessage = "Paymob configuration is missing or inactive." };
             }
 
+            // Parse IntegrationId — must be a valid integer set in admin panel
+            if (string.IsNullOrEmpty(paymobConfig.IntegrationId) || !int.TryParse(paymobConfig.IntegrationId, out int integrationId))
+            {
+                return new PaymentResult { IsSuccess = false, ErrorMessage = "Paymob IntegrationId is missing or invalid. Please set it in the admin panel." };
+            }
+
             // 3. Prepare payload (amount in cents)
             int amountCents = (int)(plan.PriceEgp * 100);
 
@@ -65,7 +71,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
             {
                 amount = amountCents,
                 currency = "EGP",
-                payment_methods = new[] { 4928859, 4928858 },
+                payment_methods = new[] { integrationId },
                 items = new[]
                 {
                     new

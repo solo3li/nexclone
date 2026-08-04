@@ -59,4 +59,80 @@
             </div>
         </div>
     </div>
+
+    @* Webhook URLs Reference Card *@
+
+    <div class="bx--row" style="margin-top: 2rem;">
+        <div class="bx--col">
+            <div style="background: #f4f4f4; border: 1px solid #e0e0e0; border-left: 4px solid #0f62fe; padding: 1.5rem; border-radius: 4px;">
+                <h4 style="margin: 0 0 1rem 0; font-size: 1rem; font-weight: 600; color: #161616;">
+                    🔗 Webhook URLs — Add these in your payment provider dashboard
+                </h4>
+                <p style="margin: 0 0 1rem 0; font-size: 0.875rem; color: #525252;">
+                    These URLs must be configured in your payment provider's dashboard to receive payment notifications.
+                </p>
+
+                @{
+                    var baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
+                    var paymobWebhook = $"{baseUrl}/api/webhooks/paymob";
+                    var paypalWebhook = $"{baseUrl}/api/webhooks/paypal";
+                }
+
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #393939; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                        Paymob — Transaction Callback URL
+                    </label>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input id="paymob-webhook-url"
+                               type="text"
+                               readonly
+                               value="@paymobWebhook"
+                               style="flex: 1; padding: 0.5rem 0.75rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.875rem; background: #ffffff; border: 1px solid #e0e0e0; border-radius: 4px; color: #161616; cursor: text;" />
+                        <button type="button"
+                                onclick="copyToClipboard('paymob-webhook-url', this)"
+                                style="padding: 0.5rem 1rem; background: #0f62fe; color: #ffffff; border: none; border-radius: 4px; font-size: 0.875rem; cursor: pointer; white-space: nowrap; transition: background 0.2s;">
+                            Copy
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #393939; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                        PayPal — Webhook URL
+                    </label>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input id="paypal-webhook-url"
+                               type="text"
+                               readonly
+                               value="@paypalWebhook"
+                               style="flex: 1; padding: 0.5rem 0.75rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.875rem; background: #ffffff; border: 1px solid #e0e0e0; border-radius: 4px; color: #161616; cursor: text;" />
+                        <button type="button"
+                                onclick="copyToClipboard('paypal-webhook-url', this)"
+                                style="padding: 0.5rem 1rem; background: #0f62fe; color: #ffffff; border: none; border-radius: 4px; font-size: 0.875rem; cursor: pointer; white-space: nowrap; transition: background 0.2s;">
+                            Copy
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+    function copyToClipboard(inputId, btn) {
+        const input = document.getElementById(inputId);
+        navigator.clipboard.writeText(input.value).then(() => {
+            const original = btn.textContent;
+            btn.textContent = '✓ Copied!';
+            btn.style.background = '#24a148';
+            setTimeout(() => {
+                btn.textContent = original;
+                btn.style.background = '#0f62fe';
+            }, 2000);
+        }).catch(() => {
+            input.select();
+            document.execCommand('copy');
+        });
+    }
+</script>
+
