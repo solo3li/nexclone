@@ -227,14 +227,7 @@ namespace NexClone.Backend.API.Controllers.Client
                     }
                 }
 
-                var activeSubscriptions = await _context.Subscriptions
-                    .Where(s => s.UserId == userId && (s.Status == "active" || s.Status == "freeze"))
-                    .ToListAsync();
 
-                foreach (var sub in activeSubscriptions)
-                {
-                    sub.Status = "canceled";
-                }
 
                 newSub = new Subscription
                 {

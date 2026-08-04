@@ -171,7 +171,7 @@
     "Extra Days": "أيام إضافية",
     "Amount": "الكمية",
     "Operation": "العملية",
-    "Select a Plan (This will cancel the current active plan and apply the new one)": "اختر باقة (هذا سيلغي الباقة الحالية الفعالة ويطبق الجديدة)",
+    "Select a Plan (This will add a new active plan alongside existing ones)": "اختر باقة (هذا سيضيف باقة جديدة بجانب الباقات الحالية)",
     "Delete User": "حذف المستخدم",
     "Extend": "تمديد",
     "Update Credits": "تحديث الرصيد",
