@@ -41,7 +41,9 @@ function AdvancedLipSyncPage() {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      api.get("/api/video/estimate-lipsync").then(res => {
+      const subId = sessionStorage.getItem('preferredSubscriptionId');
+      const qs = subId ? `?subscriptionId=${subId}` : '';
+      api.get(`/api/video/estimate-lipsync${qs}`).then(res => {
         if (res.data) {
           setEstimatedCost(res.data.estimatedCost);
           setChargedWallet(res.data.chargedWalletName);
@@ -79,6 +81,10 @@ function AdvancedLipSyncPage() {
       formData.append("video", videoFile);
       formData.append("audio", audioFile);
 
+      const subId = sessionStorage.getItem('preferredSubscriptionId');
+      if (subId) {
+        formData.append("subscriptionId", subId);
+      }
       const response = await api.post("/api/video/start-lipsync", formData, {
         headers: {
           "Content-Type": "multipart/form-data",

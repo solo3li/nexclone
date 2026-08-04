@@ -45,7 +45,9 @@ function ImageToVideoPage() {
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      api.get("/api/video/estimate-avatar").then(res => {
+      const subId = sessionStorage.getItem('preferredSubscriptionId');
+      const qs = subId ? `?subscriptionId=${subId}` : '';
+      api.get(`/api/video/estimate-avatar${qs}`).then(res => {
         if (res.data) {
           setEstimatedCost(res.data.estimatedCost);
           setChargedWallet(res.data.chargedWalletName);
@@ -142,6 +144,10 @@ function ImageToVideoPage() {
       if (audioFile) formData.append("audio", audioFile);
       if (prompt) formData.append("prompt", prompt);
 
+      const subId = sessionStorage.getItem('preferredSubscriptionId');
+      if (subId) {
+        formData.append("subscriptionId", subId);
+      }
       const response = await api.post("/api/video/start-avatar", formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
@@ -320,9 +326,9 @@ function ImageToVideoPage() {
                   {(error.includes("رصيد") || error.includes("Insufficient") || error.includes("credits")) && (
                     <div className="mt-3">
                       <Link href="/pricing" className="inline-block px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-200 hover:text-white rounded-lg font-medium transition-colors">
-                        {user?.activePlan?.isFreeTrial || user?.activePlan?.isDefaultRegistrationPlan
-                          ? (isRtl ? 'اشترك في باقة' : 'Subscribe to a plan')
-                          : (isRtl ? 'جدد اشتراكك' : 'Renew Subscription')}
+                        {user?.activeSubscriptions?.some((s: any) => !s.isFreeTrial && !s.isDefaultRegistrationPlan)
+                          ? (isRtl ? 'جدد اشتراكك' : 'Renew Subscription')
+                          : (isRtl ? 'اشترك في باقة' : 'Subscribe to a plan')}
                       </Link>
                     </div>
                   )}

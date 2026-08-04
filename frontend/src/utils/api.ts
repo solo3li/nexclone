@@ -61,7 +61,9 @@ api.interceptors.response.use(
         // Refresh failed — redirect to login
         if (typeof window !== 'undefined') {
           const locale = document.documentElement.lang || 'ar';
-          window.location.href = `/${locale}/login`;
+          if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {
+            window.location.href = `/${locale}/login`;
+          }
         }
         return Promise.reject(refreshError);
       } finally {

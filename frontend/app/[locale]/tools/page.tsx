@@ -42,6 +42,17 @@ export default function ToolsPage() {
       color: "text-blue-400",
       bg: "bg-blue-500/10",
       border: "hover:border-blue-500/50"
+    },
+    {
+      href: "/tools/advanced-lip-sync",
+      icon: Video, // Reusing Video icon
+      labelEn: "Advanced Lip Sync",
+      labelAr: "مزامنة الشفاه المتقدمة",
+      descEn: "Sync audio flawlessly with video avatars",
+      descAr: "مزامنة الصوت بدقة مع الفيديو الخاص بك",
+      color: "text-rose-400",
+      bg: "bg-rose-500/10",
+      border: "hover:border-rose-500/50"
     }
   ];
 

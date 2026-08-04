@@ -174,6 +174,12 @@ function TextToVoicePage() {
       setError(isRtl ? `لقد تجاوزت الحد الأقصى المسموح به (${maxChars} حرف). يرجى تقليل النص أو ترقية باقتك.` : `Exceeded maximum characters (${maxChars}). Please reduce text or upgrade your plan.`);
       return;
     }
+
+    const getInsufficientCreditsMsg = () => {
+      const hasPaidPlan = user?.activeSubscriptions?.some((s: any) => !s.isFreeTrial && !s.isDefaultRegistrationPlan);
+      if (isRtl) return hasPaidPlan ? "رصيدك غير كافٍ. يرجى تجديد اشتراكك." : "رصيدك غير كافٍ. يرجى الاشتراك في باقة لتتمكن من المتابعة.";
+      return hasPaidPlan ? "Insufficient credits. Please renew your subscription." : "Insufficient credits. Please subscribe to a plan to continue.";
+    };
     if (!selectedVoice) {
       setError(isRtl ? "الرجاء اختيار صوت." : "Please select a voice.");
       return;
@@ -187,7 +193,8 @@ function TextToVoicePage() {
         language: languageMode,
         voiceName: selectedVoice,
         styleInstruction: "",
-        quality: selectedQuality
+        quality: selectedQuality,
+        subscriptionId: sessionStorage.getItem('preferredSubscriptionId') ? Number(sessionStorage.getItem('preferredSubscriptionId')) : null
       });
       const cost = response.data.estimatedCost;
       setEstimatedCost(cost);
@@ -197,7 +204,7 @@ function TextToVoicePage() {
         : (user?.availableCredits || 0);
 
       if (totalCredits < cost) {
-        setError(isRtl ? "رصيدك غير كافٍ لإتمام هذه العملية." : "Insufficient credits for this operation.");
+        setError(getInsufficientCreditsMsg());
         return;
       }
       setPendingCost(cost);
@@ -208,7 +215,11 @@ function TextToVoicePage() {
       }
       
       if (err.response?.status === 400) {
-        setError(isRtl ? "رصيدك غير كافٍ لإتمام هذه العملية." : "Insufficient credits for this operation.");
+        if (err.response?.data?.error?.includes('Insufficient') || err.response?.data?.error?.includes('insufficient')) {
+          setError(getInsufficientCreditsMsg());
+        } else {
+          setError(err.response?.data?.error || getInsufficientCreditsMsg());
+        }
       } else {
         setError(err.response?.data?.error || t('error'));
       }
@@ -251,7 +262,8 @@ function TextToVoicePage() {
         language: languageMode,
         voiceName: selectedVoice,
         styleInstruction: instruction.trim(),
-        quality: selectedQuality
+        quality: selectedQuality,
+        subscriptionId: sessionStorage.getItem('preferredSubscriptionId') ? Number(sessionStorage.getItem('preferredSubscriptionId')) : null
       });
 
       if (response.data && response.data.taskId) {

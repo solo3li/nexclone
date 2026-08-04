@@ -102,8 +102,15 @@ function VoiceToTextPage() {
   const [stage, setStage] = useState<Stage>('idle');
   const [uploadProgress, setUploadProgress] = useState(0);
   const [result, setResult] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string>("");
+  const [success, setSuccess] = useState<string>("");
   const [isDragOver, setIsDragOver] = useState(false);
+
+  const getInsufficientCreditsMsg = () => {
+    const hasPaidPlan = user?.activeSubscriptions?.some((s: any) => !s.isFreeTrial && !s.isDefaultRegistrationPlan);
+    if (isRtl) return hasPaidPlan ? "رصيدك غير كافٍ. يرجى تجديد اشتراكك." : "رصيدك غير كافٍ. يرجى الاشتراك في باقة لتتمكن من المتابعة.";
+    return hasPaidPlan ? "Insufficient credits. Please renew your subscription." : "Insufficient credits. Please subscribe to a plan to continue.";
+  };
   const [estimatedCost, setEstimatedCost] = useState<number | null>(null);
   const [isEstimating, setIsEstimating] = useState(false);
   const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
@@ -187,7 +194,11 @@ function VoiceToTextPage() {
       try {
         const fileSizeBytes = file.size;
         const durationMinutes = duration / 60;
-        const res = await api.post("/api/ai/voice-to-text/estimate", { fileSizeBytes, durationMinutes });
+        const res = await api.post("/api/ai/voice-to-text/estimate", { 
+          fileSizeBytes, 
+          durationMinutes,
+          subscriptionId: sessionStorage.getItem('preferredSubscriptionId') ? Number(sessionStorage.getItem('preferredSubscriptionId')) : null 
+        });
         setEstimatedCost(res.data.estimatedCost);
         setChargedWallet(res.data.chargedWalletName);
       } catch (err: any) {
@@ -196,7 +207,11 @@ function VoiceToTextPage() {
         }
         
         if (err.response?.status === 400) {
-          setError(isRtl ? "رصيدك غير كافٍ لإتمام هذه العملية." : "Insufficient credits for this operation.");
+          if (err.response?.data?.error?.includes('Insufficient') || err.response?.data?.error?.includes('insufficient')) {
+            setError(getInsufficientCreditsMsg());
+          } else {
+            setError(err.response?.data?.error || getInsufficientCreditsMsg());
+          }
         } else {
           setError(err.response?.data?.error || (isRtl ? "فشل في حساب التكلفة التقديرية" : "Error calculating estimate."));
         }
@@ -342,7 +357,11 @@ function VoiceToTextPage() {
       // Stage 1: Pre-flight check
       const fileSizeBytes = file instanceof File ? file.size : file.size; // file.size works for both File and Blob
       const durationMinutes = duration > 0 ? duration / 60 : 0.01;
-      const estimateRes = await api.post("/api/ai/voice-to-text/estimate", { fileSizeBytes, durationMinutes });
+      const estimateRes = await api.post("/api/ai/voice-to-text/estimate", { 
+        fileSizeBytes, 
+        durationMinutes,
+        subscriptionId: sessionStorage.getItem('preferredSubscriptionId') ? Number(sessionStorage.getItem('preferredSubscriptionId')) : null 
+      });
       
       const cost = estimateRes.data.estimatedCost;
       const totalCredits = user?.wallets 
@@ -350,7 +369,7 @@ function VoiceToTextPage() {
         : (user?.availableCredits || 0);
 
       if (totalCredits < cost) {
-        setError(isRtl ? "رصيدك غير كافٍ لإتمام هذه العملية." : "Insufficient credits for this operation.");
+        setError(getInsufficientCreditsMsg());
         return;
       }
 
@@ -372,9 +391,10 @@ function VoiceToTextPage() {
       // Stage 3: Transcribe (Now queues in background)
       setStage('transcribing');
       const res = await api.post("/api/ai/voice-to-text/transcribe", {
-        fileId,
+        fileId: fileId,
         translate: language !== "auto",
         targetLanguage: language,
+        subscriptionId: sessionStorage.getItem('preferredSubscriptionId') ? Number(sessionStorage.getItem('preferredSubscriptionId')) : null
       });
 
       if (res.data && res.data.taskId) {
