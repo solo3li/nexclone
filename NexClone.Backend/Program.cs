@@ -44,11 +44,22 @@ builder.Services.AddSignalR();
 builder.Services.AddDataProtection()
     .PersistKeysToDbContext<ApplicationDbContext>();
 
-// Setup CORS for Next.js
+// Setup CORS — origins are loaded from the DB at startup.
+// Fallback origins cover local dev (Next.js :3000, Expo web :8081) and known server IPs.
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowNextjs", policyBuilder =>
     {
+        // Common dev origins always allowed (applies when DB is unreachable or empty)
+        var devOrigins = new[]
+        {
+            "http://localhost:3000", "http://localhost:3001",
+            "http://localhost:8081",              // Expo web (local)
+            "http://167.71.66.188:8081",          // Expo web (remote dev server)
+            "http://178.62.192.74:3000",
+            "https://nexclone.com"
+        };
+
         try
         {
             var dbOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
@@ -60,16 +71,17 @@ builder.Services.AddCors(options =>
             
             if (!string.IsNullOrWhiteSpace(allowedOriginsSetting))
             {
-                var origins = allowedOriginsSetting.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(o => o.Trim()).ToArray();
-                policyBuilder.WithOrigins(origins)
+                var dbOrigins = allowedOriginsSetting.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(o => o.Trim()).ToArray();
+                // Merge DB origins with dev origins so dev server always works
+                var mergedOrigins = dbOrigins.Union(devOrigins).ToArray();
+                policyBuilder.WithOrigins(mergedOrigins)
                        .AllowAnyMethod()
                        .AllowAnyHeader()
                        .AllowCredentials();
             }
             else
             {
-                // Fallback to a safe default if not set in DB
-                policyBuilder.WithOrigins("http://localhost:3000", "http://178.62.192.74:3000")
+                policyBuilder.WithOrigins(devOrigins)
                        .AllowAnyMethod()
                        .AllowAnyHeader()
                        .AllowCredentials();
@@ -77,7 +89,7 @@ builder.Services.AddCors(options =>
         }
         catch
         {
-            policyBuilder.WithOrigins("http://localhost:3000", "http://178.62.192.74:3000")
+            policyBuilder.WithOrigins(devOrigins)
                    .AllowAnyMethod()
                    .AllowAnyHeader()
                    .AllowCredentials();
@@ -297,7 +309,7 @@ using (var scope = app.Services.CreateScope())
     {
         new AppSetting { Key = "Site.MaintenanceMode", Value = "false", Description = "Global maintenance mode toggle (true/false)" },
         new AppSetting { Key = "Site.MaintenanceEndDate", Value = "", Description = "Optional end date for maintenance (ISO 8601 string)" },
-        new AppSetting { Key = "Origin.AllowedOrigins", Value = "http://localhost:3000,http://localhost:3001,https://nexclone.com", Description = "Comma-separated list of allowed origins for CORS" },
+        new AppSetting { Key = "Origin.AllowedOrigins", Value = "http://localhost:3000,http://localhost:3001,http://localhost:8081,http://167.71.66.188:8081,https://nexclone.com", Description = "Comma-separated list of allowed origins for CORS" },
         new AppSetting { Key = "Affiliate.CreditRewardReferrer", Value = "50", Description = "Credits given to the referrer" },
         new AppSetting { Key = "Affiliate.CreditRewardReferred", Value = "50", Description = "Credits given to the referred user" },
         new AppSetting { Key = "Affiliate.CashCommissionPercentage", Value = "20", Description = "Percentage of cash commission for affiliates (0-100)" }
