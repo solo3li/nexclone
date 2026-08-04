@@ -221,6 +221,8 @@ namespace NexClone.Backend.API.Controllers.Client
             {
                 try 
                 {
+                    var wallets = _context.UserWallets.Where(w => w.SubscriptionId == id);
+                    _context.UserWallets.RemoveRange(wallets);
                     _context.Subscriptions.Remove(sub);
                     await _context.SaveChangesAsync();
                     TempData["SuccessMessage"] = "Subscription deleted successfully.";
