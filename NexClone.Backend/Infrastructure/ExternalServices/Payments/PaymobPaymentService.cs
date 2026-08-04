@@ -89,7 +89,9 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
                     last_name = (plan.Name.Length > 50) ? plan.Name.Substring(0, 50) : plan.Name,
                     street = "NA",
                     building = "NA",
-                    phone_number = string.IsNullOrEmpty(phoneNumber) ? "+201553963637" : phoneNumber,
+                    phone_number = string.IsNullOrEmpty(phoneNumber)
+                        ? "+201000000000"
+                        : (phoneNumber.Length > 15 ? phoneNumber.Substring(0, 15) : phoneNumber),
                     country = "EG",
                     email = string.IsNullOrEmpty(userEmail) ? "test@mail.com" : userEmail,
                     floor = "NA",
