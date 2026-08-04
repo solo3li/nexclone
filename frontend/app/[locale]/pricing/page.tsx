@@ -112,7 +112,7 @@ export default function PricingPage() {
                     {isPopular && (
                       <div className="absolute top-0 inset-x-0 flex justify-center -translate-y-1/2">
                         <span className="bg-gradient-to-r from-purple-500 to-blue-500 text-white text-xs font-bold px-4 py-1 rounded-full uppercase tracking-wider">
-                          Most Popular
+                          {isRtl ? 'الأكثر شيوعاً' : 'Most Popular'}
                         </span>
                       </div>
                     )}
@@ -124,32 +124,32 @@ export default function PricingPage() {
                       <h3 className="text-2xl font-semibold text-white mb-2">{isRtl ? plan.nameAr : plan.name}</h3>
                       <div className="flex items-baseline gap-2">
                         <span className="text-5xl font-extrabold tracking-tight">
-                          {price === 0 ? 'Free' : `${currencySymbol}${price}`}
+                          {price === 0 ? (isRtl ? 'مجاناً' : 'Free') : `${currencySymbol}${price}`}
                         </span>
-                        {price > 0 && <span className="text-gray-400 font-medium">/mo</span>}
+                        {price > 0 && <span className="text-gray-400 font-medium">{isRtl ? '/شهر' : '/mo'}</span>}
                       </div>
                       <p className="text-gray-400 mt-4 font-medium">
-                        {plan.monthlyCredits.toLocaleString()} Credits included
+                        {plan.monthlyCredits.toLocaleString()} {isRtl ? 'رصيد مضمن' : 'Credits included'}
                       </p>
                     </div>
 
                     <div className="space-y-6 flex-grow">
                       <div>
-                        <p className="text-sm text-gray-500 uppercase tracking-wider font-semibold mb-3">Text-to-Speech (TTS)</p>
+                        <p className="text-sm text-gray-500 uppercase tracking-wider font-semibold mb-3">{isRtl ? 'تحويل النص إلى صوت (TTS)' : 'Text-to-Speech (TTS)'}</p>
                         <ul className="space-y-3">
                           <li className="flex items-start gap-3">
                             {plan.ttsEnabled ? <Check className="w-5 h-5 text-emerald-400 shrink-0" /> : <X className="w-5 h-5 text-red-400 shrink-0" />}
-                            <span className="text-gray-300">Access to standard models</span>
+                            <span className="text-gray-300">{isRtl ? 'وصول للنماذج القياسية' : 'Access to standard models'}</span>
                           </li>
                           {plan.ttsEnabled && (
                             <>
                               <li className="flex items-start gap-3">
                                 <Check className="w-5 h-5 text-emerald-400 shrink-0" />
-                                <span className="text-gray-300">Max Chars: {plan.ttsMaxCharsPerRequest === -1 ? 'Unlimited' : plan.ttsMaxCharsPerRequest.toLocaleString()}</span>
+                                <span className="text-gray-300">{isRtl ? 'الحد الأقصى للأحرف:' : 'Max Chars:'} {plan.ttsMaxCharsPerRequest === -1 ? (isRtl ? 'غير محدود' : 'Unlimited') : plan.ttsMaxCharsPerRequest.toLocaleString()}</span>
                               </li>
                               <li className="flex items-start gap-3">
                                 <Check className="w-5 h-5 text-emerald-400 shrink-0" />
-                                <span className="text-gray-300">Cost: ${plan.ttsCostPerChar}/char</span>
+                                <span className="text-gray-300">{isRtl ? 'التكلفة:' : 'Cost:'} ${plan.ttsCostPerChar}/{isRtl ? 'حرف' : 'char'}</span>
                               </li>
                             </>
                           )}
@@ -157,21 +157,21 @@ export default function PricingPage() {
                       </div>
 
                       <div>
-                        <p className="text-sm text-gray-500 uppercase tracking-wider font-semibold mb-3">Speech-to-Text (STT)</p>
+                        <p className="text-sm text-gray-500 uppercase tracking-wider font-semibold mb-3">{isRtl ? 'تحويل الصوت إلى نص (STT)' : 'Speech-to-Text (STT)'}</p>
                         <ul className="space-y-3">
                           <li className="flex items-start gap-3">
                             {plan.sttEnabled ? <Check className="w-5 h-5 text-emerald-400 shrink-0" /> : <X className="w-5 h-5 text-red-400 shrink-0" />}
-                            <span className="text-gray-300">Ultra-fast transcription</span>
+                            <span className="text-gray-300">{isRtl ? 'تفريغ صوتي فائق السرعة' : 'Ultra-fast transcription'}</span>
                           </li>
                           {plan.sttEnabled && (
                             <>
                               <li className="flex items-start gap-3">
                                 <Check className="w-5 h-5 text-emerald-400 shrink-0" />
-                                <span className="text-gray-300">Max File Size: {plan.sttMaxFileSizeMb === -1 ? 'Unlimited' : `${plan.sttMaxFileSizeMb}MB`}</span>
+                                <span className="text-gray-300">{isRtl ? 'أقصى حجم للملف:' : 'Max File Size:'} {plan.sttMaxFileSizeMb === -1 ? (isRtl ? 'غير محدود' : 'Unlimited') : `${plan.sttMaxFileSizeMb}MB`}</span>
                               </li>
                               <li className="flex items-start gap-3">
                                 <Check className="w-5 h-5 text-emerald-400 shrink-0" />
-                                <span className="text-gray-300">Cost: {plan.sttCostPerMinute} Credits/min</span>
+                                <span className="text-gray-300">{isRtl ? 'التكلفة:' : 'Cost:'} {plan.sttCostPerMinute} {isRtl ? 'رصيد/دقيقة' : 'Credits/min'}</span>
                               </li>
                             </>
                           )}
@@ -179,32 +179,32 @@ export default function PricingPage() {
                       </div>
 
                       <div>
-                        <p className="text-sm text-gray-500 uppercase tracking-wider font-semibold mb-3">Avatar Video</p>
+                        <p className="text-sm text-gray-500 uppercase tracking-wider font-semibold mb-3">{isRtl ? 'فيديو أفاتار' : 'Avatar Video'}</p>
                         <ul className="space-y-3">
                           <li className="flex items-start gap-3">
                             {plan.avatarVideoEnabled ? <Check className="w-5 h-5 text-emerald-400 shrink-0" /> : <X className="w-5 h-5 text-red-400 shrink-0" />}
-                            <span className="text-gray-300">Image-to-Video AI</span>
+                            <span className="text-gray-300">{isRtl ? 'تحويل الصورة لفيديو بالذكاء الاصطناعي' : 'Image-to-Video AI'}</span>
                           </li>
                           {plan.avatarVideoEnabled && (
                             <li className="flex items-start gap-3">
                               <Check className="w-5 h-5 text-emerald-400 shrink-0" />
-                              <span className="text-gray-300">Cost: {plan.avatarVideoCostPerGeneration} Credits/video</span>
+                              <span className="text-gray-300">{isRtl ? 'التكلفة:' : 'Cost:'} {plan.avatarVideoCostPerGeneration} {isRtl ? 'رصيد/فيديو' : 'Credits/video'}</span>
                             </li>
                           )}
                         </ul>
                       </div>
 
                       <div>
-                        <p className="text-sm text-gray-500 uppercase tracking-wider font-semibold mb-3">Advanced Lip-Sync</p>
+                        <p className="text-sm text-gray-500 uppercase tracking-wider font-semibold mb-3">{isRtl ? 'مزامنة الشفاه المتقدمة' : 'Advanced Lip-Sync'}</p>
                         <ul className="space-y-3">
                           <li className="flex items-start gap-3">
                             {plan.lipSyncEnabled ? <Check className="w-5 h-5 text-emerald-400 shrink-0" /> : <X className="w-5 h-5 text-red-400 shrink-0" />}
-                            <span className="text-gray-300">Audio-driven Lip-Sync AI</span>
+                            <span className="text-gray-300">{isRtl ? 'مزامنة الشفاه بالذكاء الاصطناعي' : 'Audio-driven Lip-Sync AI'}</span>
                           </li>
                           {plan.lipSyncEnabled && (
                             <li className="flex items-start gap-3">
                               <Check className="w-5 h-5 text-emerald-400 shrink-0" />
-                              <span className="text-gray-300">Cost: {plan.lipSyncCostPerGeneration} Credits/sync</span>
+                              <span className="text-gray-300">{isRtl ? 'التكلفة:' : 'Cost:'} {plan.lipSyncCostPerGeneration} {isRtl ? 'رصيد/مزامنة' : 'Credits/sync'}</span>
                             </li>
                           )}
                         </ul>
