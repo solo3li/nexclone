@@ -314,7 +314,20 @@ function ImageToVideoPage() {
                 />
               </div>
 
-              {error && <div className="text-red-400 text-sm p-3 bg-red-500/10 rounded-xl border border-red-500/20 mt-4 mx-2">{error}</div>}
+              {error && (
+                <div className="text-red-400 text-sm p-3 bg-red-500/10 rounded-xl border border-red-500/20 mt-4 mx-2 text-center">
+                  {error}
+                  {(error.includes("رصيد") || error.includes("Insufficient") || error.includes("credits")) && (
+                    <div className="mt-3">
+                      <Link href="/pricing" className="inline-block px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-200 hover:text-white rounded-lg font-medium transition-colors">
+                        {user?.activePlan?.isFreeTrial || user?.activePlan?.isDefaultRegistrationPlan
+                          ? (isRtl ? 'اشترك في باقة' : 'Subscribe to a plan')
+                          : (isRtl ? 'جدد اشتراكك' : 'Renew Subscription')}
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {isProcessing && (
                 <div className="mt-4 p-4 bg-fuchsia-500/10 border border-fuchsia-500/30 rounded-xl flex flex-col items-center justify-center gap-3">

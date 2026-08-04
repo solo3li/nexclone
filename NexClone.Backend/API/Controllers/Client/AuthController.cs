@@ -917,7 +917,9 @@ namespace NexClone.Backend.API.Controllers.Client
                     LipSyncCostPerGeneration = activeSub.Plan.LipSyncCostPerGeneration,
                     SttCostPerMinute = activeSub.Plan.SttCostPerMinute,
                     TtsCostPerChar = activeSub.Plan.TtsCostPerChar,
-                    TtsCostPerCharHigh = activeSub.Plan.TtsCostPerCharHigh
+                    TtsCostPerCharHigh = activeSub.Plan.TtsCostPerCharHigh,
+                    IsFreeTrial = activeSub.Plan.IsFreeTrial,
+                    IsDefaultRegistrationPlan = activeSub.Plan.IsDefaultRegistrationPlan
                 } : null
             });
         }
