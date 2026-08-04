@@ -1,0 +1,188 @@
+@model NexClone.Backend.Core.Entities.Plan
+@using NexClone.Backend.Core.Entities
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
+
+@{
+    var allGateways = ViewBag.AllGateways as List<PaymentGatewayConfig> ?? new List<PaymentGatewayConfig>();
+}
+
+<div class="bx--grid" style="padding-left: 0;">
+
+    @* ── Header ───────────────────────────────────────────────── *@
+    <div class="bx--row" style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h2 style="margin: 0; font-weight: 400; font-size: 1.5rem;">@ViewData["Title"]</h2>
+            <p style="margin: 0.25rem 0 0; color: #6f6f6f; font-size: 0.875rem;">
+                Manage which payment gateways are available for this plan and at what currency.
+            </p>
+        </div>
+        <a href="@Url.Action("Index")" class="bx--btn bx--btn--ghost bx--btn--sm">← Back to Plans</a>
+    </div>
+
+    @* ── Success / Error Messages ─────────────────────────────── *@
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="bx--inline-notification bx--inline-notification--success" style="margin-bottom: 1.5rem; max-width: 100%;">
+            <div class="bx--inline-notification__details">
+                <span class="bx--inline-notification__title">@TempData["SuccessMessage"]</span>
+            </div>
+        </div>
+    }
+
+    @* ── Current Linked Gateways ──────────────────────────────── *@
+    <div class="bx--row" style="margin-bottom: 2rem;">
+        <div class="bx--col">
+            <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #161616;">Current Payment Gateways</h4>
+
+            @if (!Model.PlanPaymentGateways.Any())
+            {
+                <div style="padding: 1.5rem; text-align: center; background: #f4f4f4; border: 1px dashed #c6c6c6; border-radius: 4px; color: #6f6f6f;">
+                    No payment gateways linked to this plan yet. Add one below.
+                </div>
+            }
+            else
+            {
+                <div class="bx--data-table-container">
+                    <table class="bx--data-table bx--data-table--zebra">
+                        <thead>
+                            <tr>
+                                <th><span class="bx--table-header-label">Gateway</span></th>
+                                <th><span class="bx--table-header-label">Display Name</span></th>
+                                <th><span class="bx--table-header-label">Currency</span></th>
+                                <th><span class="bx--table-header-label">Default</span></th>
+                                <th><span class="bx--table-header-label">Sort</span></th>
+                                <th><span class="bx--table-header-label">Status</span></th>
+                                <th><span class="bx--table-header-label">Actions</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var link in Model.PlanPaymentGateways.OrderBy(x => x.SortOrder))
+                            {
+                                <tr style="@(!link.IsActive ? "opacity:0.5;" : "")">
+                                    <td>
+                                        <strong>@link.GatewayConfig.ProviderName</strong>
+                                    </td>
+                                    <td>@(link.DisplayName ?? link.GatewayConfig.ProviderName)</td>
+                                    <td>
+                                        <span style="background: @(link.Currency == "EGP" ? "#e0f2fe" : "#f0fdf4"); color: @(link.Currency == "EGP" ? "#0369a1" : "#166534"); padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">
+                                            @link.Currency
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (link.IsDefault)
+                                        {
+                                            <span style="color: #0f62fe; font-weight: 600; font-size: 0.875rem;">⭐ Default</span>
+                                        }
+                                        else
+                                        {
+                                            <span style="color: #8d8d8d; font-size: 0.875rem;">—</span>
+                                        }
+                                    </td>
+                                    <td style="color: #6f6f6f;">@link.SortOrder</td>
+                                    <td>
+                                        <span style="background: @(link.IsActive ? "#d1fae5" : "#fee2e2"); color: @(link.IsActive ? "#065f46" : "#991b1b"); padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">
+                                            @(link.IsActive ? "Active" : "Inactive")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div style="display: flex; gap: 0.5rem;">
+                                            <form action="@Url.Action("ToggleGateway")" method="post" style="display:inline;">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@link.Id" />
+                                                <input type="hidden" name="planId" value="@Model.Id" />
+                                                <button type="submit" class="bx--btn bx--btn--sm bx--btn--ghost">
+                                                    @(link.IsActive ? "Disable" : "Enable")
+                                                </button>
+                                            </form>
+                                            <form action="@Url.Action("RemoveGateway")" method="post" style="display:inline;"
+                                                  data-confirm="Remove this gateway from the plan?">
+                                                <input type="hidden" name="id" value="@link.Id" />
+                                                <input type="hidden" name="planId" value="@Model.Id" />
+                                                <button type="submit" class="bx--btn bx--btn--sm bx--btn--danger--ghost">Remove</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    @* ── Add New Gateway ──────────────────────────────────────── *@
+    <div class="bx--row">
+        <div class="bx--col" style="max-width: 640px;">
+            <div style="background: #f4f4f4; border: 1px solid #e0e0e0; border-radius: 4px; padding: 1.5rem;">
+                <h4 style="font-size: 1rem; font-weight: 600; margin: 0 0 1.25rem; color: #161616;">Add Payment Gateway</h4>
+
+                @if (!allGateways.Any())
+                {
+                    <div style="color: #6f6f6f; font-size: 0.875rem;">
+                        No active payment gateways configured.
+                        <a href="@Url.Action("Index", "PaymentConfigAdmin")" style="color: #0f62fe;">Configure gateways →</a>
+                    </div>
+                }
+                else
+                {
+                    <form action="@Url.Action("AddGateway")" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="planId" value="@Model.Id" />
+
+                        <div class="bx--form-item" style="margin-bottom: 1rem;">
+                            <label class="bx--label" for="gatewayConfigId">Payment Gateway *</label>
+                            <div class="bx--select" style="max-width: 100%;">
+                                <select class="bx--select-input" id="gatewayConfigId" name="gatewayConfigId" required>
+                                    <option value="">-- Select Gateway --</option>
+                                    @foreach (var gw in allGateways)
+                                    {
+                                        <option value="@gw.Id">@gw.ProviderName</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="bx--form-item" style="margin-bottom: 1rem;">
+                            <label class="bx--label" for="currency">Currency *</label>
+                            <div class="bx--select" style="max-width: 100%;">
+                                <select class="bx--select-input" id="currency" name="currency" required>
+                                    <option value="EGP">EGP — Egyptian Pound (Paymob)</option>
+                                    <option value="USD">USD — US Dollar (PayPal)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="bx--form-item" style="margin-bottom: 1rem;">
+                            <label class="bx--label" for="displayName">Display Name (shown to user)</label>
+                            <input class="bx--text-input" type="text" id="displayName" name="displayName"
+                                   placeholder="e.g. Credit Card, PayPal" style="max-width: 100%;" />
+                            <p class="bx--form__helper-text">Leave blank to use gateway name.</p>
+                        </div>
+
+                        <div class="bx--form-item" style="margin-bottom: 1rem;">
+                            <label class="bx--label" for="sortOrder">Sort Order</label>
+                            <input class="bx--text-input" type="number" id="sortOrder" name="sortOrder"
+                                   value="0" min="0" style="max-width: 120px;" />
+                            <p class="bx--form__helper-text">Lower number appears first in checkout.</p>
+                        </div>
+
+                        <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+                            <div class="bx--checkbox-wrapper">
+                                <input class="bx--checkbox" type="checkbox" id="isDefault" name="isDefault" value="true" />
+                                <label class="bx--checkbox-label" for="isDefault">
+                                    Set as Default for this currency
+                                </label>
+                            </div>
+                            <p class="bx--form__helper-text">The default gateway is pre-selected in checkout UI.</p>
+                        </div>
+
+                        <button type="submit" class="bx--btn bx--btn--primary">
+                            Add Gateway to Plan
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>
