@@ -62,30 +62,18 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
         {
             var isArabic = language?.ToLower() == "arabic";
             var hasGemini = await _dbContext.ApiConfigurations.AnyAsync(c => c.ProviderName == "Gemini" && c.IsActive);
+            var hasDarijat = await _dbContext.ApiConfigurations.AnyAsync(c => c.ProviderName == "Darijat" && c.IsActive);
             
-            // Hardcoded logic for High Quality as requested by user
-            if (quality == "High" && hasGemini && isArabic)
+            if (quality == "High" && isArabic)
             {
-                var currentDate = DateTime.UtcNow.Date;
-                var toolName = config?.ToolName ?? "text-to-voice";
-                
-                var model1 = "gemini-3.1-flash-tts-preview";
-                var count1 = await _dbContext.GenerationHistories.CountAsync(h => h.Type == toolName && h.ResultText == model1 && h.CreatedAt >= currentDate);
-                
-                if (count1 < 95) 
+                if (hasDarijat)
                 {
-                    return ("Gemini", model1);
+                    return ("Darijat", "darijat-voice");
                 }
-
-                var model2 = "gemini-2.5-pro-tts";
-                var count2 = await _dbContext.GenerationHistories.CountAsync(h => h.Type == toolName && h.ResultText == model2 && h.CreatedAt >= currentDate);
-                
-                if (count2 < 95) 
+                else
                 {
-                    return ("Gemini", model2);
+                    return ("OpenAI", "tts-1-hd");
                 }
-
-                throw new Exception("يوجد ضغط حاليا الرجاء التحويل لجودة اخرى او الانتظار حتى يقل الضغط");
             }
 
             if (config == null || config.RoutingRules == null || !config.RoutingRules.Any())
@@ -314,43 +302,57 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                 
                 try
                 {
-                    var inlineData = jsonDoc.RootElement
-                        .GetProperty("candidates")[0]
-                        .GetProperty("content")
-                        .GetProperty("parts")[0]
-                        .GetProperty("inlineData");
-                    
-                    var base64Audio = inlineData.GetProperty("data").GetString();
-                    if (string.IsNullOrEmpty(base64Audio))
-                        throw new Exception("Gemini API returned empty audio data.");
+                    var candidates = jsonDoc.RootElement.GetProperty("candidates");
+                    if (candidates.GetArrayLength() > 0)
+                    {
+                        var candidate = candidates[0];
+                        if (candidate.TryGetProperty("finishReason", out var finishReason))
+                        {
+                            if (finishReason.GetString() == "OTHER" && !candidate.TryGetProperty("content", out _))
+                            {
+                                throw new Exception("Gemini TTS refused to generate audio for this text. This might be due to an unsupported language or a safety block.");
+                            }
+                        }
 
-                    var audioBytes = Convert.FromBase64String(base64Audio);
-                    
-                    var mimeType = inlineData.GetProperty("mimeType").GetString() ?? "";
-                    
-                    if (mimeType.ToLowerInvariant().Contains("audio/l16") || mimeType.ToLowerInvariant().Contains("pcm"))
-                    {
-                        var wavBytes = PcmToWav(audioBytes, 24000, 1, 16);
-                        return (new MemoryStream(wavBytes), "audio/wav", "wav");
+                        var inlineData = candidate
+                            .GetProperty("content")
+                            .GetProperty("parts")[0]
+                            .GetProperty("inlineData");
+                        
+                        var base64Audio = inlineData.GetProperty("data").GetString();
+                        if (string.IsNullOrEmpty(base64Audio))
+                            throw new Exception("Gemini API returned empty audio data.");
+
+                        var audioBytes = Convert.FromBase64String(base64Audio);
+                        
+                        var mimeType = inlineData.GetProperty("mimeType").GetString() ?? "";
+                        
+                        if (mimeType.ToLowerInvariant().Contains("audio/l16") || mimeType.ToLowerInvariant().Contains("pcm"))
+                        {
+                            var wavBytes = PcmToWav(audioBytes, 24000, 1, 16);
+                            return (new MemoryStream(wavBytes), "audio/wav", "wav");
+                        }
+                        else if (mimeType.ToLowerInvariant().Contains("ogg"))
+                        {
+                            return (new MemoryStream(audioBytes), "audio/ogg", "ogg");
+                        }
+                        else if (mimeType.ToLowerInvariant().Contains("wav"))
+                        {
+                            return (new MemoryStream(audioBytes), "audio/wav", "wav");
+                        }
+                        else if (mimeType.ToLowerInvariant().Contains("mpeg") || mimeType.ToLowerInvariant().Contains("mp3"))
+                        {
+                            return (new MemoryStream(audioBytes), "audio/mpeg", "mp3");
+                        }
+                        
+                        string ext = mimeType.Split('/').LastOrDefault()?.Split(';').FirstOrDefault() ?? "bin";
+                        return (new MemoryStream(audioBytes), mimeType, ext);
                     }
-                    else if (mimeType.ToLowerInvariant().Contains("ogg"))
-                    {
-                        return (new MemoryStream(audioBytes), "audio/ogg", "ogg");
-                    }
-                    else if (mimeType.ToLowerInvariant().Contains("wav"))
-                    {
-                        return (new MemoryStream(audioBytes), "audio/wav", "wav");
-                    }
-                    else if (mimeType.ToLowerInvariant().Contains("mpeg") || mimeType.ToLowerInvariant().Contains("mp3"))
-                    {
-                        return (new MemoryStream(audioBytes), "audio/mpeg", "mp3");
-                    }
-                    
-                    string ext = mimeType.Split('/').LastOrDefault()?.Split(';').FirstOrDefault() ?? "bin";
-                    return (new MemoryStream(audioBytes), mimeType, ext);
+                    throw new Exception("Gemini API returned no candidates.");
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine($"[Gemini TTS Raw Response]: {jsonResponse}");
                     lastException = new Exception($"Error parsing Gemini response from model {modelName}: {ex.Message}");
                     continue; // Try next fallback model on parse error
                 }
