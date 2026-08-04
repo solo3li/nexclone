@@ -110,10 +110,24 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
     try {
-      const fpPromise = import("@fingerprintjs/fingerprintjs").then((FingerprintJS) => FingerprintJS.load());
-      const fp = await fpPromise;
-      const result = await fp.get();
-      const visitorId = result.visitorId;
+      let visitorId = "unknown";
+      try {
+        const fpPromise = import("@fingerprintjs/fingerprintjs").then((FingerprintJS) => FingerprintJS.load());
+        const fp = await Promise.race([
+          fpPromise,
+          new Promise((_, reject) => setTimeout(() => reject(new Error("fp timeout")), 2000))
+        ]) as any;
+        
+        const resultPromise = fp.get();
+        const result = await Promise.race([
+          resultPromise,
+          new Promise((_, reject) => setTimeout(() => reject(new Error("fp get timeout")), 2000))
+        ]) as any;
+        
+        visitorId = result.visitorId;
+      } catch (e) {
+        console.warn("Fingerprint blocked or timed out, using fallback");
+      }
 
       await api.post("/api/auth/login", { email, password, deviceFingerprint: visitorId });
 
