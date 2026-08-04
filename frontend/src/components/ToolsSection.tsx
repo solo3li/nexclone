@@ -179,7 +179,7 @@ export default function ToolsSection() {
       iconBg: "from-violet-500 to-purple-600",
       glowColor: "shadow-violet-500/20",
       tags: t.raw('list.t1.tags'),
-      image: "/images/tool-1.png",
+      image: "/images/tool-vtt.png",
       href: "/tools/voice-to-text"
     },
     {
@@ -192,7 +192,7 @@ export default function ToolsSection() {
       iconBg: "from-emerald-500 to-teal-600",
       glowColor: "shadow-emerald-500/20",
       tags: t.raw('list.t2.tags'),
-      image: "/images/tool-2.png",
+      image: "/images/tool-tts.png",
       href: "/tools/text-to-voice"
     },
     {
@@ -205,7 +205,7 @@ export default function ToolsSection() {
       iconBg: "from-fuchsia-500 to-pink-600",
       glowColor: "shadow-fuchsia-500/20",
       tags: t.raw('list.t10.tags'),
-      image: "/images/tool-1.png",
+      image: "/images/tool-img2avatar.png",
       href: "/tools/image-to-video"
     },
     {
@@ -218,7 +218,7 @@ export default function ToolsSection() {
       iconBg: "from-rose-500 to-red-600",
       glowColor: "shadow-rose-500/20",
       tags: locale === 'ar' ? ['فيديو', 'صوت', 'تزامن'] : ['Video', 'Audio', 'Sync'],
-      image: "/images/tool-2.png",
+      image: "/images/tool-lipsync.png",
       href: "/tools/advanced-lip-sync"
     }
   ];

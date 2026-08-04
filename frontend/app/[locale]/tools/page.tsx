@@ -2,8 +2,8 @@
 
 import { useLocale } from "next-intl";
 import { Link } from "../../../src/i18n/routing";
-import { Mic, FileAudio, Video } from "lucide-react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export default function ToolsPage() {
   const locale = useLocale();
@@ -12,47 +12,43 @@ export default function ToolsPage() {
   const tools = [
     {
       href: "/tools/text-to-voice",
-      icon: Mic,
+      image: "/images/tool-tts.png",
       labelEn: "Text to Voice",
       labelAr: "تحويل النص لصوت",
       descEn: "Generate ultra-realistic human voices from text",
       descAr: "قم بتحويل النصوص إلى أصوات بشرية واقعية بضغطة زر",
-      color: "text-fuchsia-400",
-      bg: "bg-fuchsia-500/10",
-      border: "hover:border-fuchsia-500/50"
+      border: "hover:border-fuchsia-500/50",
+      glow: "hover:shadow-fuchsia-900/20"
     },
     {
       href: "/tools/voice-to-text",
-      icon: FileAudio,
+      image: "/images/tool-vtt.png",
       labelEn: "Voice to Text",
       labelAr: "تحويل الصوت لنص",
       descEn: "Transcribe and translate your audio files with high accuracy",
       descAr: "قم بتفريغ وترجمة ملفاتك الصوتية بدقة عالية جداً",
-      color: "text-emerald-400",
-      bg: "bg-emerald-500/10",
-      border: "hover:border-emerald-500/50"
+      border: "hover:border-cyan-500/50",
+      glow: "hover:shadow-cyan-900/20"
     },
     {
       href: "/tools/image-to-video",
-      icon: Video,
+      image: "/images/tool-img2avatar.png",
       labelEn: "Image to Video",
       labelAr: "تحويل الصورة لفيديو",
       descEn: "Animate your static images into stunning videos",
       descAr: "حوّل صورك الثابتة إلى فيديوهات متحركة ومذهلة",
-      color: "text-blue-400",
-      bg: "bg-blue-500/10",
-      border: "hover:border-blue-500/50"
+      border: "hover:border-emerald-500/50",
+      glow: "hover:shadow-emerald-900/20"
     },
     {
       href: "/tools/advanced-lip-sync",
-      icon: Video, // Reusing Video icon
+      image: "/images/tool-lipsync.png",
       labelEn: "Advanced Lip Sync",
       labelAr: "مزامنة الشفاه المتقدمة",
       descEn: "Sync audio flawlessly with video avatars",
       descAr: "مزامنة الصوت بدقة مع الفيديو الخاص بك",
-      color: "text-rose-400",
-      bg: "bg-rose-500/10",
-      border: "hover:border-rose-500/50"
+      border: "hover:border-rose-500/50",
+      glow: "hover:shadow-rose-900/20"
     }
   ];
 
@@ -79,36 +75,44 @@ export default function ToolsPage() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {tools.map((tool, index) => {
-            const Icon = tool.icon;
-            return (
-              <motion.div
-                key={tool.href}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+          {tools.map((tool, index) => (
+            <motion.div
+              key={tool.href}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <Link
+                href={tool.href}
+                className={`block h-full bg-[#120822]/80 backdrop-blur-xl border border-white/5 rounded-3xl overflow-hidden transition-all duration-300 hover:-translate-y-2 ${tool.border} group shadow-xl hover:shadow-2xl ${tool.glow}`}
+                dir={isRtl ? 'rtl' : 'ltr'}
               >
-                <Link
-                  href={tool.href}
-                  className={`block h-full bg-[#120822]/80 backdrop-blur-xl border border-white/5 rounded-3xl p-8 transition-all duration-300 hover:-translate-y-2 ${tool.border} group shadow-xl hover:shadow-2xl hover:shadow-fuchsia-900/20`}
-                  dir={isRtl ? 'rtl' : 'ltr'}
-                >
-                  <div className={`w-16 h-16 rounded-2xl ${tool.bg} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                    <Icon className={`w-8 h-8 ${tool.color}`} />
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-white/70 transition-all">
+                {/* Tool Image */}
+                <div className="relative w-full h-52 overflow-hidden">
+                  <Image
+                    src={tool.image}
+                    alt={isRtl ? tool.labelAr : tool.labelEn}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#120822] via-transparent to-transparent" />
+                </div>
+                {/* Tool Info */}
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-white mb-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-white/70 transition-all">
                     {isRtl ? tool.labelAr : tool.labelEn}
                   </h3>
                   <p className="text-white/50 text-sm leading-relaxed">
                     {isRtl ? tool.descAr : tool.descEn}
                   </p>
-                </Link>
-              </motion.div>
-            );
-          })}
+                </div>
+              </Link>
+            </motion.div>
+          ))}
         </div>
       </div>
     </>
   );
 }
+
