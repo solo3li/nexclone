@@ -25,7 +25,7 @@ namespace NexClone.Backend.Application.Services
         /// If resetToZero is true, it clears the wallet before adding (useful for strict monthly cycles).
         /// If false, it rolls over the existing balance.
         /// </summary>
-        public async Task DistributePlanCreditsAsync(Guid userId, int planId, bool resetToZero = false)
+        public async Task DistributePlanCreditsAsync(Guid userId, int planId, bool resetToZero = false, int? subscriptionId = null)
         {
             var user = await _context.Users
                 .Include(u => u.Wallets)
@@ -57,6 +57,7 @@ namespace NexClone.Backend.Application.Services
                     {
                         UserId = userId,
                         WalletTypeId = pw.WalletTypeId,
+                        SubscriptionId = subscriptionId,
                         Balance = 0
                     };
                     _context.UserWallets.Add(userWallet);

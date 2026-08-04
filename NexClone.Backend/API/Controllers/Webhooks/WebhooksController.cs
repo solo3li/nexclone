@@ -159,7 +159,7 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                     _context.Users.Update(user);
                     await _context.SaveChangesAsync();
                     
-                    await _walletService.DistributePlanCreditsAsync(user.Id, plan.Id, resetToZero: shouldReset);
+                    await _walletService.DistributePlanCreditsAsync(user.Id, plan.Id, resetToZero: shouldReset, subscriptionId: currentSub?.Id);
 
                     int orderId = obj.TryGetProperty("id", out var idProp) ? idProp.GetInt32() : 0;
                     int amountCents = obj.TryGetProperty("amount_cents", out var amountProp) ? amountProp.GetInt32() : 0;
@@ -404,7 +404,7 @@ namespace NexClone.Backend.API.Controllers.Webhooks
 
                 _context.Users.Update(user);
                 await _context.SaveChangesAsync();
-                await _walletService.DistributePlanCreditsAsync(user.Id, plan.Id, resetToZero: shouldReset);
+                await _walletService.DistributePlanCreditsAsync(user.Id, plan.Id, resetToZero: shouldReset, subscriptionId: currentSub?.Id);
 
                 // 8. Record payment
                 _context.Payments.Add(new Payment

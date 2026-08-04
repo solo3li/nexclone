@@ -43,6 +43,10 @@ namespace NexClone.Backend.Core.Entities
         [ForeignKey(nameof(WalletTypeId))]
         public WalletType WalletType { get; set; } = null!;
 
+        public int? SubscriptionId { get; set; }
+        [ForeignKey(nameof(SubscriptionId))]
+        public Subscription Subscription { get; set; } = null!;
+
         [Column(TypeName = "decimal(18,4)")]
         [ConcurrencyCheck]
         public decimal Balance { get; set; } = 0;

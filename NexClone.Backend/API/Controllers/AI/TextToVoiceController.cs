@@ -56,7 +56,7 @@ namespace NexClone.Backend.API.Controllers.AI
                 }
             }
 
-            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "text-to-voice", request.Text.Length, null, request.Quality);
+            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "text-to-voice", request.Text.Length, null, request.Quality, request.SubscriptionId);
             if (!policyResult.IsAllowed)
                 return BadRequest(new { error = policyResult.ErrorMessage });
 
@@ -118,7 +118,7 @@ namespace NexClone.Backend.API.Controllers.AI
                 return Unauthorized();
             }
 
-            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "text-to-voice", request.Text.Length, null, request.Quality);
+            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "text-to-voice", request.Text.Length, null, request.Quality, request.SubscriptionId);
             if (!policyResult.IsAllowed)
             {
                 Console.WriteLine($"[ESTIMATE] Policy Denied: {policyResult.ErrorMessage}");
@@ -138,5 +138,6 @@ namespace NexClone.Backend.API.Controllers.AI
         public string? VoiceName { get; set; } = string.Empty;
         public string? StyleInstruction { get; set; } = string.Empty;
         public string Quality { get; set; } = "Standard";
+        public int? SubscriptionId { get; set; }
     }
 }

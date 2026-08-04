@@ -38,6 +38,7 @@ namespace NexClone.Backend.API.Controllers.AI
             public string FileId { get; set; }
             public bool Translate { get; set; } = false;
             public string TargetLanguage { get; set; } = "en";
+            public int? SubscriptionId { get; set; }
         }
 
         [HttpPost("transcribe")]
@@ -85,7 +86,7 @@ namespace NexClone.Backend.API.Controllers.AI
                 Console.WriteLine($"[WARNING] TagLib failed for {request.FileId}. Fallback duration: {audioDurationMinutes} mins. Error: {ex.Message}");
             }
 
-            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "voice-to-text", audioData.Length, (decimal)audioDurationMinutes);
+            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "voice-to-text", audioData.Length, (decimal)audioDurationMinutes, "Standard", request.SubscriptionId);
             if (!policyResult.IsAllowed)
                 return BadRequest(new { error = policyResult.ErrorMessage });
 
@@ -133,6 +134,7 @@ namespace NexClone.Backend.API.Controllers.AI
         {
             public long FileSizeBytes { get; set; }
             public double DurationMinutes { get; set; }
+            public int? SubscriptionId { get; set; }
         }
 
         [HttpPost("estimate")]
@@ -143,7 +145,7 @@ namespace NexClone.Backend.API.Controllers.AI
 
             double duration = request.DurationMinutes <= 0 ? 0.01 : request.DurationMinutes;
 
-            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "voice-to-text", request.FileSizeBytes, (decimal)duration);
+            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "voice-to-text", request.FileSizeBytes, (decimal)duration, "Standard", request.SubscriptionId);
             if (!policyResult.IsAllowed)
                 return BadRequest(new { error = policyResult.ErrorMessage });
 

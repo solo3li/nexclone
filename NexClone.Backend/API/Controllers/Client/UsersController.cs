@@ -249,7 +249,7 @@ namespace NexClone.Backend.API.Controllers.Client
             }
 
             await _context.SaveChangesAsync();
-            await _walletService.DistributePlanCreditsAsync(user.Id, plan.Id, resetToZero: shouldReset);
+            await _walletService.DistributePlanCreditsAsync(user.Id, plan.Id, resetToZero: shouldReset, subscriptionId: newSub.Id);
 
             // Send Email Receipt
             try

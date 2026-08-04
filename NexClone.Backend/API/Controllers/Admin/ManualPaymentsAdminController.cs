@@ -133,7 +133,7 @@ namespace NexClone.Backend.API.Controllers.Admin
 
             _context.Users.Update(payment.User);
             await _context.SaveChangesAsync();
-            await _walletService.DistributePlanCreditsAsync(payment.User.Id, payment.Plan.Id, resetToZero: shouldReset);
+            await _walletService.DistributePlanCreditsAsync(payment.User.Id, payment.Plan.Id, resetToZero: shouldReset, subscriptionId: payment.SubscriptionId);
 
             await _context.SaveChangesAsync();
 

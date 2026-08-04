@@ -835,51 +835,54 @@ namespace NexClone.Backend.API.Controllers.Client
                 
             if (user == null) return Unauthorized();
 
-            var activeSub = await _context.Subscriptions
+            var allSubs = await _context.Subscriptions
                 .Include(s => s.Plan)
+                .Where(s => s.UserId == user.Id)
                 .OrderByDescending(s => s.Status == "active")
                 .ThenByDescending(s => s.Status == "freeze")
                 .ThenByDescending(s => s.Status == "expired")
                 .ThenByDescending(s => s.EndDate)
-                .FirstOrDefaultAsync(s => s.UserId == user.Id);
+                .ToListAsync();
 
-            if (activeSub != null)
+            bool needsSave = false;
+            bool shouldResetWallets = false;
+
+            foreach (var sub in allSubs)
             {
-                bool needsSave = false;
-                bool shouldResetWallets = false;
-
-                if (activeSub.Status == "active" && activeSub.EndDate <= DateTime.UtcNow)
+                if (sub.Status == "active" && sub.EndDate <= DateTime.UtcNow)
                 {
-                    var freezeEndDate = activeSub.EndDate.AddDays(activeSub.Plan.GracePeriodDays);
+                    var freezeEndDate = sub.EndDate.AddDays(sub.Plan.GracePeriodDays);
                     if (DateTime.UtcNow > freezeEndDate)
                     {
-                        activeSub.Status = "expired";
+                        sub.Status = "expired";
                         shouldResetWallets = true;
                     }
                     else
                     {
-                        activeSub.Status = "freeze";
+                        sub.Status = "freeze";
                     }
+                    _context.Subscriptions.Update(sub);
                     needsSave = true;
                 }
-                else if (activeSub.Status == "freeze" && activeSub.EndDate.AddDays(activeSub.Plan.GracePeriodDays) < DateTime.UtcNow)
+                else if (sub.Status == "freeze" && sub.EndDate.AddDays(sub.Plan.GracePeriodDays) < DateTime.UtcNow)
                 {
-                    activeSub.Status = "expired";
+                    sub.Status = "expired";
                     shouldResetWallets = true;
+                    _context.Subscriptions.Update(sub);
                     needsSave = true;
                 }
+            }
 
-                if (needsSave)
-                {
-                    _context.Subscriptions.Update(activeSub);
-                    _context.Users.Update(user);
-                    await _context.SaveChangesAsync();
-                }
+            if (needsSave)
+            {
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+            }
 
-                if (shouldResetWallets)
-                {
-                    await _walletService.ResetAllWalletsAsync(user.Id);
-                }
+            if (shouldResetWallets)
+            {
+                await _walletService.ResetAllWalletsAsync(user.Id);
+                await _context.Entry(user).Collection(u => u.Wallets).Query().Include(w => w.WalletType).LoadAsync();
             }
 
             string? imageUrl = null;
@@ -895,6 +898,23 @@ namespace NexClone.Backend.API.Controllers.Client
                 }
             }
 
+            var activeSub = allSubs.FirstOrDefault(s => s.Status == "active" || s.Status == "freeze");
+
+            var activeSubscriptionsResponse = allSubs
+                .Where(s => s.Status == "active" || s.Status == "freeze")
+                .Select(s => new {
+                    Id = s.Id,
+                    Name = s.Plan.Name,
+                    NameAr = s.Plan.NameAr,
+                    Status = s.Status,
+                    EndDate = s.EndDate,
+                    IsFreeTrial = s.Plan.IsFreeTrial,
+                    IsDefaultRegistrationPlan = s.Plan.IsDefaultRegistrationPlan,
+                    Wallets = user.Wallets
+                        .Where(w => w.SubscriptionId == s.Id || (w.SubscriptionId == null && s.Plan.IsDefaultRegistrationPlan))
+                        .Select(w => new { Code = w.WalletType.Code, Balance = w.Balance })
+                });
+
             return Ok(new
             {
                 Id = user.Id,
@@ -904,8 +924,8 @@ namespace NexClone.Backend.API.Controllers.Client
                 ImageUrl = imageUrl,
                 IsVerified = user.IsVerified,
                 HasPhoneNumber = !string.IsNullOrEmpty(user.PhoneNumber),
-                AvailableCredits = user.AvailableCredits, // Keep for backwards compatibility temporarily
-                Wallets = user.Wallets.Select(w => new { Code = w.WalletType.Code, Balance = w.Balance }),
+                AvailableCredits = user.AvailableCredits,
+                Wallets = user.Wallets.Select(w => new { Code = w.WalletType.Code, Balance = w.Balance, SubscriptionId = w.SubscriptionId }),
                 IsStaff = user.IsStaff,
                 ActivePlan = activeSub != null ? new {
                     Name = activeSub.Plan.Name,
@@ -920,7 +940,8 @@ namespace NexClone.Backend.API.Controllers.Client
                     TtsCostPerCharHigh = activeSub.Plan.TtsCostPerCharHigh,
                     IsFreeTrial = activeSub.Plan.IsFreeTrial,
                     IsDefaultRegistrationPlan = activeSub.Plan.IsDefaultRegistrationPlan
-                } : null
+                } : null,
+                ActiveSubscriptions = activeSubscriptionsResponse
             });
         }
 

@@ -41,31 +41,31 @@ namespace NexClone.Backend.API.Controllers.AI
         }
 
         [HttpGet("estimate-avatar")]
-        public async Task<IActionResult> EstimateAvatar()
+        public async Task<IActionResult> EstimateAvatar([FromQuery] int? subscriptionId = null)
         {
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
-            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "avatar-video", 1);
+            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "avatar-video", 1, null, "Standard", subscriptionId);
             if (!policyResult.IsAllowed) return BadRequest(new { error = policyResult.ErrorMessage });
 
             return Ok(new { estimatedCost = policyResult.TotalCost, chargedWalletName = policyResult.ChargedWalletName });
         }
 
         [HttpGet("estimate-lipsync")]
-        public async Task<IActionResult> EstimateLipSync()
+        public async Task<IActionResult> EstimateLipSync([FromQuery] int? subscriptionId = null)
         {
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
-            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "advanced-lip-sync", 1);
+            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "advanced-lip-sync", 1, null, "Standard", subscriptionId);
             if (!policyResult.IsAllowed) return BadRequest(new { error = policyResult.ErrorMessage });
 
             return Ok(new { estimatedCost = policyResult.TotalCost, chargedWalletName = policyResult.ChargedWalletName });
         }
 
         [HttpPost("start-avatar")]
-        public async Task<IActionResult> StartAvatar(IFormFile image, [FromForm] IFormFile? audio = null, [FromForm] string prompt = "The speaker talks naturally to camera")
+        public async Task<IActionResult> StartAvatar(IFormFile image, [FromForm] IFormFile? audio = null, [FromForm] string prompt = "The speaker talks naturally to camera", [FromForm] int? subscriptionId = null)
         {
             if (image == null || image.Length == 0)
                 return BadRequest(new { error = "Image is required." });
@@ -91,7 +91,7 @@ namespace NexClone.Backend.API.Controllers.AI
 
             // Just charge (validation is done above)
             decimal usageAmountForLimits = 0; // Handled explicitly above
-            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "kling_avatar_image2video", usageAmountForLimits, 1, "Standard");
+            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "kling_avatar_image2video", usageAmountForLimits, 1, "Standard", subscriptionId);
             if (!policyResult.IsAllowed)
                 return BadRequest(new { error = policyResult.ErrorMessage });
 
@@ -148,7 +148,7 @@ namespace NexClone.Backend.API.Controllers.AI
         }
 
         [HttpPost("start-lipsync")]
-        public async Task<IActionResult> StartLipSync(IFormFile video, IFormFile audio)
+        public async Task<IActionResult> StartLipSync(IFormFile video, IFormFile audio, [FromForm] int? subscriptionId = null)
         {
             if (video == null || video.Length == 0 || audio == null || audio.Length == 0)
                 return BadRequest(new { error = "Video and Audio are required." });
@@ -171,7 +171,7 @@ namespace NexClone.Backend.API.Controllers.AI
 
             // Just charge (validation is done above)
             decimal usageAmountForLimits = 0; // Handled explicitly above
-            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "lipsync", usageAmountForLimits, 1, "Standard");
+            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "lipsync", usageAmountForLimits, 1, "Standard", subscriptionId);
             
             if (!policyResult.IsAllowed)
                 return BadRequest(new { error = policyResult.ErrorMessage });
