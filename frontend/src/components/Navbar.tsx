@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Zap, Menu, X, Globe, ChevronDown, Mic, FileAudio, Video } from "lucide-react";
+import { Zap, Menu, X, Globe, ChevronDown, Mic, FileAudio, Video, Smile } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link, usePathname, useRouter } from "../i18n/routing";
 import { useAppStore } from "../store/useAppStore";
@@ -108,6 +108,12 @@ export default function Navbar() {
                     <Video className="w-4 h-4 text-blue-400" />
                   </div>
                   <span className="text-sm font-medium text-white/90">{locale === 'ar' ? 'تحويل الصورة لفيديو' : 'Image to Video'}</span>
+                </Link>
+                <Link href="/tools/advanced-lip-sync" className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center shrink-0">
+                    <Smile className="w-4 h-4 text-rose-400" />
+                  </div>
+                  <span className="text-sm font-medium text-white/90">{locale === 'ar' ? 'مزامنة الشفاه' : 'Advanced Lip-Sync'}</span>
                 </Link>
               </div>
             </div>
@@ -223,6 +229,12 @@ export default function Navbar() {
                     <Video className="w-4 h-4 text-blue-400" />
                   </div>
                   <span className="text-sm font-medium">{locale === 'ar' ? 'تحويل الصورة لفيديو' : 'Image to Video'}</span>
+                </Link>
+                <Link href="/tools/advanced-lip-sync" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-2 text-white/80 hover:text-white transition-colors rounded-xl hover:bg-white/5">
+                  <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center shrink-0">
+                    <Smile className="w-4 h-4 text-rose-400" />
+                  </div>
+                  <span className="text-sm font-medium">{locale === 'ar' ? 'مزامنة الشفاه' : 'Advanced Lip-Sync'}</span>
                 </Link>
               </div>
               <Link href="/pricing" onClick={() => setMenuOpen(false)} className="text-white/80 hover:text-white text-base font-medium py-2 border-b border-white/5 transition-colors">

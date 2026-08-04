@@ -8,7 +8,8 @@ import {
   PenTool,
   ArrowLeft,
   ArrowRight,
-  Video
+  Video,
+  Smile
 } from "lucide-react";
 import { AnimatedText, AnimatedReveal } from "./AnimatedText";
 import { useTranslations, useLocale } from "next-intl";
@@ -206,6 +207,19 @@ export default function ToolsSection() {
       tags: t.raw('list.t10.tags'),
       image: "/images/tool-1.png",
       href: "/tools/image-to-video"
+    },
+    {
+      icon: Smile,
+      title: locale === 'ar' ? 'مزامنة الشفاه المتقدمة' : 'Advanced Lip-Sync',
+      desc: locale === 'ar' ? 'قم بمزامنة حركة الشفاه بدقة مع أي ملف صوتي باستخدام الذكاء الاصطناعي.' : 'Accurately sync lip movements with any audio file using AI.',
+      badge: t('list.t10.badge'),
+      badgeColor: "bg-rose-500/20 text-rose-300 border-rose-500/30",
+      gradient: "from-rose-600/20 to-red-600/10",
+      iconBg: "from-rose-500 to-red-600",
+      glowColor: "shadow-rose-500/20",
+      tags: locale === 'ar' ? ['فيديو', 'صوت', 'تزامن'] : ['Video', 'Audio', 'Sync'],
+      image: "/images/tool-2.png",
+      href: "/tools/advanced-lip-sync"
     }
   ];
 
