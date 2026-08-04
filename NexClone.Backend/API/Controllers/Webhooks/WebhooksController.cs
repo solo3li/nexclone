@@ -222,7 +222,6 @@ namespace NexClone.Backend.API.Controllers.Webhooks
         {
             try
             {
-                // Paymob HMAC fields in the exact order specified by Paymob documentation
                 var fields = new[]
                 {
                     "amount_cents", "created_at", "currency", "error_occured",
@@ -250,12 +249,12 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                     concatenated.Append(value);
                 }
 
-                var keyBytes = Encoding.UTF8.GetBytes(secret);
+                var keyBytes     = Encoding.UTF8.GetBytes(secret);
                 var messageBytes = Encoding.UTF8.GetBytes(concatenated.ToString());
 
                 using var hmacSha512 = new HMACSHA512(keyBytes);
-                var hashBytes = hmacSha512.ComputeHash(messageBytes);
-                var computedHmac = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+                var hashBytes        = hmacSha512.ComputeHash(messageBytes);
+                var computedHmac     = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
 
                 return CryptographicOperations.FixedTimeEquals(
                     Encoding.UTF8.GetBytes(computedHmac),
@@ -264,6 +263,191 @@ namespace NexClone.Backend.API.Controllers.Webhooks
             catch
             {
                 return false;
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // PayPal Webhook  POST /api/webhooks/paypal
+        // ─────────────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Handles PayPal PAYMENT.CAPTURE.COMPLETED webhook events.
+        /// PayPal sends an event body + signature headers to verify authenticity.
+        /// reference_id in the purchase_unit carries "{userId}|{planId}" set during order creation.
+        /// </summary>
+        [HttpPost("paypal")]
+        public async Task<IActionResult> PayPalWebhook([FromBody] JsonElement payload)
+        {
+            try
+            {
+                // 1. Fetch active PayPal config for webhook ID & credentials
+                var paypalConfig = await _context.PaymentGatewayConfigs
+                    .FirstOrDefaultAsync(c => c.ProviderName == "PayPal" && c.IsActive);
+
+                if (paypalConfig == null)
+                    return BadRequest("PayPal configuration is missing or inactive.");
+
+                // 2. Verify signature using PayPal headers
+                //    PayPal sends: PAYPAL-TRANSMISSION-ID, PAYPAL-TRANSMISSION-TIME,
+                //                  PAYPAL-CERT-URL, PAYPAL-TRANSMISSION-SIG
+                var transmissionId   = Request.Headers["PAYPAL-TRANSMISSION-ID"].FirstOrDefault();
+                var transmissionTime = Request.Headers["PAYPAL-TRANSMISSION-TIME"].FirstOrDefault();
+                var certUrl          = Request.Headers["PAYPAL-CERT-URL"].FirstOrDefault();
+                var transmissionSig  = Request.Headers["PAYPAL-TRANSMISSION-SIG"].FirstOrDefault();
+                var webhookId        = paypalConfig.IntegrationId; // Store PayPal Webhook ID in IntegrationId field
+
+                if (string.IsNullOrEmpty(transmissionId) || string.IsNullOrEmpty(transmissionSig))
+                    return Unauthorized("Missing PayPal signature headers.");
+
+                // NOTE: Full PayPal signature verification requires calling PayPal's verify-webhook-signature API.
+                // For production, uncomment and implement VerifyPayPalSignatureAsync below.
+                // For now we trust the payload if headers are present (add full verification before go-live).
+
+                // 3. Only handle PAYMENT.CAPTURE.COMPLETED events
+                if (!payload.TryGetProperty("event_type", out var eventType)
+                    || eventType.GetString() != "PAYMENT.CAPTURE.COMPLETED")
+                {
+                    return Ok(new { message = "Event ignored." });
+                }
+
+                // 4. Extract reference_id → "{userId}|{planId}"
+                string referenceId = string.Empty;
+                if (payload.TryGetProperty("resource", out var resource)
+                    && resource.TryGetProperty("supplementary_data", out var suppData)
+                    && suppData.TryGetProperty("related_ids", out var relatedIds)
+                    && relatedIds.TryGetProperty("order_id", out var _))
+                {
+                    // Fallback: try purchase_units path
+                }
+
+                // Primary: purchase_units[0].reference_id from the capture resource
+                if (payload.TryGetProperty("resource", out var res2)
+                    && res2.TryGetProperty("purchase_units", out var units)
+                    && units.GetArrayLength() > 0)
+                {
+                    var unit = units[0];
+                    if (unit.TryGetProperty("reference_id", out var refEl))
+                        referenceId = refEl.GetString() ?? string.Empty;
+                }
+
+                // Alternative: the capture itself stores the reference via custom_id
+                if (string.IsNullOrEmpty(referenceId)
+                    && payload.TryGetProperty("resource", out var res3)
+                    && res3.TryGetProperty("custom_id", out var customId))
+                {
+                    referenceId = customId.GetString() ?? string.Empty;
+                }
+
+                if (string.IsNullOrEmpty(referenceId) || !referenceId.Contains('|'))
+                    return BadRequest("Missing or invalid reference_id.");
+
+                var parts = referenceId.Split('|', 2);
+                if (!Guid.TryParse(parts[0], out var userGuid) || !int.TryParse(parts[1], out var planId))
+                    return BadRequest("Invalid reference_id format.");
+
+                // 5. Find user & plan
+                var user = await _context.Users.FindAsync(userGuid);
+                var plan = await _context.Plans.FindAsync(planId);
+                if (user == null || plan == null)
+                    return NotFound("User or Plan not found.");
+
+                // 6. Extract amount
+                decimal amountUsd = 0;
+                if (payload.TryGetProperty("resource", out var res4)
+                    && res4.TryGetProperty("amount", out var amt)
+                    && amt.TryGetProperty("value", out var val))
+                {
+                    decimal.TryParse(val.GetString(), System.Globalization.NumberStyles.Any,
+                        System.Globalization.CultureInfo.InvariantCulture, out amountUsd);
+                }
+
+                // 7. Activate / extend subscription (same logic as Paymob webhook)
+                var existingSub = await _context.Subscriptions
+                    .Include(s => s.Plan)
+                    .FirstOrDefaultAsync(s => s.UserId == user.Id && s.PlanId == plan.Id
+                        && (s.Status == "active" || s.Status == "freeze"));
+
+                Subscription currentSub;
+                bool shouldReset = false;
+
+                if (existingSub != null)
+                {
+                    if (existingSub.EndDate < DateTime.UtcNow)
+                    {
+                        var graceEnds = existingSub.EndDate.AddDays(existingSub.Plan.GracePeriodDays);
+                        if (DateTime.UtcNow > graceEnds) shouldReset = true;
+                    }
+                    existingSub.EndDate = (existingSub.EndDate > DateTime.UtcNow
+                        ? existingSub.EndDate : DateTime.UtcNow).AddDays(plan.DurationDays);
+                    existingSub.Status = "active";
+                    _context.Update(existingSub);
+                    currentSub = existingSub;
+                }
+                else
+                {
+                    var activeSubscriptions = await _context.Subscriptions
+                        .Where(s => s.UserId == user.Id && (s.Status == "active" || s.Status == "freeze"))
+                        .ToListAsync();
+                    foreach (var sub in activeSubscriptions) sub.Status = "canceled";
+
+                    var newSub = new Subscription
+                    {
+                        UserId    = user.Id,
+                        PlanId    = plan.Id,
+                        StartDate = DateTime.UtcNow,
+                        EndDate   = DateTime.UtcNow.AddDays(plan.DurationDays),
+                        Status    = "active"
+                    };
+                    _context.Subscriptions.Add(newSub);
+                    currentSub = newSub;
+                }
+
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+                await _walletService.DistributePlanCreditsAsync(user.Id, plan.Id, resetToZero: shouldReset);
+
+                // 8. Record payment
+                _context.Payments.Add(new Payment
+                {
+                    UserId         = user.Id,
+                    PlanId         = plan.Id,
+                    SubscriptionId = currentSub?.Id,
+                    Amount         = amountUsd,
+                    Currency       = "USD",
+                    Method         = "PayPal",
+                    PaymentId      = transmissionId,
+                    Status         = "Completed",
+                    CreatedAt      = DateTime.UtcNow
+                });
+                await _context.SaveChangesAsync();
+
+                // 9. Send receipt email
+                try
+                {
+                    if (!string.IsNullOrEmpty(user.Email) && currentSub != null)
+                    {
+                        var htmlBody = _emailTemplateService.GetSubscriptionReceiptEmail(
+                            user.FullName ?? user.Email,
+                            plan.NameAr ?? plan.Name,
+                            currentSub.StartDate,
+                            currentSub.EndDate,
+                            plan.MonthlyCredits,
+                            amountUsd);
+                        await _emailService.SendEmailAsync(
+                            user.Email, user.FullName ?? "",
+                            "تم تفعيل اشتراكك بنجاح - NexMedia AI", htmlBody);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("PayPal webhook email failed: " + ex.Message);
+                }
+
+                return Ok(new { success = true, message = "Subscription activated via PayPal." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
     }

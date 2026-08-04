@@ -10,11 +10,13 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
     {
         private readonly ApplicationDbContext _context;
         private readonly HttpClient _httpClient;
+        private readonly PayPalPaymentService _payPal;
 
         public PaymobPaymentService(ApplicationDbContext context, HttpClient httpClient)
         {
             _context = context;
             _httpClient = httpClient;
+            _payPal = new PayPalPaymentService(context, httpClient);
         }
 
         /// <inheritdoc/>
@@ -27,14 +29,12 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
             string phoneNumber,
             string currency)
         {
-            // Route based on currency
-            if (currency.ToUpperInvariant() == "EGP")
+            return currency.ToUpperInvariant() switch
             {
-                return await CreatePaymobIntentAsync(planId, gatewayConfigId, userId, userEmail, userName, phoneNumber);
-            }
-
-            // Future: add PayPal routing here when implemented
-            return new PaymentResult { IsSuccess = false, ErrorMessage = $"Currency '{currency}' is not yet supported." };
+                "EGP" => await CreatePaymobIntentAsync(planId, gatewayConfigId, userId, userEmail, userName, phoneNumber),
+                "USD" => await _payPal.CreateOrderAsync(planId, gatewayConfigId, userId, userEmail, "USD"),
+                _     => new PaymentResult { IsSuccess = false, ErrorMessage = $"Currency '{currency}' is not yet supported." }
+            };
         }
 
         private async Task<PaymentResult> CreatePaymobIntentAsync(
