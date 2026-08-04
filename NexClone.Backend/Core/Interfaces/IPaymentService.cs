@@ -4,6 +4,17 @@ namespace NexClone.Backend.Core.Interfaces
 {
     public interface IPaymentService
     {
-        Task<PaymentResult> CreatePaymobIntentAsync(int planId, string userId, string userEmail, string userFirstName, string userLastName, string phoneNumber);
+        /// <summary>
+        /// Generic entry point for initiating a payment via any gateway.
+        /// The implementation resolves the correct gateway based on the gatewayConfigId and currency.
+        /// </summary>
+        Task<PaymentResult> InitiatePaymentAsync(
+            int planId,
+            int gatewayConfigId,
+            string userId,
+            string userEmail,
+            string userName,
+            string phoneNumber,
+            string currency);
     }
 }

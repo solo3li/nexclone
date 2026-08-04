@@ -38,6 +38,7 @@ namespace NexClone.Backend.Infrastructure.Data
         public DbSet<PackageToolWallet> PackageToolWallets { get; set; } = null!;
         public DbSet<SystemUpdate> SystemUpdates { get; set; } = null!;
         public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
+        public DbSet<PlanPaymentGateway> PlanPaymentGateways { get; set; } = null!;
         // Affiliate entities removed
 
         // DataProtection keys - persisted to DB to survive container restarts
@@ -141,6 +142,19 @@ namespace NexClone.Backend.Infrastructure.Data
                 .HasOne(rt => rt.User)
                 .WithMany(u => u.RefreshTokens)
                 .HasForeignKey(rt => rt.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // PlanPaymentGateway mapping
+            builder.Entity<PlanPaymentGateway>()
+                .HasOne(ppg => ppg.Plan)
+                .WithMany(p => p.PlanPaymentGateways)
+                .HasForeignKey(ppg => ppg.PlanId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<PlanPaymentGateway>()
+                .HasOne(ppg => ppg.GatewayConfig)
+                .WithMany(gc => gc.PlanPaymentGateways)
+                .HasForeignKey(ppg => ppg.GatewayConfigId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Affiliate mapping removed

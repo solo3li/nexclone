@@ -17,16 +17,42 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
             _httpClient = httpClient;
         }
 
-        public async Task<PaymentResult> CreatePaymobIntentAsync(int planId, string userId, string userEmail, string userFirstName, string userLastName, string phoneNumber)
+        /// <inheritdoc/>
+        public async Task<PaymentResult> InitiatePaymentAsync(
+            int planId,
+            int gatewayConfigId,
+            string userId,
+            string userEmail,
+            string userName,
+            string phoneNumber,
+            string currency)
+        {
+            // Route based on currency
+            if (currency.ToUpperInvariant() == "EGP")
+            {
+                return await CreatePaymobIntentAsync(planId, gatewayConfigId, userId, userEmail, userName, phoneNumber);
+            }
+
+            // Future: add PayPal routing here when implemented
+            return new PaymentResult { IsSuccess = false, ErrorMessage = $"Currency '{currency}' is not yet supported." };
+        }
+
+        private async Task<PaymentResult> CreatePaymobIntentAsync(
+            int planId,
+            int gatewayConfigId,
+            string userId,
+            string userEmail,
+            string userName,
+            string phoneNumber)
         {
             // 1. Fetch Plan
             var plan = await _context.Plans.FindAsync(planId);
             if (plan == null) return new PaymentResult { IsSuccess = false, ErrorMessage = "Plan not found." };
 
-            // 2. Fetch active Paymob Config
+            // 2. Fetch Paymob Config by the resolved gatewayConfigId (already validated by caller)
             var paymobConfig = await _context.PaymentGatewayConfigs
-                .FirstOrDefaultAsync(c => c.ProviderName == "Paymob" && c.IsActive);
-            
+                .FirstOrDefaultAsync(c => c.Id == gatewayConfigId && c.ProviderName == "Paymob" && c.IsActive);
+
             if (paymobConfig == null || string.IsNullOrEmpty(paymobConfig.SecretKey) || string.IsNullOrEmpty(paymobConfig.PublicKey))
             {
                 return new PaymentResult { IsSuccess = false, ErrorMessage = "Paymob configuration is missing or inactive." };
@@ -34,13 +60,12 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
 
             // 3. Prepare payload (amount in cents)
             int amountCents = (int)(plan.PriceEgp * 100);
-            
-            // Replicate Python Intention API Payload
+
             var payload = new
             {
                 amount = amountCents,
                 currency = "EGP",
-                payment_methods = new[] { 4928859, 4928858 }, // We can read this from config later if needed
+                payment_methods = new[] { 4928859, 4928858 },
                 items = new[]
                 {
                     new
@@ -54,8 +79,8 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
                 billing_data = new
                 {
                     apartment = "NA",
-                    first_name = (userId.Length > 50) ? userId.Substring(0, 50) : userId, // We map this to UserID for the webhook
-                    last_name = (plan.Name.Length > 50) ? plan.Name.Substring(0, 50) : plan.Name, // Map to Plan Name
+                    first_name = (userId.Length > 50) ? userId.Substring(0, 50) : userId,
+                    last_name = (plan.Name.Length > 50) ? plan.Name.Substring(0, 50) : plan.Name,
                     street = "NA",
                     building = "NA",
                     phone_number = string.IsNullOrEmpty(phoneNumber) ? "+201553963637" : phoneNumber,
@@ -71,7 +96,10 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
             // 4. Send Request to Paymob Intention API
             var request = new HttpRequestMessage(HttpMethod.Post, "https://accept.paymob.com/v1/intention/");
             request.Headers.Authorization = new AuthenticationHeaderValue("Token", paymobConfig.SecretKey);
-            request.Content = new StringContent(JsonSerializer.Serialize(payload), System.Text.Encoding.UTF8, "application/json");
+            request.Content = new System.Net.Http.StringContent(
+                JsonSerializer.Serialize(payload),
+                System.Text.Encoding.UTF8,
+                "application/json");
 
             var response = await _httpClient.SendAsync(request);
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -83,14 +111,13 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
                 if (root.TryGetProperty("client_secret", out var clientSecretElement))
                 {
                     string clientSecret = clientSecretElement.GetString() ?? "";
-                    
-                    // Unified Checkout URL
                     string checkoutUrl = $"https://accept.paymob.com/unifiedcheckout/?publicKey={paymobConfig.PublicKey}&clientSecret={clientSecret}";
-                    
+
                     return new PaymentResult
                     {
                         IsSuccess = true,
-                        CheckoutUrl = checkoutUrl
+                        CheckoutUrl = checkoutUrl,
+                        Provider = "Paymob"
                     };
                 }
                 return new PaymentResult { IsSuccess = false, ErrorMessage = "No client secret returned from Paymob." };

@@ -24,5 +24,8 @@ namespace NexClone.Backend.Core.Entities
 
         public bool IsActive { get; set; } = true;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        // Navigation
+        public ICollection<PlanPaymentGateway> PlanPaymentGateways { get; set; } = new List<PlanPaymentGateway>();
     }
 }

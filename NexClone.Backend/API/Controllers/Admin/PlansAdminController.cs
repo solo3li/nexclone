@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using NexClone.Backend.Core.Entities;
 
 namespace NexClone.Backend.API.Controllers.Admin
 {
@@ -220,6 +221,95 @@ namespace NexClone.Backend.API.Controllers.Admin
             }
             return RedirectToAction(nameof(Index));
         }
+
+        // ─── Manage Payment Gateways ────────────────────────────────────────────────
+
+        [HttpGet]
+        public async Task<IActionResult> ManageGateways(int id)
+        {
+            var plan = await _context.Plans
+                .Include(p => p.PlanPaymentGateways)
+                    .ThenInclude(ppg => ppg.GatewayConfig)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (plan == null) return NotFound();
+
+            ViewData["Title"] = $"Payment Gateways for {plan.Name}";
+            ViewBag.AllGateways = await _context.PaymentGatewayConfigs
+                .Where(g => g.IsActive)
+                .ToListAsync();
+
+            return View(plan);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddGateway(
+            int planId,
+            int gatewayConfigId,
+            string currency,
+            string? displayName,
+            bool isDefault,
+            int sortOrder)
+        {
+            var plan = await _context.Plans.FindAsync(planId);
+            if (plan == null) return NotFound();
+
+            var gateway = await _context.PaymentGatewayConfigs.FindAsync(gatewayConfigId);
+            if (gateway == null) return NotFound();
+
+            // If marking as default, unset any existing default for this plan+currency
+            if (isDefault)
+            {
+                var existingDefaults = await _context.PlanPaymentGateways
+                    .Where(ppg => ppg.PlanId == planId && ppg.Currency == currency.ToUpperInvariant() && ppg.IsDefault)
+                    .ToListAsync();
+                foreach (var d in existingDefaults) d.IsDefault = false;
+            }
+
+            _context.PlanPaymentGateways.Add(new PlanPaymentGateway
+            {
+                PlanId          = planId,
+                GatewayConfigId = gatewayConfigId,
+                Currency        = currency.ToUpperInvariant(),
+                DisplayName     = displayName,
+                IsDefault       = isDefault,
+                SortOrder       = sortOrder,
+                IsActive        = true
+            });
+
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Payment gateway added successfully.";
+            return RedirectToAction(nameof(ManageGateways), new { id = planId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RemoveGateway(int id, int planId)
+        {
+            var link = await _context.PlanPaymentGateways.FindAsync(id);
+            if (link != null)
+            {
+                _context.PlanPaymentGateways.Remove(link);
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Gateway removed from plan.";
+            }
+            return RedirectToAction(nameof(ManageGateways), new { id = planId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleGateway(int id, int planId)
+        {
+            var link = await _context.PlanPaymentGateways.FindAsync(id);
+            if (link != null)
+            {
+                link.IsActive = !link.IsActive;
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(ManageGateways), new { id = planId });
+        }
+
+        // ────────────────────────────────────────────────────────────────────────────
 
         private bool PlanExists(int id)
         {
