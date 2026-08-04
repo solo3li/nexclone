@@ -280,6 +280,7 @@ namespace NexClone.Backend.API.Controllers.Client
 
             var token = GenerateJwtToken(user);
             SetTokenCookie(token);
+            await CreateAndSetRefreshTokenAsync(user, ipAddress);
 
             return Ok(new AuthResponse
             {
@@ -424,6 +425,7 @@ namespace NexClone.Backend.API.Controllers.Client
 
             var token = GenerateJwtToken(user);
             SetTokenCookie(token);
+            await CreateAndSetRefreshTokenAsync(user, ipAddress);
 
             return Ok(new AuthResponse
             {
@@ -551,7 +553,7 @@ namespace NexClone.Backend.API.Controllers.Client
                 issuer: issuer,
                 audience: audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddDays(15),
+                expires: DateTime.UtcNow.AddHours(1),
                 signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
@@ -565,17 +567,130 @@ namespace NexClone.Backend.API.Controllers.Client
                 HttpOnly = true,
                 Secure = isHttps,
                 SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
-                Expires = DateTime.UtcNow.AddDays(15),
+                Expires = DateTime.UtcNow.AddHours(1),
                 Path = "/"
             };
             Response.Cookies.Append("jwt", token, cookieOptions);
         }
 
-        [HttpPost("logout")]
-        public IActionResult Logout()
+        private RefreshToken GenerateRefreshToken(string ipAddress)
+        {
+            using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+            var randomBytes = new byte[64];
+            rng.GetBytes(randomBytes);
+
+            return new RefreshToken
+            {
+                Token = Convert.ToBase64String(randomBytes),
+                ExpiresAt = DateTime.UtcNow.AddDays(7),
+                CreatedAt = DateTime.UtcNow,
+                CreatedByIp = ipAddress
+            };
+        }
+
+        private void SetRefreshTokenCookie(string refreshToken)
         {
             var isHttps = Request.IsHttps || Request.Headers["X-Forwarded-Proto"] == "https";
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = isHttps,
+                SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
+                Expires = DateTime.UtcNow.AddDays(7),
+                Path = "/"
+            };
+            Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
+        }
+
+        private async Task<RefreshToken> CreateAndSetRefreshTokenAsync(ApplicationUser user, string ipAddress)
+        {
+            var refreshToken = GenerateRefreshToken(ipAddress);
+            refreshToken.UserId = user.Id;
+
+            _context.RefreshTokens.Add(refreshToken);
+            await _context.SaveChangesAsync();
+
+            SetRefreshTokenCookie(refreshToken.Token);
+            return refreshToken;
+        }
+
+        public class RefreshTokenRequest
+        {
+            public string? RefreshToken { get; set; }
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshTokenEndpoint([FromBody] RefreshTokenRequest? request)
+        {
+            var token = request?.RefreshToken ?? Request.Cookies["refreshToken"];
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return BadRequest(new { Message = "Refresh Token is required." });
+            }
+
+            var refreshToken = await _context.RefreshTokens
+                .Include(r => r.User)
+                .FirstOrDefaultAsync(r => r.Token == token);
+
+            if (refreshToken == null || !refreshToken.IsActive)
+            {
+                return Unauthorized(new { Message = "Invalid or expired Refresh Token." });
+            }
+
+            var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+
+            var newRefreshToken = GenerateRefreshToken(ipAddress);
+            newRefreshToken.UserId = refreshToken.UserId;
+
+            refreshToken.IsRevoked = true;
+            refreshToken.RevokedAt = DateTime.UtcNow;
+            refreshToken.RevokedByIp = ipAddress;
+            refreshToken.ReplacedByToken = newRefreshToken.Token;
+
+            _context.RefreshTokens.Add(newRefreshToken);
+            await _context.SaveChangesAsync();
+
+            var newJwt = GenerateJwtToken(refreshToken.User);
+            SetTokenCookie(newJwt);
+            SetRefreshTokenCookie(newRefreshToken.Token);
+
+            return Ok(new
+            {
+                Message = "Token refreshed successfully.",
+                AccessToken = newJwt,
+                RefreshToken = newRefreshToken.Token,
+                ExpiresIn = 3600
+            });
+        }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            var token = Request.Cookies["refreshToken"];
+            if (!string.IsNullOrEmpty(token))
+            {
+                var refreshToken = await _context.RefreshTokens.FirstOrDefaultAsync(r => r.Token == token);
+                if (refreshToken != null && refreshToken.IsActive)
+                {
+                    var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+                    refreshToken.IsRevoked = true;
+                    refreshToken.RevokedAt = DateTime.UtcNow;
+                    refreshToken.RevokedByIp = ipAddress;
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            var isHttps = Request.IsHttps || Request.Headers["X-Forwarded-Proto"] == "https";
             Response.Cookies.Append("jwt", "", new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = isHttps,
+                SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
+                Expires = DateTime.UtcNow.AddDays(-10),
+                Path = "/"
+            });
+            Response.Cookies.Append("refreshToken", "", new CookieOptions
             {
                 HttpOnly = true,
                 Secure = isHttps,

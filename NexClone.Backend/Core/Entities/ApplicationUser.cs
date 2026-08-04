@@ -30,5 +30,6 @@ namespace NexClone.Backend.Core.Entities
         public ICollection<Subscription> Subscriptions { get; set; } = new List<Subscription>();
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
         public ICollection<UserWallet> Wallets { get; set; } = new List<UserWallet>();
+        public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     }
 }
