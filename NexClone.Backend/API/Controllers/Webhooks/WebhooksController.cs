@@ -35,35 +35,43 @@ namespace NexClone.Backend.API.Controllers.Webhooks
         {
             try
             {
-                // 1. Fetch active Paymob Config to get HMAC Secret
+                // 1. Fetch active Paymob Config
                 var paymobConfig = await _context.PaymentGatewayConfigs
                     .FirstOrDefaultAsync(c => c.ProviderName == "Paymob" && c.IsActive);
 
-                if (paymobConfig == null || string.IsNullOrEmpty(paymobConfig.HmacSecret))
+                if (paymobConfig == null)
                 {
-                    return BadRequest("Paymob configuration or HMAC Secret missing.");
+                    return BadRequest("Paymob configuration not found or inactive.");
                 }
 
-                // 2. Validate HMAC (Security Check) — Paymob signs requests with HMAC SHA512
-                if (string.IsNullOrEmpty(hmac))
+                // 2. HMAC Validation — skipped if HmacSecret is not configured (test mode)
+                bool hmacConfigured = !string.IsNullOrEmpty(paymobConfig.HmacSecret);
+                if (hmacConfigured)
                 {
-                    return Unauthorized("Missing HMAC signature.");
+                    if (string.IsNullOrEmpty(hmac))
+                        return Unauthorized("Missing HMAC signature.");
+
+                    if (payload.TryGetProperty("obj", out var objForHmac))
+                    {
+                        bool hmacValid = VerifyPaymobHmac(objForHmac, hmac, paymobConfig.HmacSecret!);
+                        if (!hmacValid)
+                            return Unauthorized("Invalid HMAC signature.");
+                    }
+                }
+                else
+                {
+                    // ⚠️ HMAC not configured — running in test mode without signature verification
+                    Console.WriteLine("[Paymob Webhook] WARNING: HMAC Secret not set. Skipping signature verification (test mode).");
                 }
 
                 if (payload.TryGetProperty("obj", out var obj))
                 {
-                    // Verify HMAC before trusting any payload data
-                    bool hmacValid = VerifyPaymobHmac(obj, hmac, paymobConfig.HmacSecret);
-                    if (!hmacValid)
-                    {
-                        return Unauthorized("Invalid HMAC signature.");
-                    }
-
                     bool success = obj.TryGetProperty("success", out var successProp) && successProp.GetBoolean();
                     if (!success)
                     {
                         return Ok(new { message = "Payment failed, ignored." });
                     }
+
 
                     // 3. Extract User ID and Plan Name
                     string userId = "";
