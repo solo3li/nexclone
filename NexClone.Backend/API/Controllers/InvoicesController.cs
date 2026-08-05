@@ -81,5 +81,61 @@ namespace NexClone.Backend.API.Controllers
 
             return Ok(new { success = true, invoices });
         }
+
+        [HttpGet("generate-retro")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GenerateRetroInvoices(
+            [FromServices] NexClone.Backend.Infrastructure.ExternalServices.Invoicing.IInvoiceGeneratorService invoiceService,
+            [FromServices] NexClone.Backend.Core.Interfaces.IMediaService mediaService)
+        {
+            var subs = await _context.Subscriptions
+                .Include(s => s.Plan)
+                .Include(s => s.User)
+                .Where(s => !_context.Invoices.Any(i => i.SubscriptionId == s.Id))
+                .ToListAsync();
+
+            foreach(var sub in subs)
+            {
+                if (sub.Plan == null || sub.User == null) continue;
+
+                string verifyUrlBase = "https://nexmedia.ai";
+                decimal amountEgp = sub.Plan.PriceEgp;
+                decimal taxAmt = amountEgp * (sub.Plan.TaxPercentage / 100m);
+                var invoice = new Invoice
+                {
+                    InvoiceNumber = $"INV-{sub.CreatedAt.Year}-{Guid.NewGuid().ToString().Substring(0, 6).ToUpper()}",
+                    SubscriptionId = sub.Id,
+                    UserId = sub.UserId,
+                    PaymentGateway = "Retroactive",
+                    PaymentMethod = "System",
+                    Currency = "EGP",
+                    SubTotal = amountEgp - taxAmt,
+                    TaxAmount = taxAmt,
+                    TotalAmount = amountEgp,
+                    TransactionId = "RETRO-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
+                    CreatedAt = sub.CreatedAt,
+                    Subscription = sub
+                };
+                
+                _context.Invoices.Add(invoice);
+                await _context.SaveChangesAsync();
+
+                try
+                {
+                    byte[] pdfBytes = await invoiceService.GenerateInvoicePdfAsync(invoice, verifyUrlBase);
+                    using var ms = new System.IO.MemoryStream(pdfBytes);
+                    string minioUrl = await mediaService.UploadFileAsync(ms, $"invoices/{invoice.InvoiceNumber}.pdf", "application/pdf", "invoices");
+                    
+                    invoice.MinioPdfUrl = minioUrl;
+                    _context.Invoices.Update(invoice);
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Failed to generate/upload retro invoice PDF: " + ex.Message);
+                }
+            }
+            return Ok($"Generated {subs.Count} missing invoices");
+        }
     }
 }
