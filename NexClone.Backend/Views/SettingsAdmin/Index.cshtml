@@ -180,6 +180,11 @@
                 <input id="Concurrency_lipsync" type="number" class="bx--text-input" name="settings[Concurrency_lipsync]" value="@(Model.FirstOrDefault(s => s.Key == "Concurrency_lipsync")?.Value ?? "10")" placeholder="10" min="1">
             </div>
 
+            <div class="bx--form-item" style="margin-bottom: 1rem; flex: 1; min-width: 250px;">
+                <label for="Concurrency_motion_control" class="bx--label">@Localizer["Motion Transfer"]</label>
+                <input id="Concurrency_motion_control" type="number" class="bx--text-input" name="settings[Concurrency_motion_control]" value="@(Model.FirstOrDefault(s => s.Key == "Concurrency_motion_control")?.Value ?? "10")" placeholder="10" min="1">
+            </div>
+
             <div class="bx--form-item">
                 <label for="Concurrency_email" class="bx--label">@Localizer["System Emails"]</label>
                 <input id="Concurrency_email" type="number" class="bx--text-input" name="settings[Concurrency_email]" value="@(Model.FirstOrDefault(s => s.Key == "Concurrency_email")?.Value ?? "10")" placeholder="10" min="1">

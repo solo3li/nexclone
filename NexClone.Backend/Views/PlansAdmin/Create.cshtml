@@ -255,6 +255,40 @@
             </div>
         </div>
 
+        <!-- Motion Control Section -->
+        <h4 class="bx--type-productive-heading-03" style="margin-top: 2rem; margin-bottom: 1rem;">@Localizer["Motion Transfer Settings"]</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; background: #ffffff; padding: 1.5rem; border: 1px solid #e0e0e0; margin-bottom: 2rem;">
+            <div class="bx--form-item bx--checkbox-wrapper">
+                <input type="checkbox" id="MotionControlEnabled" name="MotionControlEnabled" value="true" class="bx--checkbox" @(Model?.MotionControlEnabled != false ? "checked" : "") />
+                <label for="MotionControlEnabled" class="bx--checkbox-label" title="Enable Motion Transfer">
+                    <span class="bx--checkbox-label-text" style="font-weight: bold;">@Localizer["Enable Motion Transfer"]</span>
+                </label>
+                <input type="hidden" name="MotionControlEnabled" value="false" />
+            </div>
+            <div class="bx--form-item">
+                <label for="MotionControlCostPerGeneration" class="bx--label">@Localizer["Standard Cost Per Generation (Credits)"]</label>
+                <input id="MotionControlCostPerGeneration" name="MotionControlCostPerGeneration" type="number" step="0.01" class="bx--text-input" value="@(Model?.MotionControlCostPerGeneration ?? 1.0m)" />
+            </div>
+            <div class="bx--form-item">
+                <label for="MotionControlProCost" class="bx--label">@Localizer["Pro Cost Per Generation (Credits)"]</label>
+                <input id="MotionControlProCost" name="MotionControlProCost" type="number" step="0.01" class="bx--text-input" value="@(Model?.MotionControlProCost ?? 2.0m)" />
+            </div>
+            <div class="bx--form-item">
+                <label for="MotionControlMaxVideoFileSizeMb" class="bx--label">@Localizer["Max Reference Video Size (MB)"]</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="MotionControlMaxVideoFileSizeMb" type="number" class="bx--text-input" name="MotionControlMaxVideoFileSizeMb" required min="-1" value="@(Model?.MotionControlMaxVideoFileSizeMb ?? 50)">
+                </div>
+                <div class="bx--form__helper-text">@Localizer["-1 for unlimited"]</div>
+            </div>
+            <div class="bx--form-item">
+                <label for="MotionControlMaxImageFileSizeMb" class="bx--label">@Localizer["Max Image Size (MB)"]</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="MotionControlMaxImageFileSizeMb" type="number" class="bx--text-input" name="MotionControlMaxImageFileSizeMb" required min="-1" value="@(Model?.MotionControlMaxImageFileSizeMb ?? 15)">
+                </div>
+                <div class="bx--form__helper-text">@Localizer["-1 for unlimited"]</div>
+            </div>
+        </div>
+
         <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-bottom: 2rem;">
             <div class="bx--form-item bx--checkbox-wrapper">
                 <input type="checkbox" id="IsDefaultRegistrationPlan" name="IsDefaultRegistrationPlan" value="true" class="bx--checkbox" />

@@ -291,6 +291,17 @@ namespace NexClone.Backend.Application.Services
                 policy.MaxVideoFileSizeMb = plan.LipSyncMaxVideoFileSizeMb;
                 policy.MaxAudioFileSizeMb = plan.LipSyncMaxAudioFileSizeMb;
             }
+            else if (toolId == "kling_motion_control" || toolId == "motion-control")
+            {
+                policy.Enabled = plan.MotionControlEnabled;
+                if (quality == "pro")
+                    policy.CostPerUnit = plan.MotionControlProCost;
+                else
+                    policy.CostPerUnit = plan.MotionControlCostPerGeneration;
+                
+                policy.MaxVideoFileSizeMb = plan.MotionControlMaxVideoFileSizeMb;
+                policy.MaxImageFileSizeMb = plan.MotionControlMaxImageFileSizeMb;
+            }
 
             return policy;
         }

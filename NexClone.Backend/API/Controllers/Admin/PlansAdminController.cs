@@ -114,6 +114,12 @@ namespace NexClone.Backend.API.Controllers.Admin
                 existingPlan.LipSyncEnabled = plan.LipSyncEnabled;
                 existingPlan.LipSyncCostPerGeneration = plan.LipSyncCostPerGeneration;
 
+                existingPlan.MotionControlEnabled = plan.MotionControlEnabled;
+                existingPlan.MotionControlCostPerGeneration = plan.MotionControlCostPerGeneration;
+                existingPlan.MotionControlProCost = plan.MotionControlProCost;
+                existingPlan.MotionControlMaxVideoFileSizeMb = plan.MotionControlMaxVideoFileSizeMb;
+                existingPlan.MotionControlMaxImageFileSizeMb = plan.MotionControlMaxImageFileSizeMb;
+
                 existingPlan.IsFreeTrial = plan.IsFreeTrial;
                 
                 existingPlan.IsDefaultRegistrationPlan = plan.IsDefaultRegistrationPlan;
