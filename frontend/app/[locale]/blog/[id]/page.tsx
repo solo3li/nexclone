@@ -2,8 +2,8 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { use, useEffect, useState } from "react";
-import api from "@/utils/api";
 import { useAppStore } from "@/store/useAppStore";
+import { useBlogStore } from "@/store/useBlogStore";
 
 export default function BlogPost({ params }: { params: Promise<{ id: string }> }) {
   // Next.js 15: params is a Promise, must be unwrapped with React.use()
@@ -13,6 +13,7 @@ export default function BlogPost({ params }: { params: Promise<{ id: string }> }
   const [commentContent, setCommentContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { isAuthenticated } = useAppStore();
+  const { fetchBlogPost, postComment } = useBlogStore();
 
   useEffect(() => {
     if (!id) return;
@@ -21,8 +22,8 @@ export default function BlogPost({ params }: { params: Promise<{ id: string }> }
 
   const fetchPost = async () => {
     try {
-      const res = await api.get(`/api/blog/${id}`);
-      setPost(res.data);
+      const data = await fetchBlogPost(id);
+      setPost(data);
     } catch (err) {
       console.error(err);
     }
@@ -34,7 +35,7 @@ export default function BlogPost({ params }: { params: Promise<{ id: string }> }
 
     setIsSubmitting(true);
     try {
-      await api.post(`/api/blog/${id}/comments`, { content: commentContent });
+      await postComment(id, commentContent);
       setCommentContent("");
       await fetchPost();
     } catch (err) {

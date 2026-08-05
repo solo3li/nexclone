@@ -53,6 +53,7 @@ export const API_ENDPOINTS = {
   // Blog
   BLOG: "/api/blog",
   BLOG_DETAILS: (id: string) => `/api/blog/${id}`,
+  BLOG_COMMENT: (id: string) => `/api/blog/${id}/comments`,
   BLOG_COMMENTS: (id: string) => `/api/blog/${id}/comments`,
   
   // AI Tools (Platform Configs)

@@ -11,7 +11,7 @@ import {
   Clock, Globe, User, Zap, Loader2, Download, Copy, Play, Pause,
   XCircle, CheckCircle2, AlertTriangle, FileAudio, AlignLeft
 } from "lucide-react";
-import api from "../../../../../src/utils/api";
+import { useHistoryStore } from "../../../../../src/store/useHistoryStore";
 
 interface HistoryDetail {
   id: string;
@@ -153,13 +153,15 @@ export default function HistoryDetailPage() {
   const [notFound, setNotFound] = useState(false);
   const [copied,   setCopied]   = useState(false);
 
+  const { fetchHistoryItem } = useHistoryStore();
+
   useEffect(() => {
     if (!id) return;
-    api.get(`/api/history/${id}`)
-      .then(r => setRecord(r.data))
+    fetchHistoryItem(id)
+      .then(data => setRecord(data))
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, fetchHistoryItem]);
 
   const copyText = (text: string) => {
     navigator.clipboard.writeText(text);
