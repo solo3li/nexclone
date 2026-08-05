@@ -183,6 +183,7 @@ builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IEmailTemplateServic
 
 // Register Payment Service
 builder.Services.AddHttpClient();
+builder.Services.AddScoped<NexClone.Backend.Infrastructure.ExternalServices.Invoicing.IInvoiceGeneratorService, NexClone.Backend.Infrastructure.ExternalServices.Invoicing.InvoiceGeneratorService>();
 builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IPaymentService, NexClone.Backend.Infrastructure.ExternalServices.Payments.PaymobPaymentService>();
 
 // Register Credit Manager

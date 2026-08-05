@@ -10,7 +10,8 @@ namespace NexClone.Backend.Core.Interfaces
             DateTime startDate, 
             DateTime endDate, 
             decimal monthlyCredits, 
-            decimal amountPaid = 0m);
+            decimal amountPaid = 0m,
+            string invoiceUrl = "");
 
         string GetGracePeriodEmail(
             string userName, 

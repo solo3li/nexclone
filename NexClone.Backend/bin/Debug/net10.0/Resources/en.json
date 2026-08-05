@@ -171,7 +171,7 @@
     "Extra Days": "Extra Days",
     "Amount": "Amount",
     "Operation": "Operation",
-    "Select a Plan (This will cancel the current active plan and apply the new one)": "Select a Plan (This will cancel the current active plan and apply the new one)",
+    "Select a Plan (This will add a new active plan alongside existing ones)": "Select a Plan (This will add a new active plan alongside existing ones)",
     "Delete User": "Delete User",
     "Extend": "Extend",
     "Update Credits": "Update Credits",

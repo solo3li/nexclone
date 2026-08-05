@@ -11,12 +11,19 @@ namespace NexClone.Backend.Application.Services
             DateTime startDate, 
             DateTime endDate, 
             decimal monthlyCredits, 
-            decimal amountPaid = 0m)
+            decimal amountPaid = 0m,
+            string invoiceUrl = "")
         {
             var culture = new CultureInfo("ar-EG");
             string formattedStartDate = startDate.ToString("dd MMMM yyyy, hh:mm tt", culture);
             string formattedEndDate = endDate.ToString("dd MMMM yyyy, hh:mm tt", culture);
             string formattedAmount = amountPaid > 0 ? $"{amountPaid:N2} ج.م" : "مجاناً";
+
+            string invoiceSection = string.IsNullOrEmpty(invoiceUrl) ? "" : $@"
+            <div style=""text-align: center; margin-top: 30px;"">
+                <p style=""font-size: 16px; color: #555;"">يمكنك تحميل وطباعة الفاتورة الضريبية الخاصة بك من هنا:</p>
+                <a href=""{invoiceUrl}"" style=""display: inline-block; padding: 12px 25px; background-color: #6366f1; color: #ffffff; text-decoration: none; font-weight: bold; border-radius: 8px; font-size: 16px; box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2);"">📄 عرض الفاتورة (PDF)</a>
+            </div>";
 
             return $@"
 <!DOCTYPE html>
@@ -61,66 +68,67 @@ namespace NexClone.Backend.Application.Services
             opacity: 0.9;
         }}
         .content {{
-            padding: 30px;
+            padding: 40px 30px;
         }}
-        .welcome {{
-            font-size: 18px;
+        .greeting {{
+            font-size: 20px;
             font-weight: 600;
-            color: #2c3e50;
             margin-bottom: 20px;
+            color: #222;
+        }}
+        .message {{
+            font-size: 16px;
+            line-height: 1.6;
+            color: #555;
+            margin-bottom: 30px;
         }}
         .details-box {{
-            background-color: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 25px;
+            background-color: #f8faff;
+            border: 1px solid #e1e8f0;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
         }}
-        .details-row {{
+        .details-box h2 {{
+            margin: 0 0 20px;
+            font-size: 18px;
+            color: #161616;
+            border-bottom: 2px solid #6366f1;
+            display: inline-block;
+            padding-bottom: 5px;
+        }}
+        .detail-item {{
             display: flex;
             justify-content: space-between;
-            margin-bottom: 12px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #e9ecef;
+            margin-bottom: 15px;
+            font-size: 15px;
         }}
-        .details-row:last-child {{
+        .detail-item:last-child {{
             margin-bottom: 0;
-            padding-bottom: 0;
-            border-bottom: none;
         }}
-        .details-label {{
+        .detail-label {{
             font-weight: 600;
-            color: #6c757d;
-            font-size: 15px;
+            color: #555;
         }}
-        .details-value {{
+        .detail-value {{
             font-weight: 700;
-            color: #2c3e50;
-            font-size: 15px;
+            color: #222;
         }}
-        .highlight {{
-            color: #0f62fe;
+        .amount-highlight {{
+            color: #10b981;
+            font-size: 18px;
         }}
         .footer {{
-            background-color: #f8f9fa;
+            background-color: #f9f9f9;
             padding: 20px;
             text-align: center;
-            font-size: 13px;
-            color: #6c757d;
-            border-top: 1px solid #e9ecef;
+            font-size: 14px;
+            color: #777;
+            border-top: 1px solid #eee;
         }}
-
-        @media only screen and (max-width: 600px) {{
-            .container {{
-                margin: 20px 10px;
-                width: auto;
-            }}
-            .details-row {{
-                flex-direction: column;
-            }}
-            .details-label {{
-                margin-bottom: 5px;
-            }}
+        .footer a {{
+            color: #6366f1;
+            text-decoration: none;
         }}
     </style>
 </head>
@@ -131,37 +139,12 @@ namespace NexClone.Backend.Application.Services
             <p>تم تفعيل اشتراكك بنجاح</p>
         </div>
         <div class=""content"">
-            <div class=""welcome"">مرحباً {userName}،</div>
-            <p style=""line-height: 1.6; color: #4a5568; margin-bottom: 25px;"">
-                شكراً لاختيارك NexMedia AI. يسعدنا إخبارك بأنه تم تفعيل اشتراكك بنجاح. 
-                يمكنك الآن الاستمتاع بكافة أدوات الذكاء الاصطناعي المتاحة في باقتك. إليك تفاصيل الاشتراك:
-            </p>
-
-            <div class=""details-box"">
-                <div class=""details-row"">
-                    <span class=""details-label"">الباقة الحالية:</span>
-                    <span class=""details-value highlight"">{planName}</span>
-                </div>
-                <div class=""details-row"">
-                    <span class=""details-label"">المبلغ المدفوع:</span>
-                    <span class=""details-value"">{formattedAmount}</span>
-                </div>
-                <div class=""details-row"">
-                    <span class=""details-label"">تاريخ البداية:</span>
-                    <span class=""details-value"" dir=""ltr"">{formattedStartDate}</span>
-                </div>
-                <div class=""details-row"">
-                    <span class=""details-label"">تاريخ الانتهاء:</span>
-                    <span class=""details-value"" dir=""ltr"">{formattedEndDate}</span>
-                </div>
-                <div class=""details-row"">
-                    <span class=""details-label"">الرصيد المتاح (الكريدتس):</span>
-                    <span class=""details-value"">{monthlyCredits} نقطة</span>
-                </div>
+            <div class=""greeting"">مرحباً {userName}،</div>
+            <div class=""message"">
+                شكراً لاختيارك NexMedia AI. يسعدنا إخبارك بأنه تم تفعيل اشتراكك في باقة <strong>{planName}</strong> بنجاح. أنت الآن مستعد للبدء في استخدام أدوات الذكاء الاصطناعي الخاصة بنا.
             </div>
-
-            <p style=""line-height: 1.6; color: #4a5568;"">
-                إذا كان لديك أي استفسار أو احتجت إلى مساعدة، فريق الدعم الفني لدينا جاهز لخدمتك في أي وقت.
+            
+            <div class=""details-box"">
             </p>
 
         </div>

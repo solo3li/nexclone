@@ -17,6 +17,7 @@ namespace NexClone.Backend.Infrastructure.Data
         public DbSet<EmailVerification> EmailVerifications { get; set; } = null!;
         public DbSet<Plan> Plans { get; set; } = null!;
         public DbSet<Subscription> Subscriptions { get; set; } = null!;
+        public DbSet<Invoice> Invoices { get; set; } = null!;
         public DbSet<Payment> Payments { get; set; } = null!;
         public DbSet<ApiConfiguration> ApiConfigurations { get; set; } = null!;
         public DbSet<PaymentGatewayConfig> PaymentGatewayConfigs { get; set; } = null!;

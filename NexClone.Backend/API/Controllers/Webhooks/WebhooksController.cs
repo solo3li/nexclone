@@ -17,17 +17,23 @@ namespace NexClone.Backend.API.Controllers.Webhooks
         private readonly IEmailService _emailService;
         private readonly IEmailTemplateService _emailTemplateService;
         private readonly WalletService _walletService;
+        private readonly NexClone.Backend.Infrastructure.ExternalServices.Invoicing.IInvoiceGeneratorService _invoiceService;
+        private readonly IMediaService _mediaService;
 
         public WebhooksController(
             ApplicationDbContext context, 
             IEmailService emailService, 
             IEmailTemplateService emailTemplateService,
-            WalletService walletService)
+            WalletService walletService,
+            NexClone.Backend.Infrastructure.ExternalServices.Invoicing.IInvoiceGeneratorService invoiceService,
+            IMediaService mediaService)
         {
             _context = context;
             _emailService = emailService;
             _emailTemplateService = emailTemplateService;
             _walletService = walletService;
+            _invoiceService = invoiceService;
+            _mediaService = mediaService;
         }
 
         [HttpPost("paymob")]
@@ -188,6 +194,43 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                     _context.Payments.Add(payment);
                     await _context.SaveChangesAsync();
 
+                    // Generate Invoice
+                    string verifyUrlBase = "https://nexmedia.ai"; // Replace with config variable later if needed
+                    decimal taxAmt = amountEgp * (plan.TaxPercentage / 100m);
+                    var invoice = new Invoice
+                    {
+                        InvoiceNumber = $"INV-{DateTime.UtcNow.Year}-{Guid.NewGuid().ToString().Substring(0, 6).ToUpper()}",
+                        SubscriptionId = currentSub?.Id ?? 0,
+                        UserId = user.Id,
+                        PaymentGateway = "Paymob",
+                        PaymentMethod = "Card", // Adjust based on Paymob details if needed
+                        Currency = "EGP",
+                        SubTotal = amountEgp - taxAmt,
+                        TaxAmount = taxAmt,
+                        TotalAmount = amountEgp,
+                        Subscription = currentSub
+                    };
+                    
+                    _context.Invoices.Add(invoice);
+                    await _context.SaveChangesAsync(); // Save to get VerificationToken if auto-generated
+
+                    // Generate PDF
+                    string minioUrl = "";
+                    try
+                    {
+                        byte[] pdfBytes = await _invoiceService.GenerateInvoicePdfAsync(invoice, verifyUrlBase);
+                        using var ms = new System.IO.MemoryStream(pdfBytes);
+                        minioUrl = await _mediaService.UploadFileAsync(ms, $"invoices/{invoice.InvoiceNumber}.pdf", "application/pdf", "invoices");
+                        
+                        invoice.MinioPdfUrl = minioUrl;
+                        _context.Invoices.Update(invoice);
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Failed to generate/upload invoice PDF: " + ex.Message);
+                    }
+
                     // Send Email Receipt
                     try
                     {
@@ -200,7 +243,8 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                                 sub.StartDate,
                                 sub.EndDate,
                                 plan.MonthlyCredits,
-                                amountEgp);
+                                amountEgp,
+                                minioUrl);
                             
                             await _emailService.SendEmailAsync(user.Email, user.FullName ?? "", "تم تفعيل اشتراكك بنجاح - NexMedia AI", htmlBody);
                         }
