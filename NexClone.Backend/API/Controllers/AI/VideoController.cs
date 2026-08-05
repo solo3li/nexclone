@@ -41,12 +41,12 @@ namespace NexClone.Backend.API.Controllers.AI
         }
 
         [HttpGet("estimate-avatar")]
-        public async Task<IActionResult> EstimateAvatar([FromQuery] int? subscriptionId = null)
+        public async Task<IActionResult> EstimateAvatar([FromQuery] string renderingSpeed = "std", [FromQuery] int? subscriptionId = null)
         {
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
-            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "avatar-video", 1, null, "Standard", subscriptionId);
+            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "kling_avatar_image2video", 1, null, renderingSpeed, subscriptionId);
             if (!policyResult.IsAllowed) return BadRequest(new { error = policyResult.ErrorMessage });
 
             return Ok(new { estimatedCost = policyResult.TotalCost, chargedWalletName = policyResult.ChargedWalletName });
@@ -58,7 +58,7 @@ namespace NexClone.Backend.API.Controllers.AI
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
-            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "advanced-lip-sync", 1, null, "Standard", subscriptionId);
+            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "kling_advanced_lip_sync", 1, null, "Standard", subscriptionId);
             if (!policyResult.IsAllowed) return BadRequest(new { error = policyResult.ErrorMessage });
 
             return Ok(new { estimatedCost = policyResult.TotalCost, chargedWalletName = policyResult.ChargedWalletName });
@@ -158,7 +158,7 @@ namespace NexClone.Backend.API.Controllers.AI
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
             // Fetch policy for limits validation
-            var policy = await _usagePolicy.GetToolPolicyForUserAsync(userId, "lipsync");
+            var policy = await _usagePolicy.GetToolPolicyForUserAsync(userId, "kling_advanced_lip_sync");
             
             if (!policy.Enabled)
                 return BadRequest(new { error = "Your current plan does not have access to this tool." });
@@ -172,7 +172,7 @@ namespace NexClone.Backend.API.Controllers.AI
 
             // Just charge (validation is done above)
             decimal usageAmountForLimits = 0; // Handled explicitly above
-            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "lipsync", usageAmountForLimits, 1, "Standard", subscriptionId);
+            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "kling_advanced_lip_sync", usageAmountForLimits, 1, "Standard", subscriptionId);
             
             if (!policyResult.IsAllowed)
                 return BadRequest(new { error = policyResult.ErrorMessage });
