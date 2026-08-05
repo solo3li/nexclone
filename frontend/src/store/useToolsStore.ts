@@ -11,6 +11,7 @@ interface ToolsState {
   startAvatar: (formData: FormData) => Promise<any>;
   startLipsync: (formData: FormData) => Promise<any>;
   startMotionControl: (formData: FormData) => Promise<any>;
+  estimateMotionControl: (qs: string) => Promise<any>;
 }
 
 export const useToolsStore = create<ToolsState>((set) => ({
@@ -67,6 +68,11 @@ export const useToolsStore = create<ToolsState>((set) => ({
     if (res.data.newBalance !== undefined) {
       useAppStore.getState().updateUser({ availableCredits: res.data.newBalance });
     }
+    return res.data;
+  },
+
+  estimateMotionControl: async (qs) => {
+    const res = await api.get(API_ENDPOINTS.ESTIMATE_MOTION_CONTROL(qs));
     return res.data;
   }
 }));

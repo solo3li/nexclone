@@ -22,7 +22,7 @@ function MotionControlPage() {
   const { user, isAuthenticated } = useAppStore();
   const router = useRouter();
   const { setUser } = useAppStore();
-  const { startMotionControl } = useToolsStore();
+  const { estimateMotionControl, startMotionControl } = useToolsStore();
 
   const [imageUrl, setImageUrl] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -57,14 +57,15 @@ function MotionControlPage() {
       params.append('renderingSpeed', renderingSpeed);
       if (subId) params.append('subscriptionId', subId);
 
-      api.get(`/api/video/estimate-motion-control?${params.toString()}`)
-        .then(res => {
-          if (isMounted && res.data) {
-            setEstimatedCost(res.data.estimatedCost);
-            setChargedWallet(res.data.chargedWalletName);
+      const qs = `?${params.toString()}`;
+      estimateMotionControl(qs)
+        .then((data: any) => {
+          if (isMounted) {
+            setEstimatedCost(data.estimatedCost);
+            setChargedWallet(data.chargedWalletName);
           }
         })
-        .catch(err => {
+        .catch((err: any) => {
           console.error("Failed to estimate cost", err);
           if (isMounted) setEstimatedCost(0);
         });
