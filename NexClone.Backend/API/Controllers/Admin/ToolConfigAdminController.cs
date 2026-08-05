@@ -31,6 +31,8 @@ namespace NexClone.Backend.API.Controllers.Admin
             var tools = new[] { "text-to-voice", "voice-to-text" };
             
             var toolConfigs = new Dictionary<string, ToolConfiguration>();
+            var concurrencyLimits = new Dictionary<string, int>();
+
             foreach (var t in tools)
             {
                 var config = allConfigs.FirstOrDefault(c => c.ToolName == t);
@@ -39,14 +41,26 @@ namespace NexClone.Backend.API.Controllers.Admin
                     config = new ToolConfiguration { ToolName = t, Id = Guid.NewGuid() };
                 }
                 toolConfigs[t] = config;
+
+                var settingKey = $"Concurrency_{t}";
+                var setting = await _context.AppSettings.FirstOrDefaultAsync(s => s.Key == settingKey);
+                if (setting != null && int.TryParse(setting.Value, out int limit))
+                {
+                    concurrencyLimits[t] = limit;
+                }
+                else
+                {
+                    concurrencyLimits[t] = 10; // Default limit
+                }
             }
 
+            ViewBag.ConcurrencyLimits = concurrencyLimits;
             return View(toolConfigs);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SaveConfig(ToolConfiguration config)
+        public async Task<IActionResult> SaveConfig(ToolConfiguration config, [FromForm] int? MaxConcurrentOperations)
         {
             if (ModelState.IsValid)
             {
@@ -86,6 +100,28 @@ namespace NexClone.Backend.API.Controllers.Admin
                     }
                     _context.Add(config);
                 }
+                if (MaxConcurrentOperations.HasValue)
+                {
+                    string settingKey = $"Concurrency_{config.ToolName}";
+                    var setting = await _context.AppSettings.FirstOrDefaultAsync(s => s.Key == settingKey);
+                    if (setting != null)
+                    {
+                        setting.Value = MaxConcurrentOperations.Value.ToString();
+                        setting.UpdatedAt = DateTime.UtcNow;
+                        _context.Update(setting);
+                    }
+                    else
+                    {
+                        _context.AppSettings.Add(new AppSetting
+                        {
+                            Key = settingKey,
+                            Value = MaxConcurrentOperations.Value.ToString(),
+                            Description = $"Max concurrent operations for {config.ToolName}",
+                            UpdatedAt = DateTime.UtcNow
+                        });
+                    }
+                }
+
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource>>()["Settings saved successfully."];
             }

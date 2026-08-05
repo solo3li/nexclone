@@ -266,7 +266,7 @@ namespace NexClone.Backend.API.Controllers.Client
             decimal amountEgp = plan.PriceEgp; // Base price
             decimal fixedFee = plan.FixedFeeEgp;
             decimal taxAmt = (amountEgp + fixedFee) * (plan.TaxPercentageEgp / 100m);
-            decimal totalAmount = amountEgp + fixedFee + taxAmt;
+            decimal subTotal = amountEgp - taxAmt - fixedFee;
             
             var invoice = new Invoice
             {
@@ -276,10 +276,10 @@ namespace NexClone.Backend.API.Controllers.Client
                 PaymentGateway = "Admin Assigned",
                 PaymentMethod = "Manual",
                 Currency = "EGP",
-                SubTotal = amountEgp,
+                SubTotal = subTotal,
                 TaxAmount = taxAmt,
                 FixedFeeAmount = fixedFee,
-                TotalAmount = totalAmount,
+                TotalAmount = amountEgp,
                 TransactionId = payment.PaymentId,
                 Subscription = newSub
             };

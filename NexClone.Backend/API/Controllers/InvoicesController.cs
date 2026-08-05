@@ -108,22 +108,40 @@ namespace NexClone.Backend.API.Controllers
 
                 string verifyUrlBase = "https://nexmedia.ai"; // or from config
                 
-                decimal fixedFee = sub.Plan.FixedFeeEgp;
-                decimal taxAmt = (sub.Plan.PriceEgp + fixedFee) * (sub.Plan.TaxPercentageEgp / 100m);
-                decimal subTotal = sub.Plan.PriceEgp - taxAmt - fixedFee;
+                var payment = await _context.Payments.FirstOrDefaultAsync(p => p.SubscriptionId == sub.Id);
+                string currency = payment?.Currency ?? "EGP";
+
+                decimal fixedFee = 0;
+                decimal taxAmt = 0;
+                decimal totalAmt = 0;
+
+                if (currency.ToUpper() == "USD")
+                {
+                    fixedFee = sub.Plan.FixedFeeUsd;
+                    taxAmt = (sub.Plan.PriceUsd + fixedFee) * (sub.Plan.TaxPercentageUsd / 100m);
+                    totalAmt = sub.Plan.PriceUsd;
+                }
+                else
+                {
+                    fixedFee = sub.Plan.FixedFeeEgp;
+                    taxAmt = (sub.Plan.PriceEgp + fixedFee) * (sub.Plan.TaxPercentageEgp / 100m);
+                    totalAmt = sub.Plan.PriceEgp;
+                }
+
+                decimal subTotal = totalAmt - taxAmt - fixedFee;
 
                 var invoice = new Invoice
                 {
                     InvoiceNumber = $"INV-{DateTime.UtcNow.Year}-{Guid.NewGuid().ToString().Substring(0, 6).ToUpper()}",
                     SubscriptionId = sub.Id,
                     UserId = sub.UserId,
-                    PaymentGateway = "Manual",
+                    PaymentGateway = payment?.Method ?? "Manual",
                     PaymentMethod = "Offline",
-                    Currency = "EGP",
+                    Currency = currency,
                     SubTotal = subTotal,
                     TaxAmount = taxAmt,
                     FixedFeeAmount = fixedFee,
-                    TotalAmount = sub.Plan.PriceEgp,
+                    TotalAmount = totalAmt,
                     TransactionId = "MANUAL-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
                     CreatedAt = sub.CreatedAt,
                     Subscription = sub

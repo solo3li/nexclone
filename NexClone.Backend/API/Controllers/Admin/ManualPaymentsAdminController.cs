@@ -146,10 +146,23 @@ namespace NexClone.Backend.API.Controllers.Admin
             if (currentSub != null)
             {
                 string verifyUrlBase = "https://nexmedia.ai";
-                decimal amountEgp = payment.Amount;
-                decimal fixedFee = payment.Plan.FixedFeeEgp;
-                decimal taxAmt = (payment.Plan.PriceEgp + fixedFee) * (payment.Plan.TaxPercentageEgp / 100m);
-                decimal subTotal = amountEgp - taxAmt - fixedFee;
+                decimal amount = payment.Amount;
+                
+                decimal fixedFee = 0;
+                decimal taxAmt = 0;
+                
+                if (payment.Currency?.ToUpper() == "USD")
+                {
+                    fixedFee = payment.Plan.FixedFeeUsd;
+                    taxAmt = (payment.Plan.PriceUsd + fixedFee) * (payment.Plan.TaxPercentageUsd / 100m);
+                }
+                else
+                {
+                    fixedFee = payment.Plan.FixedFeeEgp;
+                    taxAmt = (payment.Plan.PriceEgp + fixedFee) * (payment.Plan.TaxPercentageEgp / 100m);
+                }
+                
+                decimal subTotal = amount - taxAmt - fixedFee;
 
                 var invoice = new Invoice
                 {
@@ -158,11 +171,11 @@ namespace NexClone.Backend.API.Controllers.Admin
                     UserId = payment.UserId,
                     PaymentGateway = payment.Method,
                     PaymentMethod = "Offline",
-                    Currency = "EGP",
+                    Currency = payment.Currency ?? "EGP",
                     SubTotal = subTotal,
                     TaxAmount = taxAmt,
                     FixedFeeAmount = fixedFee,
-                    TotalAmount = amountEgp,
+                    TotalAmount = amount,
                     TransactionId = payment.PaymentId ?? payment.Id.ToString(),
                     Subscription = currentSub
                 };

@@ -56,11 +56,17 @@ namespace NexClone.Backend.API.Controllers.Admin
             foreach (var kvp in settings)
             {
                 var setting = existingSettings.FirstOrDefault(s => s.Key == kvp.Key);
+                var val = kvp.Value ?? "";
+                if (val.Contains(",")) 
+                {
+                    val = val.Split(',')[0];
+                }
+
                 if (setting != null)
                 {
-                    if (setting.Value != kvp.Value)
+                    if (setting.Value != val)
                     {
-                        setting.Value = kvp.Value ?? "";
+                        setting.Value = val;
                         setting.UpdatedAt = System.DateTime.UtcNow;
                         _context.Update(setting);
                     }
@@ -70,7 +76,7 @@ namespace NexClone.Backend.API.Controllers.Admin
                     _context.AppSettings.Add(new AppSetting
                     {
                         Key = kvp.Key,
-                        Value = kvp.Value ?? "",
+                        Value = val,
                         Description = "Dynamically added setting",
                         UpdatedAt = System.DateTime.UtcNow
                     });
