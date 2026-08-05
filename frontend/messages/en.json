@@ -486,7 +486,7 @@
     "error": "An error occurred during generation."
   },
   "MotionControl": {
-    "title": "Motion Control",
+    "title": "Motion Transfer",
     "uploadImage": "Upload Image",
     "imagePlaceholder": "Drag and drop or click to upload",
     "uploadVideo": "Upload Video",

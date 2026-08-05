@@ -119,7 +119,7 @@ export default function Navbar() {
                   <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center shrink-0">
                     <Video className="w-4 h-4 text-cyan-400" />
                   </div>
-                  <span className="text-sm font-medium text-white/90">{locale === 'ar' ? 'التحكم بالحركة' : 'Motion Control'}</span>
+                  <span className="text-sm font-medium text-white/90">{locale === 'ar' ? 'نسخ الحركة' : 'Motion Transfer'}</span>
                 </Link>
               </div>
             </div>

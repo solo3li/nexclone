@@ -223,7 +223,7 @@ export default function ToolsSection() {
     },
     {
       icon: Video,
-      title: locale === 'ar' ? 'التحكم بالحركة' : 'Motion Control',
+      title: locale === 'ar' ? 'نسخ الحركة' : 'Motion Transfer',
       desc: locale === 'ar' ? 'تحكم بحركة الشخصيات في الصور الثابتة وتحويلها إلى فيديو ديناميكي متقدم.' : 'Control character movement in static images and turn them into dynamic video.',
       badge: locale === 'ar' ? 'جديد' : 'New',
       badgeColor: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",

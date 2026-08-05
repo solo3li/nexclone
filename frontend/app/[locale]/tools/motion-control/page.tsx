@@ -499,7 +499,7 @@ function MotionControlPage() {
       
       <ToolInstructions 
         toolId="motion_control"
-        title={isRtl ? "كيفية استخدام التحكم بالحركة" : "How to use Motion Control"}
+        title={isRtl ? "كيفية استخدام نسخ الحركة" : "How to use Motion Transfer"}
         instructions={isRtl ? [
           "قم برفع صورة الشخصية (يفضل النصف العلوي فقط).",
           "قم برفع فيديو الحركة الذي تريد تطبيقه على الشخصية.",

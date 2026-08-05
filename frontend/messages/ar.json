@@ -486,7 +486,7 @@
     "error": "حدث خطأ أثناء التوليد."
   },
   "MotionControl": {
-    "title": "التحكم بالحركة",
+    "title": "نسخ الحركة",
     "uploadImage": "رفع الصورة",
     "imagePlaceholder": "اسحب وأفلت أو انقر للرفع",
     "uploadVideo": "رفع الفيديو",
