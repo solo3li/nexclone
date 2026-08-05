@@ -222,7 +222,7 @@
                             {
                                 int durationMonths = (int)Math.Ceiling((sub.EndDate - sub.StartDate).TotalDays / 30.0);
                                 var paymentInfo = sub.Payments != null && sub.Payments.Any() 
-                                    ? string.Join(", ", sub.Payments.Select(p => $"{p.Amount} {p.Currency} ({p.Status})")) 
+                                    ? string.Join(", ", sub.Payments.Select(p => $"{p.Amount} {p.Currency} via {p.Method ?? "Gateway"} ({p.Status})")) 
                                     : "No Payment (Manual/Free)";
                                 <tr>
                                     <td>@(sub.Plan?.Name ?? "Unknown Plan")</td>
