@@ -34,13 +34,7 @@
             <span asp-validation-for="ApiKey" style="color: #da1e28; font-size: 0.75rem; margin-top: 0.25rem; display: block;"></span>
         </div>
 
-        <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom: 2rem;">
-            <input id="IsActive" class="bx--checkbox" type="checkbox" value="true" name="IsActive" @(Model.IsActive ? "checked" : "")>
-            <input type="hidden" name="IsActive" value="false" />
-            <label for="IsActive" class="bx--checkbox-label" title="Active Status">
-                <span class="bx--checkbox-label-text">@Localizer["Set as Active Configuration"]</span>
-            </label>
-        </div>
+        <input type="hidden" name="IsActive" value="true" />
 
         <div style="display: flex; justify-content: flex-end; gap: 1rem;">
             <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">@Localizer["Cancel"]</a>
