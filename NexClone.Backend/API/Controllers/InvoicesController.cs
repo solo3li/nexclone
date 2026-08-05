@@ -44,6 +44,7 @@ namespace NexClone.Backend.API.Controllers
                 PlanName = invoice.Subscription?.Plan?.Name ?? "Custom Plan",
                 invoice.PaymentGateway,
                 invoice.PaymentMethod,
+                invoice.TransactionId,
                 invoice.SubTotal,
                 invoice.TaxAmount,
                 invoice.TotalAmount,

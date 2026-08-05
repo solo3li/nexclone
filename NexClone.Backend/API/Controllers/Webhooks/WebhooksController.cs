@@ -208,6 +208,7 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                         SubTotal = amountEgp - taxAmt,
                         TaxAmount = taxAmt,
                         TotalAmount = amountEgp,
+                        TransactionId = orderId.ToString(),
                         Subscription = currentSub
                     };
                     
@@ -473,7 +474,45 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                 });
                 await _context.SaveChangesAsync();
 
-                // 9. Send receipt email
+                // 9. Generate Invoice
+                string verifyUrlBase = "https://nexmedia.ai"; 
+                decimal taxAmtUsd = amountUsd * (plan.TaxPercentage / 100m);
+                var invoice = new Invoice
+                {
+                    InvoiceNumber = $"INV-{DateTime.UtcNow.Year}-{Guid.NewGuid().ToString().Substring(0, 6).ToUpper()}",
+                    SubscriptionId = currentSub?.Id ?? 0,
+                    UserId = user.Id,
+                    PaymentGateway = "PayPal",
+                    PaymentMethod = "Card/PayPal Wallet",
+                    Currency = "USD",
+                    SubTotal = amountUsd - taxAmtUsd,
+                    TaxAmount = taxAmtUsd,
+                    TotalAmount = amountUsd,
+                    TransactionId = transmissionId,
+                    Subscription = currentSub
+                };
+                
+                _context.Invoices.Add(invoice);
+                await _context.SaveChangesAsync();
+
+                // Generate PDF
+                string minioUrl = "";
+                try
+                {
+                    byte[] pdfBytes = await _invoiceService.GenerateInvoicePdfAsync(invoice, verifyUrlBase);
+                    using var ms = new System.IO.MemoryStream(pdfBytes);
+                    minioUrl = await _mediaService.UploadFileAsync(ms, $"invoices/{invoice.InvoiceNumber}.pdf", "application/pdf", "invoices");
+                    
+                    invoice.MinioPdfUrl = minioUrl;
+                    _context.Invoices.Update(invoice);
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Failed to generate/upload invoice PDF: " + ex.Message);
+                }
+
+                // 10. Send receipt email
                 try
                 {
                     if (!string.IsNullOrEmpty(user.Email) && currentSub != null)
@@ -484,7 +523,8 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                             currentSub.StartDate,
                             currentSub.EndDate,
                             plan.MonthlyCredits,
-                            amountUsd);
+                            amountUsd,
+                            minioUrl);
                         await _emailService.SendEmailAsync(
                             user.Email, user.FullName ?? "",
                             "تم تفعيل اشتراكك بنجاح - NexMedia AI", htmlBody);

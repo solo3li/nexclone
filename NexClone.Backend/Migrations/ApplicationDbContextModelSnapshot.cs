@@ -699,6 +699,10 @@ namespace NexClone.Backend.Migrations
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("numeric");
 
+                    b.Property<string>("TransactionId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 

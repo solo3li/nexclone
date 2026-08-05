@@ -33,6 +33,9 @@ namespace NexClone.Backend.Core.Entities
         [MaxLength(50)]
         public string PaymentMethod { get; set; } = "Unknown"; // Card, Wallet, etc.
 
+        [MaxLength(100)]
+        public string? TransactionId { get; set; } // Paymob Order ID or PayPal Capture ID
+
         [Required]
         [MaxLength(10)]
         public string Currency { get; set; } = "USD";

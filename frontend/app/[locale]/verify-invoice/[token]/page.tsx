@@ -81,6 +81,12 @@ export default function VerifyInvoicePage() {
                   <span className="text-gray-500 dark:text-gray-400">الباقة</span>
                   <span className="font-semibold text-gray-900 dark:text-white">{data.invoice.planName}</span>
                 </div>
+                {data.invoice.transactionId && (
+                  <div className="flex justify-between items-center py-3 border-b border-gray-100 dark:border-gray-700">
+                    <span className="text-gray-500 dark:text-gray-400">رقم العملية (Transaction ID)</span>
+                    <span className="font-semibold text-gray-900 dark:text-white font-mono text-sm">{data.invoice.transactionId}</span>
+                  </div>
+                )}
                 
                 <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mt-6">
                   <div className="flex justify-between items-center mb-2">

@@ -46,6 +46,10 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Invoicing
                     column.Item().Text($"Invoice #{invoice.InvoiceNumber}").FontSize(20).SemiBold().FontColor(Colors.Blue.Darken2);
                     column.Item().Text($"Date: {invoice.CreatedAt:d MMM yyyy}");
                     column.Item().Text($"Gateway: {invoice.PaymentGateway} ({invoice.PaymentMethod})");
+                    if (!string.IsNullOrEmpty(invoice.TransactionId))
+                    {
+                        column.Item().Text($"Transaction ID: {invoice.TransactionId}").FontSize(10).FontColor(Colors.Grey.Medium);
+                    }
                 });
 
                 row.ConstantItem(100).Height(50).Placeholder(); // Placeholder for Logo
