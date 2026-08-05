@@ -327,7 +327,7 @@ using (var scope = app.Services.CreateScope())
                 {
                     new NexClone.Backend.Core.Entities.ToolRoutingRule
                     {
-                        ProviderName = "CometAPI",
+                        ProviderName = "Picsart",
                         ModelName = tool == "kling_avatar_image2video" ? "kling-v1" : "kling-v1",
                         QualityLevel = "Standard"
                     }
@@ -337,8 +337,15 @@ using (var scope = app.Services.CreateScope())
         }
     }
     dbContext.SaveChanges();
-}
 
+    // Fix for existing CometAPI configs
+    var existingKlingRules = dbContext.ToolRoutingRules.Include(r => r.ToolConfiguration).Where(r => r.ProviderName == "CometAPI" && (r.ToolConfiguration.ToolName == "kling_avatar_image2video" || r.ToolConfiguration.ToolName == "kling_advanced_lip_sync")).ToList();
+    foreach(var r in existingKlingRules)
+    {
+        r.ProviderName = "Picsart";
+    }
+    dbContext.SaveChanges();
+}
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
