@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Download, FileText, ArrowLeft, ArrowRight, Crown, Activity } from 'lucide-react';
+import api from '../../../../src/utils/api';
+import { Download, FileText, ArrowLeft, ArrowRight, Crown, Activity, Lock } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useAppStore } from '../../../../src/store/useAppStore';
@@ -16,34 +16,26 @@ export default function MyInvoicesPage() {
 
   const isRtl = locale === 'ar';
   const user = useAppStore(state => state.user);
+  const isAuthenticated = useAppStore(state => state.isAuthenticated);
 
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const token = localStorage.getItem('token');
-        if (token) {
-          const res = await axios.get(`http://167.71.66.188:8080/api/history`, {
-             headers: { Authorization: `Bearer ${token}` }
-          });
+        if (isAuthenticated) {
+          const res = await api.get(`/api/history`);
           setHistoryCount(res.data.length);
         }
       } catch (err) {}
     };
     fetchHistory();
-  }, []);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const fetchInvoices = async () => {
       try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          router.push(`/${locale}/login`);
-          return;
-        }
+        if (!isAuthenticated) return;
 
-        const res = await axios.get(`http://167.71.66.188:8080/api/invoices/my-invoices`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.get(`/api/invoices/my-invoices`);
         setInvoices(res.data.invoices || []);
       } catch (err) {
         console.error('Failed to fetch invoices', err);
@@ -53,7 +45,23 @@ export default function MyInvoicesPage() {
     };
 
     fetchInvoices();
-  }, [locale, router]);
+  }, [locale, router, isAuthenticated]);
+
+  if (!isAuthenticated && !isLoading) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center py-20">
+         <div className="text-center p-10 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl max-w-md w-full relative overflow-hidden">
+            <div className="w-20 h-20 bg-white/5 rounded-2xl mx-auto flex items-center justify-center mb-6 border border-white/10 shadow-xl">
+               <Lock className="w-10 h-10 text-indigo-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-4">{isRtl ? "سجل الدخول للمتابعة" : "Login to continue"}</h2>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+               <button onClick={() => router.push(`/${locale}/login`)} className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold transition-all w-full">{isRtl ? "تسجيل الدخول" : "Login"}</button>
+            </div>
+         </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white p-4 sm:p-6 lg:p-8" dir={isRtl ? 'rtl' : 'ltr'}>
