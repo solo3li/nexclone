@@ -934,6 +934,7 @@ namespace NexClone.Backend.API.Controllers.Client
                     EndDate = activeSub.EndDate,
                     TtsCustomInstructionsEnabled = activeSub.Plan.TtsCustomInstructionsEnabled,
                     AvatarVideoCostPerGeneration = activeSub.Plan.AvatarVideoCostPerGeneration,
+                    AvatarVideoProCost = activeSub.Plan.AvatarVideoProCost,
                     LipSyncCostPerGeneration = activeSub.Plan.LipSyncCostPerGeneration,
                     SttCostPerMinute = activeSub.Plan.SttCostPerMinute,
                     TtsCostPerChar = activeSub.Plan.TtsCostPerChar,

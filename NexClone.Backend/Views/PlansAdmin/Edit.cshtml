@@ -199,8 +199,13 @@
                 <input type="hidden" name="AvatarVideoEnabled" value="false" />
             </div>
             <div class="bx--form-item">
-                <label for="AvatarVideoCostPerGeneration" class="bx--label">@Localizer["Cost Per Generation (Credits)"]</label>
+                <label for="AvatarVideoCostPerGeneration" class="bx--label">@Localizer["Cost Per Generation (Credits) - Standard"]</label>
                 <input id="AvatarVideoCostPerGeneration" name="AvatarVideoCostPerGeneration" type="number" step="0.01" class="bx--text-input" value="@Model.AvatarVideoCostPerGeneration" />
+            </div>
+            
+            <div class="bx--form-item">
+                <label for="AvatarVideoProCost" class="bx--label">@Localizer["Cost Per Generation (Credits) - Fast"]</label>
+                <input id="AvatarVideoProCost" name="AvatarVideoProCost" type="number" step="0.01" class="bx--text-input" value="@Model.AvatarVideoProCost" />
             </div>
             <div class="bx--form-item">
                 <label for="AvatarVideoMaxFileSizeMb" class="bx--label">@Localizer["Max Image Size (MB)"]</label>

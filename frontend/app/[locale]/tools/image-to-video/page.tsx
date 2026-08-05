@@ -43,10 +43,12 @@ function ImageToVideoPage() {
   const [estimatedCost, setEstimatedCost] = useState<number>(user?.activePlan?.avatarVideoCostPerGeneration || 1);
   const [chargedWallet, setChargedWallet] = useState<string | null>(null);
 
+  const [renderingSpeed, setRenderingSpeed] = useState<"std" | "pro">("std");
+  
   useEffect(() => {
     if (isAuthenticated && user) {
       const subId = sessionStorage.getItem('preferredSubscriptionId');
-      const qs = subId ? `?subscriptionId=${subId}` : '';
+      const qs = subId ? `?subscriptionId=${subId}&renderingSpeed=${renderingSpeed}` : `?renderingSpeed=${renderingSpeed}`;
       api.get(`/api/video/estimate-avatar${qs}`).then(res => {
         if (res.data) {
           setEstimatedCost(res.data.estimatedCost);
@@ -56,10 +58,14 @@ function ImageToVideoPage() {
         console.warn("Failed to get estimated cost:", err.response?.data?.error || err.message);
       });
     } else {
-      setEstimatedCost(user?.activePlan?.avatarVideoCostPerGeneration || 1);
+      setEstimatedCost(
+        renderingSpeed === "pro" 
+          ? (user?.activePlan?.avatarVideoProCost || 2) 
+          : (user?.activePlan?.avatarVideoCostPerGeneration || 1)
+      );
       setChargedWallet(null);
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, renderingSpeed]);
   useEffect(() => {
     const fetchConfig = async () => {
       try {
@@ -143,6 +149,7 @@ function ImageToVideoPage() {
       formData.append("image", imageFile);
       if (audioFile) formData.append("audio", audioFile);
       if (prompt) formData.append("prompt", prompt);
+      formData.append("renderingSpeed", renderingSpeed);
 
       const subId = sessionStorage.getItem('preferredSubscriptionId');
       if (subId) {
@@ -401,6 +408,25 @@ function ImageToVideoPage() {
               
               <div className="space-y-3" dir={isRtl ? 'rtl' : 'ltr'}>
                 
+                {/* Processing Speed Selection */}
+                <div className="bg-black/20 rounded-xl p-3 border border-white/5 space-y-3">
+                  <h3 className="text-white text-sm font-medium">{isRtl ? "سرعة المعالجة" : "Processing Speed"}</h3>
+                  <div className="flex bg-black/40 rounded-lg p-1">
+                    <button
+                      onClick={() => setRenderingSpeed("std")}
+                      className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${renderingSpeed === "std" ? "bg-white/20 text-white shadow-sm" : "text-white/60 hover:text-white/80"}`}
+                    >
+                      {isRtl ? "عادي" : "Standard"}
+                    </button>
+                    <button
+                      onClick={() => setRenderingSpeed("pro")}
+                      className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${renderingSpeed === "pro" ? "bg-fuchsia-600/50 text-fuchsia-100 shadow-sm" : "text-white/60 hover:text-white/80"}`}
+                    >
+                      {isRtl ? "سريع (Pro)" : "Fast (Pro)"}
+                    </button>
+                  </div>
+                </div>
+
                 {/* Cost Estimation */}
                 <div className="bg-fuchsia-500/10 border border-fuchsia-500/20 rounded-xl p-3 flex justify-between items-center">
                   <span className="text-fuchsia-200/80 text-xs font-medium">{t('estimatedCost')}</span>

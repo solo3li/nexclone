@@ -52,6 +52,7 @@ namespace NexClone.Backend.Core.Entities
         // Avatar Image-to-Video Settings
         public bool AvatarVideoEnabled { get; set; } = true;
         public decimal AvatarVideoCostPerGeneration { get; set; } = 1.0m;
+        public decimal AvatarVideoProCost { get; set; } = 2.0m;
         public int AvatarVideoMaxFileSizeMb { get; set; } = 15;
         public int AvatarVideoMaxAudioFileSizeMb { get; set; } = 15;
         public int AvatarVideoMaxCharsPerRequest { get; set; } = 500;

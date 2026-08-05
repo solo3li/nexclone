@@ -65,39 +65,52 @@ namespace NexClone.Backend.Infrastructure.Consumers
 
                 var payload = new
                 {
-                    model = modelName,
-                    prompt = message.Prompt ?? "lip sync",
-                    image = imageUrl,
-                    image_url = imageUrl,
-                    sound_file = audioUrl,
-                    audio = audioUrl,
-                    mode = "std"
+                    params_ = new // C# doesn't let us use 'params', so we serialize with options or use a dict
+                    {
+                        prompt = message.Prompt ?? "The speaker talks naturally to camera",
+                        imageUrls = new[] { imageUrl },
+                        audioUrl = audioUrl,
+                        renderingSpeed = message.RenderingSpeed ?? "std"
+                    }
                 };
 
-                var jsonContent = new StringContent(JsonSerializer.Serialize(payload), System.Text.Encoding.UTF8, "application/json");
-                var response = await client.PostAsync("https://api.cometapi.com/v1/images/generations", jsonContent);
+                // Create a dict to bypass 'params' reserved keyword issue
+                var jsonPayload = new System.Collections.Generic.Dictionary<string, object>
+                {
+                    ["params"] = new 
+                    {
+                        prompt = message.Prompt ?? "The speaker talks naturally to camera",
+                        imageUrls = new[] { imageUrl },
+                        audioUrl = audioUrl,
+                        renderingSpeed = message.RenderingSpeed ?? "std"
+                    }
+                };
+
+                var jsonContent = new StringContent(JsonSerializer.Serialize(jsonPayload), System.Text.Encoding.UTF8, "application/json");
+                var response = await client.PostAsync("https://api.picsart.com/gw-v2/workflows/kling-avatar/submit", jsonContent);
                 var responseString = await response.Content.ReadAsStringAsync();
 
                 if (!response.IsSuccessStatusCode)
-                    throw new Exception($"API Error: {responseString}");
+                    throw new Exception($"Picsart API Error: {responseString}");
 
                 using var doc = JsonDocument.Parse(responseString);
                 var root = doc.RootElement;
                 string taskId = "";
 
-                if (root.TryGetProperty("data", out var dataEl) && dataEl.TryGetProperty("task_id", out var taskIdEl))
-                    taskId = taskIdEl.GetString();
-                else if (root.TryGetProperty("id", out var idElement))
-                    taskId = idElement.GetString();
+                // Picsart format: { "status": "success", "response": { "id": "wf_abc123" } }
+                if (root.TryGetProperty("response", out var respEl) && respEl.TryGetProperty("id", out var idEl))
+                {
+                    taskId = idEl.GetString();
+                }
 
                 if (string.IsNullOrEmpty(taskId))
-                    throw new Exception($"Failed to get task_id. Response: {responseString}");
+                    throw new Exception($"Failed to get task_id from Picsart. Response: {responseString}");
 
                 history.ResultText = taskId;
                 await _dbContext.SaveChangesAsync();
 
-                // Polling
-                string outputUrl = await PollCometApiTask(client, taskId);
+                // Polling logic for Picsart
+                string outputUrl = await PollPicsartApiTask(client, taskId);
 
                 history.Status = "completed";
                 history.FileUrl = outputUrl;

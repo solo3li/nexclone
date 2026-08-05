@@ -87,6 +87,46 @@ namespace NexClone.Backend.Infrastructure.Consumers
             return outputUrl;
         }
 
+        protected async Task<string> PollPicsartApiTask(HttpClient client, string taskId)
+        {
+            string outputUrl = "";
+            for (int i = 0; i < 60; i++)
+            {
+                await Task.Delay(10000); // Poll every 10 seconds (max 10 mins)
+                var pollResponse = await client.GetAsync($"https://api.picsart.com/gw-v2/workflows/kling-avatar/{taskId}/result");
+                var pollString = await pollResponse.Content.ReadAsStringAsync();
+
+                using var pollDoc = JsonDocument.Parse(pollString);
+                var pollRoot = pollDoc.RootElement;
+                
+                // Picsart format: { "status": "success", "response": { "status": "COMPLETED", "result": { "url": "..." } } }
+                if (pollRoot.TryGetProperty("response", out var respEl))
+                {
+                    if (respEl.TryGetProperty("status", out var statusEl))
+                    {
+                        var status = statusEl.GetString()?.ToUpper();
+                        if (status == "COMPLETED")
+                        {
+                            if (respEl.TryGetProperty("result", out var resultEl) && resultEl.TryGetProperty("url", out var urlEl))
+                            {
+                                outputUrl = urlEl.GetString();
+                                break;
+                            }
+                        }
+                        else if (status == "FAILED" || status == "ERROR")
+                        {
+                            throw new Exception($"Picsart Task failed: {pollString}");
+                        }
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(outputUrl))
+                throw new Exception("Timed out waiting for Picsart task to complete.");
+
+            return outputUrl;
+        }
+
         protected async Task<(string ApiKey, string ModelName)> GetToolConfigAsync(string toolName)
         {
             var toolConfig = await _dbContext.ToolConfigurations

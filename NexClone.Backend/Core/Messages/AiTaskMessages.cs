@@ -17,6 +17,7 @@ namespace NexClone.Backend.Core.Messages
         public byte[] AudioBytes { get; set; }
         public string AudioContentType { get; set; }
         public string Prompt { get; set; }
+        public string RenderingSpeed { get; set; }
     }
 
     public class LipSyncMessage : IAiTaskMessage

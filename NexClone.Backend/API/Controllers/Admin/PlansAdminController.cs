@@ -107,6 +107,7 @@ namespace NexClone.Backend.API.Controllers.Admin
 
                 existingPlan.AvatarVideoEnabled = plan.AvatarVideoEnabled;
                 existingPlan.AvatarVideoCostPerGeneration = plan.AvatarVideoCostPerGeneration;
+                existingPlan.AvatarVideoProCost = plan.AvatarVideoProCost;
                 existingPlan.AvatarVideoMaxFileSizeMb = plan.AvatarVideoMaxFileSizeMb;
                 existingPlan.AvatarVideoMaxCharsPerRequest = plan.AvatarVideoMaxCharsPerRequest;
 

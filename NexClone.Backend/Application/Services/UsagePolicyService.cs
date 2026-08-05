@@ -275,7 +275,11 @@ namespace NexClone.Backend.Application.Services
             else if (toolId == "kling_avatar_image2video")
             {
                 policy.Enabled = plan.AvatarVideoEnabled;
-                policy.CostPerUnit = plan.AvatarVideoCostPerGeneration;
+                if (quality == "pro")
+                    policy.CostPerUnit = plan.AvatarVideoProCost;
+                else
+                    policy.CostPerUnit = plan.AvatarVideoCostPerGeneration;
+                
                 policy.MaxImageFileSizeMb = plan.AvatarVideoMaxFileSizeMb;
                 policy.MaxAudioFileSizeMb = plan.AvatarVideoMaxAudioFileSizeMb;
                 policy.MaxCharsPerRequest = plan.AvatarVideoMaxCharsPerRequest;

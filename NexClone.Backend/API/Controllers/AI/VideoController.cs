@@ -65,7 +65,7 @@ namespace NexClone.Backend.API.Controllers.AI
         }
 
         [HttpPost("start-avatar")]
-        public async Task<IActionResult> StartAvatar(IFormFile image, [FromForm] IFormFile? audio = null, [FromForm] string prompt = "The speaker talks naturally to camera", [FromForm] int? subscriptionId = null)
+        public async Task<IActionResult> StartAvatar(IFormFile image, [FromForm] IFormFile? audio = null, [FromForm] string prompt = "The speaker talks naturally to camera", [FromForm] int? subscriptionId = null, [FromForm] string renderingSpeed = "std")
         {
             if (image == null || image.Length == 0)
                 return BadRequest(new { error = "Image is required." });
@@ -74,7 +74,7 @@ namespace NexClone.Backend.API.Controllers.AI
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
             // Fetch policy for limits validation
-            var policy = await _usagePolicy.GetToolPolicyForUserAsync(userId, "kling_avatar_image2video");
+            var policy = await _usagePolicy.GetToolPolicyForUserAsync(userId, "kling_avatar_image2video", renderingSpeed);
             
             if (!policy.Enabled)
                 return BadRequest(new { error = "Your current plan does not have access to this tool." });
@@ -91,7 +91,7 @@ namespace NexClone.Backend.API.Controllers.AI
 
             // Just charge (validation is done above)
             decimal usageAmountForLimits = 0; // Handled explicitly above
-            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "kling_avatar_image2video", usageAmountForLimits, 1, "Standard", subscriptionId);
+            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "kling_avatar_image2video", usageAmountForLimits, 1, renderingSpeed, subscriptionId);
             if (!policyResult.IsAllowed)
                 return BadRequest(new { error = policyResult.ErrorMessage });
 
@@ -134,7 +134,8 @@ namespace NexClone.Backend.API.Controllers.AI
                     ImageContentType = imageContentType,
                     AudioBytes = audioBytes,
                     AudioContentType = audioContentType,
-                    Prompt = prompt
+                    Prompt = prompt,
+                    RenderingSpeed = renderingSpeed
                 });
 
                 // Return OK immediately so frontend can show the Wait/Leave UI
