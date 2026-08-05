@@ -8,8 +8,9 @@ import {
   Activity, Crown, History, User as UserIcon, Lock,
   Image as ImageIcon, Loader2, Save, Upload, LifeBuoy, MessageSquarePlus, Share2
 } from "lucide-react";
-import api from "../../../src/utils/api";
-import { useAppStore } from "../../../src/store/useAppStore";
+import { useAuthStore } from "../../../src/store/useAuthStore";
+import { useProfileStore } from "../../../src/store/useProfileStore";
+import { useHistoryStore } from "../../../src/store/useHistoryStore";
 
 export default function ProfilePage() {
   const t = useTranslations("Profile");
@@ -17,8 +18,9 @@ export default function ProfilePage() {
   const isRtl = locale === "ar";
   const router = useRouter();
   
-  const user = useAppStore(state => state.user);
-  const isAuthenticated = useAppStore(state => state.isAuthenticated);
+  const { user, isAuthenticated } = useAuthStore();
+  const { updateProfile, changePassword } = useProfileStore();
+  const { fetchHistory } = useHistoryStore();
   
   const [historyCount, setHistoryCount] = useState(0);
   const [isReady, setIsReady] = useState(false);
@@ -45,19 +47,19 @@ export default function ProfilePage() {
   }, [user]);
 
   useEffect(() => {
-    const fetchHistory = async () => {
+    const getHistoryCount = async () => {
       if (!user) return;
       try {
-        const res = await api.get("/api/history");
-        setHistoryCount(res.data.length);
+        const history = await fetchHistory();
+        setHistoryCount(history.length);
       } catch (err) {
         console.error("Failed to fetch history count:", err);
       }
     };
     if (isReady) {
-      fetchHistory();
+      getHistoryCount();
     }
-  }, [user, isReady]);
+  }, [user, isReady, fetchHistory]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -76,15 +78,12 @@ export default function ProfilePage() {
         formData.append("ProfileImage", profileImage);
       }
 
-      const res = await api.put("/api/profile", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data"
-        }
-      });
+      const res = await updateProfile(formData);
       
-      // Update local store
+      // Update local state if needed (store already fetches me internally)
       if (user) {
-        useAppStore.setState({ user: { ...user, fullName: res.data.fullName, imageUrl: res.data.imageUrl } });
+         setFullName(res.fullName);
+         setImagePreview(res.imageUrl);
       }
       alert(isRtl ? "تم التحديث بنجاح" : "Profile updated successfully");
     } catch (err) {
@@ -99,7 +98,7 @@ export default function ProfilePage() {
     if (!currentPassword || !newPassword) return;
     setSavingPassword(true);
     try {
-      await api.post("/api/profile/change-password", { currentPassword, newPassword });
+      await changePassword({ currentPassword, newPassword });
       alert(isRtl ? "تم تغيير كلمة المرور بنجاح" : "Password changed successfully");
       setCurrentPassword("");
       setNewPassword("");

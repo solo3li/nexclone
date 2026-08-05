@@ -6,7 +6,7 @@ import { Link } from "../../../src/i18n/routing";
 import Navbar from "../../../src/components/Navbar";
 import { Mail, Lock, User, ArrowRight, ArrowLeft, CheckCircle, XCircle, Eye, EyeOff } from "lucide-react";
 import { useState, useCallback } from "react";
-import api from "../../../src/utils/api";
+import { useAuthStore } from "../../../src/store/useAuthStore";
 import { useRouter } from "../../../src/i18n/routing";
 import { GoogleLoginButton } from "../../../components/GoogleLoginButton";
 import { useSearchParams } from "next/navigation";
@@ -64,6 +64,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const refCode = searchParams.get("ref") || undefined;
+  const { register } = useAuthStore();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -159,7 +160,7 @@ export default function RegisterPage() {
         console.warn("Fingerprint blocked or timed out, using fallback");
       }
 
-      const res = await api.post("/api/auth/register", {
+      const res = await register({
         fullName: name,
         email,
         password,

@@ -2,11 +2,11 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { motion } from "framer-motion";
-import { useTranslations, useLocale } from "next-intl";
+import { useLocale } from "next-intl";
 import { useRouter } from "../../../src/i18n/routing";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle, XCircle, Loader2, Mail } from "lucide-react";
-import api from "../../../src/utils/api";
+import { useAuthStore } from "../../../src/store/useAuthStore";
 import Navbar from "../../../src/components/Navbar";
 import Footer from "../../../src/components/Footer";
 
@@ -20,6 +20,7 @@ function VerifyEmailContent() {
   // Status can be: 'loading', 'success', 'error', 'timer'
   const [status, setStatus] = useState<"loading" | "success" | "error" | "timer">("loading");
   const [message, setMessage] = useState("");
+  const { verifyEmail, checkCooldown, resendVerification } = useAuthStore();
   const [remainingSeconds, setRemainingSeconds] = useState(0);
 
   useEffect(() => {
@@ -33,9 +34,9 @@ function VerifyEmailContent() {
     if (token) {
       const verify = async () => {
         try {
-          const res = await api.post("/api/auth/verify-email", { email, token });
+          const res = await verifyEmail(email, token);
           setStatus("success");
-          setMessage(res.data.Message || (locale === 'ar' ? "تم تفعيل حسابك بنجاح!" : "Account verified successfully!"));
+          setMessage(res.Message || (locale === 'ar' ? "تم تفعيل حسابك بنجاح!" : "Account verified successfully!"));
         } catch (err: any) {
           setStatus("error");
           setMessage(err.response?.data?.Message || (locale === 'ar' ? "حدث خطأ أثناء التفعيل." : "Verification failed."));
@@ -46,11 +47,11 @@ function VerifyEmailContent() {
     }
 
     // SCENARIO 2: No Token => Show Timer / Resend Screen
-    const checkCooldown = async () => {
+    const fetchCooldown = async () => {
       try {
-        const res = await api.get(`/api/auth/resend-cooldown?email=${encodeURIComponent(email)}`);
+        const res = await checkCooldown(email);
         
-        if (res.data.Allowed === false && res.data.Message === "تم تفعيل الحساب مسبقاً.") {
+        if (res.Allowed === false && res.Message === "تم تفعيل الحساب مسبقاً.") {
            // User is already verified
            setStatus("success");
            setMessage(locale === 'ar' ? "حسابك مفعل مسبقاً." : "Your account is already verified.");
@@ -58,14 +59,14 @@ function VerifyEmailContent() {
         }
 
         setStatus("timer");
-        setRemainingSeconds(res.data.RemainingSeconds || 0);
+        setRemainingSeconds(res.RemainingSeconds || 0);
       } catch (err: any) {
         setStatus("error");
         setMessage(err.response?.data?.Message || (locale === 'ar' ? "حدث خطأ أثناء فحص حالة الحساب." : "Failed to check account status."));
       }
     };
 
-    checkCooldown();
+    fetchCooldown();
   }, [email, token, locale]);
 
   // Handle Local Timer
@@ -84,8 +85,8 @@ function VerifyEmailContent() {
     
     setStatus("loading");
     try {
-      const res = await api.post("/api/auth/resend-verification", { email });
-      setMessage(res.data.Message || (locale === 'ar' ? "تم إرسال رسالة التفعيل بنجاح." : "Verification email sent successfully."));
+      const res = await resendVerification(email);
+      setMessage(res.Message || (locale === 'ar' ? "تم إرسال رسالة التفعيل بنجاح." : "Verification email sent successfully."));
       setRemainingSeconds(300); // 5 minutes
       setStatus("timer");
     } catch (err: any) {
@@ -93,8 +94,8 @@ function VerifyEmailContent() {
       setMessage(err.response?.data?.Message || (locale === 'ar' ? "فشل إرسال رسالة التفعيل." : "Failed to send verification email."));
       // Restore timer if it was a rate limit error (e.g. from a different tab)
       if (err.response?.status === 429) {
-          api.get(`/api/auth/resend-cooldown?email=${encodeURIComponent(email)}`).then(res => {
-              setRemainingSeconds(res.data.RemainingSeconds || 0);
+          checkCooldown(email).then(res => {
+              setRemainingSeconds(res.RemainingSeconds || 0);
               setStatus("timer");
           });
       }
@@ -197,10 +198,10 @@ function VerifyEmailContent() {
                         setMessage("");
                         setStatus("loading");
                         // Refresh cooldown logic
-                        api.get(`/api/auth/resend-cooldown?email=${encodeURIComponent(email)}`)
+                        checkCooldown(email)
                            .then(res => {
                               setStatus("timer");
-                              setRemainingSeconds(res.data.RemainingSeconds || 0);
+                              setRemainingSeconds(res.RemainingSeconds || 0);
                            }).catch(() => setStatus("error"));
                     }}
                     className="mt-6 px-8 py-3 rounded-xl bg-white/10 border border-white/20 text-white font-bold hover:bg-white/20 transition-all"

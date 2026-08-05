@@ -6,9 +6,9 @@ import { Link } from "../../../src/i18n/routing";
 import Navbar from "../../../src/components/Navbar";
 import { Mail, Lock, ArrowRight, ArrowLeft, CheckCircle, XCircle, Eye, EyeOff } from "lucide-react";
 import { useState, useCallback } from "react";
-import api from "../../../src/utils/api";
+
 import { useRouter } from "../../../src/i18n/routing";
-import { useAppStore } from "../../../src/store/useAppStore";
+import { useAuthStore } from "../../../src/store/useAuthStore";
 import { GoogleLoginButton } from "../../../components/GoogleLoginButton";
 
 // ── Validation ──────────────────────────────────────────────────
@@ -35,7 +35,7 @@ export default function LoginPage() {
   const isRtl = locale === "ar";
   const ArrowIcon = isRtl ? ArrowLeft : ArrowRight;
   const router = useRouter();
-  const setUser = useAppStore((state) => state.setUser);
+  const { login } = useAuthStore();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -129,11 +129,7 @@ export default function LoginPage() {
         console.warn("Fingerprint blocked or timed out, using fallback");
       }
 
-      await api.post("/api/auth/login", { email, password, deviceFingerprint: visitorId });
-
-      const meRes = await api.get("/api/auth/me");
-      setUser(meRes.data);
-
+      await login({ email, password, deviceFingerprint: visitorId });
       router.push("/");
     } catch (err: any) {
       if (err.response?.data?.RequiresVerification) {

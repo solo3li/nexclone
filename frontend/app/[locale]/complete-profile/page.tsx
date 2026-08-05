@@ -4,9 +4,9 @@ import { motion } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
 import { Phone, ArrowRight, ArrowLeft } from "lucide-react";
 import { useState, useEffect } from "react";
-import api from "../../../src/utils/api";
+
 import { useRouter } from "../../../src/i18n/routing";
-import { useAppStore } from "../../../src/store/useAppStore";
+import { useAuthStore } from "../../../src/store/useAuthStore";
 import Navbar from "../../../src/components/Navbar";
 import Footer from "../../../src/components/Footer";
 
@@ -16,7 +16,7 @@ export default function CompleteProfilePage() {
   const ArrowIcon = locale === 'ar' ? ArrowLeft : ArrowRight;
   const router = useRouter();
   
-  const { user, isAuthenticated, hasPhoneNumber, setUser } = useAppStore();
+  const { user, isAuthenticated, hasPhoneNumber, addPhone } = useAuthStore();
 
   const [phone, setPhone] = useState("");
   const [countryCode, setCountryCode] = useState("+20");
@@ -51,16 +51,10 @@ export default function CompleteProfilePage() {
       const result = await fp.get();
       const visitorId = result.visitorId;
 
-      const res = await api.post("/api/auth/add-phone", {
+      await addPhone({
         phoneNumber: `${countryCode}${phone}`,
         deviceFingerprint: visitorId
       });
-
-      // Fetch the updated user data to get the new wallets and active plan
-      const meRes = await api.get("/api/auth/me");
-      
-      // Update store with the complete updated user object
-      setUser(meRes.data);
       
       // Navigate to tools
       router.push("/tools");

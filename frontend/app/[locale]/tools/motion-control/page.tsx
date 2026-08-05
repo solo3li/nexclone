@@ -10,6 +10,7 @@ import {
   Zap, Settings, ChevronDown, Wallet, ArrowLeft, ArrowRight
 } from "lucide-react";
 import { useAppStore } from "../../../../src/store/useAppStore";
+import { useToolsStore } from "../../../../src/store/useToolsStore";
 import { useRouter, Link } from "../../../../src/i18n/routing";
 import api from "../../../../src/utils/api";
 import ToolInstructions from "../../../../components/ToolInstructions";
@@ -21,6 +22,7 @@ function MotionControlPage() {
   const { user, isAuthenticated } = useAppStore();
   const router = useRouter();
   const { setUser } = useAppStore();
+  const { startMotionControl } = useToolsStore();
 
   const [imageUrl, setImageUrl] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -157,15 +159,10 @@ function MotionControlPage() {
         formData.append("subscriptionId", subId);
       }
 
-      // Endpoint assumes Backend handles the proxying to Picsart
-      const response = await api.post("/api/video/start-motion-control", formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      const responseData = await startMotionControl(formData);
       
-      if (response.data && response.data.taskId) {
-        setCurrentTaskId(response.data.taskId);
+      if (responseData && (responseData.id || responseData.taskId)) {
+        setCurrentTaskId(responseData.id || responseData.taskId);
         api.get("/api/auth/me").then(res => {
           if (res.data) setUser(res.data);
         }).catch(err => console.error(err));

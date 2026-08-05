@@ -1,17 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
-import api from "@/utils/api";
-import { useAppStore } from "@/store/useAppStore";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useTicketStore } from "@/store/useTicketStore";
 import { Link } from "@/i18n/routing";
 import { useRouter } from "next/navigation";
 
 export default function TicketsList() {
-  const [tickets, setTickets] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showCreate, setShowCreate] = useState(false);
-  const [subject, setSubject] = useState("");
-  const [message, setMessage] = useState("");
-  const { isAuthenticated } = useAppStore();
+  const { isAuthenticated } = useAuthStore();
+  const { tickets, isLoading: loading, fetchTickets, createTicket } = useTicketStore();
   const router = useRouter();
 
   useEffect(() => {
@@ -20,17 +16,9 @@ export default function TicketsList() {
     }
   }, [isAuthenticated]);
 
-  const fetchTickets = async () => {
-    try {
-      const res = await api.get("/api/tickets");
-      setTickets(res.data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  const [showCreate, setShowCreate] = useState(false);
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
   const [creating, setCreating] = useState(false);
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -38,9 +26,9 @@ export default function TicketsList() {
     if (creating) return;
     setCreating(true);
     try {
-      const res = await api.post("/api/tickets", { subject, message });
+      const res = await createTicket({ subject, message });
       setShowCreate(false);
-      router.push(`/profile/tickets/${res.data.id}` as any);
+      router.push(`/profile/tickets/${res.id}` as any);
     } catch (err) {
       console.error(err);
     } finally {

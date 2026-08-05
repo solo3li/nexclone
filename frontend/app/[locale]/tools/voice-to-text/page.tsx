@@ -12,6 +12,7 @@ import {
 import { uploadDirectToMinio } from "../../../../src/utils/upload";
 import api from "../../../../src/utils/api";
 import { useAppStore } from "../../../../src/store/useAppStore";
+import { useToolsStore } from '../../../../src/store/useToolsStore';
 import { useRouter, Link } from "../../../../src/i18n/routing";
 import { ArrowLeft, ArrowRight, Wallet } from "lucide-react";
 import ToolInstructions from "../../../../components/ToolInstructions";
@@ -89,9 +90,10 @@ function VoiceToTextPage() {
   const t = useTranslations("VoiceToText");
   const locale = useLocale();
   const isRtl = locale === 'ar';
-  const { user, isAuthenticated, hasPhoneNumber, setUser } = useAppStore();
+  const { user, isAuthenticated, hasPhoneNumber, setUser, updateUser } = useAppStore();
   const router = useRouter();
   const ArrowIcon = locale === 'ar' ? ArrowRight : ArrowLeft;
+  const { estimateVoiceToText, generateVoiceToText } = useToolsStore();
 
   const [file, setFile] = useState<File | Blob | null>(null);
   const [mode, setMode] = useState("transcribe");
@@ -194,13 +196,13 @@ function VoiceToTextPage() {
       try {
         const fileSizeBytes = file.size;
         const durationMinutes = duration / 60;
-        const res = await api.post("/api/ai/voice-to-text/estimate", { 
+        const responseData = await estimateVoiceToText({ 
           fileSizeBytes, 
           durationMinutes,
           subscriptionId: sessionStorage.getItem('preferredSubscriptionId') ? Number(sessionStorage.getItem('preferredSubscriptionId')) : null 
         });
-        setEstimatedCost(res.data.estimatedCost);
-        setChargedWallet(res.data.chargedWalletName);
+        setEstimatedCost(responseData.estimatedCost);
+        setChargedWallet(responseData.chargedWalletName);
       } catch (err: any) {
         if (err.response?.status !== 400) {
           console.error(err);
@@ -357,13 +359,12 @@ function VoiceToTextPage() {
       // Stage 1: Pre-flight check
       const fileSizeBytes = file instanceof File ? file.size : file.size; // file.size works for both File and Blob
       const durationMinutes = duration > 0 ? duration / 60 : 0.01;
-      const estimateRes = await api.post("/api/ai/voice-to-text/estimate", { 
+      const estimateResponseData = await estimateVoiceToText({ 
         fileSizeBytes, 
         durationMinutes,
         subscriptionId: sessionStorage.getItem('preferredSubscriptionId') ? Number(sessionStorage.getItem('preferredSubscriptionId')) : null 
       });
-      
-      const cost = estimateRes.data.estimatedCost;
+      const cost = estimateResponseData.estimatedCost;
       const totalCredits = user?.wallets 
         ? user.wallets.reduce((acc: number, w: any) => acc + w.balance, 0) 
         : (user?.availableCredits || 0);
@@ -390,15 +391,15 @@ function VoiceToTextPage() {
 
       // Stage 3: Transcribe (Now queues in background)
       setStage('transcribing');
-      const res = await api.post("/api/ai/voice-to-text/transcribe", {
+      const responseData = await generateVoiceToText({
         fileId: fileId,
         translate: language !== "auto",
         targetLanguage: language,
         subscriptionId: sessionStorage.getItem('preferredSubscriptionId') ? Number(sessionStorage.getItem('preferredSubscriptionId')) : null
       });
 
-      if (res.data && res.data.taskId) {
-        setCurrentTaskId(res.data.taskId);
+      if (responseData && responseData.taskId) {
+        setCurrentTaskId(responseData.taskId);
         api.get("/api/auth/me").then(res => {
           if (res.data) setUser(res.data);
         }).catch(err => console.error("Failed to update user profile", err));

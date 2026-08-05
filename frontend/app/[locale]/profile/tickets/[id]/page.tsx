@@ -1,7 +1,7 @@
 "use client";
 import { use, useEffect, useState, useRef } from "react";
-import api from "@/utils/api";
-import { useAppStore } from "@/store/useAppStore";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useTicketStore } from "@/store/useTicketStore";
 import { Link } from "@/i18n/routing";
 import * as signalR from "@microsoft/signalr";
 
@@ -15,7 +15,8 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
   const [attachment, setAttachment] = useState<File | null>(null);
   const [sending, setSending] = useState(false);
 
-  const { isAuthenticated } = useAppStore();
+  const { isAuthenticated } = useAuthStore();
+  const { fetchTicketDetails, replyTicket } = useTicketStore();
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [connection, setConnection] = useState<signalR.HubConnection | null>(null);
 
@@ -71,8 +72,8 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
 
   const fetchTicket = async () => {
     try {
-      const res = await api.get(`/api/tickets/${id}`);
-      setTicket(res.data);
+      const data = await fetchTicketDetails(id);
+      setTicket(data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -90,13 +91,11 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
       if (message.trim()) formData.append("content", message);
       if (attachment) formData.append("attachment", attachment);
 
-      const res = await api.post(`/api/tickets/${id}/message`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const data = await replyTicket(id, formData);
 
       setTicket((prev: any) => ({
         ...prev,
-        messages: [...prev.messages, res.data],
+        messages: [...prev.messages, data],
       }));
 
       setMessage("");

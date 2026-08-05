@@ -11,7 +11,7 @@ import {
   ArrowLeft, ArrowRight, Clock, Calendar, Zap, Play, FileText,
   Volume2, Mic, CheckCircle, XCircle, AlertCircle, Video, Smile, Image
 } from "lucide-react";
-import api from "../../../../src/utils/api";
+import { useHistoryStore } from "../../../../src/store/useHistoryStore";
 
 interface RecordDetail {
   id: string;
@@ -40,11 +40,13 @@ export default function HistoryDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const { fetchHistoryItem } = useHistoryStore();
+
   useEffect(() => {
     const fetchDetail = async () => {
       try {
-        const res = await api.get(`/api/history/${id}`);
-        setRecord(res.data);
+        const data = await fetchHistoryItem(id);
+        setRecord(data);
       } catch (err) {
         console.error("Failed to fetch detail:", err);
         setError(isRtl ? "فشل في تحميل تفاصيل العملية" : "Failed to load record details");

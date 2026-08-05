@@ -2,12 +2,11 @@
 
 import { GoogleLogin } from '@react-oauth/google';
 import { useRouter } from '../src/i18n/routing';
-import api from '../src/utils/api';
-import { useAppStore } from '../src/store/useAppStore';
+import { useAuthStore } from '../src/store/useAuthStore';
 
 export function GoogleLoginButton({ refCode }: { refCode?: string }) {
   const router = useRouter();
-  const setUser = useAppStore(state => state.setUser);
+  const { googleLogin } = useAuthStore();
 
   return (
     <div className="w-full flex justify-center">
@@ -15,17 +14,11 @@ export function GoogleLoginButton({ refCode }: { refCode?: string }) {
         onSuccess={async (credentialResponse) => {
           if (!credentialResponse.credential) return;
           try {
-            // Post to our new backend endpoint
-            const res = await api.post(`/api/auth/google-login`, {
+            await googleLogin({ 
               token: credentialResponse.credential,
               refCode: refCode
             });
-            
-            if (res.status === 200) {
-              const meRes = await api.get('/api/auth/me');
-              setUser(meRes.data);
-              router.push('/');
-            }
+            router.push('/');
           } catch (error) {
             console.error("Login failed", error);
             alert("Google login failed. Please try again.");

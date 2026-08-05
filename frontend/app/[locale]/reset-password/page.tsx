@@ -5,7 +5,7 @@ import { useTranslations, useLocale } from "next-intl";
 import Navbar from "../../../src/components/Navbar";
 import { Lock, ArrowRight, ArrowLeft } from "lucide-react";
 import { useState, useEffect, Suspense } from "react";
-import api from "../../../src/utils/api";
+import { useAuthStore } from "../../../src/store/useAuthStore";
 import { Link, useRouter } from "../../../src/i18n/routing";
 import { useSearchParams } from "next/navigation";
 
@@ -15,6 +15,7 @@ function ResetPasswordForm() {
   const ArrowIcon = locale === 'ar' ? ArrowLeft : ArrowRight;
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { resetPassword } = useAuthStore();
 
   const [email, setEmail] = useState("");
   const [token, setToken] = useState("");
@@ -43,7 +44,7 @@ function ResetPasswordForm() {
     setSuccess(false);
 
     try {
-      await api.post("/api/auth/reset-password", {
+      await resetPassword({
         email,
         token,
         newPassword

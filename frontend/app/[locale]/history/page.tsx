@@ -12,8 +12,7 @@ import {
   Image, Loader2, Trash2, ChevronRight,
   Clock, Zap, AlertCircle, Video, Smile
 } from "lucide-react";
-import api from "../../../src/utils/api";
-import { useAppStore } from "../../../src/store/useAppStore";
+import { useHistoryStore } from "../../../src/store/useHistoryStore";
 import { signalRNotificationService } from "../../../lib/signalr-client";
 
 interface GenerationRecord {
@@ -63,23 +62,22 @@ export default function HistoryPage() {
   const isRtl = locale === "ar";
   const router = useRouter();
 
-  const [history, setHistory] = useState<GenerationRecord[]>([]);
+  const { historyItems, fetchHistory, deleteHistoryItem } = useHistoryStore();
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState("all");
 
   useEffect(() => {
-    const fetchHistory = async () => {
+    const loadHistory = async () => {
       try {
-        const res = await api.get("/api/history");
-        setHistory(res.data);
+        await fetchHistory();
       } catch (err) {
         console.error("Failed to fetch history:", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchHistory();
+    loadHistory();
 
     // Re-fetch on notification
     signalRNotificationService.startConnection();
@@ -99,8 +97,7 @@ export default function HistoryPage() {
     
     setDeletingId(id);
     try {
-      await api.delete(`/api/history/${id}`);
-      setHistory(prev => prev.filter(r => r.id !== id));
+      await deleteHistoryItem(id);
     } catch (err) {
       console.error("Failed to delete record:", err);
     } finally {
@@ -112,8 +109,8 @@ export default function HistoryPage() {
     router.push(`/${locale}/history/${id}`);
   };
 
-  const filters = ["all", ...Array.from(new Set(history.map(h => h.type)))];
-  const filtered = activeFilter === "all" ? history : history.filter(h => h.type === activeFilter);
+  const filters = ["all", ...Array.from(new Set(historyItems.map(h => h.type)))];
+  const filtered = activeFilter === "all" ? historyItems : historyItems.filter(h => h.type === activeFilter);
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] selection:bg-violet-500/30">

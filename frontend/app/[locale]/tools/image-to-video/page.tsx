@@ -12,6 +12,7 @@ import {
   Monitor, Smartphone
 } from "lucide-react";
 import { useAppStore } from "../../../../src/store/useAppStore";
+import { useToolsStore } from '../../../../src/store/useToolsStore';
 import { useRouter, Link } from "../../../../src/i18n/routing";
 import api from "../../../../src/utils/api";
 import ToolInstructions from "../../../../components/ToolInstructions";
@@ -24,6 +25,8 @@ function ImageToVideoPage() {
   const router = useRouter();
   const ArrowIcon = locale === 'ar' ? ArrowRight : ArrowLeft;
   const { setUser } = useAppStore();
+  const updateUser = useAppStore(state => state.updateUser);
+  const { startAvatar } = useToolsStore();
 
   const [imageUrl, setImageUrl] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -155,14 +158,10 @@ function ImageToVideoPage() {
       if (subId) {
         formData.append("subscriptionId", subId);
       }
-      const response = await api.post("/api/video/start-avatar", formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      const responseData = await startAvatar(formData);
       
-      if (response.data && response.data.taskId) {
-        setCurrentTaskId(response.data.taskId);
+      if (responseData && (responseData.id || responseData.taskId)) {
+        setCurrentTaskId(responseData.id || responseData.taskId);
         api.get("/api/auth/me").then(res => {
           if (res.data) setUser(res.data);
         }).catch(err => console.error(err));

@@ -12,7 +12,8 @@ import {
   Monitor, Smartphone
 } from "lucide-react";
 import { useAppStore } from "../../../../src/store/useAppStore";
-import { useRouter } from "../../../../src/i18n/routing";
+import { useToolsStore } from '../../../../src/store/useToolsStore';
+import { useRouter, Link } from "../../../../src/i18n/routing";
 import api from "../../../../src/utils/api";
 import ToolInstructions from "../../../../components/ToolInstructions";
 
@@ -20,9 +21,9 @@ function AdvancedLipSyncPage() {
   const t = useTranslations("ImageToVideo");
   const locale = useLocale();
   const isRtl = locale === 'ar';
-  const { user, isAuthenticated } = useAppStore();
+  const { user, isAuthenticated, setUser } = useAppStore();
   const router = useRouter();
-  const { setUser } = useAppStore();
+  const { startLipsync } = useToolsStore();
 
   const [inputVideoUrl, setInputVideoUrl] = useState("");
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -85,12 +86,8 @@ function AdvancedLipSyncPage() {
       if (subId) {
         formData.append("subscriptionId", subId);
       }
-      const response = await api.post("/api/video/start-lipsync", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      const taskId = response.data.taskId;
+      const responseData = await startLipsync(formData);
+      const taskId = responseData.id || responseData.taskId;
       
       api.get("/api/auth/me").then(res => {
         if (res.data) setUser(res.data);

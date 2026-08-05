@@ -5,14 +5,14 @@ import { useTranslations, useLocale } from "next-intl";
 import Navbar from "../../../src/components/Navbar";
 import { Mail, ArrowRight, ArrowLeft } from "lucide-react";
 import { useState } from "react";
-import api from "../../../src/utils/api";
+import { useAuthStore } from "../../../src/store/useAuthStore";
 import { Link } from "../../../src/i18n/routing";
 
 export default function ForgotPasswordPage() {
   const t = useTranslations("Auth");
   const locale = useLocale();
   const ArrowIcon = locale === 'ar' ? ArrowLeft : ArrowRight;
-
+  const { forgotPassword } = useAuthStore();
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -25,7 +25,7 @@ export default function ForgotPasswordPage() {
     setSuccess(false);
 
     try {
-      await api.post("/api/auth/forgot-password", { email });
+      await forgotPassword(email);
       setSuccess(true);
     } catch (err: any) {
       setError(err.response?.data?.Message || "Failed to send reset link.");

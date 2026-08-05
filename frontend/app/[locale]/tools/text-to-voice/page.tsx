@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import api from "../../../../src/utils/api";
 import { useAppStore } from "../../../../src/store/useAppStore";
+import { useToolsStore } from '../../../../src/store/useToolsStore';
 import { useRouter, Link } from "../../../../src/i18n/routing";
 import { ArrowLeft, ArrowRight, Wallet } from "lucide-react";
 import ToolInstructions from "../../../../components/ToolInstructions";
@@ -36,9 +37,10 @@ function TextToVoicePage() {
   const t = useTranslations("TextToVoice");
   const locale = useLocale();
   const isRtl = locale === 'ar';
-  const { user, isAuthenticated, hasPhoneNumber, setUser } = useAppStore();
+  const { user, isAuthenticated, hasPhoneNumber, setUser, updateUser } = useAppStore();
   const router = useRouter();
   const ArrowIcon = locale === 'ar' ? ArrowRight : ArrowLeft;
+  const { estimateTextToVoice, generateTextToVoice } = useToolsStore();
 
   const [text, setText] = useState("");
   const [languageMode, setLanguageMode] = useState("arabic"); // "arabic" | "other"
@@ -188,7 +190,7 @@ function TextToVoicePage() {
     setIsEstimating(true);
     setError("");
     try {
-      const response = await api.post("/api/ai/text-to-voice/estimate", { 
+      const responseData = await estimateTextToVoice({ 
         text,
         language: languageMode,
         voiceName: selectedVoice,
@@ -196,9 +198,9 @@ function TextToVoicePage() {
         quality: selectedQuality,
         subscriptionId: sessionStorage.getItem('preferredSubscriptionId') ? Number(sessionStorage.getItem('preferredSubscriptionId')) : null
       });
-      const cost = response.data.estimatedCost;
+      const cost = responseData.estimatedCost;
       setEstimatedCost(cost);
-      setChargedWallet(response.data.chargedWalletName);
+      setChargedWallet(responseData.chargedWalletName);
       const totalCredits = user?.wallets 
         ? user.wallets.reduce((acc: number, w: any) => acc + w.balance, 0) 
         : (user?.availableCredits || 0);
@@ -257,7 +259,7 @@ function TextToVoicePage() {
     if (customInstruction && languageMode !== 'other') instruction += `Additional Context: ${customInstruction}. `;
 
     try {
-      const response = await api.post("/api/ai/text-to-voice/generate", {
+      const responseData = await generateTextToVoice({
         text: text,
         language: languageMode,
         voiceName: selectedVoice,
@@ -266,13 +268,13 @@ function TextToVoicePage() {
         subscriptionId: sessionStorage.getItem('preferredSubscriptionId') ? Number(sessionStorage.getItem('preferredSubscriptionId')) : null
       });
 
-      if (response.data && response.data.taskId) {
-        setCurrentTaskId(response.data.taskId);
+      if (responseData && responseData.taskId) {
+        setCurrentTaskId(responseData.taskId);
         api.get("/api/auth/me").then(res => {
           if (res.data) setUser(res.data);
         }).catch(err => console.error("Failed to update user profile", err));
-      } else if (response.data && response.data.audioUrl) {
-        setAudioUrl(response.data.audioUrl);
+      } else if (responseData && responseData.audioUrl) {
+        setAudioUrl(responseData.audioUrl);
         setIsProcessing(false);
       } else {
         throw new Error("No audio URL or task ID returned");

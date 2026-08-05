@@ -1,51 +1,34 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import api from '../../../../src/utils/api';
+import { useAuthStore } from '../../../../src/store/useAuthStore';
+import { useHistoryStore } from '../../../../src/store/useHistoryStore';
 import { Download, FileText, ArrowLeft, ArrowRight, Crown, Activity, Lock } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { useAppStore } from '../../../../src/store/useAppStore';
+
 
 export default function MyInvoicesPage() {
   const { locale } = useParams();
   const router = useRouter();
-  const [invoices, setInvoices] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, isAuthenticated } = useAuthStore();
+  const { fetchHistory, fetchInvoices, invoices, isLoading } = useHistoryStore();
   const [historyCount, setHistoryCount] = useState(0);
 
   const isRtl = locale === 'ar';
-  const user = useAppStore(state => state.user);
-  const isAuthenticated = useAppStore(state => state.isAuthenticated);
 
   useEffect(() => {
-    const fetchHistory = async () => {
+    const loadData = async () => {
       try {
         if (isAuthenticated) {
-          const res = await api.get(`/api/history`);
-          setHistoryCount(res.data.length);
+          const history = await fetchHistory();
+          setHistoryCount(history.length);
+          await fetchInvoices();
         }
       } catch (err) {}
     };
-    fetchHistory();
-  }, [isAuthenticated]);
-
-  useEffect(() => {
-    const fetchInvoices = async () => {
-      try {
-        if (!isAuthenticated) return;
-
-        const res = await api.get(`/api/invoices/my-invoices`);
-        setInvoices(res.data.invoices || []);
-      } catch (err) {
-        console.error('Failed to fetch invoices', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchInvoices();
-  }, [locale, router, isAuthenticated]);
+    loadData();
+  }, [isAuthenticated, fetchHistory, fetchInvoices]);
 
   if (!isAuthenticated && !isLoading) {
     return (
