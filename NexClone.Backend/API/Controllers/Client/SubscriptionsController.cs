@@ -120,7 +120,11 @@ namespace NexClone.Backend.API.Controllers.Client
                 .OrderByDescending(g => g.CreatedAt)
                 .ToListAsync();
 
+            var invoice = await _context.Invoices
+                .FirstOrDefaultAsync(i => i.SubscriptionId == subscription.Id);
+
             ViewBag.History = history;
+            ViewBag.Invoice = invoice;
 
             return View(subscription);
         }

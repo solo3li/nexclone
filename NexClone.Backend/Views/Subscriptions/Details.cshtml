@@ -65,6 +65,13 @@
                 </p>
                 <p><strong>Start Date:</strong> @Model.StartDate.ToString("g")</p>
                 <p><strong>Current End Date:</strong> @Model.EndDate.ToString("g")</p>
+                @if (ViewBag.Invoice != null)
+                {
+                    <p style="margin-top: 1rem;">
+                        <strong>@Localizer["Tax Invoice"]:</strong> 
+                        <a href="@ViewBag.Invoice.MinioPdfUrl" target="_blank" class="bx--link">@ViewBag.Invoice.InvoiceNumber (PDF)</a>
+                    </p>
+                }
             </div>
         </div>
 
