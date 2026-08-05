@@ -48,11 +48,26 @@ function MotionControlPage() {
   const [chargedWallet, setChargedWallet] = useState<string | null>(null);
 
   useEffect(() => {
-    // Basic cost estimation logic, assuming it's similar to avatar generation for now
+    let isMounted = true;
     if (isAuthenticated && user) {
-      setEstimatedCost(renderingSpeed === "pro" ? 2 : 1);
-      setChargedWallet(null);
+      const subId = sessionStorage.getItem('preferredSubscriptionId');
+      const params = new URLSearchParams();
+      params.append('renderingSpeed', renderingSpeed);
+      if (subId) params.append('subscriptionId', subId);
+
+      api.get(`/api/video/estimate-motion-control?${params.toString()}`)
+        .then(res => {
+          if (isMounted && res.data) {
+            setEstimatedCost(res.data.estimatedCost);
+            setChargedWallet(res.data.chargedWalletName);
+          }
+        })
+        .catch(err => {
+          console.error("Failed to estimate cost", err);
+          if (isMounted) setEstimatedCost(0);
+        });
     }
+    return () => { isMounted = false; };
   }, [isAuthenticated, user, renderingSpeed]);
 
   useEffect(() => {
@@ -134,8 +149,8 @@ function MotionControlPage() {
       if (prompt) formData.append("prompt", prompt);
       formData.append("resolution", resolution);
       formData.append("renderingSpeed", renderingSpeed);
-      formData.append("characterOrientation", characterOrientation);
-      formData.append("keepOriginalSound", keepOriginalSound);
+      formData.append("orientation", characterOrientation);
+      formData.append("keepOriginalSound", keepOriginalSound.toString());
 
       const subId = sessionStorage.getItem('preferredSubscriptionId');
       if (subId) {
