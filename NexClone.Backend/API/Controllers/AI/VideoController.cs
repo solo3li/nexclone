@@ -280,6 +280,110 @@ namespace NexClone.Backend.API.Controllers.AI
         }
 
 
+        [HttpGet("estimate-motion-control")]
+        public async Task<IActionResult> EstimateMotionControl([FromQuery] string resolution = "720p", [FromQuery] string renderingSpeed = "std", [FromQuery] int? subscriptionId = null)
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+
+            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "kling_motion_control", 1, null, renderingSpeed, subscriptionId);
+            if (!policyResult.IsAllowed) return BadRequest(new { error = policyResult.ErrorMessage });
+
+            return Ok(new { estimatedCost = policyResult.TotalCost, chargedWalletName = policyResult.ChargedWalletName });
+        }
+
+        [HttpPost("start-motion-control")]
+        public async Task<IActionResult> StartMotionControl(
+            [FromForm] IFormFile image, 
+            [FromForm] IFormFile video, 
+            [FromForm] string prompt = "", 
+            [FromForm] string resolution = "720p", 
+            [FromForm] string renderingSpeed = "std",
+            [FromForm] string orientation = "front",
+            [FromForm] bool keepOriginalSound = false,
+            [FromForm] int? subscriptionId = null)
+        {
+            if (image == null || image.Length == 0)
+                return BadRequest(new { error = "Image is required." });
+            if (video == null || video.Length == 0)
+                return BadRequest(new { error = "Video is required." });
+                
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+
+            // Fetch policy for limits validation
+            var policy = await _usagePolicy.GetToolPolicyForUserAsync(userId, "kling_motion_control", renderingSpeed);
+            
+            if (!policy.Enabled)
+                return BadRequest(new { error = "Your current plan does not have access to this tool." });
+
+            // Validate Dynamic Limits from Plan
+            if (image.Length > policy.MaxImageFileSizeMb * 1024 * 1024)
+                return BadRequest(new { error = $"Image file is too large. Maximum size is {policy.MaxImageFileSizeMb}MB." });
+                
+            if (video.Length > policy.MaxVideoFileSizeMb * 1024 * 1024)
+                return BadRequest(new { error = $"Video file is too large. Maximum size is {policy.MaxVideoFileSizeMb}MB." });
+                
+            if (!string.IsNullOrWhiteSpace(prompt) && policy.MaxCharsPerRequest != -1 && prompt.Length > policy.MaxCharsPerRequest)
+                return BadRequest(new { error = $"Prompt too long. Maximum allowed is {policy.MaxCharsPerRequest} characters." });
+
+            decimal usageAmountForLimits = 0; 
+            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "kling_motion_control", usageAmountForLimits, 1, renderingSpeed, subscriptionId);
+            if (!policyResult.IsAllowed)
+                return BadRequest(new { error = policyResult.ErrorMessage });
+
+            try
+            {
+                byte[] imageBytes;
+                using (var ms = new MemoryStream()) { await image.CopyToAsync(ms); imageBytes = ms.ToArray(); }
+                string imageContentType = image.ContentType;
+
+                byte[] videoBytes;
+                using (var ms = new MemoryStream()) { await video.CopyToAsync(ms); videoBytes = ms.ToArray(); }
+                string videoContentType = video.ContentType;
+
+                // Save history as processing
+                var history = new GenerationHistory
+                {
+                    UserId = userId,
+                    Type = "motion-control",
+                    Title = "Motion Control Video Generation",
+                    InputText = "Image & Video Upload",
+                    Status = "processing",
+                    ResultText = "initializing",
+                    CreatedAt = DateTime.UtcNow,
+                    CreditsUsed = policyResult.TotalCost
+                };
+                _dbContext.GenerationHistories.Add(history);
+                await _dbContext.SaveChangesAsync();
+
+                // Publish to RabbitMQ
+                await _publishEndpoint.Publish(new MotionControlMessage
+                {
+                    HistoryId = history.Id,
+                    UserId = userId,
+                    ImageBytes = imageBytes,
+                    ImageContentType = imageContentType,
+                    VideoBytes = videoBytes,
+                    VideoContentType = videoContentType,
+                    Prompt = prompt,
+                    Resolution = resolution,
+                    RenderingSpeed = renderingSpeed,
+                    Orientation = orientation,
+                    KeepOriginalSound = keepOriginalSound
+                });
+
+                // Return OK immediately so frontend can show the Wait/Leave UI
+                return Ok(new { taskId = history.Id.ToString(), status = "processing", message = "Task has been added to the queue." });
+            }
+            catch (Exception ex)
+            {
+                await _usagePolicy.RefundAsync(userId, policyResult.ChargedWalletTypeId, policyResult.TotalCost);
+                return StatusCode(500, new { error = "An error occurred while queuing the video task: " + ex.Message });
+            }
+        }
+
+
         [HttpGet("download-proxy")]
         public async Task<IActionResult> DownloadProxy([FromQuery] string url, [FromQuery] string type = "video")
         {

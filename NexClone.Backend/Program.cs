@@ -206,6 +206,7 @@ builder.Services.AddMassTransit(x =>
     x.AddConsumer<NexClone.Backend.Infrastructure.Consumers.TtsConsumer>();
     x.AddConsumer<NexClone.Backend.Infrastructure.Consumers.VttConsumer>();
     x.AddConsumer<NexClone.Backend.Infrastructure.Consumers.EmailConsumer>();
+    x.AddConsumer<NexClone.Backend.Infrastructure.Consumers.MotionControlConsumer>();
 
     x.UsingRabbitMq((context, cfg) =>
     {
@@ -240,6 +241,12 @@ builder.Services.AddMassTransit(x =>
             e.PrefetchCount = 100;
             e.UseFilter(new NexClone.Backend.Infrastructure.Consumers.Filters.DynamicConcurrencyFilter<NexClone.Backend.Core.Messages.VoiceToTextMessage>(concurrencyManager, "vtt"));
             e.ConfigureConsumer<NexClone.Backend.Infrastructure.Consumers.VttConsumer>(context);
+        });
+
+        cfg.ReceiveEndpoint("motion_control_queue", e => {
+            e.PrefetchCount = 100;
+            e.UseFilter(new NexClone.Backend.Infrastructure.Consumers.Filters.DynamicConcurrencyFilter<NexClone.Backend.Core.Messages.MotionControlMessage>(concurrencyManager, "kling_motion_control"));
+            e.ConfigureConsumer<NexClone.Backend.Infrastructure.Consumers.MotionControlConsumer>(context);
         });
 
         cfg.ReceiveEndpoint("email_queue", e => {
