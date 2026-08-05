@@ -484,5 +484,25 @@
     "estimatedCost": "التكلفة المتوقعة",
     "credits": "رصيد",
     "error": "حدث خطأ أثناء التوليد."
+  },
+  "MotionControl": {
+    "title": "التحكم بالحركة",
+    "uploadImage": "رفع الصورة",
+    "imagePlaceholder": "اسحب وأفلت أو انقر للرفع",
+    "uploadVideo": "رفع الفيديو",
+    "generate": "إنشاء فيديو",
+    "processing": "جاري التوليد...",
+    "result": "النتيجة",
+    "download": "تحميل الفيديو",
+    "taskSettings": "إعدادات المهمة",
+    "videoPrompt": "وصف إضافي (اختياري)",
+    "promptPlaceholder": "صف المشهد (إضاءة سينمائية، حركة ديناميكية...)",
+    "resolution": "الدقة",
+    "speed": "سرعة المعالجة",
+    "orientation": "اتجاه الشخصية",
+    "keepSound": "الاحتفاظ بالصوت الأصلي",
+    "estimatedCost": "التكلفة المتوقعة",
+    "credits": "رصيد",
+    "error": "حدث خطأ أثناء التوليد."
   }
 }

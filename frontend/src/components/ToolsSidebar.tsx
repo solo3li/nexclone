@@ -55,6 +55,16 @@ export default function ToolsSidebar() {
       color: "text-amber-400",
       bg: "bg-amber-500/10",
       activeBorder: "border-amber-500/30",
+    },
+    {
+      id: "motion-control",
+      href: "/tools/motion-control",
+      icon: Video,
+      labelEn: "Motion Control",
+      labelAr: "التحكم بالحركة",
+      color: "text-cyan-400",
+      bg: "bg-cyan-500/10",
+      activeBorder: "border-cyan-500/30",
     }
   ];
 
