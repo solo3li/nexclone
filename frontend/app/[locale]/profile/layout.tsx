@@ -11,8 +11,7 @@ import {
   LayoutDashboard,
   History,
   LifeBuoy,
-  Share2,
-  Settings,
+  FileText,
   LogOut,
   User as UserIcon
 } from "lucide-react";
@@ -58,6 +57,12 @@ export default function ProfileLayout({
       name: isRtl ? "تذاكر الدعم" : "Support Tickets",
       href: `/profile/tickets`,
       icon: LifeBuoy,
+      exact: false
+    },
+    {
+      name: isRtl ? "الاشتراكات والفواتير" : "Subscriptions & Invoices",
+      href: `/profile/invoices`,
+      icon: FileText, // Can use FileText if imported, but History is already imported. Let's add FileText import.
       exact: false
     }
   ];

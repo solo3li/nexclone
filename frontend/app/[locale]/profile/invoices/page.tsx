@@ -1,18 +1,36 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Download, FileText, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Download, FileText, ArrowLeft, ArrowRight, Crown, Activity } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { useAppStore } from '../../../../src/store/useAppStore';
 
 export default function MyInvoicesPage() {
   const { locale } = useParams();
   const router = useRouter();
   const [invoices, setInvoices] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [historyCount, setHistoryCount] = useState(0);
 
   const isRtl = locale === 'ar';
+  const user = useAppStore(state => state.user);
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          const res = await axios.get(`http://167.71.66.188:8080/api/history`, {
+             headers: { Authorization: `Bearer ${token}` }
+          });
+          setHistoryCount(res.data.length);
+        }
+      } catch (err) {}
+    };
+    fetchHistory();
+  }, []);
 
   useEffect(() => {
     const fetchInvoices = async () => {
@@ -39,7 +57,7 @@ export default function MyInvoicesPage() {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white p-4 sm:p-6 lg:p-8" dir={isRtl ? 'rtl' : 'ltr'}>
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-8">
         <button
           onClick={() => router.push(`/${locale}/profile`)}
           className="flex items-center gap-2 text-white/50 hover:text-white transition-colors"
@@ -48,20 +66,112 @@ export default function MyInvoicesPage() {
           {isRtl ? "العودة للملف الشخصي" : "Back to Profile"}
         </button>
 
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8">
-          <div className="flex items-center gap-4 mb-8">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
-              <FileText className="w-6 h-6 text-indigo-400" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-white">
-                {isRtl ? "فواتيري الضريبية" : "My Tax Invoices"}
-              </h1>
-              <p className="text-white/50 mt-1">
-                {isRtl ? "قائمة بجميع فواتير الاشتراكات الخاصة بك" : "A list of all your subscription invoices"}
-              </p>
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* Left Column: Subscriptions & Usage */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Subscription Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-yellow-400/20 to-transparent blur-2xl" />
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-yellow-500/20 flex items-center justify-center border border-yellow-500/30">
+                  <Crown className="w-5 h-5 text-yellow-400" />
+                </div>
+                <h2 className="text-xl font-bold text-white">{isRtl ? "اشتراكي الحالي" : "My Subscription"}</h2>
+              </div>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center pb-4 border-b border-white/5">
+                  <span className="text-white/60">{isRtl ? "الباقة" : "Plan"}</span>
+                  <span className="text-white font-bold bg-white/10 px-3 py-1 rounded-full text-sm">
+                    {user?.activePlan ? (isRtl ? user.activePlan.nameAr : user.activePlan.name) : (isRtl ? "مجاني" : "Free")}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center pb-4 border-b border-white/5">
+                  <span className="text-white/60">{isRtl ? "الحالة" : "Status"}</span>
+                  {(() => {
+                    const status = (user?.activePlan?.status || "Active").toLowerCase();
+                    let color = "text-emerald-400";
+                    let bgColor = "bg-emerald-400";
+                    let text = isRtl ? "نشط" : "Active";
+                    
+                    if (status === "freeze") {
+                      color = "text-amber-400";
+                      bgColor = "bg-amber-400";
+                      text = isRtl ? "فترة السماح" : "Grace Period";
+                    } else if (status === "expired") {
+                      color = "text-rose-400";
+                      bgColor = "bg-rose-400";
+                      text = isRtl ? "منتهي" : "Expired";
+                    }
+
+                    return (
+                      <span className={`${color} font-medium text-sm flex items-center gap-1`}>
+                        <span className={`w-2 h-2 rounded-full ${bgColor}`} /> {text}
+                      </span>
+                    );
+                  })()}
+                </div>
+                <div className="flex justify-between items-center pb-4 border-b border-white/5">
+                  <span className="text-white/60">{isRtl ? "تاريخ الانتهاء" : "Expiration Date"}</span>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="text-white font-medium text-sm">
+                      {user?.activePlan?.endDate 
+                        ? new Date(user.activePlan.endDate).toLocaleDateString(isRtl ? "ar-EG" : "en-US")
+                        : (isRtl ? "بدون تاريخ انتهاء" : "No expiration")}
+                    </span>
+                  </div>
+                </div>
+                <button onClick={() => router.push(`/${locale}/pricing`)} className="w-full py-3 mt-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white font-medium transition-all hover:border-white/20">
+                  {isRtl ? "ترقية الباقة" : "Upgrade Plan"}
+                </button>
+              </div>
+            </motion.div>
+
+            {/* Stats Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6"
+            >
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center border border-violet-500/30">
+                  <Activity className="w-5 h-5 text-violet-400" />
+                </div>
+                <h2 className="text-xl font-bold text-white">{isRtl ? "الاستخدام" : "Usage"}</h2>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-white/5 rounded-2xl p-3 text-center">
+                  <p className="text-2xl font-extrabold text-white">{historyCount}</p>
+                  <p className="text-xs text-white/50 mt-1">{isRtl ? "إجمالي العمليات" : "Total Operations"}</p>
+                </div>
+                <div className="bg-white/5 rounded-2xl p-3 text-center">
+                  <p className="text-2xl font-extrabold text-emerald-400">
+                    {user?.wallets ? user.wallets.reduce((acc: number, w: any) => acc + w.balance, 0).toFixed(1) : Number(user?.availableCredits || 0).toFixed(1)}
+                  </p>
+                  <p className="text-xs text-white/50 mt-1">{isRtl ? "رصيد المحافظ" : "Wallets Balance"}</p>
+                </div>
+              </div>
+            </motion.div>
           </div>
+
+          {/* Right Column: Invoices */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
+                  <FileText className="w-6 h-6 text-indigo-400" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-white">
+                    {isRtl ? "فواتيري الضريبية" : "My Tax Invoices"}
+                  </h1>
+                  <p className="text-white/50 mt-1">
+                    {isRtl ? "قائمة بجميع فواتير الاشتراكات الخاصة بك" : "A list of all your subscription invoices"}
+                  </p>
+                </div>
+              </div>
 
           {isLoading ? (
             <div className="flex justify-center py-12">
@@ -118,6 +228,8 @@ export default function MyInvoicesPage() {
               ))}
             </div>
           )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
