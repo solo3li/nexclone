@@ -220,6 +220,19 @@ export default function ToolsSection() {
       tags: locale === 'ar' ? ['فيديو', 'صوت', 'تزامن'] : ['Video', 'Audio', 'Sync'],
       image: "/images/tool-lipsync.png",
       href: "/tools/advanced-lip-sync"
+    },
+    {
+      icon: Video,
+      title: locale === 'ar' ? 'التحكم بالحركة' : 'Motion Control',
+      desc: locale === 'ar' ? 'تحكم بحركة الشخصيات في الصور الثابتة وتحويلها إلى فيديو ديناميكي متقدم.' : 'Control character movement in static images and turn them into dynamic video.',
+      badge: locale === 'ar' ? 'جديد' : 'New',
+      badgeColor: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
+      gradient: "from-cyan-600/20 to-blue-600/10",
+      iconBg: "from-cyan-500 to-blue-600",
+      glowColor: "shadow-cyan-500/20",
+      tags: locale === 'ar' ? ['فيديو', 'حركة', 'Kling'] : ['Video', 'Motion', 'Kling'],
+      image: "/images/tool-motion-control.png",
+      href: "/tools/motion-control"
     }
   ];
 

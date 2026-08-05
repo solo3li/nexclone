@@ -115,6 +115,12 @@ export default function Navbar() {
                   </div>
                   <span className="text-sm font-medium text-white/90">{locale === 'ar' ? 'مزامنة الشفاه' : 'Advanced Lip-Sync'}</span>
                 </Link>
+                <Link href="/tools/motion-control" className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center shrink-0">
+                    <Video className="w-4 h-4 text-cyan-400" />
+                  </div>
+                  <span className="text-sm font-medium text-white/90">{locale === 'ar' ? 'التحكم بالحركة' : 'Motion Control'}</span>
+                </Link>
               </div>
             </div>
 
