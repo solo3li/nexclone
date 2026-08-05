@@ -181,7 +181,9 @@ namespace NexClone.Backend.API.Controllers.Client
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AssignPlan(Guid userId, int planId)
+        public async Task<IActionResult> AssignPlan(Guid userId, int planId,
+            [FromServices] NexClone.Backend.Infrastructure.ExternalServices.Invoicing.IInvoiceGeneratorService invoiceService,
+            [FromServices] NexClone.Backend.Core.Interfaces.IMediaService mediaService)
         {
             var user = await _context.Users.FindAsync(userId);
             var plan = await _context.Plans.FindAsync(planId);
@@ -228,7 +230,6 @@ namespace NexClone.Backend.API.Controllers.Client
                 }
 
 
-
                 newSub = new Subscription
                 {
                     UserId = userId,
@@ -243,6 +244,59 @@ namespace NexClone.Backend.API.Controllers.Client
 
             await _context.SaveChangesAsync();
             await _walletService.DistributePlanCreditsAsync(user.Id, plan.Id, resetToZero: shouldReset, subscriptionId: newSub.Id);
+
+            // Record Payment for Admin assignment
+            var payment = new Payment
+            {
+                UserId = user.Id,
+                PlanId = plan.Id,
+                SubscriptionId = newSub.Id,
+                Amount = plan.PriceEgp, // Or USD depending on standard, using EGP for invoice fallback
+                Currency = "EGP",
+                Method = "Manual/Admin",
+                PaymentId = "ADMIN-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
+                Status = "Completed",
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.Payments.Add(payment);
+            await _context.SaveChangesAsync();
+
+            // Generate Invoice
+            string verifyUrlBase = "https://nexmedia.ai";
+            decimal amountEgp = plan.PriceEgp;
+            decimal taxAmt = amountEgp * (plan.TaxPercentage / 100m);
+            var invoice = new Invoice
+            {
+                InvoiceNumber = $"INV-{DateTime.UtcNow.Year}-{Guid.NewGuid().ToString().Substring(0, 6).ToUpper()}",
+                SubscriptionId = newSub.Id,
+                UserId = user.Id,
+                PaymentGateway = "Admin Assigned",
+                PaymentMethod = "Manual",
+                Currency = "EGP",
+                SubTotal = amountEgp - taxAmt,
+                TaxAmount = taxAmt,
+                TotalAmount = amountEgp,
+                TransactionId = payment.PaymentId,
+                Subscription = newSub
+            };
+            
+            _context.Invoices.Add(invoice);
+            await _context.SaveChangesAsync();
+
+            try
+            {
+                byte[] pdfBytes = await invoiceService.GenerateInvoicePdfAsync(invoice, verifyUrlBase);
+                using var ms = new System.IO.MemoryStream(pdfBytes);
+                string minioUrl = await mediaService.UploadFileAsync(ms, $"invoices/{invoice.InvoiceNumber}.pdf", "application/pdf", "invoices");
+                
+                invoice.MinioPdfUrl = minioUrl;
+                _context.Invoices.Update(invoice);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed to generate/upload admin invoice PDF: " + ex.Message);
+            }
 
             // Send Email Receipt
             try

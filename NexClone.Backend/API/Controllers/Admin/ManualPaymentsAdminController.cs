@@ -59,7 +59,9 @@ namespace NexClone.Backend.API.Controllers.Admin
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Approve(int id)
+        public async Task<IActionResult> Approve(int id,
+            [FromServices] NexClone.Backend.Infrastructure.ExternalServices.Invoicing.IInvoiceGeneratorService invoiceService,
+            [FromServices] NexClone.Backend.Core.Interfaces.IMediaService mediaService)
         {
             var payment = await _context.Payments
                 .Include(p => p.Plan)
@@ -73,8 +75,9 @@ namespace NexClone.Backend.API.Controllers.Admin
 
             var existingSub = await _context.Subscriptions
                 .Include(s => s.Plan)
-                .FirstOrDefaultAsync(s => s.UserId == payment.UserId && s.PlanId == payment.PlanId && (s.Status == "active" || s.Status == "freeze"));
+                .FirstOrDefaultAsync(s => s.UserId == payment.UserId && s.PlanId == payment.Plan.Id && (s.Status == "active" || s.Status == "freeze"));
 
+            Subscription currentSub = null;
             bool shouldReset = false;
 
             if (existingSub != null)
@@ -90,6 +93,7 @@ namespace NexClone.Backend.API.Controllers.Admin
 
                 existingSub.EndDate = (existingSub.EndDate > DateTime.UtcNow ? existingSub.EndDate : DateTime.UtcNow).AddDays(payment.Plan.DurationDays);
                 existingSub.Status = "active";
+                currentSub = existingSub;
                 payment.SubscriptionId = existingSub.Id;
             }
             else
@@ -129,6 +133,7 @@ namespace NexClone.Backend.API.Controllers.Admin
                 _context.Subscriptions.Add(newSub);
                 await _context.SaveChangesAsync();
                 payment.SubscriptionId = newSub.Id;
+                currentSub = newSub;
             }
 
             _context.Users.Update(payment.User);
@@ -136,6 +141,46 @@ namespace NexClone.Backend.API.Controllers.Admin
             await _walletService.DistributePlanCreditsAsync(payment.User.Id, payment.Plan.Id, resetToZero: shouldReset, subscriptionId: payment.SubscriptionId);
 
             await _context.SaveChangesAsync();
+
+            // Generate Invoice
+            if (currentSub != null)
+            {
+                string verifyUrlBase = "https://nexmedia.ai";
+                decimal amountEgp = payment.Amount;
+                decimal taxAmt = amountEgp * (payment.Plan.TaxPercentage / 100m);
+                var invoice = new Invoice
+                {
+                    InvoiceNumber = $"INV-{DateTime.UtcNow.Year}-{Guid.NewGuid().ToString().Substring(0, 6).ToUpper()}",
+                    SubscriptionId = currentSub.Id,
+                    UserId = payment.User.Id,
+                    PaymentGateway = "Bank Transfer",
+                    PaymentMethod = "Manual",
+                    Currency = payment.Currency ?? "EGP",
+                    SubTotal = amountEgp - taxAmt,
+                    TaxAmount = taxAmt,
+                    TotalAmount = amountEgp,
+                    TransactionId = payment.PaymentId ?? payment.Id.ToString(),
+                    Subscription = currentSub
+                };
+                
+                _context.Invoices.Add(invoice);
+                await _context.SaveChangesAsync();
+
+                try
+                {
+                    byte[] pdfBytes = await invoiceService.GenerateInvoicePdfAsync(invoice, verifyUrlBase);
+                    using var ms = new System.IO.MemoryStream(pdfBytes);
+                    string minioUrl = await mediaService.UploadFileAsync(ms, $"invoices/{invoice.InvoiceNumber}.pdf", "application/pdf", "invoices");
+                    
+                    invoice.MinioPdfUrl = minioUrl;
+                    _context.Invoices.Update(invoice);
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Failed to generate/upload manual payment invoice PDF: " + ex.Message);
+                }
+            }
 
             // Send Email Receipt
             try
