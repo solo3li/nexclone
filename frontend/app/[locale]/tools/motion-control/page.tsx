@@ -12,7 +12,7 @@ import {
 import { useAppStore } from "../../../../src/store/useAppStore";
 import { useRouter, Link } from "../../../../src/i18n/routing";
 import api from "../../../../src/utils/api";
-import ToolInstructions from "../../../../src/components/ToolInstructions"; // Corrected path to src/components
+import ToolInstructions from "../../../../components/ToolInstructions";
 
 function MotionControlPage() {
   const t = useTranslations("MotionControl");
