@@ -94,6 +94,11 @@ namespace NexClone.Backend.API.Controllers.Admin
                 existingPlan.PriceEgp = plan.PriceEgp;
                 existingPlan.MonthlyCredits = plan.MonthlyCredits;
 
+                existingPlan.TaxPercentageUsd = plan.TaxPercentageUsd;
+                existingPlan.TaxPercentageEgp = plan.TaxPercentageEgp;
+                existingPlan.FixedFeeUsd = plan.FixedFeeUsd;
+                existingPlan.FixedFeeEgp = plan.FixedFeeEgp;
+
                 existingPlan.TtsEnabled = plan.TtsEnabled;
                 existingPlan.TtsMaxCharsPerRequest = plan.TtsMaxCharsPerRequest;
                 existingPlan.TtsCharactersBlock = plan.TtsCharactersBlock;

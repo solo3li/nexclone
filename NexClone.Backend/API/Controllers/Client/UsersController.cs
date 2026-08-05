@@ -263,8 +263,11 @@ namespace NexClone.Backend.API.Controllers.Client
 
             // Generate Invoice
             string verifyUrlBase = "https://nexmedia.ai";
-            decimal amountEgp = plan.PriceEgp;
-            decimal taxAmt = amountEgp * (plan.TaxPercentage / 100m);
+            decimal amountEgp = plan.PriceEgp; // Base price
+            decimal fixedFee = plan.FixedFeeEgp;
+            decimal taxAmt = (amountEgp + fixedFee) * (plan.TaxPercentageEgp / 100m);
+            decimal totalAmount = amountEgp + fixedFee + taxAmt;
+            
             var invoice = new Invoice
             {
                 InvoiceNumber = $"INV-{DateTime.UtcNow.Year}-{Guid.NewGuid().ToString().Substring(0, 6).ToUpper()}",
@@ -273,9 +276,10 @@ namespace NexClone.Backend.API.Controllers.Client
                 PaymentGateway = "Admin Assigned",
                 PaymentMethod = "Manual",
                 Currency = "EGP",
-                SubTotal = amountEgp - taxAmt,
+                SubTotal = amountEgp,
                 TaxAmount = taxAmt,
-                TotalAmount = amountEgp,
+                FixedFeeAmount = fixedFee,
+                TotalAmount = totalAmount,
                 TransactionId = payment.PaymentId,
                 Subscription = newSub
             };

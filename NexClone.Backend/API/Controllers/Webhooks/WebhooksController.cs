@@ -196,7 +196,11 @@ namespace NexClone.Backend.API.Controllers.Webhooks
 
                     // Generate Invoice
                     string verifyUrlBase = "https://nexmedia.ai"; // Replace with config variable later if needed
-                    decimal taxAmt = amountEgp * (plan.TaxPercentage / 100m);
+                    
+                    decimal fixedFee = plan.FixedFeeEgp;
+                    decimal taxAmt = (plan.PriceEgp + fixedFee) * (plan.TaxPercentageEgp / 100m);
+                    decimal subTotal = amountEgp - taxAmt - fixedFee;
+
                     var invoice = new Invoice
                     {
                         InvoiceNumber = $"INV-{DateTime.UtcNow.Year}-{Guid.NewGuid().ToString().Substring(0, 6).ToUpper()}",
@@ -205,8 +209,9 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                         PaymentGateway = "Paymob",
                         PaymentMethod = "Card", // Adjust based on Paymob details if needed
                         Currency = "EGP",
-                        SubTotal = amountEgp - taxAmt,
+                        SubTotal = subTotal,
                         TaxAmount = taxAmt,
+                        FixedFeeAmount = fixedFee,
                         TotalAmount = amountEgp,
                         TransactionId = orderId.ToString(),
                         Subscription = currentSub
@@ -476,7 +481,11 @@ namespace NexClone.Backend.API.Controllers.Webhooks
 
                 // 9. Generate Invoice
                 string verifyUrlBase = "https://nexmedia.ai"; 
-                decimal taxAmtUsd = amountUsd * (plan.TaxPercentage / 100m);
+                
+                decimal fixedFeeUsd = plan.FixedFeeUsd;
+                decimal taxAmtUsd = (plan.PriceUsd + fixedFeeUsd) * (plan.TaxPercentageUsd / 100m);
+                decimal subTotalUsd = amountUsd - taxAmtUsd - fixedFeeUsd;
+
                 var invoice = new Invoice
                 {
                     InvoiceNumber = $"INV-{DateTime.UtcNow.Year}-{Guid.NewGuid().ToString().Substring(0, 6).ToUpper()}",
@@ -485,8 +494,9 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                     PaymentGateway = "PayPal",
                     PaymentMethod = "Card/PayPal Wallet",
                     Currency = "USD",
-                    SubTotal = amountUsd - taxAmtUsd,
+                    SubTotal = subTotalUsd,
                     TaxAmount = taxAmtUsd,
+                    FixedFeeAmount = fixedFeeUsd,
                     TotalAmount = amountUsd,
                     TransactionId = transmissionId,
                     Subscription = currentSub

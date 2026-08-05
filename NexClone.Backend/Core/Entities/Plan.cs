@@ -30,7 +30,10 @@ namespace NexClone.Backend.Core.Entities
         public decimal PriceUsd { get; set; }
         public decimal PriceEgp { get; set; }
 
-        public decimal TaxPercentage { get; set; } = 0;
+        public decimal TaxPercentageUsd { get; set; } = 0;
+        public decimal TaxPercentageEgp { get; set; } = 0;
+        public decimal FixedFeeUsd { get; set; } = 0;
+        public decimal FixedFeeEgp { get; set; } = 0;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

@@ -106,21 +106,25 @@ namespace NexClone.Backend.API.Controllers
             {
                 if (sub.Plan == null || sub.User == null) continue;
 
-                string verifyUrlBase = "https://nexmedia.ai";
-                decimal amountEgp = sub.Plan.PriceEgp;
-                decimal taxAmt = amountEgp * (sub.Plan.TaxPercentage / 100m);
+                string verifyUrlBase = "https://nexmedia.ai"; // or from config
+                
+                decimal fixedFee = sub.Plan.FixedFeeEgp;
+                decimal taxAmt = (sub.Plan.PriceEgp + fixedFee) * (sub.Plan.TaxPercentageEgp / 100m);
+                decimal subTotal = sub.Plan.PriceEgp - taxAmt - fixedFee;
+
                 var invoice = new Invoice
                 {
-                    InvoiceNumber = $"INV-{sub.CreatedAt.Year}-{Guid.NewGuid().ToString().Substring(0, 6).ToUpper()}",
+                    InvoiceNumber = $"INV-{DateTime.UtcNow.Year}-{Guid.NewGuid().ToString().Substring(0, 6).ToUpper()}",
                     SubscriptionId = sub.Id,
                     UserId = sub.UserId,
-                    PaymentGateway = "Retroactive",
-                    PaymentMethod = "System",
+                    PaymentGateway = "Manual",
+                    PaymentMethod = "Offline",
                     Currency = "EGP",
-                    SubTotal = amountEgp - taxAmt,
+                    SubTotal = subTotal,
                     TaxAmount = taxAmt,
-                    TotalAmount = amountEgp,
-                    TransactionId = "RETRO-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
+                    FixedFeeAmount = fixedFee,
+                    TotalAmount = sub.Plan.PriceEgp,
+                    TransactionId = "MANUAL-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
                     CreatedAt = sub.CreatedAt,
                     Subscription = sub
                 };

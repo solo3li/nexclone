@@ -147,17 +147,21 @@ namespace NexClone.Backend.API.Controllers.Admin
             {
                 string verifyUrlBase = "https://nexmedia.ai";
                 decimal amountEgp = payment.Amount;
-                decimal taxAmt = amountEgp * (payment.Plan.TaxPercentage / 100m);
+                decimal fixedFee = payment.Plan.FixedFeeEgp;
+                decimal taxAmt = (payment.Plan.PriceEgp + fixedFee) * (payment.Plan.TaxPercentageEgp / 100m);
+                decimal subTotal = amountEgp - taxAmt - fixedFee;
+
                 var invoice = new Invoice
                 {
                     InvoiceNumber = $"INV-{DateTime.UtcNow.Year}-{Guid.NewGuid().ToString().Substring(0, 6).ToUpper()}",
-                    SubscriptionId = currentSub.Id,
-                    UserId = payment.User.Id,
-                    PaymentGateway = "Bank Transfer",
-                    PaymentMethod = "Manual",
-                    Currency = payment.Currency ?? "EGP",
-                    SubTotal = amountEgp - taxAmt,
+                    SubscriptionId = payment.SubscriptionId ?? 0,
+                    UserId = payment.UserId,
+                    PaymentGateway = payment.Method,
+                    PaymentMethod = "Offline",
+                    Currency = "EGP",
+                    SubTotal = subTotal,
                     TaxAmount = taxAmt,
+                    FixedFeeAmount = fixedFee,
                     TotalAmount = amountEgp,
                     TransactionId = payment.PaymentId ?? payment.Id.ToString(),
                     Subscription = currentSub

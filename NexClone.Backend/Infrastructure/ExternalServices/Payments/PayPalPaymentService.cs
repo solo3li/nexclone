@@ -55,7 +55,14 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
                 return new PaymentResult { IsSuccess = false, ErrorMessage = "Failed to authenticate with PayPal." };
 
             // 4. Determine amount
-            var amount = currency.ToUpperInvariant() == "USD" ? plan.PriceUsd : plan.PriceEgp;
+            decimal basePrice = currency.ToUpperInvariant() == "USD" ? plan.PriceUsd : plan.PriceEgp;
+            decimal fixedFee = currency.ToUpperInvariant() == "USD" ? plan.FixedFeeUsd : plan.FixedFeeEgp;
+            decimal taxPercentage = currency.ToUpperInvariant() == "USD" ? plan.TaxPercentageUsd : plan.TaxPercentageEgp;
+            
+            decimal taxAmount = (basePrice + fixedFee) * (taxPercentage / 100m);
+            decimal finalTotal = basePrice + fixedFee + taxAmount;
+            
+            var amount = finalTotal;
             var amountStr = amount.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
 
             // 5. Build return/cancel URLs — these should come from AppSettings ideally

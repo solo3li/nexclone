@@ -1,3 +1,4 @@
+using System;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -65,7 +66,11 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
             }
 
             // 3. Prepare payload (amount in cents)
-            int amountCents = (int)(plan.PriceEgp * 100);
+            decimal basePrice = plan.PriceEgp;
+            decimal fixedFee = plan.FixedFeeEgp;
+            decimal taxAmount = (basePrice + fixedFee) * (plan.TaxPercentageEgp / 100m);
+            decimal finalTotal = basePrice + fixedFee + taxAmount;
+            int amountCents = (int)Math.Round(finalTotal * 100);
 
             var payload = new
             {

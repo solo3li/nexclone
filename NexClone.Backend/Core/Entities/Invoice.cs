@@ -42,6 +42,7 @@ namespace NexClone.Backend.Core.Entities
 
         public decimal SubTotal { get; set; }
         public decimal TaxAmount { get; set; }
+        public decimal FixedFeeAmount { get; set; } = 0;
         public decimal TotalAmount { get; set; }
 
         [MaxLength(1000)]

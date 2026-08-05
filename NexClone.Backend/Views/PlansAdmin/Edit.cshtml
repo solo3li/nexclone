@@ -68,11 +68,32 @@
                     <input id="PriceEgp" type="number" class="bx--text-input" name="PriceEgp" required min="0" step="0.01" value="@Model.PriceEgp">
                 </div>
             </div>
+        </div>
 
-            <div class="bx--form-item custom-form-item custom-grid-span">
-                <label for="TaxPercentage" class="bx--label">@Localizer["Tax Percentage (%)"]</label>
+        <h4 class="bx--type-productive-heading-03" style="margin-top: 2rem; margin-bottom: 1rem;">@Localizer["Taxes & Fees"]</h4>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; background: #ffffff; padding: 1.5rem; border: 1px solid #e0e0e0; margin-bottom: 2rem;">
+            <div class="bx--form-item">
+                <label for="TaxPercentageUsd" class="bx--label">@Localizer["Tax Percentage (USD) (%)"]</label>
                 <div class="bx--text-input__field-wrapper">
-                    <input id="TaxPercentage" type="number" class="bx--text-input" name="TaxPercentage" required min="0" max="100" step="0.01" value="@Model.TaxPercentage">
+                    <input id="TaxPercentageUsd" type="number" class="bx--text-input" name="TaxPercentageUsd" required min="0" max="100" step="0.01" value="@Model.TaxPercentageUsd">
+                </div>
+            </div>
+            <div class="bx--form-item">
+                <label for="TaxPercentageEgp" class="bx--label">@Localizer["Tax Percentage (EGP) (%)"]</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="TaxPercentageEgp" type="number" class="bx--text-input" name="TaxPercentageEgp" required min="0" max="100" step="0.01" value="@Model.TaxPercentageEgp">
+                </div>
+            </div>
+            <div class="bx--form-item">
+                <label for="FixedFeeUsd" class="bx--label">@Localizer["Fixed Fee (USD)"]</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="FixedFeeUsd" type="number" class="bx--text-input" name="FixedFeeUsd" required min="0" step="0.01" value="@Model.FixedFeeUsd">
+                </div>
+            </div>
+            <div class="bx--form-item">
+                <label for="FixedFeeEgp" class="bx--label">@Localizer["Fixed Fee (EGP)"]</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="FixedFeeEgp" type="number" class="bx--text-input" name="FixedFeeEgp" required min="0" step="0.01" value="@Model.FixedFeeEgp">
                 </div>
             </div>
         </div>
