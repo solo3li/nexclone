@@ -20,7 +20,7 @@ namespace NexClone.Backend.API.Controllers
 
         [HttpGet("verify/{token}")]
         [AllowAnonymous]
-        public async Task<IActionResult> VerifyInvoice(string token)
+        public async Task<IActionResult> VerifyInvoice(string token, [FromServices] NexClone.Backend.Core.Interfaces.IMediaService mediaService)
         {
             if (string.IsNullOrWhiteSpace(token))
                 return BadRequest(new { message = "Token is required" });
@@ -36,11 +36,13 @@ namespace NexClone.Backend.API.Controllers
                 return NotFound(new { message = "Invoice not found or invalid token." });
             }
 
+            var pdfUrl = string.IsNullOrWhiteSpace(invoice.MinioPdfUrl) ? null : await mediaService.GetFileUrlAsync(invoice.MinioPdfUrl, "invoices");
+
             var result = new
             {
                 invoice.InvoiceNumber,
                 Date = invoice.CreatedAt,
-                CustomerName = invoice.User.FullName ?? invoice.User.Email,
+                CustomerName = invoice.User?.FullName ?? invoice.User?.Email,
                 PlanName = invoice.Subscription?.Plan?.Name ?? "Custom Plan",
                 invoice.PaymentGateway,
                 invoice.PaymentMethod,
@@ -49,7 +51,7 @@ namespace NexClone.Backend.API.Controllers
                 invoice.TaxAmount,
                 invoice.TotalAmount,
                 invoice.Currency,
-                invoice.MinioPdfUrl
+                MinioPdfUrl = pdfUrl
             };
 
             return Ok(new { success = true, invoice = result });
@@ -57,7 +59,7 @@ namespace NexClone.Backend.API.Controllers
 
         [HttpGet("my-invoices")]
         [Authorize]
-        public async Task<IActionResult> GetMyInvoices()
+        public async Task<IActionResult> GetMyInvoices([FromServices] NexClone.Backend.Core.Interfaces.IMediaService mediaService)
         {
             var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (!Guid.TryParse(userIdStr, out var userId))
@@ -68,18 +70,24 @@ namespace NexClone.Backend.API.Controllers
                 .ThenInclude(s => s.Plan)
                 .Where(i => i.UserId == userId)
                 .OrderByDescending(i => i.CreatedAt)
-                .Select(i => new
+                .ToListAsync();
+
+            var result = new System.Collections.Generic.List<object>();
+            foreach (var i in invoices)
+            {
+                var pdfUrl = string.IsNullOrWhiteSpace(i.MinioPdfUrl) ? null : await mediaService.GetFileUrlAsync(i.MinioPdfUrl, "invoices");
+                result.Add(new
                 {
                     i.InvoiceNumber,
                     Date = i.CreatedAt,
-                    PlanName = i.Subscription.Plan.Name,
+                    PlanName = i.Subscription?.Plan?.Name ?? "Custom Plan",
                     i.TotalAmount,
                     i.Currency,
-                    i.MinioPdfUrl
-                })
-                .ToListAsync();
+                    MinioPdfUrl = pdfUrl
+                });
+            }
 
-            return Ok(new { success = true, invoices });
+            return Ok(new { success = true, invoices = result });
         }
 
         [HttpGet("generate-retro")]
