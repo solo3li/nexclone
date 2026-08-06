@@ -15,6 +15,7 @@ namespace NexClone.Backend.Core.Entities
         public string? SecretKey { get; set; }
         public string? HmacSecret { get; set; }
         public string? IntegrationId { get; set; }
+        public string? WalletIntegrationId { get; set; }
         public string? IframeId { get; set; }
 
         // PayPal specific

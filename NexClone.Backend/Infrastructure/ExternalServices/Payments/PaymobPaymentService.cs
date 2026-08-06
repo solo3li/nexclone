@@ -72,11 +72,17 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
             decimal finalTotal = basePrice + fixedFee + taxAmount;
             int amountCents = (int)Math.Round(finalTotal * 100);
 
+            var paymentMethodsList = new System.Collections.Generic.List<int> { integrationId };
+            if (!string.IsNullOrEmpty(paymobConfig.WalletIntegrationId) && int.TryParse(paymobConfig.WalletIntegrationId, out int walletIntegrationId))
+            {
+                paymentMethodsList.Add(walletIntegrationId);
+            }
+
             var payload = new
             {
                 amount = amountCents,
                 currency = "EGP",
-                payment_methods = new[] { integrationId },
+                payment_methods = paymentMethodsList.ToArray(),
                 items = new[]
                 {
                     new
