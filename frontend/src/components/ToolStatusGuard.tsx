@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname } from "../../i18n/routing";
+import { usePathname } from "../i18n/routing";
 import { useLocale } from "next-intl";
 import { Loader2, Settings, Clock, Sparkles } from "lucide-react";
-import api from "../../utils/api";
+import api from "../utils/api";
 
 type ToolConfig = {
   isActive: boolean;
