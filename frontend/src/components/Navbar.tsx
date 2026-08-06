@@ -32,6 +32,7 @@ function LanguageSwitcher() {
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [toolConfigs, setToolConfigs] = useState<any>(null);
   
   const t = useTranslations('Navbar');
   const locale = useLocale();
@@ -45,9 +46,84 @@ export default function Navbar() {
         setUser(res.data);
       }).catch(() => {});
     }
+    
+    // Fetch tool configs for badges
+    api.get('/api/platform/tools-config')
+      .then(res => setToolConfigs(res.data))
+      .catch(err => console.error("Failed to fetch tool configs:", err));
   }, [isAuthenticated, setUser]);
 
+  const tools = [
+    {
+      id: "text-to-voice",
+      href: "/tools/text-to-voice",
+      icon: Mic,
+      labelEn: "Text to Voice",
+      labelAr: "تحويل النص لصوت",
+      color: "text-fuchsia-400",
+      bg: "bg-fuchsia-500/10",
+    },
+    {
+      id: "voice-to-text",
+      href: "/tools/voice-to-text",
+      icon: FileAudio,
+      labelEn: "Voice to Text",
+      labelAr: "تحويل الصوت لنص",
+      color: "text-emerald-400",
+      bg: "bg-emerald-500/10",
+    },
+    {
+      id: "image-to-video",
+      href: "/tools/image-to-video",
+      icon: Video,
+      labelEn: "Image to Video",
+      labelAr: "تحويل الصورة لفيديو",
+      color: "text-blue-400",
+      bg: "bg-blue-500/10",
+    },
+    {
+      id: "advanced-lip-sync",
+      href: "/tools/advanced-lip-sync",
+      icon: Smile,
+      labelEn: "Advanced Lip-Sync",
+      labelAr: "مزامنة الشفاه",
+      color: "text-rose-400",
+      bg: "bg-rose-500/10",
+    },
+    {
+      id: "motion-control",
+      href: "/tools/motion-control",
+      icon: Video,
+      labelEn: "Motion Transfer",
+      labelAr: "نسخ الحركة",
+      color: "text-cyan-400",
+      bg: "bg-cyan-500/10",
+    }
+  ];
 
+  const getToolStatus = (id: string) => {
+    if (!toolConfigs) return 'active';
+    const routeMapping: Record<string, string[]> = {
+      "image-to-video": ["kling_avatar_image2video"],
+      "advanced-lip-sync": ["kling_advanced_lip_sync", "vidu_advanced_lip_sync"],
+      "text-to-voice": ["text-to-voice"],
+      "voice-to-text": ["voice-to-text"],
+      "motion-control": ["motion-control"]
+    };
+    let mappedKeys = routeMapping[id];
+    if (!mappedKeys) {
+      const fuzzyKey = Object.keys(toolConfigs).find(k => k.includes(id.replace(/-/g, '_')));
+      if (fuzzyKey) mappedKeys = [fuzzyKey];
+    }
+    if (mappedKeys && mappedKeys.length > 0) {
+      const relevantConfigs = mappedKeys.map(k => toolConfigs[k]).filter(Boolean);
+      if (relevantConfigs.length > 0) {
+        if (relevantConfigs.some(c => c.isMaintenanceMode)) return 'maintenance';
+        if (relevantConfigs.some(c => c.isComingSoon)) return 'coming_soon';
+      }
+    }
+    return 'active';
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -93,36 +169,28 @@ export default function Navbar() {
                 <ChevronDown className="w-4 h-4 opacity-70 group-hover:opacity-100 transition-transform group-hover:rotate-180" />
               </button>
               <div className="absolute top-full mt-4 w-64 rounded-2xl bg-[#0a0015]/95 backdrop-blur-xl border border-white/10 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 flex flex-col overflow-hidden pt-2 pb-2" style={{ [locale === 'ar' ? 'right' : 'left']: '-1rem' }}>
-                <Link href="/tools/text-to-voice" className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-fuchsia-500/10 flex items-center justify-center shrink-0">
-                    <Mic className="w-4 h-4 text-fuchsia-400" />
-                  </div>
-                  <span className="text-sm font-medium text-white/90">{locale === 'ar' ? 'تحويل النص لصوت' : 'Text to Voice'}</span>
-                </Link>
-                <Link href="/tools/voice-to-text" className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
-                    <FileAudio className="w-4 h-4 text-emerald-400" />
-                  </div>
-                  <span className="text-sm font-medium text-white/90">{locale === 'ar' ? 'تحويل الصوت لنص' : 'Voice to Text'}</span>
-                </Link>
-                <Link href="/tools/image-to-video" className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
-                    <Video className="w-4 h-4 text-blue-400" />
-                  </div>
-                  <span className="text-sm font-medium text-white/90">{locale === 'ar' ? 'تحويل الصورة لفيديو' : 'Image to Video'}</span>
-                </Link>
-                <Link href="/tools/advanced-lip-sync" className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center shrink-0">
-                    <Smile className="w-4 h-4 text-rose-400" />
-                  </div>
-                  <span className="text-sm font-medium text-white/90">{locale === 'ar' ? 'مزامنة الشفاه' : 'Advanced Lip-Sync'}</span>
-                </Link>
-                <Link href="/tools/motion-control" className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center shrink-0">
-                    <Video className="w-4 h-4 text-cyan-400" />
-                  </div>
-                  <span className="text-sm font-medium text-white/90">{locale === 'ar' ? 'نسخ الحركة' : 'Motion Transfer'}</span>
-                </Link>
+                {tools.map(tool => {
+                  const status = getToolStatus(tool.id);
+                  const Icon = tool.icon;
+                  return (
+                    <Link key={tool.id} href={tool.href} className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors group/item">
+                      <div className={`w-8 h-8 rounded-lg ${tool.bg} flex items-center justify-center shrink-0`}>
+                        <Icon className={`w-4 h-4 ${tool.color}`} />
+                      </div>
+                      <span className="text-sm font-medium text-white/90 flex-1">{locale === 'ar' ? tool.labelAr : tool.labelEn}</span>
+                      {status === 'maintenance' && (
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 whitespace-nowrap ml-auto">
+                          {locale === 'ar' ? 'صيانة' : 'Maint.'}
+                        </span>
+                      )}
+                      {status === 'coming_soon' && (
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 whitespace-nowrap ml-auto">
+                          {locale === 'ar' ? 'قريباً' : 'Soon'}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
               </div>
             </div>
 
@@ -220,30 +288,28 @@ export default function Navbar() {
               </Link>
               <div className="flex flex-col py-2 border-b border-white/5">
                 <span className="text-white/50 text-xs font-bold uppercase mb-3 px-1">{t('tools')}</span>
-                <Link href="/tools/text-to-voice" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-2 text-white/80 hover:text-white transition-colors rounded-xl hover:bg-white/5">
-                  <div className="w-8 h-8 rounded-lg bg-fuchsia-500/10 flex items-center justify-center shrink-0">
-                    <Mic className="w-4 h-4 text-fuchsia-400" />
-                  </div>
-                  <span className="text-sm font-medium">{locale === 'ar' ? 'تحويل النص لصوت' : 'Text to Voice'}</span>
-                </Link>
-                <Link href="/tools/voice-to-text" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-2 text-white/80 hover:text-white transition-colors rounded-xl hover:bg-white/5">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
-                    <FileAudio className="w-4 h-4 text-emerald-400" />
-                  </div>
-                  <span className="text-sm font-medium">{locale === 'ar' ? 'تحويل الصوت لنص' : 'Voice to Text'}</span>
-                </Link>
-                <Link href="/tools/image-to-video" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-2 text-white/80 hover:text-white transition-colors rounded-xl hover:bg-white/5">
-                  <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
-                    <Video className="w-4 h-4 text-blue-400" />
-                  </div>
-                  <span className="text-sm font-medium">{locale === 'ar' ? 'تحويل الصورة لفيديو' : 'Image to Video'}</span>
-                </Link>
-                <Link href="/tools/advanced-lip-sync" onClick={() => setMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-2 text-white/80 hover:text-white transition-colors rounded-xl hover:bg-white/5">
-                  <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center shrink-0">
-                    <Smile className="w-4 h-4 text-rose-400" />
-                  </div>
-                  <span className="text-sm font-medium">{locale === 'ar' ? 'مزامنة الشفاه' : 'Advanced Lip-Sync'}</span>
-                </Link>
+                {tools.map(tool => {
+                  const status = getToolStatus(tool.id);
+                  const Icon = tool.icon;
+                  return (
+                    <Link key={tool.id} href={tool.href} onClick={() => setMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-2 text-white/80 hover:text-white transition-colors rounded-xl hover:bg-white/5 group/item">
+                      <div className={`w-8 h-8 rounded-lg ${tool.bg} flex items-center justify-center shrink-0`}>
+                        <Icon className={`w-4 h-4 ${tool.color}`} />
+                      </div>
+                      <span className="text-sm font-medium flex-1">{locale === 'ar' ? tool.labelAr : tool.labelEn}</span>
+                      {status === 'maintenance' && (
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 whitespace-nowrap">
+                          {locale === 'ar' ? 'صيانة' : 'Maint.'}
+                        </span>
+                      )}
+                      {status === 'coming_soon' && (
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 whitespace-nowrap">
+                          {locale === 'ar' ? 'قريباً' : 'Soon'}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
               </div>
               <Link href="/pricing" onClick={() => setMenuOpen(false)} className="text-white/80 hover:text-white text-base font-medium py-2 border-b border-white/5 transition-colors">
                 {t('pricing')}

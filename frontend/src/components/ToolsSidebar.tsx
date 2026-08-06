@@ -84,9 +84,15 @@ export default function ToolsSidebar() {
   const [walletsExpanded, setWalletsExpanded] = useState(false);
   const [consumptionExpanded, setConsumptionExpanded] = useState(false);
   const [preferredSubId, setPreferredSubId] = useState<number | null>(null);
+  const [toolConfigs, setToolConfigs] = useState<any>(null);
 
   useEffect(() => {
     setPreferredSubId(Number(sessionStorage.getItem('preferredSubscriptionId')) || null);
+    
+    // Fetch tool configs for badges
+    api.get('/api/platform/tools-config')
+      .then(res => setToolConfigs(res.data))
+      .catch(err => console.error("Failed to fetch tool configs:", err));
   }, []);
 
   const [notifications, setNotifications] = useState<Array<{ id: number, title: string, message: string, type: string, url: string, time: Date }>>([]);
@@ -435,13 +441,37 @@ export default function ToolsSidebar() {
             {tools.map((tool) => {
               const isActive = pathname.includes(tool.id);
               const Icon = tool.icon;
+              
+              // Determine status
+              let status = 'active';
+              if (toolConfigs) {
+                const routeMapping: Record<string, string[]> = {
+                  "image-to-video": ["kling_avatar_image2video"],
+                  "advanced-lip-sync": ["kling_advanced_lip_sync", "vidu_advanced_lip_sync"],
+                  "text-to-voice": ["text-to-voice"],
+                  "voice-to-text": ["voice-to-text"],
+                  "motion-control": ["motion-control"]
+                };
+                let mappedKeys = routeMapping[tool.id];
+                if (!mappedKeys) {
+                  const fuzzyKey = Object.keys(toolConfigs).find(k => k.includes(tool.id.replace(/-/g, '_')));
+                  if (fuzzyKey) mappedKeys = [fuzzyKey];
+                }
+                if (mappedKeys && mappedKeys.length > 0) {
+                  const relevantConfigs = mappedKeys.map(k => toolConfigs[k]).filter(Boolean);
+                  if (relevantConfigs.length > 0) {
+                    if (relevantConfigs.some(c => c.isMaintenanceMode)) status = 'maintenance';
+                    else if (relevantConfigs.some(c => c.isComingSoon)) status = 'coming_soon';
+                  }
+                }
+              }
 
               return (
                 <Link
                   key={tool.id}
                   href={tool.href}
                   onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group border ${isActive
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group border relative overflow-hidden ${isActive
                       ? `bg-white/8 text-white ${tool.activeBorder}`
                       : 'text-white/50 hover:bg-white/5 hover:text-white border-transparent'
                     }`}
@@ -451,10 +481,22 @@ export default function ToolsSidebar() {
                     }`}>
                     <Icon className={`w-4.5 h-4.5 ${isActive ? tool.color : 'text-white/40 group-hover:text-white/70'}`} />
                   </div>
-                  <span className="font-medium text-sm leading-tight">
+                  <span className="font-medium text-sm leading-tight flex-1">
                     {isRtl ? tool.labelAr : tool.labelEn}
                   </span>
-                  {isActive && (
+                  
+                  {status === 'maintenance' && (
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 whitespace-nowrap">
+                      {isRtl ? 'صيانة' : 'Maint.'}
+                    </span>
+                  )}
+                  {status === 'coming_soon' && (
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 whitespace-nowrap">
+                      {isRtl ? 'قريباً' : 'Soon'}
+                    </span>
+                  )}
+
+                  {isActive && status === 'active' && (
                     <div className={`w-1.5 h-1.5 rounded-full ${tool.color.replace('text-', 'bg-')} ${isRtl ? 'mr-auto' : 'ml-auto'} opacity-80`} />
                   )}
                 </Link>
