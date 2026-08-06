@@ -15,6 +15,7 @@ import { Plan } from '@/store/usePlansStore';
 export default function PricingPage() {
   const { plans, isLoading, error, fetchPlans } = usePlansStore();
   const [currency, setCurrency] = useState<'USD' | 'EGP'>('USD');
+  const [checkoutCurrency, setCheckoutCurrency] = useState<'USD' | 'EGP'>('USD');
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const locale = useLocale();
   const isRtl = locale === 'ar';
@@ -216,12 +217,38 @@ export default function PricingPage() {
                       </div>
                     </div>
 
-                    <button 
-                      onClick={() => setSelectedPlan(plan)}
-                      className={`w-full py-4 mt-8 rounded-xl font-semibold transition-all duration-300 ${isPopular ? 'bg-white text-black hover:bg-gray-100 hover:shadow-lg hover:shadow-white/20' : 'bg-white/10 text-white hover:bg-white/20'}`}
-                    >
-                      {plan.priceUsd === 0 ? (isRtl ? 'ابدأ مجاناً' : 'Get Started for Free') : (isRtl ? 'اشترك الآن' : 'Subscribe Now')}
-                    </button>
+                    {plan.priceUsd === 0 ? (
+                      <button 
+                        onClick={() => {
+                          setCheckoutCurrency('USD');
+                          setSelectedPlan(plan);
+                        }}
+                        className={`w-full py-4 mt-8 rounded-xl font-semibold transition-all duration-300 ${isPopular ? 'bg-white text-black hover:bg-gray-100 hover:shadow-lg hover:shadow-white/20' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                      >
+                        {isRtl ? 'ابدأ مجاناً' : 'Get Started for Free'}
+                      </button>
+                    ) : (
+                      <div className="flex gap-3 mt-8">
+                        <button
+                          onClick={() => {
+                            setCheckoutCurrency('EGP');
+                            setSelectedPlan(plan);
+                          }}
+                          className={`flex-1 py-3.5 rounded-xl font-semibold transition-all duration-300 text-sm ${isPopular ? 'bg-white text-black hover:bg-gray-100 hover:shadow-lg hover:shadow-white/20' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                        >
+                          {isRtl ? 'دفع بالجنيه' : 'Pay in EGP'}
+                        </button>
+                        <button
+                          onClick={() => {
+                            setCheckoutCurrency('USD');
+                            setSelectedPlan(plan);
+                          }}
+                          className={`flex-1 py-3.5 rounded-xl font-semibold transition-all duration-300 text-sm ${isPopular ? 'bg-white text-black hover:bg-gray-100 hover:shadow-lg hover:shadow-white/20' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                        >
+                          {isRtl ? 'دفع بالدولار' : 'Pay in USD'}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               );
@@ -237,7 +264,7 @@ export default function PricingPage() {
       {selectedPlan && (
         <CheckoutModal 
           plan={selectedPlan} 
-          currency={currency} 
+          currency={checkoutCurrency} 
           onClose={() => setSelectedPlan(null)} 
         />
       )}

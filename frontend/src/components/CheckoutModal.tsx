@@ -36,7 +36,6 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
   const isRtl = locale === 'ar';
 
   // State
-  const [paymentCurrency, setPaymentCurrency] = useState<'USD' | 'EGP'>(currency);
   const [activeTab, setActiveTab]             = useState<'card' | 'wallet' | 'manual'>('card');
   const [gateways, setGateways]               = useState<GatewayOption[]>([]);
   const [selectedGateway, setSelectedGateway] = useState<GatewayOption | null>(null);
@@ -55,7 +54,7 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
       const res = await api.get<GatewayOption[]>(`/api/checkout/gateways/${plan.id}`);
       // Filter by selected currency
       const filtered = res.data.filter(
-        (g) => g.currency === paymentCurrency.toUpperCase()
+        (g) => g.currency === currency.toUpperCase()
       );
       setGateways(filtered);
       // Auto-select the default gateway
@@ -66,7 +65,7 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
     } finally {
       setIsLoadingGateways(false);
     }
-  }, [plan, paymentCurrency]);
+  }, [plan, currency]);
 
   useEffect(() => { fetchGateways(); }, [fetchGateways]);
 
@@ -81,8 +80,8 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
 
   if (!plan) return null;
 
-  const price = paymentCurrency === 'USD' ? plan.priceUsd : plan.priceEgp;
-  const currencySymbol = paymentCurrency === 'USD' ? '$' : 'EGP ';
+  const price = currency === 'USD' ? plan.priceUsd : plan.priceEgp;
+  const currencySymbol = currency === 'USD' ? '$' : 'EGP ';
 
   // ─── Gateway Checkout ─────────────────────────────────────────────────────
   const handleGatewayCheckout = async () => {
@@ -96,7 +95,7 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
       const res = await api.post('/api/checkout/pay', {
         planId:          plan.id,
         gatewayConfigId: selectedGateway.gatewayConfigId,
-        currency:        paymentCurrency,
+        currency,
         method:          activeTab === 'wallet' ? 'wallet' : 'card'
       });
       if (res.data?.checkoutUrl) {
@@ -155,39 +154,6 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
             <span className="ml-2 text-emerald-400 font-bold">{currencySymbol}{price}</span>
           </p>
 
-          {!success && (
-            <div className="flex gap-2 mb-6 p-1 bg-white/5 border border-white/10 rounded-xl">
-              <button
-                onClick={() => {
-                  setPaymentCurrency('EGP');
-                  if (activeTab === 'wallet' && paymentCurrency !== 'EGP') {
-                    // Reset to card if switching to USD which doesn't have wallet, though this is EGP
-                  }
-                }}
-                className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${
-                  paymentCurrency === 'EGP'
-                    ? 'bg-violet-600 text-white shadow-lg'
-                    : 'text-gray-400 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                {isRtl ? 'جنيه مصري (EGP)' : 'Egyptian Pound (EGP)'}
-              </button>
-              <button
-                onClick={() => {
-                  setPaymentCurrency('USD');
-                  if (activeTab === 'wallet') setActiveTab('card');
-                }}
-                className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${
-                  paymentCurrency === 'USD'
-                    ? 'bg-violet-600 text-white shadow-lg'
-                    : 'text-gray-400 hover:text-white hover:bg-white/5'
-                }`}
-              >
-                {isRtl ? 'دولار أمريكي (USD)' : 'US Dollar (USD)'}
-              </button>
-            </div>
-          )}
-
           {success ? (
             /* ── Success State ── */
             <div className="text-center py-8">
@@ -221,7 +187,7 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
                 >
                   {isRtl ? 'دفع بالبطاقة (فيزا/ماستر)' : 'Card Payment'}
                 </button>
-                {paymentCurrency === 'EGP' && (
+                {currency === 'EGP' && (
                   <button
                     onClick={() => setActiveTab('wallet')}
                     className={`flex-1 py-3 rounded-xl border font-semibold transition-all text-sm ${
