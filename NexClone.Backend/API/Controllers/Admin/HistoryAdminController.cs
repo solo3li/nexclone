@@ -17,7 +17,7 @@ namespace NexClone.Backend.API.Controllers.Admin
             _context = context;
         }
 
-        public async Task<IActionResult> Index(string searchEmail, string filterType, string filterStatus)
+        public async Task<IActionResult> Index(string searchEmail, string searchId, string filterType, string filterStatus)
         {
             var query = _context.GenerationHistories
                 .Include(h => h.User)
@@ -25,6 +25,14 @@ namespace NexClone.Backend.API.Controllers.Admin
 
             if (!string.IsNullOrEmpty(searchEmail))
                 query = query.Where(h => h.User.Email.ToLower().Contains(searchEmail.ToLower()));
+
+            if (!string.IsNullOrEmpty(searchId))
+            {
+                if (Guid.TryParse(searchId, out Guid parsedId))
+                {
+                    query = query.Where(h => h.Id == parsedId);
+                }
+            }
 
             if (!string.IsNullOrEmpty(filterType) && filterType != "all")
                 query = query.Where(h => h.Type == filterType);
@@ -45,6 +53,7 @@ namespace NexClone.Backend.API.Controllers.Admin
             ViewBag.ProcessingCount= await allQuery.CountAsync(h => h.Status == "processing");
 
             ViewBag.CurrentSearch = searchEmail;
+            ViewBag.SearchId      = searchId;
             ViewBag.FilterType    = filterType;
             ViewBag.FilterStatus  = filterStatus;
 
@@ -65,6 +74,18 @@ namespace NexClone.Backend.API.Controllers.Admin
             }
 
             return View(history);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var history = await _context.GenerationHistories.FirstOrDefaultAsync(h => h.Id == id);
+            if (history == null) return NotFound();
+
+            _context.GenerationHistories.Remove(history);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }
