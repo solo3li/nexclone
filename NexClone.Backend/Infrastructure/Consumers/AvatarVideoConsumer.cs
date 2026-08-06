@@ -71,6 +71,9 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 formData.Add(new StringContent("3"), "length");
                 formData.Add(new StringContent("urn:air:kling:model:kling:kling-v3-image-to-video@1"), "model");
                 
+                string prompt = string.IsNullOrWhiteSpace(message.Prompt) ? "The speaker talks naturally to camera" : message.Prompt;
+                formData.Add(new StringContent(prompt), "prompt");
+
                 if (!string.IsNullOrEmpty(imageUrl))
                 {
                     formData.Add(new StringContent(imageUrl), "image_url");
