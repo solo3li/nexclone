@@ -6,6 +6,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { Link, usePathname, useRouter } from "../i18n/routing";
 import { useAppStore } from "../store/useAppStore";
 import api from "../utils/api";
+import { FreezeWarningBanner } from "./FreezeWarningBanner";
 
 function LanguageSwitcher() {
   const locale = useLocale();
@@ -59,13 +60,14 @@ export default function Navbar() {
       initial={{ y: -80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.7, ease: "easeOut" }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 flex flex-col ${
         scrolled
           ? "bg-[#0a0015]/90 backdrop-blur-xl border-b border-white/10 shadow-2xl shadow-purple-900/20"
           : "bg-transparent"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <FreezeWarningBanner />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="flex items-center justify-between h-16 md:h-20" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">

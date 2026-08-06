@@ -908,6 +908,7 @@ namespace NexClone.Backend.API.Controllers.Client
                     NameAr = s.Plan.NameAr,
                     Status = s.Status,
                     EndDate = s.EndDate,
+                    FreezeEndDate = s.EndDate.AddDays(s.Plan.GracePeriodDays),
                     IsFreeTrial = s.Plan.IsFreeTrial,
                     IsDefaultRegistrationPlan = s.Plan.IsDefaultRegistrationPlan,
                     Wallets = user.Wallets
@@ -932,6 +933,7 @@ namespace NexClone.Backend.API.Controllers.Client
                     NameAr = activeSub.Plan.NameAr,
                     Status = activeSub.Status,
                     EndDate = activeSub.EndDate,
+                    FreezeEndDate = activeSub.EndDate.AddDays(activeSub.Plan.GracePeriodDays),
                     TtsCustomInstructionsEnabled = activeSub.Plan.TtsCustomInstructionsEnabled,
                     AvatarVideoCostPerGeneration = activeSub.Plan.AvatarVideoCostPerGeneration,
                     AvatarVideoProCost = activeSub.Plan.AvatarVideoProCost,
