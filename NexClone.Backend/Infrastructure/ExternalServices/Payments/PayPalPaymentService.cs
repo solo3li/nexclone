@@ -91,13 +91,20 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
                         }
                     }
                 },
-                application_context = new
+                payment_source = new
                 {
-                    brand_name          = "NexMedia AI",
-                    landing_page        = "BILLING",
-                    user_action         = "PAY_NOW",
-                    return_url          = returnUrl,
-                    cancel_url          = cancelUrl
+                    paypal = new
+                    {
+                        experience_context = new
+                        {
+                            payment_method_preference = "UNRESTRICTED",
+                            brand_name = "NexMedia AI",
+                            landing_page = "GUEST_CHECKOUT", // Forces guest checkout (credit card)
+                            user_action = "PAY_NOW",
+                            return_url = returnUrl,
+                            cancel_url = cancelUrl
+                        }
+                    }
                 }
             };
 
