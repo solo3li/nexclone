@@ -78,11 +78,17 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
     }
   }, [activeTab, paymentMethods.length]);
 
-  // ─── Fetch Public Settings for Payment Statuses ──────────────────────────
+  // ─── Fetch Public Settings & Social Links ────────────────────────────────
   const [paymentStatuses, setPaymentStatuses] = useState<any>(null);
+  const [socialLinks, setSocialLinks] = useState<{ [key: string]: string }>({});
+
   useEffect(() => {
     api.get('/api/settings/public')
       .then((res) => setPaymentStatuses(res.data.paymentStatuses))
+      .catch(() => {});
+
+    api.get('/api/platform/social-links')
+      .then(res => setSocialLinks(res.data))
       .catch(() => {});
   }, []);
 
@@ -177,11 +183,43 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
     return 'active';
   };
 
-  const getGatewayErrorMessage = (status: string) => {
-    if (status === 'maintenance') return isRtl ? 'بوابة الدفع هذه تحت الصيانة حالياً.' : 'This payment gateway is currently under maintenance.';
-    if (status === 'coming_soon') return isRtl ? 'بوابة الدفع هذه ستتوفر قريباً.' : 'This payment gateway is coming soon.';
-    if (status === 'suspended') return isRtl ? 'بوابة الدفع هذه موقوفة حالياً.' : 'This payment gateway is currently suspended.';
-    return '';
+  const renderFallbackMessage = (status: string) => {
+    let mainMsg = '';
+    if (status === 'maintenance') mainMsg = isRtl ? 'بوابة الدفع هذه تحت الصيانة حالياً.' : 'This payment gateway is currently under maintenance.';
+    else if (status === 'coming_soon') mainMsg = isRtl ? 'بوابة الدفع هذه ستتوفر قريباً.' : 'This payment gateway is coming soon.';
+    else if (status === 'suspended') mainMsg = isRtl ? 'بوابة الدفع هذه موقوفة حالياً.' : 'This payment gateway is currently suspended.';
+    
+    if (!mainMsg) return null;
+
+    const fbLink = socialLinks['facebook'] || socialLinks['Facebook'];
+    const whatsappLink = socialLinks['whatsapp'] || socialLinks['WhatsApp'];
+    const supportLink = "mailto:support@nexclone.com"; // Placeholder or primary support link
+
+    return (
+      <div className="bg-orange-500/10 p-4 rounded-xl border border-orange-500/20 text-center">
+        <p className="text-orange-400 font-medium mb-3">{mainMsg}</p>
+        <p className="text-sm text-gray-300 mb-4">
+          {isRtl 
+            ? 'لكن لا تقلق، يمكنك تفعيل اشتراكك الآن بكل سهولة من خلال التواصل معنا أو فتح تذكرة دعم فني وسنقوم بتفعيله لك فوراً.' 
+            : 'But do not worry! You can easily activate your subscription by contacting us or opening a support ticket.'}
+        </p>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          {fbLink && (
+            <a href={fbLink} target="_blank" rel="noopener noreferrer" className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-2 px-4 rounded-lg transition-colors">
+              {isRtl ? 'تواصل عبر فيسبوك' : 'Contact via Facebook'}
+            </a>
+          )}
+          {whatsappLink && (
+            <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="bg-green-600 hover:bg-green-700 text-white text-xs font-semibold py-2 px-4 rounded-lg transition-colors">
+              {isRtl ? 'واتساب' : 'WhatsApp'}
+            </a>
+          )}
+          <a href={supportLink} className="bg-white/10 hover:bg-white/20 text-white text-xs font-semibold py-2 px-4 rounded-lg transition-colors">
+            {isRtl ? 'فتح تذكرة دعم فني' : 'Open Support Ticket'}
+          </a>
+        </div>
+      </div>
+    );
   };
 
   const renderBadge = (status: string) => {
@@ -333,9 +371,7 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
 
                       {error && <p className="text-red-400 text-sm">{error}</p>}
                       {selectedGateway && getGatewayStatus(selectedGateway.providerName) !== 'active' && (
-                        <p className="text-orange-400 text-sm bg-orange-500/10 p-3 rounded-xl border border-orange-500/20">
-                          {getGatewayErrorMessage(getGatewayStatus(selectedGateway.providerName))}
-                        </p>
+                        renderFallbackMessage(getGatewayStatus(selectedGateway.providerName))
                       )}
 
                       <button
@@ -410,9 +446,7 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
 
                   {error && <p className="text-red-400 text-sm">{error}</p>}
                   {getTabStatus('manual') !== 'active' && (
-                    <p className="text-orange-400 text-sm bg-orange-500/10 p-3 rounded-xl border border-orange-500/20">
-                      {getGatewayErrorMessage(getTabStatus('manual'))}
-                    </p>
+                    renderFallbackMessage(getTabStatus('manual'))
                   )}
 
                   <button
