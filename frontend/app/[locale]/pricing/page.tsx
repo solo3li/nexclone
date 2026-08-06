@@ -234,18 +234,28 @@ export default function PricingPage() {
                             setCheckoutCurrency('EGP');
                             setSelectedPlan(plan);
                           }}
-                          className={`flex-1 py-3.5 rounded-xl font-semibold transition-all duration-300 text-sm ${isPopular ? 'bg-white text-black hover:bg-gray-100 hover:shadow-lg hover:shadow-white/20' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                          className={`flex-1 py-3.5 px-2 rounded-xl font-bold transition-all duration-300 text-sm flex items-center justify-center gap-2 ${
+                            isPopular 
+                              ? 'bg-white text-purple-900 hover:bg-gray-50 hover:shadow-xl hover:-translate-y-0.5' 
+                              : 'bg-gradient-to-r from-purple-600 to-purple-500 text-white hover:from-purple-500 hover:to-purple-400 hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] hover:-translate-y-0.5'
+                          }`}
                         >
-                          {isRtl ? 'دفع بالجنيه' : 'Pay in EGP'}
+                          <span className="text-lg leading-none">🇪🇬</span>
+                          <span>{isRtl ? 'دفع بالجنيه' : 'Pay in EGP'}</span>
                         </button>
                         <button
                           onClick={() => {
                             setCheckoutCurrency('USD');
                             setSelectedPlan(plan);
                           }}
-                          className={`flex-1 py-3.5 rounded-xl font-semibold transition-all duration-300 text-sm ${isPopular ? 'bg-white text-black hover:bg-gray-100 hover:shadow-lg hover:shadow-white/20' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                          className={`flex-1 py-3.5 px-2 rounded-xl font-bold transition-all duration-300 text-sm flex items-center justify-center gap-2 ${
+                            isPopular 
+                              ? 'bg-black/20 text-white border border-white/30 hover:bg-black/30 hover:border-white/50 backdrop-blur-md hover:-translate-y-0.5' 
+                              : 'bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-500 hover:to-blue-400 hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] hover:-translate-y-0.5'
+                          }`}
                         >
-                          {isRtl ? 'دفع بالدولار' : 'Pay in USD'}
+                          <span className="text-lg leading-none">🌎</span>
+                          <span>{isRtl ? 'دفع بالدولار' : 'Pay in USD'}</span>
                         </button>
                       </div>
                     )}

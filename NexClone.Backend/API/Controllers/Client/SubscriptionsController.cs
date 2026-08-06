@@ -32,6 +32,8 @@ namespace NexClone.Backend.API.Controllers.Client
             var query = _context.Subscriptions
                 .Include(s => s.Plan)
                 .Include(s => s.User)
+                    .ThenInclude(u => u.Wallets)
+                        .ThenInclude(w => w.WalletType)
                 .Where(s => s.Plan.PriceUsd > 0 && !s.Plan.IsDefaultRegistrationPlan)
                 .AsQueryable();
 
