@@ -24,7 +24,7 @@ namespace NexClone.Backend.API.Controllers.Admin
             var settings = await _context.AppSettings.ToListAsync();
             
             var toolConfigs = await _context.ToolConfigurations.ToListAsync();
-            var defaultTools = new[] { "text-to-voice", "voice-to-text" };
+            var defaultTools = new[] { "text-to-voice", "voice-to-text", "image-to-video", "advanced-lip-sync", "motion-control" };
             bool changesMade = false;
             foreach (var defaultTool in defaultTools)
             {
@@ -95,9 +95,12 @@ namespace NexClone.Backend.API.Controllers.Admin
             foreach (var tool in toolConfigs)
             {
                 bool isMaintenance = form.ContainsKey($"toolMaintenance_{tool.Id}");
-                if (tool.IsMaintenanceMode != isMaintenance)
+                bool isComingSoon = form.ContainsKey($"toolComingSoon_{tool.Id}");
+                
+                if (tool.IsMaintenanceMode != isMaintenance || tool.IsComingSoon != isComingSoon)
                 {
                     tool.IsMaintenanceMode = isMaintenance;
+                    tool.IsComingSoon = isComingSoon;
                     tool.UpdatedAt = System.DateTime.UtcNow;
                     _context.Update(tool);
                 }
