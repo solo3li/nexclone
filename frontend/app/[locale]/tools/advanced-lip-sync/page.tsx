@@ -30,6 +30,7 @@ function AdvancedLipSyncPage() {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   
   const [isProcessing, setIsProcessing] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -58,6 +59,21 @@ function AdvancedLipSyncPage() {
     }
   }, [isAuthenticated, user]);
 
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isProcessing) {
+      setElapsedSeconds(0);
+      timer = setInterval(() => {
+        setElapsedSeconds(prev => prev + 1);
+      }, 1000);
+    } else {
+      setElapsedSeconds(0);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [isProcessing]);
+
 
   const handleProcessClick = () => {
     if (!isAuthenticated) {
@@ -74,6 +90,7 @@ function AdvancedLipSyncPage() {
     if (!videoFile || !audioFile) return;
     
     setIsProcessing(true);
+    setElapsedSeconds(0);
     setError("");
     setVideoUrl(null);
 
@@ -120,6 +137,12 @@ function AdvancedLipSyncPage() {
       setError(err.response?.data?.error || t('error'));
       setIsProcessing(false);
     }
+  };
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
   const downloadVideo = async () => {
@@ -287,23 +310,30 @@ function AdvancedLipSyncPage() {
                 </div>
               )}
 
-              <button
-                  onClick={handleProcessClick}
-                  disabled={isProcessing || !videoFile || !audioFile}
-                  className="w-full mt-4 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                {isProcessing ? (
-                  <>
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                    {t('processing')}
-                  </>
-                ) : (
-                  <>
-                    <Wand2 className="w-5 h-5" />
-                    {t('generate')}
-                  </>
-                )}
-              </button>
+              {isProcessing && (
+                <div className="mt-4 p-4 bg-fuchsia-500/10 border border-fuchsia-500/30 rounded-xl flex flex-col items-center justify-center gap-3">
+                  <Loader2 className="w-8 h-8 text-fuchsia-400 animate-spin" />
+                  <div className="text-center">
+                    <h3 className="text-white font-bold mb-1">{isRtl ? "جاري المعالجة..." : "Processing..."}</h3>
+                    <p className="text-white/60 text-sm">{isRtl ? "تستغرق هذه العملية وقتاً طويلاً. يمكنك إغلاق هذه الصفحة، وسنرسل لك إشعاراً عند الانتهاء." : "This process takes some time. You can close this page, we will notify you when it's done."}</p>
+                    <div className="mt-2 text-2xl font-mono text-fuchsia-300 font-bold">{formatTime(elapsedSeconds)}</div>
+                  </div>
+                  <Link href="/history" className="mt-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-medium transition-colors">
+                     {isRtl ? "الذهاب لسجل العمليات" : "Go to History"}
+                  </Link>
+                </div>
+              )}
+
+              {!isProcessing && (
+                <button
+                    onClick={handleProcessClick}
+                    disabled={!videoFile || !audioFile}
+                    className="w-full mt-4 bg-gradient-to-r from-fuchsia-600 to-pink-600 hover:from-fuchsia-500 hover:to-pink-500 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                  <Wand2 className="w-5 h-5" />
+                  {t('generate')}
+                </button>
+              )}
 
               {/* Output Video Player */}
               {videoUrl && (
