@@ -61,33 +61,22 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 var (apiKey, modelName) = await GetToolConfigAsync("kling_avatar_image2video");
                 var client = _httpClientFactory.CreateClient();
                 client.Timeout = TimeSpan.FromMinutes(5);
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+                client.DefaultRequestHeaders.Add("X-Picsart-API-Key", apiKey);
 
-                var payload = new
+                using var formData = new MultipartFormDataContent();
+                formData.Add(new StringContent("1024"), "width");
+                formData.Add(new StringContent("1024"), "height");
+                formData.Add(new StringContent("480p"), "quality");
+                formData.Add(new StringContent("false"), "audio");
+                formData.Add(new StringContent("3"), "length");
+                formData.Add(new StringContent("urn:air:kling:model:kling:kling-v3-image-to-video@1"), "model");
+                
+                if (!string.IsNullOrEmpty(imageUrl))
                 {
-                    params_ = new // C# doesn't let us use 'params', so we serialize with options or use a dict
-                    {
-                        prompt = message.Prompt ?? "The speaker talks naturally to camera",
-                        imageUrls = new[] { imageUrl },
-                        audioUrl = audioUrl,
-                        renderingSpeed = message.RenderingSpeed ?? "std"
-                    }
-                };
+                    formData.Add(new StringContent(imageUrl), "image_url");
+                }
 
-                // Create a dict to bypass 'params' reserved keyword issue
-                var jsonPayload = new System.Collections.Generic.Dictionary<string, object>
-                {
-                    ["params"] = new 
-                    {
-                        prompt = message.Prompt ?? "The speaker talks naturally to camera",
-                        imageUrls = new[] { imageUrl },
-                        audioUrl = audioUrl,
-                        renderingSpeed = message.RenderingSpeed ?? "std"
-                    }
-                };
-
-                var jsonContent = new StringContent(JsonSerializer.Serialize(jsonPayload), System.Text.Encoding.UTF8, "application/json");
-                var response = await client.PostAsync("https://api.picsart.com/gw-v2/workflows/kling-avatar/submit", jsonContent);
+                var response = await client.PostAsync("https://genai-api.picsart.io/v1/image2video", formData);
                 var responseString = await response.Content.ReadAsStringAsync();
 
                 if (!response.IsSuccessStatusCode)
@@ -97,10 +86,14 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 var root = doc.RootElement;
                 string taskId = "";
 
-                // Picsart format: { "status": "success", "response": { "id": "wf_abc123" } }
-                if (root.TryGetProperty("response", out var respEl) && respEl.TryGetProperty("id", out var idEl))
+                // Picsart new genai-api format: { "status": "processing", "inference_id": "abc123" }
+                if (root.TryGetProperty("inference_id", out var idEl))
                 {
                     taskId = idEl.GetString();
+                }
+                else if (root.TryGetProperty("response", out var respEl) && respEl.TryGetProperty("id", out var oldIdEl))
+                {
+                    taskId = oldIdEl.GetString();
                 }
 
                 if (string.IsNullOrEmpty(taskId))
