@@ -93,30 +93,28 @@ namespace NexClone.Backend.Infrastructure.Consumers
             for (int i = 0; i < 60; i++)
             {
                 await Task.Delay(10000); // Poll every 10 seconds (max 10 mins)
-                var pollResponse = await client.GetAsync($"https://api.picsart.com/gw-v2/workflows/kling-avatar/{taskId}/result");
+                var pollResponse = await client.GetAsync($"https://genai-api.picsart.io/v1/video/{taskId}");
                 var pollString = await pollResponse.Content.ReadAsStringAsync();
 
                 using var pollDoc = JsonDocument.Parse(pollString);
                 var pollRoot = pollDoc.RootElement;
                 
-                // Picsart format: { "status": "success", "response": { "status": "COMPLETED", "result": { "url": "..." } } }
-                if (pollRoot.TryGetProperty("response", out var respEl))
+                // Picsart genai-api format: { "status": "DONE"|"success"|"processing"|"error", "data": { "url": "..." } }
+                if (pollRoot.TryGetProperty("status", out var statusEl))
                 {
-                    if (respEl.TryGetProperty("status", out var statusEl))
+                    var status = statusEl.GetString()?.ToUpper();
+                    if (status == "DONE" || status == "SUCCESS" || status == "COMPLETED")
                     {
-                        var status = statusEl.GetString()?.ToUpper();
-                        if (status == "COMPLETED")
+                        if (pollRoot.TryGetProperty("data", out var dataEl) && dataEl.TryGetProperty("url", out var urlEl))
                         {
-                            if (respEl.TryGetProperty("result", out var resultEl) && resultEl.TryGetProperty("url", out var urlEl))
-                            {
-                                outputUrl = urlEl.GetString();
-                                break;
-                            }
+                            outputUrl = urlEl.GetString();
+                            break;
                         }
-                        else if (status == "FAILED" || status == "ERROR")
-                        {
-                            throw new Exception($"Picsart Task failed: {pollString}");
-                        }
+                    }
+                    else if (status == "FAILED" || status == "ERROR")
+                    {
+                        string errorMsg = pollRoot.TryGetProperty("message", out var msgEl) ? msgEl.GetString() : pollString;
+                        throw new Exception($"Picsart Task failed: {errorMsg}");
                     }
                 }
             }
