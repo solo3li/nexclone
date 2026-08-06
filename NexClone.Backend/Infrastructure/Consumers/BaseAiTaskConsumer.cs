@@ -158,6 +158,11 @@ namespace NexClone.Backend.Infrastructure.Consumers
                                     outputUrl = videoUrlEl.GetString();
                                     break;
                                 }
+                                else if (resultEl.TryGetProperty("media_urls", out var mediaUrlsEl) && mediaUrlsEl.ValueKind == JsonValueKind.Array && mediaUrlsEl.GetArrayLength() > 0)
+                                {
+                                    outputUrl = mediaUrlsEl[0].GetString();
+                                    break;
+                                }
                             }
                         }
                         else if (status == "failed" || status == "error")
