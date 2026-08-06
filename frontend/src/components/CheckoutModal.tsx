@@ -184,7 +184,7 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
                       : 'border-white/10 text-gray-400 hover:bg-white/5'
                   }`}
                 >
-                  {isRtl ? 'بوابة الدفع' : 'Payment Gateway'}
+                  {isRtl ? 'دفع إلكتروني (بطاقات/محافظ)' : 'Online Payment (Cards/Wallets)'}
                 </button>
                 <button
                   onClick={() => setActiveTab('manual')}
