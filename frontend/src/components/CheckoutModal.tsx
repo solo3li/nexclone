@@ -124,7 +124,7 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
       await api.post('/api/ManualPayments', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      setSuccess(true);
+      window.location.href = `/${locale}/payment/success?method=manual`;
     } catch (err: any) {
       setError(err.response?.data?.message || (isRtl ? 'حدث خطأ' : 'An error occurred'));
     } finally {
@@ -154,27 +154,6 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
             <span className="ml-2 text-emerald-400 font-bold">{currencySymbol}{price}</span>
           </p>
 
-          {success ? (
-            /* ── Success State ── */
-            <div className="text-center py-8">
-              <CheckCircle className="w-16 h-16 text-emerald-400 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-white mb-2">
-                {isRtl ? 'تم إرسال الطلب بنجاح' : 'Request Submitted Successfully'}
-              </h3>
-              <p className="text-gray-400 mb-6">
-                {isRtl
-                  ? 'سوف يقوم الإدارة بمراجعة الإيصال وتفعيل الباقة قريباً.'
-                  : 'Admin will review your receipt and activate your plan shortly.'}
-              </p>
-              <button
-                onClick={onClose}
-                className="w-full bg-white text-black font-semibold py-3 rounded-xl"
-              >
-                {isRtl ? 'إغلاق' : 'Close'}
-              </button>
-            </div>
-          ) : (
-            <>
               {/* ── Tab Switcher ── */}
               <div className="flex gap-3 mb-6">
                 <button
@@ -359,8 +338,6 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
                   </button>
                 </div>
               )}
-            </>
-          )}
         </div>
       </div>
     </div>
