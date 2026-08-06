@@ -320,8 +320,24 @@ using (var scope = app.Services.CreateScope())
     }
     dbContext.SaveChanges();
 
+    // Seed API Configs
+    var defaultApiConfigs = new[] { "CrunAI" };
+    foreach (var provider in defaultApiConfigs)
+    {
+        if (!dbContext.ApiConfigurations.Any(c => c.ProviderName == provider))
+        {
+            dbContext.ApiConfigurations.Add(new NexClone.Backend.Core.Entities.ApiConfiguration
+            {
+                ProviderName = provider,
+                IsActive = true,
+                ApiKey = provider == "CrunAI" ? "ak_CY4NJBlD5UvgzHAvmWjdlf6urVOBRm92" : "" // default
+            });
+        }
+    }
+    dbContext.SaveChanges();
+
     // Seed Tools
-    var toolsToSeed = new[] { "kling_avatar_image2video", "kling_advanced_lip_sync" };
+    var toolsToSeed = new[] { "kling_avatar_image2video", "vidu_advanced_lip_sync" };
     foreach (var tool in toolsToSeed)
     {
         if (!dbContext.ToolConfigurations.Any(t => t.ToolName == tool))
@@ -334,8 +350,8 @@ using (var scope = app.Services.CreateScope())
                 {
                     new NexClone.Backend.Core.Entities.ToolRoutingRule
                     {
-                        ProviderName = "Picsart",
-                        ModelName = tool == "kling_avatar_image2video" ? "kling-v1" : "kling-v1",
+                        ProviderName = tool == "vidu_advanced_lip_sync" ? "CrunAI" : "Picsart",
+                        ModelName = tool == "kling_avatar_image2video" ? "kling-v1" : "vidu/lip-sync",
                         QualityLevel = "Standard"
                     }
                 }

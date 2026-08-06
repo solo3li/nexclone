@@ -41,10 +41,10 @@ namespace NexClone.Backend.Infrastructure.Consumers
 
             try
             {
-                var (apiKey, modelName) = await GetToolConfigAsync("kling_advanced_lip_sync");
+                var (apiKey, modelName) = await GetToolConfigAsync("vidu_advanced_lip_sync");
                 var client = _httpClientFactory.CreateClient();
-                client.Timeout = TimeSpan.FromMinutes(5);
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+                client.Timeout = TimeSpan.FromMinutes(10);
+                client.DefaultRequestHeaders.Add("x-api-key", apiKey);
 
                 using var videoStream = new MemoryStream(message.VideoBytes);
                 string videoKey = await _mediaService.UploadFileAsync(videoStream, $"{Guid.NewGuid()}_{message.VideoFileName}", message.VideoContentType);
@@ -57,19 +57,22 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 var payload = new
                 {
                     model = modelName,
-                    prompt = "lip sync",
-                    video_url = videoUrl,
-                    audio_url = audioUrl,
-                    video = videoUrl,
-                    audio = audioUrl
+                    input = new 
+                    {
+                        video_url = videoUrl,
+                        audio_url = audioUrl,
+                        speed = 1,
+                        volume = 5,
+                        moderation = "enabled"
+                    }
                 };
 
                 var jsonContent = new StringContent(JsonSerializer.Serialize(payload), System.Text.Encoding.UTF8, "application/json");
-                var response = await client.PostAsync("https://api.cometapi.com/v1/images/generations", jsonContent);
+                var response = await client.PostAsync("https://api.crun.ai/api/v1/client/job/CreateTask", jsonContent);
                 var responseString = await response.Content.ReadAsStringAsync();
 
                 if (!response.IsSuccessStatusCode)
-                    throw new Exception($"API Error: {responseString}");
+                    throw new Exception($"Crun AI API Error: {responseString}");
 
                 using var doc = JsonDocument.Parse(responseString);
                 var root = doc.RootElement;
@@ -77,17 +80,15 @@ namespace NexClone.Backend.Infrastructure.Consumers
 
                 if (root.TryGetProperty("data", out var dataEl) && dataEl.TryGetProperty("task_id", out var taskIdEl))
                     taskId = taskIdEl.GetString();
-                else if (root.TryGetProperty("task_id", out var taskIdEl2))
-                    taskId = taskIdEl2.GetString();
 
                 if (string.IsNullOrEmpty(taskId))
-                    throw new Exception($"Failed to get task_id. Response: {responseString}");
+                    throw new Exception($"Failed to get task_id from Crun AI. Response: {responseString}");
 
                 history.ResultText = taskId;
                 await _dbContext.SaveChangesAsync();
 
                 // Polling
-                string outputUrl = await PollCometApiTask(client, taskId);
+                string outputUrl = await PollCrunApiTask(client, taskId);
 
                 history.Status = "completed";
                 history.FileUrl = outputUrl;

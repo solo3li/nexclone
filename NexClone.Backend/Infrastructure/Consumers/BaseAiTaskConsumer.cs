@@ -127,6 +127,55 @@ namespace NexClone.Backend.Infrastructure.Consumers
             return outputUrl;
         }
 
+        protected async Task<string> PollCrunApiTask(HttpClient client, string taskId)
+        {
+            string outputUrl = "";
+            for (int i = 0; i < 60; i++)
+            {
+                await Task.Delay(10000); // Poll every 10 seconds (max 10 mins)
+                var pollResponse = await client.GetAsync($"https://api.crun.ai/api/v1/client/job/TaskInfo?task_id={taskId}");
+                var pollString = await pollResponse.Content.ReadAsStringAsync();
+
+                using var pollDoc = JsonDocument.Parse(pollString);
+                var pollRoot = pollDoc.RootElement;
+                
+                if (pollRoot.TryGetProperty("data", out var dataEl))
+                {
+                    if (dataEl.TryGetProperty("status", out var statusEl))
+                    {
+                        var status = statusEl.GetString()?.ToLower();
+                        if (status == "success" || status == "completed")
+                        {
+                            if (dataEl.TryGetProperty("result", out var resultEl))
+                            {
+                                if (resultEl.TryGetProperty("url", out var urlEl))
+                                {
+                                    outputUrl = urlEl.GetString();
+                                    break;
+                                }
+                                else if (resultEl.TryGetProperty("video_url", out var videoUrlEl))
+                                {
+                                    outputUrl = videoUrlEl.GetString();
+                                    break;
+                                }
+                            }
+                        }
+                        else if (status == "failed" || status == "error")
+                        {
+                            string errMsg = dataEl.TryGetProperty("result", out var resultEl) && resultEl.TryGetProperty("message", out var msgEl) 
+                                            ? msgEl.GetString() : pollString;
+                            throw new Exception($"Crun AI Task failed: {errMsg}");
+                        }
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(outputUrl))
+                throw new Exception("Timed out waiting for Crun AI task to complete.");
+
+            return outputUrl;
+        }
+
         protected async Task<(string ApiKey, string ModelName)> GetToolConfigAsync(string toolName)
         {
             var toolConfig = await _dbContext.ToolConfigurations
