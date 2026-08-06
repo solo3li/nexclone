@@ -131,17 +131,21 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
             {
                 foreach (var link in links.EnumerateArray())
                 {
-                    if (link.TryGetProperty("rel", out var rel) && rel.GetString() == "approve"
-                        && link.TryGetProperty("href", out var href))
+                    if (link.TryGetProperty("rel", out var rel) && link.TryGetProperty("href", out var href))
                     {
-                        approvalUrl = href.GetString() ?? string.Empty;
-                        break;
+                        var relStr = rel.GetString();
+                        if (relStr == "approve" || relStr == "payer-action")
+                        {
+                            approvalUrl = href.GetString() ?? string.Empty;
+                            if (relStr == "payer-action") 
+                                break; // Prefer payer-action if both exist
+                        }
                     }
                 }
             }
 
             if (string.IsNullOrEmpty(approvalUrl))
-                return new PaymentResult { IsSuccess = false, ErrorMessage = "No approval URL returned from PayPal." };
+                return new PaymentResult { IsSuccess = false, ErrorMessage = $"No approval URL returned from PayPal. Raw response: {orderContent}" };
 
             return new PaymentResult
             {
