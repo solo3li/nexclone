@@ -35,7 +35,41 @@ export default function ToolStatusGuard({ children }: { children: React.ReactNod
       try {
         const res = await api.get('/api/platform/tools-config');
         const allConfigs = res.data;
-        if (allConfigs[currentTool]) {
+        
+        // Map frontend route names to database tool names
+        const routeMapping: Record<string, string[]> = {
+          "image-to-video": ["kling_avatar_image2video"],
+          "advanced-lip-sync": ["kling_advanced_lip_sync", "vidu_advanced_lip_sync"],
+          "text-to-voice": ["text-to-voice"],
+          "voice-to-text": ["voice-to-text"],
+          "motion-control": ["motion-control"]
+        };
+
+        let mappedKeys = routeMapping[currentTool];
+        
+        // Fallback fuzzy match if not in map
+        if (!mappedKeys) {
+          const fuzzyKey = Object.keys(allConfigs).find(k => k.includes(currentTool.replace(/-/g, '_')));
+          if (fuzzyKey) mappedKeys = [fuzzyKey];
+        }
+
+        if (mappedKeys && mappedKeys.length > 0) {
+          const relevantConfigs = mappedKeys.map(k => allConfigs[k]).filter(Boolean);
+          
+          if (relevantConfigs.length > 0) {
+            // Priority: Maintenance > Coming Soon > Active
+            const maintenanceConfig = relevantConfigs.find(c => c.isMaintenanceMode);
+            const comingSoonConfig = relevantConfigs.find(c => c.isComingSoon);
+            
+            if (maintenanceConfig) {
+              setConfig(maintenanceConfig);
+            } else if (comingSoonConfig) {
+              setConfig(comingSoonConfig);
+            } else {
+              setConfig(relevantConfigs[0]);
+            }
+          }
+        } else if (allConfigs[currentTool]) {
           setConfig(allConfigs[currentTool]);
         }
       } catch (err) {
