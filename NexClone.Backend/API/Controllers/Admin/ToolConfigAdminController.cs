@@ -28,7 +28,7 @@ namespace NexClone.Backend.API.Controllers.Admin
             
             ViewBag.Providers = new SelectList(providers);
 
-            var tools = new[] { "text-to-voice", "voice-to-text" };
+            var tools = new[] { "text-to-voice", "voice-to-text", "image-to-video", "advanced-lip-sync", "motion-control" };
             
             var toolConfigs = new Dictionary<string, ToolConfiguration>();
             var concurrencyLimits = new Dictionary<string, int>();
@@ -72,6 +72,7 @@ namespace NexClone.Backend.API.Controllers.Admin
                 {
                     existing.IsActive = config.IsActive;
                     existing.IsMaintenanceMode = config.IsMaintenanceMode;
+                    existing.IsComingSoon = config.IsComingSoon;
                     existing.UpdatedAt = DateTime.UtcNow;
 
                     _context.ToolRoutingRules.RemoveRange(existing.RoutingRules);

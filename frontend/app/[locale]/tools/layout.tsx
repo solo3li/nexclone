@@ -1,6 +1,8 @@
 import ToolsSidebar from "../../../src/components/ToolsSidebar";
 import ToolsAuthGuard from "../../../src/components/ToolsAuthGuard";
 
+import ToolStatusGuard from "../../../src/components/ToolStatusGuard";
+
 export default async function ToolsLayout({
   children,
   params
@@ -18,7 +20,9 @@ export default async function ToolsLayout({
       {/* Main Workspace Area - fullscreen, no top navbar */}
       <main className={`flex-1 transition-all duration-300 w-full lg:w-auto relative ${isRtl ? 'lg:mr-72' : 'lg:ml-72'}`}>
         <ToolsAuthGuard>
-          {children}
+          <ToolStatusGuard>
+            {children}
+          </ToolStatusGuard>
         </ToolsAuthGuard>
       </main>
     </div>

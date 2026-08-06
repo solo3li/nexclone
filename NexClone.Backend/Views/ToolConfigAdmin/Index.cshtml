@@ -88,7 +88,7 @@
                                 </div>
                             </div>
 
-                            <div class="bx--form-item">
+                            <div class="bx--form-item" style="margin-bottom: 1rem;">
                                 <div class="bx--toggle-c">
                                     <input type="checkbox" id="IsMaintenanceMode-@toolName" class="bx--toggle-input" name="IsMaintenanceMode" value="true" @(config.IsMaintenanceMode ? "checked" : "")>
                                     <input type="hidden" name="IsMaintenanceMode" value="false">
@@ -98,6 +98,20 @@
                                             <span class="bx--toggle__text--right" aria-hidden="true">@Localizer["On"]</span>
                                         </span>
                                         <span style="margin-left: 1rem;">@Localizer["Maintenance Mode"]</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="bx--form-item">
+                                <div class="bx--toggle-c">
+                                    <input type="checkbox" id="IsComingSoon-@toolName" class="bx--toggle-input" name="IsComingSoon" value="true" @(config.IsComingSoon ? "checked" : "")>
+                                    <input type="hidden" name="IsComingSoon" value="false">
+                                    <label for="IsComingSoon-@toolName" class="bx--toggle-input__label" aria-label="Toggle">
+                                        <span class="bx--toggle__switch">
+                                            <span class="bx--toggle__text--left" aria-hidden="true">@Localizer["Off"]</span>
+                                            <span class="bx--toggle__text--right" aria-hidden="true">@Localizer["On"]</span>
+                                        </span>
+                                        <span style="margin-left: 1rem;">@Localizer["Coming Soon Mode"]</span>
                                     </label>
                                 </div>
                             </div>

@@ -37,6 +37,19 @@ namespace NexClone.Backend.API.Controllers.Client
             });
         }
 
+        [HttpGet("tools-config")]
+        public async Task<IActionResult> GetToolsConfig()
+        {
+            var configs = await _context.ToolConfigurations.ToListAsync();
+            var result = configs.ToDictionary(c => c.ToolName, c => new
+            {
+                isActive = c.IsActive,
+                isMaintenanceMode = c.IsMaintenanceMode,
+                isComingSoon = c.IsComingSoon
+            });
+            return Ok(result);
+        }
+
         [HttpGet("plans")]
         public async Task<IActionResult> GetPlans()
         {

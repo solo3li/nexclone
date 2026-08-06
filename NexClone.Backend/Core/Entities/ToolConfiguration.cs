@@ -16,6 +16,7 @@ namespace NexClone.Backend.Core.Entities
 
         public bool IsActive { get; set; } = true;
         public bool IsMaintenanceMode { get; set; } = false;
+        public bool IsComingSoon { get; set; } = false;
 
         public ICollection<ToolRoutingRule> RoutingRules { get; set; } = new List<ToolRoutingRule>();
 
