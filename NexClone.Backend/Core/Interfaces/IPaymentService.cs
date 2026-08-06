@@ -15,6 +15,7 @@ namespace NexClone.Backend.Core.Interfaces
             string userEmail,
             string userName,
             string phoneNumber,
-            string currency);
+            string currency,
+            string method = null);
     }
 }

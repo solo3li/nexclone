@@ -28,11 +28,12 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
             string userEmail,
             string userName,
             string phoneNumber,
-            string currency)
+            string currency,
+            string method = null)
         {
             return currency.ToUpperInvariant() switch
             {
-                "EGP" => await CreatePaymobIntentAsync(planId, gatewayConfigId, userId, userEmail, userName, phoneNumber),
+                "EGP" => await CreatePaymobIntentAsync(planId, gatewayConfigId, userId, userEmail, userName, phoneNumber, method),
                 "USD" => await _payPal.CreateOrderAsync(planId, gatewayConfigId, userId, userEmail, "USD"),
                 _     => new PaymentResult { IsSuccess = false, ErrorMessage = $"Currency '{currency}' is not yet supported." }
             };
@@ -44,7 +45,8 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
             string userId,
             string userEmail,
             string userName,
-            string phoneNumber)
+            string phoneNumber,
+            string method)
         {
             // 1. Fetch Plan
             var plan = await _context.Plans.FindAsync(planId);
@@ -72,10 +74,27 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
             decimal finalTotal = basePrice + fixedFee + taxAmount;
             int amountCents = (int)Math.Round(finalTotal * 100);
 
-            var paymentMethodsList = new System.Collections.Generic.List<int> { integrationId };
-            if (!string.IsNullOrEmpty(paymobConfig.WalletIntegrationId) && int.TryParse(paymobConfig.WalletIntegrationId, out int walletIntegrationId))
+            var paymentMethodsList = new System.Collections.Generic.List<int>();
+
+            int walletIntegrationId = 0;
+            bool hasWallet = !string.IsNullOrEmpty(paymobConfig.WalletIntegrationId) && int.TryParse(paymobConfig.WalletIntegrationId, out walletIntegrationId);
+
+            if (string.Equals(method, "wallet", StringComparison.OrdinalIgnoreCase))
             {
-                paymentMethodsList.Add(walletIntegrationId);
+                if (hasWallet)
+                    paymentMethodsList.Add(walletIntegrationId);
+                else
+                    return new PaymentResult { IsSuccess = false, ErrorMessage = "Wallet integration is not configured." };
+            }
+            else if (string.Equals(method, "card", StringComparison.OrdinalIgnoreCase))
+            {
+                paymentMethodsList.Add(integrationId);
+            }
+            else
+            {
+                paymentMethodsList.Add(integrationId);
+                if (hasWallet)
+                    paymentMethodsList.Add(walletIntegrationId);
             }
 
             var payload = new

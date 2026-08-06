@@ -63,6 +63,7 @@ namespace NexClone.Backend.API.Controllers.Client
             public int PlanId          { get; set; }
             public int GatewayConfigId { get; set; }
             public string Currency     { get; set; } = "EGP";
+            public string Method       { get; set; }
         }
 
         /// <summary>
@@ -105,7 +106,8 @@ namespace NexClone.Backend.API.Controllers.Client
                 userEmail:      user.Email ?? "user@example.com",
                 userName:       user.FullName ?? "User",
                 phoneNumber:    user.PhoneNumber ?? "+201000000000",
-                currency:       request.Currency.ToUpperInvariant());
+                currency:       request.Currency.ToUpperInvariant(),
+                method:         request.Method);
 
             if (result.IsSuccess)
                 return Ok(new { checkoutUrl = result.CheckoutUrl, provider = result.Provider });

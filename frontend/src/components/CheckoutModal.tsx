@@ -36,7 +36,7 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
   const isRtl = locale === 'ar';
 
   // State
-  const [activeTab, setActiveTab]             = useState<'gateway' | 'manual'>('gateway');
+  const [activeTab, setActiveTab]             = useState<'card' | 'wallet' | 'manual'>('card');
   const [gateways, setGateways]               = useState<GatewayOption[]>([]);
   const [selectedGateway, setSelectedGateway] = useState<GatewayOption | null>(null);
   const [paymentMethods, setPaymentMethods]   = useState<PaymentMethod[]>([]);
@@ -96,6 +96,7 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
         planId:          plan.id,
         gatewayConfigId: selectedGateway.gatewayConfigId,
         currency,
+        method:          activeTab === 'wallet' ? 'wallet' : 'card'
       });
       if (res.data?.checkoutUrl) {
         window.location.href = res.data.checkoutUrl;
@@ -177,15 +178,27 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
               {/* ── Tab Switcher ── */}
               <div className="flex gap-3 mb-6">
                 <button
-                  onClick={() => setActiveTab('gateway')}
+                  onClick={() => setActiveTab('card')}
                   className={`flex-1 py-3 rounded-xl border font-semibold transition-all text-sm ${
-                    activeTab === 'gateway'
+                    activeTab === 'card'
                       ? 'bg-blue-600/20 border-blue-500 text-blue-400'
                       : 'border-white/10 text-gray-400 hover:bg-white/5'
                   }`}
                 >
-                  {isRtl ? 'دفع إلكتروني (بطاقات/محافظ)' : 'Online Payment (Cards/Wallets)'}
+                  {isRtl ? 'دفع بالبطاقة (فيزا/ماستر)' : 'Card Payment'}
                 </button>
+                {currency === 'EGP' && (
+                  <button
+                    onClick={() => setActiveTab('wallet')}
+                    className={`flex-1 py-3 rounded-xl border font-semibold transition-all text-sm ${
+                      activeTab === 'wallet'
+                        ? 'bg-emerald-600/20 border-emerald-500 text-emerald-400'
+                        : 'border-white/10 text-gray-400 hover:bg-white/5'
+                    }`}
+                  >
+                    {isRtl ? 'المحافظ الإلكترونية' : 'Mobile Wallets'}
+                  </button>
+                )}
                 <button
                   onClick={() => setActiveTab('manual')}
                   className={`flex-1 py-3 rounded-xl border font-semibold transition-all text-sm ${
@@ -198,8 +211,8 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
                 </button>
               </div>
 
-              {/* ── Gateway Tab ── */}
-              {activeTab === 'gateway' && (
+              {/* ── Gateway Tabs (Card / Wallet) ── */}
+              {(activeTab === 'card' || activeTab === 'wallet') && (
                 <div className="space-y-4">
                   {isLoadingGateways ? (
                     <div className="flex justify-center py-6">
