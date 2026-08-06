@@ -78,6 +78,14 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
     }
   }, [activeTab, paymentMethods.length]);
 
+  // ─── Fetch Public Settings for Payment Statuses ──────────────────────────
+  const [paymentStatuses, setPaymentStatuses] = useState<any>(null);
+  useEffect(() => {
+    api.get('/api/settings/public')
+      .then((res) => setPaymentStatuses(res.data.paymentStatuses))
+      .catch(() => {});
+  }, []);
+
   if (!plan) return null;
 
   const price = currency === 'USD' ? plan.priceUsd : plan.priceEgp;
@@ -132,6 +140,63 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
     }
   };
 
+  const getTabStatus = (tab: 'card' | 'wallet' | 'manual') => {
+    if (!paymentStatuses) return 'active';
+    
+    if (tab === 'manual') {
+      const status = paymentStatuses['manual'];
+      if (status?.suspended) return 'suspended';
+      if (status?.maintenance) return 'maintenance';
+      if (status?.comingSoon) return 'coming_soon';
+    } else if (tab === 'wallet') {
+      const status = paymentStatuses['paymob'];
+      if (status?.suspended) return 'suspended';
+      if (status?.maintenance) return 'maintenance';
+      if (status?.comingSoon) return 'coming_soon';
+    } else if (tab === 'card') {
+      const paymob = paymentStatuses['paymob'];
+      const paypal = paymentStatuses['paypal'];
+      
+      const isPaymobActive = !paymob?.suspended && !paymob?.maintenance && !paymob?.comingSoon;
+      const isPaypalActive = !paypal?.suspended && !paypal?.maintenance && !paypal?.comingSoon;
+      
+      if (isPaymobActive || isPaypalActive) return 'active';
+      if (paymob?.maintenance || paypal?.maintenance) return 'maintenance';
+      if (paymob?.comingSoon || paypal?.comingSoon) return 'coming_soon';
+      if (paymob?.suspended && paypal?.suspended) return 'suspended';
+    }
+    return 'active';
+  };
+
+  const getGatewayStatus = (gatewayName: string) => {
+    if (!paymentStatuses) return 'active';
+    const status = paymentStatuses[gatewayName.toLowerCase()];
+    if (status?.suspended) return 'suspended';
+    if (status?.maintenance) return 'maintenance';
+    if (status?.comingSoon) return 'coming_soon';
+    return 'active';
+  };
+
+  const getGatewayErrorMessage = (status: string) => {
+    if (status === 'maintenance') return isRtl ? 'بوابة الدفع هذه تحت الصيانة حالياً.' : 'This payment gateway is currently under maintenance.';
+    if (status === 'coming_soon') return isRtl ? 'بوابة الدفع هذه ستتوفر قريباً.' : 'This payment gateway is coming soon.';
+    if (status === 'suspended') return isRtl ? 'بوابة الدفع هذه موقوفة حالياً.' : 'This payment gateway is currently suspended.';
+    return '';
+  };
+
+  const renderBadge = (status: string) => {
+    if (status === 'maintenance') {
+      return <span className="block mt-1 text-[10px] font-bold px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 whitespace-nowrap mx-auto w-fit">{isRtl ? 'صيانة' : 'Maint.'}</span>;
+    }
+    if (status === 'coming_soon') {
+      return <span className="block mt-1 text-[10px] font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 whitespace-nowrap mx-auto w-fit">{isRtl ? 'قريباً' : 'Soon'}</span>;
+    }
+    if (status === 'suspended') {
+      return <span className="block mt-1 text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30 whitespace-nowrap mx-auto w-fit">{isRtl ? 'موقوف' : 'Suspended'}</span>;
+    }
+    return null;
+  };
+
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <div
@@ -158,35 +223,38 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
               <div className="flex gap-3 mb-6">
                 <button
                   onClick={() => setActiveTab('card')}
-                  className={`flex-1 py-3 rounded-xl border font-semibold transition-all text-sm ${
+                  className={`flex-1 py-2 rounded-xl border font-semibold transition-all text-sm flex flex-col items-center justify-center ${
                     activeTab === 'card'
                       ? 'bg-blue-600/20 border-blue-500 text-blue-400'
                       : 'border-white/10 text-gray-400 hover:bg-white/5'
                   }`}
                 >
-                  {isRtl ? 'دفع بالبطاقة (فيزا/ماستر)' : 'Card Payment'}
+                  <span>{isRtl ? 'بطاقة بنكية' : 'Card Payment'}</span>
+                  {renderBadge(getTabStatus('card'))}
                 </button>
                 {currency === 'EGP' && (
                   <button
                     onClick={() => setActiveTab('wallet')}
-                    className={`flex-1 py-3 rounded-xl border font-semibold transition-all text-sm ${
+                    className={`flex-1 py-2 rounded-xl border font-semibold transition-all text-sm flex flex-col items-center justify-center ${
                       activeTab === 'wallet'
                         ? 'bg-emerald-600/20 border-emerald-500 text-emerald-400'
                         : 'border-white/10 text-gray-400 hover:bg-white/5'
                     }`}
                   >
-                    {isRtl ? 'المحافظ الإلكترونية' : 'Mobile Wallets'}
+                    <span>{isRtl ? 'المحافظ الإلكترونية' : 'Mobile Wallets'}</span>
+                    {renderBadge(getTabStatus('wallet'))}
                   </button>
                 )}
                 <button
                   onClick={() => setActiveTab('manual')}
-                  className={`flex-1 py-3 rounded-xl border font-semibold transition-all text-sm ${
+                  className={`flex-1 py-2 rounded-xl border font-semibold transition-all text-sm flex flex-col items-center justify-center ${
                     activeTab === 'manual'
                       ? 'bg-purple-600/20 border-purple-500 text-purple-400'
                       : 'border-white/10 text-gray-400 hover:bg-white/5'
                   }`}
                 >
-                  {isRtl ? 'تحويل يدوي' : 'Manual Transfer'}
+                  <span>{isRtl ? 'تحويل يدوي' : 'Manual Transfer'}</span>
+                  {renderBadge(getTabStatus('manual'))}
                 </button>
               </div>
 
@@ -208,29 +276,37 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
                       {/* Gateway selector — shows only if more than one option */}
                       {gateways.length > 1 && (
                         <div className="grid gap-2">
-                          {gateways.map((g) => (
-                            <button
-                              key={g.gatewayConfigId}
-                              onClick={() => setSelectedGateway(g)}
-                              className={`flex items-center gap-3 p-3 rounded-xl border text-sm font-medium transition-all ${
-                                selectedGateway?.gatewayConfigId === g.gatewayConfigId
-                                  ? 'border-blue-500 bg-blue-600/10 text-white'
-                                  : 'border-white/10 text-gray-400 hover:bg-white/5'
-                              }`}
-                            >
-                              <span className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${
-                                selectedGateway?.gatewayConfigId === g.gatewayConfigId
-                                  ? 'border-blue-500 bg-blue-500'
-                                  : 'border-gray-500'
-                              }`} />
-                              {g.displayName}
-                              {g.isDefault && (
-                                <span className="ml-auto text-[10px] text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full">
-                                  {isRtl ? 'مقترح' : 'Recommended'}
-                                </span>
-                              )}
-                            </button>
-                          ))}
+                          {gateways.map((g) => {
+                            const status = getGatewayStatus(g.providerName);
+                            return (
+                              <button
+                                key={g.gatewayConfigId}
+                                onClick={() => setSelectedGateway(g)}
+                                className={`flex items-center gap-3 p-3 rounded-xl border text-sm font-medium transition-all ${
+                                  selectedGateway?.gatewayConfigId === g.gatewayConfigId
+                                    ? 'border-blue-500 bg-blue-600/10 text-white'
+                                    : 'border-white/10 text-gray-400 hover:bg-white/5'
+                                }`}
+                              >
+                                <span className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${
+                                  selectedGateway?.gatewayConfigId === g.gatewayConfigId
+                                    ? 'border-blue-500 bg-blue-500'
+                                    : 'border-gray-500'
+                                }`} />
+                                {g.displayName}
+                                {status !== 'active' && (
+                                  <span className="ml-2 inline-block">
+                                    {renderBadge(status)}
+                                  </span>
+                                )}
+                                {g.isDefault && (
+                                  <span className="ml-auto text-[10px] text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full">
+                                    {isRtl ? 'مقترح' : 'Recommended'}
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          })}
                         </div>
                       )}
 
@@ -240,8 +316,9 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
                           <span className="text-gray-400 text-sm">
                             {isRtl ? 'البوابة المختارة' : 'Selected Gateway'}
                           </span>
-                          <span className="text-white font-semibold">
+                          <span className="text-white font-semibold flex items-center gap-2">
                             {selectedGateway?.displayName ?? '—'}
+                            {selectedGateway && getGatewayStatus(selectedGateway.providerName) !== 'active' && renderBadge(getGatewayStatus(selectedGateway.providerName))}
                           </span>
                         </div>
                         <div className="flex justify-between items-center mt-2">
@@ -255,10 +332,15 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
                       </div>
 
                       {error && <p className="text-red-400 text-sm">{error}</p>}
+                      {selectedGateway && getGatewayStatus(selectedGateway.providerName) !== 'active' && (
+                        <p className="text-orange-400 text-sm bg-orange-500/10 p-3 rounded-xl border border-orange-500/20">
+                          {getGatewayErrorMessage(getGatewayStatus(selectedGateway.providerName))}
+                        </p>
+                      )}
 
                       <button
                         onClick={handleGatewayCheckout}
-                        disabled={isSubmitting || !selectedGateway}
+                        disabled={isSubmitting || !selectedGateway || getGatewayStatus(selectedGateway.providerName) !== 'active'}
                         className="w-full bg-white text-black font-semibold py-4 rounded-xl hover:bg-gray-100 transition disabled:opacity-50 flex items-center justify-center gap-2"
                       >
                         {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
@@ -327,10 +409,15 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
                   </div>
 
                   {error && <p className="text-red-400 text-sm">{error}</p>}
+                  {getTabStatus('manual') !== 'active' && (
+                    <p className="text-orange-400 text-sm bg-orange-500/10 p-3 rounded-xl border border-orange-500/20">
+                      {getGatewayErrorMessage(getTabStatus('manual'))}
+                    </p>
+                  )}
 
                   <button
                     onClick={handleManualSubmit}
-                    disabled={isSubmitting || !file}
+                    disabled={isSubmitting || !file || getTabStatus('manual') !== 'active'}
                     className="w-full bg-purple-500 text-white font-semibold py-4 rounded-xl hover:bg-purple-600 transition disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
