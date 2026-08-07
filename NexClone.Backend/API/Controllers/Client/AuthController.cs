@@ -781,7 +781,12 @@ namespace NexClone.Backend.API.Controllers.Client
                     IsDefaultRegistrationPlan = s.Plan.IsDefaultRegistrationPlan,
                     Wallets = user.Wallets
                         .Where(w => w.SubscriptionId == s.Id || (w.SubscriptionId == null && s.Plan.IsDefaultRegistrationPlan))
-                        .Select(w => new { Code = w.WalletType.Code, Balance = w.Balance })
+                        .Select(w => new { 
+                            Code = w.WalletType.Code, 
+                            Name = w.WalletType.Name,
+                            Icon = w.WalletType.Icon,
+                            Balance = w.Balance 
+                        })
                 });
 
             return Ok(new
@@ -794,7 +799,13 @@ namespace NexClone.Backend.API.Controllers.Client
                 IsVerified = user.IsVerified,
                 HasPhoneNumber = !string.IsNullOrEmpty(user.PhoneNumber),
                 AvailableCredits = user.AvailableCredits,
-                Wallets = user.Wallets.Select(w => new { Code = w.WalletType.Code, Balance = w.Balance, SubscriptionId = w.SubscriptionId }),
+                Wallets = user.Wallets.Select(w => new { 
+                    Code = w.WalletType.Code, 
+                    Name = w.WalletType.Name,
+                    Icon = w.WalletType.Icon,
+                    Balance = w.Balance, 
+                    SubscriptionId = w.SubscriptionId 
+                }),
                 IsStaff = user.IsStaff,
                 ActivePlan = activeSub != null ? new {
                     Name = activeSub.Plan.Name,

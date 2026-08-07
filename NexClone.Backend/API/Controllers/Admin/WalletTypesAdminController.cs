@@ -70,6 +70,7 @@ namespace NexClone.Backend.API.Controllers.Admin
 
                     existing.Name = walletType.Name;
                     existing.Code = walletType.Code;
+                    existing.Icon = walletType.Icon;
                     existing.IsActive = walletType.IsActive;
 
                     await _context.SaveChangesAsync();

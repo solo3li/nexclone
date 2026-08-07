@@ -29,6 +29,15 @@
                     <div class="bx--form__helper-text">@Localizer["Used internally by the system to match tools to wallets."]</div>
                 </div>
 
+                <div class="bx--form-item" style="margin-top: 1.5rem;">
+                    <label asp-for="Icon" class="bx--label">@Localizer["Wallet Icon (Emoji)"]</label>
+                    <div class="bx--text-input__field-wrapper">
+                        <input asp-for="Icon" class="bx--text-input" placeholder="e.g. 🎭" />
+                    </div>
+                    <span asp-validation-for="Icon" class="bx--form-requirement"></span>
+                    <div class="bx--form__helper-text">@Localizer["Displayed in the frontend UI."]</div>
+                </div>
+
                 <div class="bx--form-item bx--checkbox-wrapper" style="margin-top: 1.5rem;">
                     <input asp-for="IsActive" class="bx--checkbox" checked />
                     <label asp-for="IsActive" class="bx--checkbox-label" title="Enable this wallet type">

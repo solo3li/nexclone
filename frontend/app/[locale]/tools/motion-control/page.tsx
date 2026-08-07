@@ -51,6 +51,7 @@ function MotionControlPage() {
   
   const [estimatedCost, setEstimatedCost] = useState<number>(user?.activePlan?.avatarVideoCostPerGeneration || 1);
   const [chargedWallet, setChargedWallet] = useState<string | null>(null);
+  const [chargedWalletIcon, setChargedWalletIcon] = useState<string | null>(null);
   const [isEstimating, setIsEstimating] = useState(false);
 
   useEffect(() => {
@@ -65,9 +66,10 @@ function MotionControlPage() {
       const qs = `?${params.toString()}`;
       estimateMotionControl(qs)
         .then((data: any) => {
-          if (isMounted) {
+          if (data.estimatedCost !== undefined) {
             setEstimatedCost(data.estimatedCost);
             setChargedWallet(data.chargedWalletName);
+            setChargedWalletIcon(data.chargedWalletIcon);
           }
         })
         .catch((err: any) => {
@@ -360,6 +362,7 @@ function MotionControlPage() {
                   <CostEstimateCard
                     estimatedCost={estimatedCost}
                     chargedWallet={chargedWallet}
+                    chargedWalletIcon={chargedWalletIcon}
                     isLoading={isEstimating}
                     isRtl={isRtl}
                     accentColor="cyan"

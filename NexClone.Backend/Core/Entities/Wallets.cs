@@ -18,6 +18,9 @@ namespace NexClone.Backend.Core.Entities
         [MaxLength(50)]
         public string Code { get; set; } = string.Empty; // e.g. "AUDIO", "VIDEO", "GENERAL"
 
+        [MaxLength(20)]
+        public string? Icon { get; set; } // e.g. "🎭", "🏦"
+
         public bool IsActive { get; set; } = true;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

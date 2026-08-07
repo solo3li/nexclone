@@ -16,6 +16,7 @@
                 <table class="bx--data-table bx--data-table--zebra">
                     <thead>
                         <tr>
+                            <th><span class="bx--table-header-label">@Localizer["Icon"]</span></th>
                             <th><span class="bx--table-header-label">@Localizer["Name"]</span></th>
                             <th><span class="bx--table-header-label">@Localizer["Code"]</span></th>
                             <th><span class="bx--table-header-label">@Localizer["Status"]</span></th>
@@ -27,6 +28,7 @@
                         @foreach (var item in Model)
                         {
                             <tr>
+                                <td style="font-size: 1.5rem;">@(string.IsNullOrEmpty(item.Icon) ? "—" : item.Icon)</td>
                                 <td><strong>@item.Name</strong></td>
                                 <td><code>@item.Code</code></td>
                                 <td>

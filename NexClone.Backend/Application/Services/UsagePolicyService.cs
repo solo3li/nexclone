@@ -36,6 +36,7 @@ namespace NexClone.Backend.Application.Services
         public decimal TotalCost { get; set; }
         public int ChargedWalletTypeId { get; set; }
         public string ChargedWalletName { get; set; } = string.Empty;
+        public string? ChargedWalletIcon { get; set; }
     }
 
     public class UsagePolicyService
@@ -226,7 +227,8 @@ namespace NexClone.Backend.Application.Services
                 IsAllowed = true, 
                 TotalCost = totalCost, 
                 ChargedWalletTypeId = primaryWallet?.WalletTypeId ?? generalWalletType?.Id ?? 0,
-                ChargedWalletName = primaryWallet?.WalletType?.Name ?? "General Wallet"
+                ChargedWalletName = primaryWallet?.WalletType?.Name ?? "General Wallet",
+                ChargedWalletIcon = primaryWallet?.WalletType?.Icon
             };
         }
 
@@ -419,7 +421,8 @@ namespace NexClone.Backend.Application.Services
                 IsAllowed = true, 
                 TotalCost = totalCost, 
                 ChargedWalletTypeId = primaryWallet?.WalletTypeId ?? generalWalletType?.Id ?? 0,
-                ChargedWalletName = primaryWallet?.WalletType?.Name ?? "General Wallet"
+                ChargedWalletName = primaryWallet?.WalletType?.Name ?? "General Wallet",
+                ChargedWalletIcon = primaryWallet?.WalletType?.Icon
             };
         }
 

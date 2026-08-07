@@ -125,7 +125,11 @@ namespace NexClone.Backend.API.Controllers.AI
                 return BadRequest(new { error = policyResult.ErrorMessage });
             }
 
-            return Ok(new { estimatedCost = policyResult.TotalCost, chargedWalletName = policyResult.ChargedWalletName });
+            return Ok(new { 
+                estimatedCost = policyResult.TotalCost, 
+                chargedWalletName = policyResult.ChargedWalletName,
+                chargedWalletIcon = policyResult.ChargedWalletIcon
+            });
         }
     }
 

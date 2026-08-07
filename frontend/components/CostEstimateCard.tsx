@@ -6,6 +6,7 @@ import { Wallet, Loader2, AlertCircle, Zap } from "lucide-react";
 interface CostEstimateCardProps {
   estimatedCost: number | null;
   chargedWallet: string | null;
+  chargedWalletIcon?: string | null;
   isLoading?: boolean;
   error?: string | null;
   isRtl?: boolean;
@@ -30,7 +31,8 @@ const walletIconMap: Record<string, string> = {
   "نص": "📝",
 };
 
-function getWalletIcon(name: string | null): string {
+function getWalletIcon(name: string | null, customIcon?: string | null): string {
+  if (customIcon) return customIcon;
   if (!name) return "💳";
   const lower = name.toLowerCase();
   for (const [key, icon] of Object.entries(walletIconMap)) {
@@ -77,6 +79,7 @@ const colors = {
 export default function CostEstimateCard({
   estimatedCost,
   chargedWallet,
+  chargedWalletIcon,
   isLoading = false,
   error = null,
   isRtl = false,
@@ -84,7 +87,7 @@ export default function CostEstimateCard({
   extraInfo = null,
 }: CostEstimateCardProps) {
   const c = colors[accentColor] || colors.fuchsia;
-  const walletIcon = getWalletIcon(chargedWallet);
+  const walletIcon = getWalletIcon(chargedWallet, chargedWalletIcon);
 
   if (error) {
     return (

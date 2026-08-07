@@ -47,6 +47,7 @@ function ImageToVideoPage() {
   
   const [estimatedCost, setEstimatedCost] = useState<number>(user?.activePlan?.avatarVideoCostPerGeneration || 1);
   const [chargedWallet, setChargedWallet] = useState<string | null>(null);
+  const [chargedWalletIcon, setChargedWalletIcon] = useState<string | null>(null);
 
   const [renderingSpeed, setRenderingSpeed] = useState<"std" | "pro">("std");
   const [showAudioTrimmer, setShowAudioTrimmer] = useState(false);
@@ -61,6 +62,7 @@ function ImageToVideoPage() {
         if (res.data) {
           setEstimatedCost(res.data.estimatedCost);
           setChargedWallet(res.data.chargedWalletName);
+          setChargedWalletIcon(res.data.chargedWalletIcon);
         }
       }).catch(err => {
         console.warn("Failed to get estimated cost:", err.response?.data?.error || err.message);
@@ -72,6 +74,7 @@ function ImageToVideoPage() {
           : (user?.activePlan?.avatarVideoCostPerGeneration || 1)
       );
       setChargedWallet(null);
+      setChargedWalletIcon(null);
     }
   }, [isAuthenticated, user, renderingSpeed]);
   useEffect(() => {
@@ -389,6 +392,7 @@ function ImageToVideoPage() {
                   <CostEstimateCard
                     estimatedCost={estimatedCost}
                     chargedWallet={chargedWallet}
+                    chargedWalletIcon={chargedWalletIcon}
                     isLoading={isEstimating}
                     isRtl={isRtl}
                     accentColor="fuchsia"

@@ -64,6 +64,7 @@ function TextToVoicePage() {
   const [error, setError] = useState("");
   const [estimatedCost, setEstimatedCost] = useState<number | null>(null);
   const [chargedWallet, setChargedWallet] = useState<string | null>(null);
+  const [chargedWalletIcon, setChargedWalletIcon] = useState<string | null>(null);
   const [isEstimating, setIsEstimating] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingCost, setPendingCost] = useState<number | null>(null);
@@ -116,8 +117,9 @@ function TextToVoicePage() {
   }, []);
 
   useEffect(() => {
-    setEstimatedCost(null);
+    setEstimatedCost(1);
     setChargedWallet(null);
+    setChargedWalletIcon(null);
   }, [text]);
 
   useEffect(() => {
@@ -201,6 +203,7 @@ function TextToVoicePage() {
       const cost = responseData.estimatedCost;
       setEstimatedCost(cost);
       setChargedWallet(responseData.chargedWalletName);
+      setChargedWalletIcon(responseData.chargedWalletIcon);
       const totalCredits = user?.wallets 
         ? user.wallets.reduce((acc: number, w: any) => acc + w.balance, 0) 
         : (user?.availableCredits || 0);
@@ -897,7 +900,7 @@ function TextToVoicePage() {
               <span className="text-white/70 font-medium">{isRtl ? "التكلفة المتوقعة:" : "Estimated Cost:"}</span>
               <div className="flex flex-col items-end">
                 <span className="text-fuchsia-400 font-bold text-xl">{pendingCost} {isRtl ? "كريدت" : "Credits"}</span>
-                {chargedWallet && <span className="text-white/40 text-xs">({isRtl ? 'من محفظة' : 'from wallet'}: {chargedWallet})</span>}
+                {chargedWallet && <span className="text-white/40 text-xs">({isRtl ? 'من محفظة' : 'from wallet'}: {chargedWalletIcon || '💳'} {chargedWallet})</span>}
               </div>
             </div>
 

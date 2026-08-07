@@ -101,6 +101,7 @@ function VoiceToTextPage() {
   const [language, setLanguage] = useState("auto");
   const [isDownloading, setIsDownloading] = useState(false);
   const [chargedWallet, setChargedWallet] = useState<string | null>(null);
+  const [chargedWalletIcon, setChargedWalletIcon] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [stage, setStage] = useState<Stage>('idle');
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -192,6 +193,7 @@ function VoiceToTextPage() {
     if (!file || duration <= 0) {
       setEstimatedCost(null);
       setChargedWallet(null);
+      setChargedWalletIcon(null);
       return;
     }
     const fetchEstimate = async () => {
@@ -206,6 +208,7 @@ function VoiceToTextPage() {
         });
         setEstimatedCost(responseData.estimatedCost);
         setChargedWallet(responseData.chargedWalletName);
+        setChargedWalletIcon(responseData.chargedWalletIcon);
       } catch (err: any) {
         if (err.response?.status !== 400) {
           console.error(err);
@@ -223,6 +226,7 @@ function VoiceToTextPage() {
         
         setEstimatedCost(null);
         setChargedWallet(null);
+        setChargedWalletIcon(null);
       } finally {
         setIsEstimating(false);
       }
@@ -260,6 +264,7 @@ function VoiceToTextPage() {
       setFile(null);
       setEstimatedCost(null);
       setChargedWallet(null);
+      setChargedWalletIcon(null);
       setResult("");
       setStage('idle');
     } catch (err) {
@@ -321,6 +326,7 @@ function VoiceToTextPage() {
     setUploadedFileId(null);
     setEstimatedCost(null);
     setChargedWallet(null);
+    setChargedWalletIcon(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -782,7 +788,7 @@ function VoiceToTextPage() {
                               </span>
                               {chargedWallet && (
                                 <span className="text-[10px] text-white/40">
-                                  ({isRtl ? 'سيتم الخصم من' : 'Will be deducted from'}: {chargedWallet})
+                                  ({isRtl ? 'سيتم الخصم من' : 'Will be deducted from'}: {chargedWalletIcon || '💳'} {chargedWallet})
                                 </span>
                               )}
                             </div>

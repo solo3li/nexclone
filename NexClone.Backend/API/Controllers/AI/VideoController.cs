@@ -49,7 +49,11 @@ namespace NexClone.Backend.API.Controllers.AI
             var policyResult = await _usagePolicy.EstimateCostAsync(userId, "kling_avatar_image2video", 1, null, renderingSpeed, subscriptionId);
             if (!policyResult.IsAllowed) return BadRequest(new { error = policyResult.ErrorMessage });
 
-            return Ok(new { estimatedCost = policyResult.TotalCost, chargedWalletName = policyResult.ChargedWalletName });
+            return Ok(new { 
+                estimatedCost = policyResult.TotalCost, 
+                chargedWalletName = policyResult.ChargedWalletName,
+                chargedWalletIcon = policyResult.ChargedWalletIcon
+            });
         }
 
         [HttpGet("estimate-lipsync")]
@@ -72,6 +76,7 @@ namespace NexClone.Backend.API.Controllers.AI
             return Ok(new { 
                 estimatedCost = policyResult.TotalCost, 
                 chargedWalletName = policyResult.ChargedWalletName,
+                chargedWalletIcon = policyResult.ChargedWalletIcon,
                 durationSeconds = durationSeconds,
                 blocks = durationSeconds.HasValue ? (int)Math.Ceiling(durationSeconds.Value / 5.0) : (int?)null
             });
@@ -332,7 +337,11 @@ namespace NexClone.Backend.API.Controllers.AI
             var policyResult = await _usagePolicy.EstimateCostAsync(userId, "kling_motion_control", 1, null, renderingSpeed, subscriptionId);
             if (!policyResult.IsAllowed) return BadRequest(new { error = policyResult.ErrorMessage });
 
-            return Ok(new { estimatedCost = policyResult.TotalCost, chargedWalletName = policyResult.ChargedWalletName });
+            return Ok(new { 
+                estimatedCost = policyResult.TotalCost, 
+                chargedWalletName = policyResult.ChargedWalletName,
+                chargedWalletIcon = policyResult.ChargedWalletIcon
+            });
         }
 
         [HttpPost("start-motion-control")]

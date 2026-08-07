@@ -42,6 +42,7 @@ function AdvancedLipSyncPage() {
   
   const [estimatedCost, setEstimatedCost] = useState<number>(user?.activePlan?.lipSyncCostPerGeneration || 1);
   const [chargedWallet, setChargedWallet] = useState<string | null>(null);
+  const [chargedWalletIcon, setChargedWalletIcon] = useState<string | null>(null);
   const [isEstimating, setIsEstimating] = useState(false);
   const [estimateError, setEstimateError] = useState<string | null>(null);
 
@@ -68,6 +69,8 @@ function AdvancedLipSyncPage() {
     if (!isAuthenticated || !user) {
       setEstimatedCost(user?.activePlan?.lipSyncCostPerGeneration || 1);
       setChargedWallet(null);
+      setChargedWalletIcon(null);
+      setEstimateError(null);
       return;
     }
     const effectiveDuration = videoDuration ?? audioDuration;
@@ -80,9 +83,10 @@ function AdvancedLipSyncPage() {
     params.append('durationSeconds', effectiveDuration.toFixed(2));
     api.get(`/api/video/estimate-lipsync?${params.toString()}`)
       .then(res => {
-        if (res.data) {
+        if (res.data.estimatedCost !== undefined) {
           setEstimatedCost(res.data.estimatedCost);
           setChargedWallet(res.data.chargedWalletName);
+          setChargedWalletIcon(res.data.chargedWalletIcon);
         }
       })
       .catch(err => {
@@ -441,6 +445,7 @@ function AdvancedLipSyncPage() {
                   <CostEstimateCard
                     estimatedCost={estimatedCost}
                     chargedWallet={chargedWallet}
+                    chargedWalletIcon={chargedWalletIcon}
                     isLoading={isEstimating}
                     error={estimateError}
                     isRtl={isRtl}
