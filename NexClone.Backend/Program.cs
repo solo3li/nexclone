@@ -69,7 +69,11 @@ builder.Services.AddCors(options =>
             else
             {
                 // Fallback to a safe default if not set in DB
-                policyBuilder.WithOrigins("http://localhost:3000", "http://178.62.192.74:3000")
+                policyBuilder.WithOrigins(
+                        "http://localhost:3000",
+                        "http://localhost:3001",
+                        "http://167.71.66.188:3000",
+                        "http://178.62.192.74:3000")
                        .AllowAnyMethod()
                        .AllowAnyHeader()
                        .AllowCredentials();
@@ -77,7 +81,11 @@ builder.Services.AddCors(options =>
         }
         catch
         {
-            policyBuilder.WithOrigins("http://localhost:3000", "http://178.62.192.74:3000")
+            policyBuilder.WithOrigins(
+                    "http://localhost:3000",
+                    "http://localhost:3001",
+                    "http://167.71.66.188:3000",
+                    "http://178.62.192.74:3000")
                    .AllowAnyMethod()
                    .AllowAnyHeader()
                    .AllowCredentials();
@@ -305,7 +313,7 @@ using (var scope = app.Services.CreateScope())
     {
         new AppSetting { Key = "Site.MaintenanceMode", Value = "false", Description = "Global maintenance mode toggle (true/false)" },
         new AppSetting { Key = "Site.MaintenanceEndDate", Value = "", Description = "Optional end date for maintenance (ISO 8601 string)" },
-        new AppSetting { Key = "Origin.AllowedOrigins", Value = "http://localhost:3000,http://localhost:3001,https://nexclone.com", Description = "Comma-separated list of allowed origins for CORS" },
+        new AppSetting { Key = "Origin.AllowedOrigins", Value = "http://localhost:3000,http://localhost:3001,http://167.71.66.188:3000,http://178.62.192.74:3000,https://nexclone.com", Description = "Comma-separated list of allowed origins for CORS" },
         new AppSetting { Key = "Affiliate.CreditRewardReferrer", Value = "50", Description = "Credits given to the referrer" },
         new AppSetting { Key = "Affiliate.CreditRewardReferred", Value = "50", Description = "Credits given to the referred user" },
         new AppSetting { Key = "Affiliate.CashCommissionPercentage", Value = "20", Description = "Percentage of cash commission for affiliates (0-100)" }
@@ -318,6 +326,33 @@ using (var scope = app.Services.CreateScope())
             dbContext.AppSettings.Add(setting);
         }
     }
+
+    // Ensure AllowedOrigins always includes the current server IPs (upsert)
+    var originsKey = "Origin.AllowedOrigins";
+    var existingOrigins = dbContext.AppSettings.FirstOrDefault(s => s.Key == originsKey);
+    if (existingOrigins != null)
+    {
+        var requiredOrigins = new[]
+        {
+            "http://localhost:3000", "http://localhost:3001",
+            "http://167.71.66.188:3000", "http://178.62.192.74:3000"
+        };
+        var currentList = existingOrigins.Value.Split(',').Select(o => o.Trim()).ToList();
+        bool changed = false;
+        foreach (var origin in requiredOrigins)
+        {
+            if (!currentList.Contains(origin))
+            {
+                currentList.Add(origin);
+                changed = true;
+            }
+        }
+        if (changed)
+        {
+            existingOrigins.Value = string.Join(",", currentList);
+        }
+    }
+
     dbContext.SaveChanges();
 
     // Seed API Configs

@@ -1,10 +1,11 @@
 "use client";
 
+import { useGoogleOAuth } from '@react-oauth/google';
 import { GoogleLogin } from '@react-oauth/google';
 import { useRouter } from '../src/i18n/routing';
 import { useAuthStore } from '../src/store/useAuthStore';
 
-export function GoogleLoginButton({ refCode }: { refCode?: string }) {
+function GoogleLoginInner({ refCode }: { refCode?: string }) {
   const router = useRouter();
   const { googleLogin } = useAuthStore();
 
@@ -36,4 +37,15 @@ export function GoogleLoginButton({ refCode }: { refCode?: string }) {
       />
     </div>
   );
+}
+
+export function GoogleLoginButton({ refCode }: { refCode?: string }) {
+  // Only render if the GoogleOAuthProvider is active (clientId is configured)
+  try {
+    // This hook throws if GoogleOAuthProvider is not in the tree
+    useGoogleOAuth();
+    return <GoogleLoginInner refCode={refCode} />;
+  } catch {
+    return null;
+  }
 }

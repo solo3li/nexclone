@@ -561,11 +561,16 @@ namespace NexClone.Backend.API.Controllers.Client
 
         private void SetTokenCookie(string token)
         {
+            // Use Secure=true + SameSite=None only on HTTPS.
+            // On plain HTTP (dev/staging), use Secure=false + SameSite=Lax so cookies are actually sent.
+            var isHttps = Request.IsHttps ||
+                          string.Equals(Request.Headers["X-Forwarded-Proto"].FirstOrDefault(), "https", StringComparison.OrdinalIgnoreCase);
+
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None,
+                Secure = isHttps,
+                SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
                 Expires = DateTime.UtcNow.AddDays(15),
                 Path = "/"
             };
@@ -589,11 +594,14 @@ namespace NexClone.Backend.API.Controllers.Client
 
         private void SetRefreshTokenCookie(string refreshToken)
         {
+            var isHttps = Request.IsHttps ||
+                          string.Equals(Request.Headers["X-Forwarded-Proto"].FirstOrDefault(), "https", StringComparison.OrdinalIgnoreCase);
+
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None,
+                Secure = isHttps,
+                SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
                 Expires = DateTime.UtcNow.AddDays(7),
                 Path = "/"
             };
@@ -679,19 +687,22 @@ namespace NexClone.Backend.API.Controllers.Client
                 }
             }
 
+            var isHttps = Request.IsHttps ||
+                          string.Equals(Request.Headers["X-Forwarded-Proto"].FirstOrDefault(), "https", StringComparison.OrdinalIgnoreCase);
+
             Response.Cookies.Append("jwt", "", new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None,
+                Secure = isHttps,
+                SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
                 Expires = DateTime.UtcNow.AddDays(-10),
                 Path = "/"
             });
             Response.Cookies.Append("refreshToken", "", new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None,
+                Secure = isHttps,
+                SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
                 Expires = DateTime.UtcNow.AddDays(-10),
                 Path = "/"
             });
