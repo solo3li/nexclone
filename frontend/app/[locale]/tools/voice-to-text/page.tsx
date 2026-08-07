@@ -405,7 +405,7 @@ function VoiceToTextPage() {
         }).catch(err => console.error("Failed to update user profile", err));
       } else {
         // Fallback in case it's synchronous
-        setResult(res.data.translated_text || res.data.original_text);
+        setResult(responseData.translated_text || responseData.original_text);
         setStage('done');
       }
     } catch (err) {
