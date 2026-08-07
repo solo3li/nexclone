@@ -127,7 +127,6 @@ namespace NexClone.Backend.API.Controllers.Client
         }
 
         [HttpPost("{id}/message")]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddMessage(int id, [FromForm] string content, [FromForm] IFormFile? attachment)
         {
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
