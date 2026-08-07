@@ -93,16 +93,29 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
             var hasGemini = await _dbContext.ApiConfigurations.AnyAsync(c => c.ProviderName == "Gemini" && c.IsActive);
             var hasDarijat = await _dbContext.ApiConfigurations.AnyAsync(c => c.ProviderName == "Darijat" && c.IsActive);
             
-            if (quality == "High" && isArabic)
+            // Hardcoded logic for High Quality as requested by user
+            if (quality == "High" && hasGemini && isArabic)
             {
-                if (hasDarijat)
+                var currentDate = DateTime.UtcNow.Date;
+                var toolName = config?.ToolName ?? "text-to-voice";
+                
+                var model1 = "gemini-3.1-flash-tts-preview";
+                var count1 = await _dbContext.GenerationHistories.CountAsync(h => h.Type == toolName && h.ResultText == model1 && h.CreatedAt >= currentDate);
+                
+                if (count1 < 95) 
                 {
-                    return ("Darijat", "darijat-voice");
+                    return ("Gemini", model1);
                 }
-                else
+
+                var model2 = "gemini-2.5-pro-tts";
+                var count2 = await _dbContext.GenerationHistories.CountAsync(h => h.Type == toolName && h.ResultText == model2 && h.CreatedAt >= currentDate);
+                
+                if (count2 < 95) 
                 {
-                    return ("OpenAI", "tts-1-hd");
+                    return ("Gemini", model2);
                 }
+
+                throw new Exception("يوجد ضغط حاليا الرجاء التحويل لجودة اخرى او الانتظار حتى يقل الضغط");
             }
 
             if (config == null || config.RoutingRules == null || !config.RoutingRules.Any())
