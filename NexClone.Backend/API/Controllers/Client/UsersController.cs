@@ -145,7 +145,7 @@ namespace NexClone.Backend.API.Controllers.Client
                     _context.Subscriptions.Add(sub);
                     await _context.SaveChangesAsync();
 
-                    await _walletService.DistributePlanCreditsAsync(user.Id, targetPlan.Id, resetToZero: true);
+                    await _walletService.DistributePlanCreditsAsync(user.Id, targetPlan.Id, resetToZero: true, subscriptionId: sub.Id);
 
                     try
                     {
