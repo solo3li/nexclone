@@ -16,14 +16,23 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
         private readonly ApplicationDbContext _dbContext;
         private readonly IHttpClientFactory _httpClientFactory;
 
-        // Languages mapping from the old python code
         private readonly Dictionary<string, string> _languageNames = new Dictionary<string, string>
         {
-            {"en", "English"}, {"fr", "French"}, {"es", "Spanish"}, {"de", "German"},
-            {"it", "Italian"}, {"pt", "Portuguese"}, {"ru", "Russian"}, {"zh", "Chinese"},
-            {"ja", "Japanese"}, {"ko", "Korean"}, {"ar", "Arabic"}, {"hi", "Hindi"},
-            {"tr", "Turkish"}, {"nl", "Dutch"}, {"sv", "Swedish"}, {"da", "Danish"},
-            {"no", "Norwegian"}, {"fi", "Finnish"}, {"el", "Greek"}, {"pl", "Polish"}
+            {"af", "Afrikaans"}, {"ar", "Arabic"}, {"hy", "Armenian"}, {"az", "Azerbaijani"},
+            {"be", "Belarusian"}, {"bs", "Bosnian"}, {"bg", "Bulgarian"}, {"ca", "Catalan"},
+            {"zh", "Chinese"}, {"hr", "Croatian"}, {"cs", "Czech"}, {"da", "Danish"},
+            {"nl", "Dutch"}, {"en", "English"}, {"et", "Estonian"}, {"fi", "Finnish"},
+            {"fr", "French"}, {"gl", "Galician"}, {"de", "German"}, {"el", "Greek"},
+            {"he", "Hebrew"}, {"hi", "Hindi"}, {"hu", "Hungarian"}, {"is", "Icelandic"},
+            {"id", "Indonesian"}, {"it", "Italian"}, {"ja", "Japanese"}, {"kn", "Kannada"},
+            {"kk", "Kazakh"}, {"ko", "Korean"}, {"lv", "Latvian"}, {"lt", "Lithuanian"},
+            {"mk", "Macedonian"}, {"ms", "Malay"}, {"mr", "Marathi"}, {"mi", "Maori"},
+            {"ne", "Nepali"}, {"no", "Norwegian"}, {"fa", "Persian"}, {"pl", "Polish"},
+            {"pt", "Portuguese"}, {"ro", "Romanian"}, {"ru", "Russian"}, {"sr", "Serbian"},
+            {"sk", "Slovak"}, {"sl", "Slovenian"}, {"es", "Spanish"}, {"sw", "Swahili"},
+            {"sv", "Swedish"}, {"tl", "Tagalog"}, {"ta", "Tamil"}, {"th", "Thai"},
+            {"tr", "Turkish"}, {"uk", "Ukrainian"}, {"ur", "Urdu"}, {"vi", "Vietnamese"},
+            {"cy", "Welsh"}
         };
 
         public SttService(ApplicationDbContext dbContext, IHttpClientFactory httpClientFactory)
