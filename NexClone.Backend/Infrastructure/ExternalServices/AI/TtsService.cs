@@ -42,13 +42,42 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
 
             if (providerName.Equals("Gemini", StringComparison.OrdinalIgnoreCase))
             {
-                var result = await GenerateGeminiAudioAsync(text, voiceName, styleInstruction, apiConfig, customModelName);
-                return (result.Item1, result.Item2, result.Item3, providerName, customModelName ?? "gemini-2.5-flash-preview-tts");
+                try
+                {
+                    var result = await GenerateGeminiAudioAsync(text, voiceName, styleInstruction, apiConfig, customModelName);
+                    return (result.Item1, result.Item2, result.Item3, providerName, customModelName ?? "gemini-2.5-flash-preview-tts");
+                }
+                catch (Exception geminiEx)
+                {
+                    // Gemini refused or failed — fall back to OpenAI
+                    var openAiConfig = await _dbContext.ApiConfigurations.FirstOrDefaultAsync(c => c.ProviderName == "OpenAI" && c.IsActive);
+                    if (openAiConfig != null)
+                    {
+                        var fallbackResult = await GenerateOpenAiAudioAsync(text, voiceName, openAiConfig, null);
+                        return (fallbackResult.Item1, fallbackResult.Item2, fallbackResult.Item3, "OpenAI", "tts-1");
+                    }
+                    // No OpenAI fallback available — rethrow original Gemini error
+                    throw new Exception($"Gemini TTS failed and no OpenAI fallback is configured. Gemini error: {geminiEx.Message}");
+                }
             }
             else if (providerName.Equals("Darijat", StringComparison.OrdinalIgnoreCase))
             {
-                var result = await GenerateDarijatAudioAsync(text, voiceName, styleInstruction, apiConfig);
-                return (result.Item1, result.Item2, result.Item3, providerName, customModelName ?? "darijat-voice");
+                try
+                {
+                    var result = await GenerateDarijatAudioAsync(text, voiceName, styleInstruction, apiConfig);
+                    return (result.Item1, result.Item2, result.Item3, providerName, customModelName ?? "darijat-voice");
+                }
+                catch (Exception darijatEx)
+                {
+                    // Darijat failed — fall back to OpenAI
+                    var openAiConfig = await _dbContext.ApiConfigurations.FirstOrDefaultAsync(c => c.ProviderName == "OpenAI" && c.IsActive);
+                    if (openAiConfig != null)
+                    {
+                        var fallbackResult = await GenerateOpenAiAudioAsync(text, voiceName, openAiConfig, null);
+                        return (fallbackResult.Item1, fallbackResult.Item2, fallbackResult.Item3, "OpenAI", "tts-1");
+                    }
+                    throw new Exception($"Darijat TTS failed and no OpenAI fallback is configured. Darijat error: {darijatEx.Message}");
+                }
             }
             else
             {
