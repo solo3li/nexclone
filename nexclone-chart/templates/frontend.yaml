@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexclone-frontend
+  labels:
+    app: nexclone-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nexclone-frontend
+  template:
+    metadata:
+      labels:
+        app: nexclone-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: nexclone-frontend:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - secretRef:
+                name: nexclone-env
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nexclone-frontend
+spec:
+  selector:
+    app: nexclone-frontend
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000

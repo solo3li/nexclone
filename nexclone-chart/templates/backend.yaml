@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexclone-backend
+  labels:
+    app: nexclone-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nexclone-backend
+  template:
+    metadata:
+      labels:
+        app: nexclone-backend
+    spec:
+      containers:
+        - name: backend
+          image: nexclone-backend:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: nexclone-env
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Development
+            - name: ASPNETCORE_URLS
+              value: http://+:8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nexclone-backend
+spec:
+  selector:
+    app: nexclone-backend
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

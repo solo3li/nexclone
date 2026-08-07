@@ -64,8 +64,9 @@ builder.Services.AddCors(options =>
             
             if (!string.IsNullOrWhiteSpace(allowedOriginsSetting))
             {
-                var origins = allowedOriginsSetting.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(o => o.Trim()).ToArray();
-                policyBuilder.WithOrigins(origins)
+                var origins = allowedOriginsSetting.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(o => o.Trim()).ToList();
+                origins.Add("https://app-nexclone.167.71.66.188.nip.io");
+                policyBuilder.WithOrigins(origins.ToArray())
                        .AllowAnyMethod()
                        .AllowAnyHeader()
                        .AllowCredentials();
@@ -77,7 +78,8 @@ builder.Services.AddCors(options =>
                         "http://localhost:3000",
                         "http://localhost:3001",
                         "http://167.71.66.188:3000",
-                        "http://178.62.192.74:3000")
+                        "http://178.62.192.74:3000",
+                        "https://app-nexclone.167.71.66.188.nip.io")
                        .AllowAnyMethod()
                        .AllowAnyHeader()
                        .AllowCredentials();
@@ -89,7 +91,8 @@ builder.Services.AddCors(options =>
                     "http://localhost:3000",
                     "http://localhost:3001",
                     "http://167.71.66.188:3000",
-                    "http://178.62.192.74:3000")
+                    "http://178.62.192.74:3000",
+                    "https://app-nexclone.167.71.66.188.nip.io")
                    .AllowAnyMethod()
                    .AllowAnyHeader()
                    .AllowCredentials();
@@ -222,12 +225,26 @@ builder.Services.AddMassTransit(x =>
 
     x.UsingRabbitMq((context, cfg) =>
     {
-        // By default connects to localhost, but we should use the docker service name if available
         var rabbitMqHost = builder.Configuration["RabbitMQ:Host"] ?? "localhost";
-        cfg.Host(rabbitMqHost, "/", h => {
-            h.Username("guest");
-            h.Password("guest");
-        });
+        var rabbitMqUser = builder.Configuration["RabbitMQ:Username"] ?? "guest";
+        var rabbitMqPass = builder.Configuration["RabbitMQ:Password"] ?? "guest";
+        var rabbitMqPortStr = builder.Configuration["RabbitMQ:Port"];
+        var rabbitMqVHost = builder.Configuration["RabbitMQ:VHost"] ?? "/";
+
+        if (ushort.TryParse(rabbitMqPortStr, out var port))
+        {
+            cfg.Host(rabbitMqHost, port, rabbitMqVHost, h => {
+                h.Username(rabbitMqUser);
+                h.Password(rabbitMqPass);
+            });
+        }
+        else
+        {
+            cfg.Host(rabbitMqHost, rabbitMqVHost, h => {
+                h.Username(rabbitMqUser);
+                h.Password(rabbitMqPass);
+            });
+        }
 
         var concurrencyManager = context.GetRequiredService<NexClone.Backend.Core.Interfaces.IDynamicConcurrencyManager>();
 
