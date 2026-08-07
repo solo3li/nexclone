@@ -60,5 +60,8 @@ export const useAppStore = create<AppState>((set) => ({
   hasPhoneNumber: false,
   setUser: (user) => set({ user, isAuthenticated: !!user, hasPhoneNumber: user?.hasPhoneNumber ?? false }),
   updateUser: (data) => set((state) => ({ user: state.user ? { ...state.user, ...data } : null })),
-  logout: () => set({ user: null, isAuthenticated: false, hasPhoneNumber: false }),
+  logout: () => {
+    if (typeof window !== 'undefined') localStorage.removeItem('jwt_token');
+    set({ user: null, isAuthenticated: false, hasPhoneNumber: false });
+  }
 }));
