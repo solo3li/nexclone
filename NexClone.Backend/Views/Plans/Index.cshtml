@@ -6,15 +6,21 @@
 }
 
 <div class="bx--data-table-container">
-    <div class="bx--data-table-header">
-        <h4 class="bx--data-table-header__title">@Localizer["Manage Pricing Plans"]</h4>
-        <p class="bx--data-table-header__description">@Localizer["View and manage all subscription plans imported from the legacy database."]</p>
+    <div class="bx--data-table-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h4 class="bx--data-table-header__title">@Localizer["Manage Pricing Plans"]</h4>
+            <p class="bx--data-table-header__description">@Localizer["View and manage all subscription plans imported from the legacy database."]</p>
+        </div>
+        <button id="bulkDeleteBtn" class="bx--btn bx--btn--danger" onclick="bulkDelete()" disabled>
+            @Localizer["Delete Selected"]
+        </button>
     </div>
 
     <!-- Carbon Data Table -->
     <table class="bx--data-table bx--data-table--sort">
         <thead>
             <tr>
+                <th style="width: 50px; text-align: center;"><input type="checkbox" id="selectAll" onclick="toggleAll(this)" /></th>
                 <th><span class="bx--table-header-label">@Localizer["ID"]</span></th>
                 <th><span class="bx--table-header-label">@Localizer["Plan Name"]</span></th>
                 <th><span class="bx--table-header-label">@Localizer["Duration (Days)"]</span></th>
@@ -28,6 +34,7 @@
             @foreach (var item in Model)
             {
                 <tr>
+                    <td style="text-align: center;"><input type="checkbox" class="rowCheckbox" value="@item.Id" onclick="toggleRow()" /></td>
                     <td>@item.Id</td>
                     <td><strong>@item.Name</strong></td>
                     <td>@item.DurationDays</td>
@@ -46,3 +53,47 @@
         </tbody>
     </table>
 </div>
+
+<script>
+function toggleAll(source) {
+    var checkboxes = document.querySelectorAll('.rowCheckbox');
+    for (var i = 0; i < checkboxes.length; i++) {
+        checkboxes[i].checked = source.checked;
+    }
+    toggleRow();
+}
+
+function toggleRow() {
+    var checkboxes = document.querySelectorAll('.rowCheckbox:checked');
+    var bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+    bulkDeleteBtn.disabled = checkboxes.length === 0;
+}
+
+function bulkDelete() {
+    if (!confirm('@Localizer["Are you sure you want to delete the selected plans? This action cannot be undone."]')) {
+        return;
+    }
+
+    var checkboxes = document.querySelectorAll('.rowCheckbox:checked');
+    var ids = Array.from(checkboxes).map(cb => cb.value);
+
+    fetch('@Url.Action("BulkDelete", "PlansAdmin")', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(ids)
+    })
+    .then(response => {
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            alert('@Localizer["Failed to delete selected plans."]');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('@Localizer["An error occurred while deleting."]');
+    });
+}
+</script>

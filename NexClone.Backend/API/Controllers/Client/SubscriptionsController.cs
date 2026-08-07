@@ -248,5 +248,32 @@ namespace NexClone.Backend.API.Controllers.Client
             }
             return RedirectToAction(nameof(Index));
         }
+
+        [HttpPost]
+        public async Task<IActionResult> BulkDelete([FromBody] List<int> ids)
+        {
+            if (ids == null || !ids.Any())
+            {
+                return BadRequest("No subscriptions selected.");
+            }
+
+            var subscriptions = await _context.Subscriptions.Where(s => ids.Contains(s.Id)).ToListAsync();
+            if (subscriptions.Any())
+            {
+                try 
+                {
+                    var subIds = subscriptions.Select(s => s.Id).ToList();
+                    var wallets = _context.UserWallets.Where(w => w.SubscriptionId.HasValue && subIds.Contains(w.SubscriptionId.Value));
+                    _context.UserWallets.RemoveRange(wallets);
+                    _context.Subscriptions.RemoveRange(subscriptions);
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception)
+                {
+                    return StatusCode(500, "Could not delete some subscriptions.");
+                }
+            }
+            return Ok();
+        }
     }
 }

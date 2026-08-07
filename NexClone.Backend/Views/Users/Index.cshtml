@@ -9,10 +9,15 @@
     <div class="bx--row">
         <div class="bx--col" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
             <h1 class="bx--type-productive-heading-05">@Localizer["Users Management"]</h1>
-            <a href="@Url.Action("Create")" class="bx--btn bx--btn--primary">
-                Create User
-                <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="16" height="16" viewBox="0 0 32 32" aria-hidden="true" class="bx--btn__icon"><path d="M17 15L17 8 15 8 15 15 8 15 8 17 15 17 15 24 17 24 17 17 24 17 24 15z"></path></svg>
-            </a>
+            <div style="display: flex; gap: 1rem;">
+                <button id="bulkDeleteBtn" class="bx--btn bx--btn--danger" onclick="bulkDelete()" disabled>
+                    @Localizer["Delete Selected"]
+                </button>
+                <a href="@Url.Action("Create")" class="bx--btn bx--btn--primary">
+                    Create User
+                    <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="16" height="16" viewBox="0 0 32 32" aria-hidden="true" class="bx--btn__icon"><path d="M17 15L17 8 15 8 15 15 8 15 8 17 15 17 15 24 17 24 17 17 24 17 24 15z"></path></svg>
+                </a>
+            </div>
         </div>
     </div>
     
@@ -57,6 +62,7 @@
                 <table class="bx--data-table">
                     <thead>
                         <tr>
+                            <th style="width: 50px; text-align: center;"><input type="checkbox" id="selectAll" onclick="toggleAll(this)" /></th>
                             <th><span class="bx--table-header-label">@Localizer["Email"]</span></th>
                             <th><span class="bx--table-header-label">@Localizer["Phone"]</span></th>
                             <th><span class="bx--table-header-label">@Localizer["Status"]</span></th>
@@ -83,6 +89,7 @@
                             {
                                 var currentSub = user.Subscriptions?.FirstOrDefault(s => s.Status == "active");
                                 <tr>
+                                    <td style="text-align: center;"><input type="checkbox" class="rowCheckbox" value="@user.Id" onclick="toggleRow()" /></td>
                                     <td>@user.Email</td>
                                     <td>@(string.IsNullOrEmpty(user.PhoneNumber) ? "N/A" : user.PhoneNumber)</td>
                                     <td>
@@ -255,5 +262,51 @@ function showWalletsModal(btn) {
 
 function closeWalletsModal() {
     document.getElementById('walletsModal').classList.remove('is-visible');
-}
+    }
 </script>
+
+@section Scripts {
+    <script>
+        function toggleAll(source) {
+            checkboxes = document.querySelectorAll('.rowCheckbox');
+            for (var i = 0; i < checkboxes.length; i++) {
+                checkboxes[i].checked = source.checked;
+            }
+            toggleRow();
+        }
+
+        function toggleRow() {
+            var checkboxes = document.querySelectorAll('.rowCheckbox:checked');
+            var bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+            bulkDeleteBtn.disabled = checkboxes.length === 0;
+        }
+
+        function bulkDelete() {
+            if (!confirm('@Localizer["Are you sure you want to delete the selected users? This action cannot be undone."]')) {
+                return;
+            }
+
+            var checkboxes = document.querySelectorAll('.rowCheckbox:checked');
+            var ids = Array.from(checkboxes).map(cb => cb.value);
+
+            fetch('@Url.Action("BulkDelete", "Users")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(ids)
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('@Localizer["Failed to delete selected users."]');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('@Localizer["An error occurred while deleting."]');
+            });
+        }
+    </script>
+}

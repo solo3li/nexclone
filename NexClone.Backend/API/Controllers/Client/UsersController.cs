@@ -477,7 +477,6 @@ namespace NexClone.Backend.API.Controllers.Client
                 if (ticketMessages.Any()) _context.TicketMessages.RemoveRange(ticketMessages);
 
                 _context.Users.Remove(user);
-                
                 try
                 {
                     await _context.SaveChangesAsync();
@@ -489,6 +488,40 @@ namespace NexClone.Backend.API.Controllers.Client
                 }
             }
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> BulkDelete([FromBody] List<Guid> ids)
+        {
+            if (ids == null || !ids.Any())
+            {
+                return BadRequest("No users selected.");
+            }
+
+            var users = await _context.Users.Where(u => ids.Contains(u.Id)).ToListAsync();
+            
+            if (users.Any())
+            {
+                var userIds = users.Select(u => u.Id).ToList();
+
+                var blogComments = await _context.BlogComments.Where(b => b.UserId.HasValue && userIds.Contains(b.UserId.Value)).ToListAsync();
+                if (blogComments.Any()) _context.BlogComments.RemoveRange(blogComments);
+
+                var ticketMessages = await _context.TicketMessages.Where(m => m.SenderId.HasValue && userIds.Contains(m.SenderId.Value)).ToListAsync();
+                if (ticketMessages.Any()) _context.TicketMessages.RemoveRange(ticketMessages);
+
+                _context.Users.RemoveRange(users);
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch
+                {
+                    return StatusCode(500, "Could not delete some users because of associated records.");
+                }
+            }
+
+            return Ok();
         }
         [HttpGet("seed")]
         public async Task<IActionResult> Seed([FromServices] Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> userManager)

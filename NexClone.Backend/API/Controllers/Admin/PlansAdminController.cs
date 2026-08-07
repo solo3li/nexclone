@@ -234,6 +234,27 @@ namespace NexClone.Backend.API.Controllers.Admin
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
+        public async Task<IActionResult> BulkDelete([FromBody] List<int> ids)
+        {
+            if (ids == null || !ids.Any())
+            {
+                return BadRequest("No plans selected.");
+            }
+
+            var plans = await _context.Plans.Where(p => ids.Contains(p.Id)).ToListAsync();
+            if (plans.Any())
+            {
+                foreach (var plan in plans)
+                {
+                    plan.IsDeleted = true;
+                }
+                _context.Plans.UpdateRange(plans);
+                await _context.SaveChangesAsync();
+            }
+            return Ok();
+        }
+
         // ─── Manage Payment Gateways ────────────────────────────────────────────────
 
         [HttpGet]
