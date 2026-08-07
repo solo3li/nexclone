@@ -194,6 +194,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
         private async Task<(Stream, string, string)> GenerateOpenAiAudioAsync(string text, string voiceName, ApiConfiguration config, string customModelName = null)
         {
             var client = _httpClientFactory.CreateClient();
+            client.Timeout = TimeSpan.FromSeconds(300);
             client.DefaultRequestHeaders.Add("Authorization", $"Bearer {config.ApiKey}");
 
             var validOpenAiVoices = new[] { "alloy", "echo", "fable", "onyx", "nova", "shimmer" };
@@ -223,6 +224,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
         private async Task<(Stream, string, string)> GenerateDarijatAudioAsync(string text, string voiceName, string styleInstruction, ApiConfiguration config)
         {
             var client = _httpClientFactory.CreateClient();
+            client.Timeout = TimeSpan.FromSeconds(300);
             client.DefaultRequestHeaders.Add("Authorization", $"Bearer {config.ApiKey}");
             client.DefaultRequestHeaders.Add("Accept", "application/json");
 
@@ -289,6 +291,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                 $"Read the following text aloud in this style: {styleInstruction}\n\n{text}";
 
             var client = _httpClientFactory.CreateClient();
+            client.Timeout = TimeSpan.FromSeconds(300);
             client.DefaultRequestHeaders.Add("x-goog-api-key", config.ApiKey);
 
             var modelNamesStr = string.IsNullOrWhiteSpace(customModelName) ? "gemini-2.5-flash-preview-tts" : customModelName; 

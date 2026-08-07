@@ -143,6 +143,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
         private async Task<string> CallWhisperApiAsync(byte[] audioData, string fileName, string contentType, string apiKey)
         {
             var client = _httpClientFactory.CreateClient();
+            client.Timeout = TimeSpan.FromSeconds(300);
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
 
             using var content = new MultipartFormDataContent();
@@ -174,6 +175,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
         private async Task<string> CallTranslateApiAsync(string text, string targetLangName, string apiKey)
         {
             var client = _httpClientFactory.CreateClient();
+            client.Timeout = TimeSpan.FromSeconds(300);
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
 
             var payload = new
