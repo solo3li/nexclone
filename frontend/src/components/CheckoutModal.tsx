@@ -193,7 +193,7 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
 
     const fbLink = socialLinks['facebook'] || socialLinks['Facebook'];
     const whatsappLink = socialLinks['whatsapp'] || socialLinks['WhatsApp'];
-    const supportLink = `/${locale}/support`;
+    const supportLink = `/${locale}/profile/tickets`;
 
     return (
       <div className="bg-orange-500/10 p-4 rounded-xl border border-orange-500/20 text-center">

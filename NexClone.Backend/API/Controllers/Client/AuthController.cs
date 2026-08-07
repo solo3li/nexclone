@@ -553,7 +553,7 @@ namespace NexClone.Backend.API.Controllers.Client
                 issuer: issuer,
                 audience: audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(1),
+                expires: DateTime.UtcNow.AddDays(15),
                 signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
@@ -566,7 +566,7 @@ namespace NexClone.Backend.API.Controllers.Client
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
-                Expires = DateTime.UtcNow.AddHours(1),
+                Expires = DateTime.UtcNow.AddDays(15),
                 Path = "/"
             };
             Response.Cookies.Append("jwt", token, cookieOptions);

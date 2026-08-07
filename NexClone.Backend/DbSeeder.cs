@@ -56,12 +56,12 @@ namespace NexClone.Backend
             if (!await context.Voices.AnyAsync())
             {
                 context.Voices.AddRange(
-                    new Voice { Name = "عالية", VoiceName = "Alia", Gender = "Female", Accent = "Neutral", IsPremium = false, IsActive = true, Order = 1 },
-                    new Voice { Name = "عمر", VoiceName = "Omar", Gender = "Male", Accent = "Neutral", IsPremium = false, IsActive = true, Order = 2 },
-                    new Voice { Name = "ليلى", VoiceName = "Layla", Gender = "Female", Accent = "Neutral", IsPremium = true, IsActive = true, Order = 3 },
-                    new Voice { Name = "طارق", VoiceName = "Tariq", Gender = "Male", Accent = "Neutral", IsPremium = true, IsActive = true, Order = 4 },
-                    new Voice { Name = "زينة", VoiceName = "Zeina", Gender = "Female", Accent = "Neutral", IsPremium = false, IsActive = true, Order = 5 },
-                    new Voice { Name = "فارس", VoiceName = "Fares", Gender = "Male", Accent = "Neutral", IsPremium = false, IsActive = true, Order = 6 }
+                    new Voice { Name = "عالية", VoiceName = "Alia", Gender = "Female", Accent = "Neutral", IsPremium = false, IsActive = true, Order = 1, GeminiVoice = "Aoede" },
+                    new Voice { Name = "عمر", VoiceName = "Omar", Gender = "Male", Accent = "Neutral", IsPremium = false, IsActive = true, Order = 2, GeminiVoice = "Charon" },
+                    new Voice { Name = "ليلى", VoiceName = "Layla", Gender = "Female", Accent = "Neutral", IsPremium = true, IsActive = true, Order = 3, GeminiVoice = "Kore" },
+                    new Voice { Name = "طارق", VoiceName = "Tariq", Gender = "Male", Accent = "Neutral", IsPremium = true, IsActive = true, Order = 4, GeminiVoice = "Fenrir" },
+                    new Voice { Name = "زينة", VoiceName = "Zeina", Gender = "Female", Accent = "Neutral", IsPremium = false, IsActive = true, Order = 5, GeminiVoice = "Aoede" },
+                    new Voice { Name = "فارس", VoiceName = "Fares", Gender = "Male", Accent = "Neutral", IsPremium = false, IsActive = true, Order = 6, GeminiVoice = "Puck" }
                 );
             }
 
