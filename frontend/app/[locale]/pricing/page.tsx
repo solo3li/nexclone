@@ -155,7 +155,15 @@ export default function PricingPage() {
                               </li>
                               <li className="flex items-start gap-3">
                                 <Check className="w-5 h-5 text-emerald-400 shrink-0" />
-                                <span className="text-gray-300">{isRtl ? 'التكلفة:' : 'Cost:'} ${plan.ttsCostPerChar}/{isRtl ? 'حرف' : 'char'}</span>
+                                <span className="text-gray-300">
+                                  {isRtl ? 'التكلفة العادية (لكل' : 'Cost Standard (per'} {plan.ttsCharactersBlock} {isRtl ? 'حرف):' : 'chars):'} {plan.ttsCostPerChar} {isRtl ? 'كريدت' : 'Credits'}
+                                </span>
+                              </li>
+                              <li className="flex items-start gap-3">
+                                <Check className="w-5 h-5 text-emerald-400 shrink-0" />
+                                <span className="text-gray-300">
+                                  {isRtl ? 'التكلفة العالية (لكل' : 'Cost High (per'} {plan.ttsCharactersBlock} {isRtl ? 'حرف):' : 'chars):'} {plan.ttsCostPerCharHigh} {isRtl ? 'كريدت' : 'Credits'}
+                                </span>
                               </li>
                             </>
                           )}

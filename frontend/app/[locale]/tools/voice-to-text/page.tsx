@@ -473,11 +473,6 @@ function VoiceToTextPage() {
                 <label className="block text-sm font-medium text-white/70">
                   {mode === 'translate' ? t('targetLanguage') : t('language')}
                 </label>
-                {user?.activePlan && (
-                  <div className="text-[10px] bg-fuchsia-500/10 text-fuchsia-300 px-2 py-0.5 rounded-full border border-fuchsia-500/20">
-                    {user.activePlan.sttCostPerMinute} {isRtl ? 'كريدت/دقيقة' : 'Credits/min'}
-                  </div>
-                )}
               </div>
               <div className="relative">
                 <select
