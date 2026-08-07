@@ -90,7 +90,7 @@ export default function PricingPage() {
             {error}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+          <div className="flex flex-wrap justify-center gap-8 items-start">
             {plans.map((plan, index) => {
               const isPopular = index === 1;
               const price = currency === 'USD' ? plan.priceUsd : plan.priceEgp;
@@ -102,7 +102,7 @@ export default function PricingPage() {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.15 }}
-                  className={`relative group rounded-3xl p-[1px] transition-all duration-500 hover:scale-105 hover:z-10 ${isPopular ? 'bg-gradient-to-b from-purple-500 to-blue-500 shadow-2xl shadow-purple-500/20' : 'bg-white/10'}`}
+                  className={`relative group rounded-3xl p-[1px] transition-all duration-500 hover:scale-105 hover:z-10 w-full max-w-[380px] ${isPopular ? 'bg-gradient-to-b from-purple-500 to-blue-500 shadow-2xl shadow-purple-500/20' : 'bg-white/10'}`}
                 >
                   <div className={`absolute inset-0 bg-gradient-to-b from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl pointer-events-none`} />
                   
