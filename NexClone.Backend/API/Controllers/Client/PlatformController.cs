@@ -54,7 +54,7 @@ namespace NexClone.Backend.API.Controllers.Client
         public async Task<IActionResult> GetPlans()
         {
             var plans = await _context.Plans
-                .Where(p => !p.IsDefaultRegistrationPlan)
+                .Where(p => !p.IsDefaultRegistrationPlan && !p.IsDeleted)
                 .OrderBy(p => p.PriceUsd)
                 .ToListAsync();
             return Ok(plans);
