@@ -1,0 +1,164 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using System;
+
+namespace NexClone.Backend.Infrastructure.Data
+{
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>, IDataProtectionKeyContext
+    {
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options)
+        {
+        }
+
+        public DbSet<UserPhoneNumber> PhoneNumbers { get; set; } = null!;
+        public DbSet<EmailVerification> EmailVerifications { get; set; } = null!;
+        public DbSet<Plan> Plans { get; set; } = null!;
+        public DbSet<Subscription> Subscriptions { get; set; } = null!;
+        public DbSet<Invoice> Invoices { get; set; } = null!;
+        public DbSet<Payment> Payments { get; set; } = null!;
+        public DbSet<ApiConfiguration> ApiConfigurations { get; set; } = null!;
+        public DbSet<PaymentGatewayConfig> PaymentGatewayConfigs { get; set; } = null!;
+        public DbSet<GenerationHistory> GenerationHistories { get; set; } = null!;
+        public DbSet<ManualPaymentMethod> ManualPaymentMethods { get; set; } = null!;
+        public DbSet<DeviceFingerprint> DeviceFingerprints { get; set; } = null!;
+        public DbSet<ToolConfiguration> ToolConfigurations { get; set; } = null!;
+        public DbSet<ToolRoutingRule> ToolRoutingRules { get; set; } = null!;
+        public DbSet<EmailTemplate> EmailTemplates { get; set; } = null!;
+        public DbSet<AppSetting> AppSettings { get; set; } = null!;
+        public DbSet<CustomPage> CustomPages { get; set; } = null!;
+        public DbSet<BlogPost> BlogPosts { get; set; } = null!;
+        public DbSet<BlogComment> BlogComments { get; set; } = null!;
+        public DbSet<SupportTicket> SupportTickets { get; set; } = null!;
+        public DbSet<TicketMessage> TicketMessages { get; set; } = null!;
+        public DbSet<WalletType> WalletTypes { get; set; } = null!;
+        public DbSet<UserWallet> UserWallets { get; set; } = null!;
+        public DbSet<PackageWallet> PackageWallets { get; set; } = null!;
+        public DbSet<PackageToolWallet> PackageToolWallets { get; set; } = null!;
+        public DbSet<SystemUpdate> SystemUpdates { get; set; } = null!;
+        public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
+        public DbSet<PlanPaymentGateway> PlanPaymentGateways { get; set; } = null!;
+        // Affiliate entities removed
+
+        // DataProtection keys - persisted to DB to survive container restarts
+        public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
+
+        // TTS Lookups
+        public DbSet<Voice> Voices { get; set; } = null!;
+        public DbSet<Dialect> Dialects { get; set; } = null!;
+        public DbSet<Emotion> Emotions { get; set; } = null!;
+        public DbSet<Style> Styles { get; set; } = null!;
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            // Configure One-to-One relationship for ApplicationUser and UserPhoneNumber
+            builder.Entity<ApplicationUser>()
+                .HasOne(u => u.PhoneNumberDetails)
+                .WithOne(p => p.User)
+                .HasForeignKey<UserPhoneNumber>(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Subscriptions mapping
+            builder.Entity<Subscription>()
+                .HasOne(s => s.User)
+                .WithMany(u => u.Subscriptions)
+                .HasForeignKey(s => s.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Subscription>()
+                .HasOne(s => s.Plan)
+                .WithMany(p => p.Subscriptions)
+                .HasForeignKey(s => s.PlanId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Payments mapping
+            builder.Entity<Payment>()
+                .HasOne(p => p.User)
+                .WithMany(u => u.Payments)
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Payment>()
+                .HasOne(p => p.Plan)
+                .WithMany(pl => pl.Payments)
+                .HasForeignKey(p => p.PlanId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.Entity<Payment>()
+                .HasOne(p => p.Subscription)
+                .WithMany(s => s.Payments)
+                .HasForeignKey(p => p.SubscriptionId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // History mapping
+            builder.Entity<GenerationHistory>()
+                .HasOne(h => h.User)
+                .WithMany()
+                .HasForeignKey(h => h.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Wallets mapping
+            builder.Entity<UserWallet>()
+                .HasOne(uw => uw.User)
+                .WithMany(u => u.Wallets)
+                .HasForeignKey(uw => uw.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<UserWallet>()
+                .HasOne(uw => uw.WalletType)
+                .WithMany(wt => wt.UserWallets)
+                .HasForeignKey(uw => uw.WalletTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<PackageWallet>()
+                .HasOne(pw => pw.Plan)
+                .WithMany(p => p.PackageWallets)
+                .HasForeignKey(pw => pw.PlanId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<PackageWallet>()
+                .HasOne(pw => pw.WalletType)
+                .WithMany(wt => wt.PackageWallets)
+                .HasForeignKey(pw => pw.WalletTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<PackageToolWallet>()
+                .HasOne(ptw => ptw.Plan)
+                .WithMany(p => p.PackageToolWallets)
+                .HasForeignKey(ptw => ptw.PlanId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<PackageToolWallet>()
+                .HasOne(ptw => ptw.WalletType)
+                .WithMany(wt => wt.PackageToolWallets)
+                .HasForeignKey(ptw => ptw.WalletTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // RefreshToken mapping
+            builder.Entity<RefreshToken>()
+                .HasOne(rt => rt.User)
+                .WithMany(u => u.RefreshTokens)
+                .HasForeignKey(rt => rt.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // PlanPaymentGateway mapping
+            builder.Entity<PlanPaymentGateway>()
+                .HasOne(ppg => ppg.Plan)
+                .WithMany(p => p.PlanPaymentGateways)
+                .HasForeignKey(ppg => ppg.PlanId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<PlanPaymentGateway>()
+                .HasOne(ppg => ppg.GatewayConfig)
+                .WithMany(gc => gc.PlanPaymentGateways)
+                .HasForeignKey(ppg => ppg.GatewayConfigId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Affiliate mapping removed
+        }
+    }
+}
