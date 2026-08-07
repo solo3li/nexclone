@@ -12,14 +12,16 @@ namespace NexClone.Backend.API.Controllers.Client
     public class ProfileController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly NexClone.Backend.Core.Interfaces.IMediaService _mediaService;
 
-        public ProfileController(UserManager<ApplicationUser> userManager)
+        public ProfileController(UserManager<ApplicationUser> userManager, NexClone.Backend.Core.Interfaces.IMediaService mediaService)
         {
             _userManager = userManager;
+            _mediaService = mediaService;
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
+        public async Task<IActionResult> UpdateProfile([FromForm] UpdateProfileRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null) return Unauthorized();
@@ -30,10 +32,17 @@ namespace NexClone.Backend.API.Controllers.Client
             user.FullName = request.FullName ?? user.FullName;
             user.Country = request.Country ?? user.Country;
 
+            if (request.ProfileImage != null)
+            {
+                using var stream = request.ProfileImage.OpenReadStream();
+                var imageUrl = await _mediaService.UploadFileAsync(stream, "profiles", request.ProfileImage.FileName);
+                user.ImageUrl = imageUrl;
+            }
+
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded) return BadRequest(result.Errors);
 
-            return Ok(new { Message = "Profile updated successfully" });
+            return Ok(new { Message = "Profile updated successfully", ImageUrl = user.ImageUrl });
         }
 
         [HttpPost("change-password")]
@@ -59,6 +68,7 @@ namespace NexClone.Backend.API.Controllers.Client
     {
         public string? FullName { get; set; }
         public string? Country { get; set; }
+        public IFormFile? ProfileImage { get; set; }
     }
 
     public class ChangePasswordRequest
