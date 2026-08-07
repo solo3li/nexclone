@@ -197,12 +197,14 @@ namespace NexClone.Backend.API.Controllers.AI
             }
 
             // Round up to nearest 5 seconds (e.g. 6 -> 10, 21 -> 25)
-            // But wait, the user said "consume 6 calculated as 10, consume 21 calculated as 25"
-            // Wait, 6 rounded up to nearest 5 is 10. 21 to 25. 
             // The multiplier is Math.Ceiling(durationSeconds / 5.0) 
-            // So if duration=6, 6/5 = 1.2 -> ceiling is 2. (2 * 5 = 10s worth, but we just pass the multiplier = 2 units)
             decimal durationUnits = (decimal)Math.Ceiling(durationSeconds / 5.0);
             if (durationUnits < 1) durationUnits = 1;
+
+            if (durationSeconds > policy.MaxDurationSeconds)
+            {
+                return BadRequest(new { error = $"Video duration ({durationSeconds:F1}s) exceeds your plan's maximum limit of {policy.MaxDurationSeconds}s." });
+            }
 
             // Just charge
             decimal usageAmountForLimits = 0; // Handled explicitly above

@@ -41,6 +41,21 @@ function AdvancedLipSyncPage() {
   const [estimatedCost, setEstimatedCost] = useState<number>(user?.activePlan?.lipSyncCostPerGeneration || 1);
   const [chargedWallet, setChargedWallet] = useState<string | null>(null);
 
+  const [videoDuration, setVideoDuration] = useState<number | null>(null);
+  const [audioDuration, setAudioDuration] = useState<number | null>(null);
+
+  const getMediaDuration = (file: File, type: 'video' | 'audio'): Promise<number> => {
+    return new Promise((resolve) => {
+      const el = document.createElement(type);
+      el.preload = 'metadata';
+      el.onloadedmetadata = () => {
+        resolve(el.duration);
+        URL.revokeObjectURL(el.src);
+      };
+      el.src = URL.createObjectURL(file);
+    });
+  };
+
   useEffect(() => {
     if (isAuthenticated && user) {
       const subId = sessionStorage.getItem('preferredSubscriptionId');
@@ -174,13 +189,15 @@ function AdvancedLipSyncPage() {
   };
 
   // Handle Drag and Drop
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
     if (file && file.type.startsWith('video/')) {
       const url = URL.createObjectURL(file);
       setInputVideoUrl(url);
       setVideoFile(file);
+      const dur = await getMediaDuration(file, 'video');
+      setVideoDuration(dur);
     }
   };
 
@@ -229,11 +246,13 @@ function AdvancedLipSyncPage() {
                     <input 
                       type="file" 
                       accept="video/*" 
-                      onChange={(e) => {
+                      onChange={async (e) => {
                         const file = e.target.files?.[0];
                         if (file) {
                           setInputVideoUrl(URL.createObjectURL(file));
                           setVideoFile(file);
+                          const dur = await getMediaDuration(file, 'video');
+                          setVideoDuration(dur);
                         }
                       }}
                       className="absolute inset-0 opacity-0 cursor-pointer" 
@@ -251,16 +270,24 @@ function AdvancedLipSyncPage() {
                     <input 
                       type="file" 
                       accept="video/*" 
-                      onChange={(e) => {
+                      onChange={async (e) => {
                         const file = e.target.files?.[0];
                         if (file) {
                           setInputVideoUrl(URL.createObjectURL(file));
                           setVideoFile(file);
+                          const dur = await getMediaDuration(file, 'video');
+                          setVideoDuration(dur);
                         }
                       }}
                       className="absolute inset-0 opacity-0 cursor-pointer" 
                     />
                   </>
+                )}
+                {videoDuration !== null && (
+                  <motion.div initial={{ opacity: 0, y: 10, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} className="absolute bottom-4 right-4 z-20 text-xs font-mono font-bold bg-[#120822]/80 backdrop-blur-md text-fuchsia-300 px-3 py-1.5 rounded-lg border border-fuchsia-500/30 shadow-xl flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-fuchsia-500 animate-pulse" />
+                    {isRtl ? "المدة: " : "Duration: "}{videoDuration.toFixed(1)}s
+                  </motion.div>
                 )}
               </div>
 
@@ -286,12 +313,22 @@ function AdvancedLipSyncPage() {
                   <input 
                     type="file" 
                     accept="audio/*" 
-                    onChange={(e) => {
+                    onChange={async (e) => {
                       const file = e.target.files?.[0];
-                      if (file) setAudioFile(file);
+                      if (file) {
+                        setAudioFile(file);
+                        const dur = await getMediaDuration(file, 'audio');
+                        setAudioDuration(dur);
+                      }
                     }}
                     className="absolute inset-0 opacity-0 cursor-pointer" 
                   />
+                  {audioDuration !== null && (
+                    <motion.div initial={{ opacity: 0, y: -10, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} className="absolute top-4 right-4 z-20 text-xs font-mono font-bold bg-[#120822]/80 backdrop-blur-md text-amber-300 px-3 py-1.5 rounded-lg border border-amber-500/30 shadow-xl flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                      {isRtl ? "المدة: " : "Duration: "}{audioDuration.toFixed(1)}s
+                    </motion.div>
+                  )}
                 </div>
               </div>
 

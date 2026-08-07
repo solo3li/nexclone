@@ -21,6 +21,9 @@ namespace NexClone.Backend.Application.Services
         public long MaxAudioFileSizeMb { get; set; } = 15;
         public long MaxVideoFileSizeMb { get; set; } = 50;
         
+        // Limits for specific tools
+        public int MaxDurationSeconds { get; set; } = 60;
+
         // Cost per unit. If not set, we will fallback to LegacyDbContext
         public decimal? CostPerUnit { get; set; }
         public int BlockSize { get; set; } = 1;
@@ -287,9 +290,10 @@ namespace NexClone.Backend.Application.Services
             else if (toolId == "kling_advanced_lip_sync" || toolId == "lipsync")
             {
                 policy.Enabled = plan.LipSyncEnabled;
-                policy.CostPerUnit = plan.LipSyncCostPerGeneration;
+                policy.CostPerUnit = plan.LipSyncCostPerSecond * 5; // Cost per 5-second block
                 policy.MaxVideoFileSizeMb = plan.LipSyncMaxVideoFileSizeMb;
                 policy.MaxAudioFileSizeMb = plan.LipSyncMaxAudioFileSizeMb;
+                policy.MaxDurationSeconds = plan.LipSyncMaxDurationSeconds;
             }
             else if (toolId == "kling_motion_control" || toolId == "motion-control")
             {

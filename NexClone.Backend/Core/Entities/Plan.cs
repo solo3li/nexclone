@@ -65,6 +65,8 @@ namespace NexClone.Backend.Core.Entities
         public decimal LipSyncCostPerGeneration { get; set; } = 1.0m;
         public int LipSyncMaxVideoFileSizeMb { get; set; } = 50;
         public int LipSyncMaxAudioFileSizeMb { get; set; } = 15;
+        public int LipSyncMaxDurationSeconds { get; set; } = 60;
+        public decimal LipSyncCostPerSecond { get; set; } = 0.2m;
 
         // Motion Control Settings
         public bool MotionControlEnabled { get; set; } = true;
