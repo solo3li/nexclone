@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 
 import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
 import { 
   Play, Download, Loader2, Volume2, Wand2, Mic, 
@@ -309,17 +309,25 @@ function TextToVoicePage() {
     return true;
   });
 
+  // Fix: Only reset voice when allowedVoices changes (not on every filteredVoices re-render)
+  // filteredVoices is derived state; using it as dep caused voice to reset on every render.
   useEffect(() => {
     const isAllowed = (v: string) => allowedVoices === null || allowedVoices.includes(v);
-    if (filteredVoices.length > 0) {
-      if (!selectedVoice || !isAllowed(selectedVoice) || !filteredVoices.some(v => v.voiceName === selectedVoice)) {
-        const allowedInFiltered = filteredVoices.filter(v => isAllowed(v.voiceName));
+    const currentFiltered = voices.filter(v => {
+      if (voiceFilter === 'male') return v.gender.toLowerCase() === 'ذكر' || v.gender.toLowerCase() === 'male';
+      if (voiceFilter === 'female') return v.gender.toLowerCase() === 'أنثى' || v.gender.toLowerCase() === 'female';
+      return true;
+    });
+    if (currentFiltered.length > 0) {
+      if (!selectedVoice || !isAllowed(selectedVoice) || !currentFiltered.some(v => v.voiceName === selectedVoice)) {
+        const allowedInFiltered = currentFiltered.filter(v => isAllowed(v.voiceName));
         if (allowedInFiltered.length > 0) {
           setSelectedVoice(allowedInFiltered[0].voiceName);
         }
       }
     }
-  }, [filteredVoices, selectedVoice, allowedVoices]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allowedVoices, voiceFilter, voices]);
 
   return (
     <>
@@ -391,41 +399,122 @@ function TextToVoicePage() {
               )}
 
               {/* Generate Button / Processing UI */}
+              <AnimatePresence mode="wait">
               {!isProcessing ? (
-                <button
-                    onClick={handleProcessClick}
-                    disabled={isEstimating}
-                    className="w-full mt-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group relative overflow-hidden"
-                  >
-                  <Wand2 className="w-5 h-5" />
+                <motion.button
+                  key="generate-btn"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.2 }}
+                  onClick={handleProcessClick}
+                  disabled={isEstimating}
+                  className="w-full mt-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group relative overflow-hidden"
+                >
+                  {isEstimating ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <Wand2 className="w-5 h-5" />
+                  )}
                   {t('process')}
-                </button>
+                </motion.button>
               ) : (
                 <motion.div
+                  key="processing-ui"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mt-4 p-6 bg-[#0a0015]/60 border border-fuchsia-500/30 rounded-xl flex flex-col items-center justify-center gap-4 text-center"
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                  className="mt-4 bg-[#0a0015]/60 border border-fuchsia-500/20 rounded-xl overflow-hidden"
                 >
-                  <div className="relative w-16 h-16 flex items-center justify-center">
-                    <div className="absolute inset-0 rounded-full border-4 border-white/10" />
-                    <div className="absolute inset-0 rounded-full border-4 border-fuchsia-500 border-t-transparent animate-spin" />
-                    <span className="text-sm font-bold text-white relative z-10">{elapsedSeconds}s</span>
+                  {/* Top: waveform + label */}
+                  <div className="flex flex-col items-center justify-center gap-3 p-5 text-center">
+                    {/* Animated waveform bars */}
+                    <div className="flex items-end gap-1 h-12">
+                      {[...Array(9)].map((_, i) => (
+                        <motion.div
+                          key={i}
+                          className="w-1.5 bg-gradient-to-t from-violet-600 to-fuchsia-400 rounded-full"
+                          animate={{ height: ['8px', `${18 + (i % 3) * 14}px`, '8px'] }}
+                          transition={{
+                            duration: 0.55 + i * 0.07,
+                            repeat: Infinity,
+                            ease: 'easeInOut',
+                            delay: i * 0.06,
+                          }}
+                        />
+                      ))}
+                    </div>
+
+                    <div>
+                      <h3 className="font-bold text-white text-base">
+                        {isRtl ? 'جاري تحويل النص إلى صوت...' : 'Converting Text to Voice...'}
+                      </h3>
+                      <p className="text-white/50 text-xs mt-1 max-w-xs">
+                        {isRtl
+                          ? 'هذه العملية قد تستغرق بضع ثوانٍ. يمكنك ترك الصفحة وسنرسل إشعاراً فور الانتهاء.'
+                          : 'This may take a few seconds. You can leave this page and we will notify you when done.'}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-bold text-white mb-2 text-lg">
-                      {isRtl ? 'جاري تحويل النص إلى صوت...' : 'Converting Text to Voice...'}
-                    </h3>
-                    <p className="text-white/60 text-sm max-w-sm">
-                      {isRtl 
-                        ? 'هذه العملية قد تستغرق بضع ثوانٍ. يمكنك ترك هذه الصفحة وسنرسل لك إشعاراً فور الانتهاء.'
-                        : 'This process might take a few seconds. You can leave this page and we will notify you when it is done.'}
-                    </p>
+
+                  {/* Progress bar */}
+                  <div className="px-5 pb-2">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-1.5">
+                        <Loader2 className="w-3 h-3 text-fuchsia-400 animate-spin" />
+                        <span className="text-xs font-medium text-fuchsia-400">
+                          {isRtl ? 'جاري المعالجة' : 'Processing'}
+                        </span>
+                      </div>
+                      <span className="text-xs text-white/40 font-mono">{elapsedSeconds}s</span>
+                    </div>
+                    <div className="relative h-2 bg-white/10 rounded-full overflow-hidden">
+                      <motion.div
+                        className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500"
+                        animate={{ width: ['20%', '85%', '35%', '70%', '50%'] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                      />
+                      {/* shimmer */}
+                      <motion.div
+                        className="absolute inset-y-0 w-16 bg-gradient-to-r from-transparent via-white/25 to-transparent skew-x-12"
+                        animate={{ x: ['-64px', '320px'] }}
+                        transition={{ duration: 1.4, repeat: Infinity, ease: 'linear' }}
+                      />
+                    </div>
                   </div>
-                  <Link href="/history" className="mt-2 px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full text-sm font-medium transition-colors">
-                    {isRtl ? 'الذهاب لسجل العمليات' : 'Go to History'}
-                  </Link>
+
+                  {/* Step indicators */}
+                  <div className="flex items-center justify-between px-5 py-3 border-t border-white/5">
+                    {[
+                      { label: isRtl ? 'قبول النص' : 'Queue', done: true },
+                      { label: isRtl ? 'توليد الصوت' : 'Generate', done: elapsedSeconds > 3 },
+                      { label: isRtl ? 'حفظ' : 'Save', done: false },
+                    ].map((step, idx) => (
+                      <div key={idx} className="flex items-center gap-1.5">
+                        <motion.div
+                          className={`w-1.5 h-1.5 rounded-full ${
+                            step.done ? 'bg-fuchsia-400' : 'bg-white/20'
+                          }`}
+                          animate={step.done ? { scale: [1, 1.4, 1] } : {}}
+                          transition={{ duration: 1, repeat: Infinity }}
+                        />
+                        <span className={`text-[10px] font-medium ${
+                          step.done ? 'text-white/70' : 'text-white/30'
+                        }`}>{step.label}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Go to history link */}
+                  <div className="flex justify-center pb-4">
+                    <Link href="/history" className="px-5 py-1.5 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-full text-xs font-medium transition-colors">
+                      {isRtl ? 'الذهاب لسجل العمليات' : 'Go to History'}
+                    </Link>
+                  </div>
                 </motion.div>
               )}
+              </AnimatePresence>
 
               {/* Output Audio Player */}
               {audioUrl && !isProcessing && (
