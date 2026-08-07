@@ -11,7 +11,7 @@ import { motion } from 'framer-motion';
 export default function MyInvoicesPage() {
   const { locale } = useParams();
   const router = useRouter();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, isInitializing } = useAuthStore();
   const { fetchHistory, fetchInvoices, invoices, isLoading } = useHistoryStore();
   const [historyCount, setHistoryCount] = useState(0);
 
@@ -29,6 +29,14 @@ export default function MyInvoicesPage() {
     };
     loadData();
   }, [isAuthenticated, fetchHistory, fetchInvoices]);
+
+  if (isInitializing) {
+    return (
+      <div className="flex justify-center items-center py-20 min-h-screen bg-[#0A0A0A]">
+         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-500" />
+      </div>
+    );
+  }
 
   if (!isAuthenticated && !isLoading) {
     return (

@@ -15,7 +15,7 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
   const [attachment, setAttachment] = useState<File | null>(null);
   const [sending, setSending] = useState(false);
 
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, isInitializing } = useAuthStore();
   const { fetchTicketDetails, replyTicket } = useTicketStore();
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [connection, setConnection] = useState<signalR.HubConnection | null>(null);
@@ -106,6 +106,14 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
       setSending(false);
     }
   };
+
+  if (isInitializing) {
+    return (
+      <div className="bg-white/5 border border-white/10 p-8 rounded-3xl flex justify-center py-20 min-h-[60vh]">
+        <div className="w-8 h-8 border-4 border-violet-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) return null;
 

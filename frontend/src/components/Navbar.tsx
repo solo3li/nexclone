@@ -5,6 +5,7 @@ import { Zap, Menu, X, Globe, ChevronDown, Mic, FileAudio, Video, Smile } from "
 import { useTranslations, useLocale } from "next-intl";
 import { Link, usePathname, useRouter } from "../i18n/routing";
 import { useAppStore } from "../store/useAppStore";
+import { useAuthStore } from "../store/useAuthStore";
 import api from "../utils/api";
 import { FreezeWarningBanner } from "./FreezeWarningBanner";
 
@@ -42,8 +43,8 @@ export default function Navbar() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      api.get("/api/auth/me").then(res => {
-        setUser(res.data);
+      useAuthStore.getState().fetchMe().then(userData => {
+        setUser(userData);
       }).catch(() => {});
     }
     

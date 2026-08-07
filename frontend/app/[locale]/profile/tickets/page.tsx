@@ -6,7 +6,7 @@ import { Link } from "@/i18n/routing";
 import { useRouter } from "next/navigation";
 
 export default function TicketsList() {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, isInitializing } = useAuthStore();
   const { tickets, isLoading: loading, fetchTickets, createTicket } = useTicketStore();
   const router = useRouter();
 
@@ -35,6 +35,14 @@ export default function TicketsList() {
       setCreating(false);
     }
   };
+
+  if (isInitializing) {
+    return (
+      <div className="flex justify-center items-center py-20 min-h-[60vh]">
+         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-violet-500" />
+      </div>
+    );
+  }
 
   if (!isAuthenticated) return null;
 

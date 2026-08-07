@@ -18,7 +18,7 @@ export default function ProfilePage() {
   const isRtl = locale === "ar";
   const router = useRouter();
   
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, isInitializing } = useAuthStore();
   const { updateProfile, changePassword } = useProfileStore();
   const { fetchHistory } = useHistoryStore();
   
@@ -109,6 +109,14 @@ export default function ProfilePage() {
       setSavingPassword(false);
     }
   };
+
+  if (isInitializing || !isReady) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 min-h-[60vh]">
+         <Loader2 className="w-10 h-10 animate-spin text-fuchsia-500" />
+      </div>
+    );
+  }
 
   if (isReady && !isAuthenticated && !user) {
     return (
