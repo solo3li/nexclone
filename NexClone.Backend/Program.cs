@@ -65,7 +65,8 @@ builder.Services.AddCors(options =>
             if (!string.IsNullOrWhiteSpace(allowedOriginsSetting))
             {
                 var origins = allowedOriginsSetting.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(o => o.Trim()).ToList();
-                origins.Add("https://app-nexclone.167.71.66.188.nip.io");
+                origins.Add("https://nexmediaai.com");
+                origins.Add("https://www.nexmediaai.com");
                 policyBuilder.WithOrigins(origins.ToArray())
                        .AllowAnyMethod()
                        .AllowAnyHeader()
@@ -79,7 +80,8 @@ builder.Services.AddCors(options =>
                         "http://localhost:3001",
                         "http://167.71.66.188:3000",
                         "http://178.62.192.74:3000",
-                        "https://app-nexclone.167.71.66.188.nip.io")
+                        "https://nexmediaai.com",
+                        "https://www.nexmediaai.com")
                        .AllowAnyMethod()
                        .AllowAnyHeader()
                        .AllowCredentials();
@@ -92,7 +94,8 @@ builder.Services.AddCors(options =>
                     "http://localhost:3001",
                     "http://167.71.66.188:3000",
                     "http://178.62.192.74:3000",
-                    "https://app-nexclone.167.71.66.188.nip.io")
+                    "https://nexmediaai.com",
+                    "https://www.nexmediaai.com")
                    .AllowAnyMethod()
                    .AllowAnyHeader()
                    .AllowCredentials();
