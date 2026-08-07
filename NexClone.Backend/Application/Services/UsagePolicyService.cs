@@ -156,7 +156,8 @@ namespace NexClone.Backend.Application.Services
                 var walletTypeId = await GetWalletTypeIdForTool(toolId, sub.PlanId);
                 var userWallet = user.Wallets?.FirstOrDefault(w => w.WalletTypeId == walletTypeId && w.SubscriptionId == sub.Id);
                 
-                if ((userWallet == null || userWallet.Balance <= 0) && generalWalletType != null)
+                var isVoiceTool = toolId == "text-to-voice" || toolId == "voice-to-text";
+                if ((userWallet == null || userWallet.Balance <= 0) && generalWalletType != null && isVoiceTool)
                 {
                     userWallet = user.Wallets?.FirstOrDefault(w => w.WalletTypeId == generalWalletType.Id && w.SubscriptionId == sub.Id);
                 }
