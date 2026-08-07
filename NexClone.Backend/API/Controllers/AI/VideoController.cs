@@ -170,21 +170,49 @@ namespace NexClone.Backend.API.Controllers.AI
             if (audio.Length > policy.MaxAudioFileSizeMb * 1024 * 1024)
                 return BadRequest(new { error = $"Audio file is too large. Maximum size is {policy.MaxAudioFileSizeMb}MB." });
 
-            // Just charge (validation is done above)
+            // Read files into memory
+            byte[] videoBytes;
+            byte[] audioBytes;
+            using (var ms = new MemoryStream()) { await video.CopyToAsync(ms); videoBytes = ms.ToArray(); }
+            using (var ms = new MemoryStream()) { await audio.CopyToAsync(ms); audioBytes = ms.ToArray(); }
+
+            // Calculate duration
+            double durationSeconds = 5.0;
+            try
+            {
+                var extension = System.IO.Path.GetExtension(video.FileName);
+                if (string.IsNullOrEmpty(extension)) extension = ".mp4";
+                var tempFile = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Guid.NewGuid().ToString() + extension);
+                System.IO.File.WriteAllBytes(tempFile, videoBytes);
+                using (var tfile = TagLib.File.Create(tempFile))
+                {
+                    durationSeconds = tfile.Properties.Duration.TotalSeconds;
+                }
+                System.IO.File.Delete(tempFile);
+                if (durationSeconds <= 0) durationSeconds = 5.0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[WARNING] TagLib failed for LipSync duration. Fallback to 5s. Error: {ex.Message}");
+            }
+
+            // Round up to nearest 5 seconds (e.g. 6 -> 10, 21 -> 25)
+            // But wait, the user said "consume 6 calculated as 10, consume 21 calculated as 25"
+            // Wait, 6 rounded up to nearest 5 is 10. 21 to 25. 
+            // The multiplier is Math.Ceiling(durationSeconds / 5.0) 
+            // So if duration=6, 6/5 = 1.2 -> ceiling is 2. (2 * 5 = 10s worth, but we just pass the multiplier = 2 units)
+            decimal durationUnits = (decimal)Math.Ceiling(durationSeconds / 5.0);
+            if (durationUnits < 1) durationUnits = 1;
+
+            // Just charge
             decimal usageAmountForLimits = 0; // Handled explicitly above
-            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "kling_advanced_lip_sync", usageAmountForLimits, 1, "Standard", subscriptionId);
+            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "kling_advanced_lip_sync", usageAmountForLimits, durationUnits, "Standard", subscriptionId);
             
             if (!policyResult.IsAllowed)
                 return BadRequest(new { error = policyResult.ErrorMessage });
             
             try
             {
-                // Read files into memory so background task can use them after the request ends
-                byte[] videoBytes;
-                byte[] audioBytes;
-                using (var ms = new MemoryStream()) { await video.CopyToAsync(ms); videoBytes = ms.ToArray(); }
-                using (var ms = new MemoryStream()) { await audio.CopyToAsync(ms); audioBytes = ms.ToArray(); }
-
                 string videoFileName = video.FileName;
                 string videoContentType = video.ContentType;
                 string audioFileName = audio.FileName;

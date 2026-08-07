@@ -561,12 +561,11 @@ namespace NexClone.Backend.API.Controllers.Client
 
         private void SetTokenCookie(string token)
         {
-            var isHttps = Request.IsHttps || Request.Headers["X-Forwarded-Proto"] == "https";
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = isHttps,
-                SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
+                Secure = true,
+                SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddHours(1),
                 Path = "/"
             };
@@ -590,12 +589,11 @@ namespace NexClone.Backend.API.Controllers.Client
 
         private void SetRefreshTokenCookie(string refreshToken)
         {
-            var isHttps = Request.IsHttps || Request.Headers["X-Forwarded-Proto"] == "https";
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = isHttps,
-                SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
+                Secure = true,
+                SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddDays(7),
                 Path = "/"
             };
@@ -681,20 +679,19 @@ namespace NexClone.Backend.API.Controllers.Client
                 }
             }
 
-            var isHttps = Request.IsHttps || Request.Headers["X-Forwarded-Proto"] == "https";
             Response.Cookies.Append("jwt", "", new CookieOptions
             {
                 HttpOnly = true,
-                Secure = isHttps,
-                SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
+                Secure = true,
+                SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddDays(-10),
                 Path = "/"
             });
             Response.Cookies.Append("refreshToken", "", new CookieOptions
             {
                 HttpOnly = true,
-                Secure = isHttps,
-                SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
+                Secure = true,
+                SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddDays(-10),
                 Path = "/"
             });

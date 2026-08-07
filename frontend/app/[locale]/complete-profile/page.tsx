@@ -84,10 +84,10 @@ export default function CompleteProfilePage() {
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-fuchsia-500 to-pink-500" />
           
           <h1 className="text-3xl font-bold text-white mb-2 text-center">
-            {locale === 'ar' ? 'إكمال البيانات' : 'Complete Profile'}
+            {locale === 'ar' ? 'ضيف رقمك عشان تاخد النقاط المجانية' : 'Add your number to get free points'}
           </h1>
           <p className="text-center text-white/60 text-sm mb-6">
-            {locale === 'ar' ? 'يرجى إدخال رقم هاتفك للمتابعة والحصول على الباقة المجانية.' : 'Please enter your phone number to continue and claim your free trial.'}
+            {locale === 'ar' ? 'يرجى إدخال رقم هاتفك للمتابعة والحصول على نقاطك المجانية للبدء.' : 'Please enter your phone number to continue and claim your free points.'}
           </p>
           
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>

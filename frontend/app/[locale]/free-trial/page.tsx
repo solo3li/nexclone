@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { useLocale } from "next-intl";
 import { useRouter } from "../../../src/i18n/routing";
 import { Link } from "../../../src/i18n/routing";
@@ -43,7 +43,7 @@ const features = [
   },
 ];
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -51,7 +51,7 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 24 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
 };
@@ -112,8 +112,8 @@ export default function FreeTrialPage() {
             {/* Subtitle */}
             <motion.p variants={itemVariants} className="text-white/60 text-center text-sm leading-relaxed mb-8">
               {isRtl
-                ? "تم إنشاء حسابك بنجاح. لقد حصلت على التجربة المجانية! يرجى تفعيل بريدك الإلكتروني لبدء استخدام المنصة."
-                : "Your account was created successfully. You've unlocked the free trial! Please verify your email to get started."}
+                ? "تم إنشاء حسابك بنجاح. لقد حصلت على النقاط المجانية! يرجى تفعيل بريدك الإلكتروني لبدء استخدام المنصة."
+                : "Your account was created successfully. You've unlocked the free points! Please verify your email to get started."}
             </motion.p>
 
             {/* Email verification notice */}

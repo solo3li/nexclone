@@ -46,7 +46,6 @@ namespace NexClone.Backend.API.Controllers.Client
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateTicket([FromBody] CreateTicketRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Subject) || string.IsNullOrWhiteSpace(request.Message))

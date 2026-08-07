@@ -86,6 +86,10 @@ namespace NexClone.Backend.API.Controllers.AI
                 Console.WriteLine($"[WARNING] TagLib failed for {request.FileId}. Fallback duration: {audioDurationMinutes} mins. Error: {ex.Message}");
             }
 
+            // Round up to the nearest minute (e.g. 1.2 -> 2, 0.5 -> 1)
+            audioDurationMinutes = Math.Ceiling(audioDurationMinutes);
+            if (audioDurationMinutes < 1) audioDurationMinutes = 1;
+
             var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "voice-to-text", audioData.Length, (decimal)audioDurationMinutes, "Standard", request.SubscriptionId);
             if (!policyResult.IsAllowed)
                 return BadRequest(new { error = policyResult.ErrorMessage });

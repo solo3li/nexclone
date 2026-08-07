@@ -4,19 +4,25 @@ import { motion } from "framer-motion";
 import { Check, Zap, Crown, Rocket, ArrowLeft, ArrowRight } from "lucide-react";
 import { AnimatedText, AnimatedReveal } from "./AnimatedText";
 import { useTranslations, useLocale } from "next-intl";
+import { usePlansStore } from "../store/usePlansStore";
+import { useEffect } from "react";
 
 export default function PricingSection() {
   const [yearly, setYearly] = useState(false);
   const t = useTranslations("Pricing");
   const locale = useLocale();
+  const { plans: dbPlans, fetchPlans } = usePlansStore();
+
+  useEffect(() => {
+    fetchPlans();
+  }, [fetchPlans]);
 
   const ArrowIcon = locale === 'ar' ? ArrowLeft : ArrowRight;
 
-  const plans = [
+  const staticPlans = [
     {
       name: t('freePlan.name'),
       icon: Zap,
-      price: { monthly: t('freePlan.price.monthly'), yearly: t('freePlan.price.yearly') },
       currency: t('freePlan.currency'),
       period: t('freePlan.period'),
       desc: t('freePlan.desc'),
@@ -31,7 +37,6 @@ export default function PricingSection() {
     {
       name: t('proPlan.name'),
       icon: Rocket,
-      price: { monthly: t('proPlan.price.monthly'), yearly: t('proPlan.price.yearly') },
       currency: t('proPlan.currency'),
       period: t('proPlan.period'),
       desc: t('proPlan.desc'),
@@ -47,7 +52,6 @@ export default function PricingSection() {
     {
       name: t('enterprisePlan.name'),
       icon: Crown,
-      price: { monthly: t('enterprisePlan.price.monthly'), yearly: t('enterprisePlan.price.yearly') },
       currency: t('enterprisePlan.currency'),
       period: t('enterprisePlan.period'),
       desc: t('enterprisePlan.desc'),
@@ -60,6 +64,32 @@ export default function PricingSection() {
       button: t('enterprisePlan.button')
     },
   ];
+
+  const plans = staticPlans.map((sp, index) => {
+    const dbPlan = dbPlans[index];
+    if (dbPlan) {
+      const price = locale === 'ar' ? dbPlan.priceEgp : dbPlan.priceUsd;
+      const currencyStr = locale === 'ar' ? 'ج.م' : '$';
+      const monthly = price === 0 ? t('freePlan.price.monthly') : price.toString();
+      const yearlyVal = price === 0 ? t('freePlan.price.yearly') : (price * 10).toString();
+      
+      return {
+        ...sp,
+        name: locale === 'ar' ? dbPlan.nameAr : dbPlan.name,
+        desc: locale === 'ar' ? dbPlan.descriptionAr : dbPlan.description,
+        currency: price === 0 ? sp.currency : currencyStr,
+        price: { monthly, yearly: yearlyVal }
+      };
+    }
+    // Fallback to static if no dbPlan matches
+    return {
+      ...sp,
+      price: { 
+        monthly: index === 0 ? t('freePlan.price.monthly') : index === 1 ? t('proPlan.price.monthly') : t('enterprisePlan.price.monthly'),
+        yearly: index === 0 ? t('freePlan.price.yearly') : index === 1 ? t('proPlan.price.yearly') : t('enterprisePlan.price.yearly')
+      }
+    };
+  });
 
   return (
     <section id="pricing-home" className="relative py-24 bg-[#0a0015]" dir={locale === 'ar' ? 'rtl' : 'ltr'}>

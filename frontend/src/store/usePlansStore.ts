@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import axios from 'axios';
+import api from '../utils/api';
 
 export interface Plan {
   id: number;
@@ -38,10 +38,7 @@ export const usePlansStore = create<PlansState>((set) => ({
   fetchPlans: async () => {
     set({ isLoading: true, error: null });
     try {
-      // Assuming Next.js proxies or backend is at API_URL
-      // The backend is typically exposed on port 8080 locally or via proxy
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-      const response = await axios.get(`${apiUrl}/api/platform/plans`);
+      const response = await api.get('/api/platform/plans');
       set({ plans: response.data, isLoading: false });
     } catch (error: any) {
       console.error('Error fetching plans:', error);
