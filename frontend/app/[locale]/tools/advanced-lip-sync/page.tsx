@@ -9,13 +9,14 @@ import {
   Download, Loader2, Wand2, 
   Video, UploadCloud, Image as ImageIcon, 
   Zap, Settings, Wallet,
-  Monitor, Smartphone
+  Monitor, Smartphone, Scissors
 } from "lucide-react";
 import { useAppStore } from "../../../../src/store/useAppStore";
 import { useToolsStore } from '../../../../src/store/useToolsStore';
 import { useRouter, Link } from "../../../../src/i18n/routing";
 import api from "../../../../src/utils/api";
 import ToolInstructions from "../../../../components/ToolInstructions";
+import MediaTrimmer from "../../../../components/MediaTrimmer";
 
 function AdvancedLipSyncPage() {
   const t = useTranslations("ImageToVideo");
@@ -43,6 +44,9 @@ function AdvancedLipSyncPage() {
 
   const [videoDuration, setVideoDuration] = useState<number | null>(null);
   const [audioDuration, setAudioDuration] = useState<number | null>(null);
+
+  const [showVideoTrimmer, setShowVideoTrimmer] = useState(false);
+  const [showAudioTrimmer, setShowAudioTrimmer] = useState(false);
 
   const getMediaDuration = (file: File, type: 'video' | 'audio'): Promise<number> => {
     return new Promise((resolve) => {
@@ -291,6 +295,35 @@ function AdvancedLipSyncPage() {
                 )}
               </div>
 
+              {/* Video Trim Button */}
+              {videoFile && !showVideoTrimmer && (
+                <button
+                  onClick={() => setShowVideoTrimmer(true)}
+                  className="mt-2 flex items-center gap-2 px-3 py-1.5 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 border border-fuchsia-500/30 text-fuchsia-300 text-xs rounded-lg transition-all self-start"
+                >
+                  <Scissors className="w-3 h-3" />
+                  {isRtl ? "تقطيع الفيديو" : "Trim Video"}
+                </button>
+              )}
+              {showVideoTrimmer && videoFile && (
+                <div className="mt-2">
+                  <MediaTrimmer
+                    file={videoFile}
+                    type="video"
+                    isRtl={isRtl}
+                    accentColor="fuchsia"
+                    onTrimmed={async (f) => {
+                      setVideoFile(f);
+                      setInputVideoUrl(URL.createObjectURL(f));
+                      const dur = await getMediaDuration(f, 'video');
+                      setVideoDuration(dur);
+                      setShowVideoTrimmer(false);
+                    }}
+                    onCancel={() => setShowVideoTrimmer(false)}
+                  />
+                </div>
+              )}
+
               {/* Audio Input */}
               <div className="mt-4">
                 <div className="relative min-h-[150px] border-2 border-dashed border-white/10 hover:border-amber-500/50 rounded-xl bg-[#0a0015]/60 flex flex-col items-center justify-center gap-4 transition-all overflow-hidden group/upload cursor-pointer">
@@ -317,6 +350,7 @@ function AdvancedLipSyncPage() {
                       const file = e.target.files?.[0];
                       if (file) {
                         setAudioFile(file);
+                        setShowAudioTrimmer(false);
                         const dur = await getMediaDuration(file, 'audio');
                         setAudioDuration(dur);
                       }
@@ -330,6 +364,33 @@ function AdvancedLipSyncPage() {
                     </motion.div>
                   )}
                 </div>
+                {/* Audio Trim Button */}
+                {audioFile && !showAudioTrimmer && (
+                  <button
+                    onClick={() => setShowAudioTrimmer(true)}
+                    className="mt-2 flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs rounded-lg transition-all"
+                  >
+                    <Scissors className="w-3 h-3" />
+                    {isRtl ? "تقطيع الصوت" : "Trim Audio"}
+                  </button>
+                )}
+                {showAudioTrimmer && audioFile && (
+                  <div className="mt-2">
+                    <MediaTrimmer
+                      file={audioFile}
+                      type="audio"
+                      isRtl={isRtl}
+                      accentColor="amber"
+                      onTrimmed={async (f) => {
+                        setAudioFile(f);
+                        setShowAudioTrimmer(false);
+                        const dur = await getMediaDuration(f, 'audio');
+                        setAudioDuration(dur);
+                      }}
+                      onCancel={() => setShowAudioTrimmer(false)}
+                    />
+                  </div>
+                )}
               </div>
 
               {error && (

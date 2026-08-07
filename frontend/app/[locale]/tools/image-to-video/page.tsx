@@ -9,13 +9,14 @@ import {
   Play, Download, Loader2, Wand2, 
   Video, UploadCloud, Image as ImageIcon, 
   Zap, Settings, ChevronDown, Wallet, ArrowLeft, ArrowRight,
-  Monitor, Smartphone
+  Monitor, Smartphone, Scissors
 } from "lucide-react";
 import { useAppStore } from "../../../../src/store/useAppStore";
 import { useToolsStore } from '../../../../src/store/useToolsStore';
 import { useRouter, Link } from "../../../../src/i18n/routing";
 import api from "../../../../src/utils/api";
 import ToolInstructions from "../../../../components/ToolInstructions";
+import MediaTrimmer from "../../../../components/MediaTrimmer";
 
 function ImageToVideoPage() {
   const t = useTranslations("ImageToVideo");
@@ -47,6 +48,7 @@ function ImageToVideoPage() {
   const [chargedWallet, setChargedWallet] = useState<string | null>(null);
 
   const [renderingSpeed, setRenderingSpeed] = useState<"std" | "pro">("std");
+  const [showAudioTrimmer, setShowAudioTrimmer] = useState(false);
   
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -308,11 +310,34 @@ function ImageToVideoPage() {
                     onChange={(e) => {
                       if (e.target.files && e.target.files[0]) {
                         setAudioFile(e.target.files[0]);
+                        setShowAudioTrimmer(false);
                       }
                     }}
                     className="w-full bg-[#0a0015]/60 border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-1 focus:ring-fuchsia-500/50 transition-all text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-fuchsia-500/10 file:text-fuchsia-400 hover:file:bg-fuchsia-500/20"
                   />
                 </div>
+                {audioFile && !showAudioTrimmer && (
+                  <button
+                    onClick={() => setShowAudioTrimmer(true)}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs rounded-lg transition-all self-start"
+                  >
+                    <Scissors className="w-3 h-3" />
+                    {isRtl ? 'تقطيع الصوت' : 'Trim Audio'}
+                  </button>
+                )}
+                {showAudioTrimmer && audioFile && (
+                  <MediaTrimmer
+                    file={audioFile}
+                    type="audio"
+                    isRtl={isRtl}
+                    accentColor="amber"
+                    onTrimmed={(f) => {
+                      setAudioFile(f);
+                      setShowAudioTrimmer(false);
+                    }}
+                    onCancel={() => setShowAudioTrimmer(false)}
+                  />
+                )}
               </div>
 
               {/* Prompt Input */}

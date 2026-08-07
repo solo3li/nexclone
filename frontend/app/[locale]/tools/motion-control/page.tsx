@@ -7,13 +7,14 @@ import { useTranslations, useLocale } from "next-intl";
 import { 
   Download, Loader2, Wand2, 
   Video, UploadCloud, Image as ImageIcon, 
-  Zap, Settings, ChevronDown, Wallet, ArrowLeft, ArrowRight
+  Zap, Settings, ChevronDown, Wallet, ArrowLeft, ArrowRight, Scissors
 } from "lucide-react";
 import { useAppStore } from "../../../../src/store/useAppStore";
 import { useToolsStore } from "../../../../src/store/useToolsStore";
 import { useRouter, Link } from "../../../../src/i18n/routing";
 import api from "../../../../src/utils/api";
 import ToolInstructions from "../../../../components/ToolInstructions";
+import MediaTrimmer from "../../../../components/MediaTrimmer";
 
 function MotionControlPage() {
   const t = useTranslations("MotionControl");
@@ -36,6 +37,7 @@ function MotionControlPage() {
   const [renderingSpeed, setRenderingSpeed] = useState<"std" | "pro">("std");
   const [characterOrientation, setCharacterOrientation] = useState<"image" | "video">("video");
   const [keepOriginalSound, setKeepOriginalSound] = useState<"yes" | "no">("yes");
+  const [showVideoTrimmer, setShowVideoTrimmer] = useState(false);
   
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
@@ -272,7 +274,7 @@ function MotionControlPage() {
                 />
               </div>
 
-              {/* Video Reference Input */}
+                {/* Video Reference Input */}
               <div className="mt-6 flex flex-col gap-2" dir={isRtl ? 'rtl' : 'ltr'}>
                 <label className="text-white/80 font-semibold text-sm px-1 flex items-center gap-2">
                   <Video className="w-4 h-4 text-cyan-400" />
@@ -286,11 +288,35 @@ function MotionControlPage() {
                       if (e.target.files && e.target.files[0]) {
                         setVideoFile(e.target.files[0]);
                         setVideoUrlInput(URL.createObjectURL(e.target.files[0]));
+                        setShowVideoTrimmer(false);
                       }
                     }}
                     className="w-full bg-[#0a0015]/60 border border-white/5 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-1 focus:ring-cyan-500/50 transition-all text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-cyan-500/10 file:text-cyan-400 hover:file:bg-cyan-500/20"
                   />
                 </div>
+                {videoFile && !showVideoTrimmer && (
+                  <button
+                    onClick={() => setShowVideoTrimmer(true)}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 text-xs rounded-lg transition-all self-start"
+                  >
+                    <Scissors className="w-3 h-3" />
+                    {isRtl ? 'تقطيع الفيديو' : 'Trim Video'}
+                  </button>
+                )}
+                {showVideoTrimmer && videoFile && (
+                  <MediaTrimmer
+                    file={videoFile}
+                    type="video"
+                    isRtl={isRtl}
+                    accentColor="violet"
+                    onTrimmed={(f) => {
+                      setVideoFile(f);
+                      setVideoUrlInput(URL.createObjectURL(f));
+                      setShowVideoTrimmer(false);
+                    }}
+                    onCancel={() => setShowVideoTrimmer(false)}
+                  />
+                )}
                 {videoUrlInput && !videoFile && (
                   <p className="text-white/50 text-xs px-2 mt-1">Video ready</p>
                 )}

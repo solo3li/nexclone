@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
 import {
   UploadCloud, Mic, Square, Play, Pause, Copy, Download,
-  Loader2, FileAudio, CheckCircle2, X, Volume2, Zap, AudioWaveform
+  Loader2, FileAudio, CheckCircle2, X, Volume2, Zap, AudioWaveform, Scissors
 } from "lucide-react";
 import { uploadDirectToMinio } from "../../../../src/utils/upload";
 import api from "../../../../src/utils/api";
@@ -16,6 +16,7 @@ import { useToolsStore } from '../../../../src/store/useToolsStore';
 import { useRouter, Link } from "../../../../src/i18n/routing";
 import { ArrowLeft, ArrowRight, Wallet } from "lucide-react";
 import ToolInstructions from "../../../../components/ToolInstructions";
+import MediaTrimmer from "../../../../components/MediaTrimmer";
 
 const LANGUAGES = [
   { code: 'auto', name: 'لغة الصوت الأصلية (Auto-Detect)' },
@@ -126,6 +127,8 @@ function VoiceToTextPage() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const [showTrimmer, setShowTrimmer] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
@@ -615,6 +618,37 @@ function VoiceToTextPage() {
                         {/* Volume icon */}
                         <Volume2 className="w-4 h-4 text-white/30 shrink-0" />
                       </div>
+                    </div>
+                  )}
+
+                  {/* Trim Button */}
+                  {file && !isProcessing && !showTrimmer && (
+                    <div className="px-4 pb-3" dir={isRtl ? 'rtl' : 'ltr'}>
+                      <button
+                        onClick={() => setShowTrimmer(true)}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/30 text-violet-300 text-xs rounded-lg transition-all"
+                      >
+                        <Scissors className="w-3 h-3" />
+                        {isRtl ? 'تقطيع الصوت' : 'Trim Audio'}
+                      </button>
+                    </div>
+                  )}
+                  {showTrimmer && file && (
+                    <div className="px-4 pb-3">
+                      <MediaTrimmer
+                        file={file instanceof File ? file : new File([file], 'recording.webm', { type: 'audio/webm' })}
+                        type="audio"
+                        isRtl={isRtl}
+                        accentColor="violet"
+                        onTrimmed={(f) => {
+                          setFile(f);
+                          const url = URL.createObjectURL(f);
+                          setAudioPreviewUrl(url);
+                          setShowTrimmer(false);
+                          setUploadedFileId(null);
+                        }}
+                        onCancel={() => setShowTrimmer(false)}
+                      />
                     </div>
                   )}
 
