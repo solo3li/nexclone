@@ -33,8 +33,8 @@ export default function ToolsPage() {
     {
       href: "/tools/image-to-video",
       image: "/images/tool-img2avatar.png",
-      labelEn: "Image to Video",
-      labelAr: "تحويل الصورة لفيديو",
+      labelEn: "Avatar to Video",
+      labelAr: "افتار الى فيديو",
       descEn: "Animate your static images into stunning videos",
       descAr: "حوّل صورك الثابتة إلى فيديوهات متحركة ومذهلة",
       border: "hover:border-emerald-500/50",

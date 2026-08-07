@@ -488,7 +488,7 @@ function ImageToVideoPage() {
       
       <ToolInstructions 
         toolId="image_to_video"
-        title={isRtl ? "كيفية استخدام تحويل الصورة لفيديو" : "How to use Image to Video"}
+        title={isRtl ? "كيفية استخدام افتار الى فيديو" : "How to use Avatar to Video"}
         instructions={isRtl ? [
           "قم برفع صورة واضحة ترغب في تحويلها إلى فيديو.",
           "يمكنك اختيارياً إضافة ملف صوتي ليقوم الذكاء الاصطناعي بمزامنة الشفاه مع الصوت.",
