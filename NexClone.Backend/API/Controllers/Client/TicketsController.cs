@@ -162,7 +162,7 @@ namespace NexClone.Backend.API.Controllers.Client
                 TicketId = id,
                 SenderId = userId,
                 Content = content ?? "",
-                AttachmentUrl = attachmentUrl,
+                AttachmentUrl = attachmentUrl ?? string.Empty,
                 CreatedAt = DateTime.UtcNow
             };
 
