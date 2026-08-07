@@ -43,9 +43,14 @@ export default function Navbar() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      useAuthStore.getState().fetchMe().then(userData => {
-        setUser(userData);
-      }).catch(() => {});
+      // Only attempt to fetch session if we actually have a token saved
+      // This prevents unnecessary 401 Unauthorized errors in the console on initial page load
+      const token = typeof window !== 'undefined' ? localStorage.getItem('jwt_token') : null;
+      if (token) {
+        useAuthStore.getState().fetchMe().then((data) => {
+          setUser(data);
+        }).catch(() => {});
+      }
     }
     
     // Fetch tool configs for badges
