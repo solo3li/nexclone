@@ -17,6 +17,7 @@ import { useRouter, Link } from "../../../../src/i18n/routing";
 import api from "../../../../src/utils/api";
 import ToolInstructions from "../../../../components/ToolInstructions";
 import MediaTrimmer from "../../../../components/MediaTrimmer";
+import CostEstimateCard from "../../../../components/CostEstimateCard";
 
 function ImageToVideoPage() {
   const t = useTranslations("ImageToVideo");
@@ -49,9 +50,11 @@ function ImageToVideoPage() {
 
   const [renderingSpeed, setRenderingSpeed] = useState<"std" | "pro">("std");
   const [showAudioTrimmer, setShowAudioTrimmer] = useState(false);
+  const [isEstimating, setIsEstimating] = useState(false);
   
   useEffect(() => {
     if (isAuthenticated && user) {
+      setIsEstimating(true);
       const subId = sessionStorage.getItem('preferredSubscriptionId');
       const qs = subId ? `?subscriptionId=${subId}&renderingSpeed=${renderingSpeed}` : `?renderingSpeed=${renderingSpeed}`;
       api.get(`/api/video/estimate-avatar${qs}`).then(res => {
@@ -61,7 +64,7 @@ function ImageToVideoPage() {
         }
       }).catch(err => {
         console.warn("Failed to get estimated cost:", err.response?.data?.error || err.message);
-      });
+      }).finally(() => setIsEstimating(false));
     } else {
       setEstimatedCost(
         renderingSpeed === "pro" 
@@ -377,6 +380,19 @@ function ImageToVideoPage() {
                   <Link href="/history" className="mt-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-medium transition-colors">
                      {isRtl ? "الذهاب لسجل العمليات" : "Go to History"}
                   </Link>
+                </div>
+              )}
+
+              {/* Cost Estimate Card — shown after image uploaded */}
+              {imageFile && !isProcessing && (
+                <div className="mt-4" dir={isRtl ? 'rtl' : 'ltr'}>
+                  <CostEstimateCard
+                    estimatedCost={estimatedCost}
+                    chargedWallet={chargedWallet}
+                    isLoading={isEstimating}
+                    isRtl={isRtl}
+                    accentColor="fuchsia"
+                  />
                 </div>
               )}
 

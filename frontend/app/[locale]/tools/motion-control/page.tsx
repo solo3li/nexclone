@@ -15,6 +15,7 @@ import { useRouter, Link } from "../../../../src/i18n/routing";
 import api from "../../../../src/utils/api";
 import ToolInstructions from "../../../../components/ToolInstructions";
 import MediaTrimmer from "../../../../components/MediaTrimmer";
+import CostEstimateCard from "../../../../components/CostEstimateCard";
 
 function MotionControlPage() {
   const t = useTranslations("MotionControl");
@@ -50,10 +51,12 @@ function MotionControlPage() {
   
   const [estimatedCost, setEstimatedCost] = useState<number>(user?.activePlan?.avatarVideoCostPerGeneration || 1);
   const [chargedWallet, setChargedWallet] = useState<string | null>(null);
+  const [isEstimating, setIsEstimating] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
     if (isAuthenticated && user) {
+      setIsEstimating(true);
       const subId = sessionStorage.getItem('preferredSubscriptionId');
       const params = new URLSearchParams();
       params.append('renderingSpeed', renderingSpeed);
@@ -70,7 +73,8 @@ function MotionControlPage() {
         .catch((err: any) => {
           console.error("Failed to estimate cost", err);
           if (isMounted) setEstimatedCost(0);
-        });
+        })
+        .finally(() => { if (isMounted) setIsEstimating(false); });
     }
     return () => { isMounted = false; };
   }, [isAuthenticated, user, renderingSpeed]);
@@ -347,6 +351,19 @@ function MotionControlPage() {
                     <p className="text-white/60 text-sm">{isRtl ? "قد تستغرق هذه العملية وقتاً. يمكنك المتابعة لاحقاً في سجل العمليات." : "This process takes some time. You can check History later."}</p>
                     <div className="mt-2 text-2xl font-mono text-cyan-300 font-bold">{formatTime(elapsedSeconds)}</div>
                   </div>
+                </div>
+              )}
+
+              {/* Cost Estimate Card — shown after image + video uploaded */}
+              {(imageFile || imageUrl) && !isProcessing && (
+                <div className="mt-4" dir={isRtl ? 'rtl' : 'ltr'}>
+                  <CostEstimateCard
+                    estimatedCost={estimatedCost}
+                    chargedWallet={chargedWallet}
+                    isLoading={isEstimating}
+                    isRtl={isRtl}
+                    accentColor="cyan"
+                  />
                 </div>
               )}
 

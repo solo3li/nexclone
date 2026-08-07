@@ -53,15 +53,28 @@ namespace NexClone.Backend.API.Controllers.AI
         }
 
         [HttpGet("estimate-lipsync")]
-        public async Task<IActionResult> EstimateLipSync([FromQuery] int? subscriptionId = null)
+        public async Task<IActionResult> EstimateLipSync([FromQuery] int? subscriptionId = null, [FromQuery] double? durationSeconds = null)
         {
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
-            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "kling_advanced_lip_sync", 1, null, "Standard", subscriptionId);
+            // If duration provided, compute blocks (rounded up to 5-second increments)
+            decimal usageUnits = 1;
+            if (durationSeconds.HasValue && durationSeconds.Value > 0)
+            {
+                int blocks = (int)Math.Ceiling(durationSeconds.Value / 5.0);
+                usageUnits = blocks;
+            }
+
+            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "kling_advanced_lip_sync", usageUnits, usageUnits, "Standard", subscriptionId);
             if (!policyResult.IsAllowed) return BadRequest(new { error = policyResult.ErrorMessage });
 
-            return Ok(new { estimatedCost = policyResult.TotalCost, chargedWalletName = policyResult.ChargedWalletName });
+            return Ok(new { 
+                estimatedCost = policyResult.TotalCost, 
+                chargedWalletName = policyResult.ChargedWalletName,
+                durationSeconds = durationSeconds,
+                blocks = durationSeconds.HasValue ? (int)Math.Ceiling(durationSeconds.Value / 5.0) : (int?)null
+            });
         }
 
         [HttpPost("start-avatar")]

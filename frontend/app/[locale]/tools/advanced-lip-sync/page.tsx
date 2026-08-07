@@ -17,6 +17,7 @@ import { useRouter, Link } from "../../../../src/i18n/routing";
 import api from "../../../../src/utils/api";
 import ToolInstructions from "../../../../components/ToolInstructions";
 import MediaTrimmer from "../../../../components/MediaTrimmer";
+import CostEstimateCard from "../../../../components/CostEstimateCard";
 
 function AdvancedLipSyncPage() {
   const t = useTranslations("ImageToVideo");
@@ -41,6 +42,8 @@ function AdvancedLipSyncPage() {
   
   const [estimatedCost, setEstimatedCost] = useState<number>(user?.activePlan?.lipSyncCostPerGeneration || 1);
   const [chargedWallet, setChargedWallet] = useState<string | null>(null);
+  const [isEstimating, setIsEstimating] = useState(false);
+  const [estimateError, setEstimateError] = useState<string | null>(null);
 
   const [videoDuration, setVideoDuration] = useState<number | null>(null);
   const [audioDuration, setAudioDuration] = useState<number | null>(null);
@@ -60,23 +63,33 @@ function AdvancedLipSyncPage() {
     });
   };
 
+  // Dynamic estimate: re-fetch whenever duration changes
   useEffect(() => {
-    if (isAuthenticated && user) {
-      const subId = sessionStorage.getItem('preferredSubscriptionId');
-      const qs = subId ? `?subscriptionId=${subId}` : '';
-      api.get(`/api/video/estimate-lipsync${qs}`).then(res => {
+    if (!isAuthenticated || !user) {
+      setEstimatedCost(user?.activePlan?.lipSyncCostPerGeneration || 1);
+      setChargedWallet(null);
+      return;
+    }
+    const effectiveDuration = videoDuration ?? audioDuration;
+    if (effectiveDuration == null) return;
+    setIsEstimating(true);
+    setEstimateError(null);
+    const subId = sessionStorage.getItem('preferredSubscriptionId');
+    const params = new URLSearchParams();
+    if (subId) params.append('subscriptionId', subId);
+    params.append('durationSeconds', effectiveDuration.toFixed(2));
+    api.get(`/api/video/estimate-lipsync?${params.toString()}`)
+      .then(res => {
         if (res.data) {
           setEstimatedCost(res.data.estimatedCost);
           setChargedWallet(res.data.chargedWalletName);
         }
-      }).catch(err => {
-        console.warn("Failed to get estimated cost:", err.response?.data?.error || err.message);
-      });
-    } else {
-      setEstimatedCost(user?.activePlan?.lipSyncCostPerGeneration || 1);
-      setChargedWallet(null);
-    }
-  }, [isAuthenticated, user]);
+      })
+      .catch(err => {
+        setEstimateError(err.response?.data?.error || 'Failed to estimate cost');
+      })
+      .finally(() => setIsEstimating(false));
+  }, [isAuthenticated, user, videoDuration, audioDuration]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -419,6 +432,25 @@ function AdvancedLipSyncPage() {
                   <Link href="/history" className="mt-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-medium transition-colors">
                      {isRtl ? "الذهاب لسجل العمليات" : "Go to History"}
                   </Link>
+                </div>
+              )}
+
+              {/* Cost Estimate Card — shown after at least one file uploaded */}
+              {(videoFile || audioFile) && !isProcessing && (
+                <div className="mt-4" dir={isRtl ? 'rtl' : 'ltr'}>
+                  <CostEstimateCard
+                    estimatedCost={estimatedCost}
+                    chargedWallet={chargedWallet}
+                    isLoading={isEstimating}
+                    error={estimateError}
+                    isRtl={isRtl}
+                    accentColor="fuchsia"
+                    extraInfo={
+                      (videoDuration || audioDuration)
+                        ? `${(videoDuration ?? audioDuration)!.toFixed(1)}s → ${Math.ceil((videoDuration ?? audioDuration)! / 5)} ${isRtl ? 'وحدة × 5 ث' : 'blocks × 5s'}`
+                        : null
+                    }
+                  />
                 </div>
               )}
 
