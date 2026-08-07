@@ -30,12 +30,17 @@ api.interceptors.response.use(
     if (
       error.response?.status === 401 &&
       !error.config.url?.includes('/api/auth/login') &&
-      !error.config.url?.includes('/api/auth/register')
+      !error.config.url?.includes('/api/auth/register') &&
+      !error.config.url?.includes('/api/auth/me')
     ) {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('jwt_token');
         const locale = document.documentElement.lang || 'ar';
-        if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {
+        const path = window.location.pathname;
+        if (!path.includes('/login') && 
+            !path.includes('/register') && 
+            !path.includes('/forgot-password') && 
+            !path.includes('/reset-password')) {
           window.location.href = `/${locale}/login`;
         }
       }
