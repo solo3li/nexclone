@@ -20,6 +20,10 @@ namespace NexClone.Backend.Core.Entities
 
         public ICollection<ToolRoutingRule> RoutingRules { get; set; } = new List<ToolRoutingRule>();
 
+        public int? WalletTypeId { get; set; }
+        [ForeignKey("WalletTypeId")]
+        public virtual WalletType? WalletType { get; set; }
+
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         // JSON field for any extra settings the tool might need

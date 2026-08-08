@@ -69,6 +69,7 @@ namespace NexClone.Backend.API.Controllers.Client
                 .ToListAsync();
 
             ViewBag.Plans = new SelectList(await _context.Plans.Where(p => p.PriceUsd > 0 && !p.IsDefaultRegistrationPlan && !p.IsDeleted).ToListAsync(), "Id", "Name");
+            ViewBag.AllWalletTypes = await _context.WalletTypes.ToListAsync();
             ViewBag.CurrentSearch = searchString;
             ViewBag.CurrentPlanId = planId;
             ViewBag.PageNumber = pageNumber;
@@ -97,6 +98,7 @@ namespace NexClone.Backend.API.Controllers.Client
 
             ViewData["Title"] = $"User Details - {user.Email}";
             ViewBag.Plans = new SelectList(await _context.Plans.Where(p => p.PriceUsd > 0 && !p.IsDefaultRegistrationPlan && !p.IsDeleted).ToListAsync(), "Id", "Name");
+            ViewBag.AllWalletTypes = await _context.WalletTypes.ToListAsync();
             ViewBag.Devices = devices;
             return View(user);
         }

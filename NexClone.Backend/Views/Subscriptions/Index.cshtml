@@ -209,6 +209,9 @@
                     </td>
                     <td>@item.CreatedAt.ToString("MMM dd, yyyy")</td>
                     <td>
+                        <button type="button" class="bx--btn bx--btn--tertiary bx--btn--sm" style="padding: 5px 10px; font-size: 12px; height: 30px; min-height: unset;" onclick="openAddBalanceModal('@item.UserId', '@(item.User?.Email)')">
+                            @Localizer["Add Balance"]
+                        </button>
                         <a href="@Url.Action("Details", "Subscriptions", new { id = item.Id })" class="bx--btn bx--btn--secondary bx--btn--sm" style="padding: 5px 10px; font-size: 12px; height: 30px; min-height: unset; text-decoration: none; display: inline-block;">
                             @Localizer["Details"]
                         </a>
@@ -239,6 +242,50 @@
     </div>
 </div>
 
+<div data-modal id="addBalanceModal" class="bx--modal" role="dialog" aria-modal="true" tabindex="-1">
+    <div class="bx--modal-container">
+        <div class="bx--modal-header">
+            <p class="bx--modal-header__label bx--type-delta" id="addBalanceModalUserEmail"></p>
+            <p class="bx--modal-header__heading bx--type-beta">@Localizer["Add Balance"]</p>
+            <button class="bx--modal-close" type="button" data-modal-close aria-label="Close modal" onclick="closeAddBalanceModal()">
+                <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="16" height="16" viewBox="0 0 32 32" aria-hidden="true" class="bx--modal-close__icon"><path d="M24 9.4L22.6 8 16 14.6 9.4 8 8 9.4 14.6 16 8 22.6 9.4 24 16 17.4 22.6 24 24 22.6 17.4 16 24 9.4z"></path></svg>
+            </button>
+        </div>
+        <form action="/Users/AddWalletCredits" method="post" style="margin: 0;">
+            <div class="bx--modal-content">
+                <input type="hidden" id="addBalanceUserId" name="userId" value="" />
+                
+                <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+                    <label for="walletTypeId" class="bx--label">@Localizer["Select Wallet"]</label>
+                    <div class="bx--select">
+                        <select id="walletTypeId" name="walletTypeId" class="bx--select-input" required>
+                            @if (ViewBag.AllWalletTypes != null)
+                            {
+                                foreach (var wt in (IEnumerable<NexClone.Backend.Core.Entities.WalletType>)ViewBag.AllWalletTypes)
+                                {
+                                    <option value="@wt.Id">@wt.Name</option>
+                                }
+                            }
+                        </select>
+                        <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" class="bx--select__arrow"><path d="M8 11L3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z"></path></svg>
+                    </div>
+                </div>
+                
+                <div class="bx--form-item">
+                    <label for="amount" class="bx--label">@Localizer["Amount (Credits)"]</label>
+                    <div class="bx--text-input__field-wrapper">
+                        <input id="amount" type="number" class="bx--text-input" name="amount" required step="0.01" placeholder="e.g. 100 or -50">
+                    </div>
+                </div>
+            </div>
+            <div class="bx--modal-footer">
+                <button class="bx--btn bx--btn--secondary" type="button" data-modal-close onclick="closeAddBalanceModal()">@Localizer["Cancel"]</button>
+                <button class="bx--btn bx--btn--primary" type="submit">@Localizer["Apply Balance"]</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
 function showWalletsModal(btn) {
     var wallets = JSON.parse(btn.getAttribute('data-wallets'));
@@ -261,6 +308,16 @@ function showWalletsModal(btn) {
 
 function closeWalletsModal() {
     document.getElementById('walletsModal').classList.remove('is-visible');
+}
+
+function openAddBalanceModal(userId, email) {
+    document.getElementById('addBalanceUserId').value = userId;
+    document.getElementById('addBalanceModalUserEmail').innerText = 'User: ' + email;
+    document.getElementById('addBalanceModal').classList.add('is-visible');
+}
+
+function closeAddBalanceModal() {
+    document.getElementById('addBalanceModal').classList.remove('is-visible');
 }
 
 function toggleAll(source) {

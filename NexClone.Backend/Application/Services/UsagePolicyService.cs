@@ -85,42 +85,24 @@ namespace NexClone.Backend.Application.Services
             if (user == null) 
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "User not found." };
 
-            var activeSubscriptionsQuery = user.Subscriptions
-                .Where(s => s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow);
-
-            if (subscriptionId.HasValue)
+            var toolConfig = await _context.ToolConfigurations.FirstOrDefaultAsync(t => t.ToolName == toolId);
+            if (toolConfig != null && !toolConfig.IsActive)
             {
-                activeSubscriptionsQuery = activeSubscriptionsQuery.Where(s => s.Id == subscriptionId.Value);
+                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "This tool is currently disabled." };
             }
 
-            var activeSubscriptions = activeSubscriptionsQuery
-                .OrderByDescending(s => s.Plan.IsDefaultRegistrationPlan || s.Plan.IsFreeTrial) // Free first
-                .ThenBy(s => s.EndDate) // Then closest to expire
-                .ToList();
+            // For limits, if the user doesn't have an active plan, we will fallback to a default or skip limits entirely.
+            var activeSubscription = user.Subscriptions
+                .Where(s => s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow)
+                .OrderByDescending(s => s.Plan.IsDefaultRegistrationPlan || s.Plan.IsFreeTrial)
+                .ThenBy(s => s.EndDate)
+                .FirstOrDefault();
 
-            if (!activeSubscriptions.Any())
-            {
-                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "No active subscription found." };
-            }
-
-            Plan targetPlan = null;
-            ToolPolicy toolPolicy = null;
+            // We only use the plan for Limits now, not for Wallet selection
+            var toolPolicy = activeSubscription != null ? GetToolPolicy(activeSubscription.Plan, toolId, quality) : new ToolPolicy { Enabled = true };
             
-            foreach (var sub in activeSubscriptions)
-            {
-                var policy = GetToolPolicy(sub.Plan, toolId, quality);
-                if (policy.Enabled)
-                {
-                    targetPlan = sub.Plan;
-                    toolPolicy = policy;
-                    break;
-                }
-            }
-
-            if (targetPlan == null)
-            {
-                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Your current plans do not have access to this tool." };
-            }
+            // If the plan doesn't enable it but they have no plan, we still let them try to use their wallet balance.
+            if (activeSubscription == null) toolPolicy.Enabled = true;
 
             if (toolId == "text-to-voice" && toolPolicy.MaxCharsPerRequest != -1 && usageAmountForLimits > toolPolicy.MaxCharsPerRequest)
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Your current plan allows a maximum of {toolPolicy.MaxCharsPerRequest} characters per request." };
@@ -144,31 +126,18 @@ namespace NexClone.Backend.Application.Services
             decimal totalCost = amountForCost * costPerUnit;
             decimal remainingCost = totalCost;
 
-            var generalWalletType = await _context.WalletTypes.FirstOrDefaultAsync(w => w.Code == "GENERAL");
             var walletsToDeduct = new List<(UserWallet wallet, decimal amount)>();
-
-            foreach (var sub in activeSubscriptions)
+            int walletTypeId = await GetWalletTypeIdForTool(toolId);
+            
+            // Get all wallets of this type for the user, regardless of subscription
+            var userWallets = user.Wallets?.Where(w => w.WalletTypeId == walletTypeId && w.Balance > 0).ToList() ?? new List<UserWallet>();
+            
+            foreach (var userWallet in userWallets)
             {
                 if (remainingCost <= 0) break;
-                
-                var policy = GetToolPolicy(sub.Plan, toolId, quality);
-                if (!policy.Enabled) continue;
-
-                var walletTypeId = await GetWalletTypeIdForTool(toolId, sub.PlanId);
-                var userWallet = user.Wallets?.FirstOrDefault(w => w.WalletTypeId == walletTypeId && w.SubscriptionId == sub.Id);
-                
-                var isVoiceTool = toolId == "text-to-voice" || toolId == "voice-to-text";
-                if ((userWallet == null || userWallet.Balance <= 0) && generalWalletType != null && isVoiceTool)
-                {
-                    userWallet = user.Wallets?.FirstOrDefault(w => w.WalletTypeId == generalWalletType.Id && w.SubscriptionId == sub.Id);
-                }
-
-                if (userWallet != null && userWallet.Balance > 0)
-                {
-                    decimal amountToDeduct = Math.Min(userWallet.Balance, remainingCost);
-                    walletsToDeduct.Add((userWallet, amountToDeduct));
-                    remainingCost -= amountToDeduct;
-                }
+                decimal amountToDeduct = Math.Min(userWallet.Balance, remainingCost);
+                walletsToDeduct.Add((userWallet, amountToDeduct));
+                remainingCost -= amountToDeduct;
             }
 
             if (remainingCost > 0)
@@ -226,23 +195,18 @@ namespace NexClone.Backend.Application.Services
             return new PolicyValidationResult { 
                 IsAllowed = true, 
                 TotalCost = totalCost, 
-                ChargedWalletTypeId = primaryWallet?.WalletTypeId ?? generalWalletType?.Id ?? 0,
-                ChargedWalletName = primaryWallet?.WalletType?.Name ?? "General Wallet",
+                ChargedWalletTypeId = primaryWallet?.WalletTypeId ?? walletTypeId,
+                ChargedWalletName = primaryWallet?.WalletType?.Name ?? "Wallet",
                 ChargedWalletIcon = primaryWallet?.WalletType?.Icon
             };
         }
 
-        private async Task<int> GetWalletTypeIdForTool(string toolName, int planId)
+        private async Task<int> GetWalletTypeIdForTool(string toolName)
         {
             var tool = await _context.ToolConfigurations.FirstOrDefaultAsync(t => t.ToolName == toolName);
-            if (tool != null)
+            if (tool != null && tool.WalletTypeId.HasValue)
             {
-                var packageOverride = await _context.PackageToolWallets
-                    .FirstOrDefaultAsync(p => p.PlanId == planId && p.ToolConfigurationId == tool.Id);
-                if (packageOverride != null)
-                {
-                    return packageOverride.WalletTypeId;
-                }
+                return tool.WalletTypeId.Value;
             }
 
             var generalWallet = await _context.WalletTypes.FirstOrDefaultAsync(w => w.Code == "GENERAL");
@@ -333,39 +297,20 @@ namespace NexClone.Backend.Application.Services
             var activeSubscriptionsQuery = user.Subscriptions
                 .Where(s => s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow);
 
-            if (subscriptionId.HasValue)
+            var toolConfig = await _context.ToolConfigurations.FirstOrDefaultAsync(t => t.ToolName == toolId);
+            if (toolConfig != null && !toolConfig.IsActive)
             {
-                activeSubscriptionsQuery = activeSubscriptionsQuery.Where(s => s.Id == subscriptionId.Value);
+                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "This tool is currently disabled." };
             }
 
-            var activeSubscriptions = activeSubscriptionsQuery
+            var activeSubscription = user.Subscriptions
+                .Where(s => s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow)
                 .OrderByDescending(s => s.Plan.IsDefaultRegistrationPlan || s.Plan.IsFreeTrial)
                 .ThenBy(s => s.EndDate)
-                .ToList();
+                .FirstOrDefault();
 
-            if (!activeSubscriptions.Any())
-            {
-                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "No active subscription found." };
-            }
-
-            Plan targetPlan = null;
-            ToolPolicy toolPolicy = null;
-            
-            foreach (var sub in activeSubscriptions)
-            {
-                var policy = GetToolPolicy(sub.Plan, toolId, quality);
-                if (policy.Enabled)
-                {
-                    targetPlan = sub.Plan;
-                    toolPolicy = policy;
-                    break;
-                }
-            }
-
-            if (targetPlan == null)
-            {
-                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Your current plans do not have access to this tool." };
-            }
+            var toolPolicy = activeSubscription != null ? GetToolPolicy(activeSubscription.Plan, toolId, quality) : new ToolPolicy { Enabled = true };
+            if (activeSubscription == null) toolPolicy.Enabled = true;
 
             if (toolId == "text-to-voice" && toolPolicy.MaxCharsPerRequest != -1 && usageAmountForLimits > toolPolicy.MaxCharsPerRequest)
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Your current plan allows a maximum of {toolPolicy.MaxCharsPerRequest} characters per request." };
@@ -377,38 +322,29 @@ namespace NexClone.Backend.Application.Services
             decimal amountForCost = usageAmountForCost ?? usageAmountForLimits;
             
             if (toolId == "voice-to-text" && usageAmountForCost == null)
+            {
                 amountForCost = usageAmountForLimits / 102400m; 
+            }
 
             if (toolPolicy.BlockSize > 1)
+            {
                 amountForCost = amountForCost / toolPolicy.BlockSize;
+            }
 
             decimal totalCost = amountForCost * costPerUnit;
             decimal remainingCost = totalCost;
 
-            var generalWalletType = await _context.WalletTypes.FirstOrDefaultAsync(w => w.Code == "GENERAL");
             var walletsToDeduct = new List<(UserWallet wallet, decimal amount)>();
-
-            foreach (var sub in activeSubscriptions)
+            int walletTypeId = await GetWalletTypeIdForTool(toolId);
+            
+            var userWallets = user.Wallets?.Where(w => w.WalletTypeId == walletTypeId && w.Balance > 0).ToList() ?? new List<UserWallet>();
+            
+            foreach (var userWallet in userWallets)
             {
                 if (remainingCost <= 0) break;
-                
-                var policy = GetToolPolicy(sub.Plan, toolId, quality);
-                if (!policy.Enabled) continue;
-
-                var walletTypeId = await GetWalletTypeIdForTool(toolId, sub.PlanId);
-                var userWallet = user.Wallets?.FirstOrDefault(w => w.WalletTypeId == walletTypeId && w.SubscriptionId == sub.Id);
-                
-                if ((userWallet == null || userWallet.Balance <= 0) && generalWalletType != null)
-                {
-                    userWallet = user.Wallets?.FirstOrDefault(w => w.WalletTypeId == generalWalletType.Id && w.SubscriptionId == sub.Id);
-                }
-
-                if (userWallet != null && userWallet.Balance > 0)
-                {
-                    decimal amountToDeduct = Math.Min(userWallet.Balance, remainingCost);
-                    walletsToDeduct.Add((userWallet, amountToDeduct));
-                    remainingCost -= amountToDeduct;
-                }
+                decimal amountToDeduct = Math.Min(userWallet.Balance, remainingCost);
+                walletsToDeduct.Add((userWallet, amountToDeduct));
+                remainingCost -= amountToDeduct;
             }
 
             if (remainingCost > 0)
@@ -420,8 +356,8 @@ namespace NexClone.Backend.Application.Services
             return new PolicyValidationResult { 
                 IsAllowed = true, 
                 TotalCost = totalCost, 
-                ChargedWalletTypeId = primaryWallet?.WalletTypeId ?? generalWalletType?.Id ?? 0,
-                ChargedWalletName = primaryWallet?.WalletType?.Name ?? "General Wallet",
+                ChargedWalletTypeId = primaryWallet?.WalletTypeId ?? walletTypeId,
+                ChargedWalletName = primaryWallet?.WalletType?.Name ?? "Wallet",
                 ChargedWalletIcon = primaryWallet?.WalletType?.Icon
             };
         }
@@ -476,14 +412,7 @@ namespace NexClone.Backend.Application.Services
 
             if (user == null) return;
 
-            var activeSub = user.Subscriptions
-                .OrderByDescending(s => s.Plan.IsDefaultRegistrationPlan || s.Plan.IsFreeTrial)
-                .ThenBy(s => s.EndDate)
-                .FirstOrDefault(s => s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow);
-
-            if (activeSub == null) return;
-
-            var walletTypeId = await GetWalletTypeIdForTool(toolId, activeSub.PlanId);
+            var walletTypeId = await GetWalletTypeIdForTool(toolId);
             await RefundAsync(userId, walletTypeId, amount);
         }
     }

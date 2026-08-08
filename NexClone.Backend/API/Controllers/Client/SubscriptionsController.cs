@@ -100,6 +100,7 @@ namespace NexClone.Backend.API.Controllers.Client
             ViewBag.SelectedDatePeriod = datePeriod;
             ViewBag.SelectedStartDate = startDate?.ToString("yyyy-MM-dd");
             ViewBag.SelectedEndDate = endDate?.ToString("yyyy-MM-dd");
+            ViewBag.AllWalletTypes = await _context.WalletTypes.ToListAsync();
 
             return View(subscriptions);
         }
