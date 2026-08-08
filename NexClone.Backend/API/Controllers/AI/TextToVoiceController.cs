@@ -8,7 +8,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
-using MassTransit;
+using Hangfire;
 using NexClone.Backend.Core.Messages;
 
 namespace NexClone.Backend.API.Controllers.AI
@@ -23,14 +23,14 @@ namespace NexClone.Backend.API.Controllers.AI
         private readonly ITtsService _ttsService;
         private readonly ApplicationDbContext _dbContext;
         private readonly UsagePolicyService _usagePolicy;
-        private readonly IPublishEndpoint _publishEndpoint;
+        private readonly IBackgroundJobClient _backgroundJobClient;
 
-        public TextToVoiceController(ITtsService ttsService, ApplicationDbContext dbContext, UsagePolicyService usagePolicy, IPublishEndpoint publishEndpoint)
+        public TextToVoiceController(ITtsService ttsService, ApplicationDbContext dbContext, UsagePolicyService usagePolicy, IBackgroundJobClient backgroundJobClient)
         {
             _ttsService = ttsService;
             _dbContext = dbContext;
             _usagePolicy = usagePolicy;
-            _publishEndpoint = publishEndpoint;
+            _backgroundJobClient = backgroundJobClient;
         }
 
         [HttpPost("generate")]
@@ -78,18 +78,20 @@ namespace NexClone.Backend.API.Controllers.AI
                 _dbContext.GenerationHistories.Add(history);
                 await _dbContext.SaveChangesAsync();
 
-                await _publishEndpoint.Publish(new TextToVoiceMessage
-                {
-                    HistoryId = history.Id,
-                    UserId = userId,
-                    Text = request.Text,
-                    Language = request.Language,
-                    VoiceName = request.VoiceName,
-                    StyleInstruction = request.StyleInstruction,
-                    Quality = request.Quality,
-                    Cost = cost,
-                    ChargedWalletTypeId = policyResult.ChargedWalletTypeId
-                });
+                _backgroundJobClient.Enqueue<NexClone.Backend.Infrastructure.Consumers.TtsConsumer>(
+                    c => c.Consume(new TextToVoiceMessage
+                    {
+                        HistoryId = history.Id,
+                        UserId = userId,
+                        Text = request.Text,
+                        Language = request.Language,
+                        VoiceName = request.VoiceName,
+                        StyleInstruction = request.StyleInstruction,
+                        Quality = request.Quality,
+                        Cost = cost,
+                        ChargedWalletTypeId = policyResult.ChargedWalletTypeId
+                    })
+                );
 
                 return Ok(new { taskId = history.Id, status = "processing" });
             }

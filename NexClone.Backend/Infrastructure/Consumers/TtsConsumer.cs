@@ -1,4 +1,4 @@
-using MassTransit;
+using Hangfire;
 using Microsoft.Extensions.Logging;
 using NexClone.Backend.Core.Entities;
 using NexClone.Backend.Core.Interfaces;
@@ -6,11 +6,16 @@ using NexClone.Backend.Core.Messages;
 using NexClone.Backend.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using System;
+using System.IO;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace NexClone.Backend.Infrastructure.Consumers
 {
-    public class TtsConsumer : BaseAiTaskConsumer, IConsumer<TextToVoiceMessage>
+    [Queue("tts_queue")]
+    public class TtsConsumer : BaseAiTaskConsumer
     {
         public TtsConsumer(
             ApplicationDbContext dbContext,
@@ -27,10 +32,9 @@ namespace NexClone.Backend.Infrastructure.Consumers
         {
         }
 
-        public async Task Consume(ConsumeContext<TextToVoiceMessage> context)
+        public async Task Consume(TextToVoiceMessage message)
         {
-            var message = context.Message;
-            _logger.LogInformation($"[TextToVoice Task {message.HistoryId}] Started consumer.");
+            _logger.LogInformation($"[TTS Task {message.HistoryId}] Started consumer.");
 
             var history = await _dbContext.GenerationHistories.FindAsync(message.HistoryId);
             if (history == null) return;

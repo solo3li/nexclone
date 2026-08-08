@@ -1,4 +1,4 @@
-using MassTransit;
+using Hangfire;
 using Microsoft.Extensions.Logging;
 using NexClone.Backend.Core.Entities;
 using NexClone.Backend.Core.Interfaces;
@@ -14,7 +14,8 @@ using System.Threading.Tasks;
 
 namespace NexClone.Backend.Infrastructure.Consumers
 {
-    public class LipSyncConsumer : BaseAiTaskConsumer, IConsumer<LipSyncMessage>
+    [Queue("lipsync_queue")]
+    public class LipSyncConsumer : BaseAiTaskConsumer
     {
         public LipSyncConsumer(
             ApplicationDbContext dbContext,
@@ -31,9 +32,8 @@ namespace NexClone.Backend.Infrastructure.Consumers
         {
         }
 
-        public async Task Consume(ConsumeContext<LipSyncMessage> context)
+        public async Task Consume(LipSyncMessage message)
         {
-            var message = context.Message;
             _logger.LogInformation($"[LipSync Task {message.HistoryId}] Started consumer.");
             
             var history = await _dbContext.GenerationHistories.FindAsync(message.HistoryId);

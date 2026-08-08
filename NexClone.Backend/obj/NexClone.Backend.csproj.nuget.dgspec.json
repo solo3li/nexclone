@@ -49,13 +49,17 @@
               "target": "Package",
               "version": "[1.68.0, )"
             },
-            "MassTransit": {
+            "Hangfire.AspNetCore": {
               "target": "Package",
-              "version": "[8.3.1, )"
+              "version": "[1.8.24, )"
             },
-            "MassTransit.RabbitMQ": {
+            "Hangfire.Core": {
               "target": "Package",
-              "version": "[8.3.1, )"
+              "version": "[1.8.24, )"
+            },
+            "Hangfire.PostgreSql": {
+              "target": "Package",
+              "version": "[1.21.1, )"
             },
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
               "target": "Package",

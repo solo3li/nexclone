@@ -1,4 +1,4 @@
-using MassTransit;
+using Hangfire;
 using Microsoft.Extensions.Logging;
 using NexClone.Backend.Core.Entities;
 using NexClone.Backend.Core.Interfaces;
@@ -14,7 +14,8 @@ using System.Threading.Tasks;
 
 namespace NexClone.Backend.Infrastructure.Consumers
 {
-    public class AvatarVideoConsumer : BaseAiTaskConsumer, IConsumer<AvatarVideoMessage>
+    [Queue("avatar_video_queue")]
+    public class AvatarVideoConsumer : BaseAiTaskConsumer
     {
         public AvatarVideoConsumer(
             ApplicationDbContext dbContext,
@@ -31,9 +32,8 @@ namespace NexClone.Backend.Infrastructure.Consumers
         {
         }
 
-        public async Task Consume(ConsumeContext<AvatarVideoMessage> context)
+        public async Task Consume(AvatarVideoMessage message)
         {
-            var message = context.Message;
             _logger.LogInformation($"[AvatarVideo Task {message.HistoryId}] Started consumer.");
             
             var history = await _dbContext.GenerationHistories.FindAsync(message.HistoryId);

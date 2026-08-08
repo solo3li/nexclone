@@ -11,7 +11,7 @@ using Scalar.AspNetCore;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.HttpOverrides;
-using MassTransit;
+using Hangfire;
 using NexClone.Backend.Infrastructure.Consumers;
 
 
@@ -215,79 +215,26 @@ builder.Services.AddHostedService<NexClone.Backend.Application.BackgroundJobs.Su
 // Register Dynamic Concurrency Manager
 builder.Services.AddSingleton<NexClone.Backend.Core.Interfaces.IDynamicConcurrencyManager, NexClone.Backend.Application.Services.DynamicConcurrencyManager>();
 
-// Configure MassTransit with RabbitMQ
-builder.Services.AddMassTransit(x =>
-{
-    // Add Consumers here
-    x.AddConsumer<NexClone.Backend.Infrastructure.Consumers.AvatarVideoConsumer>();
-    x.AddConsumer<NexClone.Backend.Infrastructure.Consumers.LipSyncConsumer>();
-    x.AddConsumer<NexClone.Backend.Infrastructure.Consumers.TtsConsumer>();
-    x.AddConsumer<NexClone.Backend.Infrastructure.Consumers.VttConsumer>();
-    x.AddConsumer<NexClone.Backend.Infrastructure.Consumers.EmailConsumer>();
-    x.AddConsumer<NexClone.Backend.Infrastructure.Consumers.MotionControlConsumer>();
+// Configure Hangfire with PostgreSQL
+builder.Services.AddHangfire(configuration => configuration
+    .SetDataCompatibilityLevel(Hangfire.CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UsePostgreSqlStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-    x.UsingRabbitMq((context, cfg) =>
-    {
-        var rabbitMqHost = builder.Configuration["RabbitMQ:Host"] ?? "localhost";
-        var rabbitMqUser = builder.Configuration["RabbitMQ:Username"] ?? "guest";
-        var rabbitMqPass = builder.Configuration["RabbitMQ:Password"] ?? "guest";
-        var rabbitMqPortStr = builder.Configuration["RabbitMQ:Port"];
-        var rabbitMqVHost = builder.Configuration["RabbitMQ:VHost"] ?? "/";
-
-        if (ushort.TryParse(rabbitMqPortStr, out var port))
-        {
-            cfg.Host(rabbitMqHost, port, rabbitMqVHost, h => {
-                h.Username(rabbitMqUser);
-                h.Password(rabbitMqPass);
-            });
-        }
-        else
-        {
-            cfg.Host(rabbitMqHost, rabbitMqVHost, h => {
-                h.Username(rabbitMqUser);
-                h.Password(rabbitMqPass);
-            });
-        }
-
-        var concurrencyManager = context.GetRequiredService<NexClone.Backend.Core.Interfaces.IDynamicConcurrencyManager>();
-
-        cfg.ReceiveEndpoint("avatar_video_queue", e => {
-            e.PrefetchCount = 100;
-            e.UseFilter(new NexClone.Backend.Infrastructure.Consumers.Filters.DynamicConcurrencyFilter<NexClone.Backend.Core.Messages.AvatarVideoMessage>(concurrencyManager, "avatar2video"));
-            e.ConfigureConsumer<NexClone.Backend.Infrastructure.Consumers.AvatarVideoConsumer>(context);
-        });
-
-        cfg.ReceiveEndpoint("lipsync_queue", e => {
-            e.PrefetchCount = 100;
-            e.UseFilter(new NexClone.Backend.Infrastructure.Consumers.Filters.DynamicConcurrencyFilter<NexClone.Backend.Core.Messages.LipSyncMessage>(concurrencyManager, "lipsync"));
-            e.ConfigureConsumer<NexClone.Backend.Infrastructure.Consumers.LipSyncConsumer>(context);
-        });
-
-        cfg.ReceiveEndpoint("tts_queue", e => {
-            e.PrefetchCount = 100;
-            e.UseFilter(new NexClone.Backend.Infrastructure.Consumers.Filters.DynamicConcurrencyFilter<NexClone.Backend.Core.Messages.TextToVoiceMessage>(concurrencyManager, "tts"));
-            e.ConfigureConsumer<NexClone.Backend.Infrastructure.Consumers.TtsConsumer>(context);
-        });
-
-        cfg.ReceiveEndpoint("vtt_queue", e => {
-            e.PrefetchCount = 100;
-            e.UseFilter(new NexClone.Backend.Infrastructure.Consumers.Filters.DynamicConcurrencyFilter<NexClone.Backend.Core.Messages.VoiceToTextMessage>(concurrencyManager, "vtt"));
-            e.ConfigureConsumer<NexClone.Backend.Infrastructure.Consumers.VttConsumer>(context);
-        });
-
-        cfg.ReceiveEndpoint("motion_control_queue", e => {
-            e.PrefetchCount = 100;
-            e.UseFilter(new NexClone.Backend.Infrastructure.Consumers.Filters.DynamicConcurrencyFilter<NexClone.Backend.Core.Messages.MotionControlMessage>(concurrencyManager, "kling_motion_control"));
-            e.ConfigureConsumer<NexClone.Backend.Infrastructure.Consumers.MotionControlConsumer>(context);
-        });
-
-        cfg.ReceiveEndpoint("email_queue", e => {
-            e.PrefetchCount = 100;
-            e.UseFilter(new NexClone.Backend.Infrastructure.Consumers.Filters.DynamicConcurrencyFilter<NexClone.Backend.Core.Messages.SendEmailMessage>(concurrencyManager, "email"));
-            e.ConfigureConsumer<NexClone.Backend.Infrastructure.Consumers.EmailConsumer>(context);
-        });
-    });
+// Add the processing server as IHostedService
+builder.Services.AddHangfireServer(options => {
+    options.WorkerCount = Environment.ProcessorCount * 5;
+    options.Queues = new[] { "default", "avatar_video_queue", "lipsync_queue", "tts_queue", "vtt_queue", "motion_control_queue", "email_queue" };
 });
+
+// Register Consumers as Scoped services so Hangfire can instantiate them
+builder.Services.AddScoped<NexClone.Backend.Infrastructure.Consumers.AvatarVideoConsumer>();
+builder.Services.AddScoped<NexClone.Backend.Infrastructure.Consumers.LipSyncConsumer>();
+builder.Services.AddScoped<NexClone.Backend.Infrastructure.Consumers.TtsConsumer>();
+builder.Services.AddScoped<NexClone.Backend.Infrastructure.Consumers.VttConsumer>();
+builder.Services.AddScoped<NexClone.Backend.Infrastructure.Consumers.EmailConsumer>();
+builder.Services.AddScoped<NexClone.Backend.Infrastructure.Consumers.MotionControlConsumer>();
 
 
 // Add Rate Limiting

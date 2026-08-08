@@ -6,7 +6,7 @@ using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using MassTransit;
+using Hangfire;
 using NexClone.Backend.Core.Messages;
 
 namespace NexClone.Backend.API.Controllers.AI
@@ -22,15 +22,15 @@ namespace NexClone.Backend.API.Controllers.AI
         private readonly ApplicationDbContext _dbContext;
         private readonly UsagePolicyService _usagePolicy;
         private readonly IMediaService _mediaService;
-        private readonly IPublishEndpoint _publishEndpoint;
+        private readonly IBackgroundJobClient _backgroundJobClient;
 
-        public VoiceToTextController(ISttService sttService, ApplicationDbContext dbContext, UsagePolicyService usagePolicy, IMediaService mediaService, IPublishEndpoint publishEndpoint)
+        public VoiceToTextController(ISttService sttService, ApplicationDbContext dbContext, UsagePolicyService usagePolicy, IMediaService mediaService, IBackgroundJobClient backgroundJobClient)
         {
             _sttService = sttService;
             _dbContext = dbContext;
             _usagePolicy = usagePolicy;
             _mediaService = mediaService;
-            _publishEndpoint = publishEndpoint;
+            _backgroundJobClient = backgroundJobClient;
         }
 
         public class TranscribeRequest
@@ -111,16 +111,18 @@ namespace NexClone.Backend.API.Controllers.AI
                 _dbContext.GenerationHistories.Add(history);
                 await _dbContext.SaveChangesAsync();
 
-                await _publishEndpoint.Publish(new VoiceToTextMessage
-                {
-                    HistoryId = history.Id,
-                    UserId = userId,
-                    FileId = request.FileId,
-                    Translate = request.Translate,
-                    TargetLanguage = request.TargetLanguage,
-                    Cost = cost,
-                    ChargedWalletTypeId = policyResult.ChargedWalletTypeId
-                });
+                _backgroundJobClient.Enqueue<NexClone.Backend.Infrastructure.Consumers.VttConsumer>(
+                    c => c.Consume(new VoiceToTextMessage
+                    {
+                        HistoryId = history.Id,
+                        UserId = userId,
+                        FileId = request.FileId,
+                        Translate = request.Translate,
+                        TargetLanguage = request.TargetLanguage,
+                        Cost = cost,
+                        ChargedWalletTypeId = policyResult.ChargedWalletTypeId
+                    })
+                );
 
                 return Ok(new
                 {

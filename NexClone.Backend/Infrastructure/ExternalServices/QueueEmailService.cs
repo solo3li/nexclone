@@ -1,4 +1,4 @@
-using MassTransit;
+using Hangfire;
 using NexClone.Backend.Core.Interfaces;
 using NexClone.Backend.Core.Messages;
 using System.Threading.Tasks;
@@ -7,45 +7,29 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
 {
     public class QueueEmailService : IEmailService
     {
-        private readonly IPublishEndpoint _publishEndpoint;
+        private readonly IBackgroundJobClient _backgroundJobClient;
         private readonly NexClone.Backend.Infrastructure.ExternalServices.BrevoEmailService _fallbackEmailService;
 
-        public QueueEmailService(IPublishEndpoint publishEndpoint, NexClone.Backend.Infrastructure.ExternalServices.BrevoEmailService fallbackEmailService)
+        public QueueEmailService(IBackgroundJobClient backgroundJobClient, NexClone.Backend.Infrastructure.ExternalServices.BrevoEmailService fallbackEmailService)
         {
-            _publishEndpoint = publishEndpoint;
+            _backgroundJobClient = backgroundJobClient;
             _fallbackEmailService = fallbackEmailService;
         }
 
         public async Task<bool> SendEmailAsync(string toEmail, string toName, string subject, string htmlContent)
         {
-            // Publish to RabbitMQ (fire and forget so it doesn't hang the API if RabbitMQ is down)
-            _ = Task.Run(async () => 
-            {
-                try 
+            // Enqueue job with Hangfire instead of MassTransit
+            _backgroundJobClient.Enqueue<NexClone.Backend.Infrastructure.Consumers.EmailConsumer>(
+                x => x.Consume(new SendEmailMessage
                 {
-                    await _publishEndpoint.Publish(new SendEmailMessage
-                    {
-                        ToEmail = toEmail,
-                        ToName = toName,
-                        Subject = subject,
-                        HtmlBody = htmlContent
-                    });
-                } 
-                catch 
-                {
-                    // Fallback to synchronous email sending if RabbitMQ is unreachable
-                    try
-                    {
-                        await _fallbackEmailService.SendEmailAsync(toEmail, toName, subject, htmlContent);
-                    }
-                    catch
-                    {
-                        // Ignore
-                    }
-                }
-            });
+                    ToEmail = toEmail,
+                    ToName = toName,
+                    Subject = subject,
+                    HtmlBody = htmlContent
+                })
+            );
 
-            return true; // Assume success for queueing
+            return await Task.FromResult(true); // Assume success for queueing
         }
     }
 }

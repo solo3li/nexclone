@@ -1,4 +1,4 @@
-using MassTransit;
+using Hangfire;
 using Microsoft.Extensions.Logging;
 using NexClone.Backend.Core.Entities;
 using NexClone.Backend.Core.Interfaces;
@@ -14,7 +14,8 @@ using System.Threading.Tasks;
 
 namespace NexClone.Backend.Infrastructure.Consumers
 {
-    public class MotionControlConsumer : BaseAiTaskConsumer, IConsumer<MotionControlMessage>
+    [Queue("motion_control_queue")]
+    public class MotionControlConsumer : BaseAiTaskConsumer
     {
         public MotionControlConsumer(
             ApplicationDbContext dbContext,
@@ -31,9 +32,8 @@ namespace NexClone.Backend.Infrastructure.Consumers
         {
         }
 
-        public async Task Consume(ConsumeContext<MotionControlMessage> context)
+        public async Task Consume(MotionControlMessage message)
         {
-            var message = context.Message;
             _logger.LogInformation($"[MotionControl Task {message.HistoryId}] Started consumer.");
             
             var history = await _dbContext.GenerationHistories.FindAsync(message.HistoryId);

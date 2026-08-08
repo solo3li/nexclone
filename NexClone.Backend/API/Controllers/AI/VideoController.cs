@@ -7,7 +7,7 @@ using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using MassTransit;
+using Hangfire;
 using NexClone.Backend.Core.Messages;
 using System.IO;
 
@@ -24,20 +24,20 @@ namespace NexClone.Backend.API.Controllers.AI
         private readonly ApplicationDbContext _dbContext;
         private readonly UsagePolicyService _usagePolicy;
         private readonly IMediaService _mediaService;
-        private readonly IPublishEndpoint _publishEndpoint;
+        private readonly IBackgroundJobClient _backgroundJobClient;
 
         public VideoController(
             IVideoService videoService,
             ApplicationDbContext dbContext,
             UsagePolicyService usagePolicy,
             IMediaService mediaService,
-            IPublishEndpoint publishEndpoint)
+            IBackgroundJobClient backgroundJobClient)
         {
             _videoService = videoService;
             _dbContext = dbContext;
             _usagePolicy = usagePolicy;
             _mediaService = mediaService;
-            _publishEndpoint = publishEndpoint;
+            _backgroundJobClient = backgroundJobClient;
         }
 
         [HttpGet("estimate-avatar")]
@@ -143,20 +143,20 @@ namespace NexClone.Backend.API.Controllers.AI
                 _dbContext.GenerationHistories.Add(history);
                 await _dbContext.SaveChangesAsync();
 
-                // Publish to RabbitMQ
-                await _publishEndpoint.Publish(new AvatarVideoMessage
-                {
-                    HistoryId = history.Id,
-                    UserId = userId,
-                    ImageBytes = imageBytes,
-                    ImageContentType = imageContentType,
-                    AudioBytes = audioBytes,
-                    AudioContentType = audioContentType,
-                    Prompt = prompt,
-                    RenderingSpeed = renderingSpeed
-                });
-
-                // Return OK immediately so frontend can show the Wait/Leave UI
+                // Publish to Hangfire
+                _backgroundJobClient.Enqueue<NexClone.Backend.Infrastructure.Consumers.AvatarVideoConsumer>(
+                    c => c.Consume(new AvatarVideoMessage
+                    {
+                        HistoryId = history.Id,
+                        UserId = userId,
+                        ImageBytes = imageBytes,
+                        ImageContentType = imageContentType,
+                        AudioBytes = audioBytes,
+                        AudioContentType = audioContentType,
+                        Prompt = prompt,
+                        RenderingSpeed = renderingSpeed
+                    })
+                );
                 return Ok(new { taskId = history.Id.ToString(), status = "processing", message = "Task has been added to the queue." });
             }
             catch (Exception ex)
@@ -253,18 +253,20 @@ namespace NexClone.Backend.API.Controllers.AI
                 _dbContext.GenerationHistories.Add(history);
                 await _dbContext.SaveChangesAsync();
 
-                // Publish to RabbitMQ instead of direct fire-and-forget
-                await _publishEndpoint.Publish(new LipSyncMessage
-                {
-                    HistoryId = history.Id,
-                    UserId = userId,
-                    VideoBytes = videoBytes,
-                    VideoFileName = videoFileName,
-                    VideoContentType = videoContentType,
-                    AudioBytes = audioBytes,
-                    AudioFileName = audioFileName,
-                    AudioContentType = audioContentType
-                });
+                // Publish to Hangfire
+                _backgroundJobClient.Enqueue<NexClone.Backend.Infrastructure.Consumers.LipSyncConsumer>(
+                    c => c.Consume(new LipSyncMessage
+                    {
+                        HistoryId = history.Id,
+                        UserId = userId,
+                        VideoBytes = videoBytes,
+                        VideoFileName = videoFileName,
+                        VideoContentType = videoContentType,
+                        AudioBytes = audioBytes,
+                        AudioFileName = audioFileName,
+                        AudioContentType = audioContentType
+                    })
+                );
 
                 return Ok(new { taskId = history.Id.ToString(), status = "processing", message = "Task has been added to the queue." });
             }
@@ -409,21 +411,23 @@ namespace NexClone.Backend.API.Controllers.AI
                 _dbContext.GenerationHistories.Add(history);
                 await _dbContext.SaveChangesAsync();
 
-                // Publish to RabbitMQ
-                await _publishEndpoint.Publish(new MotionControlMessage
-                {
-                    HistoryId = history.Id,
-                    UserId = userId,
-                    ImageBytes = imageBytes,
-                    ImageContentType = imageContentType,
-                    VideoBytes = videoBytes,
-                    VideoContentType = videoContentType,
-                    Prompt = prompt,
-                    Resolution = resolution,
-                    RenderingSpeed = renderingSpeed,
-                    Orientation = orientation,
-                    KeepOriginalSound = keepOriginalSound
-                });
+                // Publish to Hangfire
+                _backgroundJobClient.Enqueue<NexClone.Backend.Infrastructure.Consumers.MotionControlConsumer>(
+                    c => c.Consume(new MotionControlMessage
+                    {
+                        HistoryId = history.Id,
+                        UserId = userId,
+                        ImageBytes = imageBytes,
+                        ImageContentType = imageContentType,
+                        VideoBytes = videoBytes,
+                        VideoContentType = videoContentType,
+                        Prompt = prompt,
+                        Resolution = resolution,
+                        RenderingSpeed = renderingSpeed,
+                        Orientation = orientation,
+                        KeepOriginalSound = keepOriginalSound
+                    })
+                );
 
                 // Return OK immediately so frontend can show the Wait/Leave UI
                 return Ok(new { taskId = history.Id.ToString(), status = "processing", message = "Task has been added to the queue." });
