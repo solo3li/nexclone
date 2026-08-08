@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -27,7 +27,8 @@ namespace NexClone.Backend.Migrations
                 name: "AllowedWalletTypeIds",
                 table: "ToolConfigurations",
                 type: "integer[]",
-                nullable: false);
+                nullable: false,
+                defaultValueSql: "'{}'");
         }
 
         /// <inheritdoc />
