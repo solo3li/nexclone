@@ -124,7 +124,9 @@
                                         bool isChecked = config.AllowedWalletTypeIds?.Contains(int.Parse(item.Value)) ?? false;
                                         <div class="bx--checkbox-wrapper">
                                             <input id="Wallet-@toolName-@item.Value" class="bx--checkbox" type="checkbox" value="@item.Value" name="AllowedWalletTypeIds" @(isChecked ? "checked" : "")>
-                                            <label for="Wallet-@toolName-@item.Value" class="bx--checkbox-label">@item.Text</label>
+                                            <label for="Wallet-@toolName-@item.Value" class="bx--checkbox-label">
+                                                <span class="bx--checkbox-label-text">@item.Text</span>
+                                            </label>
                                         </div>
                                     }
                                 </div>
