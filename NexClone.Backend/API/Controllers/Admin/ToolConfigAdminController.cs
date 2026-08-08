@@ -21,42 +21,49 @@ namespace NexClone.Backend.API.Controllers.Admin
 
         public async Task<IActionResult> Index()
         {
-            ViewData["Title"] = "Tool Settings";
-            
-            var allConfigs = await _context.ToolConfigurations.Include(c => c.RoutingRules).ToListAsync();
-            var providers = await _context.ApiConfigurations.Where(a => a.IsActive).Select(a => a.ProviderName).ToListAsync();
-            
-            ViewBag.Providers = new SelectList(providers);
-            ViewBag.WalletTypes = new SelectList(await _context.WalletTypes.ToListAsync(), "Id", "Name");
-
-            var tools = new[] { "text-to-voice", "voice-to-text", "image-to-video", "advanced-lip-sync", "motion-control" };
-            
-            var toolConfigs = new Dictionary<string, ToolConfiguration>();
-            var concurrencyLimits = new Dictionary<string, int>();
-
-            foreach (var t in tools)
+            try
             {
-                var config = allConfigs.FirstOrDefault(c => c.ToolName == t);
-                if (config == null)
-                {
-                    config = new ToolConfiguration { ToolName = t, Id = Guid.NewGuid() };
-                }
-                toolConfigs[t] = config;
+                ViewData["Title"] = "Tool Settings";
+                
+                var allConfigs = await _context.ToolConfigurations.Include(c => c.RoutingRules).ToListAsync();
+                var providers = await _context.ApiConfigurations.Where(a => a.IsActive).Select(a => a.ProviderName).ToListAsync();
+                
+                ViewBag.Providers = new SelectList(providers);
+                ViewBag.WalletTypes = new SelectList(await _context.WalletTypes.ToListAsync(), "Id", "Name");
 
-                var settingKey = $"Concurrency_{t}";
-                var setting = await _context.AppSettings.FirstOrDefaultAsync(s => s.Key == settingKey);
-                if (setting != null && int.TryParse(setting.Value, out int limit))
+                var tools = new[] { "text-to-voice", "voice-to-text", "image-to-video", "advanced-lip-sync", "motion-control" };
+                
+                var toolConfigs = new Dictionary<string, ToolConfiguration>();
+                var concurrencyLimits = new Dictionary<string, int>();
+
+                foreach (var t in tools)
                 {
-                    concurrencyLimits[t] = limit;
+                    var config = allConfigs.FirstOrDefault(c => c.ToolName == t);
+                    if (config == null)
+                    {
+                        config = new ToolConfiguration { ToolName = t, Id = Guid.NewGuid() };
+                    }
+                    toolConfigs[t] = config;
+
+                    var settingKey = $"Concurrency_{t}";
+                    var setting = await _context.AppSettings.FirstOrDefaultAsync(s => s.Key == settingKey);
+                    if (setting != null && int.TryParse(setting.Value, out int limit))
+                    {
+                        concurrencyLimits[t] = limit;
+                    }
+                    else
+                    {
+                        concurrencyLimits[t] = 10; // Default limit
+                    }
                 }
-                else
-                {
-                    concurrencyLimits[t] = 10; // Default limit
-                }
+
+                ViewBag.ConcurrencyLimits = concurrencyLimits;
+                return View(toolConfigs);
             }
-
-            ViewBag.ConcurrencyLimits = concurrencyLimits;
-            return View(toolConfigs);
+            catch (Exception ex)
+            {
+                return Content($"ERROR: {ex.Message}\n{ex.StackTrace}\n{ex.InnerException?.Message}");
+            }
         }
 
         [HttpPost]
