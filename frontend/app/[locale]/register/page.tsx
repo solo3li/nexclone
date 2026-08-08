@@ -179,7 +179,18 @@ export default function RegisterPage() {
         setIsSuccess(true);
       }
     } catch (err: any) {
-      setError(err.response?.data?.Message || err.response?.data?.Errors?.[0] || "Registration failed");
+      let errorMsg = "Registration failed";
+      if (err.response?.data) {
+        if (err.response.data.Message) errorMsg = err.response.data.Message;
+        else if (err.response.data.errors) {
+          if (Array.isArray(err.response.data.errors)) {
+            errorMsg = err.response.data.errors[0];
+          } else {
+            errorMsg = Object.values(err.response.data.errors).flat()[0] as string;
+          }
+        }
+      }
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
