@@ -117,23 +117,18 @@
                             </div>
 
                             <div class="bx--form-item" style="margin-bottom: 2rem;">
-                                <label for="AllowedWalletTypeIds-@toolName" class="bx--label">@Localizer["Allowed Wallets for Deduction"]</label>
-                                <div class="bx--select">
-                                    <select id="AllowedWalletTypeIds-@toolName" name="AllowedWalletTypeIds" class="bx--select-input" multiple style="height: auto; padding-top: 0.5rem; padding-bottom: 0.5rem;">
-                                        @foreach (var item in (SelectList)ViewBag.WalletTypes)
-                                        {
-                                            if (config.AllowedWalletTypeIds.Contains(int.Parse(item.Value)))
-                                            {
-                                                <option value="@item.Value" selected>@item.Text</option>
-                                            }
-                                            else
-                                            {
-                                                <option value="@item.Value">@item.Text</option>
-                                            }
-                                        }
-                                    </select>
+                                <label class="bx--label">@Localizer["Allowed Wallets for Deduction"]</label>
+                                <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
+                                    @foreach (var item in (SelectList)ViewBag.WalletTypes)
+                                    {
+                                        bool isChecked = config.AllowedWalletTypeIds.Contains(int.Parse(item.Value));
+                                        <div class="bx--checkbox-wrapper">
+                                            <input id="Wallet-@toolName-@item.Value" class="bx--checkbox" type="checkbox" value="@item.Value" name="AllowedWalletTypeIds" @(isChecked ? "checked" : "")>
+                                            <label for="Wallet-@toolName-@item.Value" class="bx--checkbox-label">@item.Text</label>
+                                        </div>
+                                    }
                                 </div>
-                                <div class="bx--form__helper-text">@Localizer["Hold Ctrl (Windows) or Cmd (Mac) to select multiple wallets. The first valid wallet with balance will be charged."]</div>
+                                <div class="bx--form__helper-text" style="margin-top: 0.5rem;">@Localizer["Select the wallets this tool can deduct from. The first valid wallet with balance will be charged."]</div>
                             </div>
 
                             <div class="bx--form-item" style="margin-top: 1rem;">
