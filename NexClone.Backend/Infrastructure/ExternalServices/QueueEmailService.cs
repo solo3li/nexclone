@@ -8,10 +8,12 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
     public class QueueEmailService : IEmailService
     {
         private readonly IPublishEndpoint _publishEndpoint;
+        private readonly NexClone.Backend.Infrastructure.ExternalServices.BrevoEmailService _fallbackEmailService;
 
-        public QueueEmailService(IPublishEndpoint publishEndpoint)
+        public QueueEmailService(IPublishEndpoint publishEndpoint, NexClone.Backend.Infrastructure.ExternalServices.BrevoEmailService fallbackEmailService)
         {
             _publishEndpoint = publishEndpoint;
+            _fallbackEmailService = fallbackEmailService;
         }
 
         public async Task<bool> SendEmailAsync(string toEmail, string toName, string subject, string htmlContent)
@@ -31,7 +33,15 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
                 } 
                 catch 
                 {
-                    // Ignore errors silently for now if RabbitMQ is unreachable
+                    // Fallback to synchronous email sending if RabbitMQ is unreachable
+                    try
+                    {
+                        await _fallbackEmailService.SendEmailAsync(toEmail, toName, subject, htmlContent);
+                    }
+                    catch
+                    {
+                        // Ignore
+                    }
                 }
             });
 
