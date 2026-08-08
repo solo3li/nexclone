@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Hangfire;
+using Hangfire.PostgreSql;
 using NexClone.Backend.Infrastructure.Consumers;
 
 
