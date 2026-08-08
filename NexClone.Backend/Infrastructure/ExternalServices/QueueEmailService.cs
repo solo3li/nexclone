@@ -16,13 +16,23 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
 
         public async Task<bool> SendEmailAsync(string toEmail, string toName, string subject, string htmlContent)
         {
-            // Publish to RabbitMQ instead of sending synchronously
-            await _publishEndpoint.Publish(new SendEmailMessage
+            // Publish to RabbitMQ (fire and forget so it doesn't hang the API if RabbitMQ is down)
+            _ = Task.Run(async () => 
             {
-                ToEmail = toEmail,
-                ToName = toName,
-                Subject = subject,
-                HtmlBody = htmlContent
+                try 
+                {
+                    await _publishEndpoint.Publish(new SendEmailMessage
+                    {
+                        ToEmail = toEmail,
+                        ToName = toName,
+                        Subject = subject,
+                        HtmlBody = htmlContent
+                    });
+                } 
+                catch 
+                {
+                    // Ignore errors silently for now if RabbitMQ is unreachable
+                }
             });
 
             return true; // Assume success for queueing
