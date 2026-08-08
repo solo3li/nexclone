@@ -5,6 +5,13 @@
 #           -f nexclone-chart/values-dev.yaml
 # ==============================================================
 
+# Override bitnami sub-chart image registries to use official Docker images
+# (bitnami images need Docker Hub auth for specific versioned tags)
+global:
+  imageRegistry: ""
+  security:
+    allowInsecureImages: true  # required to use non-bitnami images in bitnami charts
+
 namespace: nexclone-dev
 
 # ── Images: use locally built images (no registry pull) ───────
@@ -42,9 +49,13 @@ ingress:
 # ── Secret name (will be created from .dev.env) ───────────────
 envSecretName: nexclone-dev-env
 
-# ── PostgreSQL (smaller footprint for dev) ─────────────────────
+# ── PostgreSQL — use official postgres:15-alpine (already in k3s) ────────────
 postgresql:
   enabled: true
+  image:
+    registry: docker.io
+    repository: library/postgres
+    tag: "15-alpine"
   auth:
     username: nexclone
     password: devpassword123!
@@ -61,9 +72,13 @@ postgresql:
         cpu: "500m"
         memory: "512Mi"
 
-# ── Redis (standalone, no replica in dev) ─────────────────────
+# ── Redis — use official redis:7-alpine (already in k3s) ─────────────────────
 redis:
   enabled: true
+  image:
+    registry: docker.io
+    repository: library/redis
+    tag: "7-alpine"
   architecture: standalone
   auth:
     enabled: true
@@ -80,9 +95,13 @@ redis:
         cpu: "200m"
         memory: "256Mi"
 
-# ── RabbitMQ ──────────────────────────────────────────────────
+# ── RabbitMQ — use official rabbitmq:3-management-alpine ─────────────────────
 rabbitmq:
   enabled: true
+  image:
+    registry: docker.io
+    repository: library/rabbitmq
+    tag: "3-management-alpine"
   auth:
     username: devuser
     password: devrabbit123!
@@ -98,9 +117,13 @@ rabbitmq:
       cpu: "500m"
       memory: "512Mi"
 
-# ── MinIO ─────────────────────────────────────────────────────
+# ── MinIO — use official minio/minio image ───────────────────────────────────
 minio:
   enabled: true
+  image:
+    registry: docker.io
+    repository: minio/minio
+    tag: "latest"
   auth:
     rootUser: devminioadmin
     rootPassword: devminiosecret123!
