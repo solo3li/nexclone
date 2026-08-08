@@ -1,0 +1,122 @@
+# ==============================================================
+# values-dev.yaml — Local Development Overrides
+# Usage:  helm upgrade --install nexclone-dev ./nexclone-chart \
+#           -n nexclone-dev --create-namespace \
+#           -f nexclone-chart/values-dev.yaml
+# ==============================================================
+
+namespace: nexclone-dev
+
+# ── Images: use locally built images (no registry pull) ───────
+backend:
+  image:
+    repository: nexclone-backend
+    tag: latest
+    pullPolicy: Never          # use local docker build only
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
+    limits:
+      cpu: "1500m"
+      memory: "1.5Gi"
+
+frontend:
+  image:
+    repository: nexclone-frontend
+    tag: latest
+    pullPolicy: Never
+  replicaCount: 1
+
+# ── Ingress: nip.io hostnames, Let's Encrypt staging ──────────
+ingress:
+  enabled: true
+  ingressClass: traefik
+  tls: true
+  certIssuer: letsencrypt-prod
+  hosts:
+    frontend: nexclone-dev.167.71.66.188.nip.io
+    backend:  api-nexclone-dev.167.71.66.188.nip.io
+
+# ── Secret name (will be created from .dev.env) ───────────────
+envSecretName: nexclone-dev-env
+
+# ── PostgreSQL (smaller footprint for dev) ─────────────────────
+postgresql:
+  enabled: true
+  auth:
+    username: nexclone
+    password: devpassword123!
+    database: nexclone_dev
+  primary:
+    persistence:
+      enabled: true
+      size: 2Gi
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "128Mi"
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+
+# ── Redis (standalone, no replica in dev) ─────────────────────
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: true
+    password: devredis123!
+  master:
+    persistence:
+      enabled: true
+      size: 512Mi
+    resources:
+      requests:
+        cpu: "50m"
+        memory: "64Mi"
+      limits:
+        cpu: "200m"
+        memory: "256Mi"
+
+# ── RabbitMQ ──────────────────────────────────────────────────
+rabbitmq:
+  enabled: true
+  auth:
+    username: devuser
+    password: devrabbit123!
+    erlangCookie: deverlangcookie123
+  persistence:
+    enabled: true
+    size: 512Mi
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+
+# ── MinIO ─────────────────────────────────────────────────────
+minio:
+  enabled: true
+  auth:
+    rootUser: devminioadmin
+    rootPassword: devminiosecret123!
+  defaultBuckets: "nexmedia-dev"
+  persistence:
+    enabled: true
+    size: 2Gi
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+  service:
+    type: ClusterIP
+    ports:
+      api: 9000
+      console: 9001

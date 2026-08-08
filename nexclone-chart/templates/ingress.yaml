@@ -1,35 +1,50 @@
+{{/* ============================================================
+  ingress.yaml — Traefik Ingress for frontend + backend
+  ============================================================ */}}
+{{- if .Values.ingress.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: nexclone-ingress
+  namespace: {{ .Values.namespace }}
   annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    {{- if .Values.ingress.tls }}
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.certIssuer | quote }}
     traefik.ingress.kubernetes.io/router.tls: "true"
+    {{- end }}
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure,web
+    # Force HTTPS redirect
+    traefik.ingress.kubernetes.io/router.middlewares: default-redirect-https@kubernetescrd
 spec:
+  ingressClassName: {{ .Values.ingress.ingressClass }}
+  {{- if .Values.ingress.tls }}
   tls:
-  - hosts:
-    - api-nexclone.167.71.66.188.nip.io
-    - app-nexclone.167.71.66.188.nip.io
-    secretName: nexclone-tls
+    - hosts:
+        - {{ .Values.ingress.hosts.backend }}
+        - {{ .Values.ingress.hosts.frontend }}
+      secretName: nexclone-dev-tls
+  {{- end }}
   rules:
-  - host: api-nexclone.167.71.66.188.nip.io
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: nexclone-backend
-            port:
-              number: 8080
-  - host: app-nexclone.167.71.66.188.nip.io
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: nexclone-frontend
-            port:
-              number: 3000
+    # ── Backend API ────────────────────────────────────────────
+    - host: {{ .Values.ingress.hosts.backend }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nexclone-backend
+                port:
+                  number: {{ .Values.backend.port }}
+    # ── Frontend App ───────────────────────────────────────────
+    - host: {{ .Values.ingress.hosts.frontend }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nexclone-frontend
+                port:
+                  number: {{ .Values.frontend.port }}
+{{- end }}
