@@ -127,17 +127,22 @@ namespace NexClone.Backend.Application.Services
             decimal remainingCost = totalCost;
 
             var walletsToDeduct = new List<(UserWallet wallet, decimal amount)>();
-            int walletTypeId = await GetWalletTypeIdForTool(toolId);
+            List<int> walletTypeIds = await GetWalletTypeIdsForTool(toolId);
             
-            // Get all wallets of this type for the user, regardless of subscription
-            var userWallets = user.Wallets?.Where(w => w.WalletTypeId == walletTypeId && w.Balance > 0).ToList() ?? new List<UserWallet>();
-            
-            foreach (var userWallet in userWallets)
+            // Try to deduct from the allowed wallets in order
+            foreach (var walletTypeId in walletTypeIds)
             {
                 if (remainingCost <= 0) break;
-                decimal amountToDeduct = Math.Min(userWallet.Balance, remainingCost);
-                walletsToDeduct.Add((userWallet, amountToDeduct));
-                remainingCost -= amountToDeduct;
+                
+                var userWallets = user.Wallets?.Where(w => w.WalletTypeId == walletTypeId && w.Balance > 0).ToList() ?? new List<UserWallet>();
+                
+                foreach (var userWallet in userWallets)
+                {
+                    if (remainingCost <= 0) break;
+                    decimal amountToDeduct = Math.Min(userWallet.Balance, remainingCost);
+                    walletsToDeduct.Add((userWallet, amountToDeduct));
+                    remainingCost -= amountToDeduct;
+                }
             }
 
             if (remainingCost > 0)
@@ -195,18 +200,18 @@ namespace NexClone.Backend.Application.Services
             return new PolicyValidationResult { 
                 IsAllowed = true, 
                 TotalCost = totalCost, 
-                ChargedWalletTypeId = primaryWallet?.WalletTypeId ?? walletTypeId,
+                ChargedWalletTypeId = primaryWallet?.WalletTypeId ?? walletTypeIds.FirstOrDefault(),
                 ChargedWalletName = primaryWallet?.WalletType?.Name ?? "Wallet",
                 ChargedWalletIcon = primaryWallet?.WalletType?.Icon
             };
         }
 
-        private async Task<int> GetWalletTypeIdForTool(string toolName)
+        private async Task<List<int>> GetWalletTypeIdsForTool(string toolName)
         {
             var tool = await _context.ToolConfigurations.FirstOrDefaultAsync(t => t.ToolName == toolName);
-            if (tool != null && tool.WalletTypeId.HasValue)
+            if (tool != null && tool.AllowedWalletTypeIds != null && tool.AllowedWalletTypeIds.Any())
             {
-                return tool.WalletTypeId.Value;
+                return tool.AllowedWalletTypeIds;
             }
 
             var generalWallet = await _context.WalletTypes.FirstOrDefaultAsync(w => w.Code == "GENERAL");
@@ -216,7 +221,7 @@ namespace NexClone.Backend.Application.Services
                 _context.WalletTypes.Add(generalWallet);
                 await _context.SaveChangesAsync();
             }
-            return generalWallet.Id;
+            return new List<int> { generalWallet.Id };
         }
 
         public ToolPolicy GetToolPolicy(Plan plan, string toolId, string quality = "Standard")
@@ -335,16 +340,21 @@ namespace NexClone.Backend.Application.Services
             decimal remainingCost = totalCost;
 
             var walletsToDeduct = new List<(UserWallet wallet, decimal amount)>();
-            int walletTypeId = await GetWalletTypeIdForTool(toolId);
+            List<int> walletTypeIds = await GetWalletTypeIdsForTool(toolId);
             
-            var userWallets = user.Wallets?.Where(w => w.WalletTypeId == walletTypeId && w.Balance > 0).ToList() ?? new List<UserWallet>();
-            
-            foreach (var userWallet in userWallets)
+            foreach (var walletTypeId in walletTypeIds)
             {
                 if (remainingCost <= 0) break;
-                decimal amountToDeduct = Math.Min(userWallet.Balance, remainingCost);
-                walletsToDeduct.Add((userWallet, amountToDeduct));
-                remainingCost -= amountToDeduct;
+                
+                var userWallets = user.Wallets?.Where(w => w.WalletTypeId == walletTypeId && w.Balance > 0).ToList() ?? new List<UserWallet>();
+                
+                foreach (var userWallet in userWallets)
+                {
+                    if (remainingCost <= 0) break;
+                    decimal amountToDeduct = Math.Min(userWallet.Balance, remainingCost);
+                    walletsToDeduct.Add((userWallet, amountToDeduct));
+                    remainingCost -= amountToDeduct;
+                }
             }
 
             if (remainingCost > 0)
@@ -356,7 +366,7 @@ namespace NexClone.Backend.Application.Services
             return new PolicyValidationResult { 
                 IsAllowed = true, 
                 TotalCost = totalCost, 
-                ChargedWalletTypeId = primaryWallet?.WalletTypeId ?? walletTypeId,
+                ChargedWalletTypeId = primaryWallet?.WalletTypeId ?? walletTypeIds.FirstOrDefault(),
                 ChargedWalletName = primaryWallet?.WalletType?.Name ?? "Wallet",
                 ChargedWalletIcon = primaryWallet?.WalletType?.Icon
             };
@@ -412,8 +422,12 @@ namespace NexClone.Backend.Application.Services
 
             if (user == null) return;
 
-            var walletTypeId = await GetWalletTypeIdForTool(toolId);
-            await RefundAsync(userId, walletTypeId, amount);
+            var walletTypeIds = await GetWalletTypeIdsForTool(toolId);
+            var targetWalletTypeId = walletTypeIds.FirstOrDefault();
+            if (targetWalletTypeId > 0)
+            {
+                await RefundAsync(userId, targetWalletTypeId, amount);
+            }
         }
     }
 }

@@ -117,13 +117,12 @@
                             </div>
 
                             <div class="bx--form-item" style="margin-bottom: 2rem;">
-                                <label for="WalletTypeId-@toolName" class="bx--label">@Localizer["Primary Wallet for Deduction"]</label>
+                                <label for="AllowedWalletTypeIds-@toolName" class="bx--label">@Localizer["Allowed Wallets for Deduction"]</label>
                                 <div class="bx--select">
-                                    <select id="WalletTypeId-@toolName" name="WalletTypeId" class="bx--select-input">
-                                        <option value="">@Localizer["None (Free or System Default)"]</option>
+                                    <select id="AllowedWalletTypeIds-@toolName" name="AllowedWalletTypeIds" class="bx--select-input" multiple style="height: auto; padding-top: 0.5rem; padding-bottom: 0.5rem;">
                                         @foreach (var item in (SelectList)ViewBag.WalletTypes)
                                         {
-                                            if (config.WalletTypeId.ToString() == item.Value)
+                                            if (config.AllowedWalletTypeIds.Contains(int.Parse(item.Value)))
                                             {
                                                 <option value="@item.Value" selected>@item.Text</option>
                                             }
@@ -133,8 +132,8 @@
                                             }
                                         }
                                     </select>
-                                    <svg focusable="false" preserveAspectRatio="xMidYMid meet" style="will-change: transform;" xmlns="http://www.w3.org/2000/svg" class="bx--select__arrow" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 11L3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z"></path></svg>
                                 </div>
+                                <div class="bx--form__helper-text">@Localizer["Hold Ctrl (Windows) or Cmd (Mac) to select multiple wallets. The first valid wallet with balance will be charged."]</div>
                             </div>
 
                             <div class="bx--form-item" style="margin-top: 1rem;">

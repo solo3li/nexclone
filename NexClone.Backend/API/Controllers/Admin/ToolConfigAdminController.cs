@@ -74,7 +74,7 @@ namespace NexClone.Backend.API.Controllers.Admin
                     existing.IsActive = config.IsActive;
                     existing.IsMaintenanceMode = config.IsMaintenanceMode;
                     existing.IsComingSoon = config.IsComingSoon;
-                    existing.WalletTypeId = config.WalletTypeId;
+                    existing.AllowedWalletTypeIds = config.AllowedWalletTypeIds ?? new List<int>();
                     existing.UpdatedAt = DateTime.UtcNow;
 
                     _context.ToolRoutingRules.RemoveRange(existing.RoutingRules);
