@@ -2,30 +2,5 @@ apiVersion: v2
 name: nexclone-chart
 description: NexClone – Full-stack AI SaaS (Backend + Frontend + PostgreSQL + Redis + RabbitMQ + MinIO)
 type: application
-version: 0.2.0
+version: 0.3.0
 appVersion: "1.0.0"
-
-dependencies:
-  # Bitnami PostgreSQL
-  - name: postgresql
-    version: "16.x.x"
-    repository: https://charts.bitnami.com/bitnami
-    condition: postgresql.enabled
-
-  # Bitnami Redis
-  - name: redis
-    version: "20.x.x"
-    repository: https://charts.bitnami.com/bitnami
-    condition: redis.enabled
-
-  # Bitnami RabbitMQ
-  - name: rabbitmq
-    version: "15.x.x"
-    repository: https://charts.bitnami.com/bitnami
-    condition: rabbitmq.enabled
-
-  # Bitnami MinIO
-  - name: minio
-    version: "14.x.x"
-    repository: https://charts.bitnami.com/bitnami
-    condition: minio.enabled

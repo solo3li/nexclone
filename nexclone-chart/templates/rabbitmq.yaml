@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nexclone-dev-rabbitmq
+  labels:
+    app: nexclone-dev-rabbitmq
+spec:
+  serviceName: "nexclone-dev-rabbitmq"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nexclone-dev-rabbitmq
+  template:
+    metadata:
+      labels:
+        app: nexclone-dev-rabbitmq
+    spec:
+      containers:
+      - name: rabbitmq
+        image: rabbitmq:3-management-alpine
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5672
+          name: amqp
+        - containerPort: 15672
+          name: management
+        env:
+        - name: RABBITMQ_DEFAULT_USER
+          value: devuser
+        - name: RABBITMQ_DEFAULT_PASS
+          value: devrabbit123!
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/rabbitmq
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nexclone-dev-rabbitmq
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5672
+    targetPort: 5672
+    name: amqp
+  - port: 15672
+    targetPort: 15672
+    name: management
+  selector:
+    app: nexclone-dev-rabbitmq

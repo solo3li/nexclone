@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nexclone-dev-postgresql
+  labels:
+    app: nexclone-dev-postgresql
+spec:
+  serviceName: "nexclone-dev-postgresql"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nexclone-dev-postgresql
+  template:
+    metadata:
+      labels:
+        app: nexclone-dev-postgresql
+    spec:
+      containers:
+      - name: postgresql
+        image: postgres:15-alpine
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5432
+          name: postgresql
+        env:
+        - name: POSTGRES_DB
+          value: nexclone_dev
+        - name: POSTGRES_USER
+          value: nexclone
+        - name: POSTGRES_PASSWORD
+          value: devpassword123!
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nexclone-dev-postgresql
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5432
+    targetPort: 5432
+    name: postgresql
+  selector:
+    app: nexclone-dev-postgresql

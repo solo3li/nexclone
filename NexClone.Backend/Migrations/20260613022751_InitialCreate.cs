@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -67,6 +67,9 @@ namespace NexClone.Backend.Migrations
                     DurationDays = table.Column<int>(type: "integer", nullable: false),
                     PriceUsd = table.Column<decimal>(type: "numeric", nullable: false),
                     PriceEgp = table.Column<decimal>(type: "numeric", nullable: false),
+                    AllowedVoices = table.Column<string>(type: "text", nullable: true),
+                    IsDefaultRegistrationPlan = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    IsFreeTrial = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
@@ -294,6 +297,50 @@ namespace NexClone.Backend.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
                 });
+
+            migrationBuilder.CreateTable(
+                name: "DeviceFingerprints",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    IpAddress = table.Column<string>(type: "text", nullable: false),
+                    UserAgent = table.Column<string>(type: "text", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DeviceFingerprints", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DeviceFingerprints_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ToolConfigurations",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ToolName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    ProviderName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    ModelName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    AdditionalSettings = table.Column<string>(type: "jsonb", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ToolConfigurations", x => x.Id);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DeviceFingerprints_UserId",
+                table: "DeviceFingerprints",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",

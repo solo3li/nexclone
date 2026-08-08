@@ -11,7 +11,7 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - .env
+      - .dev.env
     networks:
       - nexclone_network
     depends_on:
@@ -29,7 +29,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
     env_file:
-      - .env
+      - .dev.env
     networks:
       - nexclone_network
     depends_on:
@@ -42,7 +42,7 @@ services:
     image: postgres:15
     container_name: nexclone-postgres
     env_file:
-      - .env
+      - .dev.env
     ports:
       - "5432:5432"
     networks:
@@ -67,7 +67,7 @@ services:
       - "9001:9001"
       - "9002:9002"
     env_file:
-      - .env
+      - .dev.env
     command: server /data --address ":9001" --console-address ":9002"
     networks:
       - nexclone_network

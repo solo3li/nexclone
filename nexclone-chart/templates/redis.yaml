@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nexclone-dev-redis-master
+  labels:
+    app: nexclone-dev-redis
+spec:
+  serviceName: "nexclone-dev-redis-master"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nexclone-dev-redis
+  template:
+    metadata:
+      labels:
+        app: nexclone-dev-redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        imagePullPolicy: IfNotPresent
+        command: ["redis-server", "--requirepass", "devredis123!"]
+        ports:
+        - containerPort: 6379
+          name: redis
+        volumeMounts:
+        - name: data
+          mountPath: /data
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nexclone-dev-redis-master
+spec:
+  type: ClusterIP
+  ports:
+  - port: 6379
+    targetPort: 6379
+    name: redis
+  selector:
+    app: nexclone-dev-redis

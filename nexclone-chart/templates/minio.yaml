@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nexclone-dev-minio
+  labels:
+    app: nexclone-dev-minio
+spec:
+  serviceName: "nexclone-dev-minio"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nexclone-dev-minio
+  template:
+    metadata:
+      labels:
+        app: nexclone-dev-minio
+    spec:
+      containers:
+      - name: minio
+        image: minio/minio:latest
+        imagePullPolicy: IfNotPresent
+        command:
+        - /bin/sh
+        - -c
+        - |
+          mkdir -p /data/nexmedia-dev && minio server /data --console-address ":9001"
+        ports:
+        - containerPort: 9000
+          name: api
+        - containerPort: 9001
+          name: console
+        env:
+        - name: MINIO_ROOT_USER
+          value: devminioadmin
+        - name: MINIO_ROOT_PASSWORD
+          value: devminiosecret123!
+        volumeMounts:
+        - name: data
+          mountPath: /data
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nexclone-dev-minio
+spec:
+  type: ClusterIP
+  ports:
+  - port: 9000
+    targetPort: 9000
+    name: api
+  - port: 9001
+    targetPort: 9001
+    name: console
+  selector:
+    app: nexclone-dev-minio
