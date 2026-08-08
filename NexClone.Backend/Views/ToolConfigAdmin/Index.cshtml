@@ -121,7 +121,7 @@
                                 <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
                                     @foreach (var item in (SelectList)ViewBag.WalletTypes)
                                     {
-                                        bool isChecked = config.AllowedWalletTypeIds.Contains(int.Parse(item.Value));
+                                        bool isChecked = config.AllowedWalletTypeIds?.Contains(int.Parse(item.Value)) ?? false;
                                         <div class="bx--checkbox-wrapper">
                                             <input id="Wallet-@toolName-@item.Value" class="bx--checkbox" type="checkbox" value="@item.Value" name="AllowedWalletTypeIds" @(isChecked ? "checked" : "")>
                                             <label for="Wallet-@toolName-@item.Value" class="bx--checkbox-label">@item.Text</label>
