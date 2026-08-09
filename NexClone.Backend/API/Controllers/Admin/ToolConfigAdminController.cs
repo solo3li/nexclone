@@ -81,7 +81,8 @@ namespace NexClone.Backend.API.Controllers.Admin
                     existing.IsActive = config.IsActive;
                     existing.IsMaintenanceMode = config.IsMaintenanceMode;
                     existing.IsComingSoon = config.IsComingSoon;
-                    existing.AllowedWalletTypeIds = config.AllowedWalletTypeIds ?? new List<int>();
+                    existing.AllowStandardCredits = config.AllowStandardCredits;
+                    existing.AllowPremiumCredits = config.AllowPremiumCredits;
                     existing.UpdatedAt = DateTime.UtcNow;
 
                     _context.ToolRoutingRules.RemoveRange(existing.RoutingRules);
@@ -137,7 +138,8 @@ namespace NexClone.Backend.API.Controllers.Admin
             }
             else
             {
-                TempData["ErrorMessage"] = HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource>>()["Failed to save settings."].Value;
+                var errors = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                TempData["ErrorMessage"] = HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource>>()["Failed to save settings."].Value + " " + errors;
             }
             return RedirectToAction(nameof(Index));
         }

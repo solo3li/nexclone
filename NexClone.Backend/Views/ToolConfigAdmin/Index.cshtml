@@ -119,18 +119,22 @@
                             <div class="bx--form-item" style="margin-bottom: 2rem;">
                                 <label class="bx--label">@Localizer["Allowed Wallets for Deduction"]</label>
                                 <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
-                                    @foreach (var item in (SelectList)ViewBag.WalletTypes)
-                                    {
-                                        bool isChecked = config.AllowedWalletTypeIds?.Contains(int.Parse(item.Value)) ?? false;
-                                        <div class="bx--checkbox-wrapper">
-                                            <input id="Wallet-@toolName-@item.Value" class="bx--checkbox" type="checkbox" value="@item.Value" name="AllowedWalletTypeIds" @(isChecked ? "checked" : "")>
-                                            <label for="Wallet-@toolName-@item.Value" class="bx--checkbox-label">
-                                                <span class="bx--checkbox-label-text">@item.Text</span>
-                                            </label>
-                                        </div>
-                                    }
+                                    <div class="bx--checkbox-wrapper">
+                                        <input id="AllowStandard-@toolName" class="bx--checkbox" type="checkbox" value="true" name="AllowStandardCredits" @(config.AllowStandardCredits ? "checked" : "")>
+                                        <input type="hidden" value="false" name="AllowStandardCredits">
+                                        <label for="AllowStandard-@toolName" class="bx--checkbox-label">
+                                            <span class="bx--checkbox-label-text">Standard Credits</span>
+                                        </label>
+                                    </div>
+                                    <div class="bx--checkbox-wrapper">
+                                        <input id="AllowPremium-@toolName" class="bx--checkbox" type="checkbox" value="true" name="AllowPremiumCredits" @(config.AllowPremiumCredits ? "checked" : "")>
+                                        <input type="hidden" value="false" name="AllowPremiumCredits">
+                                        <label for="AllowPremium-@toolName" class="bx--checkbox-label">
+                                            <span class="bx--checkbox-label-text">Premium Credits</span>
+                                        </label>
+                                    </div>
                                 </div>
-                                <div class="bx--form__helper-text" style="margin-top: 0.5rem;">@Localizer["Select the wallets this tool can deduct from. The first valid wallet with balance will be charged."]</div>
+                                <div class="bx--form__helper-text" style="margin-top: 0.5rem;">@Localizer["Standard Credits are prioritized for deduction. If insufficient, Premium Credits will cover the remainder if checked."]</div>
                             </div>
 
                             <div class="bx--form-item" style="margin-top: 1rem;">

@@ -104,12 +104,10 @@
                                     </td>
                                     <td>@user.Country</td>
                                     <td>
-                                        @{
-                                            var walletsJson = System.Text.Json.JsonSerializer.Serialize(user.Wallets.Select(w => new { Name = w.WalletType.Name, Balance = w.Balance }));
-                                        }
-                                        <button class="bx--btn bx--btn--tertiary bx--btn--sm" onclick="showWalletsModal(this)" data-wallets="@walletsJson">
-                                            @Localizer["View Balances"]
-                                        </button>
+                                        <div style="font-size: 0.85rem;">
+                                            <div><strong>SC:</strong> @user.StandardCredits.ToString("0.##")</div>
+                                            <div><strong>PC:</strong> @user.PremiumCredits.ToString("0.##")</div>
+                                        </div>
                                     </td>
                                     <td>
                                         @if (currentSub?.Plan != null)

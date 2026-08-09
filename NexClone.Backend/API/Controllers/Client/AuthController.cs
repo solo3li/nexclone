@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Hangfire;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.RateLimiting;
@@ -173,14 +174,8 @@ namespace NexClone.Backend.API.Controllers.Client
             var locale = origin.Contains("localhost") ? "ar" : "ar";
             var verifyLink = $"{origin}/{locale}/verify-email?email={Uri.EscapeDataString(user.Email)}&token={Uri.EscapeDataString(verificationToken)}";
 
-            string emailHtml = $@"
-<div style='font-family: Arial, sans-serif; background-color: #0a0015; color: #ffffff; padding: 40px; text-align: center; border-radius: 8px;'>
-    <h2 style='color: #8b5cf6;'>تأكيد البريد الإلكتروني</h2>
-    <p style='color: #d1d5db; font-size: 16px; margin-bottom: 30px;'>مرحباً بك في NexMedia! يرجى الضغط على الزر أدناه لتأكيد بريدك الإلكتروني وتفعيل حسابك.</p>
-    <a href='{verifyLink}' style='background-color: #8b5cf6; color: #ffffff; text-decoration: none; padding: 15px 30px; font-size: 16px; font-weight: bold; border-radius: 50px; display: inline-block;'>تفعيل الحساب</a>
-</div>";
-
-            await _emailService.SendEmailAsync(user.Email, user.FullName ?? user.UserName ?? "User", "تفعيل الحساب - NexMedia", emailHtml);
+            string emailHtml = _emailTemplateService.GetVerificationEmail(user.FullName ?? user.UserName ?? "User", verifyLink);
+            BackgroundJob.Enqueue<IEmailService>(x => x.SendEmailAsync(user.Email, user.FullName ?? user.UserName ?? "User", "تفعيل الحساب - NexMedia AI", emailHtml));
 
             return Ok(new { Message = "تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني لتفعيل الحساب.", FreeTrialAssigned = freeTrialAssigned });
 
@@ -239,14 +234,8 @@ namespace NexClone.Backend.API.Controllers.Client
             var locale = origin.Contains("localhost") ? "ar" : "ar";
             var verifyLink = $"{origin}/{locale}/verify-email?email={Uri.EscapeDataString(user.Email)}&token={Uri.EscapeDataString(verificationToken)}";
 
-            string emailHtml = $@"
-<div style='font-family: Arial, sans-serif; background-color: #0a0015; color: #ffffff; padding: 40px; text-align: center; border-radius: 8px;'>
-    <h2 style='color: #8b5cf6;'>تأكيد البريد الإلكتروني</h2>
-    <p style='color: #d1d5db; font-size: 16px; margin-bottom: 30px;'>مرحباً بك مجدداً في NexMedia! يرجى الضغط على الزر أدناه لتأكيد بريدك الإلكتروني وتفعيل حسابك.</p>
-    <a href='{verifyLink}' style='background-color: #8b5cf6; color: #ffffff; text-decoration: none; padding: 15px 30px; font-size: 16px; font-weight: bold; border-radius: 50px; display: inline-block;'>تفعيل الحساب</a>
-</div>";
-
-            await _emailService.SendEmailAsync(user.Email, user.FullName ?? user.UserName ?? "User", "إعادة إرسال: تفعيل الحساب - NexMedia", emailHtml);
+            string emailHtml = _emailTemplateService.GetVerificationEmail(user.FullName ?? user.UserName ?? "User", verifyLink);
+            BackgroundJob.Enqueue<IEmailService>(x => x.SendEmailAsync(user.Email, user.FullName ?? user.UserName ?? "User", "إعادة إرسال: تفعيل الحساب - NexMedia AI", emailHtml));
 
             return Ok(new { Message = "تم إرسال رسالة التفعيل بنجاح." });
         }
@@ -453,16 +442,8 @@ namespace NexClone.Backend.API.Controllers.Client
             var origin = Request.Headers["Origin"].FirstOrDefault() ?? "http://178.62.192.74:3000";
             var resetLink = $"{origin}/reset-password?email={Uri.EscapeDataString(request.Email)}&token={token}";
 
-            string emailHtml = $@"
-<div style='font-family: Arial, sans-serif; background-color: #0a0015; color: #ffffff; padding: 40px; text-align: center; border-radius: 8px;'>
-    <h2 style='color: #8b5cf6;'>إعادة تعيين كلمة المرور</h2>
-    <p style='color: #d1d5db; font-size: 16px; margin-bottom: 30px;'>لقد طلبت إعادة تعيين كلمة المرور الخاصة بحسابك في NexMedia. اضغط على الزر أدناه لاختيار كلمة مرور جديدة.</p>
-    <a href='{resetLink}' style='background-color: #8b5cf6; color: #ffffff; text-decoration: none; padding: 15px 30px; font-size: 16px; font-weight: bold; border-radius: 50px; display: inline-block;'>إعادة تعيين كلمة المرور</a>
-    <p style='color: #9ca3af; font-size: 14px; margin-top: 30px;'>إذا لم تقم بطلب ذلك، يمكنك تجاهل هذه الرسالة.</p>
-</div>
-            ";
-
-            await _emailService.SendEmailAsync(user.Email, user.FullName ?? user.UserName ?? "User", "إعادة تعيين كلمة المرور - NexMedia", emailHtml);
+            string emailHtml = _emailTemplateService.GetPasswordResetEmail(user.FullName ?? user.UserName ?? "User", resetLink);
+            BackgroundJob.Enqueue<IEmailService>(x => x.SendEmailAsync(user.Email, user.FullName ?? user.UserName ?? "User", "إعادة تعيين كلمة المرور - NexMedia AI", emailHtml));
 
             return Ok(new { Message = "If an account with this email exists, a password reset link has been sent." });
         }
@@ -671,7 +652,7 @@ namespace NexClone.Backend.API.Controllers.Client
                                     targetPlan.MonthlyCredits,
                                     targetPlan.PriceEgp);
                                 
-                                await _emailService.SendEmailAsync(user.Email, user.FullName ?? "", "تم تفعيل اشتراكك بنجاح - NexMedia AI", htmlBody);
+                                BackgroundJob.Enqueue<IEmailService>(x => x.SendEmailAsync(user.Email, user.FullName ?? "", "تم تفعيل اشتراكك بنجاح - NexMedia AI", htmlBody));
                             }
                         }
                         catch (Exception ex)
@@ -817,6 +798,7 @@ namespace NexClone.Backend.API.Controllers.Client
                     AvatarVideoCostPerGeneration = activeSub.Plan.AvatarVideoCostPerGeneration,
                     AvatarVideoProCost = activeSub.Plan.AvatarVideoProCost,
                     LipSyncCostPerGeneration = activeSub.Plan.LipSyncCostPerGeneration,
+                    LipSyncCostPerSecond = activeSub.Plan.LipSyncCostPerSecond,
                     SttCostPerMinute = activeSub.Plan.SttCostPerMinute,
                     TtsCostPerChar = activeSub.Plan.TtsCostPerChar,
                     TtsCostPerCharHigh = activeSub.Plan.TtsCostPerCharHigh,

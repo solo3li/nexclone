@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Linq;
 using System;
+using Hangfire;
 
 namespace NexClone.Backend.API.Controllers.Webhooks
 {
@@ -252,7 +253,7 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                                 amountEgp,
                                 minioUrl);
                             
-                            await _emailService.SendEmailAsync(user.Email, user.FullName ?? "", "تم تفعيل اشتراكك بنجاح - NexMedia AI", htmlBody);
+                            Hangfire.BackgroundJob.Enqueue<IEmailService>(x => x.SendEmailAsync(user.Email, user.FullName ?? "", "تم تفعيل اشتراكك بنجاح - NexMedia AI", htmlBody));
                         }
                     }
                     catch (Exception ex)
@@ -535,9 +536,7 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                             plan.MonthlyCredits,
                             amountUsd,
                             minioUrl);
-                        await _emailService.SendEmailAsync(
-                            user.Email, user.FullName ?? "",
-                            "تم تفعيل اشتراكك بنجاح - NexMedia AI", htmlBody);
+                        Hangfire.BackgroundJob.Enqueue<IEmailService>(x => x.SendEmailAsync(user.Email, user.FullName ?? "", "تم تفعيل اشتراكك بنجاح - NexMedia AI", htmlBody));
                     }
                 }
                 catch (Exception ex)

@@ -135,35 +135,43 @@
             <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem;">
                 <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">@Localizer["User Wallets & Balances"]</h3>
                 
-                @if (ViewBag.AllWalletTypes == null || !((IEnumerable<NexClone.Backend.Core.Entities.WalletType>)ViewBag.AllWalletTypes).Any())
-                {
-                    <p style="color: #525252;">@Localizer["No wallet types found in the system."]</p>
-                }
-                else
-                {
-                    <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
-                        @foreach(var walletType in (IEnumerable<NexClone.Backend.Core.Entities.WalletType>)ViewBag.AllWalletTypes)
-                        {
-                            var currentBalance = Model.Wallets?.FirstOrDefault(w => w.WalletTypeId == walletType.Id)?.Balance ?? 0;
-                            <div style="background: #ffffff; padding: 1.5rem; border: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center;">
-                                <div>
-                                    <strong style="font-size: 1.1rem; color: #161616;">@walletType.Name</strong>
-                                    <p style="font-size: 1.25rem; font-weight: bold; color: #0f62fe; margin-top: 0.5rem;">@currentBalance.ToString("0.00") <span style="font-size: 0.875rem; font-weight: normal; color: #525252;">Credits</span></p>
+                <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
+                    <!-- Standard Credits -->
+                    <div style="background: #ffffff; padding: 1.5rem; border: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="font-size: 1.1rem; color: #161616;">Standard Credits</strong>
+                            <p style="font-size: 1.25rem; font-weight: bold; color: #0f62fe; margin-top: 0.5rem;">@Model.StandardCredits.ToString("0.00") <span style="font-size: 0.875rem; font-weight: normal; color: #525252;">Credits</span></p>
+                        </div>
+                        <form asp-action="AddCreditAmount" method="post" style="display: flex; gap: 0.5rem; align-items: flex-end; margin: 0;">
+                            <input type="hidden" name="userId" value="@Model.Id" />
+                            <input type="hidden" name="creditType" value="Standard" />
+                            <div class="bx--form-item">
+                                <div class="bx--text-input__field-wrapper">
+                                    <input type="number" class="bx--text-input" name="amount" required step="0.01" placeholder="+ or - amount" style="width: 120px;">
                                 </div>
-                                <form asp-action="AddWalletCredits" method="post" style="display: flex; gap: 0.5rem; align-items: flex-end; margin: 0;">
-                                    <input type="hidden" name="userId" value="@Model.Id" />
-                                    <input type="hidden" name="walletTypeId" value="@walletType.Id" />
-                                    <div class="bx--form-item">
-                                        <div class="bx--text-input__field-wrapper">
-                                            <input type="number" class="bx--text-input" name="amount" required step="0.01" placeholder="+ or - amount" style="width: 120px;">
-                                        </div>
-                                    </div>
-                                    <button type="submit" class="bx--btn bx--btn--primary bx--btn--sm">@Localizer["Add/Remove"]</button>
-                                </form>
                             </div>
-                        }
+                            <button type="submit" class="bx--btn bx--btn--primary bx--btn--sm">@Localizer["Add/Remove"]</button>
+                        </form>
                     </div>
-                }
+
+                    <!-- Premium Credits -->
+                    <div style="background: #ffffff; padding: 1.5rem; border: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="font-size: 1.1rem; color: #161616;">Premium Credits</strong>
+                            <p style="font-size: 1.25rem; font-weight: bold; color: #0f62fe; margin-top: 0.5rem;">@Model.PremiumCredits.ToString("0.00") <span style="font-size: 0.875rem; font-weight: normal; color: #525252;">Credits</span></p>
+                        </div>
+                        <form asp-action="AddCreditAmount" method="post" style="display: flex; gap: 0.5rem; align-items: flex-end; margin: 0;">
+                            <input type="hidden" name="userId" value="@Model.Id" />
+                            <input type="hidden" name="creditType" value="Premium" />
+                            <div class="bx--form-item">
+                                <div class="bx--text-input__field-wrapper">
+                                    <input type="number" class="bx--text-input" name="amount" required step="0.01" placeholder="+ or - amount" style="width: 120px;">
+                                </div>
+                            </div>
+                            <button type="submit" class="bx--btn bx--btn--primary bx--btn--sm">@Localizer["Add/Remove"]</button>
+                        </form>
+                    </div>
+                </div>
             </div>
 
             <!-- Assign Plan Section -->

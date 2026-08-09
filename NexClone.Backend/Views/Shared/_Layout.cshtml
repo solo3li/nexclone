@@ -1,7 +1,12 @@
 @inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
+@inject Microsoft.AspNetCore.Identity.UserManager<NexClone.Backend.Core.Entities.ApplicationUser> UserManager
 @{
     var lang = Context.Request.Cookies["AdminLang"]?.Contains("ar") == true ? "ar" : "en";
     var dir = lang == "ar" ? "rtl" : "ltr";
+    
+    var currentUser = await UserManager.GetUserAsync(User);
+    var isSuperAdmin = currentUser?.IsSuperAdmin ?? false;
+    var visibleSections = currentUser?.VisibleAdminSections ?? "";
 }
 <!DOCTYPE html>
 <html lang="@lang" dir="@dir">
@@ -416,120 +421,158 @@
                         @Localizer["Dashboard"]
                     </a>
                 </li>
-                <li class="sidebar-menu-item">
+                @if (isSuperAdmin || visibleSections.Contains("/Users")) {
+                    <li class="sidebar-menu-item">
                     <a href="/Users">
                         <i class='bx bx-user'></i>
                         @Localizer["Users Management"]
                     </a>
                 </li>
-                <li class="sidebar-menu-item">
+                }
+                @if (isSuperAdmin || visibleSections.Contains("/Subscriptions")) {
+                    <li class="sidebar-menu-item">
                     <a href="/Subscriptions">
                         <i class='bx bx-credit-card-front'></i>
                         @Localizer["Subscriptions"]
                     </a>
                 </li>
-                <li class="sidebar-menu-item">
+                }
+                @if (isSuperAdmin || visibleSections.Contains("/PlansAdmin")) {
+                    <li class="sidebar-menu-item">
                     <a href="@Url.Action("Index", "PlansAdmin")">
                         <i class='bx bx-layer'></i>
                         @Localizer["Pricing &amp; Plans"]
                     </a>
                 </li>
-                <li class="sidebar-menu-item">
+                }
+                @if (isSuperAdmin || visibleSections.Contains("/WalletTypesAdmin")) {
+                    <li class="sidebar-menu-item">
                     <a href="@Url.Action("Index", "WalletTypesAdmin")">
                         <i class='bx bx-wallet-alt'></i>
                         @Localizer["Wallet Types"]
                     </a>
                 </li>
-                <li class="sidebar-menu-item">
+                }
+                @if (isSuperAdmin || visibleSections.Contains("/ToolConfigAdmin")) {
+                    <li class="sidebar-menu-item">
                     <a href="@Url.Action("Index", "ToolConfigAdmin")">
                         <i class='bx bx-slider-alt'></i>
                         @Localizer["Tool Settings"]
                     </a>
                 </li>
-                <li class="sidebar-menu-item">
+                }
+                @if (isSuperAdmin || visibleSections.Contains("/SettingsAdmin")) {
+                    <li class="sidebar-menu-item">
                     <a href="@Url.Action("Index", "SettingsAdmin")">
                         <i class='bx bx-cog'></i>
                         @Localizer["Global Settings"]
                     </a>
                 </li>
-                <li class="sidebar-menu-item">
+                }
+                @if (isSuperAdmin || visibleSections.Contains("/CustomPagesAdmin")) {
+                    <li class="sidebar-menu-item">
                     <a href="/CustomPagesAdmin">
                         <i class='bx bx-file'></i>
                         @Localizer["Custom Pages"]
                     </a>
                 </li>
-                <li class="sidebar-menu-item">
+                }
+                @if (isSuperAdmin || visibleSections.Contains("/SocialLinksAdmin")) {
+                    <li class="sidebar-menu-item">
                     <a href="/SocialLinksAdmin">
                         <i class='bx bx-share-alt'></i>
                         @Localizer["Communication Links"]
                     </a>
                 </li>
-                <li class="sidebar-menu-item">
+                }
+                @if (isSuperAdmin || visibleSections.Contains("/BlogAdmin")) {
+                    <li class="sidebar-menu-item">
                     <a href="/BlogAdmin">
                         <i class='bx bx-news'></i>
                         @Localizer["Blog Posts"]
                     </a>
                 </li>
-                <li class="sidebar-menu-item">
+                }
+                @if (isSuperAdmin || visibleSections.Contains("/TicketsAdmin")) {
+                    <li class="sidebar-menu-item">
                     <a href="/TicketsAdmin">
                         <i class='bx bx-support'></i>
                         @Localizer["Support Tickets"]
                     </a>
                 </li>
-                <li class="sidebar-menu-item">
+                }
+                @if (isSuperAdmin || visibleSections.Contains("/HistoryAdmin")) {
+                    <li class="sidebar-menu-item">
                     <a href="@Url.Action("Index", "HistoryAdmin")">
                         <i class='bx bx-history'></i>
                         @Localizer["Operations History"]
                     </a>
                 </li>
-                <li class="sidebar-menu-item">
+                }
+                @if (isSuperAdmin || visibleSections.Contains("/SystemUpdatesAdmin")) {
+                    <li class="sidebar-menu-item">
                     <a href="@Url.Action("Index", "SystemUpdatesAdmin")">
                         <i class='bx bx-sync'></i>
                         @Localizer["System Updates"]
                     </a>
                 </li>
-                <li class="sidebar-menu-item">
+                }
+                @if (isSuperAdmin || visibleSections.Contains("/LogsAdmin")) {
+                    <li class="sidebar-menu-item">
                     <a href="@Url.Action("Index", "LogsAdmin")">
                         <i class='bx bx-terminal'></i>
                         @Localizer["System Logs"]
                     </a>
                 </li>
-                <li class="sidebar-menu-item">
+                }
+                @if (isSuperAdmin || visibleSections.Contains("/Voices")) {
+                    <li class="sidebar-menu-item">
                     <a href="/Voices">
                         <i class='bx bx-microphone'></i>
                         @Localizer["AI Voices"]
                     </a>
                 </li>
-                <li class="sidebar-menu-item">
+                }
+                @if (isSuperAdmin || visibleSections.Contains("/PaymentConfigAdmin")) {
+                    <li class="sidebar-menu-item">
                     <a href="/PaymentConfigAdmin">
                         <i class='bx bx-credit-card-alt'></i>
                         @Localizer["Payment Gateways"]
                     </a>
                 </li>
-                <li class="sidebar-menu-item">
+                }
+                @if (isSuperAdmin || visibleSections.Contains("/ApiConfigAdmin")) {
+                    <li class="sidebar-menu-item">
                     <a href="/ApiConfigAdmin">
                         <i class='bx bx-key'></i>
                         @Localizer["API Keys"]
                     </a>
                 </li>
-                <li class="sidebar-menu-item">
+                }
+                @if (isSuperAdmin || visibleSections.Contains("/MailingAdmin")) {
+                    <li class="sidebar-menu-item">
                     <a href="/MailingAdmin">
                         <i class='bx bx-envelope'></i>
                         @Localizer["Mailing &amp; Emails"]
                     </a>
                 </li>
-                <li class="sidebar-menu-item">
+                }
+                @if (isSuperAdmin || visibleSections.Contains("/ManualPaymentsAdmin")) {
+                    <li class="sidebar-menu-item">
                     <a href="/ManualPaymentsAdmin">
                         <i class='bx bx-receipt'></i>
                         @Localizer["Pending Payments"]
                     </a>
                 </li>
-                <li class="sidebar-menu-item">
+                }
+                @if (isSuperAdmin || visibleSections.Contains("/ManualPaymentMethodsAdmin")) {
+                    <li class="sidebar-menu-item">
                     <a href="/ManualPaymentMethodsAdmin">
                         <i class='bx bx-wallet'></i>
                         @Localizer["Payment Methods"]
                     </a>
                 </li>
+                }
 
                 <li class="sidebar-menu-item">
                     <a href="/AdminAuth/SwitchLang?lang=@(lang == "en" ? "ar" : "en")">

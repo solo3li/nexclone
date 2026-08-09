@@ -39,6 +39,8 @@ namespace NexClone.Backend.Core.Entities
 
         // Economy
         public decimal MonthlyCredits { get; set; } = 0;
+        public decimal StandardCredits { get; set; } = 0;
+        public decimal PremiumCredits { get; set; } = 0;
         // Text-To-Voice (TTS) Settings
         public bool TtsEnabled { get; set; } = true;
         public int TtsMaxCharsPerRequest { get; set; } = 3000;

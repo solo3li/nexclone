@@ -32,6 +32,53 @@
                         <input id="password" name="password" type="password" class="bx--text-input" placeholder="Enter initial password" required>
                     </div>
 
+                    <div class="bx--form-item" style="margin-bottom: 1rem;">
+                        <div class="bx--checkbox-wrapper">
+                            <input name="isStaff" value="true" type="checkbox" class="bx--checkbox" id="isStaffCheckbox">
+                            <label for="isStaffCheckbox" class="bx--checkbox-label">@Localizer["Is Admin / Staff Member"]</label>
+                        </div>
+                    </div>
+
+                    <div class="bx--form-item" style="margin-bottom: 2rem;">
+                        <div class="bx--checkbox-wrapper">
+                            <input name="isSuperAdmin" value="true" type="checkbox" class="bx--checkbox" id="isSuperAdminCheckbox">
+                            <label for="isSuperAdminCheckbox" class="bx--checkbox-label">@Localizer["Is Super Admin (Has access to all sections)"]</label>
+                        </div>
+                    </div>
+
+                    <div class="bx--form-item" style="margin-bottom: 2rem;">
+                        <label class="bx--label">@Localizer["Visible Admin Sections"]</label>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                            @foreach (var sec in new Dictionary<string, string> {
+                                {"/Users", "Users Management"},
+                                {"/Subscriptions", "Subscriptions"},
+                                {"/PlansAdmin", "Pricing & Plans"},
+                                {"/WalletTypesAdmin", "Wallet Types"},
+                                {"/ToolConfigAdmin", "Tool Settings"},
+                                {"/SettingsAdmin", "Global Settings"},
+                                {"/CustomPagesAdmin", "Custom Pages"},
+                                {"/SocialLinksAdmin", "Communication Links"},
+                                {"/BlogAdmin", "Blog Posts"},
+                                {"/TicketsAdmin", "Support Tickets"},
+                                {"/HistoryAdmin", "Operations History"},
+                                {"/SystemUpdatesAdmin", "System Updates"},
+                                {"/LogsAdmin", "System Logs"},
+                                {"/Voices", "AI Voices"},
+                                {"/PaymentConfigAdmin", "Payment Gateways"},
+                                {"/ApiConfigAdmin", "API Keys"},
+                                {"/MailingAdmin", "Mailing & Emails"},
+                                {"/ManualPaymentsAdmin", "Pending Payments"},
+                                {"/ManualPaymentMethodsAdmin", "Payment Methods"}
+                            })
+                            {
+                                <div class="bx--checkbox-wrapper">
+                                    <input type="checkbox" class="bx--checkbox" id="sec_@sec.Key.Replace("/","")" name="visibleSections" value="@sec.Key">
+                                    <label for="sec_@sec.Key.Replace("/","")" class="bx--checkbox-label">@Localizer[sec.Value]</label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
                     <div style="display: flex; gap: 1rem;">
                         <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Create User"]</button>
                         <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">@Localizer["Cancel"]</a>

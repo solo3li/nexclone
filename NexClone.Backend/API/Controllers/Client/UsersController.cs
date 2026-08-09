@@ -110,7 +110,7 @@ namespace NexClone.Backend.API.Controllers.Client
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(string email, string fullName, string password, [FromServices] Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> userManager)
+        public async Task<IActionResult> Create(string email, string fullName, string password, bool isStaff, bool isSuperAdmin, List<string> visibleSections, [FromServices] Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> userManager)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
@@ -125,7 +125,10 @@ namespace NexClone.Backend.API.Controllers.Client
                 FullName = fullName,
                 CreatedAt = DateTime.UtcNow,
                 IsVerified = true,
-                AvailableCredits = 0
+                AvailableCredits = 0,
+                IsStaff = isStaff,
+                IsSuperAdmin = isSuperAdmin,
+                VisibleAdminSections = string.Join(",", visibleSections ?? new List<string>())
             };
 
             var result = await userManager.CreateAsync(user, password);
@@ -432,7 +435,7 @@ namespace NexClone.Backend.API.Controllers.Client
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,FullName,Email,PhoneNumber,Country,IsStaff")] ApplicationUser updatedUser)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,FullName,Email,PhoneNumber,Country,IsStaff,IsSuperAdmin,StandardCredits,PremiumCredits")] ApplicationUser updatedUser, List<string> visibleSections)
         {
             if (id != updatedUser.Id) return NotFound();
 
@@ -445,6 +448,10 @@ namespace NexClone.Backend.API.Controllers.Client
             user.PhoneNumber = updatedUser.PhoneNumber;
             user.Country = updatedUser.Country;
             user.IsStaff = updatedUser.IsStaff;
+            user.IsSuperAdmin = updatedUser.IsSuperAdmin;
+            user.StandardCredits = updatedUser.StandardCredits;
+            user.PremiumCredits = updatedUser.PremiumCredits;
+            user.VisibleAdminSections = string.Join(",", visibleSections ?? new List<string>());
 
             try
             {
@@ -596,28 +603,21 @@ namespace NexClone.Backend.API.Controllers.Client
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddWalletCredits(Guid userId, int walletTypeId, decimal amount)
+        public async Task<IActionResult> AddCreditAmount(Guid userId, string creditType, decimal amount)
         {
             var user = await _context.Users.FindAsync(userId);
             if (user == null) return NotFound();
 
-            var wallet = await _context.UserWallets.FirstOrDefaultAsync(w => w.UserId == userId && w.WalletTypeId == walletTypeId);
-            if (wallet != null)
+            if (creditType == "Premium")
             {
-                wallet.Balance += amount;
-                wallet.UpdatedAt = DateTime.UtcNow;
+                user.PremiumCredits += amount;
             }
             else
             {
-                _context.UserWallets.Add(new Core.Entities.UserWallet
-                {
-                    UserId = userId,
-                    WalletTypeId = walletTypeId,
-                    Balance = amount,
-                    UpdatedAt = DateTime.UtcNow
-                });
+                user.StandardCredits += amount;
             }
 
+            _context.Users.Update(user);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Details), new { id = userId });
         }

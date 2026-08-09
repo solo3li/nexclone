@@ -176,14 +176,10 @@
                     <td><strong>@item.Plan.Name</strong></td>
                     <td>$@item.Plan.PriceUsd</td>
                     <td>
-                        @{
-                            var walletsJson = item.User != null && item.User.Wallets != null 
-                                ? System.Text.Json.JsonSerializer.Serialize(item.User.Wallets.Select(w => new { Name = w.WalletType.Name, Balance = w.Balance }))
-                                : "[]";
-                        }
-                        <button class="bx--btn bx--btn--tertiary bx--btn--sm" onclick="showWalletsModal(this)" data-wallets="@walletsJson">
-                            @Localizer["View Balances"]
-                        </button>
+                        <div style="font-size: 0.85rem;">
+                            <div><strong>SC:</strong> @(item.User?.StandardCredits.ToString("0.##") ?? "0")</div>
+                            <div><strong>PC:</strong> @(item.User?.PremiumCredits.ToString("0.##") ?? "0")</div>
+                        </div>
                     </td>
                     <td>@(lastUsed.HasValue ? lastUsed.Value.ToString("MMM dd, yyyy HH:mm") : "Never")</td>
                     <td>@item.StartDate.ToString("MMM dd, yyyy")</td>

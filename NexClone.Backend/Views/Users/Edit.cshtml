@@ -53,10 +53,66 @@
                         <span asp-validation-for="Country" class="bx--form-requirement"></span>
                     </div>
 
-                    <div class="bx--form-item" style="margin-bottom: 2rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; background: #f4f4f4; padding: 1rem; border-radius: 4px;">
+                        <div class="bx--form-item">
+                            <label asp-for="StandardCredits" class="bx--label">@Localizer["Standard Credits"]</label>
+                            <div class="bx--text-input__field-wrapper">
+                                <input asp-for="StandardCredits" type="number" step="0.01" class="bx--text-input">
+                            </div>
+                        </div>
+                        <div class="bx--form-item">
+                            <label asp-for="PremiumCredits" class="bx--label">@Localizer["Premium Credits"]</label>
+                            <div class="bx--text-input__field-wrapper">
+                                <input asp-for="PremiumCredits" type="number" step="0.01" class="bx--text-input">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bx--form-item" style="margin-bottom: 1rem;">
                         <div class="bx--checkbox-wrapper">
                             <input asp-for="IsStaff" type="checkbox" class="bx--checkbox" id="isStaffCheckbox">
                             <label for="isStaffCheckbox" class="bx--checkbox-label">@Localizer["Is Admin / Staff Member"]</label>
+                        </div>
+                    </div>
+
+                    <div class="bx--form-item" style="margin-bottom: 2rem;">
+                        <div class="bx--checkbox-wrapper">
+                            <input asp-for="IsSuperAdmin" type="checkbox" class="bx--checkbox" id="isSuperAdminCheckbox">
+                            <label for="isSuperAdminCheckbox" class="bx--checkbox-label">@Localizer["Is Super Admin (Has access to all sections)"]</label>
+                        </div>
+                    </div>
+
+                    <div class="bx--form-item" style="margin-bottom: 2rem;">
+                        <label class="bx--label">@Localizer["Visible Admin Sections"]</label>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                            @foreach (var sec in new Dictionary<string, string> {
+                                {"/Users", "Users Management"},
+                                {"/Subscriptions", "Subscriptions"},
+                                {"/PlansAdmin", "Pricing & Plans"},
+                                {"/WalletTypesAdmin", "Wallet Types"},
+                                {"/ToolConfigAdmin", "Tool Settings"},
+                                {"/SettingsAdmin", "Global Settings"},
+                                {"/CustomPagesAdmin", "Custom Pages"},
+                                {"/SocialLinksAdmin", "Communication Links"},
+                                {"/BlogAdmin", "Blog Posts"},
+                                {"/TicketsAdmin", "Support Tickets"},
+                                {"/HistoryAdmin", "Operations History"},
+                                {"/SystemUpdatesAdmin", "System Updates"},
+                                {"/LogsAdmin", "System Logs"},
+                                {"/Voices", "AI Voices"},
+                                {"/PaymentConfigAdmin", "Payment Gateways"},
+                                {"/ApiConfigAdmin", "API Keys"},
+                                {"/MailingAdmin", "Mailing & Emails"},
+                                {"/ManualPaymentsAdmin", "Pending Payments"},
+                                {"/ManualPaymentMethodsAdmin", "Payment Methods"}
+                            })
+                            {
+                                bool isChecked = !string.IsNullOrEmpty(Model.VisibleAdminSections) && Model.VisibleAdminSections.Contains(sec.Key);
+                                <div class="bx--checkbox-wrapper">
+                                    <input type="checkbox" class="bx--checkbox" id="sec_@sec.Key.Replace("/","")" name="visibleSections" value="@sec.Key" @(isChecked ? "checked" : "")>
+                                    <label for="sec_@sec.Key.Replace("/","")" class="bx--checkbox-label">@Localizer[sec.Value]</label>
+                                </div>
+                            }
                         </div>
                     </div>
 

@@ -15,9 +15,15 @@ namespace NexClone.Backend.Core.Entities
         public string? ImageUrl { get; set; }
         public bool IsActive { get; set; } = true;
         public bool IsStaff { get; set; } = false;
+        public bool IsSuperAdmin { get; set; } = false;
+        
+        // Admin Sidebar Sections Visibility (Comma-separated string)
+        public string? VisibleAdminSections { get; set; }
         
         // Credits Economy
         public decimal AvailableCredits { get; set; } = 0;
+        public decimal StandardCredits { get; set; } = 0;
+        public decimal PremiumCredits { get; set; } = 0;
 
         // Affiliate System (Removed)
 

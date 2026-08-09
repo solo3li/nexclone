@@ -108,11 +108,16 @@
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem;">
             <div class="bx--form-item">
-                <label for="MonthlyCredits" class="bx--label">@Localizer["Monthly Credits"]</label>
+                <label for="StandardCredits" class="bx--label">@Localizer["Standard Credits"]</label>
                 <div class="bx--text-input__field-wrapper">
-                    <input id="MonthlyCredits" type="number" class="bx--text-input" name="MonthlyCredits" required min="0" value="@Model.MonthlyCredits">
+                    <input id="StandardCredits" type="number" class="bx--text-input" name="StandardCredits" required min="0" value="@Model.StandardCredits">
                 </div>
-                <div class="bx--form__helper-text">@Localizer["Credits granted per month"]</div>
+            </div>
+            <div class="bx--form-item">
+                <label for="PremiumCredits" class="bx--label">@Localizer["Premium Credits"]</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="PremiumCredits" type="number" class="bx--text-input" name="PremiumCredits" required min="0" value="@Model.PremiumCredits">
+                </div>
             </div>
         </div>
 

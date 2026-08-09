@@ -62,12 +62,11 @@ namespace NexClone.Backend.API.Controllers.AI
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
-            // If duration provided, compute blocks (rounded up to 5-second increments)
-            decimal usageUnits = 1;
+            // If duration provided, compute cost by exact seconds
+            decimal usageUnits = 0;
             if (durationSeconds.HasValue && durationSeconds.Value > 0)
             {
-                int blocks = (int)Math.Ceiling(durationSeconds.Value / 5.0);
-                usageUnits = blocks;
+                usageUnits = (decimal)durationSeconds.Value;
             }
 
             var policyResult = await _usagePolicy.EstimateCostAsync(userId, "kling_advanced_lip_sync", usageUnits, usageUnits, "Standard", subscriptionId);
@@ -214,10 +213,9 @@ namespace NexClone.Backend.API.Controllers.AI
                 Console.WriteLine($"[WARNING] TagLib failed for LipSync duration. Fallback to 5s. Error: {ex.Message}");
             }
 
-            // Round up to nearest 5 seconds (e.g. 6 -> 10, 21 -> 25)
-            // The multiplier is Math.Ceiling(durationSeconds / 5.0) 
-            decimal durationUnits = (decimal)Math.Ceiling(durationSeconds / 5.0);
-            if (durationUnits < 1) durationUnits = 1;
+            // Use exact duration in seconds for cost calculation
+            decimal durationUnits = (decimal)durationSeconds;
+            if (durationUnits < 0) durationUnits = 0;
 
             if (durationSeconds > policy.MaxDurationSeconds)
             {

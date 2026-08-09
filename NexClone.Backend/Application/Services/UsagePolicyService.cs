@@ -26,6 +26,7 @@ namespace NexClone.Backend.Application.Services
 
         // Cost per unit. If not set, we will fallback to LegacyDbContext
         public decimal? CostPerUnit { get; set; }
+        public decimal? BaseCost { get; set; }
         public int BlockSize { get; set; } = 1;
     }
 
@@ -37,6 +38,8 @@ namespace NexClone.Backend.Application.Services
         public int ChargedWalletTypeId { get; set; }
         public string ChargedWalletName { get; set; } = string.Empty;
         public string? ChargedWalletIcon { get; set; }
+        public decimal StandardCreditsCharged { get; set; }
+        public decimal PremiumCreditsCharged { get; set; }
     }
 
     public class UsagePolicyService
@@ -91,6 +94,14 @@ namespace NexClone.Backend.Application.Services
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "This tool is currently disabled." };
             }
 
+            var hasFrozenSubscription = user.Subscriptions.Any(s => s.Status.ToLower() == "freeze");
+            var hasActiveSubscription = user.Subscriptions.Any(s => s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow);
+
+            if (hasFrozenSubscription && !hasActiveSubscription)
+            {
+                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Your account is currently in the freeze period. Please renew your subscription to continue using the services." };
+            }
+
             // For limits, if the user doesn't have an active plan, we will fallback to a default or skip limits entirely.
             var activeSubscription = user.Subscriptions
                 .Where(s => s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow)
@@ -123,31 +134,30 @@ namespace NexClone.Backend.Application.Services
                 amountForCost = amountForCost / toolPolicy.BlockSize;
             }
 
-            decimal totalCost = amountForCost * costPerUnit;
-            decimal remainingCost = totalCost;
+            decimal totalCost = (toolPolicy.BaseCost ?? 0) + (amountForCost * costPerUnit);
 
-            var walletsToDeduct = new List<(UserWallet wallet, decimal amount)>();
-            List<int> walletTypeIds = await GetWalletTypeIdsForTool(toolId);
-            
-            // Try to deduct from the allowed wallets in order
-            foreach (var walletTypeId in walletTypeIds)
+            bool allowStandard = toolConfig?.AllowStandardCredits ?? true;
+            bool allowPremium = toolConfig?.AllowPremiumCredits ?? false;
+
+            decimal remainingCost = totalCost;
+            decimal standardToCharge = 0;
+            decimal premiumToCharge = 0;
+
+            if (allowStandard)
             {
-                if (remainingCost <= 0) break;
-                
-                var userWallets = user.Wallets?.Where(w => w.WalletTypeId == walletTypeId && w.Balance > 0).ToList() ?? new List<UserWallet>();
-                
-                foreach (var userWallet in userWallets)
-                {
-                    if (remainingCost <= 0) break;
-                    decimal amountToDeduct = Math.Min(userWallet.Balance, remainingCost);
-                    walletsToDeduct.Add((userWallet, amountToDeduct));
-                    remainingCost -= amountToDeduct;
-                }
+                standardToCharge = Math.Min(user.StandardCredits, remainingCost);
+                remainingCost -= standardToCharge;
+            }
+
+            if (allowPremium && remainingCost > 0)
+            {
+                premiumToCharge = Math.Min(user.PremiumCredits, remainingCost);
+                remainingCost -= premiumToCharge;
             }
 
             if (remainingCost > 0)
             {
-                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Insufficient credits. Requires {totalCost:F4}." };
+                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Insufficient credits. Requires {totalCost:F4} total credits." };
             }
 
             int retries = 3;
@@ -156,11 +166,9 @@ namespace NexClone.Backend.Application.Services
             {
                 try
                 {
-                    foreach (var deduct in walletsToDeduct)
-                    {
-                        deduct.wallet.Balance -= deduct.amount;
-                        deduct.wallet.UpdatedAt = DateTime.UtcNow;
-                    }
+                    user.StandardCredits -= standardToCharge;
+                    user.PremiumCredits -= premiumToCharge;
+                        
                     _context.Users.Update(user);
                     await _context.SaveChangesAsync();
                     
@@ -178,50 +186,46 @@ namespace NexClone.Backend.Application.Services
                         return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "A system error occurred while processing your request. Please try again." };
                     }
                     
-                    foreach (var deduct in walletsToDeduct)
-                    {
-                        await _context.Entry(deduct.wallet).ReloadAsync();
-                    }
+                    await _context.Entry(user).ReloadAsync();
                     
-                    decimal checkRemaining = totalCost;
-                    foreach (var deduct in walletsToDeduct)
+                    remainingCost = totalCost;
+                    standardToCharge = 0;
+                    premiumToCharge = 0;
+
+                    if (allowStandard)
                     {
-                        checkRemaining -= Math.Min(deduct.wallet.Balance, checkRemaining);
+                        standardToCharge = Math.Min(user.StandardCredits, remainingCost);
+                        remainingCost -= standardToCharge;
                     }
 
-                    if (checkRemaining > 0)
+                    if (allowPremium && remainingCost > 0)
+                    {
+                        premiumToCharge = Math.Min(user.PremiumCredits, remainingCost);
+                        remainingCost -= premiumToCharge;
+                    }
+
+                    if (remainingCost > 0)
                     {
                         return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Insufficient credits after state refresh. Please top up your wallet." };
                     }
                 }
             }
 
-            var primaryWallet = walletsToDeduct.FirstOrDefault().wallet;
+            string chargedName = "";
+            int chargedId = 1;
+            if (standardToCharge > 0 && premiumToCharge > 0) { chargedName = "Standard & Premium Credits"; chargedId = 3; }
+            else if (premiumToCharge > 0) { chargedName = "Premium Credits"; chargedId = 2; }
+            else { chargedName = "Standard Credits"; chargedId = 1; }
+
             return new PolicyValidationResult { 
                 IsAllowed = true, 
                 TotalCost = totalCost, 
-                ChargedWalletTypeId = primaryWallet?.WalletTypeId ?? walletTypeIds.FirstOrDefault(),
-                ChargedWalletName = primaryWallet?.WalletType?.Name ?? "Wallet",
-                ChargedWalletIcon = primaryWallet?.WalletType?.Icon
+                ChargedWalletTypeId = chargedId, 
+                ChargedWalletName = chargedName,
+                ChargedWalletIcon = "bx bx-coin",
+                StandardCreditsCharged = standardToCharge,
+                PremiumCreditsCharged = premiumToCharge
             };
-        }
-
-        private async Task<List<int>> GetWalletTypeIdsForTool(string toolName)
-        {
-            var tool = await _context.ToolConfigurations.FirstOrDefaultAsync(t => t.ToolName == toolName);
-            if (tool != null && tool.AllowedWalletTypeIds != null && tool.AllowedWalletTypeIds.Any())
-            {
-                return tool.AllowedWalletTypeIds;
-            }
-
-            var generalWallet = await _context.WalletTypes.FirstOrDefaultAsync(w => w.Code == "GENERAL");
-            if (generalWallet == null)
-            {
-                generalWallet = new WalletType { Name = "General Wallet", Code = "GENERAL" };
-                _context.WalletTypes.Add(generalWallet);
-                await _context.SaveChangesAsync();
-            }
-            return new List<int> { generalWallet.Id };
         }
 
         public ToolPolicy GetToolPolicy(Plan plan, string toolId, string quality = "Standard")
@@ -262,7 +266,8 @@ namespace NexClone.Backend.Application.Services
             else if (toolId == "kling_advanced_lip_sync" || toolId == "lipsync")
             {
                 policy.Enabled = plan.LipSyncEnabled;
-                policy.CostPerUnit = plan.LipSyncCostPerSecond * 5; // Cost per 5-second block
+                policy.BaseCost = plan.LipSyncCostPerGeneration;
+                policy.CostPerUnit = plan.LipSyncCostPerSecond;
                 policy.MaxVideoFileSizeMb = plan.LipSyncMaxVideoFileSizeMb;
                 policy.MaxAudioFileSizeMb = plan.LipSyncMaxAudioFileSizeMb;
                 policy.MaxDurationSeconds = plan.LipSyncMaxDurationSeconds;
@@ -336,39 +341,46 @@ namespace NexClone.Backend.Application.Services
                 amountForCost = amountForCost / toolPolicy.BlockSize;
             }
 
-            decimal totalCost = amountForCost * costPerUnit;
-            decimal remainingCost = totalCost;
+            decimal totalCost = (toolPolicy.BaseCost ?? 0) + (amountForCost * costPerUnit);
 
-            var walletsToDeduct = new List<(UserWallet wallet, decimal amount)>();
-            List<int> walletTypeIds = await GetWalletTypeIdsForTool(toolId);
-            
-            foreach (var walletTypeId in walletTypeIds)
+            bool allowStandard = toolConfig?.AllowStandardCredits ?? true;
+            bool allowPremium = toolConfig?.AllowPremiumCredits ?? false;
+
+            decimal remainingCost = totalCost;
+            decimal standardToCharge = 0;
+            decimal premiumToCharge = 0;
+
+            if (allowStandard)
             {
-                if (remainingCost <= 0) break;
-                
-                var userWallets = user.Wallets?.Where(w => w.WalletTypeId == walletTypeId && w.Balance > 0).ToList() ?? new List<UserWallet>();
-                
-                foreach (var userWallet in userWallets)
-                {
-                    if (remainingCost <= 0) break;
-                    decimal amountToDeduct = Math.Min(userWallet.Balance, remainingCost);
-                    walletsToDeduct.Add((userWallet, amountToDeduct));
-                    remainingCost -= amountToDeduct;
-                }
+                standardToCharge = Math.Min(user.StandardCredits, remainingCost);
+                remainingCost -= standardToCharge;
+            }
+
+            if (allowPremium && remainingCost > 0)
+            {
+                premiumToCharge = Math.Min(user.PremiumCredits, remainingCost);
+                remainingCost -= premiumToCharge;
             }
 
             if (remainingCost > 0)
             {
-                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Insufficient credits. Requires {totalCost:F4}." };
+                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Insufficient credits. Requires {totalCost:F4} total credits." };
             }
 
-            var primaryWallet = walletsToDeduct.FirstOrDefault().wallet;
+            string chargedName = "";
+            int chargedId = 1;
+            if (standardToCharge > 0 && premiumToCharge > 0) { chargedName = "Standard & Premium Credits"; chargedId = 3; }
+            else if (premiumToCharge > 0) { chargedName = "Premium Credits"; chargedId = 2; }
+            else { chargedName = "Standard Credits"; chargedId = 1; }
+
             return new PolicyValidationResult { 
                 IsAllowed = true, 
                 TotalCost = totalCost, 
-                ChargedWalletTypeId = primaryWallet?.WalletTypeId ?? walletTypeIds.FirstOrDefault(),
-                ChargedWalletName = primaryWallet?.WalletType?.Name ?? "Wallet",
-                ChargedWalletIcon = primaryWallet?.WalletType?.Icon
+                ChargedWalletTypeId = chargedId, 
+                ChargedWalletName = chargedName,
+                ChargedWalletIcon = "bx bx-coin",
+                StandardCreditsCharged = standardToCharge,
+                PremiumCreditsCharged = premiumToCharge
             };
         }
 
@@ -376,23 +388,22 @@ namespace NexClone.Backend.Application.Services
         {
             if (amount <= 0) return;
 
+            // Map legacy walletTypeId to creditType: 2 = Premium, others = Standard
+            string creditType = walletTypeId == 2 ? "Premium" : "Standard";
+
             int retries = 3;
             bool saved = false;
             while (retries > 0 && !saved)
             {
                 try
                 {
-                    var userWallet = await _context.UserWallets
-                        .Include(w => w.Subscription)
-                        .Where(w => w.UserId == userId && w.WalletTypeId == walletTypeId)
-                        .OrderByDescending(w => w.Subscription != null && w.Subscription.Status == "active" ? 1 : 0)
-                        .ThenByDescending(w => w.Subscription != null ? w.Subscription.EndDate : DateTime.MinValue)
-                        .FirstOrDefaultAsync();
-
-                    if (userWallet != null)
+                    var user = await _context.Users.FindAsync(userId);
+                    if (user != null)
                     {
-                        userWallet.Balance += amount;
-                        userWallet.UpdatedAt = DateTime.UtcNow;
+                        if (creditType == "Premium") user.PremiumCredits += amount;
+                        else user.StandardCredits += amount;
+                        
+                        _context.Users.Update(user);
                         await _context.SaveChangesAsync();
                         
                         if (_hubContext != null) {
@@ -405,7 +416,6 @@ namespace NexClone.Backend.Application.Services
                 {
                     retries--;
                     if (retries == 0) throw;
-                    // For refund, we just retry by looping again, which fetches the latest row state
                 }
             }
         }
@@ -413,21 +423,17 @@ namespace NexClone.Backend.Application.Services
         public async Task RefundByToolAsync(Guid userId, string toolId, decimal amount)
         {
             if (amount <= 0) return;
+            var toolConfig = await _context.ToolConfigurations.FirstOrDefaultAsync(t => t.ToolName == toolId);
+            bool allowStandard = toolConfig?.AllowStandardCredits ?? true;
+            bool allowPremium = toolConfig?.AllowPremiumCredits ?? false;
+            
+            // 1 = Standard, 2 = Premium, 3 = Both
+            int walletTypeId = 1;
+            if (allowStandard && allowPremium) walletTypeId = 3;
+            else if (allowPremium) walletTypeId = 2;
+            else walletTypeId = 1;
 
-            var user = await _context.Users
-                .Include(u => u.Subscriptions)
-                    .ThenInclude(s => s.Plan)
-                .Include(u => u.Wallets)
-                .FirstOrDefaultAsync(u => u.Id == userId);
-
-            if (user == null) return;
-
-            var walletTypeIds = await GetWalletTypeIdsForTool(toolId);
-            var targetWalletTypeId = walletTypeIds.FirstOrDefault();
-            if (targetWalletTypeId > 0)
-            {
-                await RefundAsync(userId, targetWalletTypeId, amount);
-            }
+            await RefundAsync(userId, walletTypeId, amount);
         }
     }
 }

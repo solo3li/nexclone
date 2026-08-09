@@ -13,7 +13,7 @@ export default function VerifyInvoicePage() {
 
   useEffect(() => {
     if (token) {
-      axios.get(`http://167.71.66.188:8080/api/invoices/verify/${token}`)
+      axios.get(`http://188.166.65.112:8080/api/invoices/verify/${token}`)
         .then(res => {
           setData(res.data);
           setIsLoading(false);

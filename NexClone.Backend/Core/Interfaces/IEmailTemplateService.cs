@@ -21,5 +21,18 @@ namespace NexClone.Backend.Core.Interfaces
         string GetSubscriptionExpiredEmail(
             string userName, 
             string planName);
+
+        string GetVerificationEmail(
+            string userName, 
+            string verificationLink);
+
+        string GetPasswordResetEmail(
+            string userName, 
+            string resetLink);
+
+        string GetVideoCompletionEmail(
+            string userName, 
+            string toolName, 
+            string resultUrl);
     }
 }

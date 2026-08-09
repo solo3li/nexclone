@@ -23,6 +23,17 @@ namespace NexClone.Backend.API.Controllers.Admin
             ViewData["Title"] = "Global Settings";
             var settings = await _context.AppSettings.ToListAsync();
             
+            var predefinedSocialKeys = new[] { "Social.Facebook", "Social.Twitter", "Social.LinkedIn", "Social.Instagram", "Social.YouTube", "Social.Email" };
+            foreach (var key in predefinedSocialKeys)
+            {
+                if (!settings.Any(s => s.Key == key))
+                {
+                    var newSetting = new AppSetting { Key = key, Value = "", Description = "Social Link", UpdatedAt = System.DateTime.UtcNow };
+                    _context.AppSettings.Add(newSetting);
+                    settings.Add(newSetting);
+                }
+            }
+            
             var toolConfigs = await _context.ToolConfigurations.ToListAsync();
             var defaultTools = new[] { "text-to-voice", "voice-to-text", "image-to-video", "advanced-lip-sync", "motion-control" };
             bool changesMade = false;

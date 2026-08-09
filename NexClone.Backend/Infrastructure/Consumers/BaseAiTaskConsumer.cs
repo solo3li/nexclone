@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Linq;
+using Hangfire;
 
 namespace NexClone.Backend.Infrastructure.Consumers
 {
@@ -213,14 +214,11 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 if (history.Type != "text-to-voice" && history.Type != "voice-to-text")
                 {
                     try {
-                        var htmlBody = $@"<div dir=""rtl"" style=""font-family:Arial,sans-serif;direction:rtl;text-align:right;"">
-<p>مرحباً {System.Web.HttpUtility.HtmlEncode(user.FullName)}،</p>
-<p>لقد انتهينا من معالجة طلبك <strong>{System.Web.HttpUtility.HtmlEncode(history.Title)}</strong> بنجاح.</p>
-<p>يمكنك مشاهدة أو تحميل النتيجة من الرابط أدناه:</p>
-<p><a href=""{history.FileUrl}"">{history.FileUrl}</a></p>
-<p>أو يمكنك زيارة <a href=""https://nexmedia.com/history"">سجل العمليات</a> في لوحة التحكم.</p>
-</div>";
-                        await _emailService.SendEmailAsync(user.Email, user.FullName, $"عملية {history.Title} مكتملة", htmlBody);
+                        var htmlBody = _emailTemplateService.GetVideoCompletionEmail(
+                            user.FullName ?? user.UserName ?? "User", 
+                            history.Title, 
+                            history.FileUrl);
+                        Hangfire.BackgroundJob.Enqueue<IEmailService>(x => x.SendEmailAsync(user.Email, user.FullName ?? user.UserName ?? "", $"عملية {history.Title} مكتملة - NexMedia AI", htmlBody));
                     } catch { /* Ignore email fail */ }
                 }
             }

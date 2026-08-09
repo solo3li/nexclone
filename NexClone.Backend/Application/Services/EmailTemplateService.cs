@@ -379,5 +379,126 @@ namespace NexClone.Backend.Application.Services
 </body>
 </html>";
         }
+        public string GetVerificationEmail(string userName, string verificationLink)
+        {
+            return $@"
+<!DOCTYPE html>
+<html lang=""ar"" dir=""rtl"">
+<head>
+    <meta charset=""UTF-8"">
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+    <title>تأكيد الحساب - NexMedia AI</title>
+    <style>
+        body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 0; color: #333; direction: rtl; text-align: right; }}
+        .container {{ max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); }}
+        .header {{ background-color: #161616; color: #ffffff; padding: 30px 20px; text-align: center; }}
+        .header h1 {{ margin: 0; font-size: 28px; font-weight: 700; }}
+        .content {{ padding: 40px 30px; text-align: center; }}
+        .message {{ font-size: 16px; line-height: 1.6; color: #555; margin-bottom: 30px; }}
+        .btn {{ display: inline-block; padding: 14px 35px; background-color: #6366f1; color: #ffffff !important; text-decoration: none; font-weight: bold; border-radius: 50px; font-size: 18px; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); }}
+        .footer {{ background-color: #f9f9f9; padding: 20px; text-align: center; font-size: 14px; color: #777; border-top: 1px solid #eee; }}
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <div class=""header"">
+            <h1>NexMedia AI</h1>
+        </div>
+        <div class=""content"">
+            <h2 style=""color: #222;"">أهلاً بك، {userName} 👋</h2>
+            <div class=""message"">
+                يسعدنا انضمامك إلى NexMedia AI. للبدء في استخدام أدوات الذكاء الاصطناعي الخاصة بنا، يرجى تأكيد بريدك الإلكتروني بالضغط على الزر أدناه:
+            </div>
+            <a href=""{verificationLink}"" class=""btn"">تفعيل الحساب الآن</a>
+            <p style=""margin-top: 30px; font-size: 14px; color: #888;"">إذا لم تقم بإنشاء هذا الحساب، يرجى تجاهل هذه الرسالة.</p>
+        </div>
+        <div class=""footer"">
+            <p>&copy; {DateTime.UtcNow.Year} NexMedia AI. جميع الحقوق محفوظة.</p>
+        </div>
+    </div>
+</body>
+</html>";
+        }
+
+        public string GetPasswordResetEmail(string userName, string resetLink)
+        {
+            return $@"
+<!DOCTYPE html>
+<html lang=""ar"" dir=""rtl"">
+<head>
+    <meta charset=""UTF-8"">
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+    <title>إعادة تعيين كلمة المرور - NexMedia AI</title>
+    <style>
+        body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 0; color: #333; direction: rtl; text-align: right; }}
+        .container {{ max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); }}
+        .header {{ background-color: #161616; color: #ffffff; padding: 30px 20px; text-align: center; }}
+        .header h1 {{ margin: 0; font-size: 28px; font-weight: 700; }}
+        .content {{ padding: 40px 30px; text-align: center; }}
+        .message {{ font-size: 16px; line-height: 1.6; color: #555; margin-bottom: 30px; }}
+        .btn {{ display: inline-block; padding: 14px 35px; background-color: #ef4444; color: #ffffff !important; text-decoration: none; font-weight: bold; border-radius: 50px; font-size: 18px; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4); }}
+        .footer {{ background-color: #f9f9f9; padding: 20px; text-align: center; font-size: 14px; color: #777; border-top: 1px solid #eee; }}
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <div class=""header"">
+            <h1>NexMedia AI</h1>
+        </div>
+        <div class=""content"">
+            <h2 style=""color: #222;"">إعادة تعيين كلمة المرور 🔒</h2>
+            <div class=""message"">
+                مرحباً {userName}، لقد تلقينا طلباً لإعادة تعيين كلمة المرور الخاصة بحسابك. يمكنك القيام بذلك عن طريق الضغط على الزر أدناه:
+            </div>
+            <a href=""{resetLink}"" class=""btn"">إعادة تعيين كلمة المرور</a>
+            <p style=""margin-top: 30px; font-size: 14px; color: #888;"">إذا لم تطلب إعادة تعيين كلمة المرور، فيمكنك تجاهل هذه الرسالة بأمان.</p>
+        </div>
+        <div class=""footer"">
+            <p>&copy; {DateTime.UtcNow.Year} NexMedia AI. جميع الحقوق محفوظة.</p>
+        </div>
+    </div>
+</body>
+</html>";
+        }
+
+        public string GetVideoCompletionEmail(string userName, string toolName, string resultUrl)
+        {
+            return $@"
+<!DOCTYPE html>
+<html lang=""ar"" dir=""rtl"">
+<head>
+    <meta charset=""UTF-8"">
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+    <title>اكتملت المعالجة - NexMedia AI</title>
+    <style>
+        body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #111111; margin: 0; padding: 0; color: #eee; direction: rtl; text-align: right; }}
+        .container {{ max-width: 600px; margin: 40px auto; background-color: #1a1a1a; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); border: 1px solid #333; }}
+        .header {{ background: linear-gradient(135deg, #6366f1, #a855f7); color: #ffffff; padding: 40px 20px; text-align: center; }}
+        .header h1 {{ margin: 0; font-size: 32px; font-weight: 800; letter-spacing: 1px; }}
+        .content {{ padding: 40px 30px; text-align: center; }}
+        .message {{ font-size: 18px; line-height: 1.6; color: #ccc; margin-bottom: 30px; }}
+        .btn {{ display: inline-block; padding: 15px 40px; background-color: #ffffff; color: #111111 !important; text-decoration: none; font-weight: bold; border-radius: 50px; font-size: 18px; box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2); transition: all 0.3s; }}
+        .footer {{ background-color: #111111; padding: 20px; text-align: center; font-size: 14px; color: #666; border-top: 1px solid #222; }}
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <div class=""header"">
+            <h1>NexMedia AI</h1>
+        </div>
+        <div class=""content"">
+            <h2 style=""color: #fff; margin-bottom: 20px;"">مرحباً {userName}، النتيجة جاهزة! 🎉</h2>
+            <div class=""message"">
+                لقد انتهينا للتو من معالجة طلبك لأداة <strong style=""color: #a855f7;"">{toolName}</strong>. يمكنك الآن مشاهدة وتحميل النتيجة النهائية.
+            </div>
+            <a href=""{resultUrl}"" class=""btn"">عرض النتيجة الآن</a>
+        </div>
+        <div class=""footer"">
+            <p>&copy; {DateTime.UtcNow.Year} NexMedia AI. الذكاء الاصطناعي بين يديك.</p>
+        </div>
+    </div>
+</body>
+</html>";
+        }
     }
 }

@@ -18,14 +18,17 @@ namespace NexClone.Backend.Core.Entities
         public bool IsMaintenanceMode { get; set; } = false;
         public bool IsComingSoon { get; set; } = false;
 
-        public ICollection<ToolRoutingRule> RoutingRules { get; set; } = new List<ToolRoutingRule>();
+        public ICollection<ToolRoutingRule>? RoutingRules { get; set; } = new List<ToolRoutingRule>();
 
-        public List<int> AllowedWalletTypeIds { get; set; } = new List<int>();
+        public List<int>? AllowedWalletTypeIds { get; set; } = new List<int>();
+        
+        public bool AllowStandardCredits { get; set; } = true;
+        public bool AllowPremiumCredits { get; set; } = false; // "Standard" or "Premium"
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         // JSON field for any extra settings the tool might need
         [Column(TypeName = "jsonb")]
-        public string AdditionalSettings { get; set; } = "{}";
+        public string? AdditionalSettings { get; set; } = "{}";
     }
 }

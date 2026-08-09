@@ -4,7 +4,7 @@ import random
 import os
 import time
 
-base_url = "http://localhost:8080"
+base_url = "http://188.166.65.112:8080"
 email = ''.join(random.choices(string.ascii_lowercase, k=10)) + "@test.com"
 password = "password123"
 
@@ -15,14 +15,17 @@ res = session.post(f"{base_url}/api/auth/register", json={"email": email, "passw
 print(res.status_code, res.text)
 
 print("Confirming email in db...")
-os.system(f'docker exec nexclone-postgres psql -U postgres -d nexclonedb -c "UPDATE \\"AspNetUsers\\" SET \\"EmailConfirmed\\" = true, \\"IsVerified\\" = true WHERE \\"Email\\" = \'{email}\';"')
+os.system(f'psql "postgresql://nexclone:devpassword123!@188.166.65.112:5432/nexclone_dev" -c "UPDATE \\"AspNetUsers\\" SET \\"EmailConfirmed\\" = true, \\"IsVerified\\" = true WHERE \\"Email\\" = \'{email}\';"')
 
 print("Logging in...")
 res = session.post(f"{base_url}/api/auth/login", json={"email": email, "password": password})
 print(res.status_code, res.text)
 
+token = res.json().get("token")
+session.headers.update({"Authorization": f"Bearer {token}"})
+
 # Add credits to Wallets via User ID
-os.system(f'docker exec nexclone-postgres psql -U postgres -d nexclonedb -c "UPDATE \\"Wallets\\" SET \\"Balance\\" = 100 WHERE \\"UserId\\" = (SELECT \\"Id\\" FROM \\"AspNetUsers\\" WHERE \\"Email\\" = \'{email}\');"')
+os.system(f'psql "postgresql://nexclone:devpassword123!@188.166.65.112:5432/nexclone_dev" -c "INSERT INTO \\"UserWallets\\" (\\"UserId\\", \\"WalletTypeId\\", \\"Balance\\") VALUES ((SELECT \\"Id\\" FROM \\"AspNetUsers\\" WHERE \\"Email\\" = \'{email}\'), 1, 100);" || true')
 
 print("Testing start-avatar...")
 with open('scratch/face.jpg', 'rb') as f_img, open('scratch/tiny.wav', 'rb') as f_audio:

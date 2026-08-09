@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NexClone.Backend.Core.Entities;
+using Hangfire;
 using System.Linq;
 using System.Threading.Tasks;
 using System;
@@ -213,7 +215,7 @@ namespace NexClone.Backend.API.Controllers.Admin
                         payment.Plan.MonthlyCredits,
                         payment.Amount);
                     
-                    await _emailService.SendEmailAsync(payment.User.Email, payment.User.FullName ?? "", "تم تفعيل اشتراكك بنجاح - NexMedia AI", htmlBody);
+                    Hangfire.BackgroundJob.Enqueue<IEmailService>(x => x.SendEmailAsync(payment.User.Email, payment.User.FullName ?? "", "تم تفعيل اشتراكك بنجاح - NexMedia AI", htmlBody));
                 }
             }
             catch (Exception ex)
