@@ -215,7 +215,7 @@ namespace NexClone.Backend.API.Controllers.Admin
                         payment.Plan.MonthlyCredits,
                         payment.Amount);
                     
-                    Hangfire.BackgroundJob.Enqueue<IEmailService>(x => x.SendEmailAsync(payment.User.Email, payment.User.FullName ?? "", "تم تفعيل اشتراكك بنجاح - NexMedia AI", htmlBody));
+                    Hangfire.BackgroundJob.Enqueue<NexClone.Backend.Infrastructure.Consumers.EmailConsumer>(c => c.Consume(new NexClone.Backend.Core.Messages.SendEmailMessage { ToEmail = payment.User.Email, ToName = payment.User.FullName ?? "", Subject = "تم تفعيل اشتراكك بنجاح - NexMedia AI", HtmlBody = htmlBody }));
                 }
             }
             catch (Exception ex)

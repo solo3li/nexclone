@@ -253,7 +253,7 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                                 amountEgp,
                                 minioUrl);
                             
-                            Hangfire.BackgroundJob.Enqueue<IEmailService>(x => x.SendEmailAsync(user.Email, user.FullName ?? "", "تم تفعيل اشتراكك بنجاح - NexMedia AI", htmlBody));
+                            Hangfire.BackgroundJob.Enqueue<NexClone.Backend.Infrastructure.Consumers.EmailConsumer>(c => c.Consume(new NexClone.Backend.Core.Messages.SendEmailMessage { ToEmail = user.Email, ToName = user.FullName ?? "", Subject = "تم تفعيل اشتراكك بنجاح - NexMedia AI", HtmlBody = htmlBody }));
                         }
                     }
                     catch (Exception ex)
@@ -536,7 +536,7 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                             plan.MonthlyCredits,
                             amountUsd,
                             minioUrl);
-                        Hangfire.BackgroundJob.Enqueue<IEmailService>(x => x.SendEmailAsync(user.Email, user.FullName ?? "", "تم تفعيل اشتراكك بنجاح - NexMedia AI", htmlBody));
+                        Hangfire.BackgroundJob.Enqueue<NexClone.Backend.Infrastructure.Consumers.EmailConsumer>(c => c.Consume(new NexClone.Backend.Core.Messages.SendEmailMessage { ToEmail = user.Email, ToName = user.FullName ?? "", Subject = "تم تفعيل اشتراكك بنجاح - NexMedia AI", HtmlBody = htmlBody }));
                     }
                 }
                 catch (Exception ex)

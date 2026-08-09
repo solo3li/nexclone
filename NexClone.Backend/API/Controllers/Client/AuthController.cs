@@ -175,7 +175,7 @@ namespace NexClone.Backend.API.Controllers.Client
             var verifyLink = $"{origin}/{locale}/verify-email?email={Uri.EscapeDataString(user.Email)}&token={Uri.EscapeDataString(verificationToken)}";
 
             string emailHtml = _emailTemplateService.GetVerificationEmail(user.FullName ?? user.UserName ?? "User", verifyLink);
-            BackgroundJob.Enqueue<IEmailService>(x => x.SendEmailAsync(user.Email, user.FullName ?? user.UserName ?? "User", "تفعيل الحساب - NexMedia AI", emailHtml));
+            BackgroundJob.Enqueue<NexClone.Backend.Infrastructure.Consumers.EmailConsumer>(c => c.Consume(new NexClone.Backend.Core.Messages.SendEmailMessage { ToEmail = user.Email, ToName = user.FullName ?? user.UserName ?? "User", Subject = "تفعيل الحساب - NexMedia AI", HtmlBody = emailHtml }));
 
             return Ok(new { Message = "تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني لتفعيل الحساب.", FreeTrialAssigned = freeTrialAssigned });
 
@@ -235,7 +235,7 @@ namespace NexClone.Backend.API.Controllers.Client
             var verifyLink = $"{origin}/{locale}/verify-email?email={Uri.EscapeDataString(user.Email)}&token={Uri.EscapeDataString(verificationToken)}";
 
             string emailHtml = _emailTemplateService.GetVerificationEmail(user.FullName ?? user.UserName ?? "User", verifyLink);
-            BackgroundJob.Enqueue<IEmailService>(x => x.SendEmailAsync(user.Email, user.FullName ?? user.UserName ?? "User", "إعادة إرسال: تفعيل الحساب - NexMedia AI", emailHtml));
+            BackgroundJob.Enqueue<NexClone.Backend.Infrastructure.Consumers.EmailConsumer>(c => c.Consume(new NexClone.Backend.Core.Messages.SendEmailMessage { ToEmail = user.Email, ToName = user.FullName ?? user.UserName ?? "User", Subject = "إعادة إرسال: تفعيل الحساب - NexMedia AI", HtmlBody = emailHtml }));
 
             return Ok(new { Message = "تم إرسال رسالة التفعيل بنجاح." });
         }
@@ -443,7 +443,7 @@ namespace NexClone.Backend.API.Controllers.Client
             var resetLink = $"{origin}/reset-password?email={Uri.EscapeDataString(request.Email)}&token={token}";
 
             string emailHtml = _emailTemplateService.GetPasswordResetEmail(user.FullName ?? user.UserName ?? "User", resetLink);
-            BackgroundJob.Enqueue<IEmailService>(x => x.SendEmailAsync(user.Email, user.FullName ?? user.UserName ?? "User", "إعادة تعيين كلمة المرور - NexMedia AI", emailHtml));
+            BackgroundJob.Enqueue<NexClone.Backend.Infrastructure.Consumers.EmailConsumer>(c => c.Consume(new NexClone.Backend.Core.Messages.SendEmailMessage { ToEmail = user.Email, ToName = user.FullName ?? user.UserName ?? "User", Subject = "إعادة تعيين كلمة المرور - NexMedia AI", HtmlBody = emailHtml }));
 
             return Ok(new { Message = "If an account with this email exists, a password reset link has been sent." });
         }
@@ -652,7 +652,7 @@ namespace NexClone.Backend.API.Controllers.Client
                                     targetPlan.MonthlyCredits,
                                     targetPlan.PriceEgp);
                                 
-                                BackgroundJob.Enqueue<IEmailService>(x => x.SendEmailAsync(user.Email, user.FullName ?? "", "تم تفعيل اشتراكك بنجاح - NexMedia AI", htmlBody));
+                                BackgroundJob.Enqueue<NexClone.Backend.Infrastructure.Consumers.EmailConsumer>(c => c.Consume(new NexClone.Backend.Core.Messages.SendEmailMessage { ToEmail = user.Email, ToName = user.FullName ?? "", Subject = "تم تفعيل اشتراكك بنجاح - NexMedia AI", HtmlBody = htmlBody }));
                             }
                         }
                         catch (Exception ex)

@@ -218,7 +218,7 @@ namespace NexClone.Backend.Infrastructure.Consumers
                             user.FullName ?? user.UserName ?? "User", 
                             history.Title, 
                             history.FileUrl);
-                        Hangfire.BackgroundJob.Enqueue<IEmailService>(x => x.SendEmailAsync(user.Email, user.FullName ?? user.UserName ?? "", $"عملية {history.Title} مكتملة - NexMedia AI", htmlBody));
+                        Hangfire.BackgroundJob.Enqueue<NexClone.Backend.Infrastructure.Consumers.EmailConsumer>(c => c.Consume(new NexClone.Backend.Core.Messages.SendEmailMessage { ToEmail = user.Email, ToName = user.FullName ?? user.UserName ?? "", Subject = $"عملية {history.Title} مكتملة - NexMedia AI", HtmlBody = htmlBody }));
                     } catch { /* Ignore email fail */ }
                 }
             }
