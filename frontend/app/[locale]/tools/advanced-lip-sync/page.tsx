@@ -432,8 +432,8 @@ function AdvancedLipSyncPage() {
                 <div className="mt-4" dir={isRtl ? 'rtl' : 'ltr'}>
                   <CostEstimateCard
                     estimatedCost={estimatedCost}
-                    chargedWallet={chargedWallet}
-                    chargedWalletIcon={chargedWalletIcon}
+                    chargedWallet={null}
+                    chargedWalletIcon={null}
                     isLoading={isEstimating}
                     error={estimateError}
                     isRtl={isRtl}
@@ -511,7 +511,7 @@ function AdvancedLipSyncPage() {
               <span className="text-white/70 font-medium">{t('estimatedCost')}:</span>
               <div className="flex flex-col items-end">
                 <span className="text-fuchsia-400 font-bold text-xl">{estimatedCost} {t('credits')}</span>
-                {chargedWallet && <span className="text-white/40 text-[10px]">({isRtl ? 'سيتم الخصم من' : 'Will be deducted from'}: {chargedWallet})</span>}
+
               </div>
             </div>
 

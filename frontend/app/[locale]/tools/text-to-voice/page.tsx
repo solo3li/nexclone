@@ -63,6 +63,8 @@ function TextToVoicePage() {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [estimatedCost, setEstimatedCost] = useState<number | null>(null);
+  const [chargedWallet, setChargedWallet] = useState<string | null>(null);
+  const [chargedWalletIcon, setChargedWalletIcon] = useState<string | null>(null);
 
   const [isEstimating, setIsEstimating] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
