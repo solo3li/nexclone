@@ -32,7 +32,6 @@ namespace NexClone.Backend.API.Controllers.Client
             var query = _context.Subscriptions
                 .Include(s => s.Plan)
                 .Include(s => s.User)
-                    .ThenInclude(u => u.Wallets)
                 .Where(s => s.Plan.PriceUsd > 0 && !s.Plan.IsDefaultRegistrationPlan)
                 .AsQueryable();
 
@@ -99,7 +98,6 @@ namespace NexClone.Backend.API.Controllers.Client
             ViewBag.SelectedDatePeriod = datePeriod;
             ViewBag.SelectedStartDate = startDate?.ToString("yyyy-MM-dd");
             ViewBag.SelectedEndDate = endDate?.ToString("yyyy-MM-dd");
-            ViewBag.AllWalletTypes = await _context.WalletTypes.ToListAsync();
 
             return View(subscriptions);
         }
@@ -227,8 +225,7 @@ namespace NexClone.Backend.API.Controllers.Client
             {
                 try 
                 {
-                    var wallets = _context.UserWallets.Where(w => w.SubscriptionId == id);
-                    _context.UserWallets.RemoveRange(wallets);
+
                     _context.Subscriptions.Remove(sub);
                     await _context.SaveChangesAsync();
                     TempData["SuccessMessage"] = "Subscription deleted successfully.";
@@ -263,8 +260,7 @@ namespace NexClone.Backend.API.Controllers.Client
                 try 
                 {
                     var subIds = subscriptions.Select(s => s.Id).ToList();
-                    var wallets = _context.UserWallets.Where(w => w.SubscriptionId.HasValue && subIds.Contains(w.SubscriptionId.Value));
-                    _context.UserWallets.RemoveRange(wallets);
+
                     _context.Subscriptions.RemoveRange(subscriptions);
                     await _context.SaveChangesAsync();
                 }

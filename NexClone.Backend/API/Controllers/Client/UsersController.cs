@@ -331,6 +331,7 @@ namespace NexClone.Backend.API.Controllers.Client
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AdjustCredits(Guid userId, decimal amount, string operation)
         {
+            var user = await _context.Users.FindAsync(userId);
             if (user == null) return NotFound();
 
             if (operation == "add")
