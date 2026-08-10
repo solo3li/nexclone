@@ -41,8 +41,6 @@ function AdvancedLipSyncPage() {
   const [selectedQuality, setSelectedQuality] = useState("Standard");
   
   const [estimatedCost, setEstimatedCost] = useState<number>(user?.activePlan?.lipSyncCostPerGeneration || 1);
-  const [chargedWallet, setChargedWallet] = useState<string | null>(null);
-  const [chargedWalletIcon, setChargedWalletIcon] = useState<string | null>(null);
   const [isEstimating, setIsEstimating] = useState(false);
   const [estimateError, setEstimateError] = useState<string | null>(null);
 
@@ -68,25 +66,18 @@ function AdvancedLipSyncPage() {
   useEffect(() => {
     if (!isAuthenticated || !user) {
       setEstimatedCost(user?.activePlan?.lipSyncCostPerGeneration || 1);
-      setChargedWallet(null);
-      setChargedWalletIcon(null);
       setEstimateError(null);
       return;
     }
     const effectiveDuration = videoDuration ?? audioDuration;
     if (effectiveDuration == null) return;
     setIsEstimating(true);
-    setEstimateError(null);
-    const subId = sessionStorage.getItem('preferredSubscriptionId');
     const params = new URLSearchParams();
-    if (subId) params.append('subscriptionId', subId);
     params.append('durationSeconds', effectiveDuration.toFixed(2));
     api.get(`/api/video/estimate-lipsync?${params.toString()}`)
       .then(res => {
-        if (res.data.estimatedCost !== undefined) {
-          setEstimatedCost(res.data.estimatedCost);
-          setChargedWallet(res.data.chargedWalletName);
-          setChargedWalletIcon(res.data.chargedWalletIcon);
+        if (res.data.estimatedCost !== undefined || res.data.totalCost !== undefined) {
+          setEstimatedCost(res.data.estimatedCost || res.data.totalCost || 1);
         }
       })
       .catch(err => {
@@ -135,10 +126,7 @@ function AdvancedLipSyncPage() {
       formData.append("video", videoFile);
       formData.append("audio", audioFile);
 
-      const subId = sessionStorage.getItem('preferredSubscriptionId');
-      if (subId) {
-        formData.append("subscriptionId", subId);
-      }
+
       const responseData = await startLipsync(formData);
       const taskId = responseData.id || responseData.taskId;
       

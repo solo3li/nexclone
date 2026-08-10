@@ -63,8 +63,7 @@ function TextToVoicePage() {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [estimatedCost, setEstimatedCost] = useState<number | null>(null);
-  const [chargedWallet, setChargedWallet] = useState<string | null>(null);
-  const [chargedWalletIcon, setChargedWalletIcon] = useState<string | null>(null);
+
   const [isEstimating, setIsEstimating] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingCost, setPendingCost] = useState<number | null>(null);
@@ -197,16 +196,11 @@ function TextToVoicePage() {
         language: languageMode,
         voiceName: selectedVoice,
         styleInstruction: "",
-        quality: selectedQuality,
-        subscriptionId: sessionStorage.getItem('preferredSubscriptionId') ? Number(sessionStorage.getItem('preferredSubscriptionId')) : null
+        quality: selectedQuality
       });
-      const cost = responseData.estimatedCost;
+      const cost = responseData.estimatedCost || responseData.totalCost || 1;
       setEstimatedCost(cost);
-      setChargedWallet(responseData.chargedWalletName);
-      setChargedWalletIcon(responseData.chargedWalletIcon);
-      const totalCredits = user?.wallets 
-        ? user.wallets.reduce((acc: number, w: any) => acc + w.balance, 0) 
-        : (user?.availableCredits || 0);
+      const totalCredits = (user?.standardCredits || 0) + (user?.premiumCredits || 0);
 
       if (totalCredits < cost) {
         setError(getInsufficientCreditsMsg());
@@ -267,8 +261,7 @@ function TextToVoicePage() {
         language: languageMode,
         voiceName: selectedVoice,
         styleInstruction: instruction.trim(),
-        quality: selectedQuality,
-        subscriptionId: sessionStorage.getItem('preferredSubscriptionId') ? Number(sessionStorage.getItem('preferredSubscriptionId')) : null
+        quality: selectedQuality
       });
 
       if (responseData && responseData.taskId) {

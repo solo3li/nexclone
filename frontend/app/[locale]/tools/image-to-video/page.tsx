@@ -46,8 +46,6 @@ function ImageToVideoPage() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   
   const [estimatedCost, setEstimatedCost] = useState<number>(user?.activePlan?.avatarVideoCostPerGeneration || 1);
-  const [chargedWallet, setChargedWallet] = useState<string | null>(null);
-  const [chargedWalletIcon, setChargedWalletIcon] = useState<string | null>(null);
 
   const [renderingSpeed, setRenderingSpeed] = useState<"std" | "pro">("std");
   const [showAudioTrimmer, setShowAudioTrimmer] = useState(false);
@@ -56,13 +54,10 @@ function ImageToVideoPage() {
   useEffect(() => {
     if (isAuthenticated && user) {
       setIsEstimating(true);
-      const subId = sessionStorage.getItem('preferredSubscriptionId');
-      const qs = subId ? `?subscriptionId=${subId}&renderingSpeed=${renderingSpeed}` : `?renderingSpeed=${renderingSpeed}`;
+      const qs = `?renderingSpeed=${renderingSpeed}`;
       api.get(`/api/video/estimate-avatar${qs}`).then(res => {
         if (res.data) {
-          setEstimatedCost(res.data.estimatedCost);
-          setChargedWallet(res.data.chargedWalletName);
-          setChargedWalletIcon(res.data.chargedWalletIcon);
+          setEstimatedCost(res.data.estimatedCost || res.data.totalCost || 1);
         }
       }).catch(err => {
         console.warn("Failed to get estimated cost:", err.response?.data?.error || err.message);
@@ -73,9 +68,7 @@ function ImageToVideoPage() {
           ? (user?.activePlan?.avatarVideoProCost || 2) 
           : (user?.activePlan?.avatarVideoCostPerGeneration || 1)
       );
-      setChargedWallet(null);
-      setChargedWalletIcon(null);
-    }
+      );
   }, [isAuthenticated, user, renderingSpeed]);
   useEffect(() => {
     const fetchConfig = async () => {
@@ -162,10 +155,7 @@ function ImageToVideoPage() {
       if (prompt) formData.append("prompt", prompt);
       formData.append("renderingSpeed", renderingSpeed);
 
-      const subId = sessionStorage.getItem('preferredSubscriptionId');
-      if (subId) {
-        formData.append("subscriptionId", subId);
-      }
+
       const responseData = await startAvatar(formData);
       
       if (responseData && (responseData.id || responseData.taskId)) {

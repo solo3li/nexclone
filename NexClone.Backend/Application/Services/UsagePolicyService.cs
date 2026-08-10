@@ -200,18 +200,9 @@ namespace NexClone.Backend.Application.Services
                 }
             }
 
-            string chargedName = "";
-            int chargedId = 1;
-            if (standardToCharge > 0 && premiumToCharge > 0) { chargedName = "Standard & Premium Credits"; chargedId = 3; }
-            else if (premiumToCharge > 0) { chargedName = "Premium Credits"; chargedId = 2; }
-            else { chargedName = "Standard Credits"; chargedId = 1; }
-
             return new PolicyValidationResult { 
                 IsAllowed = true, 
                 TotalCost = totalCost, 
-                ChargedWalletTypeId = chargedId, 
-                ChargedWalletName = chargedName,
-                ChargedWalletIcon = "bx bx-coin",
                 StandardCreditsCharged = standardToCharge,
                 PremiumCreditsCharged = premiumToCharge
             };
@@ -286,8 +277,6 @@ namespace NexClone.Backend.Application.Services
             var user = await _context.Users
                 .Include(u => u.Subscriptions)
                     .ThenInclude(s => s.Plan)
-                .Include(u => u.Wallets)
-                    .ThenInclude(w => w.WalletType)
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null) 

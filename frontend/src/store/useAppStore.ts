@@ -11,11 +11,8 @@ interface AppState {
     hasPhoneNumber: boolean;
     availableCredits: number;
     isStaff: boolean;
-    wallets: Array<{
-      code: string;
-      balance: number;
-      subscriptionId: number | null;
-    }>;
+    standardCredits: number;
+    premiumCredits: number;
     activePlan: {
       name: string;
       nameAr: string;
@@ -41,10 +38,7 @@ interface AppState {
       freezeEndDate?: string;
       isFreeTrial: boolean;
       isDefaultRegistrationPlan: boolean;
-      wallets: Array<{
-        code: string;
-        balance: number;
-      }>;
+
     }>;
   } | null;
   isAuthenticated: boolean;

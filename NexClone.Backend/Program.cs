@@ -206,7 +206,6 @@ builder.Services.AddScoped<NexClone.Backend.Infrastructure.ExternalServices.Invo
 builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IPaymentService, NexClone.Backend.Infrastructure.ExternalServices.Payments.PaymobPaymentService>();
 
 // Register Credit Manager
-builder.Services.AddScoped<NexClone.Backend.Application.Services.CreditManagerService>();
 builder.Services.AddScoped<NexClone.Backend.Application.Services.WalletService>();
 builder.Services.AddScoped<NexClone.Backend.Application.Services.UsagePolicyService>();
 

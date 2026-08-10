@@ -11,7 +11,7 @@ vi.mock('../../i18n/routing', () => ({
 
 vi.mock('../../store/useAppStore', () => ({
   useAppStore: () => ({
-    user: { fullName: 'Test User', email: 'test@example.com', wallets: [] },
+    user: { fullName: 'Test User', email: 'test@example.com', standardCredits: 100, premiumCredits: 50 },
     setUser: vi.fn(),
     logout: vi.fn(),
   }),

@@ -50,26 +50,18 @@ function MotionControlPage() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   
   const [estimatedCost, setEstimatedCost] = useState<number>(user?.activePlan?.avatarVideoCostPerGeneration || 1);
-  const [chargedWallet, setChargedWallet] = useState<string | null>(null);
-  const [chargedWalletIcon, setChargedWalletIcon] = useState<string | null>(null);
+
   const [isEstimating, setIsEstimating] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
     if (isAuthenticated && user) {
       setIsEstimating(true);
-      const subId = sessionStorage.getItem('preferredSubscriptionId');
-      const params = new URLSearchParams();
-      params.append('renderingSpeed', renderingSpeed);
-      if (subId) params.append('subscriptionId', subId);
-
-      const qs = `?${params.toString()}`;
+      const qs = `?renderingSpeed=${renderingSpeed}`;
       estimateMotionControl(qs)
         .then((data: any) => {
-          if (data.estimatedCost !== undefined) {
-            setEstimatedCost(data.estimatedCost);
-            setChargedWallet(data.chargedWalletName);
-            setChargedWalletIcon(data.chargedWalletIcon);
+          if (data.estimatedCost !== undefined || data.totalCost !== undefined) {
+            setEstimatedCost(data.estimatedCost || data.totalCost || 1);
           }
         })
         .catch((err: any) => {
@@ -163,10 +155,7 @@ function MotionControlPage() {
       formData.append("orientation", characterOrientation);
       formData.append("keepOriginalSound", keepOriginalSound.toString());
 
-      const subId = sessionStorage.getItem('preferredSubscriptionId');
-      if (subId) {
-        formData.append("subscriptionId", subId);
-      }
+
 
       const responseData = await startMotionControl(formData);
       

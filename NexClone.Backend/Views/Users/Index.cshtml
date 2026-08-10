@@ -273,21 +273,16 @@ function closeWalletsModal() {
                 <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="16" height="16" viewBox="0 0 32 32" aria-hidden="true" class="bx--modal-close__icon"><path d="M24 9.4L22.6 8 16 14.6 9.4 8 8 9.4 14.6 16 8 22.6 9.4 24 16 17.4 22.6 24 24 22.6 17.4 16 24 9.4z"></path></svg>
             </button>
         </div>
-        <form asp-action="AddWalletCredits" method="post" style="margin: 0;">
+        <form asp-action="AdjustCredits" method="post" style="margin: 0;">
             <div class="bx--modal-content">
                 <input type="hidden" id="addBalanceUserId" name="userId" value="" />
                 
                 <div class="bx--form-item" style="margin-bottom: 1.5rem;">
-                    <label for="walletTypeId" class="bx--label">@Localizer["Select Wallet"]</label>
+                    <label for="operation" class="bx--label">@Localizer["Operation"]</label>
                     <div class="bx--select">
-                        <select id="walletTypeId" name="walletTypeId" class="bx--select-input" required>
-                            @if (ViewBag.AllWalletTypes != null)
-                            {
-                                foreach (var wt in (IEnumerable<NexClone.Backend.Core.Entities.WalletType>)ViewBag.AllWalletTypes)
-                                {
-                                    <option value="@wt.Id">@wt.Name</option>
-                                }
-                            }
+                        <select id="operation" name="operation" class="bx--select-input" required>
+                            <option value="add">@Localizer["Add Credits"]</option>
+                            <option value="remove">@Localizer["Remove Credits"]</option>
                         </select>
                         <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" class="bx--select__arrow"><path d="M8 11L3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z"></path></svg>
                     </div>

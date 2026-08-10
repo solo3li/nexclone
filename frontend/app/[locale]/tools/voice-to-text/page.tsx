@@ -192,8 +192,6 @@ function VoiceToTextPage() {
   useEffect(() => {
     if (!file || duration <= 0) {
       setEstimatedCost(null);
-      setChargedWallet(null);
-      setChargedWalletIcon(null);
       return;
     }
     const fetchEstimate = async () => {
@@ -203,12 +201,9 @@ function VoiceToTextPage() {
         const durationMinutes = duration / 60;
         const responseData = await estimateVoiceToText({ 
           fileSizeBytes, 
-          durationMinutes,
-          subscriptionId: sessionStorage.getItem('preferredSubscriptionId') ? Number(sessionStorage.getItem('preferredSubscriptionId')) : null 
+          durationMinutes
         });
-        setEstimatedCost(responseData.estimatedCost);
-        setChargedWallet(responseData.chargedWalletName);
-        setChargedWalletIcon(responseData.chargedWalletIcon);
+        setEstimatedCost(responseData.estimatedCost || responseData.totalCost || 1);
       } catch (err: any) {
         if (err.response?.status !== 400) {
           console.error(err);
@@ -225,8 +220,6 @@ function VoiceToTextPage() {
         }
         
         setEstimatedCost(null);
-        setChargedWallet(null);
-        setChargedWalletIcon(null);
       } finally {
         setIsEstimating(false);
       }
@@ -370,13 +363,10 @@ function VoiceToTextPage() {
       const durationMinutes = duration > 0 ? duration / 60 : 0.01;
       const estimateResponseData = await estimateVoiceToText({ 
         fileSizeBytes, 
-        durationMinutes,
-        subscriptionId: sessionStorage.getItem('preferredSubscriptionId') ? Number(sessionStorage.getItem('preferredSubscriptionId')) : null 
+        durationMinutes
       });
-      const cost = estimateResponseData.estimatedCost;
-      const totalCredits = user?.wallets 
-        ? user.wallets.reduce((acc: number, w: any) => acc + w.balance, 0) 
-        : (user?.availableCredits || 0);
+      const cost = estimateResponseData.estimatedCost || estimateResponseData.totalCost || 1;
+      const totalCredits = (user?.standardCredits || 0) + (user?.premiumCredits || 0);
 
       if (totalCredits < cost) {
         setError(getInsufficientCreditsMsg());
@@ -403,8 +393,7 @@ function VoiceToTextPage() {
       const responseData = await generateVoiceToText({
         fileId: fileId,
         translate: language !== "auto",
-        targetLanguage: language,
-        subscriptionId: sessionStorage.getItem('preferredSubscriptionId') ? Number(sessionStorage.getItem('preferredSubscriptionId')) : null
+        targetLanguage: language
       });
 
       if (responseData && responseData.taskId) {
