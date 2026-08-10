@@ -39,8 +39,6 @@ namespace NexClone.Backend.API.Controllers.Client
             if (pageNumber < 1) pageNumber = 1;
 
             var query = _context.Users
-                .Include(u => u.Wallets)
-                    .ThenInclude(w => w.WalletType)
                 .Include(u => u.Subscriptions.Where(s => s.Status == "active" && s.Plan.PriceUsd > 0 && !s.Plan.IsDefaultRegistrationPlan))
                     .ThenInclude(s => s.Plan)
                 .AsQueryable();
@@ -69,7 +67,7 @@ namespace NexClone.Backend.API.Controllers.Client
                 .ToListAsync();
 
             ViewBag.Plans = new SelectList(await _context.Plans.Where(p => p.PriceUsd > 0 && !p.IsDefaultRegistrationPlan && !p.IsDeleted).ToListAsync(), "Id", "Name");
-            ViewBag.AllWalletTypes = await _context.WalletTypes.ToListAsync();
+
             ViewBag.CurrentSearch = searchString;
             ViewBag.CurrentPlanId = planId;
             ViewBag.PageNumber = pageNumber;
@@ -81,8 +79,6 @@ namespace NexClone.Backend.API.Controllers.Client
         public async Task<IActionResult> Details(Guid id)
         {
             var user = await _context.Users
-                .Include(u => u.Wallets)
-                    .ThenInclude(w => w.WalletType)
                 .Include(u => u.Subscriptions)
                     .ThenInclude(s => s.Plan)
                 .Include(u => u.Subscriptions)
@@ -98,7 +94,7 @@ namespace NexClone.Backend.API.Controllers.Client
 
             ViewData["Title"] = $"User Details - {user.Email}";
             ViewBag.Plans = new SelectList(await _context.Plans.Where(p => p.PriceUsd > 0 && !p.IsDefaultRegistrationPlan && !p.IsDeleted).ToListAsync(), "Id", "Name");
-            ViewBag.AllWalletTypes = await _context.WalletTypes.ToListAsync();
+
             ViewBag.Devices = devices;
             return View(user);
         }
@@ -335,35 +331,18 @@ namespace NexClone.Backend.API.Controllers.Client
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AdjustCredits(Guid userId, decimal amount, string operation)
         {
-            var user = await _context.Users.Include(u => u.Wallets).FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null) return NotFound();
-
-            var generalWalletType = await _context.WalletTypes.FirstOrDefaultAsync(w => w.Code == "GENERAL");
-            if (generalWalletType == null)
-            {
-                generalWalletType = new WalletType { Code = "GENERAL", Name = "General Wallet" };
-                _context.WalletTypes.Add(generalWalletType);
-                await _context.SaveChangesAsync();
-            }
-
-            var userWallet = user.Wallets.FirstOrDefault(w => w.WalletTypeId == generalWalletType.Id);
-            if (userWallet == null)
-            {
-                userWallet = new UserWallet { UserId = userId, WalletTypeId = generalWalletType.Id, Balance = 0 };
-                _context.UserWallets.Add(userWallet);
-                user.Wallets.Add(userWallet);
-            }
 
             if (operation == "add")
             {
-                userWallet.Balance += amount;
+                user.StandardCredits += amount;
             }
             else if (operation == "remove")
             {
-                userWallet.Balance -= amount;
-                if (userWallet.Balance < 0) userWallet.Balance = 0;
+                user.StandardCredits -= amount;
+                if (user.StandardCredits < 0) user.StandardCredits = 0;
             }
-            userWallet.UpdatedAt = DateTime.UtcNow;
+
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Details), new { id = userId });
