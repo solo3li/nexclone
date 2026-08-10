@@ -55,8 +55,8 @@ namespace NexClone.Backend.Core.Messages
         public string VoiceName { get; set; }
         public string StyleInstruction { get; set; }
         public string Quality { get; set; }
-        public decimal Cost { get; set; }
-        public int ChargedWalletTypeId { get; set; }
+        public decimal StandardCost { get; set; }
+        public decimal PremiumCost { get; set; }
     }
 
     public class VoiceToTextMessage : IAiTaskMessage
@@ -66,7 +66,7 @@ namespace NexClone.Backend.Core.Messages
         public string FileId { get; set; }
         public bool Translate { get; set; }
         public string TargetLanguage { get; set; }
-        public decimal Cost { get; set; }
-        public int ChargedWalletTypeId { get; set; }
+        public decimal StandardCost { get; set; }
+        public decimal PremiumCost { get; set; }
     }
 }

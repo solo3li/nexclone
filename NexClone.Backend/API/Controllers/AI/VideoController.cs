@@ -160,7 +160,7 @@ namespace NexClone.Backend.API.Controllers.AI
             }
             catch (Exception ex)
             {
-                await _usagePolicy.RefundAsync(userId, policyResult.ChargedWalletTypeId, policyResult.TotalCost);
+                await _usagePolicy.RefundAsync(userId, policyResult.StandardCreditsCharged, policyResult.PremiumCreditsCharged);
                 return StatusCode(500, new { error = "An error occurred while queuing the video task: " + ex.Message });
             }
         }
@@ -270,7 +270,7 @@ namespace NexClone.Backend.API.Controllers.AI
             }
             catch (Exception ex)
             {
-                await _usagePolicy.RefundAsync(userId, policyResult.ChargedWalletTypeId, policyResult.TotalCost);
+                await _usagePolicy.RefundAsync(userId, policyResult.StandardCreditsCharged, policyResult.PremiumCreditsCharged);
                 return StatusCode(500, new { error = "An error occurred while uploading files: " + ex.Message });
             }
         }
@@ -432,7 +432,7 @@ namespace NexClone.Backend.API.Controllers.AI
             }
             catch (Exception ex)
             {
-                await _usagePolicy.RefundAsync(userId, policyResult.ChargedWalletTypeId, policyResult.TotalCost);
+                await _usagePolicy.RefundAsync(userId, policyResult.StandardCreditsCharged, policyResult.PremiumCreditsCharged);
                 return StatusCode(500, new { error = "An error occurred while queuing the video task: " + ex.Message });
             }
         }

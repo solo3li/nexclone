@@ -119,8 +119,8 @@ namespace NexClone.Backend.API.Controllers.AI
                         FileId = request.FileId,
                         Translate = request.Translate,
                         TargetLanguage = request.TargetLanguage,
-                        Cost = cost,
-                        ChargedWalletTypeId = policyResult.ChargedWalletTypeId
+                        StandardCost = policyResult.StandardCreditsCharged,
+                        PremiumCost = policyResult.PremiumCreditsCharged
                     })
                 );
 
@@ -132,7 +132,7 @@ namespace NexClone.Backend.API.Controllers.AI
             }
             catch (Exception ex)
             {
-                await _usagePolicy.RefundAsync(userId, policyResult.ChargedWalletTypeId, cost);
+                await _usagePolicy.RefundAsync(userId, policyResult.StandardCreditsCharged, policyResult.PremiumCreditsCharged);
                 return StatusCode(500, new { error = "Internal server error during queuing.", details = ex.Message });
             }
         }

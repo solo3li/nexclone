@@ -92,8 +92,6 @@ namespace NexClone.Backend.Core.Entities
         // Navigation
         public ICollection<Subscription> Subscriptions { get; set; } = new List<Subscription>();
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
-        public ICollection<PackageWallet> PackageWallets { get; set; } = new List<PackageWallet>();
-        public ICollection<PackageToolWallet> PackageToolWallets { get; set; } = new List<PackageToolWallet>();
         public ICollection<PlanPaymentGateway> PlanPaymentGateways { get; set; } = new List<PlanPaymentGateway>();
     }
 }

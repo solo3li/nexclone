@@ -678,8 +678,6 @@ namespace NexClone.Backend.API.Controllers.Client
             if (userId == null) return Unauthorized();
 
             var user = await _context.Users
-                .Include(u => u.Wallets)
-                    .ThenInclude(w => w.WalletType)
                 .FirstOrDefaultAsync(u => u.Id == Guid.Parse(userId));
                 
             if (user == null) return Unauthorized();
@@ -731,7 +729,6 @@ namespace NexClone.Backend.API.Controllers.Client
             if (shouldResetWallets)
             {
                 await _walletService.ResetAllWalletsAsync(user.Id);
-                await _context.Entry(user).Collection(u => u.Wallets).Query().Include(w => w.WalletType).LoadAsync();
             }
 
             string? imageUrl = null;
@@ -759,15 +756,7 @@ namespace NexClone.Backend.API.Controllers.Client
                     EndDate = s.EndDate,
                     FreezeEndDate = s.EndDate.AddDays(s.Plan.GracePeriodDays),
                     IsFreeTrial = s.Plan.IsFreeTrial,
-                    IsDefaultRegistrationPlan = s.Plan.IsDefaultRegistrationPlan,
-                    Wallets = user.Wallets
-                        .Where(w => w.SubscriptionId == s.Id || (w.SubscriptionId == null && s.Plan.IsDefaultRegistrationPlan))
-                        .Select(w => new { 
-                            Code = w.WalletType.Code, 
-                            Name = w.WalletType.Name,
-                            Icon = w.WalletType.Icon,
-                            Balance = w.Balance 
-                        })
+                    IsDefaultRegistrationPlan = s.Plan.IsDefaultRegistrationPlan
                 });
 
             return Ok(new
@@ -780,13 +769,8 @@ namespace NexClone.Backend.API.Controllers.Client
                 IsVerified = user.IsVerified,
                 HasPhoneNumber = !string.IsNullOrEmpty(user.PhoneNumber),
                 AvailableCredits = user.AvailableCredits,
-                Wallets = user.Wallets.Select(w => new { 
-                    Code = w.WalletType.Code, 
-                    Name = w.WalletType.Name,
-                    Icon = w.WalletType.Icon,
-                    Balance = w.Balance, 
-                    SubscriptionId = w.SubscriptionId 
-                }),
+                StandardCredits = user.StandardCredits,
+                PremiumCredits = user.PremiumCredits,
                 IsStaff = user.IsStaff,
                 ActivePlan = activeSub != null ? new {
                     Name = activeSub.Plan.Name,

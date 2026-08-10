@@ -20,7 +20,6 @@ namespace NexClone.Backend.Core.Entities
 
         public ICollection<ToolRoutingRule>? RoutingRules { get; set; } = new List<ToolRoutingRule>();
 
-        public List<int>? AllowedWalletTypeIds { get; set; } = new List<int>();
         
         public bool AllowStandardCredits { get; set; } = true;
         public bool AllowPremiumCredits { get; set; } = false; // "Standard" or "Premium"

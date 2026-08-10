@@ -69,8 +69,8 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 history.ErrorMessage = ex.Message;
                 await _dbContext.SaveChangesAsync();
 
-                if (message.Cost > 0)
-                    await _usagePolicy.RefundAsync(message.UserId, message.ChargedWalletTypeId, message.Cost);
+                if (message.StandardCost > 0 || message.PremiumCost > 0)
+                    await _usagePolicy.RefundAsync(message.UserId, message.StandardCost, message.PremiumCost);
 
                 await NotifyUserFailed(message.UserId, history, ex.Message);
             }

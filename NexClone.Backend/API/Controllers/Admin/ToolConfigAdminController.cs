@@ -29,7 +29,7 @@ namespace NexClone.Backend.API.Controllers.Admin
                 var providers = await _context.ApiConfigurations.Where(a => a.IsActive).Select(a => a.ProviderName).ToListAsync();
                 
                 ViewBag.Providers = new SelectList(providers);
-                ViewBag.WalletTypes = new SelectList(await _context.WalletTypes.ToListAsync(), "Id", "Name");
+
 
                 var tools = new[] { "text-to-voice", "voice-to-text", "image-to-video", "advanced-lip-sync", "motion-control" };
                 

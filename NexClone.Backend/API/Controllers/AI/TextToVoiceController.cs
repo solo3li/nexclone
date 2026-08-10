@@ -88,8 +88,8 @@ namespace NexClone.Backend.API.Controllers.AI
                         VoiceName = request.VoiceName,
                         StyleInstruction = request.StyleInstruction,
                         Quality = request.Quality,
-                        Cost = cost,
-                        ChargedWalletTypeId = policyResult.ChargedWalletTypeId
+                        StandardCost = policyResult.StandardCreditsCharged,
+                        PremiumCost = policyResult.PremiumCreditsCharged
                     })
                 );
 
@@ -97,7 +97,7 @@ namespace NexClone.Backend.API.Controllers.AI
             }
             catch (Exception ex)
             {
-                await _usagePolicy.RefundAsync(userId, policyResult.ChargedWalletTypeId, cost);
+                await _usagePolicy.RefundAsync(userId, policyResult.StandardCreditsCharged, policyResult.PremiumCreditsCharged);
                 return StatusCode(500, new { error = "Error queuing audio generation: " + ex.Message });
             }
         }

@@ -35,9 +35,6 @@ namespace NexClone.Backend.Application.Services
         public bool IsAllowed { get; set; }
         public string ErrorMessage { get; set; } = string.Empty;
         public decimal TotalCost { get; set; }
-        public int ChargedWalletTypeId { get; set; }
-        public string ChargedWalletName { get; set; } = string.Empty;
-        public string? ChargedWalletIcon { get; set; }
         public decimal StandardCreditsCharged { get; set; }
         public decimal PremiumCreditsCharged { get; set; }
     }
@@ -72,17 +69,9 @@ namespace NexClone.Backend.Application.Services
 
         public async Task<PolicyValidationResult> ValidateAndChargeAsync(Guid userId, string toolId, decimal usageAmountForLimits, decimal? usageAmountForCost = null, string quality = "Standard", int? subscriptionId = null)
         {
-            var rabbitMqSetting = await _context.AppSettings.FirstOrDefaultAsync(s => s.Key == "Site.RabbitMqEnabled");
-            if (rabbitMqSetting != null && rabbitMqSetting.Value == "false")
-            {
-                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Background operations are temporarily paused by the administrator." };
-            }
-
             var user = await _context.Users
                 .Include(u => u.Subscriptions)
                     .ThenInclude(s => s.Plan)
-                .Include(u => u.Wallets)
-                    .ThenInclude(w => w.WalletType)
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null) 
@@ -367,29 +356,17 @@ namespace NexClone.Backend.Application.Services
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Insufficient credits. Requires {totalCost:F4} total credits." };
             }
 
-            string chargedName = "";
-            int chargedId = 1;
-            if (standardToCharge > 0 && premiumToCharge > 0) { chargedName = "Standard & Premium Credits"; chargedId = 3; }
-            else if (premiumToCharge > 0) { chargedName = "Premium Credits"; chargedId = 2; }
-            else { chargedName = "Standard Credits"; chargedId = 1; }
-
             return new PolicyValidationResult { 
                 IsAllowed = true, 
                 TotalCost = totalCost, 
-                ChargedWalletTypeId = chargedId, 
-                ChargedWalletName = chargedName,
-                ChargedWalletIcon = "bx bx-coin",
                 StandardCreditsCharged = standardToCharge,
                 PremiumCreditsCharged = premiumToCharge
             };
         }
 
-        public async Task RefundAsync(Guid userId, int walletTypeId, decimal amount)
+        public async Task RefundAsync(Guid userId, decimal standardAmount, decimal premiumAmount)
         {
-            if (amount <= 0) return;
-
-            // Map legacy walletTypeId to creditType: 2 = Premium, others = Standard
-            string creditType = walletTypeId == 2 ? "Premium" : "Standard";
+            if (standardAmount <= 0 && premiumAmount <= 0) return;
 
             int retries = 3;
             bool saved = false;
@@ -400,8 +377,8 @@ namespace NexClone.Backend.Application.Services
                     var user = await _context.Users.FindAsync(userId);
                     if (user != null)
                     {
-                        if (creditType == "Premium") user.PremiumCredits += amount;
-                        else user.StandardCredits += amount;
+                        user.StandardCredits += standardAmount;
+                        user.PremiumCredits += premiumAmount;
                         
                         _context.Users.Update(user);
                         await _context.SaveChangesAsync();
@@ -424,16 +401,16 @@ namespace NexClone.Backend.Application.Services
         {
             if (amount <= 0) return;
             var toolConfig = await _context.ToolConfigurations.FirstOrDefaultAsync(t => t.ToolName == toolId);
-            bool allowStandard = toolConfig?.AllowStandardCredits ?? true;
             bool allowPremium = toolConfig?.AllowPremiumCredits ?? false;
             
-            // 1 = Standard, 2 = Premium, 3 = Both
-            int walletTypeId = 1;
-            if (allowStandard && allowPremium) walletTypeId = 3;
-            else if (allowPremium) walletTypeId = 2;
-            else walletTypeId = 1;
-
-            await RefundAsync(userId, walletTypeId, amount);
+            if (allowPremium) 
+            {
+                await RefundAsync(userId, 0, amount);
+            }
+            else 
+            {
+                await RefundAsync(userId, amount, 0);
+            }
         }
     }
 }
