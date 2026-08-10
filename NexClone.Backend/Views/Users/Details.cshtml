@@ -171,6 +171,30 @@
                             <button type="submit" class="bx--btn bx--btn--primary bx--btn--sm">@Localizer["Add/Remove"]</button>
                         </form>
                     </div>
+                    
+                    <!-- Dynamic Wallets -->
+                    @if (Model.Wallets != null)
+                    {
+                        foreach (var wallet in Model.Wallets)
+                        {
+                            <div style="background: #ffffff; padding: 1.5rem; border: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong style="font-size: 1.1rem; color: #161616;">@wallet.WalletType?.Name Wallet</strong>
+                                    <p style="font-size: 1.25rem; font-weight: bold; color: #0f62fe; margin-top: 0.5rem;">@wallet.Balance.ToString("0.00") <span style="font-size: 0.875rem; font-weight: normal; color: #525252;">Credits</span></p>
+                                </div>
+                                <form asp-action="AddWalletCredits" method="post" style="display: flex; gap: 0.5rem; align-items: flex-end; margin: 0;">
+                                    <input type="hidden" name="userId" value="@Model.Id" />
+                                    <input type="hidden" name="walletTypeId" value="@wallet.WalletTypeId" />
+                                    <div class="bx--form-item">
+                                        <div class="bx--text-input__field-wrapper">
+                                            <input type="number" class="bx--text-input" name="amount" required step="0.01" placeholder="+ or - amount" style="width: 120px;">
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="bx--btn bx--btn--primary bx--btn--sm">@Localizer["Add/Remove"]</button>
+                                </form>
+                            </div>
+                        }
+                    }
                 </div>
             </div>
 

@@ -68,6 +68,7 @@
                             <th><span class="bx--table-header-label">@Localizer["Status"]</span></th>
                             <th><span class="bx--table-header-label">@Localizer["Country"]</span></th>
                             <th><span class="bx--table-header-label">@Localizer["Credits"]</span></th>
+                            <th><span class="bx--table-header-label">@Localizer["Wallets"]</span></th>
                             <th><span class="bx--table-header-label">@Localizer["Current Plan"]</span></th>
                             <th><span class="bx--table-header-label">@Localizer["Role"]</span></th>
                             <th><span class="bx--table-header-label">@Localizer["Joined"]</span></th>
@@ -108,6 +109,14 @@
                                             <div><strong>SC:</strong> @user.StandardCredits.ToString("0.##")</div>
                                             <div><strong>PC:</strong> @user.PremiumCredits.ToString("0.##")</div>
                                         </div>
+                                    </td>
+                                    <td>
+                                        @{
+                                            var walletsJson = System.Text.Json.JsonSerializer.Serialize(user.Wallets.Select(w => new { Name = w.WalletType.Name, Balance = w.Balance }));
+                                        }
+                                        <button type="button" class="bx--btn bx--btn--ghost bx--btn--sm" data-wallets="@walletsJson" onclick="showWalletsModal(this)">
+                                            @Localizer["View"] (@user.Wallets.Count)
+                                        </button>
                                     </td>
                                     <td>
                                         @if (currentSub?.Plan != null)
