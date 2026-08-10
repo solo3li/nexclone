@@ -157,7 +157,6 @@
                 <th><span class="bx--table-header-label">@Localizer["Plan"]</span></th>
                 <th><span class="bx--table-header-label">@Localizer["Price"]</span></th>
                 <th><span class="bx--table-header-label">@Localizer["Balance"]</span></th>
-                <th><span class="bx--table-header-label">@Localizer["Wallets"]</span></th>
                 <th><span class="bx--table-header-label">@Localizer["Last Used"]</span></th>
                 <th><span class="bx--table-header-label">@Localizer["Start Date"]</span></th>
                 <th><span class="bx--table-header-label">@Localizer["End Date"]</span></th>
@@ -181,14 +180,6 @@
                             <div><strong>SC:</strong> @(item.User?.StandardCredits.ToString("0.##") ?? "0")</div>
                             <div><strong>PC:</strong> @(item.User?.PremiumCredits.ToString("0.##") ?? "0")</div>
                         </div>
-                    </td>
-                    <td>
-                        @{
-                            var walletsJson = System.Text.Json.JsonSerializer.Serialize(item.User?.Wallets.Select(w => new { Name = w.WalletType.Name, Balance = w.Balance }) ?? Enumerable.Empty<object>());
-                        }
-                        <button type="button" class="bx--btn bx--btn--ghost bx--btn--sm" data-wallets="@walletsJson" onclick="showWalletsModal(this)">
-                            @Localizer["View"] (@(item.User?.Wallets.Count ?? 0))
-                        </button>
                     </td>
                     <td>@(lastUsed.HasValue ? lastUsed.Value.ToString("MMM dd, yyyy HH:mm") : "Never")</td>
                     <td>@item.StartDate.ToString("MMM dd, yyyy")</td>
@@ -256,7 +247,7 @@
                 <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="16" height="16" viewBox="0 0 32 32" aria-hidden="true" class="bx--modal-close__icon"><path d="M24 9.4L22.6 8 16 14.6 9.4 8 8 9.4 14.6 16 8 22.6 9.4 24 16 17.4 22.6 24 24 22.6 17.4 16 24 9.4z"></path></svg>
             </button>
         </div>
-        <form asp-controller="Users" asp-action="AddWalletCredits" method="post" style="margin: 0;">
+        <form action="/Users/AddWalletCredits" method="post" style="margin: 0;">
             <div class="bx--modal-content">
                 <input type="hidden" id="addBalanceUserId" name="userId" value="" />
                 
