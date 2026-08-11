@@ -48,7 +48,7 @@
                 <h5 style="margin-bottom: 1rem;">@Localizer["User Information"]</h5>
                 <p><strong>Name:</strong> @(Model.User?.FullName)</p>
                 <p><strong>Email:</strong> @(Model.User?.Email)</p>
-                <p><strong>Available Credits (Balance):</strong> @(Model.User?.AvailableCredits ?? 0)</p>
+                <p><strong>Standard Credits:</strong> @(Model.User?.StandardCredits ?? 0) &nbsp;|&nbsp; <strong>Premium Credits:</strong> @(Model.User?.PremiumCredits ?? 0)</p>
                 <p><strong>Joined:</strong> @(Model.User?.CreatedAt.ToString("g"))</p>
             </div>
         </div>

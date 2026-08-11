@@ -54,6 +54,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowNextjs", policyBuilder =>
     {
+        // Read the default frontend URL from config (appsettings or env var)
+        var defaultFrontendUrl = builder.Configuration["AppSettings:DefaultFrontendUrl"] ?? "http://localhost:3000";
+
         try
         {
             var dbOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
@@ -68,6 +71,7 @@ builder.Services.AddCors(options =>
                 var origins = allowedOriginsSetting.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(o => o.Trim()).ToList();
                 origins.Add("https://nexmediaai.com");
                 origins.Add("https://www.nexmediaai.com");
+                if (!origins.Contains(defaultFrontendUrl)) origins.Add(defaultFrontendUrl);
                 policyBuilder.WithOrigins(origins.ToArray())
                        .AllowAnyMethod()
                        .AllowAnyHeader()
@@ -75,12 +79,11 @@ builder.Services.AddCors(options =>
             }
             else
             {
-                // Fallback to a safe default if not set in DB
+                // Fallback when DB setting not configured
                 policyBuilder.WithOrigins(
                         "http://localhost:3000",
                         "http://localhost:3001",
-                        "http://167.71.66.188:3000",
-                        "http://178.62.192.74:3000",
+                        defaultFrontendUrl,
                         "https://nexmediaai.com",
                         "https://www.nexmediaai.com")
                        .AllowAnyMethod()
@@ -93,8 +96,7 @@ builder.Services.AddCors(options =>
             policyBuilder.WithOrigins(
                     "http://localhost:3000",
                     "http://localhost:3001",
-                    "http://167.71.66.188:3000",
-                    "http://178.62.192.74:3000",
+                    defaultFrontendUrl,
                     "https://nexmediaai.com",
                     "https://www.nexmediaai.com")
                    .AllowAnyMethod()

@@ -121,7 +121,6 @@ namespace NexClone.Backend.API.Controllers.Client
                 FullName = fullName,
                 CreatedAt = DateTime.UtcNow,
                 IsVerified = true,
-                AvailableCredits = 0,
                 IsStaff = isStaff,
                 IsSuperAdmin = isSuperAdmin,
                 VisibleAdminSections = string.Join(",", visibleSections ?? new List<string>())

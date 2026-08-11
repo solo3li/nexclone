@@ -1,17 +1,33 @@
 import { create } from 'zustand';
 import api from '../utils/api';
 import { API_ENDPOINTS } from '../utils/endpoints';
+import type { AppState } from './useAppStore';
+
+type AuthUser = AppState['user'];
+
+interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+interface RegisterData {
+  email: string;
+  password: string;
+  fullName?: string;
+  country?: string;
+  refCode?: string;
+}
 
 interface AuthState {
-  user: any | null;
+  user: AuthUser;
   isAuthenticated: boolean;
   hasPhoneNumber: boolean;
   isInitializing: boolean;
   
   // Actions
-  setUser: (user: any | null) => void;
-  login: (credentials: any) => Promise<any>;
-  register: (data: any) => Promise<any>;
+  setUser: (user: AuthUser) => void;
+  login: (credentials: LoginCredentials) => Promise<any>;
+  register: (data: RegisterData) => Promise<any>;
   logout: () => Promise<void>;
   fetchMe: () => Promise<any>;
   googleLogin: (data: { token: string, refCode?: string }) => Promise<any>;

@@ -55,7 +55,7 @@
                     <div><strong>Phone:</strong> @(string.IsNullOrEmpty(Model.PhoneNumber) ? "N/A" : Model.PhoneNumber)</div>
                     <div><strong>Country:</strong> @(string.IsNullOrEmpty(Model.Country) ? "N/A" : Model.Country)</div>
                     <div><strong>Joined:</strong> @Model.CreatedAt.ToString("MMM dd, yyyy")</div>
-                    <div><strong>Available Credits:</strong> @Model.AvailableCredits</div>
+                    <div><strong>Standard Credits:</strong> @Model.StandardCredits &nbsp;|&nbsp; <strong>Premium Credits:</strong> @Model.PremiumCredits</div>
                     <div>
                         <strong>Status:</strong> 
                         @if (Model.EmailConfirmed || Model.IsVerified)

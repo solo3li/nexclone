@@ -170,8 +170,9 @@ namespace NexClone.Backend.API.Controllers.Client
             await _context.SaveChangesAsync();
 
             var verificationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var origin = Request.Headers["Origin"].FirstOrDefault() ?? "http://178.62.192.74:3000";
-            var locale = origin.Contains("localhost") ? "ar" : "ar";
+            var origin = Request.Headers["Origin"].FirstOrDefault() ?? _configuration["AppSettings:DefaultFrontendUrl"] ?? "http://localhost:3000";
+            var acceptLang = Request.Headers["Accept-Language"].FirstOrDefault() ?? "ar";
+            var locale = acceptLang.StartsWith("en", StringComparison.OrdinalIgnoreCase) ? "en" : "ar";
             var verifyLink = $"{origin}/{locale}/verify-email?email={Uri.EscapeDataString(user.Email)}&token={Uri.EscapeDataString(verificationToken)}";
 
             string emailHtml = _emailTemplateService.GetVerificationEmail(user.FullName ?? user.UserName ?? "User", verifyLink);
@@ -230,8 +231,9 @@ namespace NexClone.Backend.API.Controllers.Client
             await _userManager.UpdateAsync(user);
 
             var verificationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var origin = Request.Headers["Origin"].FirstOrDefault() ?? "http://178.62.192.74:3000";
-            var locale = origin.Contains("localhost") ? "ar" : "ar";
+            var origin = Request.Headers["Origin"].FirstOrDefault() ?? _configuration["AppSettings:DefaultFrontendUrl"] ?? "http://localhost:3000";
+            var acceptLang = Request.Headers["Accept-Language"].FirstOrDefault() ?? "ar";
+            var locale = acceptLang.StartsWith("en", StringComparison.OrdinalIgnoreCase) ? "en" : "ar";
             var verifyLink = $"{origin}/{locale}/verify-email?email={Uri.EscapeDataString(user.Email)}&token={Uri.EscapeDataString(verificationToken)}";
 
             string emailHtml = _emailTemplateService.GetVerificationEmail(user.FullName ?? user.UserName ?? "User", verifyLink);
@@ -439,7 +441,7 @@ namespace NexClone.Backend.API.Controllers.Client
             var rawToken = await _userManager.GeneratePasswordResetTokenAsync(user);
             var token = Microsoft.AspNetCore.WebUtilities.WebEncoders.Base64UrlEncode(System.Text.Encoding.UTF8.GetBytes(rawToken));
             
-            var origin = Request.Headers["Origin"].FirstOrDefault() ?? "http://178.62.192.74:3000";
+            var origin = Request.Headers["Origin"].FirstOrDefault() ?? _configuration["AppSettings:DefaultFrontendUrl"] ?? "http://localhost:3000";
             var resetLink = $"{origin}/reset-password?email={Uri.EscapeDataString(request.Email)}&token={token}";
 
             string emailHtml = _emailTemplateService.GetPasswordResetEmail(user.FullName ?? user.UserName ?? "User", resetLink);
@@ -722,7 +724,6 @@ namespace NexClone.Backend.API.Controllers.Client
 
             if (needsSave)
             {
-                _context.Users.Update(user);
                 await _context.SaveChangesAsync();
             }
 
@@ -768,7 +769,6 @@ namespace NexClone.Backend.API.Controllers.Client
                 ImageUrl = imageUrl,
                 IsVerified = user.IsVerified,
                 HasPhoneNumber = !string.IsNullOrEmpty(user.PhoneNumber),
-                AvailableCredits = user.AvailableCredits,
                 StandardCredits = user.StandardCredits,
                 PremiumCredits = user.PremiumCredits,
                 IsStaff = user.IsStaff,

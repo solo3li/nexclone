@@ -154,7 +154,7 @@ namespace NexClone.Backend.API.Controllers.AI
                         RenderingSpeed = renderingSpeed
                     })
                 );
-                return Ok(new { taskId = history.Id.ToString(), status = "processing", message = "Task has been added to the queue." });
+                return Ok(new { taskId = history.Id.ToString(), status = "processing", message = "Task has been added to the queue.", standardCredits = (await _dbContext.Users.FindAsync(userId))?.StandardCredits ?? 0, premiumCredits = (await _dbContext.Users.FindAsync(userId))?.PremiumCredits ?? 0 });
             }
             catch (Exception ex)
             {
@@ -198,12 +198,18 @@ namespace NexClone.Backend.API.Controllers.AI
                 var extension = System.IO.Path.GetExtension(video.FileName);
                 if (string.IsNullOrEmpty(extension)) extension = ".mp4";
                 var tempFile = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Guid.NewGuid().ToString() + extension);
-                System.IO.File.WriteAllBytes(tempFile, videoBytes);
-                using (var tfile = TagLib.File.Create(tempFile))
+                try
                 {
-                    durationSeconds = tfile.Properties.Duration.TotalSeconds;
+                    System.IO.File.WriteAllBytes(tempFile, videoBytes);
+                    using (var tfile = TagLib.File.Create(tempFile))
+                    {
+                        durationSeconds = tfile.Properties.Duration.TotalSeconds;
+                    }
                 }
-                System.IO.File.Delete(tempFile);
+                finally
+                {
+                    if (System.IO.File.Exists(tempFile)) System.IO.File.Delete(tempFile);
+                }
                 if (durationSeconds <= 0) durationSeconds = 5.0;
             }
             catch (Exception ex)
@@ -264,7 +270,8 @@ namespace NexClone.Backend.API.Controllers.AI
                     })
                 );
 
-                return Ok(new { taskId = history.Id.ToString(), status = "processing", message = "Task has been added to the queue." });
+                var updatedUserLipsync = await _dbContext.Users.FindAsync(userId);
+                return Ok(new { taskId = history.Id.ToString(), status = "processing", message = "Task has been added to the queue.", standardCredits = updatedUserLipsync?.StandardCredits ?? 0, premiumCredits = updatedUserLipsync?.PremiumCredits ?? 0 });
             }
             catch (Exception ex)
             {
@@ -424,8 +431,9 @@ namespace NexClone.Backend.API.Controllers.AI
                     })
                 );
 
+                var updatedUserMotion = await _dbContext.Users.FindAsync(userId);
                 // Return OK immediately so frontend can show the Wait/Leave UI
-                return Ok(new { taskId = history.Id.ToString(), status = "processing", message = "Task has been added to the queue." });
+                return Ok(new { taskId = history.Id.ToString(), status = "processing", message = "Task has been added to the queue.", standardCredits = updatedUserMotion?.StandardCredits ?? 0, premiumCredits = updatedUserMotion?.PremiumCredits ?? 0 });
             }
             catch (Exception ex)
             {

@@ -51,6 +51,15 @@ namespace NexClone.Backend.Infrastructure.Data
         {
             base.OnModelCreating(builder);
 
+            // Mark credit columns as concurrency tokens so EF Core raises DbUpdateConcurrencyException
+            // when two simultaneous transactions try to deduct credits from the same user row.
+            // The existing retry logic in UsagePolicyService handles the exception and retries.
+            builder.Entity<ApplicationUser>(b =>
+            {
+                b.Property(u => u.StandardCredits).IsConcurrencyToken();
+                b.Property(u => u.PremiumCredits).IsConcurrencyToken();
+            });
+
             // Configure One-to-One relationship for ApplicationUser and UserPhoneNumber
             builder.Entity<ApplicationUser>()
                 .HasOne(u => u.PhoneNumberDetails)

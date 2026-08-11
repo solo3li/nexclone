@@ -41,7 +41,21 @@ export const API_ENDPOINTS = {
   TICKETS_CREATE: '/api/tickets',
   TICKET_MESSAGE: (id: string) => `/api/tickets/${id}/message`,
 
-  // AI Tools
+  // Blog
+  BLOG: "/api/blog",
+  BLOG_DETAILS: (id: string) => `/api/blog/${id}`,
+  BLOG_COMMENT: (id: string) => `/api/blog/${id}/comments`,
+  BLOG_COMMENTS: (id: string) => `/api/blog/${id}/comments`,
+  
+  // AI Tools — Platform Configs
+  VOICES: "/api/platform/voices",
+  DIALECTS: "/api/platform/dialects",
+  EMOTIONS: "/api/platform/emotions",
+  STYLES: "/api/platform/styles",
+  TTS_CONFIG: "/api/platform/tts-config",
+  VTT_CONFIG: "/api/platform/vtt-config",
+
+  // AI Tools — Estimate & Execute (canonical names)
   VOICE_TO_TEXT_ESTIMATE: '/api/ai/voice-to-text/estimate',
   VOICE_TO_TEXT_GENERATE: '/api/ai/voice-to-text/transcribe',
   TEXT_TO_VOICE_ESTIMATE: '/api/ai/text-to-voice/estimate',
@@ -49,36 +63,12 @@ export const API_ENDPOINTS = {
   VIDEO_START_AVATAR: '/api/video/start-avatar',
   VIDEO_START_LIPSYNC: '/api/video/start-lipsync',
   VIDEO_START_MOTION: '/api/video/start-motion-control',
-  
-  // Blog
-  BLOG: "/api/blog",
-  BLOG_DETAILS: (id: string) => `/api/blog/${id}`,
-  BLOG_COMMENT: (id: string) => `/api/blog/${id}/comments`,
-  BLOG_COMMENTS: (id: string) => `/api/blog/${id}/comments`,
-  
-  // AI Tools (Platform Configs)
-  VOICES: "/api/platform/voices",
-  DIALECTS: "/api/platform/dialects",
-  EMOTIONS: "/api/platform/emotions",
-  STYLES: "/api/platform/styles",
-  TTS_CONFIG: "/api/platform/tts-config",
-  VTT_CONFIG: "/api/platform/vtt-config",
-  
-  // AI Tools (Execution)
+
   ESTIMATE_AVATAR: (qs: string) => `/api/video/estimate-avatar${qs}`,
-  START_AVATAR: "/api/video/start-avatar",
-  
   ESTIMATE_LIPSYNC: (qs: string) => `/api/video/estimate-lipsync${qs}`,
-  START_LIPSYNC: "/api/video/start-lipsync",
-  
   ESTIMATE_MOTION_CONTROL: (qs: string) => `/api/video/estimate-motion-control${qs}`,
-  START_MOTION_CONTROL: "/api/video/start-motion-control",
-  
-  ESTIMATE_VTT: "/api/ai/voice-to-text/estimate",
-  START_VTT: "/api/ai/voice-to-text/transcribe",
-  
-  ESTIMATE_TTS: "/api/ai/text-to-voice/estimate",
-  START_TTS: "/api/ai/text-to-voice/generate",
-  
+  ESTIMATE_VTT: '/api/ai/voice-to-text/estimate',
+  ESTIMATE_TTS: '/api/ai/text-to-voice/estimate',
+
   VIDEO_STATUS: (taskId: string) => `/api/video/status/${taskId}`,
 };

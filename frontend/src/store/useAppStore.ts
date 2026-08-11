@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-interface AppState {
+export interface AppState {
   user: {
     id: string;
     email: string;
@@ -9,7 +9,6 @@ interface AppState {
     imageUrl: string | null;
     isVerified: boolean;
     hasPhoneNumber: boolean;
-    availableCredits: number;
     isStaff: boolean;
     standardCredits: number;
     premiumCredits: number;

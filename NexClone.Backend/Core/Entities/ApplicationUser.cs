@@ -20,8 +20,7 @@ namespace NexClone.Backend.Core.Entities
         // Admin Sidebar Sections Visibility (Comma-separated string)
         public string? VisibleAdminSections { get; set; }
         
-        // Credits Economy
-        public decimal AvailableCredits { get; set; } = 0;
+        // Credits Economy (StandardCredits + PremiumCredits are the real balances)
         public decimal StandardCredits { get; set; } = 0;
         public decimal PremiumCredits { get; set; } = 0;
 

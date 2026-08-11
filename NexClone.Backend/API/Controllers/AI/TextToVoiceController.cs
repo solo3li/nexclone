@@ -93,7 +93,14 @@ namespace NexClone.Backend.API.Controllers.AI
                     })
                 );
 
-                return Ok(new { taskId = history.Id, status = "processing" });
+                // Re-fetch updated balances to return to frontend
+                var updatedUser = await _dbContext.Users.FindAsync(userId);
+                return Ok(new { 
+                    taskId = history.Id, 
+                    status = "processing",
+                    standardCredits = updatedUser?.StandardCredits ?? 0,
+                    premiumCredits = updatedUser?.PremiumCredits ?? 0
+                });
             }
             catch (Exception ex)
             {

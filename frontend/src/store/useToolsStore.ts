@@ -22,9 +22,9 @@ export const useToolsStore = create<ToolsState>((set) => ({
 
   generateVoiceToText: async (data) => {
     const res = await api.post(API_ENDPOINTS.VOICE_TO_TEXT_GENERATE, data);
-    if (res.data.newBalance !== undefined) {
-      useAppStore.getState().updateUser({ availableCredits: res.data.newBalance });
-    }
+    if (res.data.standardCredits !== undefined) {
+        useAppStore.getState().updateUser({ standardCredits: res.data.standardCredits, premiumCredits: res.data.premiumCredits });
+      }
     return res.data;
   },
 
@@ -35,9 +35,9 @@ export const useToolsStore = create<ToolsState>((set) => ({
 
   generateTextToVoice: async (data) => {
     const res = await api.post(API_ENDPOINTS.TEXT_TO_VOICE_GENERATE, data);
-    if (res.data.newBalance !== undefined) {
-      useAppStore.getState().updateUser({ availableCredits: res.data.newBalance });
-    }
+    if (res.data.standardCredits !== undefined) {
+        useAppStore.getState().updateUser({ standardCredits: res.data.standardCredits, premiumCredits: res.data.premiumCredits });
+      }
     return res.data;
   },
 
@@ -45,9 +45,9 @@ export const useToolsStore = create<ToolsState>((set) => ({
     const res = await api.post(API_ENDPOINTS.VIDEO_START_AVATAR, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
-    if (res.data.newBalance !== undefined) {
-      useAppStore.getState().updateUser({ availableCredits: res.data.newBalance });
-    }
+    if (res.data.standardCredits !== undefined) {
+        useAppStore.getState().updateUser({ standardCredits: res.data.standardCredits, premiumCredits: res.data.premiumCredits });
+      }
     return res.data;
   },
 
@@ -55,9 +55,9 @@ export const useToolsStore = create<ToolsState>((set) => ({
     const res = await api.post(API_ENDPOINTS.VIDEO_START_LIPSYNC, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
-    if (res.data.newBalance !== undefined) {
-      useAppStore.getState().updateUser({ availableCredits: res.data.newBalance });
-    }
+    if (res.data.standardCredits !== undefined) {
+        useAppStore.getState().updateUser({ standardCredits: res.data.standardCredits, premiumCredits: res.data.premiumCredits });
+      }
     return res.data;
   },
 
@@ -65,9 +65,9 @@ export const useToolsStore = create<ToolsState>((set) => ({
     const res = await api.post(API_ENDPOINTS.VIDEO_START_MOTION, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
-    if (res.data.newBalance !== undefined) {
-      useAppStore.getState().updateUser({ availableCredits: res.data.newBalance });
-    }
+    if (res.data.standardCredits !== undefined) {
+        useAppStore.getState().updateUser({ standardCredits: res.data.standardCredits, premiumCredits: res.data.premiumCredits });
+      }
     return res.data;
   },
 
