@@ -443,6 +443,7 @@ namespace NexClone.Backend.API.Controllers.AI
         }
 
 
+        [AllowAnonymous]
         [HttpGet("download-proxy")]
         public async Task<IActionResult> DownloadProxy([FromQuery] string url, [FromQuery] string type = "video")
         {
@@ -458,7 +459,10 @@ namespace NexClone.Backend.API.Controllers.AI
                 "klingai-tos.bytedance.net",
                 "object.ksyun.com",
                 "storage.googleapis.com",
-                "amazonaws.com"
+                "amazonaws.com",
+                "188.166.65.112",
+                "localhost",
+                "127.0.0.1"
             };
 
             if (!Uri.TryCreate(url, UriKind.Absolute, out var parsedUri)

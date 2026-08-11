@@ -13,6 +13,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
     public class S3MediaService : IMediaService
     {
         private IMinioClient _minioClient;
+        private IMinioClient _publicMinioClient;
         private string _defaultBucket;
         private string _region;
         private string _endpoint;
@@ -65,6 +66,17 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
                 .WithRegion(region)
                 .WithSSL(useSsl)
                 .Build();
+
+            var publicEndpoint = Environment.GetEnvironmentVariable("MINIO_PUBLIC_ENDPOINT");
+            if (!string.IsNullOrWhiteSpace(publicEndpoint))
+            {
+                _publicMinioClient = new MinioClient()
+                    .WithEndpoint(publicEndpoint)
+                    .WithCredentials(accessKey, secretKey)
+                    .WithRegion(region)
+                    .WithSSL(useSsl)
+                    .Build();
+            }
         }
 
         public async Task<string> UploadFileAsync(IFormFile file, string bucketName = null)
@@ -148,12 +160,14 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
                     .WithObject(objectName)
                     .WithExpiry(60 * 60 * 24 * 7); // 7 days expiry
 
-                string url = await _minioClient.PresignedGetObjectAsync(presignedGetObjectArgs).ConfigureAwait(false);
-                
-                var publicEndpoint = Environment.GetEnvironmentVariable("MINIO_PUBLIC_ENDPOINT");
-                if (!string.IsNullOrWhiteSpace(publicEndpoint) && !string.IsNullOrWhiteSpace(_endpoint))
+                string url;
+                if (_publicMinioClient != null)
                 {
-                    url = url.Replace(_endpoint, publicEndpoint);
+                    url = await _publicMinioClient.PresignedGetObjectAsync(presignedGetObjectArgs).ConfigureAwait(false);
+                }
+                else
+                {
+                    url = await _minioClient.PresignedGetObjectAsync(presignedGetObjectArgs).ConfigureAwait(false);
                 }
                 
                 return url;
@@ -184,12 +198,14 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
                 .WithObject(actualObjectName)
                 .WithExpiry(60 * 60); // 1 hour expiry
 
-            string url = await _minioClient.PresignedPutObjectAsync(presignedPutObjectArgs).ConfigureAwait(false);
-            
-            var publicEndpoint = Environment.GetEnvironmentVariable("MINIO_PUBLIC_ENDPOINT");
-            if (!string.IsNullOrWhiteSpace(publicEndpoint) && !string.IsNullOrWhiteSpace(_endpoint))
+            string url;
+            if (_publicMinioClient != null)
             {
-                url = url.Replace(_endpoint, publicEndpoint);
+                url = await _publicMinioClient.PresignedPutObjectAsync(presignedPutObjectArgs).ConfigureAwait(false);
+            }
+            else
+            {
+                url = await _minioClient.PresignedPutObjectAsync(presignedPutObjectArgs).ConfigureAwait(false);
             }
             
             return url;
