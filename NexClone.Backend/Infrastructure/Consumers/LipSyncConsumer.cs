@@ -47,11 +47,11 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 client.DefaultRequestHeaders.Add("x-api-key", apiKey);
 
                 using var videoStream = new MemoryStream(message.VideoBytes);
-                string videoKey = await _mediaService.UploadFileAsync(videoStream, $"{Guid.NewGuid()}_{message.VideoFileName}", message.VideoContentType);
+                string videoKey = await _mediaService.UploadFileAsync(videoStream, $"lipsync/{message.UserId:N}/{DateTime.UtcNow:yyyy-MM}/{Guid.NewGuid()}_{message.VideoFileName}", message.VideoContentType);
                 string videoUrl = $"http://167.71.66.188:9001/nexmedia/{videoKey}";
 
                 using var audioStream = new MemoryStream(message.AudioBytes);
-                string audioKey = await _mediaService.UploadFileAsync(audioStream, $"{Guid.NewGuid()}_{message.AudioFileName}", message.AudioContentType);
+                string audioKey = await _mediaService.UploadFileAsync(audioStream, $"lipsync/{message.UserId:N}/{DateTime.UtcNow:yyyy-MM}/{Guid.NewGuid()}_{message.AudioFileName}", message.AudioContentType);
                 string audioUrl = $"http://167.71.66.188:9001/nexmedia/{audioKey}";
 
                 var payload = new

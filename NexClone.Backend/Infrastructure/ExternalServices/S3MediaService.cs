@@ -81,9 +81,6 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
         {
             await EnsureClientInitializedAsync();
             
-            // Use a unique name to avoid conflicts
-            var uniqueObjectName = $"{Guid.NewGuid()}_{objectName}";
-
             // Read stream into memory first to ensure we have length
             using var memStream = new MemoryStream();
             await stream.CopyToAsync(memStream);
@@ -101,18 +98,18 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
 
                 var putObjectArgs = new PutObjectArgs()
                     .WithBucket(_defaultBucket)
-                    .WithObject(uniqueObjectName)
+                    .WithObject(objectName)
                     .WithStreamData(memStream)
                     .WithObjectSize(memStream.Length)
                     .WithContentType(contentType);
 
                 await _minioClient.PutObjectAsync(putObjectArgs).ConfigureAwait(false);
 
-                return uniqueObjectName;
+                return objectName;
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"[S3MediaService] Upload failed for '{uniqueObjectName}': {ex.Message}");
+                Console.Error.WriteLine($"[S3MediaService] Upload failed for '{objectName}': {ex.Message}");
                 
                 throw; // No local fallback allowed as per requirements.
             }

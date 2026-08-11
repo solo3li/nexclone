@@ -35,7 +35,9 @@ namespace NexClone.Backend.API.Controllers.Client
             if (request.ProfileImage != null)
             {
                 using var stream = request.ProfileImage.OpenReadStream();
-                var imageUrl = await _mediaService.UploadFileAsync(stream, "profiles", request.ProfileImage.FileName);
+                string fileExtension = System.IO.Path.GetExtension(request.ProfileImage.FileName);
+                string objectKey = $"profiles/{userId:N}/{Guid.NewGuid()}{fileExtension}";
+                var imageUrl = await _mediaService.UploadFileAsync(stream, objectKey, request.ProfileImage.ContentType);
                 user.ImageUrl = imageUrl;
             }
 

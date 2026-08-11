@@ -124,11 +124,11 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
 
                     // Upload to Minio (now on public port 3001)
                     using var videoStream = new MemoryStream(videoBytes);
-                    string videoKey = await mediaService.UploadFileAsync(videoStream, $"{Guid.NewGuid()}_{videoFileName}", videoContentType);
+                    string videoKey = await mediaService.UploadFileAsync(videoStream, $"lipsync/{history.UserId:N}/{DateTime.UtcNow:yyyy-MM}/{Guid.NewGuid()}_{videoFileName}", videoContentType);
                     string videoUrl = $"http://167.71.66.188:9001/nexmedia/{videoKey}";
 
                     using var audioStream = new MemoryStream(audioBytes);
-                    string audioKey = await mediaService.UploadFileAsync(audioStream, $"{Guid.NewGuid()}_{audioFileName}", audioContentType);
+                    string audioKey = await mediaService.UploadFileAsync(audioStream, $"lipsync/{history.UserId:N}/{DateTime.UtcNow:yyyy-MM}/{Guid.NewGuid()}_{audioFileName}", audioContentType);
                     string audioUrl = $"http://167.71.66.188:9001/nexmedia/{audioKey}";
 
                     logger.LogInformation($"[LipSync Task {historyId}] Video URL: {videoUrl}");

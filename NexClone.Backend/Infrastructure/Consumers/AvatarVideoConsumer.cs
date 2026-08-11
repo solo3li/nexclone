@@ -46,7 +46,7 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 if (message.ImageBytes != null)
                 {
                     using var ms = new MemoryStream(message.ImageBytes);
-                    string key = await _mediaService.UploadFileAsync(ms, $"{Guid.NewGuid()}.png", message.ImageContentType);
+                    string key = await _mediaService.UploadFileAsync(ms, $"avatar-video/{message.UserId:N}/{DateTime.UtcNow:yyyy-MM}/{Guid.NewGuid()}.png", message.ImageContentType);
                     imageUrl = $"http://167.71.66.188:9001/nexmedia/{key}";
                 }
 
@@ -54,7 +54,7 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 if (message.AudioBytes != null)
                 {
                     using var ms = new MemoryStream(message.AudioBytes);
-                    string key = await _mediaService.UploadFileAsync(ms, $"{Guid.NewGuid()}.mp3", message.AudioContentType);
+                    string key = await _mediaService.UploadFileAsync(ms, $"avatar-video/{message.UserId:N}/{DateTime.UtcNow:yyyy-MM}/{Guid.NewGuid()}.mp3", message.AudioContentType);
                     audioUrl = $"http://167.71.66.188:9001/nexmedia/{key}";
                 }
 
