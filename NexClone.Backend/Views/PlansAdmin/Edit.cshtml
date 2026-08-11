@@ -29,13 +29,28 @@
             <div class="bx--form-item">
                 <label for="Description" class="bx--label">@Localizer["Description"]</label>
                 <div class="bx--text-input__field-wrapper">
-                    <textarea id="Description" class="bx--text-area" name="Description" rows="3">@Model.Description</textarea>
+                    <textarea id="Description" class="bx--text-area" name="Description" rows="2">@Model.Description</textarea>
                 </div>
             </div>
             <div class="bx--form-item">
                 <label for="DescriptionAr" class="bx--label">@Localizer["Description (Arabic)"]</label>
                 <div class="bx--text-input__field-wrapper">
-                    <textarea id="DescriptionAr" class="bx--text-area" name="DescriptionAr" rows="3" dir="rtl">@Model.DescriptionAr</textarea>
+                    <textarea id="DescriptionAr" class="bx--text-area" name="DescriptionAr" rows="2" dir="rtl">@Model.DescriptionAr</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <div class="bx--form-item">
+                <label for="Features" class="bx--label">@Localizer["Features (one per line)"]</label>
+                <div class="bx--text-input__field-wrapper">
+                    <textarea id="Features" class="bx--text-area" name="Features" rows="6" placeholder="Feature 1&#10;Feature 2&#10;Feature 3">@Model.Features</textarea>
+                </div>
+            </div>
+            <div class="bx--form-item">
+                <label for="FeaturesAr" class="bx--label">@Localizer["Features (Arabic) (one per line)"]</label>
+                <div class="bx--text-input__field-wrapper">
+                    <textarea id="FeaturesAr" class="bx--text-area" name="FeaturesAr" rows="6" dir="rtl" placeholder="ميزة 1&#10;ميزة 2&#10;ميزة 3">@Model.FeaturesAr</textarea>
                 </div>
             </div>
         </div>

@@ -23,6 +23,10 @@ namespace NexClone.Backend.Core.Entities
         [MaxLength(1000)]
         public string? DescriptionAr { get; set; }
 
+        // Manual Features (newline separated)
+        public string? Features { get; set; }
+        public string? FeaturesAr { get; set; }
+
         public int DurationDays { get; set; }
         
         public int GracePeriodDays { get; set; } = 3;

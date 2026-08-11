@@ -7,6 +7,8 @@ export interface Plan {
   nameAr: string;
   description: string;
   descriptionAr: string;
+  features?: string;
+  featuresAr?: string;
   priceUsd: number;
   priceEgp: number;
   durationDays: number;

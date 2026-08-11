@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePlansStore } from '@/store/usePlansStore';
-import { Check, X, Sparkles, Zap, Server } from 'lucide-react';
+import { Check, Sparkles, Zap, Server } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Navbar from "../../../src/components/Navbar";
 import Footer from "../../../src/components/Footer";
@@ -139,90 +139,22 @@ export default function PricingPage() {
                       )}
                     </div>
 
-                    <div className="space-y-6 flex-grow">
-                      <div>
-                        <p className="text-sm text-gray-500 uppercase tracking-wider font-semibold mb-3">{isRtl ? 'تحويل النص إلى صوت (TTS)' : 'Text-to-Speech (TTS)'}</p>
-                        <ul className="space-y-3">
-                          <li className="flex items-start gap-3">
-                            {plan.ttsEnabled ? <Check className="w-5 h-5 text-emerald-400 shrink-0" /> : <X className="w-5 h-5 text-red-400 shrink-0" />}
-                            <span className="text-gray-300">{isRtl ? 'وصول للنماذج القياسية' : 'Access to standard models'}</span>
-                          </li>
-                          {plan.ttsEnabled && (
-                            <>
-                              <li className="flex items-start gap-3">
-                                <Check className="w-5 h-5 text-emerald-400 shrink-0" />
-                                <span className="text-gray-300">{isRtl ? 'الحد الأقصى للأحرف:' : 'Max Chars:'} {plan.ttsMaxCharsPerRequest === -1 ? (isRtl ? 'غير محدود' : 'Unlimited') : plan.ttsMaxCharsPerRequest.toLocaleString()}</span>
+                    <div className="space-y-4 flex-grow">
+                      {(() => {
+                        const featuresText = isRtl ? plan.featuresAr : plan.features;
+                        if (!featuresText) return null;
+                        const featuresList = featuresText.split('\n').filter(line => line.trim() !== '');
+                        return (
+                          <ul className="space-y-4">
+                            {featuresList.map((feature, idx) => (
+                              <li key={idx} className="flex items-start gap-3">
+                                <Check className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                                <span className="text-gray-300">{feature.trim()}</span>
                               </li>
-                              <li className="flex items-start gap-3">
-                                <Check className="w-5 h-5 text-emerald-400 shrink-0" />
-                                <span className="text-gray-300">
-                                  {isRtl ? 'التكلفة العادية (لكل' : 'Cost Standard (per'} {plan.ttsCharactersBlock} {isRtl ? 'حرف):' : 'chars):'} {plan.ttsCostPerChar} {isRtl ? 'كريدت' : 'Credits'}
-                                </span>
-                              </li>
-                              <li className="flex items-start gap-3">
-                                <Check className="w-5 h-5 text-emerald-400 shrink-0" />
-                                <span className="text-gray-300">
-                                  {isRtl ? 'التكلفة العالية (لكل' : 'Cost High (per'} {plan.ttsCharactersBlock} {isRtl ? 'حرف):' : 'chars):'} {plan.ttsCostPerCharHigh} {isRtl ? 'كريدت' : 'Credits'}
-                                </span>
-                              </li>
-                            </>
-                          )}
-                        </ul>
-                      </div>
-
-                      <div>
-                        <p className="text-sm text-gray-500 uppercase tracking-wider font-semibold mb-3">{isRtl ? 'تحويل الصوت إلى نص (STT)' : 'Speech-to-Text (STT)'}</p>
-                        <ul className="space-y-3">
-                          <li className="flex items-start gap-3">
-                            {plan.sttEnabled ? <Check className="w-5 h-5 text-emerald-400 shrink-0" /> : <X className="w-5 h-5 text-red-400 shrink-0" />}
-                            <span className="text-gray-300">{isRtl ? 'تفريغ صوتي فائق السرعة' : 'Ultra-fast transcription'}</span>
-                          </li>
-                          {plan.sttEnabled && (
-                            <>
-                              <li className="flex items-start gap-3">
-                                <Check className="w-5 h-5 text-emerald-400 shrink-0" />
-                                <span className="text-gray-300">{isRtl ? 'أقصى حجم للملف:' : 'Max File Size:'} {plan.sttMaxFileSizeMb === -1 ? (isRtl ? 'غير محدود' : 'Unlimited') : `${plan.sttMaxFileSizeMb}MB`}</span>
-                              </li>
-                              <li className="flex items-start gap-3">
-                                <Check className="w-5 h-5 text-emerald-400 shrink-0" />
-                                <span className="text-gray-300">{isRtl ? 'التكلفة:' : 'Cost:'} {plan.sttCostPerMinute} {isRtl ? 'رصيد/دقيقة' : 'Credits/min'}</span>
-                              </li>
-                            </>
-                          )}
-                        </ul>
-                      </div>
-
-                      <div>
-                        <p className="text-sm text-gray-500 uppercase tracking-wider font-semibold mb-3">{isRtl ? 'فيديو أفاتار' : 'Avatar Video'}</p>
-                        <ul className="space-y-3">
-                          <li className="flex items-start gap-3">
-                            {plan.avatarVideoEnabled ? <Check className="w-5 h-5 text-emerald-400 shrink-0" /> : <X className="w-5 h-5 text-red-400 shrink-0" />}
-                            <span className="text-gray-300">{isRtl ? 'افتار الى فيديو بالذكاء الاصطناعي' : 'Avatar to Video AI'}</span>
-                          </li>
-                          {plan.avatarVideoEnabled && (
-                            <li className="flex items-start gap-3">
-                              <Check className="w-5 h-5 text-emerald-400 shrink-0" />
-                              <span className="text-gray-300">{isRtl ? 'التكلفة:' : 'Cost:'} {plan.avatarVideoCostPerGeneration} {isRtl ? 'رصيد/فيديو' : 'Credits/video'}</span>
-                            </li>
-                          )}
-                        </ul>
-                      </div>
-
-                      <div>
-                        <p className="text-sm text-gray-500 uppercase tracking-wider font-semibold mb-3">{isRtl ? 'مزامنة الشفاه المتقدمة' : 'Advanced Lip-Sync'}</p>
-                        <ul className="space-y-3">
-                          <li className="flex items-start gap-3">
-                            {plan.lipSyncEnabled ? <Check className="w-5 h-5 text-emerald-400 shrink-0" /> : <X className="w-5 h-5 text-red-400 shrink-0" />}
-                            <span className="text-gray-300">{isRtl ? 'مزامنة الشفاه بالذكاء الاصطناعي' : 'Audio-driven Lip-Sync AI'}</span>
-                          </li>
-                          {plan.lipSyncEnabled && (
-                            <li className="flex items-start gap-3">
-                              <Check className="w-5 h-5 text-emerald-400 shrink-0" />
-                              <span className="text-gray-300">{isRtl ? 'التكلفة:' : 'Cost:'} {plan.lipSyncCostPerGeneration} {isRtl ? 'رصيد/مزامنة' : 'Credits/sync'}</span>
-                            </li>
-                          )}
-                        </ul>
-                      </div>
+                            ))}
+                          </ul>
+                        );
+                      })()}
                     </div>
 
                     {plan.priceUsd === 0 ? (
