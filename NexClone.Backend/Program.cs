@@ -436,7 +436,8 @@ app.MapHub<NexClone.Backend.Hubs.NotificationHub>("/hubs/notification");
 // Register Affiliate Commission Hold Job — runs daily at midnight
 using (var hangfireScope = app.Services.CreateScope())
 {
-    Hangfire.RecurringJob.AddOrUpdate<NexClone.Backend.Application.BackgroundJobs.AffiliateCommissionHoldJob>(
+    var recurringJobManager = hangfireScope.ServiceProvider.GetRequiredService<Hangfire.IRecurringJobManager>();
+    recurringJobManager.AddOrUpdate<NexClone.Backend.Application.BackgroundJobs.AffiliateCommissionHoldJob>(
         "affiliate-commission-hold",
         j => j.ProcessAsync(),
         Hangfire.Cron.Daily);

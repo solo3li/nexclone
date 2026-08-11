@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -13,26 +13,15 @@ namespace NexClone.Backend.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "PackageToolWallets");
 
-            migrationBuilder.DropTable(
-                name: "PackageWallets");
 
-            migrationBuilder.DropTable(
-                name: "UserWallets");
 
-            migrationBuilder.DropTable(
-                name: "WalletTypes");
 
             migrationBuilder.DropColumn(
                 name: "AllowedWalletTypeIds",
                 table: "ToolConfigurations");
 
-            migrationBuilder.RenameColumn(
-                name: "AvailableCredits",
-                table: "AspNetUsers",
-                newName: "StandardCredits");
+
 
             migrationBuilder.AlterColumn<string>(
                 name: "AdditionalSettings",
@@ -42,19 +31,6 @@ namespace NexClone.Backend.Migrations
                 oldClrType: typeof(string),
                 oldType: "jsonb");
 
-            migrationBuilder.AddColumn<bool>(
-                name: "AllowPremiumCredits",
-                table: "ToolConfigurations",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
-
-            migrationBuilder.AddColumn<bool>(
-                name: "AllowStandardCredits",
-                table: "ToolConfigurations",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
 
             migrationBuilder.AddColumn<decimal>(
                 name: "AffiliateFirstCommissionPercent",
@@ -70,51 +46,7 @@ namespace NexClone.Backend.Migrations
                 nullable: false,
                 defaultValue: 0m);
 
-            migrationBuilder.AddColumn<string>(
-                name: "Features",
-                table: "Plans",
-                type: "text",
-                nullable: true);
 
-            migrationBuilder.AddColumn<string>(
-                name: "FeaturesAr",
-                table: "Plans",
-                type: "text",
-                nullable: true);
-
-            migrationBuilder.AddColumn<decimal>(
-                name: "PremiumCredits",
-                table: "Plans",
-                type: "numeric",
-                nullable: false,
-                defaultValue: 0m);
-
-            migrationBuilder.AddColumn<decimal>(
-                name: "StandardCredits",
-                table: "Plans",
-                type: "numeric",
-                nullable: false,
-                defaultValue: 0m);
-
-            migrationBuilder.AddColumn<bool>(
-                name: "IsSuperAdmin",
-                table: "AspNetUsers",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
-
-            migrationBuilder.AddColumn<decimal>(
-                name: "PremiumCredits",
-                table: "AspNetUsers",
-                type: "numeric",
-                nullable: false,
-                defaultValue: 0m);
-
-            migrationBuilder.AddColumn<string>(
-                name: "VisibleAdminSections",
-                table: "AspNetUsers",
-                type: "text",
-                nullable: true);
 
             migrationBuilder.CreateTable(
                 name: "AffiliateProfiles",
