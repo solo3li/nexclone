@@ -1,0 +1,84 @@
+@model IEnumerable<NexClone.Backend.Core.Entities.AffiliateProfile>
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
+
+<div class="bx--grid" style="padding-left: 0; max-width: 1200px;">
+    <div class="bx--row" style="margin-bottom: 1.5rem; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <h2 style="margin: 0; font-weight: 400; font-size: 1.5rem;">Affiliates</h2>
+
+        <form method="get" style="margin-left: auto; display: flex; gap: 0.5rem;">
+            <input type="text" name="search" placeholder="Search name, email, code..."
+                   class="bx--text-input" style="width:260px;" value="@Context.Request.Query["search"]" />
+            <button type="submit" class="bx--btn bx--btn--primary bx--btn--sm">Search</button>
+            <a href="@Url.Action("Affiliates")" class="bx--btn bx--btn--ghost bx--btn--sm">Clear</a>
+        </form>
+    </div>
+
+    <table class="bx--data-table" style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr>
+                <th style="padding:0.75rem 1rem; text-align:left; background:#e0e0e0;">Affiliate</th>
+                <th style="padding:0.75rem 1rem; text-align:left; background:#e0e0e0;">Code</th>
+                <th style="padding:0.75rem 1rem; text-align:center; background:#e0e0e0;">Clicks</th>
+                <th style="padding:0.75rem 1rem; text-align:center; background:#e0e0e0;">Signups</th>
+                <th style="padding:0.75rem 1rem; text-align:center; background:#e0e0e0;">Converted</th>
+                <th style="padding:0.75rem 1rem; text-align:right; background:#e0e0e0;">Available</th>
+                <th style="padding:0.75rem 1rem; text-align:right; background:#e0e0e0;">Pending</th>
+                <th style="padding:0.75rem 1rem; text-align:center; background:#e0e0e0;">Status</th>
+                <th style="padding:0.75rem 1rem; text-align:center; background:#e0e0e0;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var summary in (IEnumerable<dynamic>)ViewBag.Summaries)
+            {
+                var profile = summary.Profile;
+                <tr style="border-bottom:1px solid #e0e0e0;">
+                    <td style="padding:0.75rem 1rem;">
+                        <div style="font-weight:600;">@profile.User.FullName</div>
+                        <div style="font-size:0.75rem; color:#525252;">@profile.User.Email</div>
+                        <div style="font-size:0.75rem; color:#6f6f6f;">@profile.AffiliateDisplayId</div>
+                    </td>
+                    <td style="padding:0.75rem 1rem; font-family:monospace; font-weight:600;">@profile.ReferralCode</td>
+                    <td style="padding:0.75rem 1rem; text-align:center;">@profile.TotalClicks</td>
+                    <td style="padding:0.75rem 1rem; text-align:center;">@summary.TotalSignups</td>
+                    <td style="padding:0.75rem 1rem; text-align:center;">@summary.HasConverted</td>
+                    <td style="padding:0.75rem 1rem; text-align:right;">
+                        @foreach (var b in summary.ByCurrency)
+                        {
+                            <div style="white-space:nowrap; color:#0e6027; font-weight:600;">
+                                @b.Available.ToString("N2") @b.Currency
+                            </div>
+                        }
+                    </td>
+                    <td style="padding:0.75rem 1rem; text-align:right;">
+                        @foreach (var b in summary.ByCurrency)
+                        {
+                            <div style="white-space:nowrap; color:#b45309;">
+                                @b.Pending.ToString("N2") @b.Currency
+                            </div>
+                        }
+                    </td>
+                    <td style="padding:0.75rem 1rem; text-align:center;">
+                        @if (profile.IsActive)
+                        {
+                            <span style="background:#d1e7dd; color:#0a3622; padding:2px 8px; border-radius:3px; font-size:0.75rem;">Active</span>
+                        }
+                        else
+                        {
+                            <span style="background:#f8d7da; color:#58151c; padding:2px 8px; border-radius:3px; font-size:0.75rem;">Inactive</span>
+                        }
+                    </td>
+                    <td style="padding:0.75rem 1rem; text-align:center;">
+                        <a href="@Url.Action("Details", new { id = profile.Id })" class="bx--btn bx--btn--ghost bx--btn--sm">Details</a>
+                    </td>
+                </tr>
+            }
+
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="9" style="padding:2rem; text-align:center; color:#6f6f6f;">No affiliates found.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

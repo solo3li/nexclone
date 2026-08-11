@@ -211,6 +211,10 @@ builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IPaymentService, Nex
 builder.Services.AddScoped<NexClone.Backend.Application.Services.WalletService>();
 builder.Services.AddScoped<NexClone.Backend.Application.Services.UsagePolicyService>();
 
+// Register Affiliate Service
+builder.Services.AddScoped<NexClone.Backend.Application.Services.AffiliateService>();
+builder.Services.AddScoped<NexClone.Backend.Application.BackgroundJobs.AffiliateCommissionHoldJob>();
+
 // Register Background Services
 builder.Services.AddHostedService<NexClone.Backend.Application.BackgroundJobs.SubscriptionStatusService>();
 
@@ -429,5 +433,13 @@ app.MapControllerRoute(
 app.MapHub<NexClone.Backend.Hubs.TicketHub>("/hubs/ticket");
 app.MapHub<NexClone.Backend.Hubs.NotificationHub>("/hubs/notification");
 
+// Register Affiliate Commission Hold Job — runs daily at midnight
+using (var hangfireScope = app.Services.CreateScope())
+{
+    Hangfire.RecurringJob.AddOrUpdate<NexClone.Backend.Application.BackgroundJobs.AffiliateCommissionHoldJob>(
+        "affiliate-commission-hold",
+        j => j.ProcessAsync(),
+        Hangfire.Cron.Daily);
+}
 
 app.Run();

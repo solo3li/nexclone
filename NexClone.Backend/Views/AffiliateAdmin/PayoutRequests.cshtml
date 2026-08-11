@@ -1,0 +1,135 @@
+@model IEnumerable<NexClone.Backend.Core.Entities.AffiliatePayout>
+@using NexClone.Backend.Core.Entities
+
+<div class="bx--grid" style="padding-left:0; max-width:1200px;">
+    <div class="bx--row" style="margin-bottom:1.5rem; align-items:center; gap:1rem; flex-wrap:wrap;">
+        <h2 style="margin:0; font-weight:400; font-size:1.5rem;">Payout Requests</h2>
+
+        <form method="get" style="margin-left:auto; display:flex; gap:0.5rem; flex-wrap:wrap;">
+            <select name="status" class="bx--select-input" style="width:160px;">
+                <option value="">All Statuses</option>
+                @foreach (var s in new[] { "PENDING", "APPROVED", "PROCESSING", "PAID", "REJECTED", "FAILED" })
+                {
+                    <option value="@s" selected="@(Context.Request.Query["status"] == s ? "selected" : null)">@s</option>
+                }
+            </select>
+            <select name="currency" class="bx--select-input" style="width:120px;">
+                <option value="">All Currencies</option>
+                <option value="USD" selected="@(Context.Request.Query["currency"] == "USD" ? "selected" : null)">USD</option>
+                <option value="EGP" selected="@(Context.Request.Query["currency"] == "EGP" ? "selected" : null)">EGP</option>
+            </select>
+            <button type="submit" class="bx--btn bx--btn--primary bx--btn--sm">Filter</button>
+        </form>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="bx--inline-notification bx--inline-notification--success" style="margin-bottom:1rem;"><p>@TempData["Success"]</p></div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="bx--inline-notification bx--inline-notification--error" style="margin-bottom:1rem;"><p>@TempData["Error"]</p></div>
+    }
+
+    <table style="width:100%; border-collapse:collapse; font-size:0.875rem;">
+        <thead>
+            <tr>
+                <th style="padding:0.6rem 0.75rem; text-align:left; background:#e0e0e0;">#</th>
+                <th style="padding:0.6rem 0.75rem; text-align:left; background:#e0e0e0;">Affiliate</th>
+                <th style="padding:0.6rem 0.75rem; text-align:right; background:#e0e0e0;">Amount</th>
+                <th style="padding:0.6rem 0.75rem; text-align:center; background:#e0e0e0;">Currency</th>
+                <th style="padding:0.6rem 0.75rem; text-align:left; background:#e0e0e0;">Method</th>
+                <th style="padding:0.6rem 0.75rem; text-align:left; background:#e0e0e0;">Account</th>
+                <th style="padding:0.6rem 0.75rem; text-align:center; background:#e0e0e0;">Status</th>
+                <th style="padding:0.6rem 0.75rem; text-align:center; background:#e0e0e0;">Requested</th>
+                <th style="padding:0.6rem 0.75rem; text-align:center; background:#e0e0e0;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var payout in Model)
+            {
+                var statusColor = payout.Status switch
+                {
+                    "PENDING" => "#856404",
+                    "APPROVED" => "#0a3622",
+                    "PROCESSING" => "#024ea2",
+                    "PAID" => "#155724",
+                    "REJECTED" or "FAILED" => "#721c24",
+                    _ => "#525252"
+                };
+                var statusBg = payout.Status switch
+                {
+                    "PENDING" => "#fff3cd",
+                    "APPROVED" => "#d1e7dd",
+                    "PROCESSING" => "#cfe2ff",
+                    "PAID" => "#d4edda",
+                    "REJECTED" or "FAILED" => "#f8d7da",
+                    _ => "#e0e0e0"
+                };
+
+                <tr style="border-bottom:1px solid #e0e0e0;">
+                    <td style="padding:0.6rem 0.75rem; color:#525252; font-size:0.75rem;">#@payout.Id</td>
+                    <td style="padding:0.6rem 0.75rem;">
+                        <div style="font-weight:600;">@payout.AffiliateProfile.User.FullName</div>
+                        <div style="font-size:0.75rem; color:#525252;">@payout.AffiliateProfile.ReferralCode</div>
+                    </td>
+                    <td style="padding:0.6rem 0.75rem; text-align:right; font-weight:700; font-size:1rem;">@payout.Amount.ToString("N2")</td>
+                    <td style="padding:0.6rem 0.75rem; text-align:center; font-weight:600;">@payout.Currency</td>
+                    <td style="padding:0.6rem 0.75rem;">@payout.PayoutMethod</td>
+                    <td style="padding:0.6rem 0.75rem; font-size:0.8rem; max-width:200px; overflow:hidden; text-overflow:ellipsis;">@payout.PayoutAccount</td>
+                    <td style="padding:0.6rem 0.75rem; text-align:center;">
+                        <span style="background:@statusBg; color:@statusColor; padding:2px 8px; border-radius:3px; font-size:0.75rem; font-weight:600;">@payout.Status</span>
+                        @if (!string.IsNullOrEmpty(payout.RejectionReason))
+                        {
+                            <div style="font-size:0.7rem; color:#c62828; margin-top:2px;">@payout.RejectionReason</div>
+                        }
+                    </td>
+                    <td style="padding:0.6rem 0.75rem; text-align:center; font-size:0.8rem;">@payout.RequestedAt.ToString("yyyy-MM-dd")</td>
+                    <td style="padding:0.6rem 0.75rem; text-align:center;">
+                        <form method="post" action="@Url.Action("UpdatePayoutStatus")" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@payout.Id" />
+
+                            @if (payout.Status == "PENDING")
+                            {
+                                <button name="newStatus" value="APPROVED" class="bx--btn bx--btn--sm" style="background:#0e6027; color:#fff; border:none; padding:4px 10px; cursor:pointer;">Approve</button>
+                                <button name="newStatus" value="REJECTED" class="bx--btn bx--btn--sm" onclick="return promptReject(this)" style="background:#c62828; color:#fff; border:none; padding:4px 10px; cursor:pointer; margin-left:4px;">Reject</button>
+                                <input type="hidden" name="rejectionReason" id="rejReason_@payout.Id" />
+                            }
+                            else if (payout.Status == "APPROVED")
+                            {
+                                <button name="newStatus" value="PROCESSING" class="bx--btn bx--btn--sm" style="background:#024ea2; color:#fff; border:none; padding:4px 10px; cursor:pointer;">Mark Processing</button>
+                            }
+                            else if (payout.Status == "PROCESSING")
+                            {
+                                <button name="newStatus" value="PAID" class="bx--btn bx--btn--sm" style="background:#155724; color:#fff; border:none; padding:4px 10px; cursor:pointer;">Mark Paid</button>
+                                <button name="newStatus" value="FAILED" class="bx--btn bx--btn--sm" style="background:#721c24; color:#fff; border:none; padding:4px 10px; cursor:pointer; margin-left:4px;">Mark Failed</button>
+                            }
+                            else
+                            {
+                                <span style="color:#525252; font-size:0.75rem;">—</span>
+                            }
+                        </form>
+                    </td>
+                </tr>
+            }
+
+            @if (!Model.Any())
+            {
+                <tr><td colspan="9" style="padding:2rem; text-align:center; color:#6f6f6f;">No payout requests found.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<script>
+function promptReject(btn) {
+    const form = btn.closest('form');
+    const reason = prompt('Enter rejection reason:');
+    if (reason === null) return false;
+    const payoutId = form.querySelector('input[name="id"]').value;
+    const rejInput = form.querySelector('input[name="rejectionReason"]');
+    if (rejInput) rejInput.value = reason;
+    return true;
+}
+</script>

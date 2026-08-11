@@ -1,0 +1,108 @@
+@model NexClone.Backend.Core.Entities.AffiliateProfile
+@using NexClone.Backend.Core.Entities
+@using NexClone.Backend.Application.Services
+
+@{
+    var stats = (AffiliateStatsDto)ViewBag.Stats;
+    var balances = (List<AffiliateCurrencyBalance>)ViewBag.Balances;
+    var commissions = (List<AffiliateCommission>)ViewBag.Commissions;
+    string referralLink = ViewBag.ReferralLink;
+}
+
+<div class="bx--grid" style="padding-left:0; max-width:1100px;">
+    <div class="bx--row" style="margin-bottom:1.5rem; align-items:center; gap:1rem;">
+        <div>
+            <h2 style="margin:0; font-weight:400; font-size:1.5rem;">@Model.User.FullName</h2>
+            <div style="font-size:0.875rem; color:#525252;">@Model.AffiliateDisplayId &nbsp;|&nbsp; @Model.User.Email</div>
+        </div>
+        <a href="@Url.Action("Affiliates")" class="bx--btn bx--btn--ghost bx--btn--sm" style="margin-left:auto;">← Back</a>
+    </div>
+
+    <!-- Referral Link -->
+    <div style="background:#f4f4f4; padding:1rem; border-left:4px solid #0f62fe; margin-bottom:1.5rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+        <div>
+            <div style="font-size:0.75rem; color:#525252;">Referral Code</div>
+            <strong style="font-family:monospace; font-size:1.1rem;">@Model.ReferralCode</strong>
+        </div>
+        <div style="flex:1; min-width:200px;">
+            <div style="font-size:0.75rem; color:#525252;">Referral Link</div>
+            <code style="font-size:0.875rem; word-break:break-all;">@referralLink</code>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:1rem; margin-bottom:1.5rem;">
+        @{
+            void S(string label, object val, string color = "#0f62fe")
+            {
+                <div style="background:#f4f4f4; border-left:4px solid @color; padding:0.75rem 1rem;">
+                    <div style="font-size:0.7rem; color:#525252; margin-bottom:0.2rem;">@label</div>
+                    <div style="font-size:1.4rem; font-weight:600; color:@color;">@val</div>
+                </div>;
+            }
+        }
+        @{ S("Clicks", Model.TotalClicks); }
+        @{ S("Signups", stats.TotalSignups, "#6929c4"); }
+        @{ S("Paid Customers", stats.PaidCustomers, "#0e6027"); }
+        @{ S("Active Subscriptions", stats.ActiveSubscriptions, "#024ea2"); }
+        @{ S("Conversion Rate", $"{stats.ConversionRate}%", "#b45309"); }
+    </div>
+
+    <!-- Balances -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:1rem; margin-bottom:1.5rem;">
+        @foreach (var b in balances)
+        {
+            <div style="background:#fff; border:1px solid #e0e0e0; padding:1rem;">
+                <h4 style="margin:0 0 0.5rem; color:#0f62fe;">@b.Currency</h4>
+                <div>Available: <strong style="color:#0e6027;">@b.Available.ToString("N2")</strong></div>
+                <div>Pending: <strong style="color:#b45309;">@b.Pending.ToString("N2")</strong></div>
+            </div>
+        }
+    </div>
+
+    <!-- Commission Ledger -->
+    <h3 style="font-weight:500; font-size:1.1rem; margin-bottom:0.75rem;">Commission Ledger</h3>
+    <table style="width:100%; border-collapse:collapse; font-size:0.875rem;">
+        <thead>
+            <tr>
+                <th style="padding:0.5rem 0.75rem; text-align:left; background:#e0e0e0;">Type</th>
+                <th style="padding:0.5rem 0.75rem; text-align:left; background:#e0e0e0;">Customer</th>
+                <th style="padding:0.5rem 0.75rem; text-align:left; background:#e0e0e0;">Plan</th>
+                <th style="padding:0.5rem 0.75rem; text-align:right; background:#e0e0e0;">Amount</th>
+                <th style="padding:0.5rem 0.75rem; text-align:center; background:#e0e0e0;">Currency</th>
+                <th style="padding:0.5rem 0.75rem; text-align:center; background:#e0e0e0;">Rate</th>
+                <th style="padding:0.5rem 0.75rem; text-align:center; background:#e0e0e0;">Status</th>
+                <th style="padding:0.5rem 0.75rem; text-align:center; background:#e0e0e0;">Available At</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var c in commissions)
+            {
+                var statusColor = c.Status switch
+                {
+                    "PENDING" => "#b45309",
+                    "AVAILABLE" => "#0e6027",
+                    "PAID" => "#024ea2",
+                    "CANCELLED" or "REVERSED" => "#c62828",
+                    _ => "#525252"
+                };
+                <tr style="border-bottom:1px solid #e0e0e0;">
+                    <td style="padding:0.5rem 0.75rem; font-size:0.75rem; font-weight:600;">@c.Type</td>
+                    <td style="padding:0.5rem 0.75rem;">@(c.Customer?.FullName ?? c.Customer?.Email ?? "—")</td>
+                    <td style="padding:0.5rem 0.75rem;">@(c.Plan?.Name ?? "—")</td>
+                    <td style="padding:0.5rem 0.75rem; text-align:right; font-weight:600;">@c.Amount.ToString("N2")</td>
+                    <td style="padding:0.5rem 0.75rem; text-align:center;">@c.Currency</td>
+                    <td style="padding:0.5rem 0.75rem; text-align:center;">@c.Rate%</td>
+                    <td style="padding:0.5rem 0.75rem; text-align:center;">
+                        <span style="background:@statusColor; color:#fff; padding:2px 8px; border-radius:3px; font-size:0.7rem;">@c.Status</span>
+                    </td>
+                    <td style="padding:0.5rem 0.75rem; text-align:center; font-size:0.75rem;">@c.AvailableAt.ToShortDateString()</td>
+                </tr>
+            }
+            @if (!commissions.Any())
+            {
+                <tr><td colspan="8" style="padding:1rem; text-align:center; color:#6f6f6f;">No commissions yet.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

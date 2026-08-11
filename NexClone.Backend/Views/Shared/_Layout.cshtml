@@ -453,6 +453,14 @@
                     </a>
                 </li>
                 }
+                @if (isSuperAdmin || visibleSections.Contains("/AffiliateAdmin")) {
+                    <li class="sidebar-menu-item">
+                    <a href="@Url.Action("Index", "AffiliateAdmin")">
+                        <i class='bx bx-share-alt'></i>
+                        @Localizer["Affiliate"]
+                    </a>
+                </li>
+                }
                 @if (isSuperAdmin || visibleSections.Contains("/ToolConfigAdmin")) {
                     <li class="sidebar-menu-item">
                     <a href="@Url.Action("Index", "ToolConfigAdmin")">

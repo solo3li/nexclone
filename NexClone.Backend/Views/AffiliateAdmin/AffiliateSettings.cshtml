@@ -1,0 +1,99 @@
+@model NexClone.Backend.Application.Services.AffiliateSettingsDto
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
+
+<div class="bx--grid" style="padding-left:0; max-width:700px;">
+    <div class="bx--row" style="margin-bottom:1.5rem;">
+        <h2 style="margin:0; font-weight:400; font-size:1.5rem;">Affiliate Settings</h2>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="bx--inline-notification bx--inline-notification--success" style="margin-bottom:1.5rem;">
+            <p>@TempData["Success"]</p>
+        </div>
+    }
+
+    <form method="post" action="@Url.Action("AffiliateSettings")" style="background:#ffffff; padding:2rem; border:1px solid #e0e0e0;">
+        @Html.AntiForgeryToken()
+
+        <!-- Enable / Disable -->
+        <div class="bx--form-item" style="margin-bottom:1.5rem;">
+            <div class="bx--toggle">
+                <input id="IsEnabled" type="checkbox" name="IsEnabled" value="true"
+                       class="bx--toggle__input" @(Model.IsEnabled ? "checked" : "") />
+                <label class="bx--toggle__label" for="IsEnabled">
+                    <span class="bx--toggle__text--left">Off</span>
+                    <span class="bx--toggle__appearance"></span>
+                    <span class="bx--toggle__text--right">Affiliate System Enabled</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Hold Period -->
+        <div class="bx--form-item" style="margin-bottom:1.5rem;">
+            <label for="HoldPeriodDays" class="bx--label">Commission Hold Period (days)</label>
+            <div class="bx--text-input__field-wrapper">
+                <input id="HoldPeriodDays" type="number" min="0" max="365" class="bx--text-input"
+                       name="HoldPeriodDays" value="@Model.HoldPeriodDays" style="max-width:200px;" />
+            </div>
+            <p class="bx--form__helper-text">Number of days a new commission stays PENDING before becoming AVAILABLE.</p>
+        </div>
+
+        <!-- Attribution Period -->
+        <div class="bx--form-item" style="margin-bottom:1.5rem;">
+            <label for="AttributionPeriodDays" class="bx--label">Referral Attribution Period (days)</label>
+            <div class="bx--text-input__field-wrapper">
+                <input id="AttributionPeriodDays" type="number" min="1" max="365" class="bx--text-input"
+                       name="AttributionPeriodDays" value="@Model.AttributionPeriodDays" style="max-width:200px;" />
+            </div>
+            <p class="bx--form__helper-text">Days after clicking a referral link during which a signup is attributed to the affiliate.</p>
+        </div>
+
+        <!-- Recurring Commission -->
+        <div class="bx--form-item" style="margin-bottom:1.5rem;">
+            <div class="bx--toggle">
+                <input id="RecurringEnabled" type="checkbox" name="RecurringEnabled" value="true"
+                       class="bx--toggle__input" @(Model.RecurringEnabled ? "checked" : "") />
+                <label class="bx--toggle__label" for="RecurringEnabled">
+                    <span class="bx--toggle__text--left">Off</span>
+                    <span class="bx--toggle__appearance"></span>
+                    <span class="bx--toggle__text--right">Recurring Commission Enabled</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Stop on Cancellation -->
+        <div class="bx--form-item" style="margin-bottom:1.5rem;">
+            <div class="bx--toggle">
+                <input id="StopOnCancellation" type="checkbox" name="StopOnCancellation" value="true"
+                       class="bx--toggle__input" @(Model.StopOnCancellation ? "checked" : "") />
+                <label class="bx--toggle__label" for="StopOnCancellation">
+                    <span class="bx--toggle__text--left">Off</span>
+                    <span class="bx--toggle__appearance"></span>
+                    <span class="bx--toggle__text--right">Stop Recurring Commission After Subscription Cancellation</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Minimum Payout -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.5rem;">
+            <div class="bx--form-item">
+                <label for="MinPayoutUsd" class="bx--label">Minimum Payout (USD)</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="MinPayoutUsd" type="number" min="0" step="0.01" class="bx--text-input"
+                           name="MinPayoutUsd" value="@Model.MinPayoutUsd" />
+                </div>
+            </div>
+            <div class="bx--form-item">
+                <label for="MinPayoutEgp" class="bx--label">Minimum Payout (EGP)</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="MinPayoutEgp" type="number" min="0" step="0.01" class="bx--text-input"
+                           name="MinPayoutEgp" value="@Model.MinPayoutEgp" />
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="bx--btn bx--btn--primary">Save Settings</button>
+        <a href="@Url.Action("Index")" class="bx--btn bx--btn--ghost" style="margin-left:0.5rem;">Cancel</a>
+    </form>
+</div>

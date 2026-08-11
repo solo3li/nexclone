@@ -1,0 +1,63 @@
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
+
+<div class="bx--grid" style="padding-left: 0; max-width: 1100px;">
+    <div class="bx--row" style="margin-bottom: 1.5rem; align-items: center; gap: 1rem;">
+        <h2 style="margin: 0; font-weight: 400; font-size: 1.5rem;">Affiliate — Overview</h2>
+        <a href="@Url.Action("AffiliateSettings")" class="bx--btn bx--btn--ghost bx--btn--sm" style="margin-left: auto;">⚙ Affiliate Settings</a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="bx--inline-notification bx--inline-notification--success" style="margin-bottom:1rem;">
+            <p>@TempData["Success"]</p>
+        </div>
+    }
+
+    <!-- Stats Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        @{
+            void StatCard(string label, object value, string color = "#0f62fe")
+            {
+                <div style="background: #f4f4f4; border-left: 4px solid @color; padding: 1rem 1.25rem;">
+                    <div style="font-size: 0.75rem; color: #525252; margin-bottom: 0.25rem;">@label</div>
+                    <div style="font-size: 1.5rem; font-weight: 600; color: @color;">@value</div>
+                </div>;
+            }
+        }
+        @{ StatCard("Total Affiliates", ViewBag.TotalAffiliates); }
+        @{ StatCard("Active Affiliates", ViewBag.ActiveAffiliates, "#24a148"); }
+        @{ StatCard("Total Signups", ViewBag.TotalReferrals, "#6929c4"); }
+        @{ StatCard("Active Referred Subscriptions", ViewBag.ActiveReferredSubscriptions, "#0e6027"); }
+    </div>
+
+    <!-- Commission Breakdown -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+        <div style="background:#fff3cd; border:1px solid #ffc107; padding:1rem;">
+            <h4 style="margin:0 0 0.5rem;">Pending Commissions</h4>
+            @foreach (var item in (IEnumerable<dynamic>)ViewBag.PendingAmount)
+            {
+                <div style="font-size:1.25rem;font-weight:600;">@item.total.ToString("N2") @item.currency</div>
+            }
+        </div>
+        <div style="background:#d1e7dd; border:1px solid #198754; padding:1rem;">
+            <h4 style="margin:0 0 0.5rem;">Available Commissions</h4>
+            @foreach (var item in (IEnumerable<dynamic>)ViewBag.AvailableAmount)
+            {
+                <div style="font-size:1.25rem;font-weight:600;">@item.total.ToString("N2") @item.currency</div>
+            }
+        </div>
+        <div style="background:#cfe2ff; border:1px solid #0d6efd; padding:1rem;">
+            <h4 style="margin:0 0 0.5rem;">Paid Out</h4>
+            @foreach (var item in (IEnumerable<dynamic>)ViewBag.PaidAmount)
+            {
+                <div style="font-size:1.25rem;font-weight:600;">@item.total.ToString("N2") @item.currency</div>
+            }
+        </div>
+    </div>
+
+    <!-- Quick links -->
+    <div style="display:flex; gap:1rem;">
+        <a href="@Url.Action("Affiliates")" class="bx--btn bx--btn--primary">View All Affiliates</a>
+        <a href="@Url.Action("PayoutRequests")" class="bx--btn bx--btn--secondary">Payout Requests</a>
+    </div>
+</div>

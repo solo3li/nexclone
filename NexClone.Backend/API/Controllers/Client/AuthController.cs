@@ -169,6 +169,22 @@ namespace NexClone.Backend.API.Controllers.Client
 
             await _context.SaveChangesAsync();
 
+            // Link affiliate referral session (from ?ref= cookie) if present
+            try
+            {
+                var affiliateSession = Request.Cookies["aff_session"];
+                if (!string.IsNullOrEmpty(affiliateSession))
+                {
+                    var affiliateService = HttpContext.RequestServices.GetService<NexClone.Backend.Application.Services.AffiliateService>();
+                    if (affiliateService != null)
+                        await affiliateService.LinkReferralToUserAsync(affiliateSession, user.Id);
+                }
+            }
+            catch (Exception affEx)
+            {
+                Console.WriteLine($"[Affiliate] Failed to link referral on register: {affEx.Message}");
+            }
+
             var verificationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var origin = Request.Headers["Origin"].FirstOrDefault() ?? _configuration["AppSettings:DefaultFrontendUrl"] ?? "http://localhost:3000";
             var acceptLang = Request.Headers["Accept-Language"].FirstOrDefault() ?? "ar";

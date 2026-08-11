@@ -1,0 +1,506 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using NexClone.Backend.Core.Entities;
+
+namespace NexClone.Backend.Application.Services
+{
+    // ─────────────────────────────────────────────
+    //  DTOs
+    // ─────────────────────────────────────────────
+
+    public class AffiliateSettingsDto
+    {
+        public bool IsEnabled { get; set; }
+        public int HoldPeriodDays { get; set; }
+        public int AttributionPeriodDays { get; set; }
+        public bool RecurringEnabled { get; set; }
+        public bool StopOnCancellation { get; set; }
+        public decimal MinPayoutUsd { get; set; }
+        public decimal MinPayoutEgp { get; set; }
+    }
+
+    public class AffiliateCurrencyBalance
+    {
+        public string Currency { get; set; } = string.Empty;
+        public decimal Available { get; set; }
+        public decimal Pending { get; set; }
+    }
+
+    public class AffiliateStatsDto
+    {
+        public int TotalClicks { get; set; }
+        public int TotalSignups { get; set; }
+        public int PaidCustomers { get; set; }
+        public int ActiveSubscriptions { get; set; }
+        public decimal ConversionRate { get; set; }
+        public List<AffiliateCurrencyBalance> Balances { get; set; } = new();
+    }
+
+    // ─────────────────────────────────────────────
+    //  Service
+    // ─────────────────────────────────────────────
+
+    public class AffiliateService
+    {
+        private readonly ApplicationDbContext _db;
+        private readonly ILogger<AffiliateService> _logger;
+
+        private const string KEY_ENABLED = "Affiliate.IsEnabled";
+        private const string KEY_HOLD = "Affiliate.HoldPeriodDays";
+        private const string KEY_ATTRIBUTION = "Affiliate.AttributionPeriodDays";
+        private const string KEY_RECURRING = "Affiliate.RecurringEnabled";
+        private const string KEY_STOP_ON_CANCEL = "Affiliate.StopOnCancellation";
+        private const string KEY_MIN_USD = "Affiliate.MinPayoutUsd";
+        private const string KEY_MIN_EGP = "Affiliate.MinPayoutEgp";
+
+        public AffiliateService(ApplicationDbContext db, ILogger<AffiliateService> logger)
+        {
+            _db = db;
+            _logger = logger;
+        }
+
+        // ─── Settings ────────────────────────────────────────────────────────
+
+        public async Task<AffiliateSettingsDto> GetSettingsAsync()
+        {
+            var keys = new[]
+            {
+                KEY_ENABLED, KEY_HOLD, KEY_ATTRIBUTION,
+                KEY_RECURRING, KEY_STOP_ON_CANCEL, KEY_MIN_USD, KEY_MIN_EGP
+            };
+            var settings = await _db.AppSettings
+                .Where(s => keys.Contains(s.Key))
+                .ToDictionaryAsync(s => s.Key, s => s.Value);
+
+            return new AffiliateSettingsDto
+            {
+                IsEnabled           = GetBool(settings, KEY_ENABLED, false),
+                HoldPeriodDays      = GetInt(settings, KEY_HOLD, 14),
+                AttributionPeriodDays = GetInt(settings, KEY_ATTRIBUTION, 30),
+                RecurringEnabled    = GetBool(settings, KEY_RECURRING, true),
+                StopOnCancellation  = GetBool(settings, KEY_STOP_ON_CANCEL, true),
+                MinPayoutUsd        = GetDecimal(settings, KEY_MIN_USD, 50),
+                MinPayoutEgp        = GetDecimal(settings, KEY_MIN_EGP, 500),
+            };
+        }
+
+        public async Task SaveSettingsAsync(AffiliateSettingsDto dto)
+        {
+            await UpsertSettingAsync(KEY_ENABLED, dto.IsEnabled.ToString().ToLower(), "Affiliate system enabled toggle");
+            await UpsertSettingAsync(KEY_HOLD, dto.HoldPeriodDays.ToString(), "Days before pending commissions become available");
+            await UpsertSettingAsync(KEY_ATTRIBUTION, dto.AttributionPeriodDays.ToString(), "Days referral attribution remains valid after click");
+            await UpsertSettingAsync(KEY_RECURRING, dto.RecurringEnabled.ToString().ToLower(), "Enable recurring commissions on subscription renewals");
+            await UpsertSettingAsync(KEY_STOP_ON_CANCEL, dto.StopOnCancellation.ToString().ToLower(), "Stop recurring commissions when subscription is cancelled");
+            await UpsertSettingAsync(KEY_MIN_USD, dto.MinPayoutUsd.ToString("F2"), "Minimum payout amount in USD");
+            await UpsertSettingAsync(KEY_MIN_EGP, dto.MinPayoutEgp.ToString("F2"), "Minimum payout amount in EGP");
+            await _db.SaveChangesAsync();
+        }
+
+        // ─── Profile ─────────────────────────────────────────────────────────
+
+        public async Task<AffiliateProfile> GetOrCreateProfileAsync(Guid userId)
+        {
+            var profile = await _db.AffiliateProfiles
+                .FirstOrDefaultAsync(p => p.UserId == userId);
+
+            if (profile != null) return profile;
+
+            // Generate unique referral code from user id prefix
+            var code = await GenerateUniqueCodeAsync();
+            var count = await _db.AffiliateProfiles.CountAsync() + 1;
+
+            profile = new AffiliateProfile
+            {
+                UserId = userId,
+                AffiliateDisplayId = $"AF-{count:D5}",
+                ReferralCode = code,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _db.AffiliateProfiles.Add(profile);
+            await _db.SaveChangesAsync();
+
+            _logger.LogInformation("Created AffiliateProfile {Id} for user {UserId}", profile.Id, userId);
+            return profile;
+        }
+
+        // ─── Referral Tracking ────────────────────────────────────────────────
+
+        /// <summary>
+        /// Called when a visitor clicks a ?ref= link.
+        /// Returns a session token to store in a cookie.
+        /// </summary>
+        public async Task<string?> TrackClickAsync(string referralCode)
+        {
+            var settings = await GetSettingsAsync();
+            if (!settings.IsEnabled) return null;
+
+            var profile = await _db.AffiliateProfiles
+                .FirstOrDefaultAsync(p => p.ReferralCode == referralCode && p.IsActive);
+
+            if (profile == null) return null;
+
+            var sessionToken = Guid.NewGuid().ToString("N");
+
+            var referral = new AffiliateReferral
+            {
+                AffiliateProfileId = profile.Id,
+                SessionToken = sessionToken,
+                ClickedAt = DateTime.UtcNow,
+                AttributionExpiresAt = DateTime.UtcNow.AddDays(settings.AttributionPeriodDays)
+            };
+
+            profile.TotalClicks++;
+            _db.AffiliateReferrals.Add(referral);
+            await _db.SaveChangesAsync();
+
+            return sessionToken;
+        }
+
+        /// <summary>
+        /// Called during registration when "aff_session" cookie is present.
+        /// Links the new user to the referral, if attribution period has not expired.
+        /// </summary>
+        public async Task LinkReferralToUserAsync(string sessionToken, Guid newUserId)
+        {
+            if (string.IsNullOrWhiteSpace(sessionToken)) return;
+
+            var referral = await _db.AffiliateReferrals
+                .FirstOrDefaultAsync(r => r.SessionToken == sessionToken && r.ReferredUserId == null);
+
+            if (referral == null) return;
+
+            if (referral.AttributionExpiresAt < DateTime.UtcNow)
+            {
+                _logger.LogInformation("Referral session {Token} expired. Attribution period ended.", sessionToken);
+                return;
+            }
+
+            referral.ReferredUserId = newUserId;
+            await _db.SaveChangesAsync();
+
+            _logger.LogInformation("Linked user {UserId} to referral {ReferralId}", newUserId, referral.Id);
+        }
+
+        // ─── Commission Creation ──────────────────────────────────────────────
+
+        /// <summary>
+        /// Called after a successful payment is recorded.
+        /// Determines if an affiliate commission should be created.
+        /// </summary>
+        public async Task CreateCommissionAsync(int paymentId, bool isRecurring)
+        {
+            var settings = await GetSettingsAsync();
+            if (!settings.IsEnabled) return;
+
+            if (isRecurring && !settings.RecurringEnabled) return;
+
+            var payment = await _db.Payments
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(p => p.Id == paymentId);
+
+            if (payment == null) return;
+            if (payment.PlanId == null || payment.SubscriptionId == null) return;
+
+            // Find the active referral linking this customer to an affiliate
+            var referral = await _db.AffiliateReferrals
+                .Include(r => r.AffiliateProfile)
+                .FirstOrDefaultAsync(r =>
+                    r.ReferredUserId == payment.UserId &&
+                    r.AffiliateProfile.IsActive);
+
+            if (referral == null) return;
+
+            var plan = await _db.Plans.FindAsync(payment.PlanId.Value);
+            if (plan == null) return;
+
+            // Determine the correct commission rate
+            decimal rate = isRecurring
+                ? plan.AffiliateRecurringCommissionPercent
+                : plan.AffiliateFirstCommissionPercent;
+
+            if (rate <= 0) return;
+
+            // Check if StopOnCancellation applies
+            if (isRecurring && settings.StopOnCancellation)
+            {
+                var subscription = await _db.Subscriptions.FindAsync(payment.SubscriptionId.Value);
+                if (subscription != null && subscription.Status.ToLower() == "canceled")
+                {
+                    _logger.LogInformation("Skipping commission — subscription is cancelled for payment {PaymentId}", paymentId);
+                    return;
+                }
+            }
+
+            var commission = new AffiliateCommission
+            {
+                AffiliateProfileId = referral.AffiliateProfileId,
+                AffiliateReferralId = referral.Id,
+                CustomerId = payment.UserId,
+                PlanId = payment.PlanId.Value,
+                SubscriptionId = payment.SubscriptionId.Value,
+                PaymentId = payment.Id,
+                Type = isRecurring ? CommissionType.Recurring : CommissionType.FirstPurchase,
+                Amount = Math.Round(payment.Amount * rate / 100m, 2),
+                Currency = payment.Currency,         // NEVER converted
+                Rate = rate,
+                Status = CommissionStatus.Pending,
+                CreatedAt = DateTime.UtcNow,
+                AvailableAt = DateTime.UtcNow.AddDays(settings.HoldPeriodDays)
+            };
+
+            // Mark referral as converted on first purchase
+            if (!isRecurring)
+                referral.HasConverted = true;
+
+            _db.AffiliateCommissions.Add(commission);
+            await _db.SaveChangesAsync();
+
+            _logger.LogInformation(
+                "Created {Type} commission {Amount} {Currency} (rate {Rate}%) for affiliate {AffiliateId} on payment {PaymentId}",
+                commission.Type, commission.Amount, commission.Currency, commission.Rate,
+                referral.AffiliateProfileId, paymentId);
+        }
+
+        // ─── Hold Period Processing ───────────────────────────────────────────
+
+        /// <summary>
+        /// Executed by a daily Hangfire job.
+        /// Moves PENDING commissions past their AvailableAt to AVAILABLE.
+        /// </summary>
+        public async Task ProcessPendingCommissionsAsync()
+        {
+            var now = DateTime.UtcNow;
+            var pending = await _db.AffiliateCommissions
+                .Where(c => c.Status == CommissionStatus.Pending && c.AvailableAt <= now)
+                .ToListAsync();
+
+            foreach (var commission in pending)
+                commission.Status = CommissionStatus.Available;
+
+            if (pending.Count > 0)
+            {
+                await _db.SaveChangesAsync();
+                _logger.LogInformation("Processed {Count} pending commissions to AVAILABLE", pending.Count);
+            }
+        }
+
+        // ─── Refund / Reversal ────────────────────────────────────────────────
+
+        /// <summary>
+        /// Called when a payment is refunded.
+        /// PENDING → CANCELLED (silently).
+        /// AVAILABLE → Creates a new REVERSAL record (auditable).
+        /// </summary>
+        public async Task ReverseCommissionAsync(int paymentId)
+        {
+            var commissions = await _db.AffiliateCommissions
+                .Where(c => c.PaymentId == paymentId &&
+                            c.Type != CommissionType.Reversal &&
+                            (c.Status == CommissionStatus.Pending || c.Status == CommissionStatus.Available))
+                .ToListAsync();
+
+            foreach (var commission in commissions)
+            {
+                if (commission.Status == CommissionStatus.Pending)
+                {
+                    commission.Status = CommissionStatus.Cancelled;
+                }
+                else if (commission.Status == CommissionStatus.Available)
+                {
+                    // Immutable ledger: add a new REVERSAL record
+                    var reversal = new AffiliateCommission
+                    {
+                        AffiliateProfileId = commission.AffiliateProfileId,
+                        AffiliateReferralId = commission.AffiliateReferralId,
+                        CustomerId = commission.CustomerId,
+                        PlanId = commission.PlanId,
+                        SubscriptionId = commission.SubscriptionId,
+                        PaymentId = commission.PaymentId,
+                        Type = CommissionType.Reversal,
+                        Amount = -commission.Amount,        // Negative to offset the original
+                        Currency = commission.Currency,
+                        Rate = commission.Rate,
+                        Status = CommissionStatus.Reversed,
+                        CreatedAt = DateTime.UtcNow,
+                        AvailableAt = DateTime.UtcNow
+                    };
+                    commission.Status = CommissionStatus.Reversed;
+                    _db.AffiliateCommissions.Add(reversal);
+                }
+            }
+
+            await _db.SaveChangesAsync();
+        }
+
+        // ─── Balances ─────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Calculates available and pending balances per currency.
+        /// Balance is always computed from the ledger — never stored as a field.
+        /// </summary>
+        public async Task<List<AffiliateCurrencyBalance>> GetBalancesAsync(int affiliateProfileId)
+        {
+            var commissions = await _db.AffiliateCommissions
+                .Where(c => c.AffiliateProfileId == affiliateProfileId)
+                .ToListAsync();
+
+            var payouts = await _db.AffiliatePayouts
+                .Where(p => p.AffiliateProfileId == affiliateProfileId && p.Status == PayoutStatus.Paid)
+                .ToListAsync();
+
+            var currencies = commissions.Select(c => c.Currency).Distinct().ToList();
+
+            var result = new List<AffiliateCurrencyBalance>();
+            foreach (var currency in currencies)
+            {
+                decimal available = commissions
+                    .Where(c => c.Currency == currency && c.Status == CommissionStatus.Available)
+                    .Sum(c => c.Amount);
+
+                decimal paid = payouts
+                    .Where(p => p.Currency == currency)
+                    .Sum(p => p.Amount);
+
+                decimal pending = commissions
+                    .Where(c => c.Currency == currency && c.Status == CommissionStatus.Pending)
+                    .Sum(c => c.Amount);
+
+                result.Add(new AffiliateCurrencyBalance
+                {
+                    Currency = currency,
+                    Available = available - paid,
+                    Pending = pending
+                });
+            }
+
+            return result;
+        }
+
+        // ─── Payout ───────────────────────────────────────────────────────────
+
+        public async Task<(bool Success, string Error)> RequestPayoutAsync(
+            int affiliateProfileId, decimal amount, string currency, string method, string account)
+        {
+            var settings = await GetSettingsAsync();
+
+            // Minimum payout check
+            var minimum = currency == "USD" ? settings.MinPayoutUsd : settings.MinPayoutEgp;
+            if (amount < minimum)
+                return (false, $"Minimum payout is {minimum} {currency}.");
+
+            // Available balance check
+            var balances = await GetBalancesAsync(affiliateProfileId);
+            var balance = balances.FirstOrDefault(b => b.Currency == currency);
+            if (balance == null || balance.Available < amount)
+                return (false, "Insufficient available balance.");
+
+            var payout = new AffiliatePayout
+            {
+                AffiliateProfileId = affiliateProfileId,
+                Amount = amount,
+                Currency = currency,
+                PayoutMethod = method,
+                PayoutAccount = account,
+                Status = PayoutStatus.Pending,
+                RequestedAt = DateTime.UtcNow
+            };
+
+            _db.AffiliatePayouts.Add(payout);
+            await _db.SaveChangesAsync();
+
+            return (true, string.Empty);
+        }
+
+        // ─── Admin Stats ──────────────────────────────────────────────────────
+
+        public async Task<AffiliateStatsDto> GetAffiliateStatsAsync(int affiliateProfileId)
+        {
+            var profile = await _db.AffiliateProfiles
+                .Include(p => p.Referrals)
+                .FirstOrDefaultAsync(p => p.Id == affiliateProfileId);
+
+            if (profile == null) return new AffiliateStatsDto();
+
+            var referredUserIds = profile.Referrals
+                .Where(r => r.ReferredUserId.HasValue)
+                .Select(r => r.ReferredUserId!.Value)
+                .ToList();
+
+            var paidCustomers = await _db.AffiliateCommissions
+                .Where(c => c.AffiliateProfileId == affiliateProfileId &&
+                            c.Type == CommissionType.FirstPurchase)
+                .Select(c => c.CustomerId)
+                .Distinct()
+                .CountAsync();
+
+            var activeSubscriptions = await _db.Subscriptions
+                .Where(s => referredUserIds.Contains(s.UserId) && s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow)
+                .CountAsync();
+
+            var balances = await GetBalancesAsync(affiliateProfileId);
+
+            int signups = profile.Referrals.Count(r => r.ReferredUserId.HasValue);
+            int clicks = profile.TotalClicks;
+
+            return new AffiliateStatsDto
+            {
+                TotalClicks = clicks,
+                TotalSignups = signups,
+                PaidCustomers = paidCustomers,
+                ActiveSubscriptions = activeSubscriptions,
+                ConversionRate = clicks > 0 ? Math.Round((decimal)paidCustomers / clicks * 100, 1) : 0,
+                Balances = balances
+            };
+        }
+
+        // ─── Helpers ──────────────────────────────────────────────────────────
+
+        private async Task<string> GenerateUniqueCodeAsync()
+        {
+            string code;
+            int attempts = 0;
+            do
+            {
+                code = GenerateCode();
+                attempts++;
+                if (attempts > 50) throw new Exception("Could not generate unique affiliate code after 50 attempts.");
+            } while (await _db.AffiliateProfiles.AnyAsync(p => p.ReferralCode == code));
+            return code;
+        }
+
+        private static string GenerateCode()
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            var rng = new Random();
+            return new string(Enumerable.Repeat(chars, 8).Select(s => s[rng.Next(s.Length)]).ToArray());
+        }
+
+        private async Task UpsertSettingAsync(string key, string value, string description)
+        {
+            var setting = await _db.AppSettings.FirstOrDefaultAsync(s => s.Key == key);
+            if (setting == null)
+            {
+                _db.AppSettings.Add(new AppSetting { Key = key, Value = value, Description = description, UpdatedAt = DateTime.UtcNow });
+            }
+            else
+            {
+                setting.Value = value;
+                setting.UpdatedAt = DateTime.UtcNow;
+            }
+        }
+
+        private static bool GetBool(Dictionary<string, string> d, string key, bool def)
+            => d.TryGetValue(key, out var v) ? v.ToLower() == "true" : def;
+
+        private static int GetInt(Dictionary<string, string> d, string key, int def)
+            => d.TryGetValue(key, out var v) && int.TryParse(v, out var n) ? n : def;
+
+        private static decimal GetDecimal(Dictionary<string, string> d, string key, decimal def)
+            => d.TryGetValue(key, out var v) && decimal.TryParse(v, out var n) ? n : def;
+    }
+}

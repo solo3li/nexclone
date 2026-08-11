@@ -355,6 +355,31 @@
             </div>
         </div>
 
+        <!-- ── Affiliate Commission Settings ─────────────────────────────────── -->
+        <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e0e0e0;" />
+        <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem;">🤝 Affiliate Commission Settings</h3>
+        <p style="font-size: 0.8rem; color: #525252; margin-bottom: 1rem;">
+            These percentages apply under the ONE global Affiliate System. 0% means no affiliate commission.
+        </p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <div class="bx--form-item">
+                <label for="AffiliateFirstCommissionPercent" class="bx--label">First Purchase Commission %</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="AffiliateFirstCommissionPercent" type="number" min="0" max="100" step="0.01"
+                           class="bx--text-input" name="AffiliateFirstCommissionPercent" value="0" />
+                </div>
+                <p class="bx--form__helper-text">e.g. 30 → affiliate earns 30% of the customer's first payment</p>
+            </div>
+            <div class="bx--form-item">
+                <label for="AffiliateRecurringCommissionPercent" class="bx--label">Recurring Commission %</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="AffiliateRecurringCommissionPercent" type="number" min="0" max="100" step="0.01"
+                           class="bx--text-input" name="AffiliateRecurringCommissionPercent" value="0" />
+                </div>
+                <p class="bx--form__helper-text">e.g. 10 → affiliate earns 10% on each renewal after the first</p>
+            </div>
+        </div>
+
         <div style="display: flex; justify-content: flex-end; gap: 1rem;">
             <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">@Localizer["Cancel"]</a>
             <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Plan"]</button>

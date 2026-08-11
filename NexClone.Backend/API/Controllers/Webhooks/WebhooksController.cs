@@ -7,6 +7,7 @@ using System.Text;
 using System.Linq;
 using System;
 using Hangfire;
+using NexClone.Backend.Application.Services;
 
 namespace NexClone.Backend.API.Controllers.Webhooks
 {
@@ -20,6 +21,7 @@ namespace NexClone.Backend.API.Controllers.Webhooks
         private readonly WalletService _walletService;
         private readonly NexClone.Backend.Infrastructure.ExternalServices.Invoicing.IInvoiceGeneratorService _invoiceService;
         private readonly IMediaService _mediaService;
+        private readonly AffiliateService _affiliateService;
 
         public WebhooksController(
             ApplicationDbContext context, 
@@ -27,7 +29,8 @@ namespace NexClone.Backend.API.Controllers.Webhooks
             IEmailTemplateService emailTemplateService,
             WalletService walletService,
             NexClone.Backend.Infrastructure.ExternalServices.Invoicing.IInvoiceGeneratorService invoiceService,
-            IMediaService mediaService)
+            IMediaService mediaService,
+            AffiliateService affiliateService)
         {
             _context = context;
             _emailService = emailService;
@@ -35,6 +38,7 @@ namespace NexClone.Backend.API.Controllers.Webhooks
             _walletService = walletService;
             _invoiceService = invoiceService;
             _mediaService = mediaService;
+            _affiliateService = affiliateService;
         }
 
         [HttpPost("paymob")]
@@ -194,6 +198,17 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                     };
                     _context.Payments.Add(payment);
                     await _context.SaveChangesAsync();
+
+                    // Affiliate Commission — MUST NOT break payment flow on failure
+                    try
+                    {
+                        bool isRecurring = existingSub != null; // existing sub = renewal
+                        await _affiliateService.CreateCommissionAsync(payment.Id, isRecurring);
+                    }
+                    catch (Exception affEx)
+                    {
+                        Console.WriteLine($"[Affiliate] Commission creation failed for payment {payment.Id}: {affEx.Message}");
+                    }
 
                     // Generate Invoice
                     string verifyUrlBase = "https://nexmedia.ai"; // Replace with config variable later if needed
@@ -479,6 +494,23 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                     CreatedAt      = DateTime.UtcNow
                 });
                 await _context.SaveChangesAsync();
+
+                // Affiliate Commission — MUST NOT break payment flow on failure
+                var paypalPayment = await _context.Payments
+                    .OrderByDescending(p => p.CreatedAt)
+                    .FirstOrDefaultAsync(p => p.UserId == user.Id && p.PaymentId == transmissionId);
+                if (paypalPayment != null)
+                {
+                    try
+                    {
+                        bool isRecurringPayPal = existingSub != null;
+                        await _affiliateService.CreateCommissionAsync(paypalPayment.Id, isRecurringPayPal);
+                    }
+                    catch (Exception affPayPalEx)
+                    {
+                        Console.WriteLine($"[Affiliate] Commission creation failed for PayPal payment {paypalPayment.Id}: {affPayPalEx.Message}");
+                    }
+                }
 
                 // 9. Generate Invoice
                 string verifyUrlBase = "https://nexmedia.ai"; 
