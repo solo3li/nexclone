@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/root/nexmedia/nexclone/NexClone.Backend/NexClone.Backend.csproj": {}
+    "/app/NexClone.Backend.csproj": {}
   },
   "projects": {
-    "/root/nexmedia/nexclone/NexClone.Backend/NexClone.Backend.csproj": {
+    "/app/NexClone.Backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/root/nexmedia/nexclone/NexClone.Backend/NexClone.Backend.csproj",
+        "projectUniqueName": "/app/NexClone.Backend.csproj",
         "projectName": "NexClone.Backend",
-        "projectPath": "/root/nexmedia/nexclone/NexClone.Backend/NexClone.Backend.csproj",
+        "projectPath": "/app/NexClone.Backend.csproj",
         "packagesPath": "/root/.nuget/packages/",
-        "outputPath": "/root/nexmedia/nexclone/NexClone.Backend/obj/",
+        "outputPath": "/app/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/root/.nuget/NuGet/NuGet.Config"
@@ -20,11 +20,11 @@
           "net10.0"
         ],
         "sources": {
-          "/usr/lib/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net10.0": {
+            "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {}
           }
@@ -39,10 +39,11 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.300"
       },
       "frameworks": {
         "net10.0": {
+          "framework": "net10.0",
           "targetAlias": "net10.0",
           "dependencies": {
             "Google.Apis.Auth": {
@@ -111,10 +112,6 @@
               "target": "Package",
               "version": "[7.0.0, )"
             },
-            "StackExchange.Redis": {
-              "target": "Package",
-              "version": "[2.13.17, )"
-            },
             "TagLibSharp": {
               "target": "Package",
               "version": "[2.3.0, )"
@@ -139,7 +136,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/10.0.110/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/10.0.302/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

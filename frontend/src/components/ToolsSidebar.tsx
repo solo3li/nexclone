@@ -277,21 +277,29 @@ export default function ToolsSidebar() {
         {user && (
           <div className="px-4 py-3 border-b border-white/5" dir={isRtl ? 'rtl' : 'ltr'}>
             <div className="flex flex-col gap-2">
-              <Link
-                href="/profile"
-                className="flex items-center justify-between cursor-pointer group"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-md shadow-fuchsia-900/20">
-                    <span className="text-white text-xs font-bold">
-                      {user.fullName?.charAt(0)?.toUpperCase() || 'U'}
+              <div className="flex items-center justify-between">
+                <Link
+                  href="/profile"
+                  className="flex items-center justify-between cursor-pointer group"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-md shadow-fuchsia-900/20">
+                      <span className="text-white text-xs font-bold">
+                        {user.fullName?.charAt(0)?.toUpperCase() || 'U'}
+                      </span>
+                    </div>
+                    <span className="text-white/80 group-hover:text-white text-xs font-semibold truncate max-w-[90px] transition-colors">
+                      {user.fullName || user.email}
                     </span>
                   </div>
-                  <span className="text-white/80 group-hover:text-white text-xs font-semibold truncate max-w-[90px] transition-colors">
-                    {user.fullName || user.email}
-                  </span>
-                </div>
-              </Link>
+                </Link>
+                <Link
+                  href="/affiliate"
+                  className="text-[10px] bg-violet-600/20 text-violet-300 border border-violet-500/30 px-2 py-0.5 rounded-full hover:bg-violet-500 hover:text-white transition-colors"
+                >
+                  {isRtl ? 'الأفلييت' : 'Affiliate'}
+                </Link>
+              </div>
             
             {/* Credits / Wallet */}
             <div className="relative" ref={walletRef}>

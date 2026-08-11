@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "targets": {
     "net10.0": {
       "CommunityToolkit.HighPerformance/8.4.0": {
@@ -852,15 +852,6 @@
           "lib/net10.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll": {}
         }
       },
-      "Pipelines.Sockets.Unofficial/2.2.16": {
-        "type": "package",
-        "compile": {
-          "lib/net9.0/Pipelines.Sockets.Unofficial.dll": {}
-        },
-        "runtime": {
-          "lib/net9.0/Pipelines.Sockets.Unofficial.dll": {}
-        }
-      },
       "QRCoder/1.8.0": {
         "type": "package",
         "dependencies": {
@@ -1090,19 +1081,6 @@
           "lib/net9.0/Serilog.Sinks.File.dll": {}
         }
       },
-      "StackExchange.Redis/2.13.17": {
-        "type": "package",
-        "dependencies": {
-          "Pipelines.Sockets.Unofficial": "2.2.16",
-          "System.IO.Hashing": "10.0.2"
-        },
-        "compile": {
-          "lib/net10.0/StackExchange.Redis.dll": {}
-        },
-        "runtime": {
-          "lib/net10.0/StackExchange.Redis.dll": {}
-        }
-      },
       "System.CodeDom/7.0.0": {
         "type": "package",
         "compile": {
@@ -1247,13 +1225,13 @@
           "lib/net9.0/System.IdentityModel.Tokens.Jwt.dll": {}
         }
       },
-      "System.IO.Hashing/10.0.2": {
+      "System.IO.Hashing/9.0.4": {
         "type": "package",
         "compile": {
-          "lib/net10.0/System.IO.Hashing.dll": {}
+          "lib/net9.0/System.IO.Hashing.dll": {}
         },
         "runtime": {
-          "lib/net10.0/System.IO.Hashing.dll": {}
+          "lib/net9.0/System.IO.Hashing.dll": {}
         },
         "build": {
           "buildTransitive/net8.0/_._": {}
@@ -3073,24 +3051,6 @@
         "postgresql.png"
       ]
     },
-    "Pipelines.Sockets.Unofficial/2.2.16": {
-      "sha512": "nonu9l0YrZH6krVYbskBjE7uG0VMAnvOQ9PU+RmzUsy+++vHkqzzCkHRoP877OiA3iRTxJyNDLfpcU8hrJ3/YQ==",
-      "type": "package",
-      "path": "pipelines.sockets.unofficial/2.2.16",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "README.md",
-        "lib/net462/Pipelines.Sockets.Unofficial.dll",
-        "lib/net472/Pipelines.Sockets.Unofficial.dll",
-        "lib/net8.0/Pipelines.Sockets.Unofficial.dll",
-        "lib/net9.0/Pipelines.Sockets.Unofficial.dll",
-        "lib/netstandard2.0/Pipelines.Sockets.Unofficial.dll",
-        "lib/netstandard2.1/Pipelines.Sockets.Unofficial.dll",
-        "pipelines.sockets.unofficial.2.2.16.nupkg.sha512",
-        "pipelines.sockets.unofficial.nuspec"
-      ]
-    },
     "QRCoder/1.8.0": {
       "sha512": "RuvX3PEXU6pbY/I5ItAk800jm62r+YnoPLgyS2WTgwxkOnGkOfU9ORiipHUF0LkLyqM8rlroUCA319JjRYfRFQ==",
       "type": "package",
@@ -3384,24 +3344,6 @@
         "serilog.sinks.file.nuspec"
       ]
     },
-    "StackExchange.Redis/2.13.17": {
-      "sha512": "P7o7ZDBAmBrOLQEw8Pt44iIA08ioj48smRxn4Jp6yzCu6P3DOSU6lj7f+IOtN3pPvSgC9YufvM92ycukEEBCYQ==",
-      "type": "package",
-      "path": "stackexchange.redis/2.13.17",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "README.md",
-        "lib/net10.0/StackExchange.Redis.dll",
-        "lib/net461/StackExchange.Redis.dll",
-        "lib/net472/StackExchange.Redis.dll",
-        "lib/net6.0/StackExchange.Redis.dll",
-        "lib/net8.0/StackExchange.Redis.dll",
-        "lib/netstandard2.0/StackExchange.Redis.dll",
-        "stackexchange.redis.2.13.17.nupkg.sha512",
-        "stackexchange.redis.nuspec"
-      ]
-    },
     "System.CodeDom/7.0.0": {
       "sha512": "GLltyqEsE5/3IE+zYRP5sNa1l44qKl9v+bfdMcwg+M9qnQf47wK3H0SUR/T+3N4JEQXF3vV4CSuuo0rsg+nq2A==",
       "type": "package",
@@ -3624,26 +3566,26 @@
         "system.identitymodel.tokens.jwt.nuspec"
       ]
     },
-    "System.IO.Hashing/10.0.2": {
-      "sha512": "AKJknIFi9O3+rGExxTry188JPvUoZAPcCtS2qdqyFhIzsxQ1Ap94BeGDG0VzVEHakhmRxmJtVih6TsHoghIt/g==",
+    "System.IO.Hashing/9.0.4": {
+      "sha512": "WogPvgAFqQORFD8Iyha6RZ+/1QB3dsWRWxbwi8/HHVgiGQ8z0oMWpwe8Kk3Ti+Roe+P6a3sBg+WwBfEsyziZKg==",
       "type": "package",
-      "path": "system.io.hashing/10.0.2",
+      "path": "system.io.hashing/9.0.4",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "Icon.png",
+        "LICENSE.TXT",
         "PACKAGE.md",
         "THIRD-PARTY-NOTICES.TXT",
         "buildTransitive/net461/System.IO.Hashing.targets",
         "buildTransitive/net462/_._",
         "buildTransitive/net8.0/_._",
         "buildTransitive/netcoreapp2.0/System.IO.Hashing.targets",
-        "lib/net10.0/System.IO.Hashing.dll",
         "lib/net462/System.IO.Hashing.dll",
         "lib/net8.0/System.IO.Hashing.dll",
         "lib/net9.0/System.IO.Hashing.dll",
         "lib/netstandard2.0/System.IO.Hashing.dll",
-        "system.io.hashing.10.0.2.nupkg.sha512",
+        "system.io.hashing.9.0.4.nupkg.sha512",
         "system.io.hashing.nuspec",
         "useSharedDesignerContext.txt"
       ]
@@ -3730,7 +3672,6 @@
       "Scalar.AspNetCore >= 1.2.*",
       "Serilog.AspNetCore >= 10.0.0",
       "Serilog.Sinks.File >= 7.0.0",
-      "StackExchange.Redis >= 2.13.17",
       "TagLibSharp >= 2.3.0"
     ]
   },
@@ -3740,11 +3681,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/root/nexmedia/nexclone/NexClone.Backend/NexClone.Backend.csproj",
+      "projectUniqueName": "/app/NexClone.Backend.csproj",
       "projectName": "NexClone.Backend",
-      "projectPath": "/root/nexmedia/nexclone/NexClone.Backend/NexClone.Backend.csproj",
+      "projectPath": "/app/NexClone.Backend.csproj",
       "packagesPath": "/root/.nuget/packages/",
-      "outputPath": "/root/nexmedia/nexclone/NexClone.Backend/obj/",
+      "outputPath": "/app/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/root/.nuget/NuGet/NuGet.Config"
@@ -3753,11 +3694,11 @@
         "net10.0"
       ],
       "sources": {
-        "/usr/lib/dotnet/library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net10.0": {
+          "framework": "net10.0",
           "targetAlias": "net10.0",
           "projectReferences": {}
         }
@@ -3772,10 +3713,11 @@
         "auditLevel": "low",
         "auditMode": "all"
       },
-      "SdkAnalysisLevel": "10.0.100"
+      "SdkAnalysisLevel": "10.0.300"
     },
     "frameworks": {
       "net10.0": {
+        "framework": "net10.0",
         "targetAlias": "net10.0",
         "dependencies": {
           "Google.Apis.Auth": {
@@ -3844,10 +3786,6 @@
             "target": "Package",
             "version": "[7.0.0, )"
           },
-          "StackExchange.Redis": {
-            "target": "Package",
-            "version": "[2.13.17, )"
-          },
           "TagLibSharp": {
             "target": "Package",
             "version": "[2.3.0, )"
@@ -3872,7 +3810,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/10.0.110/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/10.0.302/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.AspNetCore": "(,10.0.32767]",
           "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",
