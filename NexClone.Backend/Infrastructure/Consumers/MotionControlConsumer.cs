@@ -47,7 +47,7 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 {
                     using var ms = new MemoryStream(message.ImageBytes);
                     string key = await _mediaService.UploadFileAsync(ms, $"motion-control/{message.UserId:N}/{DateTime.UtcNow:yyyy-MM}/{Guid.NewGuid()}.png", message.ImageContentType);
-                    imageUrl = $"http://167.71.66.188:9001/nexmedia/{key}";
+                    imageUrl = await _mediaService.GetFileUrlAsync(key);
                 }
 
                 string videoUrl = "";
@@ -55,7 +55,7 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 {
                     using var ms = new MemoryStream(message.VideoBytes);
                     string key = await _mediaService.UploadFileAsync(ms, $"motion-control/{message.UserId:N}/{DateTime.UtcNow:yyyy-MM}/{Guid.NewGuid()}.mp4", message.VideoContentType);
-                    videoUrl = $"http://167.71.66.188:9001/nexmedia/{key}";
+                    videoUrl = await _mediaService.GetFileUrlAsync(key);
                 }
 
                 var (apiKey, modelName) = await GetToolConfigAsync("kling_motion_control");

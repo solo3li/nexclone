@@ -47,7 +47,7 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 {
                     using var ms = new MemoryStream(message.ImageBytes);
                     string key = await _mediaService.UploadFileAsync(ms, $"avatar-video/{message.UserId:N}/{DateTime.UtcNow:yyyy-MM}/{Guid.NewGuid()}.png", message.ImageContentType);
-                    imageUrl = $"http://167.71.66.188:9001/nexmedia/{key}";
+                    imageUrl = await _mediaService.GetFileUrlAsync(key);
                 }
 
                 string audioUrl = "";
@@ -55,7 +55,7 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 {
                     using var ms = new MemoryStream(message.AudioBytes);
                     string key = await _mediaService.UploadFileAsync(ms, $"avatar-video/{message.UserId:N}/{DateTime.UtcNow:yyyy-MM}/{Guid.NewGuid()}.mp3", message.AudioContentType);
-                    audioUrl = $"http://167.71.66.188:9001/nexmedia/{key}";
+                    audioUrl = await _mediaService.GetFileUrlAsync(key);
                 }
 
                 var (apiKey, modelName) = await GetToolConfigAsync("kling_avatar_image2video");

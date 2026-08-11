@@ -48,11 +48,11 @@ namespace NexClone.Backend.Infrastructure.Consumers
 
                 using var videoStream = new MemoryStream(message.VideoBytes);
                 string videoKey = await _mediaService.UploadFileAsync(videoStream, $"lipsync/{message.UserId:N}/{DateTime.UtcNow:yyyy-MM}/{Guid.NewGuid()}_{message.VideoFileName}", message.VideoContentType);
-                string videoUrl = $"http://167.71.66.188:9001/nexmedia/{videoKey}";
+                string videoUrl = await _mediaService.GetFileUrlAsync(videoKey);
 
                 using var audioStream = new MemoryStream(message.AudioBytes);
                 string audioKey = await _mediaService.UploadFileAsync(audioStream, $"lipsync/{message.UserId:N}/{DateTime.UtcNow:yyyy-MM}/{Guid.NewGuid()}_{message.AudioFileName}", message.AudioContentType);
-                string audioUrl = $"http://167.71.66.188:9001/nexmedia/{audioKey}";
+                string audioUrl = await _mediaService.GetFileUrlAsync(audioKey);
 
                 var payload = new
                 {
