@@ -1,0 +1,378 @@
+time="2026-08-12T15:04:47Z" level=warning msg="Docker Compose is configured to build using Bake, but buildx isn't installed"
+#0 building with "default" instance using docker driver
+
+#1 [backend internal] load build definition from Dockerfile
+#1 transferring dockerfile: 628B done
+#1 DONE 0.0s
+
+#2 [backend internal] load metadata for mcr.microsoft.com/dotnet/sdk:10.0
+#2 DONE 0.0s
+
+#3 [backend internal] load metadata for mcr.microsoft.com/dotnet/aspnet:10.0
+#3 DONE 0.1s
+
+#4 [backend internal] load .dockerignore
+#4 transferring context: 77B done
+#4 DONE 0.0s
+
+#5 [backend internal] load build context
+#5 DONE 0.0s
+
+#6 [backend final 1/4] FROM mcr.microsoft.com/dotnet/aspnet:10.0@sha256:207cc51496778557731c81ff670333d8ade4a4fec22768fd1be8e78474a84ecf
+#6 resolve mcr.microsoft.com/dotnet/aspnet:10.0@sha256:207cc51496778557731c81ff670333d8ade4a4fec22768fd1be8e78474a84ecf
+#6 resolve mcr.microsoft.com/dotnet/aspnet:10.0@sha256:207cc51496778557731c81ff670333d8ade4a4fec22768fd1be8e78474a84ecf 0.0s done
+#6 DONE 0.0s
+
+#7 [backend build 1/7] FROM mcr.microsoft.com/dotnet/sdk:10.0@sha256:72dd743782f2ae7e5476fd64f6a460045e3998dc862218b80e6944cba79a01b0
+#7 resolve mcr.microsoft.com/dotnet/sdk:10.0@sha256:72dd743782f2ae7e5476fd64f6a460045e3998dc862218b80e6944cba79a01b0 0.0s done
+#7 DONE 0.0s
+
+#5 [backend internal] load build context
+#5 transferring context: 26.55kB 0.0s done
+#5 DONE 0.0s
+
+#8 [backend build 4/7] RUN dotnet restore "NexClone.Backend.csproj"
+#8 CACHED
+
+#9 [backend build 5/7] COPY . .
+#9 CACHED
+
+#10 [backend build 3/7] COPY [NexClone.Backend.csproj, ./]
+#10 CACHED
+
+#11 [backend build 2/7] WORKDIR /src
+#11 CACHED
+
+#12 [backend build 6/7] WORKDIR /src/.
+#12 CACHED
+
+#13 [backend build 7/7] RUN dotnet build "NexClone.Backend.csproj" -c Release -o /app/build
+#13 1.922   Determining projects to restore...
+#13 3.059 /src/NexClone.Backend.csproj : warning NU1903: Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc
+#13 3.071   All projects are up-to-date for restore.
+#13 3.859 /src/NexClone.Backend.csproj : warning NU1903: Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc
+#13 41.72 /src/Core/Interfaces/IMediaService.cs(8,74): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 41.72 /src/Core/Interfaces/IMediaService.cs(9,122): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 41.72 /src/Core/Interfaces/IMediaService.cs(10,79): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 41.72 /src/Core/Interfaces/IMediaService.cs(11,77): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 41.72 /src/Core/Interfaces/IMediaService.cs(12,113): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 41.72 /src/Core/Interfaces/IPaymentService.cs(19,29): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 41.72 /src/API/Controllers/Client/SubscriptionsController.cs(133,104): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 41.72 /src/API/Controllers/Client/SubscriptionsController.cs(221,76): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 41.72 /src/Infrastructure/ExternalServices/AI/TtsService.cs(194,160): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 41.72 /src/Infrastructure/ExternalServices/AI/TtsService.cs(279,185): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 41.72 /src/Infrastructure/ExternalServices/AI/VideoService.cs(37,132): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 41.72 /src/Infrastructure/ExternalServices/Payments/PaymobPaymentService.cs(32,29): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 41.72 /src/Infrastructure/ExternalServices/S3MediaService.cs(82,87): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 41.72 /src/Infrastructure/ExternalServices/S3MediaService.cs(92,125): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 41.72 /src/Infrastructure/ExternalServices/S3MediaService.cs(130,92): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 41.72 /src/Infrastructure/ExternalServices/S3MediaService.cs(150,90): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 41.72 /src/Infrastructure/ExternalServices/S3MediaService.cs(190,126): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 41.72 /src/Program.cs(225,47): warning CS0618: 'PostgreSqlBootstrapperConfigurationExtensions.UsePostgreSqlStorage(IGlobalConfiguration, string)' is obsolete: 'Will be removed in 2.0. Please use UsePostgreSqlStorage(Action<PostgreSqlBootstrapperOptions>) overload.' [/src/NexClone.Backend.csproj]
+#13 41.72 /src/Program.cs(275,5): warning ASPDEPR005: 'ForwardedHeadersOptions.KnownNetworks' is obsolete: 'Please use KnownIPNetworks instead. For more information, visit https://aka.ms/aspnet/deprecate/005.' (https://aka.ms/aspnet/deprecate/005) [/src/NexClone.Backend.csproj]
+#13 41.72 /src/Core/Messages/AiTaskMessages.cs(66,23): warning CS8618: Non-nullable property 'FileId' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.72 /src/Core/Messages/AiTaskMessages.cs(68,23): warning CS8618: Non-nullable property 'TargetLanguage' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.72 /src/Core/Messages/AiTaskMessages.cs(53,23): warning CS8618: Non-nullable property 'Text' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Messages/AiTaskMessages.cs(54,23): warning CS8618: Non-nullable property 'Language' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Messages/AiTaskMessages.cs(55,23): warning CS8618: Non-nullable property 'VoiceName' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Messages/AiTaskMessages.cs(56,23): warning CS8618: Non-nullable property 'StyleInstruction' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Messages/AiTaskMessages.cs(57,23): warning CS8618: Non-nullable property 'Quality' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Messages/AiTaskMessages.cs(42,23): warning CS8618: Non-nullable property 'VideoBytes' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Messages/AiTaskMessages.cs(43,23): warning CS8618: Non-nullable property 'VideoFileName' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Messages/AiTaskMessages.cs(44,23): warning CS8618: Non-nullable property 'VideoContentType' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Messages/AiTaskMessages.cs(45,23): warning CS8618: Non-nullable property 'AudioBytes' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Messages/AiTaskMessages.cs(46,23): warning CS8618: Non-nullable property 'AudioFileName' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Messages/AiTaskMessages.cs(47,23): warning CS8618: Non-nullable property 'AudioContentType' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Messages/AiTaskMessages.cs(27,23): warning CS8618: Non-nullable property 'ImageBytes' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Messages/AiTaskMessages.cs(28,23): warning CS8618: Non-nullable property 'ImageContentType' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Messages/AiTaskMessages.cs(29,23): warning CS8618: Non-nullable property 'VideoBytes' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Messages/AiTaskMessages.cs(30,23): warning CS8618: Non-nullable property 'VideoContentType' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Messages/AiTaskMessages.cs(31,23): warning CS8618: Non-nullable property 'Prompt' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Messages/AiTaskMessages.cs(32,23): warning CS8618: Non-nullable property 'Resolution' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Messages/AiTaskMessages.cs(33,23): warning CS8618: Non-nullable property 'RenderingSpeed' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Messages/AiTaskMessages.cs(34,23): warning CS8618: Non-nullable property 'Orientation' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Messages/AiTaskMessages.cs(15,23): warning CS8618: Non-nullable property 'ImageBytes' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Messages/AiTaskMessages.cs(16,23): warning CS8618: Non-nullable property 'ImageContentType' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Messages/AiTaskMessages.cs(17,23): warning CS8618: Non-nullable property 'AudioBytes' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Messages/AiTaskMessages.cs(18,23): warning CS8618: Non-nullable property 'AudioContentType' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Messages/AiTaskMessages.cs(19,23): warning CS8618: Non-nullable property 'Prompt' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Messages/AiTaskMessages.cs(20,23): warning CS8618: Non-nullable property 'RenderingSpeed' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Entities/ToolRoutingRule.cs(15,34): warning CS8618: Non-nullable property 'ToolConfiguration' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Entities/ToolRoutingRule.cs(23,23): warning CS8618: Non-nullable property 'ProviderName' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Core/Entities/ToolRoutingRule.cs(26,23): warning CS8618: Non-nullable property 'ModelName' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/API/Controllers/Client/UsersController.cs(50,21): warning CS8602: Dereference of a possibly null reference. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/API/Controllers/Client/UsersController.cs(51,21): warning CS8602: Dereference of a possibly null reference. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/API/Controllers/AI/VoiceToTextController.cs(38,27): warning CS8618: Non-nullable property 'FileId' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/API/Controllers/Admin/ToolConfigAdminController.cs(88,59): warning CS8604: Possible null reference argument for parameter 'entities' in 'void DbSet<ToolRoutingRule>.RemoveRange(IEnumerable<ToolRoutingRule> entities)'. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/API/Controllers/Webhooks/WebhooksController.cs(122,47): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/API/Controllers/Webhooks/WebhooksController.cs(235,40): warning CS8601: Possible null reference assignment. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/API/Controllers/Admin/HistoryAdminController.cs(27,42): warning CS8602: Dereference of a possibly null reference. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/API/Controllers/AI/TextToVoiceController.cs(74,28): warning CS8601: Possible null reference assignment. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/API/Controllers/AI/TextToVoiceController.cs(75,29): warning CS8601: Possible null reference assignment. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/API/Controllers/AI/TextToVoiceController.cs(87,36): warning CS8601: Possible null reference assignment. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/API/Controllers/AI/TextToVoiceController.cs(88,37): warning CS8601: Possible null reference assignment. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/API/Controllers/AI/TextToVoiceController.cs(89,44): warning CS8601: Possible null reference assignment. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Infrastructure/Consumers/VttConsumer.cs(52,38): warning CS8601: Possible null reference assignment. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/API/Controllers/AI/TextToVoiceController.cs(130,94): warning CS8602: Dereference of a possibly null reference. [/src/NexClone.Backend.csproj]
+#13 41.73 /src/Infrastructure/ExternalServices/S3MediaService.cs(22,16): warning CS8618: Non-nullable field '_minioClient' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the field as nullable. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/S3MediaService.cs(22,16): warning CS8618: Non-nullable field '_publicMinioClient' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the field as nullable. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/S3MediaService.cs(22,16): warning CS8618: Non-nullable field '_region' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the field as nullable. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/S3MediaService.cs(22,16): warning CS8618: Non-nullable field '_endpoint' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the field as nullable. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/API/Controllers/AI/VideoController.cs(120,37): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/API/Controllers/AI/VideoController.cs(121,43): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/API/Controllers/AI/VideoController.cs(151,38): warning CS8601: Possible null reference assignment. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/API/Controllers/AI/VideoController.cs(152,44): warning CS8601: Possible null reference assignment. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/API/Controllers/Admin/TicketsAdminController.cs(109,35): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/Consumers/MotionControlConsumer.cs(102,30): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/Consumers/MotionControlConsumer.cs(106,30): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/Consumers/AvatarVideoConsumer.cs(95,30): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/Consumers/AvatarVideoConsumer.cs(99,30): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/VideoService.cs(47,24): warning CS8604: Possible null reference argument for parameter 'source' in 'ToolRoutingRule? Enumerable.FirstOrDefault<ToolRoutingRule>(IEnumerable<ToolRoutingRule> source)'. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/VideoService.cs(73,36): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/VideoService.cs(98,24): warning CS8619: Nullability of reference types in value of type '(bool, string?, string Message)' doesn't match target type '(bool Success, string TaskId, string ErrorMessage)'. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/API/Controllers/Webhooks/WebhooksController.cs(539,36): warning CS8601: Possible null reference assignment. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/Consumers/LipSyncConsumer.cs(82,30): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/API/Controllers/Client/UsersController.cs(199,35): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/Consumers/BaseAiTaskConsumer.cs(73,41): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/Consumers/BaseAiTaskConsumer.cs(79,41): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/Consumers/BaseAiTaskConsumer.cs(111,41): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/Consumers/BaseAiTaskConsumer.cs(117,43): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/Consumers/BaseAiTaskConsumer.cs(152,49): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/Consumers/BaseAiTaskConsumer.cs(157,49): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/Consumers/BaseAiTaskConsumer.cs(162,49): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/Consumers/BaseAiTaskConsumer.cs(169,45): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/Consumers/BaseAiTaskConsumer.cs(191,24): warning CS8604: Possible null reference argument for parameter 'source' in 'ToolRoutingRule? Enumerable.FirstOrDefault<ToolRoutingRule>(IEnumerable<ToolRoutingRule> source)'. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/DjangoPasswordHasher.cs(25,46): warning SYSLIB0060: 'Rfc2898DeriveBytes.Rfc2898DeriveBytes(string, byte[], int, HashAlgorithmName)' is obsolete: 'The constructors on Rfc2898DeriveBytes are obsolete. Use the static Pbkdf2 method instead.' (https://aka.ms/dotnet-warnings/SYSLIB0060) [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/Consumers/BaseAiTaskConsumer.cs(228,192): warning CS8601: Possible null reference assignment. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/API/Controllers/Client/AuthController.cs(253,91): warning CS8604: Possible null reference argument for parameter 'stringToEscape' in 'string Uri.EscapeDataString(string stringToEscape)'. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/Invoicing/InvoiceGeneratorService.cs(157,24): warning CS8603: Possible null reference return. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/API/Controllers/Admin/AffiliateAdminController.cs(92,21): warning CS8602: Dereference of a possibly null reference. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/API/Controllers/Client/AuthController.cs(464,171): warning CS8601: Possible null reference assignment. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/VideoService.cs(161,41): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/VideoService.cs(163,41): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/VideoService.cs(193,54): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/VideoService.cs(199,49): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/VideoService.cs(241,24): warning CS8619: Nullability of reference types in value of type '(bool, string?, string)' doesn't match target type '(bool Success, string TaskId, string ErrorMessage)'. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/VideoService.cs(251,24): warning CS8619: Nullability of reference types in value of type '(bool, string?, string?)' doesn't match target type '(bool Success, string TaskId, string ErrorMessage)'. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/VideoService.cs(256,24): warning CS8619: Nullability of reference types in value of type '(bool, string?, string?)' doesn't match target type '(bool Success, string TaskId, string ErrorMessage)'. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/VideoService.cs(259,20): warning CS8619: Nullability of reference types in value of type '(bool, string?, string)' doesn't match target type '(bool Success, string TaskId, string ErrorMessage)'. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/VideoService.cs(279,28): warning CS8619: Nullability of reference types in value of type '(string, string?, string)' doesn't match target type '(string Status, string OutputUrl, string ErrorMessage)'. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/VideoService.cs(300,40): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/VideoService.cs(309,45): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/VideoService.cs(312,41): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/VideoService.cs(316,37): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/VideoService.cs(318,28): warning CS8619: Nullability of reference types in value of type '(string, string? outputUrl, string?)' doesn't match target type '(string Status, string OutputUrl, string ErrorMessage)'. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/VideoService.cs(324,36): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/VideoService.cs(325,28): warning CS8619: Nullability of reference types in value of type '(string, string?, string? errorMsg)' doesn't match target type '(string Status, string OutputUrl, string ErrorMessage)'. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/VideoService.cs(329,24): warning CS8619: Nullability of reference types in value of type '(string, string?, string?)' doesn't match target type '(string Status, string OutputUrl, string ErrorMessage)'. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/VideoService.cs(334,24): warning CS8619: Nullability of reference types in value of type '(string, string?, string Message)' doesn't match target type '(string Status, string OutputUrl, string ErrorMessage)'. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/TtsService.cs(37,78): warning CS8604: Possible null reference argument for parameter 'config' in 'Task<(string ProviderName, string ModelName)> TtsService.ResolveProviderAsync(ToolConfiguration config, string language, string quality)'. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/TtsService.cs(56,108): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/TtsService.cs(76,108): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/TtsService.cs(129,24): warning CS8619: Nullability of reference types in value of type '(string provider, string?)' doesn't match target type '(string ProviderName, string ModelName)'. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/API/Controllers/Client/CheckoutController.cs(66,27): warning CS8618: Non-nullable property 'Method' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/TtsService.cs(310,39): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/SttService.cs(49,72): warning CS8604: Possible null reference argument for parameter 'config' in 'Task<(string ProviderName, string ModelName)> SttService.ResolveProviderAsync(ToolConfiguration config)'. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Infrastructure/ExternalServices/AI/SttService.cs(100,24): warning CS8619: Nullability of reference types in value of type '(string, string?)' doesn't match target type '(string ProviderName, string ModelName)'. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Views/PaymentConfigAdmin/Edit.cshtml(30,107): warning CS8602: Dereference of a possibly null reference. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Views/PlansAdmin/Edit.cshtml(195,47): warning CS8602: Dereference of a possibly null reference. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Views/PlansAdmin/Create.cshtml(189,47): warning CS8602: Dereference of a possibly null reference. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/API/Controllers/Admin/LogsAdminController.cs(16,34): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/API/Controllers/Client/MediaController.cs(22,27): warning CS8618: Non-nullable property 'FileName' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/API/Controllers/Client/MediaController.cs(23,27): warning CS8618: Non-nullable property 'ContentType' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/API/Controllers/Client/MediaController.cs(24,27): warning CS8618: Non-nullable property 'ToolName' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/Views/ApiConfigAdmin/Edit.cshtml(33,102): warning CS8602: Dereference of a possibly null reference. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/API/Controllers/Client/PlatformController.cs(74,34): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/API/Controllers/Client/TicketsController.cs(141,36): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/API/Controllers/Admin/MailingAdminController.cs(181,30): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/API/Controllers/Admin/MailingAdminController.cs(182,31): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/API/Controllers/Admin/ManualPaymentsAdminController.cs(80,85): warning CS8602: Dereference of a possibly null reference. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/API/Controllers/Admin/ManualPaymentsAdminController.cs(82,39): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/API/Controllers/Admin/ManualPaymentsAdminController.cs(96,127): warning CS8602: Dereference of a possibly null reference. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/API/Controllers/Admin/ManualPaymentsAdminController.cs(130,30): warning CS8602: Dereference of a possibly null reference. [/src/NexClone.Backend.csproj]
+#13 41.74 /src/API/Controllers/Client/PlatformController.cs(131,42): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.89   NexClone.Backend -> /app/build/NexClone.Backend.dll
+#13 42.93 
+#13 42.93 Build succeeded.
+#13 42.93 
+#13 42.93 /src/NexClone.Backend.csproj : warning NU1903: Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc
+#13 42.93 /src/NexClone.Backend.csproj : warning NU1903: Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc
+#13 42.93 /src/Core/Interfaces/IMediaService.cs(8,74): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Interfaces/IMediaService.cs(9,122): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Interfaces/IMediaService.cs(10,79): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Interfaces/IMediaService.cs(11,77): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Interfaces/IMediaService.cs(12,113): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Interfaces/IPaymentService.cs(19,29): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/Client/SubscriptionsController.cs(133,104): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/Client/SubscriptionsController.cs(221,76): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/TtsService.cs(194,160): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/TtsService.cs(279,185): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/VideoService.cs(37,132): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/Payments/PaymobPaymentService.cs(32,29): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/S3MediaService.cs(82,87): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/S3MediaService.cs(92,125): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/S3MediaService.cs(130,92): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/S3MediaService.cs(150,90): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/S3MediaService.cs(190,126): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Program.cs(225,47): warning CS0618: 'PostgreSqlBootstrapperConfigurationExtensions.UsePostgreSqlStorage(IGlobalConfiguration, string)' is obsolete: 'Will be removed in 2.0. Please use UsePostgreSqlStorage(Action<PostgreSqlBootstrapperOptions>) overload.' [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Program.cs(275,5): warning ASPDEPR005: 'ForwardedHeadersOptions.KnownNetworks' is obsolete: 'Please use KnownIPNetworks instead. For more information, visit https://aka.ms/aspnet/deprecate/005.' (https://aka.ms/aspnet/deprecate/005) [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(66,23): warning CS8618: Non-nullable property 'FileId' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(68,23): warning CS8618: Non-nullable property 'TargetLanguage' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(53,23): warning CS8618: Non-nullable property 'Text' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(54,23): warning CS8618: Non-nullable property 'Language' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(55,23): warning CS8618: Non-nullable property 'VoiceName' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(56,23): warning CS8618: Non-nullable property 'StyleInstruction' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(57,23): warning CS8618: Non-nullable property 'Quality' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(42,23): warning CS8618: Non-nullable property 'VideoBytes' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(43,23): warning CS8618: Non-nullable property 'VideoFileName' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(44,23): warning CS8618: Non-nullable property 'VideoContentType' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(45,23): warning CS8618: Non-nullable property 'AudioBytes' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(46,23): warning CS8618: Non-nullable property 'AudioFileName' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(47,23): warning CS8618: Non-nullable property 'AudioContentType' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(27,23): warning CS8618: Non-nullable property 'ImageBytes' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(28,23): warning CS8618: Non-nullable property 'ImageContentType' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(29,23): warning CS8618: Non-nullable property 'VideoBytes' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(30,23): warning CS8618: Non-nullable property 'VideoContentType' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(31,23): warning CS8618: Non-nullable property 'Prompt' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(32,23): warning CS8618: Non-nullable property 'Resolution' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(33,23): warning CS8618: Non-nullable property 'RenderingSpeed' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(34,23): warning CS8618: Non-nullable property 'Orientation' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(15,23): warning CS8618: Non-nullable property 'ImageBytes' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(16,23): warning CS8618: Non-nullable property 'ImageContentType' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(17,23): warning CS8618: Non-nullable property 'AudioBytes' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(18,23): warning CS8618: Non-nullable property 'AudioContentType' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(19,23): warning CS8618: Non-nullable property 'Prompt' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Messages/AiTaskMessages.cs(20,23): warning CS8618: Non-nullable property 'RenderingSpeed' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Entities/ToolRoutingRule.cs(15,34): warning CS8618: Non-nullable property 'ToolConfiguration' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Entities/ToolRoutingRule.cs(23,23): warning CS8618: Non-nullable property 'ProviderName' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Core/Entities/ToolRoutingRule.cs(26,23): warning CS8618: Non-nullable property 'ModelName' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/Client/UsersController.cs(50,21): warning CS8602: Dereference of a possibly null reference. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/Client/UsersController.cs(51,21): warning CS8602: Dereference of a possibly null reference. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/AI/VoiceToTextController.cs(38,27): warning CS8618: Non-nullable property 'FileId' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/Admin/ToolConfigAdminController.cs(88,59): warning CS8604: Possible null reference argument for parameter 'entities' in 'void DbSet<ToolRoutingRule>.RemoveRange(IEnumerable<ToolRoutingRule> entities)'. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/Webhooks/WebhooksController.cs(122,47): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/Webhooks/WebhooksController.cs(235,40): warning CS8601: Possible null reference assignment. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/Admin/HistoryAdminController.cs(27,42): warning CS8602: Dereference of a possibly null reference. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/AI/TextToVoiceController.cs(74,28): warning CS8601: Possible null reference assignment. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/AI/TextToVoiceController.cs(75,29): warning CS8601: Possible null reference assignment. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/AI/TextToVoiceController.cs(87,36): warning CS8601: Possible null reference assignment. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/AI/TextToVoiceController.cs(88,37): warning CS8601: Possible null reference assignment. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/AI/TextToVoiceController.cs(89,44): warning CS8601: Possible null reference assignment. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/Consumers/VttConsumer.cs(52,38): warning CS8601: Possible null reference assignment. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/AI/TextToVoiceController.cs(130,94): warning CS8602: Dereference of a possibly null reference. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/S3MediaService.cs(22,16): warning CS8618: Non-nullable field '_minioClient' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the field as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/S3MediaService.cs(22,16): warning CS8618: Non-nullable field '_publicMinioClient' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the field as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/S3MediaService.cs(22,16): warning CS8618: Non-nullable field '_region' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the field as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/S3MediaService.cs(22,16): warning CS8618: Non-nullable field '_endpoint' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the field as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/AI/VideoController.cs(120,37): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/AI/VideoController.cs(121,43): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/AI/VideoController.cs(151,38): warning CS8601: Possible null reference assignment. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/AI/VideoController.cs(152,44): warning CS8601: Possible null reference assignment. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/Admin/TicketsAdminController.cs(109,35): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/Consumers/MotionControlConsumer.cs(102,30): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/Consumers/MotionControlConsumer.cs(106,30): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/Consumers/AvatarVideoConsumer.cs(95,30): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/Consumers/AvatarVideoConsumer.cs(99,30): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/VideoService.cs(47,24): warning CS8604: Possible null reference argument for parameter 'source' in 'ToolRoutingRule? Enumerable.FirstOrDefault<ToolRoutingRule>(IEnumerable<ToolRoutingRule> source)'. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/VideoService.cs(73,36): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/VideoService.cs(98,24): warning CS8619: Nullability of reference types in value of type '(bool, string?, string Message)' doesn't match target type '(bool Success, string TaskId, string ErrorMessage)'. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/Webhooks/WebhooksController.cs(539,36): warning CS8601: Possible null reference assignment. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/Consumers/LipSyncConsumer.cs(82,30): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/Client/UsersController.cs(199,35): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/Consumers/BaseAiTaskConsumer.cs(73,41): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/Consumers/BaseAiTaskConsumer.cs(79,41): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/Consumers/BaseAiTaskConsumer.cs(111,41): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/Consumers/BaseAiTaskConsumer.cs(117,43): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/Consumers/BaseAiTaskConsumer.cs(152,49): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/Consumers/BaseAiTaskConsumer.cs(157,49): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/Consumers/BaseAiTaskConsumer.cs(162,49): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/Consumers/BaseAiTaskConsumer.cs(169,45): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/Consumers/BaseAiTaskConsumer.cs(191,24): warning CS8604: Possible null reference argument for parameter 'source' in 'ToolRoutingRule? Enumerable.FirstOrDefault<ToolRoutingRule>(IEnumerable<ToolRoutingRule> source)'. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/DjangoPasswordHasher.cs(25,46): warning SYSLIB0060: 'Rfc2898DeriveBytes.Rfc2898DeriveBytes(string, byte[], int, HashAlgorithmName)' is obsolete: 'The constructors on Rfc2898DeriveBytes are obsolete. Use the static Pbkdf2 method instead.' (https://aka.ms/dotnet-warnings/SYSLIB0060) [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/Consumers/BaseAiTaskConsumer.cs(228,192): warning CS8601: Possible null reference assignment. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/Client/AuthController.cs(253,91): warning CS8604: Possible null reference argument for parameter 'stringToEscape' in 'string Uri.EscapeDataString(string stringToEscape)'. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/Invoicing/InvoiceGeneratorService.cs(157,24): warning CS8603: Possible null reference return. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/Admin/AffiliateAdminController.cs(92,21): warning CS8602: Dereference of a possibly null reference. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/Client/AuthController.cs(464,171): warning CS8601: Possible null reference assignment. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/VideoService.cs(161,41): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/VideoService.cs(163,41): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/VideoService.cs(193,54): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/VideoService.cs(199,49): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/VideoService.cs(241,24): warning CS8619: Nullability of reference types in value of type '(bool, string?, string)' doesn't match target type '(bool Success, string TaskId, string ErrorMessage)'. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/VideoService.cs(251,24): warning CS8619: Nullability of reference types in value of type '(bool, string?, string?)' doesn't match target type '(bool Success, string TaskId, string ErrorMessage)'. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/VideoService.cs(256,24): warning CS8619: Nullability of reference types in value of type '(bool, string?, string?)' doesn't match target type '(bool Success, string TaskId, string ErrorMessage)'. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/VideoService.cs(259,20): warning CS8619: Nullability of reference types in value of type '(bool, string?, string)' doesn't match target type '(bool Success, string TaskId, string ErrorMessage)'. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/VideoService.cs(279,28): warning CS8619: Nullability of reference types in value of type '(string, string?, string)' doesn't match target type '(string Status, string OutputUrl, string ErrorMessage)'. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/VideoService.cs(300,40): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/VideoService.cs(309,45): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/VideoService.cs(312,41): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/VideoService.cs(316,37): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/VideoService.cs(318,28): warning CS8619: Nullability of reference types in value of type '(string, string? outputUrl, string?)' doesn't match target type '(string Status, string OutputUrl, string ErrorMessage)'. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/VideoService.cs(324,36): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/VideoService.cs(325,28): warning CS8619: Nullability of reference types in value of type '(string, string?, string? errorMsg)' doesn't match target type '(string Status, string OutputUrl, string ErrorMessage)'. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/VideoService.cs(329,24): warning CS8619: Nullability of reference types in value of type '(string, string?, string?)' doesn't match target type '(string Status, string OutputUrl, string ErrorMessage)'. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/VideoService.cs(334,24): warning CS8619: Nullability of reference types in value of type '(string, string?, string Message)' doesn't match target type '(string Status, string OutputUrl, string ErrorMessage)'. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/TtsService.cs(37,78): warning CS8604: Possible null reference argument for parameter 'config' in 'Task<(string ProviderName, string ModelName)> TtsService.ResolveProviderAsync(ToolConfiguration config, string language, string quality)'. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/TtsService.cs(56,108): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/TtsService.cs(76,108): warning CS8625: Cannot convert null literal to non-nullable reference type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/TtsService.cs(129,24): warning CS8619: Nullability of reference types in value of type '(string provider, string?)' doesn't match target type '(string ProviderName, string ModelName)'. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/Client/CheckoutController.cs(66,27): warning CS8618: Non-nullable property 'Method' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/TtsService.cs(310,39): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/SttService.cs(49,72): warning CS8604: Possible null reference argument for parameter 'config' in 'Task<(string ProviderName, string ModelName)> SttService.ResolveProviderAsync(ToolConfiguration config)'. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Infrastructure/ExternalServices/AI/SttService.cs(100,24): warning CS8619: Nullability of reference types in value of type '(string, string?)' doesn't match target type '(string ProviderName, string ModelName)'. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Views/PaymentConfigAdmin/Edit.cshtml(30,107): warning CS8602: Dereference of a possibly null reference. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Views/PlansAdmin/Edit.cshtml(195,47): warning CS8602: Dereference of a possibly null reference. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Views/PlansAdmin/Create.cshtml(189,47): warning CS8602: Dereference of a possibly null reference. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/Admin/LogsAdminController.cs(16,34): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/Client/MediaController.cs(22,27): warning CS8618: Non-nullable property 'FileName' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/Client/MediaController.cs(23,27): warning CS8618: Non-nullable property 'ContentType' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/Client/MediaController.cs(24,27): warning CS8618: Non-nullable property 'ToolName' must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring the property as nullable. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/Views/ApiConfigAdmin/Edit.cshtml(33,102): warning CS8602: Dereference of a possibly null reference. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/Client/PlatformController.cs(74,34): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/Client/TicketsController.cs(141,36): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/Admin/MailingAdminController.cs(181,30): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/Admin/MailingAdminController.cs(182,31): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/Admin/ManualPaymentsAdminController.cs(80,85): warning CS8602: Dereference of a possibly null reference. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/Admin/ManualPaymentsAdminController.cs(82,39): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.93 /src/API/Controllers/Admin/ManualPaymentsAdminController.cs(96,127): warning CS8602: Dereference of a possibly null reference. [/src/NexClone.Backend.csproj]
+#13 42.94 /src/API/Controllers/Admin/ManualPaymentsAdminController.cs(130,30): warning CS8602: Dereference of a possibly null reference. [/src/NexClone.Backend.csproj]
+#13 42.94 /src/API/Controllers/Client/PlatformController.cs(131,42): warning CS8600: Converting null literal or possible null value to non-nullable type. [/src/NexClone.Backend.csproj]
+#13 42.94     142 Warning(s)
+#13 42.94     0 Error(s)
+#13 42.94 
+#13 42.94 Time Elapsed 00:00:42.26
+#13 DONE 43.1s
+
+#14 [backend publish 1/1] RUN dotnet publish "NexClone.Backend.csproj" -c Release -o /app/publish /p:UseAppHost=false
+#14 1.622   Determining projects to restore...
+#14 2.452 /src/NexClone.Backend.csproj : warning NU1903: Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc
+#14 2.462   All projects are up-to-date for restore.
+#14 3.023 /src/NexClone.Backend.csproj : warning NU1903: Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc
+#14 4.481   NexClone.Backend -> /src/bin/Release/net10.0/NexClone.Backend.dll
+#14 15.34   NexClone.Backend -> /app/publish/
+#14 DONE 15.4s
+
+#15 [backend final 2/4] RUN apt-get update && apt-get install -y libgssapi-krb5-2 && rm -rf /var/lib/apt/lists/*
+#15 CACHED
+
+#16 [backend final 3/4] WORKDIR /app
+#16 CACHED
+
+#17 [backend final 4/4] COPY --from=publish /app/publish .
+#17 DONE 0.3s
+
+#18 [backend] exporting to image
+#18 exporting layers
+#18 exporting layers 8.3s done
+#18 exporting manifest sha256:a8636234d5d7b81029b125ee2a1e95f97ad8562ca719e67bb2e01be74d3c8da8 0.0s done
+#18 exporting config sha256:e0bc19313d33ee2fd41dbc7f87b78b9b377471841afbf43a8fe96d368d6a9170 done
+#18 exporting attestation manifest sha256:df5cf0af1cfebecbf79adc92b248983c2a5a8dc3994526260f93ef8b2388d8ca 0.0s done
+#18 exporting manifest list sha256:3ba67f40bdd737d73e4ab3045c18021137d6ac5a80dd568c3b25be779796e875 0.0s done
+#18 naming to docker.io/library/nexclone-backend:latest done
+#18 unpacking to docker.io/library/nexclone-backend:latest
+#18 unpacking to docker.io/library/nexclone-backend:latest 1.5s done
+#18 DONE 9.9s
+
+#19 [backend] resolving provenance for metadata file
+#19 DONE 0.0s
+ backend  Built

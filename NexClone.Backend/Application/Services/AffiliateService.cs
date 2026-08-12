@@ -137,12 +137,18 @@ namespace NexClone.Backend.Application.Services
         public async Task<string?> TrackClickAsync(string referralCode)
         {
             var settings = await GetSettingsAsync();
-            if (!settings.IsEnabled) return null;
+            if (!settings.IsEnabled) {
+                _logger.LogInformation("[Affiliate] TrackClickAsync failed: System is disabled.");
+                return null;
+            }
 
             var profile = await _db.AffiliateProfiles
                 .FirstOrDefaultAsync(p => p.ReferralCode == referralCode && p.IsActive);
 
-            if (profile == null) return null;
+            if (profile == null) {
+                _logger.LogInformation("[Affiliate] TrackClickAsync failed: No active profile found for code {Code}.", referralCode);
+                return null;
+            }
 
             var sessionToken = Guid.NewGuid().ToString("N");
 

@@ -9,8 +9,8 @@ export default async function middleware(request: NextRequest) {
   
   if (refCode) {
     try {
-      // Track the click on the backend
-      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      // Track the click on the backend via internal Docker network to avoid loopback issues
+      const backendUrl = process.env.INTERNAL_API_URL || 'http://backend:8080';
       const res = await fetch(`${backendUrl}/api/affiliate-track/click?ref_code=${refCode}`, {
         // Edge runtime fetch requires this or default caching
         cache: 'no-store'
