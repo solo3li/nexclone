@@ -106,6 +106,16 @@ namespace NexClone.Backend.API.Controllers.Admin
                 .Where(p => profileIds.Contains(p.AffiliateProfileId) && p.Status == PayoutStatus.Paid)
                 .ToListAsync();
 
+            var referredUserIds = profiles.SelectMany(p => p.Referrals)
+                                          .Where(r => r.ReferredUserId.HasValue)
+                                          .Select(r => r.ReferredUserId.Value)
+                                          .ToList();
+
+            var allActiveSubs = await _db.Subscriptions
+                .Where(s => referredUserIds.Contains(s.UserId) && s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow)
+                .Select(s => s.UserId)
+                .ToListAsync();
+
             var summaries = profiles.Select(p =>
             {
                 var myCommissions = commissions.Where(c => c.AffiliateProfileId == p.Id).ToList();
@@ -120,11 +130,20 @@ namespace NexClone.Backend.API.Controllers.Admin
                                 myPayouts.Where(pw => pw.Currency == g.Key).Sum(pw => pw.Amount)
                 }).ToList();
 
+                var myReferredUserIds = p.Referrals.Where(r => r.ReferredUserId.HasValue).Select(r => r.ReferredUserId.Value).ToList();
+                var paidCustomers = myCommissions.Where(c => c.Type == CommissionType.FirstPurchase).Select(c => c.CustomerId).Distinct().Count();
+                var activeSubs = allActiveSubs.Count(uid => myReferredUserIds.Contains(uid));
+                var signups = p.Referrals.Count(r => r.ReferredUserId.HasValue);
+                var clicks = p.TotalClicks;
+                var conversionRate = clicks > 0 ? Math.Round((decimal)paidCustomers / clicks * 100, 1) : 0;
+
                 return new
                 {
                     Profile = p,
-                    TotalSignups = p.Referrals.Count(r => r.ReferredUserId.HasValue),
-                    HasConverted = p.Referrals.Count(r => r.HasConverted),
+                    TotalSignups = signups,
+                    PaidCustomers = paidCustomers,
+                    ActiveSubscriptions = activeSubs,
+                    ConversionRate = conversionRate,
                     ByCurrency = byCurrency
                 };
             }).ToList();

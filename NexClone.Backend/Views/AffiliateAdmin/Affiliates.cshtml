@@ -20,7 +20,9 @@
                 <th style="padding:0.75rem 1rem; text-align:left; background:#e0e0e0;">Code</th>
                 <th style="padding:0.75rem 1rem; text-align:center; background:#e0e0e0;">Clicks</th>
                 <th style="padding:0.75rem 1rem; text-align:center; background:#e0e0e0;">Signups</th>
-                <th style="padding:0.75rem 1rem; text-align:center; background:#e0e0e0;">Converted</th>
+                <th style="padding:0.75rem 1rem; text-align:center; background:#e0e0e0;">Paid</th>
+                <th style="padding:0.75rem 1rem; text-align:center; background:#e0e0e0;">Active Subs</th>
+                <th style="padding:0.75rem 1rem; text-align:center; background:#e0e0e0;">Conv Rate</th>
                 <th style="padding:0.75rem 1rem; text-align:right; background:#e0e0e0;">Available</th>
                 <th style="padding:0.75rem 1rem; text-align:right; background:#e0e0e0;">Pending</th>
                 <th style="padding:0.75rem 1rem; text-align:center; background:#e0e0e0;">Status</th>
@@ -40,7 +42,9 @@
                     <td style="padding:0.75rem 1rem; font-family:monospace; font-weight:600;">@profile.ReferralCode</td>
                     <td style="padding:0.75rem 1rem; text-align:center;">@profile.TotalClicks</td>
                     <td style="padding:0.75rem 1rem; text-align:center;">@summary.TotalSignups</td>
-                    <td style="padding:0.75rem 1rem; text-align:center;">@summary.HasConverted</td>
+                    <td style="padding:0.75rem 1rem; text-align:center;">@summary.PaidCustomers</td>
+                    <td style="padding:0.75rem 1rem; text-align:center;">@summary.ActiveSubscriptions</td>
+                    <td style="padding:0.75rem 1rem; text-align:center;">@summary.ConversionRate%</td>
                     <td style="padding:0.75rem 1rem; text-align:right;">
                         @foreach (var b in summary.ByCurrency)
                         {
