@@ -137,7 +137,10 @@ namespace NexClone.Backend.API.Controllers.Client
             }
 
             // Link Affiliate Referral if exists
-            var affSession = request.RefCode ?? Request.Cookies["aff_session"];
+            var refCodePayload = request.RefCode;
+            var affCookie = Request.Cookies["aff_session"];
+            var affSession = !string.IsNullOrEmpty(refCodePayload) ? refCodePayload : affCookie;
+
             if (!string.IsNullOrEmpty(affSession))
             {
                 var affiliateService = HttpContext.RequestServices.GetService<NexClone.Backend.Application.Services.AffiliateService>();

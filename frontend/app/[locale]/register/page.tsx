@@ -10,6 +10,7 @@ import { useAuthStore } from "../../../src/store/useAuthStore";
 import { useRouter } from "../../../src/i18n/routing";
 import { GoogleLoginButton } from "../../../components/GoogleLoginButton";
 import { useSearchParams } from "next/navigation";
+import { getCookie } from "../../../src/utils/getCookie";
 
 // ── Validation helpers ──────────────────────────────────────────
 const validateName = (v: string) => {
@@ -63,7 +64,10 @@ export default function RegisterPage() {
   const ArrowIcon = isRtl ? ArrowLeft : ArrowRight;
   const router = useRouter();
   const searchParams = useSearchParams();
-  const refCode = searchParams.get("ref") || undefined;
+  
+  // Read affiliate session from either URL or cookie
+  const refCode = searchParams.get("ref") || getCookie("aff_session") || undefined;
+  
   const { register } = useAuthStore();
 
   const [name, setName] = useState("");

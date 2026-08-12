@@ -1,0 +1,53 @@
+nohup: ignoring input
+time="2026-08-12T16:28:05Z" level=warning msg="Docker Compose is configured to build using Bake, but buildx isn't installed"
+#0 building with "default" instance using docker driver
+
+#1 [frontend internal] load build definition from Dockerfile
+#1 transferring dockerfile: 511B done
+#1 DONE 0.0s
+
+#2 [frontend internal] load metadata for docker.io/library/node:20-alpine
+#2 DONE 0.0s
+
+#3 [frontend internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [frontend internal] load build context
+#4 DONE 0.0s
+
+#5 [frontend builder 1/6] FROM docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+#5 resolve docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+#5 resolve docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 0.0s done
+#5 DONE 0.1s
+
+#4 [frontend internal] load build context
+#4 transferring context: 3.44MB 3.0s done
+#4 DONE 3.2s
+
+#6 [frontend builder 2/6] WORKDIR /app
+#6 CACHED
+
+#7 [frontend builder 3/6] COPY package*.json ./
+#7 CACHED
+
+#8 [frontend builder 4/6] RUN npm ci
+#8 CACHED
+
+#9 [frontend builder 5/6] COPY . .
+#9 DONE 29.4s
+
+#10 [frontend builder 6/6] RUN npm run build
+#10 0.891 
+#10 0.891 > react-vite-tailwind@0.0.0 build
+#10 0.891 > next build
+#10 0.891 
+#10 1.962 Attention: Next.js now collects completely anonymous telemetry regarding usage.
+#10 1.963 This information is used to shape Next.js' roadmap and prioritize features.
+#10 1.963 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+#10 1.963 https://nextjs.org/telemetry
+#10 1.963 
+#10 2.057 ▲ Next.js 16.2.9 (Turbopack)
+#10 2.058 
+#10 2.217 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+#10 2.303   Creating an optimized production build ...
