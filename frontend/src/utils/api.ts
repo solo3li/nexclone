@@ -11,6 +11,13 @@ const api = axios.create({
 // ─── Request Interceptor ────────────────────────────────────────────────────
 api.interceptors.request.use(
   (config) => {
+    // Attach JWT token from localStorage if available
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
     // The HttpOnly cookie 'jwt' is automatically sent due to withCredentials: true
     return config;
   },
