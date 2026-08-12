@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { Activity, Clock, Zap } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Link } from "../../../i18n/routing";
+import { Link } from "../../i18n/routing";
 
 interface Props {
   user: any;

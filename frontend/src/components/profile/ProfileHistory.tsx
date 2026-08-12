@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { History, Zap, Clock, ChevronRight, Loader2, FileText, Image, Mic, Volume2, Video, Smile } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "../../../i18n/routing";
-import { useHistoryStore } from "../../../store/useHistoryStore";
+import { useRouter } from "../../i18n/routing";
+import { useHistoryStore } from "../../store/useHistoryStore";
 
 interface Props {
   isRtl: boolean;

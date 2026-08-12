@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { LifeBuoy, MessageSquarePlus } from "lucide-react";
-import { useRouter } from "../../../i18n/routing";
+import { useRouter } from "../../i18n/routing";
 
 interface Props {
   isRtl: boolean;
