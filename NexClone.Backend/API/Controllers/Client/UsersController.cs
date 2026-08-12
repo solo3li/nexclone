@@ -218,8 +218,8 @@ namespace NexClone.Backend.API.Controllers.Client
                     }
                 }
 
-                existingSub.StartDate = startDate ?? existingSub.StartDate;
-                existingSub.EndDate = endDate ?? (existingSub.EndDate > DateTime.UtcNow ? existingSub.EndDate : DateTime.UtcNow).AddDays(plan.DurationDays);
+                existingSub.StartDate = startDate.HasValue ? DateTime.SpecifyKind(startDate.Value, DateTimeKind.Utc) : existingSub.StartDate;
+                existingSub.EndDate = endDate.HasValue ? DateTime.SpecifyKind(endDate.Value, DateTimeKind.Utc) : (existingSub.EndDate > DateTime.UtcNow ? existingSub.EndDate : DateTime.UtcNow).AddDays(plan.DurationDays);
                 existingSub.Status = "active";
                 newSub = existingSub;
             }
@@ -246,8 +246,8 @@ namespace NexClone.Backend.API.Controllers.Client
                     UserId = userId,
                     PlanId = planId,
                     Status = "active",
-                    StartDate = startDate ?? DateTime.UtcNow,
-                    EndDate = endDate ?? (startDate ?? DateTime.UtcNow).AddDays(plan.DurationDays),
+                    StartDate = startDate.HasValue ? DateTime.SpecifyKind(startDate.Value, DateTimeKind.Utc) : DateTime.UtcNow,
+                    EndDate = endDate.HasValue ? DateTime.SpecifyKind(endDate.Value, DateTimeKind.Utc) : (startDate.HasValue ? DateTime.SpecifyKind(startDate.Value, DateTimeKind.Utc) : DateTime.UtcNow).AddDays(plan.DurationDays),
                     CreatedAt = DateTime.UtcNow
                 };
                 _context.Subscriptions.Add(newSub);
@@ -658,8 +658,8 @@ namespace NexClone.Backend.API.Controllers.Client
             var sub = await _context.Subscriptions.FindAsync(subscriptionId);
             if (sub == null) return NotFound();
 
-            sub.StartDate = startDate;
-            sub.EndDate = endDate;
+            sub.StartDate = DateTime.SpecifyKind(startDate, DateTimeKind.Utc);
+            sub.EndDate = DateTime.SpecifyKind(endDate, DateTimeKind.Utc);
             await _context.SaveChangesAsync();
 
             TempData["Success"] = "Subscription dates updated successfully.";
@@ -673,8 +673,8 @@ namespace NexClone.Backend.API.Controllers.Client
             var referral = await _context.AffiliateReferrals.FindAsync(referralId);
             if (referral == null) return NotFound();
 
-            referral.ClickedAt = clickedAt;
-            referral.AttributionExpiresAt = expiresAt;
+            referral.ClickedAt = DateTime.SpecifyKind(clickedAt, DateTimeKind.Utc);
+            referral.AttributionExpiresAt = DateTime.SpecifyKind(expiresAt, DateTimeKind.Utc);
             await _context.SaveChangesAsync();
 
             TempData["Success"] = "Affiliate tracking dates updated successfully.";
