@@ -96,3 +96,42 @@ time="2026-08-12T16:58:49Z" level=warning msg="Docker Compose is configured to b
 #10 20.33 ƒ  (Dynamic)  server-rendered on demand
 #10 20.33 
 #10 DONE 20.7s
+
+#11 [frontend runner 3/7] COPY --from=builder /app/package*.json ./
+#11 CACHED
+
+#12 [frontend runner 4/7] COPY --from=builder /app/.next ./.next
+#12 DONE 0.2s
+
+#13 [frontend runner 5/7] COPY --from=builder /app/public ./public
+#13 DONE 0.1s
+
+#14 [frontend runner 6/7] COPY --from=builder /app/node_modules ./node_modules
+#14 DONE 17.8s
+
+#15 [frontend runner 7/7] COPY --from=builder /app/next.config.mjs ./
+#15 DONE 0.5s
+
+#16 [frontend] exporting to image
+#16 exporting layers
+#16 exporting layers 72.6s done
+#16 exporting manifest sha256:e8440c0d7f361a1ddfa077252fc21bb9bbd5ad80072244ea88e56b7465abc19d done
+#16 exporting config sha256:96e52064c65acab4755b83e8f7e965aad94a20922c7ff2f1af20267b34ed4f4c done
+#16 exporting attestation manifest sha256:10518b86e605ea5e5febfb7c0870b058fde3eecf0f4401e15b335c99e0ca06de 0.0s done
+#16 exporting manifest list sha256:1490ca70d6a33138ec58ecb87eacf674be042de190fb50f54a39d4805934bf61 done
+#16 naming to docker.io/library/nexclone-frontend:latest done
+#16 unpacking to docker.io/library/nexclone-frontend:latest
+#16 unpacking to docker.io/library/nexclone-frontend:latest 15.3s done
+#16 DONE 87.9s
+
+#17 [frontend] resolving provenance for metadata file
+#17 DONE 0.0s
+ frontend  Built
+time="2026-08-12T17:01:40Z" level=warning msg="Found orphan containers ([nexclone-rabbitmq]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container nexclone-minio  Running
+ Container nexclone-postgres  Running
+ Container nexclone-backend  Running
+ Container nexclone-frontend  Recreate
+ Container nexclone-frontend  Recreated
+ Container nexclone-frontend  Starting
+ Container nexclone-frontend  Started
