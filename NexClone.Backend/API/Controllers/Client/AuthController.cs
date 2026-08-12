@@ -136,6 +136,16 @@ namespace NexClone.Backend.API.Controllers.Client
                 return BadRequest(new { Errors = errors });
             }
 
+            // Link Affiliate Referral if exists
+            var affSession = request.RefCode ?? Request.Cookies["aff_session"];
+            if (!string.IsNullOrEmpty(affSession))
+            {
+                var affiliateService = HttpContext.RequestServices.GetService<NexClone.Backend.Application.Services.AffiliateService>();
+                if (affiliateService != null)
+                {
+                    await affiliateService.LinkReferralToUserAsync(affSession, user.Id);
+                }
+            }
 
             // Log fingerprint
             _context.DeviceFingerprints.Add(new DeviceFingerprint
@@ -351,7 +361,17 @@ namespace NexClone.Backend.API.Controllers.Client
                 {
                     return BadRequest(new { Message = "Could not create user account." });
                 }
-                
+
+                // Link Affiliate Referral if exists
+                var affSession = request.RefCode ?? Request.Cookies["aff_session"];
+                if (!string.IsNullOrEmpty(affSession))
+                {
+                    var affiliateService = HttpContext.RequestServices.GetService<NexClone.Backend.Application.Services.AffiliateService>();
+                    if (affiliateService != null)
+                    {
+                        await affiliateService.LinkReferralToUserAsync(affSession, user.Id);
+                    }
+                }
             }
 
             // Check trial eligibility if new user — gate free plan via fingerprint/IP check
