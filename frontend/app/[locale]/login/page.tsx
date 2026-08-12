@@ -2,14 +2,14 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
-import { Link } from "../../../src/i18n/routing";
+import { Link, useRouter } from "../../../src/i18n/routing";
 import Navbar from "../../../src/components/Navbar";
 import { Mail, Lock, ArrowRight, ArrowLeft, CheckCircle, XCircle, Eye, EyeOff } from "lucide-react";
 import { useState, useCallback } from "react";
 
-import { useRouter } from "../../../src/i18n/routing";
 import { useAuthStore } from "../../../src/store/useAuthStore";
 import { GoogleLoginButton } from "../../../components/GoogleLoginButton";
+import { getCookie } from "../../../src/utils/getCookie";
 
 // ── Validation ──────────────────────────────────────────────────
 const validateEmail = (v: string) => {
@@ -289,7 +289,7 @@ export default function LoginPage() {
               <div className="flex-grow border-t border-white/10" />
             </div>
 
-            <GoogleLoginButton />
+            <GoogleLoginButton refCode={getCookie("aff_session")} />
           </form>
 
           <div className="mt-6 text-center">
