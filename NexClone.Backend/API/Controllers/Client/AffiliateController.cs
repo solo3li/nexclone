@@ -58,7 +58,7 @@ namespace NexClone.Backend.API.Controllers.Client
                 id = profile.Id,
                 affiliateDisplayId = profile.AffiliateDisplayId,
                 referralCode = profile.ReferralCode,
-                referralLink = $"{siteUrl}/?ref={profile.ReferralCode}",
+                referralLink = $"{siteUrl}/register?ref={profile.ReferralCode}",
                 isActive = profile.IsActive,
                 totalClicks = profile.TotalClicks,
                 createdAt = profile.CreatedAt
