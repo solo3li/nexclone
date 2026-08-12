@@ -1,0 +1,50 @@
+nohup: ignoring input
+ Container nexclone-frontend  Stopping
+ Container nexclone-frontend  Stopped
+ Container nexclone-backend  Stopping
+ Container nexclone-backend  Stopped
+Going to remove nexclone-backend, nexclone-frontend
+ Container nexclone-frontend  Removing
+ Container nexclone-backend  Removing
+ Container nexclone-backend  Removed
+ Container nexclone-frontend  Removed
+time="2026-08-12T16:29:43Z" level=warning msg="Docker Compose is configured to build using Bake, but buildx isn't installed"
+#0 building with "default" instance using docker driver
+
+#1 [backend internal] load build definition from Dockerfile
+#1 transferring dockerfile: 628B done
+#1 DONE 0.0s
+
+#2 [backend internal] load metadata for mcr.microsoft.com/dotnet/aspnet:10.0
+#2 DONE 0.0s
+
+#3 [backend internal] load metadata for mcr.microsoft.com/dotnet/sdk:10.0
+#3 DONE 0.0s
+
+#4 [backend internal] load .dockerignore
+#4 transferring context: 77B done
+#4 DONE 0.0s
+
+#5 [backend internal] load build context
+#5 DONE 0.0s
+
+#6 [backend build 1/7] FROM mcr.microsoft.com/dotnet/sdk:10.0@sha256:72dd743782f2ae7e5476fd64f6a460045e3998dc862218b80e6944cba79a01b0
+#6 resolve mcr.microsoft.com/dotnet/sdk:10.0@sha256:72dd743782f2ae7e5476fd64f6a460045e3998dc862218b80e6944cba79a01b0 0.0s done
+#6 DONE 0.0s
+
+#7 [backend final 1/4] FROM mcr.microsoft.com/dotnet/aspnet:10.0@sha256:207cc51496778557731c81ff670333d8ade4a4fec22768fd1be8e78474a84ecf
+#7 resolve mcr.microsoft.com/dotnet/aspnet:10.0@sha256:207cc51496778557731c81ff670333d8ade4a4fec22768fd1be8e78474a84ecf
+#7 resolve mcr.microsoft.com/dotnet/aspnet:10.0@sha256:207cc51496778557731c81ff670333d8ade4a4fec22768fd1be8e78474a84ecf 0.0s done
+#7 CACHED
+
+#8 [backend build 2/7] WORKDIR /src
+#8 CACHED
+
+#5 [backend internal] load build context
+#5 transferring context: 64.90kB 0.1s done
+#5 DONE 0.1s
+
+#9 [backend build 3/7] COPY [NexClone.Backend.csproj, ./]
+#9 DONE 0.0s
+
+#10 [backend final 2/4] RUN apt-get update && apt-get install -y libgssapi-krb5-2 && rm -rf /var/lib/apt/lists/*

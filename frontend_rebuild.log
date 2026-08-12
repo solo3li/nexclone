@@ -51,3 +51,70 @@ time="2026-08-12T16:28:05Z" level=warning msg="Docker Compose is configured to b
 #10 2.058 
 #10 2.217 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
 #10 2.303   Creating an optimized production build ...
+#10 19.94 ✓ Compiled successfully in 17.1s
+#10 19.98   Skipping validation of types
+#10 20.03   Finished TypeScript config validation in 44ms ...
+#10 20.04   Collecting page data using 3 workers ...
+#10 21.65   Generating static pages using 3 workers (0/2) ...
+#10 22.13 ✓ Generating static pages using 3 workers (2/2) in 475ms
+#10 22.14   Finalizing page optimization ...
+#10 22.16 
+#10 22.17 Route (app)
+#10 22.17 ┌ ○ /_not-found
+#10 22.17 ├ ƒ /[locale]
+#10 22.17 ├ ƒ /[locale]/[...rest]
+#10 22.17 ├ ƒ /[locale]/affiliate
+#10 22.17 ├ ƒ /[locale]/blog
+#10 22.17 ├ ƒ /[locale]/blog/[id]
+#10 22.17 ├ ƒ /[locale]/complete-profile
+#10 22.17 ├ ƒ /[locale]/forgot-password
+#10 22.17 ├ ƒ /[locale]/free-trial
+#10 22.17 ├ ƒ /[locale]/history
+#10 22.17 ├ ƒ /[locale]/history/[id]
+#10 22.17 ├ ƒ /[locale]/login
+#10 22.17 ├ ƒ /[locale]/pages/[slug]
+#10 22.17 ├ ƒ /[locale]/payment/success
+#10 22.17 ├ ƒ /[locale]/pricing
+#10 22.17 ├ ƒ /[locale]/privacy
+#10 22.17 ├ ƒ /[locale]/profile
+#10 22.17 ├ ƒ /[locale]/profile/history/[id]
+#10 22.17 ├ ƒ /[locale]/profile/invoices
+#10 22.17 ├ ƒ /[locale]/profile/tickets
+#10 22.17 ├ ƒ /[locale]/profile/tickets/[id]
+#10 22.17 ├ ƒ /[locale]/register
+#10 22.17 ├ ƒ /[locale]/reset-password
+#10 22.17 ├ ƒ /[locale]/support
+#10 22.17 ├ ƒ /[locale]/tools
+#10 22.17 ├ ƒ /[locale]/tools/advanced-lip-sync
+#10 22.17 ├ ƒ /[locale]/tools/image-to-video
+#10 22.17 ├ ƒ /[locale]/tools/motion-control
+#10 22.17 ├ ƒ /[locale]/tools/text-to-voice
+#10 22.17 ├ ƒ /[locale]/tools/voice-to-text
+#10 22.17 ├ ƒ /[locale]/verify-email
+#10 22.17 └ ƒ /[locale]/verify-invoice/[token]
+#10 22.17 
+#10 22.17 
+#10 22.17 ƒ Proxy (Middleware)
+#10 22.17 
+#10 22.17 ○  (Static)   prerendered as static content
+#10 22.17 ƒ  (Dynamic)  server-rendered on demand
+#10 22.17 
+#10 DONE 22.6s
+
+#11 [frontend runner 3/7] COPY --from=builder /app/package*.json ./
+#11 CACHED
+
+#12 [frontend runner 4/7] COPY --from=builder /app/.next ./.next
+#12 DONE 0.2s
+
+#13 [frontend runner 5/7] COPY --from=builder /app/public ./public
+#13 DONE 0.1s
+
+#14 [frontend runner 6/7] COPY --from=builder /app/node_modules ./node_modules
+#14 DONE 11.4s
+
+#15 [frontend runner 7/7] COPY --from=builder /app/next.config.mjs ./
+#15 DONE 0.5s
+
+#16 [frontend] exporting to image
+#16 exporting layers
