@@ -193,9 +193,9 @@ namespace NexClone.Backend.API.Controllers.Client
                 var affiliateSession = Request.Cookies["aff_session"];
                 if (!string.IsNullOrEmpty(affiliateSession))
                 {
-                    var affiliateService = HttpContext.RequestServices.GetService<NexClone.Backend.Application.Services.AffiliateService>();
-                    if (affiliateService != null)
-                        await affiliateService.LinkReferralToUserAsync(affiliateSession, user.Id);
+                    var affSvc = HttpContext.RequestServices.GetService<NexClone.Backend.Application.Services.AffiliateService>();
+                    if (affSvc != null)
+                        await affSvc.LinkReferralToUserAsync(affiliateSession, user.Id);
                 }
             }
             catch (Exception affEx)
@@ -304,6 +304,15 @@ namespace NexClone.Backend.API.Controllers.Client
             await _context.SaveChangesAsync();
 
             var token = GenerateJwtToken(user);
+            
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddDays(15)
+            };
+            Response.Cookies.Append("jwt", token, cookieOptions);
 
             return Ok(new AuthResponse
             {
@@ -466,6 +475,15 @@ namespace NexClone.Backend.API.Controllers.Client
             await _context.SaveChangesAsync();
 
             var token = GenerateJwtToken(user);
+            
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddDays(15)
+            };
+            Response.Cookies.Append("jwt", token, cookieOptions);
 
             return Ok(new AuthResponse
             {
@@ -601,6 +619,13 @@ namespace NexClone.Backend.API.Controllers.Client
         [HttpPost("logout")]
         public IActionResult Logout()
         {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None
+            };
+            Response.Cookies.Delete("jwt", cookieOptions);
             return Ok(new { Message = "Logged out" });
         }
 

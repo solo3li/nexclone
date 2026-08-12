@@ -72,7 +72,16 @@ export default function BlogPost({ params }: { params: Promise<{ id: string }> }
             <h1 className="text-3xl md:text-5xl font-bold text-white mb-8 leading-tight">{post.title}</h1>
             <div
               className="prose prose-invert prose-violet max-w-none prose-img:rounded-xl prose-a:text-violet-400"
-              dangerouslySetInnerHTML={{ __html: post.content }}
+              dangerouslySetInnerHTML={{ 
+                __html: post.content
+                  ? post.content
+                      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                      .replace(/ on\w+="[^"]*"/g, '')
+                      .replace(/ on\w+='[^']*'/g, '')
+                      .replace(/ on\w+=\w+/g, '')
+                      .replace(/javascript:/gi, '')
+                  : ''
+              }}
             />
           </div>
         </article>

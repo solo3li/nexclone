@@ -446,7 +446,9 @@ namespace NexClone.Backend.Application.Services
                 .ToListAsync();
 
             var payouts = await _db.AffiliatePayouts
-                .Where(p => p.AffiliateProfileId == affiliateProfileId && p.Status == PayoutStatus.Paid)
+                .Where(p => p.AffiliateProfileId == affiliateProfileId && 
+                            p.Status != PayoutStatus.Rejected && 
+                            p.Status != PayoutStatus.Failed)
                 .ToListAsync();
 
             var currencies = commissions.Select(c => c.Currency).Distinct().ToList();

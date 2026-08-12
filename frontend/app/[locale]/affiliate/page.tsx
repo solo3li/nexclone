@@ -30,20 +30,13 @@ export default function AffiliatePage() {
   const [activeTab, setActiveTab] = useState('overview');
 
   // Use useAppStore — the single source of truth for auth state in this app
-  const { isAuthenticated } = useAppStore();
-  const [isInitializing, setIsInitializing] = useState(true);
+  const { isAuthenticated, isInitializing } = useAppStore();
 
   const {
     profile, stats, balances, referrals, commissions, payouts,
     fetchProfile, fetchStats, fetchBalances, fetchReferrals, fetchCommissions, fetchPayouts,
     isLoading
   } = useAffiliateStore();
-
-  // Give a short window for auth to hydrate from localStorage on first load
-  useEffect(() => {
-    const timer = setTimeout(() => setIsInitializing(false), 400);
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     if (!isInitializing && isAuthenticated) {

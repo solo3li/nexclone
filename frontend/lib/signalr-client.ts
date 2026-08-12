@@ -13,7 +13,6 @@ class SignalRService {
         
         this.connection = new signalR.HubConnectionBuilder()
             .withUrl(`${backendUrl}/hubs/notification`, {
-                // Ensure cookies are sent for Auth
                 withCredentials: true
             })
             .withAutomaticReconnect()

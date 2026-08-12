@@ -11,12 +11,7 @@ const api = axios.create({
 // ─── Request Interceptor ────────────────────────────────────────────────────
 api.interceptors.request.use(
   (config) => {
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('jwt_token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    }
+    // The HttpOnly cookie 'jwt' is automatically sent due to withCredentials: true
     return config;
   },
   (error) => Promise.reject(error)
@@ -34,7 +29,6 @@ api.interceptors.response.use(
       !error.config.url?.includes('/api/auth/me')
     ) {
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('jwt_token');
         const locale = document.documentElement.lang || 'ar';
         const path = window.location.pathname;
         if (!path.includes('/login') && 

@@ -342,7 +342,7 @@ using (var scope = app.Services.CreateScope())
             {
                 ProviderName = provider,
                 IsActive = true,
-                ApiKey = provider == "CrunAI" ? "ak_CY4NJBlD5UvgzHAvmWjdlf6urVOBRm92" : "" // default
+                ApiKey = provider == "CrunAI" ? (builder.Configuration["ApiKeys:CrunAI"] ?? "") : "" // default
             });
         }
     }
@@ -384,7 +384,7 @@ using (var scope = app.Services.CreateScope())
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseDeveloperExceptionPage();
+    app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
 else

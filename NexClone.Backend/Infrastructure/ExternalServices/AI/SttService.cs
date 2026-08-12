@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.IO;
 using System.Net.Http;
@@ -13,6 +14,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
 {
     public class SttService : ISttService
     {
+        private static readonly Microsoft.Extensions.Caching.Memory.IMemoryCache _cache = new Microsoft.Extensions.Caching.Memory.MemoryCache(new Microsoft.Extensions.Caching.Memory.MemoryCacheOptions());
         private readonly ApplicationDbContext _dbContext;
         private readonly IHttpClientFactory _httpClientFactory;
 
@@ -121,8 +123,13 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
 
             if (rule.MaxDailyRequests.HasValue)
             {
-                var dailyCount = await _dbContext.GenerationHistories
-                    .CountAsync(h => h.Type == config.ToolName && h.CreatedAt >= today);
+                string dailyCacheKey = $"DailyCount_{config.ToolName}";
+                if (!_cache.TryGetValue(dailyCacheKey, out int dailyCount))
+                {
+                    dailyCount = await _dbContext.GenerationHistories
+                        .CountAsync(h => h.Type == config.ToolName && h.CreatedAt >= today);
+                    _cache.Set(dailyCacheKey, dailyCount, TimeSpan.FromMinutes(10));
+                }
                 
                 if (dailyCount >= rule.MaxDailyRequests.Value)
                     throw new Exception("There is high demand on this tool, please try again later.");
@@ -130,8 +137,13 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
 
             if (rule.MaxRequestsPerMinute.HasValue)
             {
-                var minuteCount = await _dbContext.GenerationHistories
-                    .CountAsync(h => h.Type == config.ToolName && h.CreatedAt >= oneMinuteAgo);
+                string minuteCacheKey = $"MinuteCount_{config.ToolName}";
+                if (!_cache.TryGetValue(minuteCacheKey, out int minuteCount))
+                {
+                    minuteCount = await _dbContext.GenerationHistories
+                        .CountAsync(h => h.Type == config.ToolName && h.CreatedAt >= oneMinuteAgo);
+                    _cache.Set(minuteCacheKey, minuteCount, TimeSpan.FromSeconds(5));
+                }
 
                 if (minuteCount >= rule.MaxRequestsPerMinute.Value)
                     throw new Exception("There is high demand on this tool, please try again later.");

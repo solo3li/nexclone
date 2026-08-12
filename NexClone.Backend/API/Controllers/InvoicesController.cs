@@ -91,7 +91,7 @@ namespace NexClone.Backend.API.Controllers
         }
 
         [HttpGet("generate-retro")]
-        [AllowAnonymous]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GenerateRetroInvoices(
             [FromServices] NexClone.Backend.Infrastructure.ExternalServices.Invoicing.IInvoiceGeneratorService invoiceService,
             [FromServices] NexClone.Backend.Core.Interfaces.IMediaService mediaService)

@@ -37,6 +37,12 @@ export default function AffiliateWithdrawalForm({ balances, isRtl }: Props) {
       return;
     }
 
+    const currentBalance = availableBalances.find(b => b.currency === currency)?.available || 0;
+    if (Number(amount) > currentBalance) {
+      setError(isRtl ? 'المبلغ المطلوب يتجاوز الرصيد المتاح' : 'Requested amount exceeds available balance');
+      return;
+    }
+
     if (!account.trim()) {
       setError(isRtl ? 'يرجى إدخال بيانات الحساب' : 'Please enter your account details');
       return;

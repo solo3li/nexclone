@@ -33,9 +33,7 @@ namespace NexClone.Backend.API.Controllers.Admin
             var activeAffiliates = await _db.AffiliateProfiles.CountAsync(p => p.IsActive);
             var totalReferrals = await _db.AffiliateReferrals.CountAsync(r => r.ReferredUserId.HasValue);
 
-            var allCommissions = await _db.AffiliateCommissions
-                .Where(c => c.Type != CommissionType.Reversal)
-                .ToListAsync();
+            var allCommissions = await _db.AffiliateCommissions.ToListAsync();
 
             var pendingAmount = allCommissions
                 .Where(c => c.Status == CommissionStatus.Pending)
@@ -76,9 +74,10 @@ namespace NexClone.Backend.API.Controllers.Admin
 
         // ─── Affiliates List ─────────────────────────────────────────────────
 
-        public async Task<IActionResult> Affiliates([FromQuery] string? search = null)
+        public async Task<IActionResult> Affiliates([FromQuery] string? search = null, [FromQuery] int page = 1)
         {
             ViewData["Title"] = "Affiliates";
+            int pageSize = 50;
 
             var query = _db.AffiliateProfiles
                 .Include(p => p.User)
@@ -93,7 +92,11 @@ namespace NexClone.Backend.API.Controllers.Admin
                     p.ReferralCode.Contains(search));
             }
 
-            var profiles = await query.OrderByDescending(p => p.CreatedAt).ToListAsync();
+            var totalCount = await query.CountAsync();
+            var profiles = await query.OrderByDescending(p => p.CreatedAt)
+                                      .Skip((page - 1) * pageSize)
+                                      .Take(pageSize)
+                                      .ToListAsync();
 
             // Build summary per affiliate
             var profileIds = profiles.Select(p => p.Id).ToList();
@@ -124,7 +127,7 @@ namespace NexClone.Backend.API.Controllers.Admin
                 var byCurrency = myCommissions.GroupBy(c => c.Currency).Select(g => new
                 {
                     Currency = g.Key,
-                    TotalCommission = g.Where(c => c.Type != CommissionType.Reversal).Sum(c => c.Amount),
+                    TotalCommission = g.Sum(c => c.Amount),
                     Pending = g.Where(c => c.Status == CommissionStatus.Pending).Sum(c => c.Amount),
                     Available = g.Where(c => c.Status == CommissionStatus.Available).Sum(c => c.Amount) -
                                 myPayouts.Where(pw => pw.Currency == g.Key).Sum(pw => pw.Amount)
@@ -149,6 +152,8 @@ namespace NexClone.Backend.API.Controllers.Admin
             }).ToList();
 
             ViewBag.Summaries = summaries;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
             return View(profiles);
         }
 

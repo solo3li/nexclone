@@ -55,24 +55,21 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                     return BadRequest("Paymob configuration not found or inactive.");
                 }
 
-                // 2. HMAC Validation — skipped if HmacSecret is not configured (test mode)
+                // 2. HMAC Validation
                 bool hmacConfigured = !string.IsNullOrEmpty(paymobConfig.HmacSecret);
-                if (hmacConfigured)
+                if (!hmacConfigured)
                 {
-                    if (string.IsNullOrEmpty(hmac))
-                        return Unauthorized("Missing HMAC signature.");
-
-                    if (payload.TryGetProperty("obj", out var objForHmac))
-                    {
-                        bool hmacValid = VerifyPaymobHmac(objForHmac, hmac, paymobConfig.HmacSecret!);
-                        if (!hmacValid)
-                            return Unauthorized("Invalid HMAC signature.");
-                    }
+                    return BadRequest("Paymob HMAC secret is not configured.");
                 }
-                else
+
+                if (string.IsNullOrEmpty(hmac))
+                    return Unauthorized("Missing HMAC signature.");
+
+                if (payload.TryGetProperty("obj", out var objForHmac))
                 {
-                    // ⚠️ HMAC not configured — running in test mode without signature verification
-                    Console.WriteLine("[Paymob Webhook] WARNING: HMAC Secret not set. Skipping signature verification (test mode).");
+                    bool hmacValid = VerifyPaymobHmac(objForHmac, hmac, paymobConfig.HmacSecret!);
+                    if (!hmacValid)
+                        return Unauthorized("Invalid HMAC signature.");
                 }
 
                 if (payload.TryGetProperty("obj", out var obj))

@@ -5,8 +5,8 @@ import { motion } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import {
-  Activity, Crown, History, User as UserIcon, Lock,
-  Image as ImageIcon, Loader2, Save, Upload, LifeBuoy, MessageSquarePlus, Share2
+  Activity, Crown, User as UserIcon, Lock,
+  Image as ImageIcon, Loader2, Save, Upload, LifeBuoy, MessageSquarePlus, CheckCircle2, AlertCircle
 } from "lucide-react";
 import { useAuthStore } from "../../../src/store/useAuthStore";
 import { useProfileStore } from "../../../src/store/useProfileStore";
@@ -25,7 +25,6 @@ export default function ProfilePage() {
   const [historyCount, setHistoryCount] = useState(0);
   const [isReady, setIsReady] = useState(false);
 
-  
   // Settings State
   const [fullName, setFullName] = useState(user?.fullName || "");
   const [currentPassword, setCurrentPassword] = useState("");
@@ -35,6 +34,8 @@ export default function ProfilePage() {
   
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
+  const [profileMessage, setProfileMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
+  const [passwordMessage, setPasswordMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -66,11 +67,13 @@ export default function ProfilePage() {
       const file = e.target.files[0];
       setProfileImage(file);
       setImagePreview(URL.createObjectURL(file));
+      setProfileMessage(null);
     }
   };
 
   const handleUpdateProfile = async () => {
     setSavingProfile(true);
+    setProfileMessage(null);
     try {
       const formData = new FormData();
       formData.append("FullName", fullName);
@@ -80,15 +83,14 @@ export default function ProfilePage() {
 
       const res = await updateProfile(formData);
       
-      // Update local state if needed (store already fetches me internally)
       if (user) {
          setFullName(res.fullName);
          setImagePreview(res.imageUrl);
       }
-      alert(isRtl ? "تم التحديث بنجاح" : "Profile updated successfully");
+      setProfileMessage({ type: 'success', text: isRtl ? "تم التحديث بنجاح" : "Profile updated successfully." });
     } catch (err) {
       console.error(err);
-      alert(isRtl ? "حدث خطأ أثناء التحديث" : "Error updating profile");
+      setProfileMessage({ type: 'error', text: isRtl ? "حدث خطأ أثناء التحديث" : "An error occurred while updating the profile." });
     } finally {
       setSavingProfile(false);
     }
@@ -97,14 +99,15 @@ export default function ProfilePage() {
   const handleChangePassword = async () => {
     if (!currentPassword || !newPassword) return;
     setSavingPassword(true);
+    setPasswordMessage(null);
     try {
       await changePassword({ currentPassword, newPassword });
-      alert(isRtl ? "تم تغيير كلمة المرور بنجاح" : "Password changed successfully");
+      setPasswordMessage({ type: 'success', text: isRtl ? "تم تغيير كلمة المرور بنجاح" : "Password changed successfully." });
       setCurrentPassword("");
       setNewPassword("");
     } catch (err) {
       console.error(err);
-      alert(isRtl ? "كلمة المرور الحالية غير صحيحة" : "Incorrect current password");
+      setPasswordMessage({ type: 'error', text: isRtl ? "كلمة المرور الحالية غير صحيحة" : "Incorrect current password." });
     } finally {
       setSavingPassword(false);
     }
@@ -112,7 +115,7 @@ export default function ProfilePage() {
 
   if (isInitializing || !isReady) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 min-h-[60vh]">
+      <div className="flex flex-col items-center justify-center py-20 min-h-[60vh]" aria-busy="true" aria-label="Loading profile">
          <Loader2 className="w-10 h-10 animate-spin text-fuchsia-500" />
       </div>
     );
@@ -129,7 +132,7 @@ export default function ProfilePage() {
             <p className="text-white/60 mb-8">{isRtl ? "يجب عليك تسجيل الدخول أو إنشاء حساب جديد للوصول إلى هذه الصفحة." : "You need to login or create a new account to access this page."}</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
                <button onClick={() => router.push(`/${locale}/login`)} className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold transition-all w-full">{isRtl ? "تسجيل الدخول" : "Login"}</button>
-               <button onClick={() => router.push(`/${locale}/register`)} className="px-6 py-3 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white rounded-xl font-bold transition-all w-full">{isRtl ? "انضم الآن" : "Join Now"}</button>
+               <button onClick={() => router.push(`/${locale}/register`)} className="px-6 py-3 bg-white text-[#0a0015] hover:bg-white/90 rounded-xl font-bold transition-all w-full">{isRtl ? "انضم الآن" : "Join Now"}</button>
             </div>
          </div>
       </div>
@@ -143,10 +146,8 @@ export default function ProfilePage() {
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
         {/* Left Column: Info & Stats */}
         <div className="lg:col-span-1 space-y-6">
-
 
             {/* Profile Avatar summary */}
             <motion.div
@@ -155,9 +156,9 @@ export default function ProfilePage() {
             >
               <div className="w-24 h-24 mx-auto rounded-full bg-white/10 mb-4 overflow-hidden border-2 border-white/20 flex items-center justify-center">
                 {imagePreview ? (
-                  <img src={imagePreview} alt="Profile" className="w-full h-full object-cover" />
+                  <img src={imagePreview} alt={user?.fullName || "Profile image"} className="w-full h-full object-cover" />
                 ) : (
-                  <UserIcon className="w-10 h-10 text-white/50" />
+                  <UserIcon className="w-10 h-10 text-white/50" aria-label="Default avatar" />
                 )}
               </div>
               <h2 className="text-xl font-bold text-white">{user?.fullName || "User"}</h2>
@@ -169,7 +170,6 @@ export default function ProfilePage() {
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
               className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 relative overflow-hidden"
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-yellow-400/20 to-transparent blur-2xl" />
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 rounded-xl bg-yellow-500/20 flex items-center justify-center border border-yellow-500/30">
                   <Crown className="w-5 h-5 text-yellow-400" />
@@ -241,7 +241,7 @@ export default function ProfilePage() {
                     )}
                   </div>
                 </div>
-                <button onClick={() => router.push(`/${locale}/pricing`)} className="w-full py-3 mt-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white font-medium transition-all hover:border-white/20">
+                <button onClick={() => router.push(`/${locale}/pricing`)} className="w-full py-3 mt-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white font-medium transition-colors hover:border-white/20">
                   {t('subscription.upgrade')}
                 </button>
               </div>
@@ -259,11 +259,11 @@ export default function ProfilePage() {
                 <h2 className="text-xl font-bold text-white">{t('usage.title')}</h2>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-white/5 rounded-2xl p-3 text-center">
+                <div className="bg-white/5 rounded-2xl p-4 text-center border border-white/5">
                   <p className="text-2xl font-extrabold text-white">{historyCount}</p>
                   <p className="text-xs text-white/50 mt-1">{isRtl ? "إجمالي العمليات" : "Total Operations"}</p>
                 </div>
-                <div className="bg-white/5 rounded-2xl p-3 text-center">
+                <div className="bg-white/5 rounded-2xl p-4 text-center border border-white/5">
                   <p className="text-2xl font-extrabold text-emerald-400">
                     {Number(user?.standardCredits || 0).toFixed(0)} <span className="text-sm text-amber-400">/ {Number(user?.premiumCredits || 0).toFixed(0)}</span>
                   </p>
@@ -277,7 +277,6 @@ export default function ProfilePage() {
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
               className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 relative overflow-hidden"
             >
-              <div className="absolute bottom-0 left-0 w-40 h-40 bg-gradient-to-tr from-violet-600/10 to-transparent blur-2xl" />
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center border border-violet-500/30">
                   <LifeBuoy className="w-5 h-5 text-violet-400" />
@@ -293,7 +292,7 @@ export default function ProfilePage() {
               </p>
               <button
                 onClick={() => router.push(`/${locale}/profile/tickets`)}
-                className="w-full py-3 flex items-center justify-center gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-violet-500/20"
+                className="w-full py-3 flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold rounded-xl transition-colors"
               >
                 <MessageSquarePlus className="w-5 h-5" />
                 {isRtl ? "تذاكري" : "My Tickets"}
@@ -305,10 +304,9 @@ export default function ProfilePage() {
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
               className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 relative overflow-hidden"
             >
-              <div className="absolute bottom-0 right-0 w-32 h-32 bg-gradient-to-tl from-indigo-500/20 to-transparent blur-2xl" />
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-400"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-400" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                 </div>
                 <h2 className="text-xl font-bold text-white">
                   {isRtl ? "الفواتير الضريبية" : "Tax Invoices"}
@@ -321,9 +319,9 @@ export default function ProfilePage() {
               </p>
               <button
                 onClick={() => router.push(`/${locale}/profile/invoices`)}
-                className="w-full py-3 flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-500/20"
+                className="w-full py-3 flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold rounded-xl transition-colors"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 {isRtl ? "عرض فواتيري" : "My Invoices"}
               </button>
             </motion.div>
@@ -347,33 +345,40 @@ export default function ProfilePage() {
               <div className="space-y-6">
                 {/* Profile Picture Upload */}
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-3">
+                  <label htmlFor="profileImage" className="block text-sm font-medium text-white/70 mb-3">
                     {isRtl ? "الصورة الشخصية" : "Profile Picture"}
                   </label>
-                  <div className="flex items-center gap-4">
-                    <div className="w-20 h-20 rounded-xl bg-white/5 border border-white/10 overflow-hidden flex items-center justify-center relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <button 
+                      type="button"
+                      aria-label={isRtl ? "تغيير الصورة الشخصية" : "Change profile picture"}
+                      className="w-20 h-20 rounded-xl bg-white/5 border border-white/10 overflow-hidden flex items-center justify-center relative group cursor-pointer focus:outline-none focus:ring-2 focus:ring-fuchsia-500 focus:ring-offset-2 focus:ring-offset-[#0a0015]" 
+                      onClick={() => fileInputRef.current?.click()}
+                    >
                       {imagePreview ? (
                         <img src={imagePreview} alt="Profile Preview" className="w-full h-full object-cover" />
                       ) : (
                         <ImageIcon className="w-8 h-8 text-white/30" />
                       )}
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all">
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                         <Upload className="w-6 h-6 text-white" />
                       </div>
-                    </div>
+                    </button>
                     <div className="flex-1">
-                      <p className="text-xs text-white/40 mb-2">
+                      <p className="text-sm text-white/50 mb-3">
                         {isRtl ? "الصور المدعومة: JPG, PNG. أقصى حجم 2MB." : "Supported formats: JPG, PNG. Max size 2MB."}
                       </p>
-                      <button onClick={() => fileInputRef.current?.click()} className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition-colors">
+                      <button type="button" onClick={() => fileInputRef.current?.click()} className="px-5 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-white font-medium text-sm rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-white/30">
                         {isRtl ? "اختر صورة" : "Choose Image"}
                       </button>
                       <input 
+                        id="profileImage"
                         type="file" 
                         ref={fileInputRef} 
                         onChange={handleImageChange} 
                         accept="image/*" 
                         className="hidden" 
+                        tabIndex={-1}
                       />
                     </div>
                   </div>
@@ -381,23 +386,32 @@ export default function ProfilePage() {
 
                 {/* Full Name */}
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-2">
+                  <label htmlFor="fullName" className="block text-sm font-medium text-white/70 mb-2">
                     {isRtl ? "الاسم الكامل" : "Full Name"}
                   </label>
                   <input
+                    id="fullName"
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-fuchsia-500/50 focus:ring-1 focus:ring-fuchsia-500/50 transition-all"
+                    className="w-full bg-[#0a0015] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-fuchsia-500 focus:ring-1 focus:ring-fuchsia-500 transition-colors"
                     placeholder={isRtl ? "أدخل اسمك" : "Enter your name"}
                   />
                 </div>
 
+                {/* Profile Message Feedback */}
+                {profileMessage && (
+                  <div className={`flex items-center gap-2 p-4 rounded-xl text-sm font-medium ${profileMessage.type === 'success' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}`} role="alert">
+                    {profileMessage.type === 'success' ? <CheckCircle2 className="w-5 h-5 shrink-0" /> : <AlertCircle className="w-5 h-5 shrink-0" />}
+                    <span>{profileMessage.text}</span>
+                  </div>
+                )}
+
                 <div className="pt-4 flex justify-end">
                   <button
                     onClick={handleUpdateProfile}
-                    disabled={savingProfile}
-                    className="px-6 py-3 bg-white text-black font-bold rounded-xl hover:bg-gray-200 transition-colors flex items-center gap-2 disabled:opacity-50"
+                    disabled={savingProfile || (!fullName.trim() && !profileImage)}
+                    className="px-6 py-3 bg-white text-[#0a0015] font-bold rounded-xl hover:bg-white/90 transition-colors flex items-center gap-2 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#0a0015]"
                   >
                     {savingProfile ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
                     {isRtl ? "حفظ التغييرات" : "Save Changes"}
@@ -419,32 +433,43 @@ export default function ProfilePage() {
 
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-2">
+                  <label htmlFor="currentPassword" className="block text-sm font-medium text-white/70 mb-2">
                     {isRtl ? "كلمة المرور الحالية" : "Current Password"}
                   </label>
                   <input
+                    id="currentPassword"
                     type="password"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/50 transition-all"
+                    className="w-full bg-[#0a0015] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white/70 mb-2">
+                  <label htmlFor="newPassword" className="block text-sm font-medium text-white/70 mb-2">
                     {isRtl ? "كلمة المرور الجديدة" : "New Password"}
                   </label>
                   <input
+                    id="newPassword"
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/50 transition-all"
+                    className="w-full bg-[#0a0015] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
                   />
                 </div>
+
+                {/* Password Message Feedback */}
+                {passwordMessage && (
+                  <div className={`flex items-center gap-2 p-4 rounded-xl text-sm font-medium ${passwordMessage.type === 'success' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}`} role="alert">
+                    {passwordMessage.type === 'success' ? <CheckCircle2 className="w-5 h-5 shrink-0" /> : <AlertCircle className="w-5 h-5 shrink-0" />}
+                    <span>{passwordMessage.text}</span>
+                  </div>
+                )}
+
                 <div className="pt-4 flex justify-end">
                   <button
                     onClick={handleChangePassword}
                     disabled={savingPassword || !currentPassword || !newPassword}
-                    className="px-6 py-3 bg-white/10 border border-white/20 text-white font-bold rounded-xl hover:bg-white/20 transition-colors flex items-center gap-2 disabled:opacity-50"
+                    className="px-6 py-3 bg-white/5 border border-white/10 text-white font-bold rounded-xl hover:bg-white/10 transition-colors flex items-center gap-2 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-white/30"
                   >
                     {savingPassword ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
                     {isRtl ? "تحديث كلمة المرور" : "Update Password"}

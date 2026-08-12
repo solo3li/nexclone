@@ -69,85 +69,11 @@ namespace NexClone.Backend.Application.Services
 
         public async Task<PolicyValidationResult> ValidateAndChargeAsync(Guid userId, string toolId, decimal usageAmountForLimits, decimal? usageAmountForCost = null, string quality = "Standard", int? subscriptionId = null)
         {
-            var user = await _context.Users
-                .Include(u => u.Subscriptions)
-                    .ThenInclude(s => s.Plan)
-                .FirstOrDefaultAsync(u => u.Id == userId);
+            var estimate = await EstimateCostAsync(userId, toolId, usageAmountForLimits, usageAmountForCost, quality, subscriptionId);
+            if (!estimate.IsAllowed) return estimate;
 
-            if (user == null) 
-                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "User not found." };
-
-            var toolConfig = await _context.ToolConfigurations.FirstOrDefaultAsync(t => t.ToolName == toolId);
-            if (toolConfig != null && !toolConfig.IsActive)
-            {
-                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "This tool is currently disabled." };
-            }
-
-            var hasFrozenSubscription = user.Subscriptions.Any(s => s.Status.ToLower() == "freeze");
-            var hasActiveSubscription = user.Subscriptions.Any(s => s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow);
-
-            if (hasFrozenSubscription && !hasActiveSubscription)
-            {
-                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Your account is currently in the freeze period. Please renew your subscription to continue using the services." };
-            }
-
-            // For limits, if the user doesn't have an active plan, we will fallback to a default or skip limits entirely.
-            var activeSubscription = user.Subscriptions
-                .Where(s => s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow)
-                .OrderByDescending(s => s.Plan.IsDefaultRegistrationPlan || s.Plan.IsFreeTrial)
-                .ThenBy(s => s.EndDate)
-                .FirstOrDefault();
-
-            // We only use the plan for Limits now, not for Wallet selection
-            var toolPolicy = activeSubscription != null ? GetToolPolicy(activeSubscription.Plan, toolId, quality) : new ToolPolicy { Enabled = true };
-            
-            // If the plan doesn't enable it but they have no plan, we still let them try to use their wallet balance.
-            if (activeSubscription == null) toolPolicy.Enabled = true;
-
-            if (toolId == "text-to-voice" && toolPolicy.MaxCharsPerRequest != -1 && usageAmountForLimits > toolPolicy.MaxCharsPerRequest)
-                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Your current plan allows a maximum of {toolPolicy.MaxCharsPerRequest} characters per request." };
-            
-            if (toolId == "voice-to-text" && toolPolicy.MaxFileSizeMb != -1 && usageAmountForLimits > (toolPolicy.MaxFileSizeMb * 1024 * 1024))
-                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"File too large. Maximum allowed size is {toolPolicy.MaxFileSizeMb}MB." };
-
-            decimal costPerUnit = toolPolicy.CostPerUnit ?? GetLegacyCostPerUnit(toolId);
-            decimal amountForCost = usageAmountForCost ?? usageAmountForLimits;
-            
-            if (toolId == "voice-to-text" && usageAmountForCost == null)
-            {
-                amountForCost = usageAmountForLimits / 102400m; 
-            }
-
-            if (toolPolicy.BlockSize > 1)
-            {
-                amountForCost = amountForCost / toolPolicy.BlockSize;
-            }
-
-            decimal totalCost = (toolPolicy.BaseCost ?? 0) + (amountForCost * costPerUnit);
-
-            bool allowStandard = toolConfig?.AllowStandardCredits ?? true;
-            bool allowPremium = toolConfig?.AllowPremiumCredits ?? false;
-
-            decimal remainingCost = totalCost;
-            decimal standardToCharge = 0;
-            decimal premiumToCharge = 0;
-
-            if (allowStandard)
-            {
-                standardToCharge = Math.Min(user.StandardCredits, remainingCost);
-                remainingCost -= standardToCharge;
-            }
-
-            if (allowPremium && remainingCost > 0)
-            {
-                premiumToCharge = Math.Min(user.PremiumCredits, remainingCost);
-                remainingCost -= premiumToCharge;
-            }
-
-            if (remainingCost > 0)
-            {
-                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Insufficient credits. Requires {totalCost:F4} total credits." };
-            }
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null) return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "User not found." };
 
             int retries = 3;
             bool saved = false;
@@ -155,8 +81,8 @@ namespace NexClone.Backend.Application.Services
             {
                 try
                 {
-                    user.StandardCredits -= standardToCharge;
-                    user.PremiumCredits -= premiumToCharge;
+                    user.StandardCredits -= estimate.StandardCreditsCharged;
+                    user.PremiumCredits -= estimate.PremiumCreditsCharged;
                         
                     _context.Users.Update(user);
                     await _context.SaveChangesAsync();
@@ -177,9 +103,13 @@ namespace NexClone.Backend.Application.Services
                     
                     await _context.Entry(user).ReloadAsync();
                     
-                    remainingCost = totalCost;
-                    standardToCharge = 0;
-                    premiumToCharge = 0;
+                    decimal remainingCost = estimate.TotalCost;
+                    decimal standardToCharge = 0;
+                    decimal premiumToCharge = 0;
+
+                    var toolConfig = await _context.ToolConfigurations.FirstOrDefaultAsync(t => t.ToolName == toolId);
+                    bool allowStandard = toolConfig?.AllowStandardCredits ?? true;
+                    bool allowPremium = toolConfig?.AllowPremiumCredits ?? false;
 
                     if (allowStandard)
                     {
@@ -197,15 +127,13 @@ namespace NexClone.Backend.Application.Services
                     {
                         return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Insufficient credits after state refresh. Please top up your wallet." };
                     }
+                    
+                    estimate.StandardCreditsCharged = standardToCharge;
+                    estimate.PremiumCreditsCharged = premiumToCharge;
                 }
             }
 
-            return new PolicyValidationResult { 
-                IsAllowed = true, 
-                TotalCost = totalCost, 
-                StandardCreditsCharged = standardToCharge,
-                PremiumCreditsCharged = premiumToCharge
-            };
+            return estimate;
         }
 
         public ToolPolicy GetToolPolicy(Plan plan, string toolId, string quality = "Standard")
@@ -275,20 +203,26 @@ namespace NexClone.Backend.Application.Services
         public async Task<PolicyValidationResult> EstimateCostAsync(Guid userId, string toolId, decimal usageAmountForLimits, decimal? usageAmountForCost = null, string quality = "Standard", int? subscriptionId = null)
         {
             var user = await _context.Users
-                .Include(u => u.Subscriptions)
+                .Include(u => u.Subscriptions.Where(s => s.Status.ToLower() == "active" || s.Status.ToLower() == "freeze"))
                     .ThenInclude(s => s.Plan)
+                .AsSplitQuery()
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null) 
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "User not found." };
 
-            var activeSubscriptionsQuery = user.Subscriptions
-                .Where(s => s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow);
-
             var toolConfig = await _context.ToolConfigurations.FirstOrDefaultAsync(t => t.ToolName == toolId);
             if (toolConfig != null && !toolConfig.IsActive)
             {
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "This tool is currently disabled." };
+            }
+
+            var hasFrozenSubscription = user.Subscriptions.Any(s => s.Status.ToLower() == "freeze");
+            var hasActiveSubscription = user.Subscriptions.Any(s => s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow);
+
+            if (hasFrozenSubscription && !hasActiveSubscription)
+            {
+                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Your account is currently in the freeze period. Please renew your subscription to continue using the services." };
             }
 
             var activeSubscription = user.Subscriptions

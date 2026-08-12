@@ -12,6 +12,10 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
 {
     public class S3MediaService : IMediaService
     {
+        private static DateTime _lastFetched = DateTime.MinValue;
+        private static System.Collections.Generic.List<NexClone.Backend.Core.Entities.AppSetting> _cachedSettings;
+        private static readonly System.Threading.SemaphoreSlim _semaphore = new System.Threading.SemaphoreSlim(1, 1);
+
         private IMinioClient _minioClient;
         private IMinioClient _publicMinioClient;
         private string _defaultBucket;
@@ -29,7 +33,24 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
         {
             if (_minioClient != null) return;
 
-            var appSettings = await _context.AppSettings.ToListAsync();
+            System.Collections.Generic.List<NexClone.Backend.Core.Entities.AppSetting> appSettings;
+            if (DateTime.UtcNow - _lastFetched > TimeSpan.FromMinutes(5))
+            {
+                await _semaphore.WaitAsync();
+                try
+                {
+                    if (DateTime.UtcNow - _lastFetched > TimeSpan.FromMinutes(5))
+                    {
+                        _cachedSettings = await _context.AppSettings.AsNoTracking().ToListAsync();
+                        _lastFetched = DateTime.UtcNow;
+                    }
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+            }
+            appSettings = _cachedSettings;
             var dbEndpoint = appSettings.FirstOrDefault(s => s.Key == "S3.Endpoint")?.Value;
             var dbAccessKey = appSettings.FirstOrDefault(s => s.Key == "S3.AccessKey")?.Value;
             var dbSecretKey = appSettings.FirstOrDefault(s => s.Key == "S3.SecretKey")?.Value;

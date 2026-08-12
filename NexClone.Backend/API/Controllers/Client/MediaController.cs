@@ -64,7 +64,7 @@ namespace NexClone.Backend.API.Controllers.Client
 
             var toolName = string.IsNullOrEmpty(request.ToolName) ? "uploads" : request.ToolName; 
             var month = DateTime.UtcNow.ToString("yyyy-MM");
-            var uniqueFileName = $"{Guid.NewGuid()}_{request.FileName}";
+            var uniqueFileName = $"{Guid.NewGuid()}_{System.IO.Path.GetFileName(request.FileName)}";
 
             var objectName = $"private/{userIdStr}/{toolName}/{month}/{uniqueFileName}";
             var url = await _mediaService.GeneratePresignedUploadUrlAsync(objectName, request.ContentType);
