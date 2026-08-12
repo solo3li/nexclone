@@ -92,10 +92,16 @@ namespace NexClone.Backend.API.Controllers.Client
                 .OrderByDescending(d => d.CreatedAt)
                 .ToListAsync();
 
+            var affiliateReferral = await _context.AffiliateReferrals
+                .Include(r => r.AffiliateProfile)
+                .ThenInclude(ap => ap.User)
+                .FirstOrDefaultAsync(r => r.ReferredUserId == id);
+
             ViewData["Title"] = $"User Details - {user.Email}";
             ViewBag.Plans = new SelectList(await _context.Plans.Where(p => p.PriceUsd > 0 && !p.IsDefaultRegistrationPlan && !p.IsDeleted).ToListAsync(), "Id", "Name");
 
             ViewBag.Devices = devices;
+            ViewBag.AffiliateReferral = affiliateReferral;
             return View(user);
         }
 
@@ -184,6 +190,8 @@ namespace NexClone.Backend.API.Controllers.Client
         public async Task<IActionResult> AssignPlan(Guid userId, int planId,
             decimal? affiliateFirstCommissionPercent,
             decimal? affiliateRecurringCommissionPercent,
+            DateTime? startDate,
+            DateTime? endDate,
             [FromServices] NexClone.Backend.Infrastructure.ExternalServices.Invoicing.IInvoiceGeneratorService invoiceService,
             [FromServices] NexClone.Backend.Core.Interfaces.IMediaService mediaService)
         {
@@ -210,7 +218,8 @@ namespace NexClone.Backend.API.Controllers.Client
                     }
                 }
 
-                existingSub.EndDate = (existingSub.EndDate > DateTime.UtcNow ? existingSub.EndDate : DateTime.UtcNow).AddDays(plan.DurationDays);
+                existingSub.StartDate = startDate ?? existingSub.StartDate;
+                existingSub.EndDate = endDate ?? (existingSub.EndDate > DateTime.UtcNow ? existingSub.EndDate : DateTime.UtcNow).AddDays(plan.DurationDays);
                 existingSub.Status = "active";
                 newSub = existingSub;
             }
@@ -237,8 +246,8 @@ namespace NexClone.Backend.API.Controllers.Client
                     UserId = userId,
                     PlanId = planId,
                     Status = "active",
-                    StartDate = DateTime.UtcNow,
-                    EndDate = DateTime.UtcNow.AddDays(plan.DurationDays),
+                    StartDate = startDate ?? DateTime.UtcNow,
+                    EndDate = endDate ?? (startDate ?? DateTime.UtcNow).AddDays(plan.DurationDays),
                     CreatedAt = DateTime.UtcNow
                 };
                 _context.Subscriptions.Add(newSub);
@@ -262,6 +271,7 @@ namespace NexClone.Backend.API.Controllers.Client
             };
             _context.Payments.Add(payment);
             await _context.SaveChangesAsync();
+
 
             // Affiliate Commission Override — store overrides keyed by PaymentId so AffiliateService can pick them up
             if (affiliateFirstCommissionPercent.HasValue || affiliateRecurringCommissionPercent.HasValue)
@@ -639,6 +649,36 @@ namespace NexClone.Backend.API.Controllers.Client
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Details), new { id = userId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateSubscriptionDates(int subscriptionId, DateTime startDate, DateTime endDate)
+        {
+            var sub = await _context.Subscriptions.FindAsync(subscriptionId);
+            if (sub == null) return NotFound();
+
+            sub.StartDate = startDate;
+            sub.EndDate = endDate;
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Subscription dates updated successfully.";
+            return RedirectToAction(nameof(Details), new { id = sub.UserId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateAffiliateTrackingDates(int referralId, DateTime clickedAt, DateTime expiresAt)
+        {
+            var referral = await _context.AffiliateReferrals.FindAsync(referralId);
+            if (referral == null) return NotFound();
+
+            referral.ClickedAt = clickedAt;
+            referral.AttributionExpiresAt = expiresAt;
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Affiliate tracking dates updated successfully.";
+            return RedirectToAction(nameof(Details), new { id = referral.ReferredUserId });
         }
     }
 }
