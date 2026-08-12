@@ -50,22 +50,6 @@ export default function AffiliatePage() {
   }, [isAuthenticated, isInitializing]);
 
 
-  if (isInitializing || isLoading) {
-    return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-violet-500" />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-white/60">
-        {isRtl ? 'يرجى تسجيل الدخول للوصول إلى لوحة الإحالة.' : 'Please log in to access your affiliate dashboard.'}
-      </div>
-    );
-  }
-
   return (
     <div className="relative min-h-screen bg-[#0a0a0a] text-white overflow-hidden" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* Background glows */}
@@ -73,6 +57,16 @@ export default function AffiliatePage() {
       <div className="absolute bottom-0 right-0 w-[30%] h-[300px] bg-fuchsia-600/10 blur-[100px] pointer-events-none rounded-full z-0" />
 
       <Navbar />
+
+      {isInitializing || isLoading ? (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-violet-500" />
+        </div>
+      ) : !isAuthenticated ? (
+        <div className="min-h-screen flex items-center justify-center text-white/60">
+          {isRtl ? 'يرجى تسجيل الدخول للوصول إلى لوحة الإحالة.' : 'Please log in to access your affiliate dashboard.'}
+        </div>
+      ) : (
 
       <div className="max-w-6xl mx-auto relative z-10 pt-28 pb-24 px-4">
         {/* Header */}
@@ -146,6 +140,7 @@ export default function AffiliatePage() {
           </motion.div>
         </AnimatePresence>
       </div>
+      )}
 
       <Footer />
       <MobileBottomNav />
