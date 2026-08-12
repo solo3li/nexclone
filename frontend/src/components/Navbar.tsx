@@ -39,13 +39,17 @@ export default function Navbar() {
   const locale = useLocale();
   const router = useRouter();
 
-  const { isAuthenticated, user, setUser, logout } = useAppStore();
+  const { isAuthenticated, user, setUser, logout, setInitializing } = useAppStore();
 
   useEffect(() => {
     if (!isAuthenticated) {
       useAuthStore.getState().fetchMe().then((data) => {
         setUser(data);
-      }).catch(() => {});
+      }).catch(() => {
+        setInitializing(false);
+      });
+    } else {
+      setInitializing(false);
     }
     
     // Fetch tool configs for badges

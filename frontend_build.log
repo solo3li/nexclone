@@ -1,4 +1,5 @@
-time="2026-08-12T15:07:39Z" level=warning msg="Docker Compose is configured to build using Bake, but buildx isn't installed"
+nohup: ignoring input
+time="2026-08-12T22:23:47Z" level=warning msg="Docker Compose is configured to build using Bake, but buildx isn't installed"
 #0 building with "default" instance using docker driver
 
 #1 [frontend internal] load build definition from Dockerfile
@@ -12,13 +13,16 @@ time="2026-08-12T15:07:39Z" level=warning msg="Docker Compose is configured to b
 #3 transferring context: 2B done
 #3 DONE 0.0s
 
-#4 [frontend builder 1/6] FROM docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
-#4 resolve docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 0.0s done
+#4 [frontend internal] load build context
 #4 DONE 0.0s
 
-#5 [frontend internal] load build context
-#5 transferring context: 3.41MB 2.3s done
-#5 DONE 2.3s
+#5 [frontend builder 1/6] FROM docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+#5 resolve docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 0.1s done
+#5 DONE 0.1s
+
+#4 [frontend internal] load build context
+#4 transferring context: 3.44MB 2.8s done
+#4 DONE 2.9s
 
 #6 [frontend builder 2/6] WORKDIR /app
 #6 CACHED
@@ -30,99 +34,100 @@ time="2026-08-12T15:07:39Z" level=warning msg="Docker Compose is configured to b
 #8 CACHED
 
 #9 [frontend builder 5/6] COPY . .
-#9 DONE 22.6s
+#9 DONE 33.3s
 
 #10 [frontend builder 6/6] RUN npm run build
-#10 1.212 
-#10 1.212 > react-vite-tailwind@0.0.0 build
-#10 1.212 > next build
-#10 1.212 
-#10 2.867 Attention: Next.js now collects completely anonymous telemetry regarding usage.
-#10 2.876 This information is used to shape Next.js' roadmap and prioritize features.
-#10 2.876 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
-#10 2.876 https://nextjs.org/telemetry
-#10 2.876 
-#10 3.035 ▲ Next.js 16.2.9 (Turbopack)
-#10 3.035 
-#10 3.166 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-#10 3.250   Creating an optimized production build ...
-#10 25.20 ✓ Compiled successfully in 21.2s
-#10 25.24   Skipping validation of types
-#10 25.31   Finished TypeScript config validation in 73ms ...
-#10 25.36   Collecting page data using 3 workers ...
-#10 27.53   Generating static pages using 3 workers (0/2) ...
-#10 28.07 ✓ Generating static pages using 3 workers (2/2) in 544ms
-#10 28.10   Finalizing page optimization ...
-#10 28.14 
-#10 28.14 Route (app)
-#10 28.14 ┌ ○ /_not-found
-#10 28.14 ├ ƒ /[locale]
-#10 28.14 ├ ƒ /[locale]/[...rest]
-#10 28.14 ├ ƒ /[locale]/affiliate
-#10 28.14 ├ ƒ /[locale]/blog
-#10 28.14 ├ ƒ /[locale]/blog/[id]
-#10 28.14 ├ ƒ /[locale]/complete-profile
-#10 28.14 ├ ƒ /[locale]/forgot-password
-#10 28.14 ├ ƒ /[locale]/free-trial
-#10 28.14 ├ ƒ /[locale]/history
-#10 28.14 ├ ƒ /[locale]/history/[id]
-#10 28.14 ├ ƒ /[locale]/login
-#10 28.14 ├ ƒ /[locale]/pages/[slug]
-#10 28.14 ├ ƒ /[locale]/payment/success
-#10 28.14 ├ ƒ /[locale]/pricing
-#10 28.14 ├ ƒ /[locale]/privacy
-#10 28.14 ├ ƒ /[locale]/profile
-#10 28.14 ├ ƒ /[locale]/profile/history/[id]
-#10 28.14 ├ ƒ /[locale]/profile/invoices
-#10 28.14 ├ ƒ /[locale]/profile/tickets
-#10 28.14 ├ ƒ /[locale]/profile/tickets/[id]
-#10 28.14 ├ ƒ /[locale]/register
-#10 28.14 ├ ƒ /[locale]/reset-password
-#10 28.14 ├ ƒ /[locale]/support
-#10 28.14 ├ ƒ /[locale]/tools
-#10 28.14 ├ ƒ /[locale]/tools/advanced-lip-sync
-#10 28.14 ├ ƒ /[locale]/tools/image-to-video
-#10 28.14 ├ ƒ /[locale]/tools/motion-control
-#10 28.14 ├ ƒ /[locale]/tools/text-to-voice
-#10 28.14 ├ ƒ /[locale]/tools/voice-to-text
-#10 28.14 ├ ƒ /[locale]/verify-email
-#10 28.14 └ ƒ /[locale]/verify-invoice/[token]
-#10 28.14 
-#10 28.14 
-#10 28.14 ƒ Proxy (Middleware)
-#10 28.14 
-#10 28.15 ○  (Static)   prerendered as static content
-#10 28.15 ƒ  (Dynamic)  server-rendered on demand
-#10 28.15 
-#10 DONE 28.7s
+#10 1.009 
+#10 1.009 > react-vite-tailwind@0.0.0 build
+#10 1.009 > next build
+#10 1.009 
+#10 2.093 Attention: Next.js now collects completely anonymous telemetry regarding usage.
+#10 2.095 This information is used to shape Next.js' roadmap and prioritize features.
+#10 2.095 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+#10 2.096 https://nextjs.org/telemetry
+#10 2.096 
+#10 2.215 ▲ Next.js 16.2.9 (Turbopack)
+#10 2.215 
+#10 2.346 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+#10 2.433   Creating an optimized production build ...
+#10 21.23 ✓ Compiled successfully in 18.3s
+#10 21.25   Skipping validation of types
+#10 21.30   Finished TypeScript config validation in 53ms ...
+#10 21.31   Collecting page data using 3 workers ...
+#10 22.86   Generating static pages using 3 workers (0/2) ...
+#10 23.27 ✓ Generating static pages using 3 workers (2/2) in 404ms
+#10 23.28   Finalizing page optimization ...
+#10 23.30 
+#10 23.31 Route (app)
+#10 23.31 ┌ ○ /_not-found
+#10 23.31 ├ ƒ /[locale]
+#10 23.31 ├ ƒ /[locale]/[...rest]
+#10 23.31 ├ ƒ /[locale]/affiliate
+#10 23.31 ├ ƒ /[locale]/blog
+#10 23.31 ├ ƒ /[locale]/blog/[id]
+#10 23.31 ├ ƒ /[locale]/complete-profile
+#10 23.31 ├ ƒ /[locale]/forgot-password
+#10 23.31 ├ ƒ /[locale]/free-trial
+#10 23.31 ├ ƒ /[locale]/history
+#10 23.31 ├ ƒ /[locale]/history/[id]
+#10 23.31 ├ ƒ /[locale]/login
+#10 23.31 ├ ƒ /[locale]/pages/[slug]
+#10 23.31 ├ ƒ /[locale]/payment/success
+#10 23.31 ├ ƒ /[locale]/pricing
+#10 23.31 ├ ƒ /[locale]/privacy
+#10 23.31 ├ ƒ /[locale]/profile
+#10 23.31 ├ ƒ /[locale]/profile/history/[id]
+#10 23.31 ├ ƒ /[locale]/profile/invoices
+#10 23.31 ├ ƒ /[locale]/profile/tickets
+#10 23.31 ├ ƒ /[locale]/profile/tickets/[id]
+#10 23.31 ├ ƒ /[locale]/register
+#10 23.31 ├ ƒ /[locale]/reset-password
+#10 23.31 ├ ƒ /[locale]/support
+#10 23.31 ├ ƒ /[locale]/tools
+#10 23.31 ├ ƒ /[locale]/tools/advanced-lip-sync
+#10 23.31 ├ ƒ /[locale]/tools/image-to-video
+#10 23.31 ├ ƒ /[locale]/tools/motion-control
+#10 23.31 ├ ƒ /[locale]/tools/text-to-voice
+#10 23.31 ├ ƒ /[locale]/tools/voice-to-text
+#10 23.31 ├ ƒ /[locale]/verify-email
+#10 23.31 └ ƒ /[locale]/verify-invoice/[token]
+#10 23.31 
+#10 23.31 
+#10 23.31 ƒ Proxy (Middleware)
+#10 23.31 
+#10 23.31 ○  (Static)   prerendered as static content
+#10 23.31 ƒ  (Dynamic)  server-rendered on demand
+#10 23.31 
+#10 DONE 23.7s
 
 #11 [frontend runner 3/7] COPY --from=builder /app/package*.json ./
 #11 CACHED
 
 #12 [frontend runner 4/7] COPY --from=builder /app/.next ./.next
-#12 DONE 0.5s
+#12 DONE 0.2s
 
 #13 [frontend runner 5/7] COPY --from=builder /app/public ./public
 #13 DONE 0.1s
 
 #14 [frontend runner 6/7] COPY --from=builder /app/node_modules ./node_modules
-#14 DONE 29.0s
+#14 DONE 17.4s
 
 #15 [frontend runner 7/7] COPY --from=builder /app/next.config.mjs ./
-#15 DONE 0.9s
+#15 DONE 0.5s
 
 #16 [frontend] exporting to image
 #16 exporting layers
-#16 exporting layers 102.7s done
-#16 exporting manifest sha256:88ec40adee19a6c9aa0f8ea4c44ba6a2acb2edcb6395c965a72f7d43e85ee6d7 0.0s done
-#16 exporting config sha256:b9c395450256ef9948637926fbb0eb951f6267a1577a1eb354547e71324664e4 done
-#16 exporting attestation manifest sha256:8080dfdfd7209c9c6163a70fd59de328f66e297a4afa2fa22004ec77a9f8d347 0.0s done
-#16 exporting manifest list sha256:80732be5b1c76d63283509a7ef068af56102ec9b5b7c46429c5d29886cd52b99 0.0s done
+#16 exporting layers 77.3s done
+#16 exporting manifest sha256:df5071b543b3db47cec35d95682f63235f9fed80c75539df6c9746e43cb6d060
+#16 exporting manifest sha256:df5071b543b3db47cec35d95682f63235f9fed80c75539df6c9746e43cb6d060 0.0s done
+#16 exporting config sha256:8a5b2e8ad5f55395b57531d3fd22937973ff65e24b62e3ea46a897c7a3f86b6d 0.0s done
+#16 exporting attestation manifest sha256:4ad9af153b7f5c5cc428a4dcf3c976a7da1d97bd0cead3356d129e8a640b6248 0.0s done
+#16 exporting manifest list sha256:529bdf4dbbfe8b1ec0a6afcc43457ed68ff30eaa22a3d04aecc68e808c0cedce done
 #16 naming to docker.io/library/nexclone-frontend:latest done
 #16 unpacking to docker.io/library/nexclone-frontend:latest
-#16 unpacking to docker.io/library/nexclone-frontend:latest 20.5s done
-#16 DONE 123.3s
+#16 unpacking to docker.io/library/nexclone-frontend:latest 16.1s done
+#16 DONE 93.6s
 
 #17 [frontend] resolving provenance for metadata file
-#17 DONE 0.1s
+#17 DONE 0.0s
  frontend  Built
