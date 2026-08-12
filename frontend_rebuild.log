@@ -118,3 +118,27 @@ time="2026-08-12T16:28:05Z" level=warning msg="Docker Compose is configured to b
 
 #16 [frontend] exporting to image
 #16 exporting layers
+#16 exporting layers 79.3s done
+#16 exporting manifest sha256:581424f756530e94865dfadb63b6f4ad718b878599e83c0a1439500262b6c30a done
+#16 exporting config sha256:23decc0bee42520b7e7e70b1c8dde3622c34b5280cdd1961714d8c49737a3d52 0.0s done
+#16 exporting attestation manifest sha256:f4f452fb43981423d38901a7cb2c68f0bb637c167f04fad8cc690f63ac73d970 0.0s done
+#16 exporting manifest list sha256:8fb2f3e1bd1b2525470460da8f98fd9fde287b4f3847c1f68bde19c485f1e044 done
+#16 naming to docker.io/library/nexclone-frontend:latest done
+#16 unpacking to docker.io/library/nexclone-frontend:latest
+#16 unpacking to docker.io/library/nexclone-frontend:latest 18.4s done
+#16 DONE 97.9s
+
+#17 [frontend] resolving provenance for metadata file
+#17 DONE 0.0s
+ frontend  Built
+time="2026-08-12T16:31:08Z" level=warning msg="Found orphan containers ([nexclone-rabbitmq]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container nexclone-minio  Running
+ Container nexclone-postgres  Running
+ Container nexclone-backend  Creating
+ Container nexclone-backend  Created
+ Container nexclone-frontend  Creating
+ Container nexclone-frontend  Created
+ Container nexclone-backend  Starting
+ Container nexclone-backend  Started
+ Container nexclone-frontend  Starting
+ Container nexclone-frontend  Started
