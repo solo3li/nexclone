@@ -53,10 +53,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   login: async (credentials) => {
     const res = await api.post(API_ENDPOINTS.LOGIN, credentials);
-    const token = res.data?.token || res.data?.Token;
-    if (token) {
-      localStorage.setItem('token', token);
-    }
     await get().fetchMe();
     return res.data;
   },
@@ -72,7 +68,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (e) {
       console.error("Logout API failed", e);
     } finally {
-      localStorage.removeItem('token');
       set({ user: null, isAuthenticated: false, hasPhoneNumber: false });
     }
   },
@@ -100,10 +95,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   googleLogin: async (data: { token: string, refCode?: string }) => {
     const res = await api.post(API_ENDPOINTS.GOOGLE_LOGIN, data);
-    const jwtToken = res.data?.token || res.data?.Token;
-    if (jwtToken) {
-      localStorage.setItem('token', jwtToken);
-    }
     await get().fetchMe();
     return res.data;
   },
