@@ -73,6 +73,7 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [manualRefCode, setManualRefCode] = useState(searchParams.get("ref") || getCookie("aff_ref_code") || "");
   const [showPassword, setShowPassword] = useState(false);
   const [acceptedPolicy, setAcceptedPolicy] = useState(false);
   const [error, setError] = useState("");
@@ -170,7 +171,7 @@ export default function RegisterPage() {
         password,
         country: "Unknown",
         deviceFingerprint: visitorId,
-        refCode: refCode,
+        refCode: manualRefCode,
       });
 
       const freeTrialAssigned = res.data?.FreeTrialAssigned ?? false;
@@ -409,6 +410,23 @@ export default function RegisterPage() {
                         </motion.p>
                       )}
                     </AnimatePresence>
+                  </div>
+
+                  {/* Referral Code */}
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 ltr:left-0 rtl:right-0 ltr:pl-4 rtl:pr-4 flex items-center pointer-events-none">
+                      <div className="h-5 w-5 text-white/40 group-focus-within:text-pink-400 transition-colors">
+                        🤝
+                      </div>
+                    </div>
+                    <input
+                      type="text"
+                      name="manualRefCode"
+                      placeholder={isRtl ? "كود الإحالة (اختياري)" : "Referral Code (Optional)"}
+                      value={manualRefCode}
+                      onChange={(e) => setManualRefCode(e.target.value)}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-10 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 transition-all duration-300 uppercase font-mono"
+                    />
                   </div>
 
                   {/* Privacy checkbox */}

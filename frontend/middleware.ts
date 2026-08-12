@@ -35,6 +35,15 @@ export default async function middleware(request: NextRequest) {
             httpOnly: false
           });
           
+          // Save the human-readable code to autofill the UI
+          response.cookies.set('aff_ref_code', refCode, {
+            maxAge: 30 * 24 * 60 * 60, // 30 days
+            path: '/',
+            sameSite: 'lax',
+            secure: process.env.NODE_ENV === 'production',
+            httpOnly: false
+          });
+
           return response;
         }
       }

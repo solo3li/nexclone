@@ -137,16 +137,21 @@ namespace NexClone.Backend.API.Controllers.Client
             }
 
             // Link Affiliate Referral if exists
-            var refCodePayload = request.RefCode;
-            var affCookie = Request.Cookies["aff_session"];
-            var affSession = !string.IsNullOrEmpty(refCodePayload) ? refCodePayload : affCookie;
+            var refCodePayload = request.RefCode; // E.g., XS6P3VGK (Manual) or empty
+            var affCookie = Request.Cookies["aff_session"]; // E.g., a1b2c3d4... (Tracked session)
 
-            if (!string.IsNullOrEmpty(affSession))
+            var affiliateService = HttpContext.RequestServices.GetService<NexClone.Backend.Application.Services.AffiliateService>();
+            if (affiliateService != null)
             {
-                var affiliateService = HttpContext.RequestServices.GetService<NexClone.Backend.Application.Services.AffiliateService>();
-                if (affiliateService != null)
+                if (!string.IsNullOrEmpty(refCodePayload))
                 {
-                    await affiliateService.LinkReferralToUserAsync(affSession, user.Id);
+                    // Manual code entered by user
+                    await affiliateService.LinkManualReferralAsync(refCodePayload, user.Id);
+                }
+                else if (!string.IsNullOrEmpty(affCookie))
+                {
+                    // No manual code, but they arrived via link previously
+                    await affiliateService.LinkReferralToUserAsync(affCookie, user.Id);
                 }
             }
 
@@ -366,13 +371,21 @@ namespace NexClone.Backend.API.Controllers.Client
                 }
 
                 // Link Affiliate Referral if exists
-                var affSession = request.RefCode ?? Request.Cookies["aff_session"];
-                if (!string.IsNullOrEmpty(affSession))
+                var refCodePayload = request.RefCode; // E.g., XS6P3VGK (Manual) or empty
+                var affCookie = Request.Cookies["aff_session"]; // E.g., a1b2c3d4... (Tracked session)
+
+                var affiliateService = HttpContext.RequestServices.GetService<NexClone.Backend.Application.Services.AffiliateService>();
+                if (affiliateService != null)
                 {
-                    var affiliateService = HttpContext.RequestServices.GetService<NexClone.Backend.Application.Services.AffiliateService>();
-                    if (affiliateService != null)
+                    if (!string.IsNullOrEmpty(refCodePayload))
                     {
-                        await affiliateService.LinkReferralToUserAsync(affSession, user.Id);
+                        // Manual code entered by user or passed directly
+                        await affiliateService.LinkManualReferralAsync(refCodePayload, user.Id);
+                    }
+                    else if (!string.IsNullOrEmpty(affCookie))
+                    {
+                        // No manual code, but they arrived via link previously
+                        await affiliateService.LinkReferralToUserAsync(affCookie, user.Id);
                     }
                 }
             }

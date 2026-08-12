@@ -178,7 +178,7 @@ namespace NexClone.Backend.API.Controllers.Admin
                 .ToListAsync();
 
             var siteUrl = Environment.GetEnvironmentVariable("NEXT_PUBLIC_SITE_URL") ?? "https://nexmediaai.com";
-            ViewBag.ReferralLink = $"{siteUrl}/?ref={profile.ReferralCode}";
+            ViewBag.ReferralLink = $"{siteUrl}/register?ref={profile.ReferralCode}";
             ViewBag.Stats = stats;
             ViewBag.Balances = balances;
             ViewBag.Commissions = commissions;

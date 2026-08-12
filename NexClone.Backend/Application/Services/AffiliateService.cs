@@ -167,10 +167,6 @@ namespace NexClone.Backend.Application.Services
             return sessionToken;
         }
 
-        /// <summary>
-        /// Called during registration when "aff_session" cookie is present.
-        /// Links the new user to the referral, if attribution period has not expired.
-        /// </summary>
         public async Task LinkReferralToUserAsync(string sessionToken, Guid newUserId)
         {
             if (string.IsNullOrWhiteSpace(sessionToken)) return;
@@ -190,6 +186,38 @@ namespace NexClone.Backend.Application.Services
             await _db.SaveChangesAsync();
 
             _logger.LogInformation("Linked user {UserId} to referral {ReferralId}", newUserId, referral.Id);
+        }
+
+        /// <summary>
+        /// Called during registration when a user manually enters a referral code.
+        /// Creates a new referral record instantly and links it.
+        /// </summary>
+        public async Task LinkManualReferralAsync(string referralCode, Guid newUserId)
+        {
+            if (string.IsNullOrWhiteSpace(referralCode)) return;
+
+            var profile = await _db.AffiliateProfiles
+                .FirstOrDefaultAsync(p => p.ReferralCode == referralCode && p.IsActive);
+
+            if (profile == null) return;
+
+            // Prevent referring yourself
+            if (profile.UserId == newUserId) return;
+
+            var referral = new AffiliateReferral
+            {
+                AffiliateProfileId = profile.Id,
+                SessionToken = "MANUAL-" + Guid.NewGuid().ToString("N").Substring(0, 16),
+                ClickedAt = DateTime.UtcNow,
+                AttributionExpiresAt = DateTime.UtcNow.AddDays(30),
+                ReferredUserId = newUserId
+            };
+
+            profile.TotalClicks++; // Count as a click/interaction
+            _db.AffiliateReferrals.Add(referral);
+            await _db.SaveChangesAsync();
+
+            _logger.LogInformation("Manually linked user {UserId} to profile {ProfileId} via code {Code}", newUserId, profile.Id, referralCode);
         }
 
         // ─── Commission Creation ──────────────────────────────────────────────
