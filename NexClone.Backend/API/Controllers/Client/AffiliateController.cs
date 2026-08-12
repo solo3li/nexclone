@@ -198,11 +198,8 @@ namespace NexClone.Backend.API.Controllers.Client
             if (string.IsNullOrWhiteSpace(request.Currency))
                 return BadRequest(new { error = "Currency is required." });
 
-            if (string.IsNullOrWhiteSpace(request.PayoutMethod))
-                return BadRequest(new { error = "Payout method is required." });
-
-            if (string.IsNullOrWhiteSpace(request.PayoutAccount))
-                return BadRequest(new { error = "Payout account is required." });
+            var method = string.IsNullOrWhiteSpace(request.PayoutMethod) ? "Manual" : request.PayoutMethod;
+            var account = string.IsNullOrWhiteSpace(request.PayoutAccount) ? "Manual Request" : request.PayoutAccount;
 
             var profile = await _affiliateService.GetOrCreateProfileAsync(userId);
 
@@ -210,8 +207,8 @@ namespace NexClone.Backend.API.Controllers.Client
                 profile.Id,
                 request.Amount,
                 request.Currency.ToUpperInvariant(),
-                request.PayoutMethod,
-                request.PayoutAccount);
+                method,
+                account);
 
             if (!success)
                 return BadRequest(new { error });
