@@ -189,10 +189,72 @@ namespace NexClone.Backend.Application.Services
         // ─── Commission Creation ──────────────────────────────────────────────
 
         /// <summary>
+        /// Convenience method for Admin-triggered plan assignment.
+        /// Accepts optional rate overrides to bypass the plan's default commission percentages.
+        /// Pass null to use the plan's configured rates.
+        /// </summary>
+        public async Task ProcessPaymentCommissionAsync(
+            Guid userId, int paymentId, decimal amount, string currency, int planId, int subscriptionId,
+            decimal? firstCommissionOverride = null, decimal? recurringCommissionOverride = null)
+        {
+            var settings = await GetSettingsAsync();
+            if (!settings.IsEnabled) return;
+
+            // Check if user was referred by an affiliate
+            var referral = await _db.AffiliateReferrals
+                .Include(r => r.AffiliateProfile)
+                .FirstOrDefaultAsync(r => r.ReferredUserId == userId && r.AffiliateProfile.IsActive);
+
+            if (referral == null) return; // Not a referred user — skip
+
+            var plan = await _db.Plans.FindAsync(planId);
+            if (plan == null) return;
+
+            bool isRecurring = referral.HasConverted;
+            if (isRecurring && !settings.RecurringEnabled) return;
+
+            decimal rate = isRecurring
+                ? (recurringCommissionOverride ?? plan.AffiliateRecurringCommissionPercent)
+                : (firstCommissionOverride ?? plan.AffiliateFirstCommissionPercent);
+
+            // Admin can explicitly set 0 to disable commission for this assignment
+            if (rate < 0) return;
+
+            var commission = new AffiliateCommission
+            {
+                AffiliateProfileId = referral.AffiliateProfileId,
+                AffiliateReferralId = referral.Id,
+                CustomerId = userId,
+                PlanId = planId,
+                SubscriptionId = subscriptionId,
+                PaymentId = paymentId,
+                Type = isRecurring ? CommissionType.Recurring : CommissionType.FirstPurchase,
+                Amount = Math.Round(amount * rate / 100m, 2),
+                Currency = currency,
+                Rate = rate,
+                Status = CommissionStatus.Pending,
+                CreatedAt = DateTime.UtcNow,
+                AvailableAt = DateTime.UtcNow.AddDays(settings.HoldPeriodDays)
+            };
+
+            if (!isRecurring)
+                referral.HasConverted = true;
+
+            _db.AffiliateCommissions.Add(commission);
+            await _db.SaveChangesAsync();
+
+            _logger.LogInformation(
+                "Admin-assigned {Type} commission {Amount} {Currency} (rate {Rate}%) for affiliate {AffiliateId} on payment {PaymentId}",
+                commission.Type, commission.Amount, commission.Currency, commission.Rate,
+                referral.AffiliateProfileId, paymentId);
+        }
+
+        /// <summary>
         /// Called after a successful payment is recorded.
         /// Determines if an affiliate commission should be created.
         /// </summary>
         public async Task CreateCommissionAsync(int paymentId, bool isRecurring)
+
         {
             var settings = await GetSettingsAsync();
             if (!settings.IsEnabled) return;

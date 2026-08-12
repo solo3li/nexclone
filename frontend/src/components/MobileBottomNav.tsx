@@ -14,7 +14,8 @@ export default function MobileBottomNav() {
     { icon: Home, label: t('home'), href: "/" },
     { icon: Wrench, label: t('tools'), href: "/tools" },
     { icon: DollarSign, label: t('pricing'), href: "/pricing" },
-    { icon: User, label: locale === 'ar' ? 'الأفلييت' : 'Affiliate', href: "/affiliate" },
+    { icon: User, label: locale === 'ar' ? 'اربح معنا' : 'Earn With Us', href: "/affiliate" },
+
     { icon: User, label: t('account'), href: "/profile" },
   ];
 

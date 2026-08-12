@@ -106,7 +106,9 @@ namespace NexClone.Backend.API.Controllers
             {
                 if (sub.Plan == null || sub.User == null) continue;
 
-                string verifyUrlBase = "https://nexmedia.ai"; // or from config
+                string verifyUrlBase = Environment.GetEnvironmentVariable("NEXT_PUBLIC_SITE_URL") 
+                                       ?? Environment.GetEnvironmentVariable("NEXT_PUBLIC_API_URL")?.Replace("/api", "")
+                                       ?? "https://nexmediaai.com";
                 
                 var payment = await _context.Payments.FirstOrDefaultAsync(p => p.SubscriptionId == sub.Id);
                 string currency = payment?.Currency ?? "EGP";

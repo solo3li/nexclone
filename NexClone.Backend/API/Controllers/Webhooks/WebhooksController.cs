@@ -211,7 +211,9 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                     }
 
                     // Generate Invoice
-                    string verifyUrlBase = "https://nexmedia.ai"; // Replace with config variable later if needed
+                    string verifyUrlBase = Environment.GetEnvironmentVariable("NEXT_PUBLIC_SITE_URL") 
+                                           ?? Environment.GetEnvironmentVariable("NEXT_PUBLIC_API_URL")?.Replace("/api", "")
+                                           ?? "https://nexmediaai.com";
                     
                     decimal fixedFee = plan.FixedFeeEgp;
                     decimal taxAmt = (plan.PriceEgp + fixedFee) * (plan.TaxPercentageEgp / 100m);
@@ -513,7 +515,9 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                 }
 
                 // 9. Generate Invoice
-                string verifyUrlBase = "https://nexmedia.ai"; 
+                string verifyUrlBase = Environment.GetEnvironmentVariable("NEXT_PUBLIC_SITE_URL") 
+                                       ?? Environment.GetEnvironmentVariable("NEXT_PUBLIC_API_URL")?.Replace("/api", "")
+                                       ?? "https://nexmediaai.com";
                 
                 decimal fixedFeeUsd = plan.FixedFeeUsd;
                 decimal taxAmtUsd = (plan.PriceUsd + fixedFeeUsd) * (plan.TaxPercentageUsd / 100m);

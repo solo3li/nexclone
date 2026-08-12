@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocale } from 'next-intl';
-import { useAuthStore } from '@/store/useAuthStore';
+import { useAppStore } from '@/store/useAppStore';
 import { useAffiliateStore } from '@/store/useAffiliateStore';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -29,12 +29,21 @@ export default function AffiliatePage() {
   const isRtl = locale === 'ar';
   const [activeTab, setActiveTab] = useState('overview');
 
-  const { isAuthenticated, isInitializing } = useAuthStore();
+  // Use useAppStore — the single source of truth for auth state in this app
+  const { isAuthenticated } = useAppStore();
+  const [isInitializing, setIsInitializing] = useState(true);
+
   const {
     profile, stats, balances, referrals, commissions, payouts,
     fetchProfile, fetchStats, fetchBalances, fetchReferrals, fetchCommissions, fetchPayouts,
     isLoading
   } = useAffiliateStore();
+
+  // Give a short window for auth to hydrate from localStorage on first load
+  useEffect(() => {
+    const timer = setTimeout(() => setIsInitializing(false), 400);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     if (!isInitializing && isAuthenticated) {
@@ -46,6 +55,7 @@ export default function AffiliatePage() {
       fetchPayouts();
     }
   }, [isAuthenticated, isInitializing]);
+
 
   if (isInitializing || isLoading) {
     return (
@@ -79,8 +89,9 @@ export default function AffiliatePage() {
           className="mb-10"
         >
           <h1 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">
-            {isRtl ? '🤝 برنامج الإحالة' : '🤝 Affiliate Program'}
+            {isRtl ? '🤝 اربح معنا' : '🤝 Earn With Us'}
           </h1>
+
           {profile && (
             <p className="text-white/40 mt-2 text-sm">
               {isRtl ? 'معرفك:' : 'Your ID:'} <span className="text-violet-400 font-mono">{profile.affiliateDisplayId}</span>

@@ -182,6 +182,8 @@ namespace NexClone.Backend.API.Controllers.Client
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AssignPlan(Guid userId, int planId,
+            decimal? affiliateFirstCommissionPercent,
+            decimal? affiliateRecurringCommissionPercent,
             [FromServices] NexClone.Backend.Infrastructure.ExternalServices.Invoicing.IInvoiceGeneratorService invoiceService,
             [FromServices] NexClone.Backend.Core.Interfaces.IMediaService mediaService)
         {
@@ -261,13 +263,50 @@ namespace NexClone.Backend.API.Controllers.Client
             _context.Payments.Add(payment);
             await _context.SaveChangesAsync();
 
+            // Affiliate Commission Override — store overrides keyed by PaymentId so AffiliateService can pick them up
+            if (affiliateFirstCommissionPercent.HasValue || affiliateRecurringCommissionPercent.HasValue)
+            {
+                try
+                {
+                    decimal? firstPct = affiliateFirstCommissionPercent.HasValue
+                        ? Math.Max(0, Math.Min(100, affiliateFirstCommissionPercent.Value))
+                        : (decimal?)null;
+                    decimal? recurringPct = affiliateRecurringCommissionPercent.HasValue
+                        ? Math.Max(0, Math.Min(100, affiliateRecurringCommissionPercent.Value))
+                        : (decimal?)null;
+
+                    var affiliateService = HttpContext.RequestServices.GetRequiredService<NexClone.Backend.Application.Services.AffiliateService>();
+                    await affiliateService.ProcessPaymentCommissionAsync(user.Id, payment.Id, payment.Amount, payment.Currency, plan.Id, newSub.Id, firstPct, recurringPct);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Affiliate] Commission override failed: {ex.Message}");
+                }
+            }
+            else
+            {
+                // No override — trigger with plan defaults
+                try
+                {
+                    var affiliateService = HttpContext.RequestServices.GetRequiredService<NexClone.Backend.Application.Services.AffiliateService>();
+                    await affiliateService.ProcessPaymentCommissionAsync(user.Id, payment.Id, payment.Amount, payment.Currency, plan.Id, newSub.Id);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Affiliate] Commission for manual plan assignment failed: {ex.Message}");
+                }
+            }
+
+
             // Generate Invoice
-            string verifyUrlBase = "https://nexmedia.ai";
-            decimal amountEgp = plan.PriceEgp; // Base price
+            string verifyUrlBase = Environment.GetEnvironmentVariable("NEXT_PUBLIC_SITE_URL")
+                                   ?? Environment.GetEnvironmentVariable("NEXT_PUBLIC_API_URL")?.Replace("/api", "")
+                                   ?? "https://nexmediaai.com";
+            decimal amountEgp = plan.PriceEgp;
             decimal fixedFee = plan.FixedFeeEgp;
             decimal taxAmt = (amountEgp + fixedFee) * (plan.TaxPercentageEgp / 100m);
             decimal subTotal = amountEgp - taxAmt - fixedFee;
-            
+
             var invoice = new Invoice
             {
                 InvoiceNumber = $"INV-{DateTime.UtcNow.Year}-{Guid.NewGuid().ToString().Substring(0, 6).ToUpper()}",
@@ -283,7 +322,7 @@ namespace NexClone.Backend.API.Controllers.Client
                 TransactionId = payment.PaymentId,
                 Subscription = newSub
             };
-            
+
             _context.Invoices.Add(invoice);
             await _context.SaveChangesAsync();
 
@@ -292,7 +331,7 @@ namespace NexClone.Backend.API.Controllers.Client
                 byte[] pdfBytes = await invoiceService.GenerateInvoicePdfAsync(invoice, verifyUrlBase);
                 using var ms = new System.IO.MemoryStream(pdfBytes);
                 string minioUrl = await mediaService.UploadFileAsync(ms, $"invoices/{invoice.InvoiceNumber}.pdf", "application/pdf", "invoices");
-                
+
                 invoice.MinioPdfUrl = minioUrl;
                 _context.Invoices.Update(invoice);
                 await _context.SaveChangesAsync();
@@ -314,7 +353,7 @@ namespace NexClone.Backend.API.Controllers.Client
                         newSub.EndDate,
                         plan.MonthlyCredits,
                         plan.PriceEgp);
-                    
+
                     await _emailService.SendEmailAsync(user.Email, user.FullName ?? "", "تم تفعيل اشتراكك بنجاح - NexMedia AI", htmlBody);
                 }
             }
@@ -325,6 +364,7 @@ namespace NexClone.Backend.API.Controllers.Client
 
             return RedirectToAction(nameof(Details), new { id = userId });
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]

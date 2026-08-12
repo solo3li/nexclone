@@ -147,7 +147,10 @@ namespace NexClone.Backend.API.Controllers.Admin
             // Generate Invoice
             if (currentSub != null)
             {
-                string verifyUrlBase = "https://nexmedia.ai";
+                string verifyUrlBase = Environment.GetEnvironmentVariable("NEXT_PUBLIC_SITE_URL") 
+                                       ?? Environment.GetEnvironmentVariable("NEXT_PUBLIC_API_URL")?.Replace("/api", "")
+                                       ?? "https://nexmediaai.com";
+
                 decimal amount = payment.Amount;
                 
                 decimal fixedFee = 0;

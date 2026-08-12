@@ -72,13 +72,20 @@ export default function PricingSection() {
       const currencyStr = locale === 'ar' ? 'ج.م' : '$';
       const monthly = price === 0 ? t('freePlan.price.monthly') : price.toString();
       const yearlyVal = price === 0 ? t('freePlan.price.yearly') : (price * 10).toString();
-      
+
+      // Pull features from DB (newline-separated string) if set, else fall back to static
+      const rawFeatures = locale === 'ar' ? dbPlan.featuresAr : dbPlan.features;
+      const dbFeatures: string[] = rawFeatures
+        ? rawFeatures.split('\n').map((f: string) => f.trim()).filter((f: string) => f.length > 0)
+        : [];
+
       return {
         ...sp,
         name: locale === 'ar' ? dbPlan.nameAr : dbPlan.name,
         desc: locale === 'ar' ? dbPlan.descriptionAr : dbPlan.description,
         currency: price === 0 ? sp.currency : currencyStr,
-        price: { monthly, yearly: yearlyVal }
+        price: { monthly, yearly: yearlyVal },
+        ...(dbFeatures.length > 0 ? { features: dbFeatures, notIncluded: [] } : {}),
       };
     }
     // Fallback to static if no dbPlan matches

@@ -231,7 +231,7 @@ export default function Navbar() {
                   href="/affiliate"
                   className="px-4 py-2 rounded-xl text-sm font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-colors border border-transparent hover:border-white/10"
                 >
-                  {locale === 'ar' ? 'الأفلييت' : 'Affiliate'}
+                  {locale === 'ar' ? 'اربح معنا' : 'Earn With Us'}
                 </Link>
                 <Link
                   href="/profile"

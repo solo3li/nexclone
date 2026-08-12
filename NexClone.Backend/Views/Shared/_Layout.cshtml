@@ -445,14 +445,7 @@
                     </a>
                 </li>
                 }
-                @if (isSuperAdmin || visibleSections.Contains("/WalletTypesAdmin")) {
-                    <li class="sidebar-menu-item">
-                    <a href="@Url.Action("Index", "WalletTypesAdmin")">
-                        <i class='bx bx-wallet-alt'></i>
-                        @Localizer["Wallet Types"]
-                    </a>
-                </li>
-                }
+
                 @if (isSuperAdmin || visibleSections.Contains("/AffiliateAdmin")) {
                     <li class="sidebar-menu-item">
                     <a href="@Url.Action("Index", "AffiliateAdmin")">
@@ -485,22 +478,8 @@
                     </a>
                 </li>
                 }
-                @if (isSuperAdmin || visibleSections.Contains("/SocialLinksAdmin")) {
-                    <li class="sidebar-menu-item">
-                    <a href="/SocialLinksAdmin">
-                        <i class='bx bx-share-alt'></i>
-                        @Localizer["Communication Links"]
-                    </a>
-                </li>
-                }
-                @if (isSuperAdmin || visibleSections.Contains("/BlogAdmin")) {
-                    <li class="sidebar-menu-item">
-                    <a href="/BlogAdmin">
-                        <i class='bx bx-news'></i>
-                        @Localizer["Blog Posts"]
-                    </a>
-                </li>
-                }
+
+
                 @if (isSuperAdmin || visibleSections.Contains("/TicketsAdmin")) {
                     <li class="sidebar-menu-item">
                     <a href="/TicketsAdmin">
@@ -517,14 +496,7 @@
                     </a>
                 </li>
                 }
-                @if (isSuperAdmin || visibleSections.Contains("/SystemUpdatesAdmin")) {
-                    <li class="sidebar-menu-item">
-                    <a href="@Url.Action("Index", "SystemUpdatesAdmin")">
-                        <i class='bx bx-sync'></i>
-                        @Localizer["System Updates"]
-                    </a>
-                </li>
-                }
+
                 @if (isSuperAdmin || visibleSections.Contains("/LogsAdmin")) {
                     <li class="sidebar-menu-item">
                     <a href="@Url.Action("Index", "LogsAdmin")">

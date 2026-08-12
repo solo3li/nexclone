@@ -181,7 +181,7 @@
                 <form asp-action="AssignPlan" method="post">
                     <input type="hidden" name="userId" value="@Model.Id" />
                     
-                    <div class="bx--form-item" style="margin-bottom: 2rem;">
+                    <div class="bx--form-item" style="margin-bottom: 1.5rem;">
                         <label for="planId" class="bx--label">@Localizer["Select a Plan (This will add a new active plan alongside existing ones)"]</label>
                         <div class="bx--select">
                             <select id="planId" name="planId" class="bx--select-input" required>
@@ -198,6 +198,34 @@
                         </div>
                     </div>
 
+                    <!-- Affiliate Commission Override -->
+                    <div style="background: #e8f5e9; border: 1px solid #a5d6a7; border-radius: 4px; padding: 1rem; margin-bottom: 1.5rem;">
+                        <p style="margin: 0 0 0.75rem 0; font-size: 0.875rem; font-weight: 600; color: #1b5e20;">
+                            @Localizer["Affiliate Commission Override (Optional)"]
+                        </p>
+                        <p style="margin: 0 0 1rem 0; font-size: 0.8rem; color: #388e3c;">
+                            @Localizer["Leave blank to use the plan's default commission rates. Set 0 to disable commission for this assignment."]
+                        </p>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="bx--form-item">
+                                <label for="affiliateFirstCommissionPercent" class="bx--label">@Localizer["First Purchase Commission (%)"]</label>
+                                <div class="bx--text-input__field-wrapper">
+                                    <input id="affiliateFirstCommissionPercent" type="number" class="bx--text-input"
+                                           name="affiliateFirstCommissionPercent" min="0" max="100" step="0.01"
+                                           placeholder="e.g. 20 (plan default used if blank)">
+                                </div>
+                            </div>
+                            <div class="bx--form-item">
+                                <label for="affiliateRecurringCommissionPercent" class="bx--label">@Localizer["Recurring Commission (%)"]</label>
+                                <div class="bx--text-input__field-wrapper">
+                                    <input id="affiliateRecurringCommissionPercent" type="number" class="bx--text-input"
+                                           name="affiliateRecurringCommissionPercent" min="0" max="100" step="0.01"
+                                           placeholder="e.g. 10 (plan default used if blank)">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div style="display: flex; gap: 1rem;">
                         <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">@Localizer["Back to Users"]</a>
                         <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Assign Selected Plan"]</button>
@@ -206,6 +234,7 @@
             </div>
         </div>
     </div>
+
 
     <!-- Subscriptions History Section -->
     <div class="bx--row" style="margin-top: 2rem;">

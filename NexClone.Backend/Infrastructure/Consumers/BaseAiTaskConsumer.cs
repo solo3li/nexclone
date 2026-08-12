@@ -214,13 +214,23 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 if (history.Type != "text-to-voice" && history.Type != "voice-to-text")
                 {
                     try {
+                        // Use the FileUrl if available, otherwise link to the history page
+                        string resultUrl = !string.IsNullOrEmpty(history.FileUrl)
+                            ? history.FileUrl
+                            : "/history";
+
                         var htmlBody = _emailTemplateService.GetVideoCompletionEmail(
                             user.FullName ?? user.UserName ?? "User", 
                             history.Title, 
-                            history.FileUrl);
+                            resultUrl);
+                        
+                        _logger.LogInformation("[Email] Queuing video completion email to {Email} for task {Title}", user.Email, history.Title);
                         Hangfire.BackgroundJob.Enqueue<NexClone.Backend.Infrastructure.Consumers.EmailConsumer>(c => c.Consume(new NexClone.Backend.Core.Messages.SendEmailMessage { ToEmail = user.Email, ToName = user.FullName ?? user.UserName ?? "", Subject = $"عملية {history.Title} مكتملة - NexMedia AI", HtmlBody = htmlBody }));
-                    } catch { /* Ignore email fail */ }
+                    } catch (Exception emailEx) {
+                        _logger.LogError(emailEx, "[Email] Failed to queue video completion email for task {HistoryId}", history.Id);
+                    }
                 }
+
             }
         }
 
