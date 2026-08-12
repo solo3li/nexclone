@@ -87,6 +87,8 @@ namespace NexClone.Backend.API.Controllers.Admin
                 existingPlan.NameAr = plan.NameAr;
                 existingPlan.Description = plan.Description;
                 existingPlan.DescriptionAr = plan.DescriptionAr;
+                existingPlan.Features = plan.Features;
+                existingPlan.FeaturesAr = plan.FeaturesAr;
                 existingPlan.DurationDays = plan.DurationDays;
                 existingPlan.GracePeriodDays = plan.GracePeriodDays;
                 existingPlan.PriceUsd = plan.PriceUsd;

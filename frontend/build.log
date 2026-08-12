@@ -48,6 +48,107 @@ npm notice New major version of npm available! 10.8.2 -> 12.0.2
 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.2
 npm notice To update run: npm install -g npm@12.0.2
 npm notice
-[0m12.0.2
-npm notice
-[0m
+[0m ---> Removed intermediate container acdb76deb07a
+ ---> 17c19f62ac02
+Step 5/17 : COPY . .
+ ---> 4bcac0a3832e
+Step 6/17 : ARG NEXT_PUBLIC_API_URL
+ ---> Running in 1caf8d91542a
+ ---> Removed intermediate container 1caf8d91542a
+ ---> f6f7896d8989
+Step 7/17 : ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ ---> Running in dfd6340d717c
+ ---> Removed intermediate container dfd6340d717c
+ ---> 6e51fe86640a
+Step 8/17 : RUN npm run build
+ ---> Running in f468549bd3aa
+
+> react-vite-tailwind@0.0.0 build
+> next build
+
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+▲ Next.js 16.2.9 (Turbopack)
+
+[91m⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[0m  Creating an optimized production build ...
+✓ Compiled successfully in 20.6s
+  Skipping validation of types
+  Finished TypeScript config validation in 24ms ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/2) ...
+✓ Generating static pages using 3 workers (2/2) in 360ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /_not-found
+├ ƒ /[locale]
+├ ƒ /[locale]/[...rest]
+├ ƒ /[locale]/affiliate
+├ ƒ /[locale]/blog
+├ ƒ /[locale]/blog/[id]
+├ ƒ /[locale]/complete-profile
+├ ƒ /[locale]/forgot-password
+├ ƒ /[locale]/free-trial
+├ ƒ /[locale]/history
+├ ƒ /[locale]/history/[id]
+├ ƒ /[locale]/login
+├ ƒ /[locale]/pages/[slug]
+├ ƒ /[locale]/payment/success
+├ ƒ /[locale]/pricing
+├ ƒ /[locale]/privacy
+├ ƒ /[locale]/profile
+├ ƒ /[locale]/profile/history/[id]
+├ ƒ /[locale]/profile/invoices
+├ ƒ /[locale]/profile/tickets
+├ ƒ /[locale]/profile/tickets/[id]
+├ ƒ /[locale]/register
+├ ƒ /[locale]/reset-password
+├ ƒ /[locale]/support
+├ ƒ /[locale]/tools
+├ ƒ /[locale]/tools/advanced-lip-sync
+├ ƒ /[locale]/tools/image-to-video
+├ ƒ /[locale]/tools/motion-control
+├ ƒ /[locale]/tools/text-to-voice
+├ ƒ /[locale]/tools/voice-to-text
+├ ƒ /[locale]/verify-email
+└ ƒ /[locale]/verify-invoice/[token]
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+ ---> Removed intermediate container f468549bd3aa
+ ---> 5229380b6577
+Step 9/17 : FROM node:20-alpine AS runner
+ ---> fb4cd12c85ee
+Step 10/17 : WORKDIR /app
+ ---> Using cache
+ ---> a933a2cc60bc
+Step 11/17 : COPY --from=builder /app/package*.json ./
+ ---> Using cache
+ ---> 56b10f34f104
+Step 12/17 : COPY --from=builder /app/.next ./.next
+ ---> e510f4222cf6
+Step 13/17 : COPY --from=builder /app/public ./public
+ ---> dd5bddcf34a1
+Step 14/17 : COPY --from=builder /app/node_modules ./node_modules
+ ---> 61af62d9aba6
+Step 15/17 : COPY --from=builder /app/next.config.mjs ./
+ ---> a047aa54ae0c
+Step 16/17 : EXPOSE 3000
+ ---> Running in ff2f28c6c4af
+ ---> Removed intermediate container ff2f28c6c4af
+ ---> 1b5b1168aee0
+Step 17/17 : CMD ["npm", "start"]
+ ---> Running in 3988fbd8ba49
+ ---> Removed intermediate container 3988fbd8ba49
+ ---> ad1b3be261db
+Successfully built ad1b3be261db
+Successfully tagged nexclone-frontend:latest
+est
