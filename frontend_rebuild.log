@@ -1,5 +1,5 @@
 nohup: ignoring input
-time="2026-08-12T16:28:05Z" level=warning msg="Docker Compose is configured to build using Bake, but buildx isn't installed"
+time="2026-08-12T16:42:30Z" level=warning msg="Docker Compose is configured to build using Bake, but buildx isn't installed"
 #0 building with "default" instance using docker driver
 
 #1 [frontend internal] load build definition from Dockerfile
@@ -13,17 +13,13 @@ time="2026-08-12T16:28:05Z" level=warning msg="Docker Compose is configured to b
 #3 transferring context: 2B done
 #3 DONE 0.0s
 
-#4 [frontend internal] load build context
+#4 [frontend builder 1/6] FROM docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
+#4 resolve docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 0.0s done
 #4 DONE 0.0s
 
-#5 [frontend builder 1/6] FROM docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
-#5 resolve docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293
-#5 resolve docker.io/library/node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 0.0s done
-#5 DONE 0.1s
-
-#4 [frontend internal] load build context
-#4 transferring context: 3.44MB 3.0s done
-#4 DONE 3.2s
+#5 [frontend internal] load build context
+#5 transferring context: 3.42MB 2.8s done
+#5 DONE 2.9s
 
 #6 [frontend builder 2/6] WORKDIR /app
 #6 CACHED
@@ -35,110 +31,68 @@ time="2026-08-12T16:28:05Z" level=warning msg="Docker Compose is configured to b
 #8 CACHED
 
 #9 [frontend builder 5/6] COPY . .
-#9 DONE 29.4s
+#9 DONE 30.7s
 
 #10 [frontend builder 6/6] RUN npm run build
-#10 0.891 
-#10 0.891 > react-vite-tailwind@0.0.0 build
-#10 0.891 > next build
-#10 0.891 
-#10 1.962 Attention: Next.js now collects completely anonymous telemetry regarding usage.
-#10 1.963 This information is used to shape Next.js' roadmap and prioritize features.
-#10 1.963 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
-#10 1.963 https://nextjs.org/telemetry
-#10 1.963 
-#10 2.057 ▲ Next.js 16.2.9 (Turbopack)
-#10 2.058 
-#10 2.217 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-#10 2.303   Creating an optimized production build ...
-#10 19.94 ✓ Compiled successfully in 17.1s
-#10 19.98   Skipping validation of types
-#10 20.03   Finished TypeScript config validation in 44ms ...
-#10 20.04   Collecting page data using 3 workers ...
-#10 21.65   Generating static pages using 3 workers (0/2) ...
-#10 22.13 ✓ Generating static pages using 3 workers (2/2) in 475ms
-#10 22.14   Finalizing page optimization ...
-#10 22.16 
-#10 22.17 Route (app)
-#10 22.17 ┌ ○ /_not-found
-#10 22.17 ├ ƒ /[locale]
-#10 22.17 ├ ƒ /[locale]/[...rest]
-#10 22.17 ├ ƒ /[locale]/affiliate
-#10 22.17 ├ ƒ /[locale]/blog
-#10 22.17 ├ ƒ /[locale]/blog/[id]
-#10 22.17 ├ ƒ /[locale]/complete-profile
-#10 22.17 ├ ƒ /[locale]/forgot-password
-#10 22.17 ├ ƒ /[locale]/free-trial
-#10 22.17 ├ ƒ /[locale]/history
-#10 22.17 ├ ƒ /[locale]/history/[id]
-#10 22.17 ├ ƒ /[locale]/login
-#10 22.17 ├ ƒ /[locale]/pages/[slug]
-#10 22.17 ├ ƒ /[locale]/payment/success
-#10 22.17 ├ ƒ /[locale]/pricing
-#10 22.17 ├ ƒ /[locale]/privacy
-#10 22.17 ├ ƒ /[locale]/profile
-#10 22.17 ├ ƒ /[locale]/profile/history/[id]
-#10 22.17 ├ ƒ /[locale]/profile/invoices
-#10 22.17 ├ ƒ /[locale]/profile/tickets
-#10 22.17 ├ ƒ /[locale]/profile/tickets/[id]
-#10 22.17 ├ ƒ /[locale]/register
-#10 22.17 ├ ƒ /[locale]/reset-password
-#10 22.17 ├ ƒ /[locale]/support
-#10 22.17 ├ ƒ /[locale]/tools
-#10 22.17 ├ ƒ /[locale]/tools/advanced-lip-sync
-#10 22.17 ├ ƒ /[locale]/tools/image-to-video
-#10 22.17 ├ ƒ /[locale]/tools/motion-control
-#10 22.17 ├ ƒ /[locale]/tools/text-to-voice
-#10 22.17 ├ ƒ /[locale]/tools/voice-to-text
-#10 22.17 ├ ƒ /[locale]/verify-email
-#10 22.17 └ ƒ /[locale]/verify-invoice/[token]
-#10 22.17 
-#10 22.17 
-#10 22.17 ƒ Proxy (Middleware)
-#10 22.17 
-#10 22.17 ○  (Static)   prerendered as static content
-#10 22.17 ƒ  (Dynamic)  server-rendered on demand
-#10 22.17 
-#10 DONE 22.6s
-
-#11 [frontend runner 3/7] COPY --from=builder /app/package*.json ./
-#11 CACHED
-
-#12 [frontend runner 4/7] COPY --from=builder /app/.next ./.next
-#12 DONE 0.2s
-
-#13 [frontend runner 5/7] COPY --from=builder /app/public ./public
-#13 DONE 0.1s
-
-#14 [frontend runner 6/7] COPY --from=builder /app/node_modules ./node_modules
-#14 DONE 11.4s
-
-#15 [frontend runner 7/7] COPY --from=builder /app/next.config.mjs ./
-#15 DONE 0.5s
-
-#16 [frontend] exporting to image
-#16 exporting layers
-#16 exporting layers 79.3s done
-#16 exporting manifest sha256:581424f756530e94865dfadb63b6f4ad718b878599e83c0a1439500262b6c30a done
-#16 exporting config sha256:23decc0bee42520b7e7e70b1c8dde3622c34b5280cdd1961714d8c49737a3d52 0.0s done
-#16 exporting attestation manifest sha256:f4f452fb43981423d38901a7cb2c68f0bb637c167f04fad8cc690f63ac73d970 0.0s done
-#16 exporting manifest list sha256:8fb2f3e1bd1b2525470460da8f98fd9fde287b4f3847c1f68bde19c485f1e044 done
-#16 naming to docker.io/library/nexclone-frontend:latest done
-#16 unpacking to docker.io/library/nexclone-frontend:latest
-#16 unpacking to docker.io/library/nexclone-frontend:latest 18.4s done
-#16 DONE 97.9s
-
-#17 [frontend] resolving provenance for metadata file
-#17 DONE 0.0s
- frontend  Built
-time="2026-08-12T16:31:08Z" level=warning msg="Found orphan containers ([nexclone-rabbitmq]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
- Container nexclone-minio  Running
- Container nexclone-postgres  Running
- Container nexclone-backend  Creating
- Container nexclone-backend  Created
- Container nexclone-frontend  Creating
- Container nexclone-frontend  Created
- Container nexclone-backend  Starting
- Container nexclone-backend  Started
- Container nexclone-frontend  Starting
- Container nexclone-frontend  Started
+#10 0.993 
+#10 0.993 > react-vite-tailwind@0.0.0 build
+#10 0.993 > next build
+#10 0.993 
+#10 2.028 Attention: Next.js now collects completely anonymous telemetry regarding usage.
+#10 2.028 This information is used to shape Next.js' roadmap and prioritize features.
+#10 2.028 You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+#10 2.028 https://nextjs.org/telemetry
+#10 2.028 
+#10 2.160 ▲ Next.js 16.2.9 (Turbopack)
+#10 2.160 
+#10 2.288 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+#10 2.390   Creating an optimized production build ...
+#10 18.71 ✓ Compiled successfully in 15.7s
+#10 18.73   Skipping validation of types
+#10 18.77   Finished TypeScript config validation in 46ms ...
+#10 18.78   Collecting page data using 3 workers ...
+#10 20.15   Generating static pages using 3 workers (0/2) ...
+#10 20.45 ✓ Generating static pages using 3 workers (2/2) in 307ms
+#10 20.46   Finalizing page optimization ...
+#10 20.48 
+#10 20.49 Route (app)
+#10 20.49 ┌ ○ /_not-found
+#10 20.49 ├ ƒ /[locale]
+#10 20.49 ├ ƒ /[locale]/[...rest]
+#10 20.49 ├ ƒ /[locale]/affiliate
+#10 20.49 ├ ƒ /[locale]/blog
+#10 20.49 ├ ƒ /[locale]/blog/[id]
+#10 20.49 ├ ƒ /[locale]/complete-profile
+#10 20.49 ├ ƒ /[locale]/forgot-password
+#10 20.49 ├ ƒ /[locale]/free-trial
+#10 20.49 ├ ƒ /[locale]/history
+#10 20.49 ├ ƒ /[locale]/history/[id]
+#10 20.49 ├ ƒ /[locale]/login
+#10 20.49 ├ ƒ /[locale]/pages/[slug]
+#10 20.49 ├ ƒ /[locale]/payment/success
+#10 20.49 ├ ƒ /[locale]/pricing
+#10 20.49 ├ ƒ /[locale]/privacy
+#10 20.49 ├ ƒ /[locale]/profile
+#10 20.49 ├ ƒ /[locale]/profile/history/[id]
+#10 20.49 ├ ƒ /[locale]/profile/invoices
+#10 20.49 ├ ƒ /[locale]/profile/tickets
+#10 20.49 ├ ƒ /[locale]/profile/tickets/[id]
+#10 20.49 ├ ƒ /[locale]/register
+#10 20.49 ├ ƒ /[locale]/reset-password
+#10 20.49 ├ ƒ /[locale]/support
+#10 20.49 ├ ƒ /[locale]/tools
+#10 20.49 ├ ƒ /[locale]/tools/advanced-lip-sync
+#10 20.49 ├ ƒ /[locale]/tools/image-to-video
+#10 20.49 ├ ƒ /[locale]/tools/motion-control
+#10 20.49 ├ ƒ /[locale]/tools/text-to-voice
+#10 20.49 ├ ƒ /[locale]/tools/voice-to-text
+#10 20.49 ├ ƒ /[locale]/verify-email
+#10 20.49 └ ƒ /[locale]/verify-invoice/[token]
+#10 20.49 
+#10 20.49 
+#10 20.49 ƒ Proxy (Middleware)
+#10 20.49 
+#10 20.49 ○  (Static)   prerendered as static content
+#10 20.49 ƒ  (Dynamic)  server-rendered on demand
+#10 20.49 
+#10 DONE 20.8s

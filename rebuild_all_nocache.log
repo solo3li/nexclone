@@ -549,3 +549,92 @@ time="2026-08-12T16:29:43Z" level=warning msg="Docker Compose is configured to b
 #29 2.094 
 #29 2.203 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
 #29 2.293   Creating an optimized production build ...
+#29 17.04 ✓ Compiled successfully in 14.3s
+#29 17.05   Skipping validation of types
+#29 17.06   Finished TypeScript config validation in 15ms ...
+#29 17.07   Collecting page data using 3 workers ...
+#29 18.29   Generating static pages using 3 workers (0/2) ...
+#29 18.58 ✓ Generating static pages using 3 workers (2/2) in 284ms
+#29 18.59   Finalizing page optimization ...
+#29 18.61 
+#29 18.62 Route (app)
+#29 18.62 ┌ ○ /_not-found
+#29 18.62 ├ ƒ /[locale]
+#29 18.62 ├ ƒ /[locale]/[...rest]
+#29 18.62 ├ ƒ /[locale]/affiliate
+#29 18.62 ├ ƒ /[locale]/blog
+#29 18.62 ├ ƒ /[locale]/blog/[id]
+#29 18.62 ├ ƒ /[locale]/complete-profile
+#29 18.62 ├ ƒ /[locale]/forgot-password
+#29 18.62 ├ ƒ /[locale]/free-trial
+#29 18.62 ├ ƒ /[locale]/history
+#29 18.62 ├ ƒ /[locale]/history/[id]
+#29 18.62 ├ ƒ /[locale]/login
+#29 18.62 ├ ƒ /[locale]/pages/[slug]
+#29 18.62 ├ ƒ /[locale]/payment/success
+#29 18.62 ├ ƒ /[locale]/pricing
+#29 18.62 ├ ƒ /[locale]/privacy
+#29 18.62 ├ ƒ /[locale]/profile
+#29 18.62 ├ ƒ /[locale]/profile/history/[id]
+#29 18.62 ├ ƒ /[locale]/profile/invoices
+#29 18.62 ├ ƒ /[locale]/profile/tickets
+#29 18.62 ├ ƒ /[locale]/profile/tickets/[id]
+#29 18.62 ├ ƒ /[locale]/register
+#29 18.62 ├ ƒ /[locale]/reset-password
+#29 18.62 ├ ƒ /[locale]/support
+#29 18.62 ├ ƒ /[locale]/tools
+#29 18.62 ├ ƒ /[locale]/tools/advanced-lip-sync
+#29 18.62 ├ ƒ /[locale]/tools/image-to-video
+#29 18.62 ├ ƒ /[locale]/tools/motion-control
+#29 18.62 ├ ƒ /[locale]/tools/text-to-voice
+#29 18.62 ├ ƒ /[locale]/tools/voice-to-text
+#29 18.62 ├ ƒ /[locale]/verify-email
+#29 18.62 └ ƒ /[locale]/verify-invoice/[token]
+#29 18.62 
+#29 18.62 
+#29 18.62 ƒ Proxy (Middleware)
+#29 18.62 
+#29 18.62 ○  (Static)   prerendered as static content
+#29 18.62 ƒ  (Dynamic)  server-rendered on demand
+#29 18.62 
+#29 DONE 19.0s
+
+#30 [frontend runner 3/7] COPY --from=builder /app/package*.json ./
+#30 DONE 1.0s
+
+#31 [frontend runner 4/7] COPY --from=builder /app/.next ./.next
+#31 DONE 0.2s
+
+#32 [frontend runner 5/7] COPY --from=builder /app/public ./public
+#32 DONE 0.1s
+
+#33 [frontend runner 6/7] COPY --from=builder /app/node_modules ./node_modules
+#33 DONE 7.9s
+
+#34 [frontend runner 7/7] COPY --from=builder /app/next.config.mjs ./
+#34 DONE 0.4s
+
+#35 [frontend] exporting to image
+#35 exporting layers
+#35 exporting layers 64.4s done
+#35 exporting manifest sha256:d15f00dd4fb7d8c4a876472701c8c094e74bac235a7ecd191309ba698cd429b2 done
+#35 exporting config sha256:dc87a24629d8fc67d77d108eb20d07c1eb8df6727dec1937aae80e9857b0d16b done
+#35 exporting attestation manifest sha256:5bd3369a0ace83ffe076c41d4f92a974ef5c5a45f88692635d944eeeb2bc551b 0.0s done
+#35 exporting manifest list sha256:1abbab58ad60395e15b2d6a75846abb1a6c74faa2e2cc54e94957d25da64357b done
+#35 naming to docker.io/library/nexclone-frontend:latest done
+#35 unpacking to docker.io/library/nexclone-frontend:latest
+#35 unpacking to docker.io/library/nexclone-frontend:latest 14.1s done
+#35 DONE 78.6s
+
+#36 [frontend] resolving provenance for metadata file
+#36 DONE 0.0s
+ backend  Built
+ frontend  Built
+time="2026-08-12T16:34:11Z" level=warning msg="Found orphan containers ([nexclone-rabbitmq]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container nexclone-postgres  Running
+ Container nexclone-minio  Running
+ Container nexclone-backend  Running
+ Container nexclone-frontend  Recreate
+ Container nexclone-frontend  Recreated
+ Container nexclone-frontend  Starting
+ Container nexclone-frontend  Started

@@ -31,7 +31,8 @@ export default async function middleware(request: NextRequest) {
             maxAge: 30 * 24 * 60 * 60, // 30 days
             path: '/',
             sameSite: 'lax',
-            secure: process.env.NODE_ENV === 'production'
+            secure: process.env.NODE_ENV === 'production',
+            httpOnly: false
           });
           
           return response;
