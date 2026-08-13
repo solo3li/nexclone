@@ -566,3 +566,20 @@ POSITION: 1611
 2026-08-14 00:18:56.009 +03:00 [INF] End processing HTTP request after 173.6041ms - 201
 2026-08-14 00:18:56.009 +03:00 [INF] [Email Task] Email sent to god_4218@protonmail.com successfully.
 2026-08-14 00:22:39.090 +03:00 [INF] 2 servers were removed due to timeout
+2026-08-14 00:38:06.614 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-14 00:38:16.965 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-14 00:38:19.835 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-14 00:38:19.919 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-14 00:38:19.920 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-14 00:38:19.920 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-14 00:38:19.920 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-14 00:38:19.921 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-14 00:38:19.921 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-14 00:38:20.249 +03:00 [INF] Server desktop-rjppsk4:39804:785e89fb successfully announced in 316.2682 ms
+2026-08-14 00:38:20.252 +03:00 [INF] Server desktop-rjppsk4:39804:785e89fb is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-14 00:38:20.264 +03:00 [INF] Server desktop-rjppsk4:39804:785e89fb all the dispatchers started
+2026-08-14 00:43:20.896 +03:00 [INF] 1 servers were removed due to timeout
