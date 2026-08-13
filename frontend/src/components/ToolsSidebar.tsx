@@ -2,7 +2,7 @@
 
 import { useLocale } from "next-intl";
 import { Link, usePathname, useRouter } from "../i18n/routing";
-import { Mic, FileAudio, Video, Menu, X, Home, LogOut, Wallet, ChevronDown, Bell, Zap, Settings2 } from "lucide-react";
+import { Mic, FileAudio, Video, Menu, X, Home, LogOut, Wallet, ChevronDown, Bell, Zap, Settings2, Image as ImageIcon, Film, Layers, ChevronRight } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppStore } from "../store/useAppStore";
@@ -15,58 +15,122 @@ export default function ToolsSidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const tools = [
+  const toolCategories = [
     {
-      id: "text-to-voice",
-      href: "/tools/text-to-voice",
-      icon: Mic,
-      labelEn: "Text to Voice",
-      labelAr: "تحويل النص لصوت",
-      color: "text-fuchsia-400",
-      bg: "bg-fuchsia-500/10",
-      activeBorder: "border-fuchsia-500/30",
+      id: "video",
+      labelEn: "Video Tools",
+      labelAr: "أدوات الفيديو",
+      icon: Video,
+      tools: [
+        {
+          id: "text-to-video",
+          href: "/tools/text-to-video",
+          icon: Film,
+          labelEn: "Text to Video",
+          labelAr: "تحويل النص لفيديو",
+          color: "text-fuchsia-400",
+          bg: "bg-fuchsia-500/10",
+          activeBorder: "border-fuchsia-500/30",
+        },
+        {
+          id: "image-to-video",
+          href: "/tools/image-to-video",
+          icon: Film,
+          labelEn: "Image to Video",
+          labelAr: "تحويل الصورة لفيديو",
+          color: "text-blue-400",
+          bg: "bg-blue-500/10",
+          activeBorder: "border-blue-500/30",
+        },
+        {
+          id: "reference-to-video",
+          href: "/tools/reference-to-video",
+          icon: Layers,
+          labelEn: "Reference to Video",
+          labelAr: "صور مرجعية لفيديو",
+          color: "text-emerald-400",
+          bg: "bg-emerald-500/10",
+          activeBorder: "border-emerald-500/30",
+        },
+        {
+          id: "advanced-lip-sync",
+          href: "/tools/advanced-lip-sync",
+          icon: Video,
+          labelEn: "Advanced Lip Sync",
+          labelAr: "مزامنة الشفاه (متقدم)",
+          color: "text-amber-400",
+          bg: "bg-amber-500/10",
+          activeBorder: "border-amber-500/30",
+        },
+        {
+          id: "motion-control",
+          href: "/tools/motion-control",
+          icon: Video,
+          labelEn: "Motion Transfer",
+          labelAr: "نسخ الحركة",
+          color: "text-cyan-400",
+          bg: "bg-cyan-500/10",
+          activeBorder: "border-cyan-500/30",
+        }
+      ]
     },
     {
-      id: "voice-to-text",
-      href: "/tools/voice-to-text",
+      id: "image",
+      labelEn: "Image Tools",
+      labelAr: "أدوات الصور",
+      icon: ImageIcon,
+      tools: [
+        {
+          id: "text-to-image",
+          href: "/tools/text-to-image",
+          icon: ImageIcon,
+          labelEn: "Text to Image",
+          labelAr: "تحويل النص لصورة",
+          color: "text-orange-400",
+          bg: "bg-orange-500/10",
+          activeBorder: "border-orange-500/30",
+        }
+      ]
+    },
+    {
+      id: "audio",
+      labelEn: "Audio Tools",
+      labelAr: "أدوات الصوت",
       icon: FileAudio,
-      labelEn: "Voice to Text",
-      labelAr: "تحويل الصوت لنص",
-      color: "text-emerald-400",
-      bg: "bg-emerald-500/10",
-      activeBorder: "border-emerald-500/30",
-    },
-    {
-      id: "image-to-video",
-      href: "/tools/image-to-video",
-      icon: Video,
-      labelEn: "Avatar to Video",
-      labelAr: "افتار الى فيديو",
-      color: "text-blue-400",
-      bg: "bg-blue-500/10",
-      activeBorder: "border-blue-500/30",
-    },
-    {
-      id: "advanced-lip-sync",
-      href: "/tools/advanced-lip-sync",
-      icon: Video,
-      labelEn: "Advanced Lip Sync",
-      labelAr: "مزامنة الشفاه (متقدم)",
-      color: "text-amber-400",
-      bg: "bg-amber-500/10",
-      activeBorder: "border-amber-500/30",
-    },
-    {
-      id: "motion-control",
-      href: "/tools/motion-control",
-      icon: Video,
-      labelEn: "Motion Transfer",
-      labelAr: "نسخ الحركة",
-      color: "text-cyan-400",
-      bg: "bg-cyan-500/10",
-      activeBorder: "border-cyan-500/30",
+      tools: [
+        {
+          id: "text-to-voice",
+          href: "/tools/text-to-voice",
+          icon: Mic,
+          labelEn: "Text to Voice",
+          labelAr: "تحويل النص لصوت",
+          color: "text-violet-400",
+          bg: "bg-violet-500/10",
+          activeBorder: "border-violet-500/30",
+        },
+        {
+          id: "voice-to-text",
+          href: "/tools/voice-to-text",
+          icon: FileAudio,
+          labelEn: "Voice to Text",
+          labelAr: "تحويل الصوت لنص",
+          color: "text-emerald-400",
+          bg: "bg-emerald-500/10",
+          activeBorder: "border-emerald-500/30",
+        }
+      ]
     }
   ];
+
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
+    video: true,
+    image: true,
+    audio: true
+  });
+
+  const toggleCategory = (id: string) => {
+    setExpandedCategories(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const { user, setUser, logout } = useAppStore();
 
@@ -380,69 +444,102 @@ export default function ToolsSidebar() {
             {isRtl ? 'أدوات الاستوديو' : 'Studio Tools'}
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            {tools.map((tool) => {
-              const isActive = pathname.includes(tool.id);
-              const Icon = tool.icon;
-              
-              // Determine status
-              let status = 'active';
-              if (toolConfigs) {
-                const routeMapping: Record<string, string[]> = {
-                  "image-to-video": ["kling_avatar_image2video"],
-                  "advanced-lip-sync": ["kling_advanced_lip_sync", "vidu_advanced_lip_sync"],
-                  "text-to-voice": ["text-to-voice"],
-                  "voice-to-text": ["voice-to-text"],
-                  "motion-control": ["motion-control"]
-                };
-                let mappedKeys = routeMapping[tool.id];
-                if (!mappedKeys) {
-                  const fuzzyKey = Object.keys(toolConfigs).find(k => k.includes(tool.id.replace(/-/g, '_')));
-                  if (fuzzyKey) mappedKeys = [fuzzyKey];
-                }
-                if (mappedKeys && mappedKeys.length > 0) {
-                  const relevantConfigs = mappedKeys.map(k => toolConfigs[k]).filter(Boolean);
-                  if (relevantConfigs.length > 0) {
-                    if (relevantConfigs.some(c => c.isMaintenanceMode)) status = 'maintenance';
-                    else if (relevantConfigs.some(c => c.isComingSoon)) status = 'coming_soon';
-                  }
-                }
-              }
-
+          <div className="flex flex-col gap-3">
+            {toolCategories.map((category) => {
+              const isExpanded = expandedCategories[category.id];
+              const CategoryIcon = category.icon;
               return (
-                <Link
-                  key={tool.id}
-                  href={tool.href}
-                  onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group border relative overflow-hidden ${isActive
-                      ? `bg-white/8 text-white ${tool.activeBorder}`
-                      : 'text-white/50 hover:bg-white/5 hover:text-white border-transparent'
-                    }`}
-                  dir={isRtl ? 'rtl' : 'ltr'}
-                >
-                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${isActive ? tool.bg : 'bg-white/5 group-hover:bg-white/8'
-                    }`}>
-                    <Icon className={`w-4.5 h-4.5 ${isActive ? tool.color : 'text-white/40 group-hover:text-white/70'}`} />
-                  </div>
-                  <span className="font-medium text-sm leading-tight flex-1">
-                    {isRtl ? tool.labelAr : tool.labelEn}
-                  </span>
-                  
-                  {status === 'maintenance' && (
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 whitespace-nowrap">
-                      {isRtl ? 'صيانة' : 'Maint.'}
-                    </span>
-                  )}
-                  {status === 'coming_soon' && (
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 whitespace-nowrap">
-                      {isRtl ? 'قريباً' : 'Soon'}
-                    </span>
-                  )}
+                <div key={category.id} className="flex flex-col gap-1">
+                  <button
+                    onClick={() => toggleCategory(category.id)}
+                    className="flex items-center justify-between w-full px-2 py-1.5 text-white/40 hover:text-white/80 transition-colors group"
+                  >
+                    <div className="flex items-center gap-2">
+                      <CategoryIcon className="w-4 h-4" />
+                      <span className="font-bold text-xs">{isRtl ? category.labelAr : category.labelEn}</span>
+                    </div>
+                    <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                  </button>
 
-                  {isActive && status === 'active' && (
-                    <div className={`w-1.5 h-1.5 rounded-full ${tool.color.replace('text-', 'bg-')} ${isRtl ? 'mr-auto' : 'ml-auto'} opacity-80`} />
-                  )}
-                </Link>
+                  <AnimatePresence initial={false}>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="flex flex-col gap-1 overflow-hidden"
+                      >
+                        {category.tools.map((tool) => {
+                          const isActive = pathname.includes(tool.id);
+                          const Icon = tool.icon;
+                          
+                          // Determine status
+                          let status = 'active';
+                          if (toolConfigs) {
+                            const routeMapping: Record<string, string[]> = {
+                              "image-to-video": ["image-to-video"],
+                              "text-to-video": ["text-to-video"],
+                              "reference-to-video": ["reference-to-video"],
+                              "text-to-image": ["text-to-image"],
+                              "advanced-lip-sync": ["kling_advanced_lip_sync", "vidu_advanced_lip_sync"],
+                              "text-to-voice": ["text-to-voice"],
+                              "voice-to-text": ["voice-to-text"],
+                              "motion-control": ["motion-control"]
+                            };
+                            let mappedKeys = routeMapping[tool.id];
+                            if (!mappedKeys) {
+                              const fuzzyKey = Object.keys(toolConfigs).find(k => k.includes(tool.id.replace(/-/g, '_')));
+                              if (fuzzyKey) mappedKeys = [fuzzyKey];
+                            }
+                            if (mappedKeys && mappedKeys.length > 0) {
+                              const relevantConfigs = mappedKeys.map(k => toolConfigs[k]).filter(Boolean);
+                              if (relevantConfigs.length > 0) {
+                                if (relevantConfigs.some(c => c.isMaintenanceMode)) status = 'maintenance';
+                                else if (relevantConfigs.some(c => c.isComingSoon)) status = 'coming_soon';
+                              }
+                            }
+                          }
+
+                          return (
+                            <Link
+                              key={tool.id}
+                              href={tool.href}
+                              onClick={() => setIsOpen(false)}
+                              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group border relative overflow-hidden ${isActive
+                                  ? `bg-white/8 text-white ${tool.activeBorder}`
+                                  : 'text-white/50 hover:bg-white/5 hover:text-white border-transparent'
+                                }`}
+                              dir={isRtl ? 'rtl' : 'ltr'}
+                            >
+                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${isActive ? tool.bg : 'bg-white/5 group-hover:bg-white/8'
+                                }`}>
+                                <Icon className={`w-4 h-4 ${isActive ? tool.color : 'text-white/40 group-hover:text-white/70'}`} />
+                              </div>
+                              <span className="font-medium text-[13px] leading-tight flex-1">
+                                {isRtl ? tool.labelAr : tool.labelEn}
+                              </span>
+                              
+                              {status === 'maintenance' && (
+                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 whitespace-nowrap">
+                                  {isRtl ? 'صيانة' : 'Maint.'}
+                                </span>
+                              )}
+                              {status === 'coming_soon' && (
+                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 whitespace-nowrap">
+                                  {isRtl ? 'قريباً' : 'Soon'}
+                                </span>
+                              )}
+
+                              {isActive && status === 'active' && (
+                                <div className={`w-1.5 h-1.5 rounded-full ${tool.color.replace('text-', 'bg-')} ${isRtl ? 'mr-auto' : 'ml-auto'} opacity-80`} />
+                              )}
+                            </Link>
+                          );
+                        })}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               );
             })}
           </div>

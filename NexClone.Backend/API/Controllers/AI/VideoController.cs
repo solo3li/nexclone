@@ -443,6 +443,88 @@ namespace NexClone.Backend.API.Controllers.AI
         }
 
 
+        [HttpPost("start-tool/{toolType}")]
+        public async Task<IActionResult> StartVideoTool(
+            string toolType,
+            [FromForm] System.Collections.Generic.List<IFormFile> images,
+            [FromForm] string prompt = "",
+            [FromForm] string model = "veo",
+            [FromForm] string resolution = "1080p",
+            [FromForm] string mode = "",
+            [FromForm] int duration = 0,
+            [FromForm] string aspectRatio = "16:9",
+            [FromForm] int? subscriptionId = null)
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+
+            // Here we assume "toolType" is one of: text-to-video, image-to-video, reference-to-video
+            if (toolType != "text-to-video" && toolType != "image-to-video" && toolType != "reference-to-video")
+                return BadRequest(new { error = "Invalid tool type." });
+
+            if (toolType == "image-to-video" && (images == null || images.Count == 0))
+                return BadRequest(new { error = "An image is required for this tool." });
+
+            if (toolType == "reference-to-video" && (images == null || images.Count == 0))
+                return BadRequest(new { error = "At least one reference image is required." });
+
+            string qualityFormat = $"{model}|{resolution}";
+            decimal usageUnits = model == "grok" && duration > 0 ? duration : 1;
+
+            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, toolType, usageUnits, usageUnits, qualityFormat, subscriptionId);
+            if (!policyResult.IsAllowed)
+                return BadRequest(new { error = policyResult.ErrorMessage });
+
+            try
+            {
+                var history = new GenerationHistory
+                {
+                    UserId = userId,
+                    Type = toolType,
+                    Title = $"{toolType} Generation",
+                    InputText = prompt,
+                    Status = "processing",
+                    ResultText = "initializing",
+                    CreatedAt = DateTime.UtcNow,
+                    CreditsUsed = policyResult.TotalCost
+                };
+                _dbContext.GenerationHistories.Add(history);
+                await _dbContext.SaveChangesAsync();
+
+                var message = new NexClone.Backend.Core.Messages.VideoToolMessage
+                {
+                    HistoryId = history.Id,
+                    UserId = userId,
+                    ToolType = toolType,
+                    Prompt = prompt,
+                    Model = model,
+                    Resolution = resolution,
+                    Mode = mode,
+                    Duration = duration,
+                    AspectRatio = aspectRatio
+                };
+
+                if (images != null && images.Count > 0)
+                {
+                    using (var ms = new MemoryStream()) { await images[0].CopyToAsync(ms); message.Image1Bytes = ms.ToArray(); message.Image1ContentType = images[0].ContentType; }
+                    if (images.Count > 1) { using (var ms = new MemoryStream()) { await images[1].CopyToAsync(ms); message.Image2Bytes = ms.ToArray(); message.Image2ContentType = images[1].ContentType; } }
+                    if (images.Count > 2) { using (var ms = new MemoryStream()) { await images[2].CopyToAsync(ms); message.Image3Bytes = ms.ToArray(); message.Image3ContentType = images[2].ContentType; } }
+                }
+
+                _backgroundJobClient.Enqueue<NexClone.Backend.Infrastructure.Consumers.VideoToolConsumer>(
+                    c => c.Consume(message)
+                );
+
+                var updatedUser = await _dbContext.Users.FindAsync(userId);
+                return Ok(new { taskId = history.Id.ToString(), status = "processing", message = "Task queued.", standardCredits = updatedUser?.StandardCredits ?? 0, premiumCredits = updatedUser?.PremiumCredits ?? 0 });
+            }
+            catch (Exception ex)
+            {
+                await _usagePolicy.RefundAsync(userId, policyResult.StandardCreditsCharged, policyResult.PremiumCreditsCharged);
+                return StatusCode(500, new { error = "An error occurred: " + ex.Message });
+            }
+        }
+
         [AllowAnonymous]
         [HttpGet("download-proxy")]
         public async Task<IActionResult> DownloadProxy([FromQuery] string url, [FromQuery] string type = "video")

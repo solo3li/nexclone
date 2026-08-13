@@ -241,6 +241,8 @@ builder.Services.AddScoped<NexClone.Backend.Infrastructure.Consumers.TtsConsumer
 builder.Services.AddScoped<NexClone.Backend.Infrastructure.Consumers.VttConsumer>();
 builder.Services.AddScoped<NexClone.Backend.Infrastructure.Consumers.EmailConsumer>();
 builder.Services.AddScoped<NexClone.Backend.Infrastructure.Consumers.MotionControlConsumer>();
+builder.Services.AddScoped<NexClone.Backend.Infrastructure.Consumers.VideoToolConsumer>();
+builder.Services.AddScoped<NexClone.Backend.Infrastructure.Consumers.ImageToolConsumer>();
 
 
 // Add Rate Limiting
@@ -378,6 +380,36 @@ using (var scope = app.Services.CreateScope())
     foreach(var r in existingKlingRules)
     {
         r.ProviderName = "Picsart";
+    }
+    dbContext.SaveChanges();
+
+    // Seed New AI Tools
+    var newToolsToSeed = new[] { "text-to-video", "image-to-video", "reference-to-video", "text-to-image" };
+    var defaultJsonConfig = "{ \"grok\": { \"IsPerSecond\": true, \"BaseCost\": 0, \"CostPerSecond\": { \"default\": 2.0, \"480p\": 2.4, \"720p\": 4.5, \"1080p\": 8.0 } }, \"veo\": { \"IsPerSecond\": false, \"FixedCost\": { \"default\": 30, \"720p\": 30, \"1080p\": 37.5, \"4k\": 90 } } }";
+
+    foreach (var tool in newToolsToSeed)
+    {
+        if (!dbContext.ToolConfigurations.Any(t => t.ToolName == tool))
+        {
+            var config = new NexClone.Backend.Core.Entities.ToolConfiguration
+            {
+                ToolName = tool,
+                IsActive = true,
+                AllowPremiumCredits = true, // Use premium for video
+                AllowStandardCredits = true,
+                AdditionalSettings = defaultJsonConfig,
+                RoutingRules = new System.Collections.Generic.List<NexClone.Backend.Core.Entities.ToolRoutingRule>
+                {
+                    new NexClone.Backend.Core.Entities.ToolRoutingRule
+                    {
+                        ProviderName = "CrunAI",
+                        ModelName = "default",
+                        QualityLevel = "Standard"
+                    }
+                }
+            };
+            dbContext.ToolConfigurations.Add(config);
+        }
     }
     dbContext.SaveChanges();
 }

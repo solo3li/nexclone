@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading;
+using System.Text.Json;
 
 using Microsoft.AspNetCore.SignalR;
 using NexClone.Backend.Hubs;
@@ -37,6 +38,14 @@ namespace NexClone.Backend.Application.Services
         public decimal TotalCost { get; set; }
         public decimal StandardCreditsCharged { get; set; }
         public decimal PremiumCreditsCharged { get; set; }
+    }
+
+    public class ModelPricingConfig
+    {
+        public bool IsPerSecond { get; set; }
+        public decimal BaseCost { get; set; }
+        public System.Collections.Generic.Dictionary<string, decimal> CostPerSecond { get; set; } = new System.Collections.Generic.Dictionary<string, decimal>();
+        public System.Collections.Generic.Dictionary<string, decimal> FixedCost { get; set; } = new System.Collections.Generic.Dictionary<string, decimal>();
     }
 
     public class UsagePolicyService
@@ -254,6 +263,42 @@ namespace NexClone.Backend.Application.Services
             }
 
             decimal totalCost = (toolPolicy.BaseCost ?? 0) + (amountForCost * costPerUnit);
+
+            // Dynamic JSON Pricing for new tools
+            if (toolId == "text-to-video" || toolId == "image-to-video" || toolId == "reference-to-video" || toolId == "text-to-image")
+            {
+                if (toolConfig != null && !string.IsNullOrEmpty(toolConfig.AdditionalSettings))
+                {
+                    try
+                    {
+                        var settings = JsonSerializer.Deserialize<System.Collections.Generic.Dictionary<string, ModelPricingConfig>>(toolConfig.AdditionalSettings, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                        if (settings != null)
+                        {
+                            var parts = quality.Split('|');
+                            var modelName = parts[0].ToLower();
+                            var res = parts.Length > 1 ? parts[1].ToLower() : "default";
+
+                            if (settings.TryGetValue(modelName, out var mConfig))
+                            {
+                                if (mConfig.IsPerSecond)
+                                {
+                                    decimal cps = mConfig.CostPerSecond.ContainsKey(res) ? mConfig.CostPerSecond[res] : 0;
+                                    totalCost = mConfig.BaseCost + (amountForCost * cps);
+                                }
+                                else
+                                {
+                                    decimal fc = mConfig.FixedCost.ContainsKey(res) ? mConfig.FixedCost[res] : 0;
+                                    totalCost = fc;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error parsing JSON config for {toolId}: {ex.Message}");
+                    }
+                }
+            }
 
             bool allowStandard = toolConfig?.AllowStandardCredits ?? true;
             bool allowPremium = toolConfig?.AllowPremiumCredits ?? false;
