@@ -2,25 +2,22 @@ import * as signalR from "@microsoft/signalr";
 
 class SignalRService {
     private connection: signalR.HubConnection | null = null;
+    private isStarting = false;
     private onNotificationReceivedCallback: ((title: string, message: string, type: string, url: string) => void) | null = null;
     private onWalletUpdateReceivedCallback: (() => void) | null = null;
 
-    public startConnection() {
-        if (this.connection) return;
+    public async startConnection() {
+        if (this.connection || this.isStarting) return;
 
-        // Assuming NEXT_PUBLIC_API_URL has the backend URL
         const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
         
         this.connection = new signalR.HubConnectionBuilder()
             .withUrl(`${backendUrl}/hubs/notification`, {
                 withCredentials: true
             })
-            .withAutomaticReconnect()
+            .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
+            .configureLogging(signalR.LogLevel.Warning)
             .build();
-
-        this.connection.start()
-            .then(() => console.log('SignalR Notification Hub connected'))
-            .catch(err => console.error('SignalR Connection Error: ', err));
 
         this.connection.on("ReceiveNotification", (title, message, type, url) => {
             if (this.onNotificationReceivedCallback) {
@@ -33,6 +30,21 @@ class SignalRService {
                 this.onWalletUpdateReceivedCallback();
             }
         });
+
+        this.isStarting = true;
+        try {
+            if (this.connection.state === signalR.HubConnectionState.Disconnected) {
+                await this.connection.start();
+                console.log('[SignalR] Notification Hub connected successfully');
+            }
+        } catch (err: any) {
+            // Ignore abort errors caused by React StrictMode unmounts
+            if (err?.name !== 'AbortError' && !err?.message?.includes('stopped during negotiation')) {
+                console.warn('[SignalR] Connection notice:', err?.message || err);
+            }
+        } finally {
+            this.isStarting = false;
+        }
     }
 
     public onNotification(callback: (title: string, message: string, type: string, url: string) => void) {
@@ -43,10 +55,18 @@ class SignalRService {
         this.onWalletUpdateReceivedCallback = callback;
     }
 
-    public stopConnection() {
+    public async stopConnection() {
         if (this.connection) {
-            this.connection.stop();
-            this.connection = null;
+            try {
+                if (this.connection.state === signalR.HubConnectionState.Connected) {
+                    await this.connection.stop();
+                }
+            } catch {
+                // Ignore stop errors on unmount
+            } finally {
+                this.connection = null;
+                this.isStarting = false;
+            }
         }
     }
 }

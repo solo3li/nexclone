@@ -54,55 +54,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowNextjs", policyBuilder =>
     {
-        // Read the default frontend URL from config (appsettings or env var)
-        var defaultFrontendUrl = builder.Configuration["AppSettings:DefaultFrontendUrl"] ?? "http://localhost:3000";
-
-        try
-        {
-            var dbOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
-                .Options;
-                
-            using var context = new ApplicationDbContext(dbOptions);
-            var allowedOriginsSetting = context.AppSettings.FirstOrDefault(s => s.Key == "Origin.AllowedOrigins")?.Value;
-            
-            if (!string.IsNullOrWhiteSpace(allowedOriginsSetting))
-            {
-                var origins = allowedOriginsSetting.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(o => o.Trim()).ToList();
-                origins.Add("https://nexmediaai.com");
-                origins.Add("https://www.nexmediaai.com");
-                if (!origins.Contains(defaultFrontendUrl)) origins.Add(defaultFrontendUrl);
-                policyBuilder.WithOrigins(origins.ToArray())
-                       .AllowAnyMethod()
-                       .AllowAnyHeader()
-                       .AllowCredentials();
-            }
-            else
-            {
-                // Fallback when DB setting not configured
-                policyBuilder.WithOrigins(
-                        "http://localhost:3000",
-                        "http://localhost:3001",
-                        defaultFrontendUrl,
-                        "https://nexmediaai.com",
-                        "https://www.nexmediaai.com")
-                       .AllowAnyMethod()
-                       .AllowAnyHeader()
-                       .AllowCredentials();
-            }
-        }
-        catch
-        {
-            policyBuilder.WithOrigins(
-                    "http://localhost:3000",
-                    "http://localhost:3001",
-                    defaultFrontendUrl,
-                    "https://nexmediaai.com",
-                    "https://www.nexmediaai.com")
-                   .AllowAnyMethod()
-                   .AllowAnyHeader()
-                   .AllowCredentials();
-        }
+        policyBuilder.SetIsOriginAllowed(origin => true)
+               .AllowAnyMethod()
+               .AllowAnyHeader()
+               .AllowCredentials();
     });
 });
 
