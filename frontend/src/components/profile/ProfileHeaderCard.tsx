@@ -49,16 +49,16 @@ export default function ProfileHeaderCard({ user, historyCount, isRtl, locale }:
   }
 
   return (
-    <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 relative overflow-hidden mb-8">
+    <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-4 sm:p-6 relative overflow-hidden mb-6">
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 blur-[80px] rounded-full pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-64 h-64 bg-fuchsia-500/10 blur-[80px] rounded-full pointer-events-none" />
 
-      <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center md:items-stretch">
+      <div className="relative z-10 flex flex-col md:flex-row gap-4 sm:gap-6 md:gap-8 items-center md:items-stretch">
         
         {/* User Identity Section */}
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 flex-1 text-center sm:text-start">
-          <div className="w-24 h-24 shrink-0 rounded-full bg-white/10 overflow-hidden border-2 border-white/20 flex items-center justify-center">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 flex-1 text-center sm:text-start">
+          <div className="w-16 h-16 sm:w-24 sm:h-24 shrink-0 rounded-full bg-white/10 overflow-hidden border-2 border-white/20 flex items-center justify-center">
             {user?.imageUrl ? (
               <img src={user.imageUrl} alt={user?.fullName || "Profile image"} className="w-full h-full object-cover" />
             ) : (
@@ -79,8 +79,8 @@ export default function ProfileHeaderCard({ user, historyCount, isRtl, locale }:
         <div className="hidden md:block w-px bg-white/10 self-stretch my-2" />
 
         {/* Plan Section */}
-        <div className="flex-1 flex flex-col justify-center border-t border-white/10 md:border-t-0 pt-6 md:pt-0 w-full md:w-auto text-center sm:text-start">
-          <div className="flex items-center justify-center sm:justify-start gap-2 mb-2">
+        <div className="flex-1 flex flex-col justify-center border-t border-white/10 md:border-t-0 pt-4 md:pt-0 w-full md:w-auto text-center sm:text-start">
+          <div className="flex items-center justify-center sm:justify-start gap-2 mb-1 sm:mb-2">
             <Crown className="w-4 h-4 text-yellow-400" />
             <h3 className="text-sm font-medium text-white/60">{t('subscription.plan')}</h3>
           </div>
@@ -102,8 +102,8 @@ export default function ProfileHeaderCard({ user, historyCount, isRtl, locale }:
         <div className="hidden md:block w-px bg-white/10 self-stretch my-2" />
 
         {/* Usage Section */}
-        <div className="flex-1 flex flex-col justify-center border-t border-white/10 md:border-t-0 pt-6 md:pt-0 w-full md:w-auto">
-          <h3 className="text-sm font-medium text-white/60 mb-3 text-center sm:text-start">{isRtl ? "الرصيد المتاح" : "Available Credits"}</h3>
+        <div className="flex-1 flex flex-col justify-center border-t border-white/10 md:border-t-0 pt-4 md:pt-0 w-full md:w-auto">
+          <h3 className="text-sm font-medium text-white/60 mb-2 sm:mb-3 text-center sm:text-start">{isRtl ? "الرصيد المتاح" : "Available Credits"}</h3>
           
           <div className="space-y-3 w-full max-w-[200px] mx-auto sm:mx-0">
             <div>
