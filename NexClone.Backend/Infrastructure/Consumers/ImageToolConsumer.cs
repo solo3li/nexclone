@@ -44,8 +44,12 @@ namespace NexClone.Backend.Infrastructure.Consumers
 
                 string endpoint = "https://api.crun.ai/api/v1/client/job/submit";
 
+                string crunModel = (message.Model ?? "grok").ToLower();
+                if (crunModel == "grok" || crunModel == "grok-imagine" || crunModel == "grok-image")
+                    crunModel = "grok-imagine/t2i";
+
                 var payload = new {
-                    model = message.Model,
+                    model = crunModel,
                     prompt = message.Prompt,
                     aspect_ratio = message.AspectRatio
                 };

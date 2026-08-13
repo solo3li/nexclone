@@ -303,30 +303,37 @@ namespace NexClone.Backend.Application.Services
 
                 if (!priceFound)
                 {
-                    var parts = quality.Split('|');
-                    var modelName = parts[0].ToLower();
-                    var res = parts.Length > 1 ? parts[1].ToLower() : "1080p";
+                    if (toolId == "text-to-image")
+                    {
+                        totalCost = 2.0m; // 2 credits per image
+                    }
+                    else
+                    {
+                        var parts = quality.Split('|');
+                        var modelName = parts[0].ToLower();
+                        var res = parts.Length > 1 ? parts[1].ToLower() : "1080p";
 
-                    if (modelName.Contains("grok"))
-                    {
-                        // Grok Imagine: 480p = 2.4/s, 720p = 4.5/s, 1080p = 8.0/s
-                        decimal cps = res == "480p" ? 2.4m : (res == "720p" ? 4.5m : 8.0m);
-                        totalCost = amountForCost * cps;
-                    }
-                    else if (modelName.Contains("lite"))
-                    {
-                        // Veo 3.1 Lite: 720p = 15, 1080p = 22.5, 4k = 75
-                        totalCost = res == "720p" ? 15m : (res == "4k" ? 75m : 22.5m);
-                    }
-                    else if (modelName.Contains("fast"))
-                    {
-                        // Veo 3.1 Fast: 720p = 30, 1080p = 37.5, 4k = 90
-                        totalCost = res == "720p" ? 30m : (res == "4k" ? 90m : 37.5m);
-                    }
-                    else // Quality / Standard Veo 3.1
-                    {
-                        // Veo 3.1 Quality: 720p = 225, 1080p = 232.5, 4k = 285
-                        totalCost = res == "720p" ? 225m : (res == "4k" ? 285m : 232.5m);
+                        if (modelName.Contains("grok"))
+                        {
+                            // Grok Imagine: 480p = 2.4/s, 720p = 4.5/s, 1080p = 8.0/s
+                            decimal cps = res == "480p" ? 2.4m : (res == "720p" ? 4.5m : 8.0m);
+                            totalCost = amountForCost * cps;
+                        }
+                        else if (modelName.Contains("lite"))
+                        {
+                            // Veo 3.1 Lite: 720p = 15, 1080p = 22.5, 4k = 75
+                            totalCost = res == "720p" ? 15m : (res == "4k" ? 75m : 22.5m);
+                        }
+                        else if (modelName.Contains("fast"))
+                        {
+                            // Veo 3.1 Fast: 720p = 30, 1080p = 37.5, 4k = 90
+                            totalCost = res == "720p" ? 30m : (res == "4k" ? 90m : 37.5m);
+                        }
+                        else // Quality / Standard Veo 3.1
+                        {
+                            // Veo 3.1 Quality: 720p = 225, 1080p = 232.5, 4k = 285
+                            totalCost = res == "720p" ? 225m : (res == "4k" ? 285m : 232.5m);
+                        }
                     }
                 }
             }
