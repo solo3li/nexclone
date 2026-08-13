@@ -240,6 +240,12 @@
             <div class="bx--form__helper-text">Found in Google Cloud Console > APIs & Services > Credentials</div>
         </div>
 
+        <div class="bx--form-item" style="margin-bottom: 1rem;">
+            <label for="OAuth_GoogleClientSecret" class="bx--label">@Localizer["Google Client Secret"]</label>
+            <input id="OAuth_GoogleClientSecret" type="text" class="bx--text-input" name="settings[OAuth.GoogleClientSecret]" value="@Model.FirstOrDefault(s => s.Key == "OAuth.GoogleClientSecret")?.Value" placeholder="GOCSPX-xxxxxxxxxxxxxxxxxxxxxxxx">
+            <div class="bx--form__helper-text">Keep this secret. Found in Google Cloud Console next to your Client ID.</div>
+        </div>
+
         <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
             <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Google OAuth Settings"]</button>
         </div>
