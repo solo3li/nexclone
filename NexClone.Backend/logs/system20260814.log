@@ -583,3 +583,20 @@ POSITION: 1611
 2026-08-14 00:38:20.252 +03:00 [INF] Server desktop-rjppsk4:39804:785e89fb is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-14 00:38:20.264 +03:00 [INF] Server desktop-rjppsk4:39804:785e89fb all the dispatchers started
 2026-08-14 00:43:20.896 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-14 01:24:14.114 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-14 01:24:22.956 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-14 01:24:27.577 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-14 01:24:27.692 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-14 01:24:27.693 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-14 01:24:27.693 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-14 01:24:27.693 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-14 01:24:27.693 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-14 01:24:27.693 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-14 01:24:28.509 +03:00 [INF] Server desktop-rjppsk4:12728:73052972 successfully announced in 795.2918 ms
+2026-08-14 01:24:28.528 +03:00 [INF] Server desktop-rjppsk4:12728:73052972 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-14 01:24:28.552 +03:00 [INF] Server desktop-rjppsk4:12728:73052972 all the dispatchers started
+2026-08-14 01:29:30.062 +03:00 [INF] 1 servers were removed due to timeout

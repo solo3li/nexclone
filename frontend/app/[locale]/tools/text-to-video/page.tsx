@@ -1,104 +1,132 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { useLocale } from "next-intl";
 import { 
   Film, 
   Zap, 
   Wand2, 
-  Settings2, 
   Sparkles, 
-  Layers, 
-  Clock, 
+  SlidersHorizontal, 
+  ChevronDown, 
   Monitor, 
   Smartphone, 
-  Square,
-  CheckCircle2,
-  Coins,
+  Square, 
+  Coins, 
+  Clock, 
+  Check, 
+  Layers, 
+  Copy, 
+  CheckCheck, 
+  Trash2, 
+  Info,
+  Play,
   Flame,
-  Info
+  CheckCircle2,
+  AlertCircle
 } from "lucide-react";
 import api from "../../../../src/utils/api";
 import { useAppStore } from "../../../../src/store/useAppStore";
 
-interface VeoTier {
+interface ModelOption {
   id: string;
+  family: "veo" | "grok";
   name: string;
   nameAr: string;
   badge: string;
   badgeAr: string;
-  tagline: string;
-  taglineAr: string;
-  discount: string;
+  desc: string;
+  descAr: string;
+  discount?: string;
+  isPerSecond?: boolean;
+  supportedResolutions: string[];
   prices: { [resolution: string]: number };
 }
 
-const VEO_TIERS: VeoTier[] = [
+const MODELS: ModelOption[] = [
   {
     id: "veo-3.1-fast",
-    name: "Veo 3.1 Fast",
-    nameAr: "فيو 3.1 فاست (سريع)",
-    badge: "Fast & High Quality",
-    badgeAr: "توليد سريع وعالي الدقة",
-    tagline: "Ultra fast generation with stunning 8-second realism",
-    taglineAr: "سرعة توليد فائقة مع واقعية سينمائية لمدة 8 ثواني",
+    family: "veo",
+    name: "Google Veo 3.1 Fast",
+    nameAr: "جوجل فيو 3.1 فاست (سريع)",
+    badge: "Fast & 4K",
+    badgeAr: "سريع • حتى 4K",
+    desc: "Ultra fast 8-second generation with stunning cinematic realism",
+    descAr: "توليد فائق السرعة لمدة 8 ثواني بجودة سينمائية عالية",
     discount: "-83%",
-    prices: {
-      "720p": 30,
-      "1080p": 37.5,
-      "4k": 90
-    }
+    isPerSecond: false,
+    supportedResolutions: ["720p", "1080p", "4k"],
+    prices: { "720p": 30, "1080p": 37.5, "4k": 90 }
   },
   {
     id: "veo-3.1-lite",
-    name: "Veo 3.1 Lite",
-    nameAr: "فيو 3.1 لايت (اقتصادي)",
+    family: "veo",
+    name: "Google Veo 3.1 Lite",
+    nameAr: "جوجل فيو 3.1 لايت (اقتصادي)",
     badge: "Budget Friendly",
-    badgeAr: "اقتصادي ومثالي للمسودات",
-    tagline: "Cost-effective generation ideal for rapid prototyping",
-    taglineAr: "أقل استهلاك للرصيد مع جودة ممتازة للمشاريع السريعة",
+    badgeAr: "اقتصادي وموفر",
+    desc: "Lowest credit consumption ideal for rapid concepts & drafts",
+    descAr: "أقل استهلاك للنقاط ومثالي للتجارب والمسودات السريعة",
     discount: "-84%",
-    prices: {
-      "720p": 15,
-      "1080p": 22.5,
-      "4k": 75
-    }
+    isPerSecond: false,
+    supportedResolutions: ["720p", "1080p", "4k"],
+    prices: { "720p": 15, "1080p": 22.5, "4k": 75 }
   },
   {
     id: "veo-3.1-quality",
-    name: "Veo 3.1 Quality",
-    nameAr: "فيو 3.1 كواليتي (سينمائي)",
-    badge: "Studio Grade",
-    badgeAr: "أعلى دقة سينمائية نقية",
-    tagline: "Maximum visual fidelity and camera movement precision",
-    taglineAr: "أقصى درجات النقاء البصري وتفاصيل حركة الكاميرا الاحترافية",
+    family: "veo",
+    name: "Google Veo 3.1 Quality",
+    nameAr: "جوجل فيو 3.1 كواليتي (سينمائي)",
+    badge: "Studio Cinema Grade",
+    badgeAr: "أعلى جودة سينمائية",
+    desc: "Maximum visual fidelity, sharp lighting and realistic motion",
+    descAr: "أقصى دقة ونقاء بصري مع تفاصيل حركة وإضاءة واقعية جداً",
     discount: "-69%",
-    prices: {
-      "720p": 225,
-      "1080p": 232.5,
-      "4k": 285
-    }
+    isPerSecond: false,
+    supportedResolutions: ["720p", "1080p", "4k"],
+    prices: { "720p": 225, "1080p": 232.5, "4k": 285 }
+  },
+  {
+    id: "grok-imagine",
+    family: "grok",
+    name: "xAI Grok Imagine",
+    nameAr: "إكس إيه آي جروك إيماجين",
+    badge: "Flexible Duration",
+    badgeAr: "مدة مرنة 1-30 ثانية",
+    desc: "Highly dynamic motion with flexible per-second duration",
+    descAr: "حركة ديناميكية سريعة وحساب تسعير مرن بالثانية",
+    discount: "Flexible",
+    isPerSecond: true,
+    supportedResolutions: ["480p", "720p", "1080p"],
+    prices: { "480p": 2.4, "720p": 4.5, "1080p": 8.0 }
   }
 ];
 
-const GROK_PRICING: { [resolution: string]: { rate: number; usd: number; discount: string } } = {
-  "480p": { rate: 2.4, usd: 0.0107, discount: "-79%" },
-  "720p": { rate: 4.5, usd: 0.0201, discount: "-71%" },
-  "1080p": { rate: 8.0, usd: 0.0357, discount: "Dynamic" }
-};
+const RESOLUTIONS = [
+  { id: "480p", label: "480p (SD)", desc: "Standard Definition", descAr: "دقة قياسية خفيفة" },
+  { id: "720p", label: "720p (HD)", desc: "High Definition", descAr: "عالي الدقة HD" },
+  { id: "1080p", label: "1080p (FHD)", desc: "Full High Definition", descAr: "دقة كاملة Full HD" },
+  { id: "4k", label: "4K (UHD)", desc: "Ultra High Definition", descAr: "دقة سينمائية فائقة 4K" }
+];
+
+const ASPECT_RATIOS = [
+  { id: "16:9", label: "16:9", desc: "YouTube / Desktop", descAr: "عرضي (يوتيوب وكمبيوتر)", icon: Monitor },
+  { id: "9:16", label: "9:16", desc: "TikTok / Reels / Shorts", descAr: "طولي (تيك توك وريلز)", icon: Smartphone },
+  { id: "1:1", label: "1:1", desc: "Instagram / Square", descAr: "مربع (انستغرام وبوستات)", icon: Square }
+];
 
 const SAMPLE_PROMPTS = {
   ar: [
-    "مشهد سينمائي بطيء لمدينة مستقبلية سايبربانك تتلألأ فيها أضواء النيون تحت المطر الكثيف بدقة 4K",
-    "لقطة درون جوية تسحر الأبصار لجزيرة استوائية مياهها فيروزية ورمالها بيضاء عاجية مع شمس الغروب",
-    "فراشة ميكانيكية روبوتية مصنوعة من الذهب والكريستال ترفرف فوق زهرة متوهجة في غابة سحرية",
-    "سيارة رياضية فائقة تنطلق بسرعة فائقة على طريق ساحلي متعرج بين الجبال وقت الشفق"
+    { title: "مدينة سايبربانك 4K", text: "مشهد سينمائي بطيء لمدينة مستقبلية بأسلوب السايبربانك تتلألأ فيها أضواء النيون مع انعكاسات مائية تحت المطر الكثيف، لقطة كاميرا سلسة منخفضة الزاوية بدقة 4K فائقة الواقعية." },
+    { title: "شاطئ استوائي جوي", text: "لقطة درون سينمائية تسحر الأبصار لجزيرة استوائية عذراء، مياه فيروزية كريستالية وأشجار نخيل تتمايل بلطف مع أشعة الشمس الذهبية وقت الغروب بدقة 1080p." },
+    { title: "فراشة ميكانيكية روبوتية", text: "لقطة ماكرو مقربة فائقة التفاصيل لفراشة ميكانيكية مصنوعة من الذهب والكريستال ترفرف بجناحيها المتوهجين فوق زهرة نيون سحرية في غابة ليلية خيالية." },
+    { title: "سيارة رياضية في الشفق", text: "سيارة رياضية فائقة ذات تصميم مستقبلي تنطلق بسرعة عالية وتنزلق بانسيابية على طريق ساحلي متعرج بين الجبال الشاهقة وقت الشفق مع غبار ضوئي ناعم." }
   ],
   en: [
-    "Cinematic slow-motion shot of a futuristic cyberpunk city with neon reflections in heavy rain, 4K quality",
-    "Stunning aerial drone footage gliding over tropical island turquoise waters and white sand at golden hour",
-    "Macro close-up of an intricate golden mechanical robotic butterfly fluttering over a glowing crystal flower",
-    "Hypercar drifting at high speed along a dramatic mountain coastal highway during vibrant twilight"
+    { title: "Cyberpunk City 4K", text: "Cinematic slow-motion tracking shot through a sprawling futuristic cyberpunk city with vibrant neon reflections in rain-slicked asphalt, dramatic volumetric lighting, 4K realistic." },
+    { title: "Tropical Island Drone", text: "Breathtaking aerial drone footage gliding smoothly over a pristine tropical island, crystal-clear turquoise waters and lush palms basking in golden sunset light." },
+    { title: "Robotic Butterfly Macro", text: "Ultra-detailed macro shot of an intricate mechanical steampunk butterfly crafted from polished brass and glowing sapphire crystal, fluttering over a luminous flower." },
+    { title: "Hypercar Twilight Drift", text: "Sleek futuristic hypercar drifting smoothly along a dramatic coastal mountain highway during vivid purple twilight, exhaust flames and cinematic motion blur." }
   ]
 };
 
@@ -106,119 +134,181 @@ export default function TextToVideoPage() {
   const locale = useLocale();
   const isRtl = locale === 'ar';
   const { user } = useAppStore();
-  
-  // Model selection state
-  const [modelFamily, setModelFamily] = useState<"veo" | "grok">("veo");
-  const [veoTier, setVeoTier] = useState<string>("veo-3.1-fast");
+
+  // Selected Options
+  const [selectedModelId, setSelectedModelId] = useState<string>("veo-3.1-fast");
   const [resolution, setResolution] = useState<string>("1080p");
-  const [duration, setDuration] = useState<number>(6); // Grok duration (1-30s)
   const [aspectRatio, setAspectRatio] = useState<string>("16:9");
+  const [duration, setDuration] = useState<number>(6); // For Grok (1-30s)
   const [prompt, setPrompt] = useState<string>("");
-  
+
+  // Dropdown UI Open States
+  const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
+  const [isResDropdownOpen, setIsResDropdownOpen] = useState(false);
+  const [isAspectDropdownOpen, setIsAspectDropdownOpen] = useState(false);
+
+  // Status and Notifications
+  const [copied, setCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Switch model family
-  const handleModelFamilyChange = (family: "veo" | "grok") => {
-    setModelFamily(family);
-    if (family === "veo") {
-      if (resolution === "480p") setResolution("1080p");
-    } else {
-      if (resolution === "4k") setResolution("1080p");
+  // Close dropdowns when clicking outside
+  const modelRef = useRef<HTMLDivElement>(null);
+  const resRef = useRef<HTMLDivElement>(null);
+  const aspectRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (modelRef.current && !modelRef.current.contains(event.target as Node)) {
+        setIsModelDropdownOpen(false);
+      }
+      if (resRef.current && !resRef.current.contains(event.target as Node)) {
+        setIsResDropdownOpen(false);
+      }
+      if (aspectRef.current && !aspectRef.current.contains(event.target as Node)) {
+        setIsAspectDropdownOpen(false);
+      }
     }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Find active model object
+  const currentModel = useMemo(() => {
+    return MODELS.find(m => m.id === selectedModelId) || MODELS[0];
+  }, [selectedModelId]);
+
+  // Adjust resolution if not supported by newly selected model
+  const handleModelSelect = (modelId: string) => {
+    const model = MODELS.find(m => m.id === modelId);
+    if (model) {
+      setSelectedModelId(modelId);
+      if (!model.supportedResolutions.includes(resolution)) {
+        setResolution(model.supportedResolutions.includes("1080p") ? "1080p" : model.supportedResolutions[0]);
+      }
+    }
+    setIsModelDropdownOpen(false);
   };
 
   // Calculate live estimated cost
   const estimatedCost = useMemo(() => {
-    if (modelFamily === "veo") {
-      const selectedTier = VEO_TIERS.find(t => t.id === veoTier) || VEO_TIERS[0];
-      return selectedTier.prices[resolution] || selectedTier.prices["1080p"] || 37.5;
+    if (currentModel.isPerSecond) {
+      const rate = currentModel.prices[resolution] || 4.5;
+      return +(rate * duration).toFixed(2);
     } else {
-      const grokRate = GROK_PRICING[resolution]?.rate || 4.5;
-      return +(grokRate * duration).toFixed(2);
+      return currentModel.prices[resolution] || currentModel.prices["1080p"] || 37.5;
     }
-  }, [modelFamily, veoTier, resolution, duration]);
+  }, [currentModel, resolution, duration]);
 
-  const activeModelId = modelFamily === "veo" ? veoTier : "grok-imagine";
+  // Total balance & check sufficiency
+  const totalUserCredits = (user?.standardCredits || 0) + (user?.premiumCredits || 0);
+  const hasSufficientCredits = totalUserCredits >= estimatedCost;
 
-  const handleGenerate = async () => {
+  // AI Prompt Enhancer Action
+  const handleEnhancePrompt = () => {
     if (!prompt.trim()) {
-      setError(isRtl ? "يرجى كتابة وصف الفيديو (Prompt) أولاً" : "Please enter a prompt description first");
+      setPrompt(isRtl ? SAMPLE_PROMPTS.ar[0].text : SAMPLE_PROMPTS.en[0].text);
       return;
     }
-    
+    const cinematicAddon = isRtl 
+      ? "، إضاءة سينمائية احترافية، لقطة كاميرا ديناميكية سلسة، دقة واقعية فائقة 4K مع ألوان غنية وتفاصيل مذهلة."
+      : ", highly detailed, 8k resolution, cinematic lighting, photorealistic, dynamic camera movement, octane render, masterpiece.";
+    if (!prompt.includes("cinematic") && !prompt.includes("سينمائي")) {
+      setPrompt(prev => prev.trim() + cinematicAddon);
+    }
+  };
+
+  const handleCopyPrompt = () => {
+    if (prompt.trim()) {
+      navigator.clipboard.writeText(prompt);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleClearPrompt = () => {
+    setPrompt("");
+  };
+
+  // Submission handler
+  const handleGenerate = async () => {
+    if (!prompt.trim()) {
+      setError(isRtl ? "يرجى إدخال وصف المشهد (Prompt) أولاً" : "Please enter a scene prompt first");
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     setSuccessMessage(null);
-    
+
     try {
       const formData = new FormData();
       formData.append("prompt", prompt);
-      formData.append("model", activeModelId);
+      formData.append("model", currentModel.id);
       formData.append("resolution", resolution);
       formData.append("aspectRatio", aspectRatio);
-      
-      if (modelFamily === "grok") {
+
+      if (currentModel.family === "grok") {
         formData.append("duration", duration.toString());
       } else {
-        formData.append("duration", "8"); // Veo standard
+        formData.append("duration", "8"); // Veo 8s standard
       }
-      
+
       const res = await api.post("/api/video/start-tool/text-to-video", formData);
       setSuccessMessage(
         isRtl 
-          ? "🎉 تمت إضافة الفيديو إلى طابور المعالجة بنجاح! ستتلقى إشعاراً فور اكتماله."
-          : "🎉 Video successfully queued! You will be notified once processing finishes."
+          ? "🎉 تمت إضافة الفيديو إلى طابور المعالجة بنجاح! سيصلك إشعار فوري عند اكتمال الرندر."
+          : "🎉 Video added to generation queue! You will be notified once rendering completes."
       );
       setPrompt("");
     } catch (err: any) {
-      setError(err.response?.data?.error || (isRtl ? "حدث خطأ أثناء توليد الفيديو" : "Error generating video"));
+      setError(err.response?.data?.error || (isRtl ? "حدث خطأ أثناء إرسال طلب التوليد" : "Error submitting video task"));
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-16" dir={isRtl ? 'rtl' : 'ltr'}>
-      {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-950/60 via-[#120726] to-[#0a0217] border border-violet-500/20 p-8 shadow-2xl backdrop-blur-xl">
+    <div className="max-w-7xl mx-auto space-y-8 pb-16" dir={isRtl ? 'rtl' : 'ltr'}>
+      {/* Studio Header Banner */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-950/70 via-[#100522] to-[#080112] border border-violet-500/20 p-6 md:p-8 shadow-2xl backdrop-blur-2xl">
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-violet-600/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-fuchsia-600/15 rounded-full blur-3xl pointer-events-none" />
-        
+
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/30 text-violet-300 text-xs font-semibold">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/30 text-violet-300 text-xs font-semibold">
               <Sparkles className="w-3.5 h-3.5 text-violet-400" />
-              <span>{isRtl ? "محرك الذكاء الاصطناعي السينمائي 2026" : "Next-Gen AI Video Studio 2026"}</span>
+              <span>{isRtl ? "استوديو تحويل النص إلى فيديو الذكي" : "AI Text-to-Video Studio"}</span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-              {isRtl ? "تحويل النص إلى فيديو" : "Text to Video Generation"}
+            <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+              {isRtl ? "توليد الفيديوهات السينمائية بالذكاء الاصطناعي" : "Cinematic Text to Video Generator"}
             </h1>
-            <p className="text-white/70 text-sm md:text-base max-w-2xl leading-relaxed">
+            <p className="text-white/60 text-xs md:text-sm max-w-2xl leading-relaxed">
               {isRtl 
-                ? "حوّل أفكارك وسيناريوهاتك المكتوبة إلى مقاطع فيديو فائقة الجودة بتقنيات Google Veo 3.1 و xAI Grok Imagine بأعلى دقة سينمائية تصل إلى 4K."
-                : "Generate cinematic, ultra-realistic video scenes from text descriptions using Google Veo 3.1 & xAI Grok Imagine up to 4K resolution."}
+                ? "اكتب المشهد بدقة وسيتولى المحرك إخراجه بأعلى معايير الدقة مع نماذج Google Veo 3.1 و xAI Grok Imagine."
+                : "Describe your scene and let the studio render cinematic shots using Google Veo 3.1 and xAI Grok Imagine models."}
             </p>
           </div>
 
-          {/* User Credits Badge */}
+          {/* Wallet Balance Badge */}
           {user && (
-            <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-md shrink-0">
+            <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl p-3.5 backdrop-blur-md shrink-0">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500/20 to-violet-500/20 flex items-center justify-center border border-amber-500/30">
                 <Coins className="w-5 h-5 text-amber-400" />
               </div>
               <div>
-                <span className="text-[11px] text-white/50 block font-medium">
-                  {isRtl ? "رصيدك المتاح" : "Available Credits"}
+                <span className="text-[10px] text-white/50 block font-medium">
+                  {isRtl ? "رصيد المحفظة المتاح" : "Available Balance"}
                 </span>
                 <div className="text-sm font-bold text-white flex items-center gap-2">
-                  <span className="text-amber-300">{(user.standardCredits || 0).toLocaleString()}</span>
-                  <span className="text-xs text-white/40">Std</span>
+                  <span className="text-amber-300 font-mono">{(user.standardCredits || 0).toLocaleString()}</span>
+                  <span className="text-[10px] text-white/40">Std</span>
                   {user.premiumCredits > 0 && (
                     <>
-                      <span className="text-fuchsia-300 font-bold">+{(user.premiumCredits).toLocaleString()}</span>
-                      <span className="text-xs text-white/40">Prem</span>
+                      <span className="text-fuchsia-300 font-mono font-bold">+{(user.premiumCredits).toLocaleString()}</span>
+                      <span className="text-[10px] text-white/40">Prem</span>
                     </>
                   )}
                 </div>
@@ -228,437 +318,157 @@ export default function TextToVideoPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column: Configuration Controls */}
+      {/* Main Studio 2-Column Split Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        {/* ========================================================================= */}
+        {/* 1. Main Center/Right Area: Prompt Studio & Generation Canvas              */}
+        {/* ========================================================================= */}
         <div className="lg:col-span-8 space-y-6">
-
-          {/* 1. Prompt Input Section */}
-          <div className="bg-[#0e071e]/80 border border-white/10 rounded-3xl p-6 shadow-xl space-y-4 backdrop-blur-md">
+          
+          {/* Main Prompt Box */}
+          <div className="bg-[#0e071e]/85 border border-white/10 rounded-3xl p-6 shadow-2xl space-y-4 backdrop-blur-xl relative overflow-hidden group focus-within:border-violet-500/50 transition-all">
             <div className="flex items-center justify-between">
-              <label className="text-base font-bold text-white flex items-center gap-2">
-                <Wand2 className="w-4 h-4 text-fuchsia-400" />
-                {isRtl ? "وصف المشهد (Prompt)" : "Scene Description (Prompt)"}
-              </label>
-              <span className="text-xs text-white/40 font-mono">
-                {prompt.length} / 2000
-              </span>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
+                  <Wand2 className="w-4 h-4 text-violet-400" />
+                </div>
+                <div>
+                  <label className="text-sm font-bold text-white block">
+                    {isRtl ? "نص المشهد (Prompt Description)" : "Prompt Description"}
+                  </label>
+                  <span className="text-[11px] text-white/40 block">
+                    {isRtl ? "اكتب ما تريد رؤيته وحركة الكاميرا والإضاءة" : "Describe camera motion, style, characters, and lighting"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Quick Actions in Header */}
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={handleEnhancePrompt}
+                  title={isRtl ? "تحسين البرومت تلقائياً" : "Enhance with AI"}
+                  className="px-3 py-1.5 rounded-xl bg-violet-500/15 hover:bg-violet-500/30 text-violet-300 border border-violet-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+                  <span>{isRtl ? "تحسين ذكي ✨" : "Enhance AI ✨"}</span>
+                </button>
+
+                {prompt && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={handleCopyPrompt}
+                      title={isRtl ? "نسخ النص" : "Copy"}
+                      className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/60 hover:text-white border border-white/5 transition-all"
+                    >
+                      {copied ? <CheckCheck className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleClearPrompt}
+                      title={isRtl ? "مسح النص" : "Clear"}
+                      className="p-1.5 rounded-xl bg-white/5 hover:bg-red-500/20 text-white/60 hover:text-red-300 border border-white/5 transition-all"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
 
-            <textarea
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              rows={4}
-              maxLength={2000}
-              placeholder={
-                isRtl 
-                  ? "صف مشهدك بالتفصيل (مثل: زوايا التصوير، الإضاءة، حركة الكاميرا، الألوان والأسلوب)..." 
-                  : "Describe your video scene with detailed lighting, camera movement, style, and cinematic mood..."
-              }
-              className="w-full bg-[#080214] border border-white/10 rounded-2xl p-4 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 resize-none text-sm leading-relaxed transition-all shadow-inner"
-            />
+            {/* Prompt Textarea */}
+            <div className="relative">
+              <textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                rows={6}
+                maxLength={2000}
+                placeholder={
+                  isRtl 
+                    ? "اكتب وصف المشهد بالتفصيل هنا... (مثال: لقطة سينمائية لغروب الشمس فوق بحيرة هادئة، انعكاسات ذهبية دافئة، حركة كاميرا درون بطيئة بدقة 4K)" 
+                    : "Describe the video scene in rich detail... (e.g. Cinematic slow pan of futuristic cityscape at golden hour, neon lights, ultra 4k realism)"
+                }
+                className="w-full bg-[#070112] border border-white/10 rounded-2xl p-4 text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 resize-none text-sm md:text-base leading-relaxed transition-all shadow-inner font-sans"
+              />
+              <div className="absolute bottom-3 end-3 text-[11px] text-white/40 font-mono bg-[#070112]/90 px-2 py-0.5 rounded-md border border-white/5">
+                {prompt.length} / 2000
+              </div>
+            </div>
 
-            {/* Prompt Inspiration Chips */}
-            <div className="space-y-2 pt-1">
-              <span className="text-[11px] text-white/50 font-medium flex items-center gap-1.5">
+            {/* Quick Inspiration Pills */}
+            <div className="space-y-2 pt-2 border-t border-white/5">
+              <div className="flex items-center gap-1.5 text-xs text-white/50 font-medium">
                 <Flame className="w-3.5 h-3.5 text-amber-400" />
-                {isRtl ? "أمثلة مقترحة سريعة:" : "Quick Inspiration Examples:"}
-              </span>
+                <span>{isRtl ? "أفكار جاهزة سريعة للإلهام:" : "Quick Inspiration Presets:"}</span>
+              </div>
               <div className="flex flex-wrap gap-2">
                 {(isRtl ? SAMPLE_PROMPTS.ar : SAMPLE_PROMPTS.en).map((sample, idx) => (
                   <button
                     key={idx}
                     type="button"
-                    onClick={() => setPrompt(sample)}
-                    className="text-xs text-white/70 hover:text-white bg-white/5 hover:bg-violet-600/20 border border-white/5 hover:border-violet-500/30 rounded-xl px-3 py-1.5 transition-all text-start line-clamp-1 max-w-full"
+                    onClick={() => setPrompt(sample.text)}
+                    className="text-xs bg-white/5 hover:bg-violet-600/20 text-white/70 hover:text-white border border-white/10 hover:border-violet-500/40 rounded-xl px-3 py-1.5 transition-all text-start flex items-center gap-1.5"
                   >
-                    "{sample.slice(0, 55)}..."
+                    <span className="w-1.5 h-1.5 rounded-full bg-violet-400 shrink-0" />
+                    <span>{sample.title}</span>
                   </button>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* 2. Model Family Selector */}
-          <div className="bg-[#0e071e]/80 border border-white/10 rounded-3xl p-6 shadow-xl space-y-5 backdrop-blur-md">
-            <div className="flex items-center justify-between">
-              <label className="text-base font-bold text-white flex items-center gap-2">
-                <Layers className="w-4 h-4 text-violet-400" />
-                {isRtl ? "اختر محرك الذكاء الاصطناعي (Model Family)" : "AI Model Family"}
-              </label>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Google Veo 3.1 Button */}
-              <button
-                type="button"
-                onClick={() => handleModelFamilyChange("veo")}
-                className={`relative rounded-2xl p-5 border text-start transition-all overflow-hidden flex flex-col justify-between gap-3 ${
-                  modelFamily === "veo"
-                    ? "bg-gradient-to-br from-violet-600/25 to-purple-900/30 border-violet-500 shadow-lg shadow-violet-950/50 ring-1 ring-violet-500/50"
-                    : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 text-white/60"
-                }`}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-extrabold text-lg text-white">Google Veo 3.1</span>
-                      <span className="text-[10px] bg-violet-500/20 text-violet-300 border border-violet-500/30 px-2 py-0.5 rounded-full font-bold">
-                        Google DeepMind
-                      </span>
-                    </div>
-                    <p className="text-xs text-white/60">
-                      {isRtl ? "دقة سينمائية حتى 4K • مدة 8 ثواني ثابتة" : "Cinematic 4K fidelity • Fixed 8-second clips"}
-                    </p>
-                  </div>
-                  {modelFamily === "veo" && (
-                    <CheckCircle2 className="w-5 h-5 text-violet-400 shrink-0" />
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2 text-[11px] text-violet-300 font-medium">
-                  <span>Fast / Lite / Quality</span>
-                  <span>•</span>
-                  <span className="text-emerald-400 font-bold">{isRtl ? "خصم حتى 84%" : "Up to 84% OFF"}</span>
-                </div>
-              </button>
-
-              {/* xAI Grok Imagine Button */}
-              <button
-                type="button"
-                onClick={() => handleModelFamilyChange("grok")}
-                className={`relative rounded-2xl p-5 border text-start transition-all overflow-hidden flex flex-col justify-between gap-3 ${
-                  modelFamily === "grok"
-                    ? "bg-gradient-to-br from-fuchsia-600/25 to-pink-900/30 border-fuchsia-500 shadow-lg shadow-fuchsia-950/50 ring-1 ring-fuchsia-500/50"
-                    : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 text-white/60"
-                }`}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-extrabold text-lg text-white">xAI Grok Imagine</span>
-                      <span className="text-[10px] bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30 px-2 py-0.5 rounded-full font-bold">
-                        xAI
-                      </span>
-                    </div>
-                    <p className="text-xs text-white/60">
-                      {isRtl ? "حركة ديناميكية سريعة • مدة مرنة 1-30 ثانية" : "Dynamic fast motion • Flexible 1s - 30s duration"}
-                    </p>
-                  </div>
-                  {modelFamily === "grok" && (
-                    <CheckCircle2 className="w-5 h-5 text-fuchsia-400 shrink-0" />
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2 text-[11px] text-fuchsia-300 font-medium">
-                  <span>{isRtl ? "تسعير مرن بالثانية" : "Flexible per-second pricing"}</span>
-                  <span>•</span>
-                  <span className="text-emerald-400 font-bold">2.4 - 8.0 Cr/s</span>
-                </div>
-              </button>
-            </div>
-
-            {/* 3. Sub-model Selection for Veo 3.1 */}
-            {modelFamily === "veo" && (
-              <div className="space-y-3 pt-3 border-t border-white/5">
-                <label className="text-sm font-semibold text-white/90 flex items-center justify-between">
-                  <span>{isRtl ? "فئة الموديل (Veo 3.1 Model Tier)" : "Veo 3.1 Model Tier"}</span>
-                  <span className="text-xs text-violet-400 font-normal">
-                    {isRtl ? "اختر المستوى المناسب لميزانيتك وجودتك" : "Choose according to your budget & quality"}
-                  </span>
-                </label>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {VEO_TIERS.map((tier) => {
-                    const isSelected = veoTier === tier.id;
-                    const tierPrice = tier.prices[resolution] || tier.prices["1080p"];
-                    return (
-                      <button
-                        key={tier.id}
-                        type="button"
-                        onClick={() => setVeoTier(tier.id)}
-                        className={`rounded-2xl p-4 border text-start transition-all relative flex flex-col justify-between gap-3 ${
-                          isSelected 
-                            ? "bg-violet-500/20 border-violet-400 text-white shadow-md shadow-violet-900/30"
-                            : "bg-white/5 border-white/5 hover:bg-white/10 text-white/70"
-                        }`}
-                      >
-                        <div>
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-bold text-sm text-white">
-                              {isRtl ? tier.nameAr : tier.name}
-                            </span>
-                            <span className="text-[10px] font-extrabold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">
-                              {tier.discount}
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-white/50 line-clamp-2">
-                            {isRtl ? tier.taglineAr : tier.tagline}
-                          </p>
-                        </div>
-
-                        <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                          <span className="text-[11px] text-violet-300 font-medium">
-                            {resolution} (8s)
-                          </span>
-                          <span className="text-xs font-extrabold text-amber-300">
-                            {tierPrice} {isRtl ? "نقطة" : "Credits"}
-                          </span>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* 4. Resolution & Aspect Ratio Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Resolution Selector */}
-            <div className="bg-[#0e071e]/80 border border-white/10 rounded-3xl p-6 shadow-xl space-y-4 backdrop-blur-md">
-              <label className="text-sm font-bold text-white flex items-center gap-2">
-                <Settings2 className="w-4 h-4 text-amber-400" />
-                {isRtl ? "دقة الفيديو (Resolution)" : "Video Resolution"}
-              </label>
-
-              <div className="grid grid-cols-3 gap-2.5">
-                {modelFamily === "grok" && (
-                  <button
-                    type="button"
-                    onClick={() => setResolution("480p")}
-                    className={`py-3 px-3 rounded-xl border text-center font-bold text-xs transition-all flex flex-col items-center justify-center gap-1 ${
-                      resolution === "480p"
-                        ? "bg-amber-500/20 border-amber-400 text-amber-200 shadow-md shadow-amber-950/30"
-                        : "bg-white/5 border-white/5 text-white/60 hover:bg-white/10"
-                    }`}
-                  >
-                    <span>480p (SD)</span>
-                    <span className="text-[10px] font-normal opacity-70">2.4 Cr/s</span>
-                  </button>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => setResolution("720p")}
-                  className={`py-3 px-3 rounded-xl border text-center font-bold text-xs transition-all flex flex-col items-center justify-center gap-1 ${
-                    resolution === "720p"
-                      ? "bg-amber-500/20 border-amber-400 text-amber-200 shadow-md shadow-amber-950/30"
-                      : "bg-white/5 border-white/5 text-white/60 hover:bg-white/10"
-                  }`}
-                >
-                  <span>720p (HD)</span>
-                  <span className="text-[10px] font-normal opacity-70">
-                    {modelFamily === "grok" ? "4.5 Cr/s" : isRtl ? "اقتصادي" : "Standard"}
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setResolution("1080p")}
-                  className={`py-3 px-3 rounded-xl border text-center font-bold text-xs transition-all flex flex-col items-center justify-center gap-1 ${
-                    resolution === "1080p"
-                      ? "bg-amber-500/20 border-amber-400 text-amber-200 shadow-md shadow-amber-950/30"
-                      : "bg-white/5 border-white/5 text-white/60 hover:bg-white/10"
-                  }`}
-                >
-                  <span>1080p (FHD)</span>
-                  <span className="text-[10px] font-normal opacity-70">
-                    {modelFamily === "grok" ? "8.0 Cr/s" : isRtl ? "عالي الدقة" : "Full HD"}
-                  </span>
-                </button>
-
-                {modelFamily === "veo" && (
-                  <button
-                    type="button"
-                    onClick={() => setResolution("4k")}
-                    className={`py-3 px-3 rounded-xl border text-center font-bold text-xs transition-all flex flex-col items-center justify-center gap-1 ${
-                      resolution === "4k"
-                        ? "bg-gradient-to-r from-amber-500/30 to-fuchsia-500/30 border-amber-400 text-amber-100 shadow-md shadow-amber-950/30"
-                        : "bg-white/5 border-white/5 text-white/60 hover:bg-white/10"
-                    }`}
-                  >
-                    <span>4K (Ultra HD)</span>
-                    <span className="text-[10px] text-fuchsia-300 font-bold">Ultra 4K</span>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Aspect Ratio Selector */}
-            <div className="bg-[#0e071e]/80 border border-white/10 rounded-3xl p-6 shadow-xl space-y-4 backdrop-blur-md">
-              <label className="text-sm font-bold text-white flex items-center gap-2">
-                <Monitor className="w-4 h-4 text-cyan-400" />
-                {isRtl ? "أبعاد الفيديو (Aspect Ratio)" : "Aspect Ratio"}
-              </label>
-
-              <div className="grid grid-cols-3 gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => setAspectRatio("16:9")}
-                  className={`py-3 px-3 rounded-xl border text-center font-bold text-xs transition-all flex flex-col items-center justify-center gap-1.5 ${
-                    aspectRatio === "16:9"
-                      ? "bg-cyan-500/20 border-cyan-400 text-cyan-200 shadow-md shadow-cyan-950/30"
-                      : "bg-white/5 border-white/5 text-white/60 hover:bg-white/10"
-                  }`}
-                >
-                  <Monitor className="w-4 h-4" />
-                  <span>16:9</span>
-                  <span className="text-[9px] opacity-60 font-normal">YouTube</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setAspectRatio("9:16")}
-                  className={`py-3 px-3 rounded-xl border text-center font-bold text-xs transition-all flex flex-col items-center justify-center gap-1.5 ${
-                    aspectRatio === "9:16"
-                      ? "bg-cyan-500/20 border-cyan-400 text-cyan-200 shadow-md shadow-cyan-950/30"
-                      : "bg-white/5 border-white/5 text-white/60 hover:bg-white/10"
-                  }`}
-                >
-                  <Smartphone className="w-4 h-4" />
-                  <span>9:16</span>
-                  <span className="text-[9px] opacity-60 font-normal">TikTok / Shorts</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setAspectRatio("1:1")}
-                  className={`py-3 px-3 rounded-xl border text-center font-bold text-xs transition-all flex flex-col items-center justify-center gap-1.5 ${
-                    aspectRatio === "1:1"
-                      ? "bg-cyan-500/20 border-cyan-400 text-cyan-200 shadow-md shadow-cyan-950/30"
-                      : "bg-white/5 border-white/5 text-white/60 hover:bg-white/10"
-                  }`}
-                >
-                  <Square className="w-4 h-4" />
-                  <span>1:1</span>
-                  <span className="text-[9px] opacity-60 font-normal">Instagram</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* 5. Grok Duration Slider */}
-          {modelFamily === "grok" && (
-            <div className="bg-[#0e071e]/80 border border-white/10 rounded-3xl p-6 shadow-xl space-y-4 backdrop-blur-md">
-              <div className="flex justify-between items-center">
-                <label className="text-sm font-bold text-white flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-fuchsia-400" />
-                  {isRtl ? "مدة الفيديو (ثواني)" : "Video Duration (Seconds)"}
-                </label>
-                <div className="flex items-center gap-2">
-                  <span className="text-fuchsia-300 font-extrabold bg-fuchsia-500/15 border border-fuchsia-500/30 px-3 py-1 rounded-xl text-sm font-mono">
-                    {duration} {isRtl ? "ثانية" : "seconds"}
-                  </span>
-                  <span className="text-xs text-white/40">
-                    ({+(GROK_PRICING[resolution]?.rate * duration).toFixed(1)} {isRtl ? "نقطة" : "Cr"})
-                  </span>
-                </div>
-              </div>
-
-              <input 
-                type="range" 
-                min="1" 
-                max="30" 
-                step="1" 
-                value={duration} 
-                onChange={(e) => setDuration(Number(e.target.value))}
-                className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-fuchsia-500"
-              />
-
-              <div className="flex justify-between text-[11px] text-white/40 font-mono">
-                <span>1s ({GROK_PRICING[resolution]?.rate} Cr)</span>
-                <span>15s</span>
-                <span>30s ({+(GROK_PRICING[resolution]?.rate * 30).toFixed(1)} Cr)</span>
+          {/* Notifications: Error / Success */}
+          {error && (
+            <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-400 text-sm flex items-start gap-3 backdrop-blur-md">
+              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-red-400" />
+              <div className="space-y-1">
+                <p className="font-bold">{isRtl ? "خطأ في التوليد" : "Generation Error"}</p>
+                <p className="text-xs text-red-300/80">{error}</p>
               </div>
             </div>
           )}
-        </div>
 
-        {/* Right Column: Generation Summary & Order Card */}
-        <div className="lg:col-span-4 space-y-6">
-          <div className="sticky top-24 bg-[#0e071e]/90 border border-white/10 rounded-3xl p-6 shadow-2xl space-y-6 backdrop-blur-xl">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2 pb-4 border-b border-white/10">
-              <Film className="w-5 h-5 text-violet-400" />
-              {isRtl ? "ملخص طلب التوليد" : "Generation Summary"}
-            </h2>
-
-            {/* Summary Details */}
-            <div className="space-y-3.5 text-sm">
-              <div className="flex justify-between items-center text-white/70">
-                <span>{isRtl ? "المحرك المختار" : "Selected Model"}</span>
-                <span className="font-bold text-white">
-                  {modelFamily === "veo" 
-                    ? VEO_TIERS.find(t => t.id === veoTier)?.name || "Google Veo 3.1"
-                    : "xAI Grok Imagine"}
-                </span>
+          {successMessage && (
+            <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-emerald-300 text-sm flex items-start gap-3 backdrop-blur-md">
+              <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5 text-emerald-400" />
+              <div className="space-y-1">
+                <p className="font-bold">{isRtl ? "تم إرسال الطلب بنجاح" : "Task Submitted Successfully"}</p>
+                <p className="text-xs text-emerald-300/80">{successMessage}</p>
               </div>
+            </div>
+          )}
 
-              <div className="flex justify-between items-center text-white/70">
-                <span>{isRtl ? "الدقة والأبعاد" : "Resolution & Ratio"}</span>
-                <span className="font-bold text-cyan-300">
-                  {resolution} • {aspectRatio}
-                </span>
+          {/* Large Action Bar & Submit CTA */}
+          <div className="bg-[#0e071e]/85 border border-white/10 rounded-3xl p-6 shadow-2xl backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="space-y-1 text-center sm:text-start">
+              <div className="flex items-center justify-center sm:justify-start gap-2 text-xs text-white/50">
+                <span>{isRtl ? "الموديل المختار:" : "Selected:"}</span>
+                <span className="font-bold text-white">{isRtl ? currentModel.nameAr : currentModel.name}</span>
+                <span>•</span>
+                <span className="text-cyan-300 font-bold">{resolution}</span>
+                <span>•</span>
+                <span className="text-white/80">{aspectRatio}</span>
               </div>
-
-              <div className="flex justify-between items-center text-white/70">
-                <span>{isRtl ? "مدة الفيديو" : "Clip Duration"}</span>
-                <span className="font-bold text-white">
-                  {modelFamily === "veo" ? "8s (Google Standard)" : `${duration}s (Flexible)`}
-                </span>
-              </div>
-
-              {modelFamily === "veo" && (
-                <div className="flex justify-between items-center text-white/70">
-                  <span>{isRtl ? "نسبة الخصم الرسمية" : "Official Discount"}</span>
-                  <span className="text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded text-xs">
-                    {VEO_TIERS.find(t => t.id === veoTier)?.discount || "-83%"}
+              <div className="flex items-center justify-center sm:justify-start gap-2">
+                <span className="text-xs text-white/50">{isRtl ? "تكلفة التوليد:" : "Cost:"}</span>
+                <span className="text-xl font-black text-amber-300 font-mono">{estimatedCost}</span>
+                <span className="text-xs text-amber-300/70 font-semibold">{isRtl ? "نقطة" : "Credits"}</span>
+                {currentModel.discount && currentModel.discount !== "Flexible" && (
+                  <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 rounded">
+                    {currentModel.discount} {isRtl ? "خصم" : "OFF"}
                   </span>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
-            {/* Cost Breakdown Box */}
-            <div className="bg-gradient-to-br from-violet-950/40 to-purple-950/40 border border-violet-500/30 rounded-2xl p-5 space-y-2">
-              <div className="flex justify-between items-baseline">
-                <span className="text-xs font-semibold text-white/60">
-                  {isRtl ? "إجمالي التكلفة المقدرة" : "Estimated Total Cost"}
-                </span>
-                <div className="text-2xl font-black text-amber-300 font-mono">
-                  {estimatedCost}
-                  <span className="text-xs font-medium text-amber-300/70 ms-1.5">
-                    {isRtl ? "نقطة" : "Credits"}
-                  </span>
-                </div>
-              </div>
-              <p className="text-[11px] text-white/40 flex items-center gap-1">
-                <Info className="w-3.5 h-3.5 shrink-0" />
-                {isRtl 
-                  ? "يتم الخصم تلقائياً من محفظة النقاط لديك فور بدء التوليد."
-                  : "Deducted automatically from your credits wallet upon submission."}
-              </p>
-            </div>
-
-            {/* Error Notification */}
-            {error && (
-              <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-400 text-xs leading-relaxed">
-                {error}
-              </div>
-            )}
-
-            {/* Success Notification */}
-            {successMessage && (
-              <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-emerald-300 text-xs leading-relaxed">
-                {successMessage}
-              </div>
-            )}
-
-            {/* Submit Button */}
             <button
               type="button"
               onClick={handleGenerate}
-              disabled={isLoading || !prompt.trim()}
-              className={`w-full py-4 px-6 rounded-2xl font-bold text-base flex items-center justify-center gap-2.5 transition-all shadow-xl ${
-                isLoading || !prompt.trim()
+              disabled={isLoading || !prompt.trim() || !hasSufficientCredits}
+              className={`w-full sm:w-auto px-8 py-4 rounded-2xl font-extrabold text-base flex items-center justify-center gap-3 transition-all shadow-xl ${
+                isLoading || !prompt.trim() || !hasSufficientCredits
                   ? "bg-white/10 text-white/40 cursor-not-allowed border border-white/5"
                   : "bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 bg-[length:200%_auto] hover:bg-[position:right_center] text-white shadow-violet-900/50 hover:shadow-violet-800/80 active:scale-[0.98]"
               }`}
@@ -666,7 +476,7 @@ export default function TextToVideoPage() {
               {isLoading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>{isRtl ? "جاري الإرسال إلى طابور المعالجة..." : "Submitting to Queue..."}</span>
+                  <span>{isRtl ? "جاري الإرسال للطابور..." : "Submitting to Queue..."}</span>
                 </>
               ) : (
                 <>
@@ -677,6 +487,296 @@ export default function TextToVideoPage() {
             </button>
           </div>
         </div>
+
+        {/* ========================================================================= */}
+        {/* 2. Side Settings Panel: Compact Dropdowns & Parameters Controls           */}
+        {/* ========================================================================= */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className="sticky top-24 bg-[#0e071e]/90 border border-white/10 rounded-3xl p-6 shadow-2xl space-y-5 backdrop-blur-2xl">
+            
+            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+              <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <SlidersHorizontal className="w-4 h-4 text-violet-400" />
+                <span>{isRtl ? "إعدادات وتخصيص الفيديو" : "Video Settings"}</span>
+              </h2>
+              <span className="text-[10px] text-white/40 uppercase tracking-widest font-mono">Options</span>
+            </div>
+
+            {/* 1. Model & Tier Dropdown Select */}
+            <div className="space-y-2 relative" ref={modelRef}>
+              <label className="text-xs font-bold text-white/80 flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5 text-violet-400" />
+                <span>{isRtl ? "الموديل والمحرك (AI Engine & Tier)" : "Model & Tier"}</span>
+              </label>
+
+              <button
+                type="button"
+                onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
+                className="w-full bg-[#070112] border border-white/10 hover:border-violet-500/40 rounded-2xl p-3.5 text-start flex items-center justify-between gap-3 transition-all group"
+              >
+                <div className="space-y-0.5 truncate">
+                  <div className="flex items-center gap-2 truncate">
+                    <span className="font-bold text-sm text-white truncate">
+                      {isRtl ? currentModel.nameAr : currentModel.name}
+                    </span>
+                    <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded shrink-0">
+                      {currentModel.discount}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-white/40 truncate">
+                    {isRtl ? currentModel.descAr : currentModel.desc}
+                  </p>
+                </div>
+                <ChevronDown className={`w-4 h-4 text-white/50 transition-transform duration-200 shrink-0 ${isModelDropdownOpen ? "rotate-180 text-violet-400" : ""}`} />
+              </button>
+
+              {/* Model Dropdown Menu */}
+              {isModelDropdownOpen && (
+                <div className="absolute z-50 top-full mt-2 w-full bg-[#0d041c] border border-violet-500/30 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-violet-400/70 border-b border-white/5">
+                    {isRtl ? "نماذج Google Veo 3.1" : "Google Veo 3.1 Models"}
+                  </div>
+
+                  {MODELS.filter(m => m.family === "veo").map((m) => {
+                    const isSelected = selectedModelId === m.id;
+                    return (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => handleModelSelect(m.id)}
+                        className={`w-full text-start p-2.5 rounded-xl transition-all flex items-center justify-between gap-2 ${
+                          isSelected 
+                            ? "bg-violet-600/25 text-white border border-violet-500/40" 
+                            : "hover:bg-white/5 text-white/70 hover:text-white"
+                        }`}
+                      >
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-xs text-white">{isRtl ? m.nameAr : m.name}</span>
+                            <span className="text-[9px] text-emerald-400 bg-emerald-500/10 px-1 rounded font-mono">{m.discount}</span>
+                          </div>
+                          <p className="text-[10px] text-white/40">{isRtl ? m.badgeAr : m.badge}</p>
+                        </div>
+                        {isSelected && <Check className="w-4 h-4 text-violet-400 shrink-0" />}
+                      </button>
+                    );
+                  })}
+
+                  <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-fuchsia-400/70 border-b border-white/5 pt-2">
+                    {isRtl ? "نماذج xAI Grok" : "xAI Grok Models"}
+                  </div>
+
+                  {MODELS.filter(m => m.family === "grok").map((m) => {
+                    const isSelected = selectedModelId === m.id;
+                    return (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => handleModelSelect(m.id)}
+                        className={`w-full text-start p-2.5 rounded-xl transition-all flex items-center justify-between gap-2 ${
+                          isSelected 
+                            ? "bg-fuchsia-600/25 text-white border border-fuchsia-500/40" 
+                            : "hover:bg-white/5 text-white/70 hover:text-white"
+                        }`}
+                      >
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-xs text-white">{isRtl ? m.nameAr : m.name}</span>
+                          </div>
+                          <p className="text-[10px] text-white/40">{isRtl ? m.badgeAr : m.badge}</p>
+                        </div>
+                        {isSelected && <Check className="w-4 h-4 text-fuchsia-400 shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* 2. Resolution Dropdown Select */}
+            <div className="space-y-2 relative" ref={resRef}>
+              <label className="text-xs font-bold text-white/80 flex items-center gap-1.5">
+                <Monitor className="w-3.5 h-3.5 text-amber-400" />
+                <span>{isRtl ? "دقة الفيديو (Resolution)" : "Resolution"}</span>
+              </label>
+
+              <button
+                type="button"
+                onClick={() => setIsResDropdownOpen(!isResDropdownOpen)}
+                className="w-full bg-[#070112] border border-white/10 hover:border-amber-500/40 rounded-2xl p-3.5 text-start flex items-center justify-between gap-3 transition-all"
+              >
+                <div>
+                  <span className="font-bold text-sm text-white">
+                    {RESOLUTIONS.find(r => r.id === resolution)?.label || resolution}
+                  </span>
+                  <span className="text-[11px] text-white/40 block">
+                    {isRtl 
+                      ? RESOLUTIONS.find(r => r.id === resolution)?.descAr 
+                      : RESOLUTIONS.find(r => r.id === resolution)?.desc}
+                  </span>
+                </div>
+                <ChevronDown className={`w-4 h-4 text-white/50 transition-transform duration-200 ${isResDropdownOpen ? "rotate-180 text-amber-400" : ""}`} />
+              </button>
+
+              {/* Resolution Dropdown Menu */}
+              {isResDropdownOpen && (
+                <div className="absolute z-40 top-full mt-2 w-full bg-[#0d041c] border border-amber-500/30 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                  {RESOLUTIONS.filter(r => currentModel.supportedResolutions.includes(r.id)).map((r) => {
+                    const isSelected = resolution === r.id;
+                    const priceTag = currentModel.isPerSecond
+                      ? `${currentModel.prices[r.id]} Cr/s`
+                      : `${currentModel.prices[r.id]} Cr (8s)`;
+
+                    return (
+                      <button
+                        key={r.id}
+                        type="button"
+                        onClick={() => { setResolution(r.id); setIsResDropdownOpen(false); }}
+                        className={`w-full text-start p-2.5 rounded-xl transition-all flex items-center justify-between gap-2 ${
+                          isSelected 
+                            ? "bg-amber-500/20 text-white border border-amber-500/40" 
+                            : "hover:bg-white/5 text-white/70 hover:text-white"
+                        }`}
+                      >
+                        <div>
+                          <span className="font-bold text-xs text-white block">{r.label}</span>
+                          <span className="text-[10px] text-white/40">{isRtl ? r.descAr : r.desc}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-mono font-bold text-amber-300">{priceTag}</span>
+                          {isSelected && <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* 3. Aspect Ratio Dropdown Select */}
+            <div className="space-y-2 relative" ref={aspectRef}>
+              <label className="text-xs font-bold text-white/80 flex items-center gap-1.5">
+                <Film className="w-3.5 h-3.5 text-cyan-400" />
+                <span>{isRtl ? "أبعاد الفيديو (Aspect Ratio)" : "Aspect Ratio"}</span>
+              </label>
+
+              <button
+                type="button"
+                onClick={() => setIsAspectDropdownOpen(!isAspectDropdownOpen)}
+                className="w-full bg-[#070112] border border-white/10 hover:border-cyan-500/40 rounded-2xl p-3.5 text-start flex items-center justify-between gap-3 transition-all"
+              >
+                <div className="flex items-center gap-2.5">
+                  {(() => {
+                    const IconComp = ASPECT_RATIOS.find(a => a.id === aspectRatio)?.icon || Monitor;
+                    return <IconComp className="w-4 h-4 text-cyan-400" />;
+                  })()}
+                  <div>
+                    <span className="font-bold text-sm text-white">
+                      {aspectRatio}
+                    </span>
+                    <span className="text-[11px] text-white/40 block">
+                      {isRtl 
+                        ? ASPECT_RATIOS.find(a => a.id === aspectRatio)?.descAr 
+                        : ASPECT_RATIOS.find(a => a.id === aspectRatio)?.desc}
+                    </span>
+                  </div>
+                </div>
+                <ChevronDown className={`w-4 h-4 text-white/50 transition-transform duration-200 ${isAspectDropdownOpen ? "rotate-180 text-cyan-400" : ""}`} />
+              </button>
+
+              {/* Aspect Ratio Dropdown Menu */}
+              {isAspectDropdownOpen && (
+                <div className="absolute z-30 top-full mt-2 w-full bg-[#0d041c] border border-cyan-500/30 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                  {ASPECT_RATIOS.map((a) => {
+                    const isSelected = aspectRatio === a.id;
+                    const IconComp = a.icon;
+                    return (
+                      <button
+                        key={a.id}
+                        type="button"
+                        onClick={() => { setAspectRatio(a.id); setIsAspectDropdownOpen(false); }}
+                        className={`w-full text-start p-2.5 rounded-xl transition-all flex items-center justify-between gap-2 ${
+                          isSelected 
+                            ? "bg-cyan-500/20 text-white border border-cyan-500/40" 
+                            : "hover:bg-white/5 text-white/70 hover:text-white"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <IconComp className="w-4 h-4 text-cyan-400" />
+                          <div>
+                            <span className="font-bold text-xs text-white block">{a.label}</span>
+                            <span className="text-[10px] text-white/40">{isRtl ? a.descAr : a.desc}</span>
+                          </div>
+                        </div>
+                        {isSelected && <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* 4. Grok Duration Slider (Shown only when Grok is active) */}
+            {currentModel.isPerSecond && (
+              <div className="space-y-3 pt-3 border-t border-white/5">
+                <div className="flex justify-between items-center">
+                  <label className="text-xs font-bold text-white/80 flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-fuchsia-400" />
+                    <span>{isRtl ? "مدة الفيديو (ثواني)" : "Duration (Seconds)"}</span>
+                  </label>
+                  <span className="text-xs font-mono font-extrabold text-fuchsia-300 bg-fuchsia-500/15 border border-fuchsia-500/30 px-2 py-0.5 rounded-lg">
+                    {duration}s
+                  </span>
+                </div>
+
+                <input 
+                  type="range" 
+                  min="1" 
+                  max="30" 
+                  step="1" 
+                  value={duration} 
+                  onChange={(e) => setDuration(Number(e.target.value))}
+                  className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-fuchsia-500"
+                />
+
+                <div className="flex justify-between text-[10px] text-white/40 font-mono">
+                  <span>1s</span>
+                  <span>15s</span>
+                  <span>30s</span>
+                </div>
+              </div>
+            )}
+
+            {/* 5. Live Summary & Wallet Widget */}
+            <div className="pt-3 border-t border-white/5 space-y-3">
+              <div className="bg-[#070112] border border-white/5 rounded-2xl p-4 space-y-2.5">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-white/50">{isRtl ? "تكلفة العملية:" : "Operation Cost:"}</span>
+                  <span className="font-bold text-amber-300 font-mono">{estimatedCost} Cr</span>
+                </div>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-white/50">{isRtl ? "الرصيد المتاح:" : "Your Balance:"}</span>
+                  <span className="font-bold text-white font-mono">{totalUserCredits.toLocaleString()} Cr</span>
+                </div>
+                <div className="flex justify-between items-center text-xs pt-2 border-t border-white/5">
+                  <span className="text-white/50">{isRtl ? "الرصيد المتبقي:" : "Remaining:"}</span>
+                  <span className={`font-bold font-mono ${hasSufficientCredits ? "text-emerald-400" : "text-red-400"}`}>
+                    {(totalUserCredits - estimatedCost).toLocaleString()} Cr
+                  </span>
+                </div>
+              </div>
+
+              {!hasSufficientCredits && (
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{isRtl ? "رصيدك غير كافٍ لتنفيذ هذه العملية. يرجى شحن الرصيد." : "Insufficient credits for this task. Please top up."}</span>
+                </div>
+              )}
+            </div>
+
+          </div>
+        </div>
+
       </div>
     </div>
   );
