@@ -104,7 +104,7 @@ export default function ProfilePage() {
       {/* Tab Navigation */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-        className="flex gap-1 bg-white/5 rounded-2xl p-1 overflow-x-auto border border-white/10 w-full no-scrollbar"
+        className="flex gap-1 bg-white/5 rounded-2xl p-1 overflow-x-auto border border-white/10 w-full thin-scrollbar"
       >
         {TABS.map((tab) => (
           <button

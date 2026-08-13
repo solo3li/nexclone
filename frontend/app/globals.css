@@ -26,9 +26,28 @@
     font-family: var(--font-cairo), var(--font-inter), sans-serif;
   }
 
-  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar { width: 6px; height: 3px; }
   ::-webkit-scrollbar-track { background: #0a0015; }
   ::-webkit-scrollbar-thumb { background: #7c3aed; border-radius: 10px; }
+
+  /* Utility to hide scrollbar but keep functionality */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  /* Utility for ultra-thin scrollbar */
+  .thin-scrollbar::-webkit-scrollbar {
+    width: 2px;
+    height: 2px;
+  }
+  .thin-scrollbar::-webkit-scrollbar-thumb {
+    background: #7c3aed;
+    border-radius: 10px;
+  }
 }
 
 @layer utilities {
