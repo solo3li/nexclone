@@ -46,12 +46,15 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 object payload = null;
                 string endpoint = "https://api.crun.ai/api/v1/client/job/submit";
 
+                string crunModel = ResolveModelId(message.Model, message.ToolType);
+
                 if (message.ToolType == "text-to-video")
                 {
                     payload = new {
-                        model = message.Model,
+                        model = crunModel,
                         prompt = message.Prompt,
                         resolution = message.Resolution,
+                        aspect_ratio = !string.IsNullOrEmpty(message.AspectRatio) ? message.AspectRatio : "16:9",
                         duration = message.Duration > 0 ? message.Duration : (int?)null
                     };
                 }
@@ -64,7 +67,7 @@ namespace NexClone.Backend.Infrastructure.Consumers
                         imageUrl = await _mediaService.UploadFileAsync(ms, $"image2video_{Guid.NewGuid()}.jpg", message.Image1ContentType);
                     }
                     payload = new {
-                        model = message.Model,
+                        model = crunModel,
                         image = imageUrl,
                         prompt = message.Prompt,
                         mode = message.Mode,
@@ -80,11 +83,11 @@ namespace NexClone.Backend.Infrastructure.Consumers
                     if (message.Image3Bytes != null) { using var ms = new System.IO.MemoryStream(message.Image3Bytes); images.Add(await _mediaService.UploadFileAsync(ms, $"ref_{Guid.NewGuid()}.jpg", message.Image3ContentType)); }
                     
                     payload = new {
-                        model = message.Model,
+                        model = crunModel,
                         image_urls = images,
                         prompt = message.Prompt,
                         resolution = message.Resolution,
-                        aspect_ratio = message.AspectRatio
+                        aspect_ratio = !string.IsNullOrEmpty(message.AspectRatio) ? message.AspectRatio : "16:9"
                     };
                 }
 
@@ -128,6 +131,20 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 await _usagePolicy.RefundByToolAsync(message.UserId, message.ToolType, history.CreditsUsed);
                 await NotifyUserFailed(message.UserId, history, ex.Message);
             }
+        }
+
+        private string ResolveModelId(string model, string toolType)
+        {
+            var m = (model ?? "").Trim().ToLower();
+            if (m == "veo-3.1-fast" || m == "veo-fast" || m == "google/veo3-1-fast-t2v")
+                return toolType == "image-to-video" ? "google/veo3-1-fast-i2v" : "google/veo3-1-fast-t2v";
+            if (m == "veo-3.1-lite" || m == "veo-lite" || m == "google/veo3-1-lite-t2v")
+                return toolType == "image-to-video" ? "google/veo3-1-lite-i2v" : "google/veo3-1-lite-t2v";
+            if (m == "veo-3.1-quality" || m == "veo" || m == "veo-quality" || m == "google/veo3-1-t2v")
+                return toolType == "image-to-video" ? "google/veo3-1-i2v" : "google/veo3-1-t2v";
+            if (m == "grok" || m == "grok-imagine" || m == "grok-imagine/t2v")
+                return toolType == "image-to-video" ? "grok-imagine/i2v" : "grok-imagine/t2v";
+            return model;
         }
     }
 }
