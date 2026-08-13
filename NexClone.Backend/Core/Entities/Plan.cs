@@ -91,8 +91,15 @@ namespace NexClone.Backend.Core.Entities
         public bool IsDefaultRegistrationPlan { get; set; } = false;
 
         // Affiliate Commission Settings (under the ONE global Affiliate System)
-        public decimal AffiliateFirstCommissionPercent { get; set; } = 0;
-        public decimal AffiliateRecurringCommissionPercent { get; set; } = 0;
+        [MaxLength(50)]
+        public string AffiliateFirstCommissionType { get; set; } = "Percentage"; // "Percentage" or "Fixed"
+        public decimal AffiliateFirstCommissionValueUsd { get; set; } = 0;
+        public decimal AffiliateFirstCommissionValueEgp { get; set; } = 0;
+
+        [MaxLength(50)]
+        public string AffiliateRecurringCommissionType { get; set; } = "Percentage"; // "Percentage" or "Fixed"
+        public decimal AffiliateRecurringCommissionValueUsd { get; set; } = 0;
+        public decimal AffiliateRecurringCommissionValueEgp { get; set; } = 0;
 
         // Soft Delete
         public bool IsDeleted { get; set; } = false;

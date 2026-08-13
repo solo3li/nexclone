@@ -131,6 +131,14 @@ namespace NexClone.Backend.API.Controllers.Admin
 
                 existingPlan.IsFreeTrial = plan.IsFreeTrial;
                 
+                existingPlan.AffiliateFirstCommissionType = plan.AffiliateFirstCommissionType;
+                existingPlan.AffiliateFirstCommissionValueUsd = plan.AffiliateFirstCommissionValueUsd;
+                existingPlan.AffiliateFirstCommissionValueEgp = plan.AffiliateFirstCommissionValueEgp;
+                
+                existingPlan.AffiliateRecurringCommissionType = plan.AffiliateRecurringCommissionType;
+                existingPlan.AffiliateRecurringCommissionValueUsd = plan.AffiliateRecurringCommissionValueUsd;
+                existingPlan.AffiliateRecurringCommissionValueEgp = plan.AffiliateRecurringCommissionValueEgp;
+                
                 existingPlan.IsDefaultRegistrationPlan = plan.IsDefaultRegistrationPlan;
                 if (existingPlan.IsDefaultRegistrationPlan)
                 {

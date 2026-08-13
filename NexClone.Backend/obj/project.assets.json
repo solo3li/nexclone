@@ -18,27 +18,19 @@
       "Dapper/2.0.123": {
         "type": "package",
         "compile": {
-          "lib/net5.0/Dapper.dll": {
-            "related": ".xml"
-          }
+          "lib/net5.0/Dapper.dll": {}
         },
         "runtime": {
-          "lib/net5.0/Dapper.dll": {
-            "related": ".xml"
-          }
+          "lib/net5.0/Dapper.dll": {}
         }
       },
       "Dapper.AOT/1.0.48": {
         "type": "package",
         "compile": {
-          "lib/net8.0/Dapper.AOT.dll": {
-            "related": ".xml"
-          }
+          "lib/net8.0/Dapper.AOT.dll": {}
         },
         "runtime": {
-          "lib/net8.0/Dapper.AOT.dll": {
-            "related": ".xml"
-          }
+          "lib/net8.0/Dapper.AOT.dll": {}
         }
       },
       "Google.Apis/1.68.0": {
@@ -97,14 +89,10 @@
           "Hangfire.NetCore": "[1.8.24]"
         },
         "compile": {
-          "lib/netcoreapp3.0/Hangfire.AspNetCore.dll": {
-            "related": ".xml"
-          }
+          "lib/netcoreapp3.0/Hangfire.AspNetCore.dll": {}
         },
         "runtime": {
-          "lib/netcoreapp3.0/Hangfire.AspNetCore.dll": {
-            "related": ".xml"
-          }
+          "lib/netcoreapp3.0/Hangfire.AspNetCore.dll": {}
         },
         "frameworkReferences": [
           "Microsoft.AspNetCore.App"
@@ -116,14 +104,10 @@
           "Newtonsoft.Json": "11.0.1"
         },
         "compile": {
-          "lib/netstandard2.0/Hangfire.Core.dll": {
-            "related": ".xml"
-          }
+          "lib/netstandard2.0/Hangfire.Core.dll": {}
         },
         "runtime": {
-          "lib/netstandard2.0/Hangfire.Core.dll": {
-            "related": ".xml"
-          }
+          "lib/netstandard2.0/Hangfire.Core.dll": {}
         },
         "resource": {
           "lib/netstandard2.0/ca/Hangfire.Core.resources.dll": {
@@ -179,14 +163,10 @@
           "Hangfire.Core": "[1.8.24]"
         },
         "compile": {
-          "lib/netstandard2.1/Hangfire.NetCore.dll": {
-            "related": ".xml"
-          }
+          "lib/netstandard2.1/Hangfire.NetCore.dll": {}
         },
         "runtime": {
-          "lib/netstandard2.1/Hangfire.NetCore.dll": {
-            "related": ".xml"
-          }
+          "lib/netstandard2.1/Hangfire.NetCore.dll": {}
         }
       },
       "Hangfire.PostgreSql/1.21.1": {
@@ -198,14 +178,10 @@
           "Npgsql": "6.0.11"
         },
         "compile": {
-          "lib/netstandard2.0/Hangfire.PostgreSql.dll": {
-            "related": ".xml"
-          }
+          "lib/netstandard2.0/Hangfire.PostgreSql.dll": {}
         },
         "runtime": {
-          "lib/netstandard2.0/Hangfire.PostgreSql.dll": {
-            "related": ".xml"
-          }
+          "lib/netstandard2.0/Hangfire.PostgreSql.dll": {}
         }
       },
       "Humanizer.Core/2.14.1": {
@@ -747,12 +723,12 @@
         "type": "package",
         "compile": {
           "lib/net8.0/Microsoft.OpenApi.dll": {
-            "related": ".pdb;.xml"
+            "related": ".pdb"
           }
         },
         "runtime": {
           "lib/net8.0/Microsoft.OpenApi.dll": {
-            "related": ".pdb;.xml"
+            "related": ".pdb"
           }
         }
       },
@@ -768,14 +744,10 @@
       "Microsoft.Win32.SystemEvents/6.0.0": {
         "type": "package",
         "compile": {
-          "lib/net6.0/Microsoft.Win32.SystemEvents.dll": {
-            "related": ".xml"
-          }
+          "lib/net6.0/Microsoft.Win32.SystemEvents.dll": {}
         },
         "runtime": {
-          "lib/net6.0/Microsoft.Win32.SystemEvents.dll": {
-            "related": ".xml"
-          }
+          "lib/net6.0/Microsoft.Win32.SystemEvents.dll": {}
         },
         "build": {
           "buildTransitive/netcoreapp3.1/_._": {}
@@ -858,27 +830,19 @@
           "System.Drawing.Common": "6.0.0"
         },
         "compile": {
-          "lib/net6.0/QRCoder.dll": {
-            "related": ".xml"
-          }
+          "lib/net6.0/QRCoder.dll": {}
         },
         "runtime": {
-          "lib/net6.0/QRCoder.dll": {
-            "related": ".xml"
-          }
+          "lib/net6.0/QRCoder.dll": {}
         }
       },
       "QuestPDF/2026.7.2": {
         "type": "package",
         "compile": {
-          "lib/net10.0/QuestPDF.dll": {
-            "related": ".xml"
-          }
+          "lib/net10.0/QuestPDF.dll": {}
         },
         "runtime": {
-          "lib/net10.0/QuestPDF.dll": {
-            "related": ".xml"
-          }
+          "lib/net10.0/QuestPDF.dll": {}
         },
         "build": {
           "buildTransitive/QuestPDF.targets": {}
@@ -1189,14 +1153,10 @@
           "Microsoft.Win32.SystemEvents": "6.0.0"
         },
         "compile": {
-          "lib/net6.0/System.Drawing.Common.dll": {
-            "related": ".xml"
-          }
+          "lib/net6.0/System.Drawing.Common.dll": {}
         },
         "runtime": {
-          "lib/net6.0/System.Drawing.Common.dll": {
-            "related": ".xml"
-          }
+          "lib/net6.0/System.Drawing.Common.dll": {}
         },
         "build": {
           "buildTransitive/netcoreapp3.1/_._": {}
@@ -1319,11 +1279,8 @@
         "dapper.2.0.123.nupkg.sha512",
         "dapper.nuspec",
         "lib/net461/Dapper.dll",
-        "lib/net461/Dapper.xml",
         "lib/net5.0/Dapper.dll",
-        "lib/net5.0/Dapper.xml",
-        "lib/netstandard2.0/Dapper.dll",
-        "lib/netstandard2.0/Dapper.xml"
+        "lib/netstandard2.0/Dapper.dll"
       ]
     },
     "Dapper.AOT/1.0.48": {
@@ -1339,15 +1296,10 @@
         "dapper.aot.1.0.48.nupkg.sha512",
         "dapper.aot.nuspec",
         "lib/net48/Dapper.AOT.dll",
-        "lib/net48/Dapper.AOT.xml",
         "lib/net6.0/Dapper.AOT.dll",
-        "lib/net6.0/Dapper.AOT.xml",
         "lib/net8.0/Dapper.AOT.dll",
-        "lib/net8.0/Dapper.AOT.xml",
         "lib/netcoreapp3.1/Dapper.AOT.dll",
-        "lib/netcoreapp3.1/Dapper.AOT.xml",
         "lib/netstandard2.0/Dapper.AOT.dll",
-        "lib/netstandard2.0/Dapper.AOT.xml",
         "readme.md"
       ]
     },
@@ -1425,15 +1377,10 @@
         "hangfire.aspnetcore.nuspec",
         "icon.png",
         "lib/net451/Hangfire.AspNetCore.dll",
-        "lib/net451/Hangfire.AspNetCore.xml",
         "lib/net461/Hangfire.AspNetCore.dll",
-        "lib/net461/Hangfire.AspNetCore.xml",
         "lib/netcoreapp3.0/Hangfire.AspNetCore.dll",
-        "lib/netcoreapp3.0/Hangfire.AspNetCore.xml",
         "lib/netstandard1.3/Hangfire.AspNetCore.dll",
-        "lib/netstandard1.3/Hangfire.AspNetCore.xml",
-        "lib/netstandard2.0/Hangfire.AspNetCore.dll",
-        "lib/netstandard2.0/Hangfire.AspNetCore.xml"
+        "lib/netstandard2.0/Hangfire.AspNetCore.dll"
       ]
     },
     "Hangfire.Core/1.8.24": {
@@ -1454,7 +1401,6 @@
         "hangfire.core.nuspec",
         "icon.png",
         "lib/net451/Hangfire.Core.dll",
-        "lib/net451/Hangfire.Core.xml",
         "lib/net451/ca/Hangfire.Core.resources.dll",
         "lib/net451/de/Hangfire.Core.resources.dll",
         "lib/net451/es/Hangfire.Core.resources.dll",
@@ -1471,7 +1417,6 @@
         "lib/net451/zh-TW/Hangfire.Core.resources.dll",
         "lib/net451/zh/Hangfire.Core.resources.dll",
         "lib/net46/Hangfire.Core.dll",
-        "lib/net46/Hangfire.Core.xml",
         "lib/net46/ca/Hangfire.Core.resources.dll",
         "lib/net46/de/Hangfire.Core.resources.dll",
         "lib/net46/es/Hangfire.Core.resources.dll",
@@ -1488,7 +1433,6 @@
         "lib/net46/zh-TW/Hangfire.Core.resources.dll",
         "lib/net46/zh/Hangfire.Core.resources.dll",
         "lib/netstandard1.3/Hangfire.Core.dll",
-        "lib/netstandard1.3/Hangfire.Core.xml",
         "lib/netstandard1.3/ca/Hangfire.Core.resources.dll",
         "lib/netstandard1.3/de/Hangfire.Core.resources.dll",
         "lib/netstandard1.3/es/Hangfire.Core.resources.dll",
@@ -1505,7 +1449,6 @@
         "lib/netstandard1.3/zh-TW/Hangfire.Core.resources.dll",
         "lib/netstandard1.3/zh/Hangfire.Core.resources.dll",
         "lib/netstandard2.0/Hangfire.Core.dll",
-        "lib/netstandard2.0/Hangfire.Core.xml",
         "lib/netstandard2.0/ca/Hangfire.Core.resources.dll",
         "lib/netstandard2.0/de/Hangfire.Core.resources.dll",
         "lib/netstandard2.0/es/Hangfire.Core.resources.dll",
@@ -1540,15 +1483,10 @@
         "hangfire.netcore.nuspec",
         "icon.png",
         "lib/net451/Hangfire.NetCore.dll",
-        "lib/net451/Hangfire.NetCore.xml",
         "lib/net461/Hangfire.NetCore.dll",
-        "lib/net461/Hangfire.NetCore.xml",
         "lib/netstandard1.3/Hangfire.NetCore.dll",
-        "lib/netstandard1.3/Hangfire.NetCore.xml",
         "lib/netstandard2.0/Hangfire.NetCore.dll",
-        "lib/netstandard2.0/Hangfire.NetCore.xml",
-        "lib/netstandard2.1/Hangfire.NetCore.dll",
-        "lib/netstandard2.1/Hangfire.NetCore.xml"
+        "lib/netstandard2.1/Hangfire.NetCore.dll"
       ]
     },
     "Hangfire.PostgreSql/1.21.1": {
@@ -1561,8 +1499,7 @@
         "LICENSE.md",
         "hangfire.postgresql.1.21.1.nupkg.sha512",
         "hangfire.postgresql.nuspec",
-        "lib/netstandard2.0/Hangfire.PostgreSql.dll",
-        "lib/netstandard2.0/Hangfire.PostgreSql.xml"
+        "lib/netstandard2.0/Hangfire.PostgreSql.dll"
       ]
     },
     "Humanizer.Core/2.14.1": {
@@ -2911,10 +2848,8 @@
         "README.md",
         "lib/net8.0/Microsoft.OpenApi.dll",
         "lib/net8.0/Microsoft.OpenApi.pdb",
-        "lib/net8.0/Microsoft.OpenApi.xml",
         "lib/netstandard2.0/Microsoft.OpenApi.dll",
         "lib/netstandard2.0/Microsoft.OpenApi.pdb",
-        "lib/netstandard2.0/Microsoft.OpenApi.xml",
         "microsoft.openapi.2.0.0.nupkg.sha512",
         "microsoft.openapi.nuspec"
       ]
@@ -2948,13 +2883,9 @@
         "buildTransitive/netcoreapp2.0/Microsoft.Win32.SystemEvents.targets",
         "buildTransitive/netcoreapp3.1/_._",
         "lib/net461/Microsoft.Win32.SystemEvents.dll",
-        "lib/net461/Microsoft.Win32.SystemEvents.xml",
         "lib/net6.0/Microsoft.Win32.SystemEvents.dll",
-        "lib/net6.0/Microsoft.Win32.SystemEvents.xml",
         "lib/netcoreapp3.1/Microsoft.Win32.SystemEvents.dll",
-        "lib/netcoreapp3.1/Microsoft.Win32.SystemEvents.xml",
         "lib/netstandard2.0/Microsoft.Win32.SystemEvents.dll",
-        "lib/netstandard2.0/Microsoft.Win32.SystemEvents.xml",
         "microsoft.win32.systemevents.6.0.0.nupkg.sha512",
         "microsoft.win32.systemevents.nuspec",
         "runtimes/win/lib/net6.0/Microsoft.Win32.SystemEvents.dll",
@@ -3061,19 +2992,12 @@
         "LICENSE.txt",
         "README.md",
         "lib/net35/QRCoder.dll",
-        "lib/net35/QRCoder.xml",
         "lib/net40/QRCoder.dll",
-        "lib/net40/QRCoder.xml",
         "lib/net5.0/QRCoder.dll",
-        "lib/net5.0/QRCoder.xml",
         "lib/net6.0/QRCoder.dll",
-        "lib/net6.0/QRCoder.xml",
         "lib/netstandard1.3/QRCoder.dll",
-        "lib/netstandard1.3/QRCoder.xml",
         "lib/netstandard2.0/QRCoder.dll",
-        "lib/netstandard2.0/QRCoder.xml",
         "lib/netstandard2.1/QRCoder.dll",
-        "lib/netstandard2.1/QRCoder.xml",
         "nuget-icon.png",
         "qrcoder.1.8.0.nupkg.sha512",
         "qrcoder.nuspec"
@@ -3132,15 +3056,10 @@
         "buildTransitive/QuestPDF.targets",
         "buildTransitive/net4/QuestPDF.targets",
         "lib/net10.0/QuestPDF.dll",
-        "lib/net10.0/QuestPDF.xml",
         "lib/net5.0/QuestPDF.dll",
-        "lib/net5.0/QuestPDF.xml",
         "lib/net6.0/QuestPDF.dll",
-        "lib/net6.0/QuestPDF.xml",
         "lib/net8.0/QuestPDF.dll",
-        "lib/net8.0/QuestPDF.xml",
         "lib/netstandard2.0/QuestPDF.dll",
-        "lib/netstandard2.0/QuestPDF.xml",
         "questpdf.2026.7.2.nupkg.sha512",
         "questpdf.nuspec",
         "runtimes/linux-arm64/native/libQuestPdfSkia.so",
@@ -3525,13 +3444,9 @@
         "lib/MonoAndroid10/_._",
         "lib/MonoTouch10/_._",
         "lib/net461/System.Drawing.Common.dll",
-        "lib/net461/System.Drawing.Common.xml",
         "lib/net6.0/System.Drawing.Common.dll",
-        "lib/net6.0/System.Drawing.Common.xml",
         "lib/netcoreapp3.1/System.Drawing.Common.dll",
-        "lib/netcoreapp3.1/System.Drawing.Common.xml",
         "lib/netstandard2.0/System.Drawing.Common.dll",
-        "lib/netstandard2.0/System.Drawing.Common.xml",
         "lib/xamarinios10/_._",
         "lib/xamarinmac20/_._",
         "lib/xamarintvos10/_._",

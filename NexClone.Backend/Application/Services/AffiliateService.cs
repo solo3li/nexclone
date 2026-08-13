@@ -247,12 +247,47 @@ namespace NexClone.Backend.Application.Services
             bool isRecurring = referral.HasConverted;
             if (isRecurring && !settings.RecurringEnabled) return;
 
-            decimal rate = isRecurring
-                ? (recurringCommissionOverride ?? plan.AffiliateRecurringCommissionPercent)
-                : (firstCommissionOverride ?? plan.AffiliateFirstCommissionPercent);
+            decimal commissionAmount = 0;
+            decimal rate = 0;
 
-            // Admin can explicitly set 0 to disable commission for this assignment
-            if (rate < 0) return;
+            if (isRecurring)
+            {
+                if (recurringCommissionOverride.HasValue)
+                {
+                    rate = recurringCommissionOverride.Value;
+                    commissionAmount = Math.Round(amount * rate / 100m, 2);
+                }
+                else if (plan.AffiliateRecurringCommissionType == "Fixed")
+                {
+                    commissionAmount = currency.ToUpper() == "USD" ? plan.AffiliateRecurringCommissionValueUsd : plan.AffiliateRecurringCommissionValueEgp;
+                }
+                else
+                {
+                    rate = currency.ToUpper() == "USD" ? plan.AffiliateRecurringCommissionValueUsd : plan.AffiliateRecurringCommissionValueEgp;
+                    commissionAmount = Math.Round(amount * rate / 100m, 2);
+                }
+            }
+            else
+            {
+                if (firstCommissionOverride.HasValue)
+                {
+                    rate = firstCommissionOverride.Value;
+                    commissionAmount = Math.Round(amount * rate / 100m, 2);
+                }
+                else if (plan.AffiliateFirstCommissionType == "Fixed")
+                {
+                    commissionAmount = currency.ToUpper() == "USD" ? plan.AffiliateFirstCommissionValueUsd : plan.AffiliateFirstCommissionValueEgp;
+                }
+                else
+                {
+                    rate = currency.ToUpper() == "USD" ? plan.AffiliateFirstCommissionValueUsd : plan.AffiliateFirstCommissionValueEgp;
+                    commissionAmount = Math.Round(amount * rate / 100m, 2);
+                }
+            }
+
+            if (isRecurring && recurringCommissionOverride < 0) return;
+            if (!isRecurring && firstCommissionOverride < 0) return;
+            if (commissionAmount <= 0) return;
 
             var commission = new AffiliateCommission
             {
@@ -263,7 +298,7 @@ namespace NexClone.Backend.Application.Services
                 SubscriptionId = subscriptionId,
                 PaymentId = paymentId,
                 Type = isRecurring ? CommissionType.Recurring : CommissionType.FirstPurchase,
-                Amount = Math.Round(amount * rate / 100m, 2),
+                Amount = commissionAmount,
                 Currency = currency,
                 Rate = rate,
                 Status = CommissionStatus.Pending,
@@ -314,12 +349,35 @@ namespace NexClone.Backend.Application.Services
             var plan = await _db.Plans.FindAsync(payment.PlanId.Value);
             if (plan == null) return;
 
-            // Determine the correct commission rate
-            decimal rate = isRecurring
-                ? plan.AffiliateRecurringCommissionPercent
-                : plan.AffiliateFirstCommissionPercent;
+            decimal commissionAmount = 0;
+            decimal rate = 0;
 
-            if (rate <= 0) return;
+            if (isRecurring)
+            {
+                if (plan.AffiliateRecurringCommissionType == "Fixed")
+                {
+                    commissionAmount = payment.Currency.ToUpper() == "USD" ? plan.AffiliateRecurringCommissionValueUsd : plan.AffiliateRecurringCommissionValueEgp;
+                }
+                else
+                {
+                    rate = payment.Currency.ToUpper() == "USD" ? plan.AffiliateRecurringCommissionValueUsd : plan.AffiliateRecurringCommissionValueEgp;
+                    commissionAmount = Math.Round(payment.Amount * rate / 100m, 2);
+                }
+            }
+            else
+            {
+                if (plan.AffiliateFirstCommissionType == "Fixed")
+                {
+                    commissionAmount = payment.Currency.ToUpper() == "USD" ? plan.AffiliateFirstCommissionValueUsd : plan.AffiliateFirstCommissionValueEgp;
+                }
+                else
+                {
+                    rate = payment.Currency.ToUpper() == "USD" ? plan.AffiliateFirstCommissionValueUsd : plan.AffiliateFirstCommissionValueEgp;
+                    commissionAmount = Math.Round(payment.Amount * rate / 100m, 2);
+                }
+            }
+
+            if (commissionAmount <= 0) return;
 
             // Check if StopOnCancellation applies
             if (isRecurring && settings.StopOnCancellation)
@@ -341,7 +399,7 @@ namespace NexClone.Backend.Application.Services
                 SubscriptionId = payment.SubscriptionId.Value,
                 PaymentId = payment.Id,
                 Type = isRecurring ? CommissionType.Recurring : CommissionType.FirstPurchase,
-                Amount = Math.Round(payment.Amount * rate / 100m, 2),
+                Amount = commissionAmount,
                 Currency = payment.Currency,         // NEVER converted
                 Rate = rate,
                 Status = CommissionStatus.Pending,

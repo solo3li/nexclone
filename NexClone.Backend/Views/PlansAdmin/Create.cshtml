@@ -356,27 +356,77 @@
         </div>
 
         <!-- ── Affiliate Commission Settings ─────────────────────────────────── -->
-        <hr style="margin: 2rem 0; border: none; border-top: 1px solid #e0e0e0;" />
+        <hr style="border:0; border-top: 1px solid #393939; margin-top: 2rem; margin-bottom: 2rem;" />
         <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem;">🤝 Affiliate Commission Settings</h3>
-        <p style="font-size: 0.8rem; color: #525252; margin-bottom: 1rem;">
-            These percentages apply under the ONE global Affiliate System. 0% means no affiliate commission.
+        <p style="margin-bottom: 1.5rem; color: #a8a8a8;">
+            Advanced settings per currency. Leave as 0 to disable commission for this plan.
         </p>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
-            <div class="bx--form-item">
-                <label for="AffiliateFirstCommissionPercent" class="bx--label">First Purchase Commission %</label>
-                <div class="bx--text-input__field-wrapper">
-                    <input id="AffiliateFirstCommissionPercent" type="number" min="0" max="100" step="0.01"
-                           class="bx--text-input" name="AffiliateFirstCommissionPercent" value="0" />
+
+        <h4 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem; margin-top: 1.5rem;">First Purchase Commission</h4>
+        <div class="bx--row" style="margin-bottom: 1.5rem;">
+            <div class="bx--col-lg-4 bx--col-md-4">
+                <div class="bx--form-item">
+                    <label for="AffiliateFirstCommissionType" class="bx--label">Commission Type</label>
+                    <div class="bx--select">
+                        <select id="AffiliateFirstCommissionType" class="bx--select-input" name="AffiliateFirstCommissionType">
+                            <option value="Percentage" selected>Percentage (%)</option>
+                            <option value="Fixed">Fixed Amount</option>
+                        </select>
+                        <svg class="bx--select__arrow" width="10" height="5" viewBox="0 0 10 5">
+                            <path d="M0 0l5 4.998L10 0z" fill-rule="evenodd" />
+                        </svg>
+                    </div>
                 </div>
-                <p class="bx--form__helper-text">e.g. 30 → affiliate earns 30% of the customer's first payment</p>
             </div>
-            <div class="bx--form-item">
-                <label for="AffiliateRecurringCommissionPercent" class="bx--label">Recurring Commission %</label>
-                <div class="bx--text-input__field-wrapper">
-                    <input id="AffiliateRecurringCommissionPercent" type="number" min="0" max="100" step="0.01"
-                           class="bx--text-input" name="AffiliateRecurringCommissionPercent" value="0" />
+            <div class="bx--col-lg-4 bx--col-md-4">
+                <div class="bx--form-item">
+                    <label for="AffiliateFirstCommissionValueUsd" class="bx--label">Value (USD)</label>
+                    <div class="bx--text-input__field-wrapper">
+                        <input id="AffiliateFirstCommissionValueUsd" type="number" min="0" step="0.01" class="bx--text-input" name="AffiliateFirstCommissionValueUsd" value="0" />
+                    </div>
                 </div>
-                <p class="bx--form__helper-text">e.g. 10 → affiliate earns 10% on each renewal after the first</p>
+            </div>
+            <div class="bx--col-lg-4 bx--col-md-4">
+                <div class="bx--form-item">
+                    <label for="AffiliateFirstCommissionValueEgp" class="bx--label">Value (EGP)</label>
+                    <div class="bx--text-input__field-wrapper">
+                        <input id="AffiliateFirstCommissionValueEgp" type="number" min="0" step="0.01" class="bx--text-input" name="AffiliateFirstCommissionValueEgp" value="0" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h4 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 1rem; margin-top: 1.5rem;">Recurring Commission (Renewals)</h4>
+        <div class="bx--row" style="margin-bottom: 1.5rem;">
+            <div class="bx--col-lg-4 bx--col-md-4">
+                <div class="bx--form-item">
+                    <label for="AffiliateRecurringCommissionType" class="bx--label">Commission Type</label>
+                    <div class="bx--select">
+                        <select id="AffiliateRecurringCommissionType" class="bx--select-input" name="AffiliateRecurringCommissionType">
+                            <option value="Percentage" selected>Percentage (%)</option>
+                            <option value="Fixed">Fixed Amount</option>
+                        </select>
+                        <svg class="bx--select__arrow" width="10" height="5" viewBox="0 0 10 5">
+                            <path d="M0 0l5 4.998L10 0z" fill-rule="evenodd" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="bx--col-lg-4 bx--col-md-4">
+                <div class="bx--form-item">
+                    <label for="AffiliateRecurringCommissionValueUsd" class="bx--label">Value (USD)</label>
+                    <div class="bx--text-input__field-wrapper">
+                        <input id="AffiliateRecurringCommissionValueUsd" type="number" min="0" step="0.01" class="bx--text-input" name="AffiliateRecurringCommissionValueUsd" value="0" />
+                    </div>
+                </div>
+            </div>
+            <div class="bx--col-lg-4 bx--col-md-4">
+                <div class="bx--form-item">
+                    <label for="AffiliateRecurringCommissionValueEgp" class="bx--label">Value (EGP)</label>
+                    <div class="bx--text-input__field-wrapper">
+                        <input id="AffiliateRecurringCommissionValueEgp" type="number" min="0" step="0.01" class="bx--text-input" name="AffiliateRecurringCommissionValueEgp" value="0" />
+                    </div>
+                </div>
             </div>
         </div>
 
