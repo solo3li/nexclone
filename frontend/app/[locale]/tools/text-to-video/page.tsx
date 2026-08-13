@@ -19,8 +19,6 @@ import {
   Copy, 
   CheckCheck, 
   Trash2, 
-  Info,
-  Play,
   Flame,
   CheckCircle2,
   AlertCircle
@@ -270,68 +268,21 @@ export default function TextToVideoPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-16" dir={isRtl ? 'rtl' : 'ltr'}>
-      {/* Studio Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-950/70 via-[#100522] to-[#080112] border border-violet-500/20 p-6 md:p-8 shadow-2xl backdrop-blur-2xl">
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-violet-600/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-fuchsia-600/15 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/30 text-violet-300 text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5 text-violet-400" />
-              <span>{isRtl ? "استوديو تحويل النص إلى فيديو الذكي" : "AI Text-to-Video Studio"}</span>
-            </div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
-              {isRtl ? "توليد الفيديوهات السينمائية بالذكاء الاصطناعي" : "Cinematic Text to Video Generator"}
-            </h1>
-            <p className="text-white/60 text-xs md:text-sm max-w-2xl leading-relaxed">
-              {isRtl 
-                ? "اكتب المشهد بدقة وسيتولى المحرك إخراجه بأعلى معايير الدقة مع نماذج Google Veo 3.1 و xAI Grok Imagine."
-                : "Describe your scene and let the studio render cinematic shots using Google Veo 3.1 and xAI Grok Imagine models."}
-            </p>
-          </div>
-
-          {/* Wallet Balance Badge */}
-          {user && (
-            <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl p-3.5 backdrop-blur-md shrink-0">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500/20 to-violet-500/20 flex items-center justify-center border border-amber-500/30">
-                <Coins className="w-5 h-5 text-amber-400" />
-              </div>
-              <div>
-                <span className="text-[10px] text-white/50 block font-medium">
-                  {isRtl ? "رصيد المحفظة المتاح" : "Available Balance"}
-                </span>
-                <div className="text-sm font-bold text-white flex items-center gap-2">
-                  <span className="text-amber-300 font-mono">{(user.standardCredits || 0).toLocaleString()}</span>
-                  <span className="text-[10px] text-white/40">Std</span>
-                  {user.premiumCredits > 0 && (
-                    <>
-                      <span className="text-fuchsia-300 font-mono font-bold">+{(user.premiumCredits).toLocaleString()}</span>
-                      <span className="text-[10px] text-white/40">Prem</span>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
+    <div className="max-w-7xl mx-auto pb-16 pt-2" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* Main Studio 2-Column Split Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         {/* ========================================================================= */}
-        {/* 1. Main Center/Right Area: Prompt Studio & Generation Canvas              */}
+        {/* 1. Main Center/Right Area: Prompt Studio & Action Bar                      */}
         {/* ========================================================================= */}
-        <div className="lg:col-span-8 space-y-6">
+        <div className="lg:col-span-8 space-y-5">
           
           {/* Main Prompt Box */}
-          <div className="bg-[#0e071e]/85 border border-white/10 rounded-3xl p-6 shadow-2xl space-y-4 backdrop-blur-xl relative overflow-hidden group focus-within:border-violet-500/50 transition-all">
+          <div className="bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 md:p-6 shadow-xl space-y-4 backdrop-blur-md relative overflow-hidden group focus-within:border-violet-500/50 transition-all">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
-                  <Wand2 className="w-4 h-4 text-violet-400" />
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
+                  <Wand2 className="w-3.5 h-3.5 text-violet-400" />
                 </div>
                 <div>
                   <label className="text-sm font-bold text-white block">
@@ -349,7 +300,7 @@ export default function TextToVideoPage() {
                   type="button"
                   onClick={handleEnhancePrompt}
                   title={isRtl ? "تحسين البرومت تلقائياً" : "Enhance with AI"}
-                  className="px-3 py-1.5 rounded-xl bg-violet-500/15 hover:bg-violet-500/30 text-violet-300 border border-violet-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95"
+                  className="px-3 py-1.5 rounded-lg bg-violet-500/15 hover:bg-violet-500/30 text-violet-300 border border-violet-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95"
                 >
                   <Sparkles className="w-3.5 h-3.5 text-violet-400" />
                   <span>{isRtl ? "تحسين ذكي ✨" : "Enhance AI ✨"}</span>
@@ -361,7 +312,7 @@ export default function TextToVideoPage() {
                       type="button"
                       onClick={handleCopyPrompt}
                       title={isRtl ? "نسخ النص" : "Copy"}
-                      className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/60 hover:text-white border border-white/5 transition-all"
+                      className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 hover:text-white border border-white/5 transition-all"
                     >
                       {copied ? <CheckCheck className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                     </button>
@@ -369,7 +320,7 @@ export default function TextToVideoPage() {
                       type="button"
                       onClick={handleClearPrompt}
                       title={isRtl ? "مسح النص" : "Clear"}
-                      className="p-1.5 rounded-xl bg-white/5 hover:bg-red-500/20 text-white/60 hover:text-red-300 border border-white/5 transition-all"
+                      className="p-1.5 rounded-lg bg-white/5 hover:bg-red-500/20 text-white/60 hover:text-red-300 border border-white/5 transition-all"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -383,16 +334,16 @@ export default function TextToVideoPage() {
               <textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                rows={6}
+                rows={7}
                 maxLength={2000}
                 placeholder={
                   isRtl 
                     ? "اكتب وصف المشهد بالتفصيل هنا... (مثال: لقطة سينمائية لغروب الشمس فوق بحيرة هادئة، انعكاسات ذهبية دافئة، حركة كاميرا درون بطيئة بدقة 4K)" 
                     : "Describe the video scene in rich detail... (e.g. Cinematic slow pan of futuristic cityscape at golden hour, neon lights, ultra 4k realism)"
                 }
-                className="w-full bg-[#070112] border border-white/10 rounded-2xl p-4 text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 resize-none text-sm md:text-base leading-relaxed transition-all shadow-inner font-sans"
+                className="w-full bg-[#06010f] border border-white/10 rounded-xl p-4 text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/40 resize-none text-sm md:text-base leading-relaxed transition-all shadow-inner font-sans"
               />
-              <div className="absolute bottom-3 end-3 text-[11px] text-white/40 font-mono bg-[#070112]/90 px-2 py-0.5 rounded-md border border-white/5">
+              <div className="absolute bottom-3 end-3 text-[11px] text-white/40 font-mono bg-[#06010f]/90 px-2 py-0.5 rounded border border-white/5">
                 {prompt.length} / 2000
               </div>
             </div>
@@ -409,7 +360,7 @@ export default function TextToVideoPage() {
                     key={idx}
                     type="button"
                     onClick={() => setPrompt(sample.text)}
-                    className="text-xs bg-white/5 hover:bg-violet-600/20 text-white/70 hover:text-white border border-white/10 hover:border-violet-500/40 rounded-xl px-3 py-1.5 transition-all text-start flex items-center gap-1.5"
+                    className="text-xs bg-white/5 hover:bg-violet-600/20 text-white/70 hover:text-white border border-white/10 hover:border-violet-500/40 rounded-lg px-3 py-1.5 transition-all text-start flex items-center gap-1.5"
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-violet-400 shrink-0" />
                     <span>{sample.title}</span>
@@ -421,9 +372,9 @@ export default function TextToVideoPage() {
 
           {/* Notifications: Error / Success */}
           {error && (
-            <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-400 text-sm flex items-start gap-3 backdrop-blur-md">
+            <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm flex items-start gap-3 backdrop-blur-md">
               <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-red-400" />
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 <p className="font-bold">{isRtl ? "خطأ في التوليد" : "Generation Error"}</p>
                 <p className="text-xs text-red-300/80">{error}</p>
               </div>
@@ -431,9 +382,9 @@ export default function TextToVideoPage() {
           )}
 
           {successMessage && (
-            <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-emerald-300 text-sm flex items-start gap-3 backdrop-blur-md">
+            <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-300 text-sm flex items-start gap-3 backdrop-blur-md">
               <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5 text-emerald-400" />
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 <p className="font-bold">{isRtl ? "تم إرسال الطلب بنجاح" : "Task Submitted Successfully"}</p>
                 <p className="text-xs text-emerald-300/80">{successMessage}</p>
               </div>
@@ -441,10 +392,10 @@ export default function TextToVideoPage() {
           )}
 
           {/* Large Action Bar & Submit CTA */}
-          <div className="bg-[#0e071e]/85 border border-white/10 rounded-3xl p-6 shadow-2xl backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 shadow-xl backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="space-y-1 text-center sm:text-start">
               <div className="flex items-center justify-center sm:justify-start gap-2 text-xs text-white/50">
-                <span>{isRtl ? "الموديل المختار:" : "Selected:"}</span>
+                <span>{isRtl ? "الموديل:" : "Model:"}</span>
                 <span className="font-bold text-white">{isRtl ? currentModel.nameAr : currentModel.name}</span>
                 <span>•</span>
                 <span className="text-cyan-300 font-bold">{resolution}</span>
@@ -452,7 +403,7 @@ export default function TextToVideoPage() {
                 <span className="text-white/80">{aspectRatio}</span>
               </div>
               <div className="flex items-center justify-center sm:justify-start gap-2">
-                <span className="text-xs text-white/50">{isRtl ? "تكلفة التوليد:" : "Cost:"}</span>
+                <span className="text-xs text-white/50">{isRtl ? "التكلفة:" : "Cost:"}</span>
                 <span className="text-xl font-black text-amber-300 font-mono">{estimatedCost}</span>
                 <span className="text-xs text-amber-300/70 font-semibold">{isRtl ? "نقطة" : "Credits"}</span>
                 {currentModel.discount && currentModel.discount !== "Flexible" && (
@@ -467,20 +418,20 @@ export default function TextToVideoPage() {
               type="button"
               onClick={handleGenerate}
               disabled={isLoading || !prompt.trim() || !hasSufficientCredits}
-              className={`w-full sm:w-auto px-8 py-4 rounded-2xl font-extrabold text-base flex items-center justify-center gap-3 transition-all shadow-xl ${
+              className={`w-full sm:w-auto px-7 py-3.5 rounded-xl font-extrabold text-sm md:text-base flex items-center justify-center gap-2.5 transition-all shadow-lg ${
                 isLoading || !prompt.trim() || !hasSufficientCredits
                   ? "bg-white/10 text-white/40 cursor-not-allowed border border-white/5"
-                  : "bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 bg-[length:200%_auto] hover:bg-[position:right_center] text-white shadow-violet-900/50 hover:shadow-violet-800/80 active:scale-[0.98]"
+                  : "bg-gradient-to-r from-violet-600 via-fuchsia-600 to-violet-600 bg-[length:200%_auto] hover:bg-[position:right_center] text-white shadow-violet-900/40 hover:shadow-violet-800/70 active:scale-[0.98]"
               }`}
             >
               {isLoading ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   <span>{isRtl ? "جاري الإرسال للطابور..." : "Submitting to Queue..."}</span>
                 </>
               ) : (
                 <>
-                  <Zap className="w-5 h-5 text-amber-300" />
+                  <Zap className="w-4 h-4 text-amber-300" />
                   <span>{isRtl ? `توليد الفيديو (${estimatedCost} نقطة)` : `Generate Video (${estimatedCost} Credits)`}</span>
                 </>
               )}
@@ -491,39 +442,39 @@ export default function TextToVideoPage() {
         {/* ========================================================================= */}
         {/* 2. Side Settings Panel: Compact Dropdowns & Parameters Controls           */}
         {/* ========================================================================= */}
-        <div className="lg:col-span-4 space-y-6">
-          <div className="sticky top-24 bg-[#0e071e]/90 border border-white/10 rounded-3xl p-6 shadow-2xl space-y-5 backdrop-blur-2xl">
+        <div className="lg:col-span-4 space-y-5">
+          <div className="sticky top-20 bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 shadow-xl space-y-4 backdrop-blur-md">
             
             <div className="flex items-center justify-between pb-3 border-b border-white/10">
-              <h2 className="text-base font-bold text-white flex items-center gap-2">
+              <h2 className="text-sm font-bold text-white flex items-center gap-2">
                 <SlidersHorizontal className="w-4 h-4 text-violet-400" />
-                <span>{isRtl ? "إعدادات وتخصيص الفيديو" : "Video Settings"}</span>
+                <span>{isRtl ? "إعدادات الفيديو" : "Video Settings"}</span>
               </h2>
               <span className="text-[10px] text-white/40 uppercase tracking-widest font-mono">Options</span>
             </div>
 
             {/* 1. Model & Tier Dropdown Select */}
-            <div className="space-y-2 relative" ref={modelRef}>
+            <div className="space-y-1.5 relative" ref={modelRef}>
               <label className="text-xs font-bold text-white/80 flex items-center gap-1.5">
                 <Layers className="w-3.5 h-3.5 text-violet-400" />
-                <span>{isRtl ? "الموديل والمحرك (AI Engine & Tier)" : "Model & Tier"}</span>
+                <span>{isRtl ? "الموديل والمحرك" : "Model & Tier"}</span>
               </label>
 
               <button
                 type="button"
                 onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
-                className="w-full bg-[#070112] border border-white/10 hover:border-violet-500/40 rounded-2xl p-3.5 text-start flex items-center justify-between gap-3 transition-all group"
+                className="w-full bg-[#06010f] border border-white/10 hover:border-violet-500/40 rounded-xl p-3 text-start flex items-center justify-between gap-2.5 transition-all group"
               >
                 <div className="space-y-0.5 truncate">
                   <div className="flex items-center gap-2 truncate">
-                    <span className="font-bold text-sm text-white truncate">
+                    <span className="font-bold text-xs md:text-sm text-white truncate">
                       {isRtl ? currentModel.nameAr : currentModel.name}
                     </span>
-                    <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded shrink-0">
+                    <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-1 py-0.5 rounded shrink-0">
                       {currentModel.discount}
                     </span>
                   </div>
-                  <p className="text-[11px] text-white/40 truncate">
+                  <p className="text-[10px] text-white/40 truncate">
                     {isRtl ? currentModel.descAr : currentModel.desc}
                   </p>
                 </div>
@@ -532,8 +483,8 @@ export default function TextToVideoPage() {
 
               {/* Model Dropdown Menu */}
               {isModelDropdownOpen && (
-                <div className="absolute z-50 top-full mt-2 w-full bg-[#0d041c] border border-violet-500/30 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
-                  <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-violet-400/70 border-b border-white/5">
+                <div className="absolute z-50 top-full mt-1.5 w-full bg-[#0d041c] border border-violet-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-violet-400/70 border-b border-white/5">
                     {isRtl ? "نماذج Google Veo 3.1" : "Google Veo 3.1 Models"}
                   </div>
 
@@ -544,7 +495,7 @@ export default function TextToVideoPage() {
                         key={m.id}
                         type="button"
                         onClick={() => handleModelSelect(m.id)}
-                        className={`w-full text-start p-2.5 rounded-xl transition-all flex items-center justify-between gap-2 ${
+                        className={`w-full text-start p-2 rounded-lg transition-all flex items-center justify-between gap-2 ${
                           isSelected 
                             ? "bg-violet-600/25 text-white border border-violet-500/40" 
                             : "hover:bg-white/5 text-white/70 hover:text-white"
@@ -557,12 +508,12 @@ export default function TextToVideoPage() {
                           </div>
                           <p className="text-[10px] text-white/40">{isRtl ? m.badgeAr : m.badge}</p>
                         </div>
-                        {isSelected && <Check className="w-4 h-4 text-violet-400 shrink-0" />}
+                        {isSelected && <Check className="w-3.5 h-3.5 text-violet-400 shrink-0" />}
                       </button>
                     );
                   })}
 
-                  <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-fuchsia-400/70 border-b border-white/5 pt-2">
+                  <div className="px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-fuchsia-400/70 border-b border-white/5 pt-2">
                     {isRtl ? "نماذج xAI Grok" : "xAI Grok Models"}
                   </div>
 
@@ -573,7 +524,7 @@ export default function TextToVideoPage() {
                         key={m.id}
                         type="button"
                         onClick={() => handleModelSelect(m.id)}
-                        className={`w-full text-start p-2.5 rounded-xl transition-all flex items-center justify-between gap-2 ${
+                        className={`w-full text-start p-2 rounded-lg transition-all flex items-center justify-between gap-2 ${
                           isSelected 
                             ? "bg-fuchsia-600/25 text-white border border-fuchsia-500/40" 
                             : "hover:bg-white/5 text-white/70 hover:text-white"
@@ -585,7 +536,7 @@ export default function TextToVideoPage() {
                           </div>
                           <p className="text-[10px] text-white/40">{isRtl ? m.badgeAr : m.badge}</p>
                         </div>
-                        {isSelected && <Check className="w-4 h-4 text-fuchsia-400 shrink-0" />}
+                        {isSelected && <Check className="w-3.5 h-3.5 text-fuchsia-400 shrink-0" />}
                       </button>
                     );
                   })}
@@ -594,22 +545,22 @@ export default function TextToVideoPage() {
             </div>
 
             {/* 2. Resolution Dropdown Select */}
-            <div className="space-y-2 relative" ref={resRef}>
+            <div className="space-y-1.5 relative" ref={resRef}>
               <label className="text-xs font-bold text-white/80 flex items-center gap-1.5">
                 <Monitor className="w-3.5 h-3.5 text-amber-400" />
-                <span>{isRtl ? "دقة الفيديو (Resolution)" : "Resolution"}</span>
+                <span>{isRtl ? "دقة الفيديو" : "Resolution"}</span>
               </label>
 
               <button
                 type="button"
                 onClick={() => setIsResDropdownOpen(!isResDropdownOpen)}
-                className="w-full bg-[#070112] border border-white/10 hover:border-amber-500/40 rounded-2xl p-3.5 text-start flex items-center justify-between gap-3 transition-all"
+                className="w-full bg-[#06010f] border border-white/10 hover:border-amber-500/40 rounded-xl p-3 text-start flex items-center justify-between gap-2.5 transition-all"
               >
                 <div>
-                  <span className="font-bold text-sm text-white">
+                  <span className="font-bold text-xs md:text-sm text-white block">
                     {RESOLUTIONS.find(r => r.id === resolution)?.label || resolution}
                   </span>
-                  <span className="text-[11px] text-white/40 block">
+                  <span className="text-[10px] text-white/40 block">
                     {isRtl 
                       ? RESOLUTIONS.find(r => r.id === resolution)?.descAr 
                       : RESOLUTIONS.find(r => r.id === resolution)?.desc}
@@ -620,7 +571,7 @@ export default function TextToVideoPage() {
 
               {/* Resolution Dropdown Menu */}
               {isResDropdownOpen && (
-                <div className="absolute z-40 top-full mt-2 w-full bg-[#0d041c] border border-amber-500/30 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="absolute z-40 top-full mt-1.5 w-full bg-[#0d041c] border border-amber-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
                   {RESOLUTIONS.filter(r => currentModel.supportedResolutions.includes(r.id)).map((r) => {
                     const isSelected = resolution === r.id;
                     const priceTag = currentModel.isPerSecond
@@ -632,7 +583,7 @@ export default function TextToVideoPage() {
                         key={r.id}
                         type="button"
                         onClick={() => { setResolution(r.id); setIsResDropdownOpen(false); }}
-                        className={`w-full text-start p-2.5 rounded-xl transition-all flex items-center justify-between gap-2 ${
+                        className={`w-full text-start p-2 rounded-lg transition-all flex items-center justify-between gap-2 ${
                           isSelected 
                             ? "bg-amber-500/20 text-white border border-amber-500/40" 
                             : "hover:bg-white/5 text-white/70 hover:text-white"
@@ -654,7 +605,7 @@ export default function TextToVideoPage() {
             </div>
 
             {/* 3. Aspect Ratio Dropdown Select */}
-            <div className="space-y-2 relative" ref={aspectRef}>
+            <div className="space-y-1.5 relative" ref={aspectRef}>
               <label className="text-xs font-bold text-white/80 flex items-center gap-1.5">
                 <Film className="w-3.5 h-3.5 text-cyan-400" />
                 <span>{isRtl ? "أبعاد الفيديو (Aspect Ratio)" : "Aspect Ratio"}</span>
@@ -663,7 +614,7 @@ export default function TextToVideoPage() {
               <button
                 type="button"
                 onClick={() => setIsAspectDropdownOpen(!isAspectDropdownOpen)}
-                className="w-full bg-[#070112] border border-white/10 hover:border-cyan-500/40 rounded-2xl p-3.5 text-start flex items-center justify-between gap-3 transition-all"
+                className="w-full bg-[#06010f] border border-white/10 hover:border-cyan-500/40 rounded-xl p-3 text-start flex items-center justify-between gap-2.5 transition-all"
               >
                 <div className="flex items-center gap-2.5">
                   {(() => {
@@ -671,10 +622,10 @@ export default function TextToVideoPage() {
                     return <IconComp className="w-4 h-4 text-cyan-400" />;
                   })()}
                   <div>
-                    <span className="font-bold text-sm text-white">
+                    <span className="font-bold text-xs md:text-sm text-white block">
                       {aspectRatio}
                     </span>
-                    <span className="text-[11px] text-white/40 block">
+                    <span className="text-[10px] text-white/40 block">
                       {isRtl 
                         ? ASPECT_RATIOS.find(a => a.id === aspectRatio)?.descAr 
                         : ASPECT_RATIOS.find(a => a.id === aspectRatio)?.desc}
@@ -686,7 +637,7 @@ export default function TextToVideoPage() {
 
               {/* Aspect Ratio Dropdown Menu */}
               {isAspectDropdownOpen && (
-                <div className="absolute z-30 top-full mt-2 w-full bg-[#0d041c] border border-cyan-500/30 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="absolute z-30 top-full mt-1.5 w-full bg-[#0d041c] border border-cyan-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
                   {ASPECT_RATIOS.map((a) => {
                     const isSelected = aspectRatio === a.id;
                     const IconComp = a.icon;
@@ -695,7 +646,7 @@ export default function TextToVideoPage() {
                         key={a.id}
                         type="button"
                         onClick={() => { setAspectRatio(a.id); setIsAspectDropdownOpen(false); }}
-                        className={`w-full text-start p-2.5 rounded-xl transition-all flex items-center justify-between gap-2 ${
+                        className={`w-full text-start p-2 rounded-lg transition-all flex items-center justify-between gap-2 ${
                           isSelected 
                             ? "bg-cyan-500/20 text-white border border-cyan-500/40" 
                             : "hover:bg-white/5 text-white/70 hover:text-white"
@@ -718,13 +669,13 @@ export default function TextToVideoPage() {
 
             {/* 4. Grok Duration Slider (Shown only when Grok is active) */}
             {currentModel.isPerSecond && (
-              <div className="space-y-3 pt-3 border-t border-white/5">
+              <div className="space-y-2 pt-2 border-t border-white/5">
                 <div className="flex justify-between items-center">
                   <label className="text-xs font-bold text-white/80 flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5 text-fuchsia-400" />
-                    <span>{isRtl ? "مدة الفيديو (ثواني)" : "Duration (Seconds)"}</span>
+                    <span>{isRtl ? "مدة الفيديو" : "Duration"}</span>
                   </label>
-                  <span className="text-xs font-mono font-extrabold text-fuchsia-300 bg-fuchsia-500/15 border border-fuchsia-500/30 px-2 py-0.5 rounded-lg">
+                  <span className="text-xs font-mono font-extrabold text-fuchsia-300 bg-fuchsia-500/15 border border-fuchsia-500/30 px-2 py-0.5 rounded">
                     {duration}s
                   </span>
                 </div>
@@ -748,8 +699,8 @@ export default function TextToVideoPage() {
             )}
 
             {/* 5. Live Summary & Wallet Widget */}
-            <div className="pt-3 border-t border-white/5 space-y-3">
-              <div className="bg-[#070112] border border-white/5 rounded-2xl p-4 space-y-2.5">
+            <div className="pt-2 border-t border-white/5 space-y-2.5">
+              <div className="bg-[#06010f] border border-white/5 rounded-xl p-3.5 space-y-2">
                 <div className="flex justify-between items-center text-xs">
                   <span className="text-white/50">{isRtl ? "تكلفة العملية:" : "Operation Cost:"}</span>
                   <span className="font-bold text-amber-300 font-mono">{estimatedCost} Cr</span>
@@ -758,7 +709,7 @@ export default function TextToVideoPage() {
                   <span className="text-white/50">{isRtl ? "الرصيد المتاح:" : "Your Balance:"}</span>
                   <span className="font-bold text-white font-mono">{totalUserCredits.toLocaleString()} Cr</span>
                 </div>
-                <div className="flex justify-between items-center text-xs pt-2 border-t border-white/5">
+                <div className="flex justify-between items-center text-xs pt-1.5 border-t border-white/5">
                   <span className="text-white/50">{isRtl ? "الرصيد المتبقي:" : "Remaining:"}</span>
                   <span className={`font-bold font-mono ${hasSufficientCredits ? "text-emerald-400" : "text-red-400"}`}>
                     {(totalUserCredits - estimatedCost).toLocaleString()} Cr
@@ -767,9 +718,9 @@ export default function TextToVideoPage() {
               </div>
 
               {!hasSufficientCredits && (
-                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2">
+                <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 shrink-0" />
-                  <span>{isRtl ? "رصيدك غير كافٍ لتنفيذ هذه العملية. يرجى شحن الرصيد." : "Insufficient credits for this task. Please top up."}</span>
+                  <span>{isRtl ? "رصيدك غير كافٍ. يرجى شحن الرصيد." : "Insufficient credits. Please top up."}</span>
                 </div>
               )}
             </div>
