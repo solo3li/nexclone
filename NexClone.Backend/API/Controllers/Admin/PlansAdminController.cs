@@ -26,6 +26,51 @@ namespace NexClone.Backend.API.Controllers.Admin
             return View(plans);
         }
 
+        [AllowAnonymous]
+        [HttpGet("seed-test-plans")]
+        public async Task<IActionResult> SeedTestPlans()
+        {
+            var plans = new List<Plan>
+            {
+                new Plan
+                {
+                    Name = "Basic Monthly", NameAr = "أساسي شهري",
+                    DurationDays = 30, PriceUsd = 10, PriceEgp = 500,
+                    AffiliateFirstCommissionType = "Percentage", AffiliateFirstCommissionValueUsd = 20, AffiliateFirstCommissionValueEgp = 20,
+                    AffiliateRecurringCommissionType = "Percentage", AffiliateRecurringCommissionValueUsd = 10, AffiliateRecurringCommissionValueEgp = 10,
+                    MonthlyCredits = 100, StandardCredits = 100, PremiumCredits = 10
+                },
+                new Plan
+                {
+                    Name = "Pro Quarterly", NameAr = "احترافي ربع سنوي",
+                    DurationDays = 90, PriceUsd = 25, PriceEgp = 1200,
+                    AffiliateFirstCommissionType = "Fixed", AffiliateFirstCommissionValueUsd = 10, AffiliateFirstCommissionValueEgp = 400,
+                    AffiliateRecurringCommissionType = "Percentage", AffiliateRecurringCommissionValueUsd = 15, AffiliateRecurringCommissionValueEgp = 15,
+                    MonthlyCredits = 350, StandardCredits = 350, PremiumCredits = 40
+                },
+                new Plan
+                {
+                    Name = "Elite Semi-Annual", NameAr = "نخبة نصف سنوي",
+                    DurationDays = 180, PriceUsd = 45, PriceEgp = 2200,
+                    AffiliateFirstCommissionType = "Fixed", AffiliateFirstCommissionValueUsd = 20, AffiliateFirstCommissionValueEgp = 900,
+                    AffiliateRecurringCommissionType = "Fixed", AffiliateRecurringCommissionValueUsd = 5, AffiliateRecurringCommissionValueEgp = 250,
+                    MonthlyCredits = 800, StandardCredits = 800, PremiumCredits = 100
+                },
+                new Plan
+                {
+                    Name = "Ultimate Annual", NameAr = "ألتيميت سنوي",
+                    DurationDays = 365, PriceUsd = 80, PriceEgp = 4000,
+                    AffiliateFirstCommissionType = "Fixed", AffiliateFirstCommissionValueUsd = 40, AffiliateFirstCommissionValueEgp = 1800,
+                    AffiliateRecurringCommissionType = "Fixed", AffiliateRecurringCommissionValueUsd = 10, AffiliateRecurringCommissionValueEgp = 500,
+                    MonthlyCredits = 2000, StandardCredits = 2000, PremiumCredits = 300
+                }
+            };
+            
+            _context.Plans.AddRange(plans);
+            await _context.SaveChangesAsync();
+            return Ok("Seeded 4 test plans successfully with advanced affiliate settings.");
+        }
+
         public async Task<IActionResult> Create()
         {
             ViewData["Title"] = "Create Plan";

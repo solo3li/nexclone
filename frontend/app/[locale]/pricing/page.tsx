@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { usePlansStore } from '@/store/usePlansStore';
 import { Check, Sparkles, Zap, Server } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -17,8 +17,31 @@ export default function PricingPage() {
   const [currency, setCurrency] = useState<'USD' | 'EGP'>('USD');
   const [checkoutCurrency, setCheckoutCurrency] = useState<'USD' | 'EGP'>('USD');
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+  const [selectedDuration, setSelectedDuration] = useState<number>(30);
   const locale = useLocale();
   const isRtl = locale === 'ar';
+
+  const availableDurations = useMemo(() => {
+    return Array.from(new Set(plans.map(p => p.durationDays))).sort((a, b) => a - b);
+  }, [plans]);
+
+  useEffect(() => {
+    if (availableDurations.length > 0 && !availableDurations.includes(selectedDuration)) {
+      setSelectedDuration(availableDurations[0]);
+    }
+  }, [availableDurations, selectedDuration]);
+
+  const getDurationLabel = (days: number) => {
+    switch (days) {
+      case 30: return isRtl ? 'شهري' : 'Monthly';
+      case 90: return isRtl ? 'ربع سنوي (3 شهور)' : 'Quarterly (3 Months)';
+      case 180: return isRtl ? 'نصف سنوي (6 شهور)' : 'Semi-Annual (6 Months)';
+      case 365: return isRtl ? 'سنوي' : 'Annual';
+      default: return `${days} ${isRtl ? 'يوم' : 'Days'}`;
+    }
+  };
+
+  const displayedPlans = plans.filter(p => p.durationDays === selectedDuration);
 
   useEffect(() => {
     fetchPlans();
@@ -79,6 +102,29 @@ export default function PricingPage() {
               EGP
             </button>
           </motion.div>
+
+          {availableDurations.length > 0 && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="flex flex-wrap justify-center gap-3 mt-8"
+            >
+              {availableDurations.map(duration => (
+                <button
+                  key={duration}
+                  onClick={() => setSelectedDuration(duration)}
+                  className={`px-6 py-2.5 rounded-full font-semibold transition-all duration-300 border ${
+                    selectedDuration === duration 
+                      ? 'bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-white border-purple-500/50 shadow-[0_0_20px_rgba(168,85,247,0.3)]' 
+                      : 'bg-white/5 text-gray-400 border-white/10 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  {getDurationLabel(duration)}
+                </button>
+              ))}
+            </motion.div>
+          )}
         </div>
 
         {isLoading ? (
@@ -91,7 +137,7 @@ export default function PricingPage() {
           </div>
         ) : (
           <div className="flex flex-wrap justify-center gap-8 items-start">
-            {plans.map((plan, index) => {
+            {displayedPlans.map((plan, index) => {
               const isPopular = index === 1;
               const price = currency === 'USD' ? plan.priceUsd : plan.priceEgp;
               const currencySymbol = currency === 'USD' ? '$' : 'EGP ';
