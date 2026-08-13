@@ -13,7 +13,6 @@ import {
   Smartphone, 
   Square, 
   Coins, 
-  Clock, 
   Check, 
   Layers, 
   Copy, 
@@ -23,17 +22,13 @@ import {
   CheckCircle2,
   AlertCircle,
   Upload,
-  X,
-  Image as ImageIcon,
-  ArrowRight,
-  MoveRight
+  X
 } from "lucide-react";
 import api from "../../../../src/utils/api";
 import { useAppStore } from "../../../../src/store/useAppStore";
 
 interface ModelOption {
   id: string;
-  family: "veo" | "grok";
   name: string;
   nameAr: string;
   badge: string;
@@ -41,7 +36,6 @@ interface ModelOption {
   desc: string;
   descAr: string;
   discount?: string;
-  isPerSecond?: boolean;
   supportedResolutions: string[];
   prices: { [resolution: string]: number };
 }
@@ -49,7 +43,6 @@ interface ModelOption {
 const MODELS: ModelOption[] = [
   {
     id: "veo-3.1-fast",
-    family: "veo",
     name: "Google Veo 3.1 Fast",
     nameAr: "جوجل فيو 3.1 فاست (سريع)",
     badge: "Fast & 4K",
@@ -57,13 +50,11 @@ const MODELS: ModelOption[] = [
     desc: "Ultra fast 8-second multi-frame reference interpolation",
     descAr: "توليد فائق السرعة لمدة 8 ثواني مع تحول سينمائي واقعي",
     discount: "-83%",
-    isPerSecond: false,
     supportedResolutions: ["720p", "1080p", "4k"],
     prices: { "720p": 30, "1080p": 37.5, "4k": 90 }
   },
   {
     id: "veo-3.1-lite",
-    family: "veo",
     name: "Google Veo 3.1 Lite",
     nameAr: "جوجل فيو 3.1 لايت (اقتصادي)",
     badge: "Budget Friendly",
@@ -71,13 +62,11 @@ const MODELS: ModelOption[] = [
     desc: "Lowest credit consumption for fast scene sequencing",
     descAr: "أقل استهلاك للنقاط ومثالي للتجارب وتتابع المشاهد السريع",
     discount: "-84%",
-    isPerSecond: false,
     supportedResolutions: ["720p", "1080p", "4k"],
     prices: { "720p": 15, "1080p": 22.5, "4k": 75 }
   },
   {
     id: "veo-3.1-quality",
-    family: "veo",
     name: "Google Veo 3.1 Quality",
     nameAr: "جوجل فيو 3.1 كواليتي (سينمائي)",
     badge: "Studio Cinema Grade",
@@ -85,28 +74,12 @@ const MODELS: ModelOption[] = [
     desc: "Maximum visual fidelity and seamless transition blending",
     descAr: "أعلى دقة تفاصيل ونقاء بصري مع اندماج سلس بين الصور",
     discount: "-69%",
-    isPerSecond: false,
     supportedResolutions: ["720p", "1080p", "4k"],
     prices: { "720p": 225, "1080p": 232.5, "4k": 285 }
-  },
-  {
-    id: "grok-imagine",
-    family: "grok",
-    name: "xAI Grok Imagine",
-    nameAr: "إكس إيه آي جروك إيماجين",
-    badge: "Flexible Duration",
-    badgeAr: "مدة مرنة 1-30 ثانية",
-    desc: "Dynamic motion bridging frames with per-second billing",
-    descAr: "تحريك عالي الديناميكية مع مدة مرنة وتسعير بالثانية",
-    discount: "Flexible",
-    isPerSecond: true,
-    supportedResolutions: ["480p", "720p", "1080p"],
-    prices: { "480p": 2.4, "720p": 4.5, "1080p": 8.0 }
   }
 ];
 
 const RESOLUTIONS = [
-  { id: "480p", label: "480p (SD)", desc: "Standard Definition", descAr: "دقة قياسية خفيفة" },
   { id: "720p", label: "720p (HD)", desc: "High Definition", descAr: "عالي الدقة HD" },
   { id: "1080p", label: "1080p (FHD)", desc: "Full High Definition", descAr: "دقة كاملة Full HD" },
   { id: "4k", label: "4K (UHD)", desc: "Ultra High Definition", descAr: "دقة سينمائية فائقة 4K" }
@@ -144,11 +117,10 @@ export default function ReferenceToVideoPage() {
   const isRtl = locale === 'ar';
   const { user } = useAppStore();
 
-  // Selected Options
+  // Selected Options (Google Veo 3.1 only)
   const [selectedModelId, setSelectedModelId] = useState<string>("veo-3.1-fast");
   const [resolution, setResolution] = useState<string>("1080p");
   const [aspectRatio, setAspectRatio] = useState<string>("16:9");
-  const [duration, setDuration] = useState<number>(6); // For Grok (1-30s)
   const [prompt, setPrompt] = useState<string>("");
 
   // Reference Images Slots (Up to 3 distinct frames)
@@ -205,15 +177,10 @@ export default function ReferenceToVideoPage() {
     setIsModelDropdownOpen(false);
   };
 
-  // Calculate live estimated cost
+  // Calculate live estimated cost for Veo (8 seconds)
   const estimatedCost = useMemo(() => {
-    if (currentModel.isPerSecond) {
-      const rate = currentModel.prices[resolution] || 4.5;
-      return +(rate * duration).toFixed(2);
-    } else {
-      return currentModel.prices[resolution] || currentModel.prices["1080p"] || 37.5;
-    }
-  }, [currentModel, resolution, duration]);
+    return currentModel.prices[resolution] || currentModel.prices["1080p"] || 37.5;
+  }, [currentModel, resolution]);
 
   // Total balance & check sufficiency
   const totalUserCredits = (user?.standardCredits || 0) + (user?.premiumCredits || 0);
@@ -288,12 +255,7 @@ export default function ReferenceToVideoPage() {
       formData.append("model", currentModel.id);
       formData.append("resolution", resolution);
       formData.append("aspectRatio", aspectRatio);
-
-      if (currentModel.family === "grok") {
-        formData.append("duration", duration.toString());
-      } else {
-        formData.append("duration", "8"); // Veo 8s standard
-      }
+      formData.append("duration", "8"); // Veo 8s standard
 
       const res = await api.post("/api/video/start-tool/reference-to-video", formData);
       setSuccessMessage(
@@ -331,7 +293,7 @@ export default function ReferenceToVideoPage() {
                     {isRtl ? "شريط الإطارات المرجعية (Storyboard Frames)" : "Storyboard Reference Frames"}
                   </label>
                   <span className="text-[11px] text-white/40 block">
-                    {isRtl ? "ارفع حتى 3 صور لتوجيه بداية المشهد، الشخصية، ونهايته" : "Upload up to 3 frames to guide scene progression and character style"}
+                    {isRtl ? "ارفع حتى 3 صور لتوجيه بداية المشهد، الشخصية، ونهايته مع محرك Google Veo" : "Upload up to 3 frames to guide scene progression and character style via Google Veo"}
                   </span>
                 </div>
               </div>
@@ -531,12 +493,14 @@ export default function ReferenceToVideoPage() {
                 <span className="text-cyan-300 font-bold">{resolution}</span>
                 <span>•</span>
                 <span className="text-white/80">{aspectRatio}</span>
+                <span>•</span>
+                <span className="text-emerald-400 font-mono font-bold">8s</span>
               </div>
               <div className="flex items-center justify-center sm:justify-start gap-2">
                 <span className="text-xs text-white/50">{isRtl ? "التكلفة:" : "Cost:"}</span>
                 <span className="text-xl font-black text-amber-300 font-mono">{estimatedCost}</span>
                 <span className="text-xs text-amber-300/70 font-semibold">{isRtl ? "نقطة" : "Credits"}</span>
-                {currentModel.discount && currentModel.discount !== "Flexible" && (
+                {currentModel.discount && (
                   <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 rounded">
                     {currentModel.discount} {isRtl ? "خصم" : "OFF"}
                   </span>
@@ -578,7 +542,7 @@ export default function ReferenceToVideoPage() {
             <div className="flex items-center justify-between pb-3 border-b border-white/10">
               <h2 className="text-sm font-bold text-white flex items-center gap-2">
                 <SlidersHorizontal className="w-4 h-4 text-emerald-400" />
-                <span>{isRtl ? "إعدادات الرندر المرجعي" : "Rendering Settings"}</span>
+                <span>{isRtl ? "إعدادات Google Veo" : "Google Veo Settings"}</span>
               </h2>
               <span className="text-[10px] text-white/40 uppercase tracking-widest font-mono">Options</span>
             </div>
@@ -587,7 +551,7 @@ export default function ReferenceToVideoPage() {
             <div className="space-y-1.5 relative" ref={modelRef}>
               <label className="text-xs font-bold text-white/80 flex items-center gap-1.5">
                 <Layers className="w-3.5 h-3.5 text-emerald-400" />
-                <span>{isRtl ? "الموديل والمحرك" : "Model & Tier"}</span>
+                <span>{isRtl ? "موديل Google Veo 3.1" : "Google Veo 3.1 Model"}</span>
               </label>
 
               <button
@@ -615,17 +579,17 @@ export default function ReferenceToVideoPage() {
               {isModelDropdownOpen && (
                 <div className="absolute z-50 top-full mt-1.5 w-full bg-[#0d041c] border border-emerald-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
                   <div className="px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-emerald-400/70 border-b border-white/5">
-                    {isRtl ? "نماذج Google Veo 3.1" : "Google Veo 3.1 Models"}
+                    {isRtl ? "نماذج Google Veo 3.1 المرجعية" : "Google Veo 3.1 Reference Models"}
                   </div>
 
-                  {MODELS.filter(m => m.family === "veo").map((m) => {
+                  {MODELS.map((m) => {
                     const isSelected = selectedModelId === m.id;
                     return (
                       <button
                         key={m.id}
                         type="button"
                         onClick={() => handleModelSelect(m.id)}
-                        className={`w-full text-start p-2 rounded-lg transition-all flex items-center justify-between gap-2 ${
+                        className={`w-full text-start p-2.5 rounded-lg transition-all flex items-center justify-between gap-2 ${
                           isSelected 
                             ? "bg-emerald-600/25 text-white border border-emerald-500/40" 
                             : "hover:bg-white/5 text-white/70 hover:text-white"
@@ -639,34 +603,6 @@ export default function ReferenceToVideoPage() {
                           <p className="text-[10px] text-white/40">{isRtl ? m.badgeAr : m.badge}</p>
                         </div>
                         {isSelected && <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />}
-                      </button>
-                    );
-                  })}
-
-                  <div className="px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-fuchsia-400/70 border-b border-white/5 pt-2">
-                    {isRtl ? "نماذج xAI Grok" : "xAI Grok Models"}
-                  </div>
-
-                  {MODELS.filter(m => m.family === "grok").map((m) => {
-                    const isSelected = selectedModelId === m.id;
-                    return (
-                      <button
-                        key={m.id}
-                        type="button"
-                        onClick={() => handleModelSelect(m.id)}
-                        className={`w-full text-start p-2 rounded-lg transition-all flex items-center justify-between gap-2 ${
-                          isSelected 
-                            ? "bg-fuchsia-600/25 text-white border border-fuchsia-500/40" 
-                            : "hover:bg-white/5 text-white/70 hover:text-white"
-                        }`}
-                      >
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-xs text-white">{isRtl ? m.nameAr : m.name}</span>
-                          </div>
-                          <p className="text-[10px] text-white/40">{isRtl ? m.badgeAr : m.badge}</p>
-                        </div>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-fuchsia-400 shrink-0" />}
                       </button>
                     );
                   })}
@@ -702,18 +638,16 @@ export default function ReferenceToVideoPage() {
               {/* Resolution Dropdown Menu */}
               {isResDropdownOpen && (
                 <div className="absolute z-40 top-full mt-1.5 w-full bg-[#0d041c] border border-amber-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
-                  {RESOLUTIONS.filter(r => currentModel.supportedResolutions.includes(r.id)).map((r) => {
+                  {RESOLUTIONS.map((r) => {
                     const isSelected = resolution === r.id;
-                    const priceTag = currentModel.isPerSecond
-                      ? `${currentModel.prices[r.id]} Cr/s`
-                      : `${currentModel.prices[r.id]} Cr (8s)`;
+                    const priceTag = `${currentModel.prices[r.id]} Cr (8s)`;
 
                     return (
                       <button
                         key={r.id}
                         type="button"
                         onClick={() => { setResolution(r.id); setIsResDropdownOpen(false); }}
-                        className={`w-full text-start p-2 rounded-lg transition-all flex items-center justify-between gap-2 ${
+                        className={`w-full text-start p-2.5 rounded-lg transition-all flex items-center justify-between gap-2 ${
                           isSelected 
                             ? "bg-amber-500/20 text-white border border-amber-500/40" 
                             : "hover:bg-white/5 text-white/70 hover:text-white"
@@ -797,42 +731,11 @@ export default function ReferenceToVideoPage() {
               )}
             </div>
 
-            {/* 4. Grok Duration Slider (Shown only when Grok is active) */}
-            {currentModel.isPerSecond && (
-              <div className="space-y-2 pt-2 border-t border-white/5">
-                <div className="flex justify-between items-center">
-                  <label className="text-xs font-bold text-white/80 flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-fuchsia-400" />
-                    <span>{isRtl ? "مدة الفيديو" : "Duration"}</span>
-                  </label>
-                  <span className="text-xs font-mono font-extrabold text-fuchsia-300 bg-fuchsia-500/15 border border-fuchsia-500/30 px-2 py-0.5 rounded">
-                    {duration}s
-                  </span>
-                </div>
-
-                <input 
-                  type="range" 
-                  min="1" 
-                  max="30" 
-                  step="1" 
-                  value={duration} 
-                  onChange={(e) => setDuration(Number(e.target.value))}
-                  className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-fuchsia-500"
-                />
-
-                <div className="flex justify-between text-[10px] text-white/40 font-mono">
-                  <span>1s</span>
-                  <span>15s</span>
-                  <span>30s</span>
-                </div>
-              </div>
-            )}
-
-            {/* 5. Live Summary & Wallet Widget */}
+            {/* 4. Live Summary & Wallet Widget */}
             <div className="pt-2 border-t border-white/5 space-y-2.5">
               <div className="bg-[#06010f] border border-white/5 rounded-xl p-3.5 space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-white/50">{isRtl ? "تكلفة العملية:" : "Operation Cost:"}</span>
+                  <span className="text-white/50">{isRtl ? "تكلفة العملية (8 ثواني):" : "Cost (8 seconds):"}</span>
                   <span className="font-bold text-amber-300 font-mono">{estimatedCost} Cr</span>
                 </div>
                 <div className="flex justify-between items-center text-xs">

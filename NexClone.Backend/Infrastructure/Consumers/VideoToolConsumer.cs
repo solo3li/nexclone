@@ -136,6 +136,15 @@ namespace NexClone.Backend.Infrastructure.Consumers
         private string ResolveModelId(string model, string toolType)
         {
             var m = (model ?? "").Trim().ToLower();
+            if (toolType == "reference-to-video")
+            {
+                if (m == "veo-3.1-fast" || m == "veo-fast" || m == "google/veo3-1-fast-t2v" || m == "google/veo3-1-fast-r2v")
+                    return "google/veo3-1-fast-r2v";
+                if (m == "veo-3.1-lite" || m == "veo-lite" || m == "google/veo3-1-lite-t2v" || m == "google/veo3-1-lite-r2v")
+                    return "google/veo3-1-lite-r2v";
+                if (m == "veo-3.1-quality" || m == "veo" || m == "veo-quality" || m == "google/veo3-1-t2v" || m == "google/veo3-1-r2v")
+                    return "google/veo3-1-r2v";
+            }
             if (m == "veo-3.1-fast" || m == "veo-fast" || m == "google/veo3-1-fast-t2v")
                 return toolType == "image-to-video" ? "google/veo3-1-fast-i2v" : "google/veo3-1-fast-t2v";
             if (m == "veo-3.1-lite" || m == "veo-lite" || m == "google/veo3-1-lite-t2v")
