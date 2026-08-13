@@ -43,6 +43,9 @@ export interface AppState {
   isAuthenticated: boolean;
   hasPhoneNumber: boolean;
   isInitializing: boolean;
+  isSidebarCollapsed: boolean;
+  setSidebarCollapsed: (collapsed: boolean) => void;
+  toggleSidebarCollapse: () => void;
   setUser: (user: any | null) => void;
   updateUser: (data: any) => void;
   setInitializing: (isInit: boolean) => void;
@@ -54,6 +57,9 @@ export const useAppStore = create<AppState>((set) => ({
   isAuthenticated: false,
   hasPhoneNumber: false,
   isInitializing: true,
+  isSidebarCollapsed: false,
+  setSidebarCollapsed: (collapsed) => set({ isSidebarCollapsed: collapsed }),
+  toggleSidebarCollapse: () => set((state) => ({ isSidebarCollapsed: !state.isSidebarCollapsed })),
   setUser: (user) => set({ user, isAuthenticated: !!user, hasPhoneNumber: user?.hasPhoneNumber ?? false, isInitializing: false }),
   updateUser: (data) => set((state) => ({ user: state.user ? { ...state.user, ...data } : null })),
   setInitializing: (isInit) => set({ isInitializing: isInit }),

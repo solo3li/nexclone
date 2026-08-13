@@ -2,7 +2,29 @@
 
 import { useLocale } from "next-intl";
 import { Link, usePathname, useRouter } from "../i18n/routing";
-import { Mic, FileAudio, Video, Menu, X, Home, LogOut, Wallet, ChevronDown, Bell, Zap, Settings2, Image as ImageIcon, Film, Layers, ChevronRight } from "lucide-react";
+import { 
+  Mic, 
+  FileAudio, 
+  Video, 
+  Menu, 
+  X, 
+  Home, 
+  LogOut, 
+  Wallet, 
+  ChevronDown, 
+  Bell, 
+  Zap, 
+  Image as ImageIcon, 
+  Film, 
+  Layers, 
+  History,
+  ChevronsLeft,
+  ChevronsRight,
+  Plus,
+  Sparkles,
+  Loader2,
+  FolderKanban
+} from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppStore } from "../store/useAppStore";
@@ -15,12 +37,35 @@ export default function ToolsSidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
+  const { 
+    user, 
+    setUser, 
+    logout, 
+    isSidebarCollapsed, 
+    toggleSidebarCollapse 
+  } = useAppStore();
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [hasUnread, setHasUnread] = useState(false);
+  const [walletsExpanded, setWalletsExpanded] = useState(false);
+  const [toolConfigs, setToolConfigs] = useState<any>(null);
+  const [activeTasksCount, setActiveTasksCount] = useState<number>(0);
+
+  const notifRef = useRef<HTMLDivElement>(null);
+  const walletRef = useRef<HTMLDivElement>(null);
+
   const toolCategories = [
     {
       id: "video",
-      labelEn: "Video Tools",
-      labelAr: "أدوات الفيديو",
+      labelEn: "Video Studio",
+      labelAr: "استوديو الفيديو",
       icon: Video,
+      accent: "violet",
+      accentBg: "bg-violet-500/10",
+      accentText: "text-violet-400",
+      accentBorder: "border-violet-500/30",
+      accentGlow: "shadow-[0_0_15px_rgba(139,92,246,0.3)]",
       tools: [
         {
           id: "text-to-video",
@@ -28,9 +73,10 @@ export default function ToolsSidebar() {
           icon: Film,
           labelEn: "Text to Video",
           labelAr: "تحويل النص لفيديو",
-          color: "text-fuchsia-400",
-          bg: "bg-fuchsia-500/10",
-          activeBorder: "border-fuchsia-500/30",
+          color: "text-violet-400",
+          activeBg: "bg-gradient-to-r from-violet-600/30 to-fuchsia-600/10",
+          activeBorder: "border-violet-500/50 shadow-[0_0_15px_rgba(139,92,246,0.25)]",
+          dotColor: "bg-violet-400"
         },
         {
           id: "image-to-video",
@@ -39,8 +85,9 @@ export default function ToolsSidebar() {
           labelEn: "Image to Video",
           labelAr: "تحويل الصورة لفيديو",
           color: "text-blue-400",
-          bg: "bg-blue-500/10",
-          activeBorder: "border-blue-500/30",
+          activeBg: "bg-gradient-to-r from-blue-600/30 to-indigo-600/10",
+          activeBorder: "border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.25)]",
+          dotColor: "bg-blue-400"
         },
         {
           id: "reference-to-video",
@@ -48,37 +95,45 @@ export default function ToolsSidebar() {
           icon: Layers,
           labelEn: "Reference to Video",
           labelAr: "صور مرجعية لفيديو",
-          color: "text-emerald-400",
-          bg: "bg-emerald-500/10",
-          activeBorder: "border-emerald-500/30",
+          color: "text-indigo-400",
+          activeBg: "bg-gradient-to-r from-indigo-600/30 to-cyan-600/10",
+          activeBorder: "border-indigo-500/50 shadow-[0_0_15px_rgba(99,102,241,0.25)]",
+          dotColor: "bg-indigo-400"
         },
         {
           id: "advanced-lip-sync",
           href: "/tools/advanced-lip-sync",
           icon: Video,
-          labelEn: "Advanced Lip Sync",
+          labelEn: "Lip Sync Studio",
           labelAr: "مزامنة الشفاه (متقدم)",
-          color: "text-amber-400",
-          bg: "bg-amber-500/10",
-          activeBorder: "border-amber-500/30",
+          color: "text-fuchsia-400",
+          activeBg: "bg-gradient-to-r from-fuchsia-600/30 to-pink-600/10",
+          activeBorder: "border-fuchsia-500/50 shadow-[0_0_15px_rgba(217,70,239,0.25)]",
+          dotColor: "bg-fuchsia-400"
         },
         {
           id: "motion-control",
           href: "/tools/motion-control",
           icon: Video,
           labelEn: "Motion Transfer",
-          labelAr: "نسخ الحركة",
+          labelAr: "نسخ والتحكم بالحركة",
           color: "text-cyan-400",
-          bg: "bg-cyan-500/10",
-          activeBorder: "border-cyan-500/30",
+          activeBg: "bg-gradient-to-r from-cyan-600/30 to-blue-600/10",
+          activeBorder: "border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.25)]",
+          dotColor: "bg-cyan-400"
         }
       ]
     },
     {
       id: "image",
-      labelEn: "Image Tools",
-      labelAr: "أدوات الصور",
+      labelEn: "Image Studio",
+      labelAr: "استوديو الصور",
       icon: ImageIcon,
+      accent: "amber",
+      accentBg: "bg-amber-500/10",
+      accentText: "text-amber-400",
+      accentBorder: "border-amber-500/30",
+      accentGlow: "shadow-[0_0_15px_rgba(245,158,11,0.3)]",
       tools: [
         {
           id: "text-to-image",
@@ -86,17 +141,23 @@ export default function ToolsSidebar() {
           icon: ImageIcon,
           labelEn: "Text to Image",
           labelAr: "تحويل النص لصورة",
-          color: "text-orange-400",
-          bg: "bg-orange-500/10",
-          activeBorder: "border-orange-500/30",
+          color: "text-amber-400",
+          activeBg: "bg-gradient-to-r from-amber-600/30 to-orange-600/10",
+          activeBorder: "border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.25)]",
+          dotColor: "bg-amber-400"
         }
       ]
     },
     {
       id: "audio",
-      labelEn: "Audio Tools",
-      labelAr: "أدوات الصوت",
+      labelEn: "Audio Studio",
+      labelAr: "استوديو الصوت",
       icon: FileAudio,
+      accent: "emerald",
+      accentBg: "bg-emerald-500/10",
+      accentText: "text-emerald-400",
+      accentBorder: "border-emerald-500/30",
+      accentGlow: "shadow-[0_0_15px_rgba(16,185,129,0.3)]",
       tools: [
         {
           id: "text-to-voice",
@@ -104,9 +165,10 @@ export default function ToolsSidebar() {
           icon: Mic,
           labelEn: "Text to Voice",
           labelAr: "تحويل النص لصوت",
-          color: "text-violet-400",
-          bg: "bg-violet-500/10",
-          activeBorder: "border-violet-500/30",
+          color: "text-emerald-400",
+          activeBg: "bg-gradient-to-r from-emerald-600/30 to-teal-600/10",
+          activeBorder: "border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.25)]",
+          dotColor: "bg-emerald-400"
         },
         {
           id: "voice-to-text",
@@ -114,9 +176,10 @@ export default function ToolsSidebar() {
           icon: FileAudio,
           labelEn: "Voice to Text",
           labelAr: "تحويل الصوت لنص",
-          color: "text-emerald-400",
-          bg: "bg-emerald-500/10",
-          activeBorder: "border-emerald-500/30",
+          color: "text-teal-400",
+          activeBg: "bg-gradient-to-r from-teal-600/30 to-emerald-600/10",
+          activeBorder: "border-teal-500/50 shadow-[0_0_15px_rgba(20,184,166,0.25)]",
+          dotColor: "bg-teal-400"
         }
       ]
     }
@@ -132,8 +195,6 @@ export default function ToolsSidebar() {
     setExpandedCategories(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const { user, setUser, logout } = useAppStore();
-
   const handleLogout = async () => {
     try {
       await api.post('/api/auth/logout');
@@ -142,44 +203,40 @@ export default function ToolsSidebar() {
     router.push('/login');
   };
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [hasUnread, setHasUnread] = useState(false);
-  const [walletsExpanded, setWalletsExpanded] = useState(false);
-  const [toolConfigs, setToolConfigs] = useState<any>(null);
+  // Fetch active history tasks for live queue counter
+  const checkActiveTasks = () => {
+    if (!user) return;
+    api.get('/api/history')
+      .then(res => {
+        if (Array.isArray(res.data)) {
+          const active = res.data.filter((h: any) => h.status === 'pending' || h.status === 'processing');
+          setActiveTasksCount(active.length);
+        }
+      })
+      .catch(() => {});
+  };
 
   useEffect(() => {
-    // Fetch tool configs for badges
+    // Fetch tool configs for dynamic statuses
     api.get('/api/platform/tools-config')
       .then(res => setToolConfigs(res.data))
       .catch(err => console.error("Failed to fetch tool configs:", err));
-  }, []);
+
+    checkActiveTasks();
+    const interval = setInterval(checkActiveTasks, 10000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   const [notifications, setNotifications] = useState<Array<{ id: number, title: string, message: string, type: string, url: string, time: Date }>>([]);
-  const notifRef = useRef<HTMLDivElement>(null);
-  const walletRef = useRef<HTMLDivElement>(null);
 
-  /**
-   * Sanitize a notification URL from the backend into a clean relative path
-   * that next-intl's router can navigate to correctly.
-   *
-   * The backend may send:
-   *   - A full URL:           "http://example.com/ar/history/123"
-   *   - A locale-prefixed path:  "/ar/history/123"  or  "/en/history/123"
-   *   - A clean relative path:  "/history/123"
-   *   - An empty / null value
-   */
   const sanitizeNotifUrl = (url: string): string => {
     if (!url) return '/';
     try {
-      // Strip domain if it's a full URL
       let path = url;
       if (/^https?:\/\//i.test(url)) {
         path = new URL(url).pathname;
       }
-      // Remove leading locale segment  (/ar/... or /en/...)
       path = path.replace(/^\/(ar|en)(\/|$)/, '/');
-      // Ensure it starts with /
       if (!path.startsWith('/')) path = '/' + path;
       return path || '/';
     } catch {
@@ -188,11 +245,11 @@ export default function ToolsSidebar() {
   };
 
   useEffect(() => {
-    // Start SignalR
     signalRNotificationService.startConnection();
     signalRNotificationService.onNotification((title, message, type, url) => {
       setNotifications(prev => [{ id: Date.now(), title, message, type, url, time: new Date() }, ...prev]);
       setHasUnread(true);
+      checkActiveTasks();
     });
 
     signalRNotificationService.onWalletUpdate(async () => {
@@ -204,7 +261,6 @@ export default function ToolsSidebar() {
       }
     });
 
-    // Click outside to close notifications
     const handleClickOutside = (e: MouseEvent) => {
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
         setNotificationsOpen(false);
@@ -212,7 +268,6 @@ export default function ToolsSidebar() {
       if (walletRef.current && !walletRef.current.contains(e.target as Node)) {
         setWalletsExpanded(false);
       }
-
     };
     document.addEventListener("mousedown", handleClickOutside);
 
@@ -222,13 +277,15 @@ export default function ToolsSidebar() {
     };
   }, []);
 
+  const totalCredits = (user?.standardCredits || 0) + (user?.premiumCredits || 0);
+
   return (
     <>
-      {/* Mobile Toggle Button */}
+      {/* Mobile Floating Toggle */}
       <div className="lg:hidden fixed bottom-6 z-[60]" style={{ [isRtl ? 'right' : 'left']: '1.5rem' }}>
         <button
           onClick={() => setIsOpen(true)}
-          className="w-14 h-14 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-xl shadow-violet-900/50 flex items-center justify-center hover:opacity-90 transition-opacity"
+          className="w-13 h-13 p-3.5 rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-xl shadow-violet-900/50 flex items-center justify-center hover:opacity-90 transition-transform active:scale-95"
         >
           <Menu className="w-6 h-6" />
         </button>
@@ -242,46 +299,56 @@ export default function ToolsSidebar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsOpen(false)}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] lg:hidden"
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] lg:hidden"
           />
         )}
       </AnimatePresence>
 
-      {/* Sidebar Content - Full height from top-0 */}
+      {/* Sidebar Main Container */}
       <div
-        className={`fixed top-0 bottom-0 z-[60] lg:z-10 w-72 bg-[#0a0015]/95 lg:bg-[#080012] backdrop-blur-xl transition-transform duration-300 flex flex-col
-          ${isRtl ? 'right-0 border-l border-white/5' : 'left-0 border-r border-white/5'}
-          ${isOpen ? 'translate-x-0' : (isRtl ? 'translate-x-full lg:translate-x-0' : '-translate-x-full lg:translate-x-0')}
+        className={`fixed top-0 bottom-0 z-[60] lg:z-10 bg-[#080112]/95 lg:bg-[#070110] backdrop-blur-2xl transition-all duration-300 flex flex-col border-white/5
+          ${isRtl ? 'right-0 border-l' : 'left-0 border-r'}
+          ${isSidebarCollapsed ? 'w-20' : 'w-72'}
+          ${isOpen ? 'translate-x-0 !w-72' : (isRtl ? 'translate-x-full lg:translate-x-0' : '-translate-x-full lg:translate-x-0')}
         `}
       >
-        {/* Studio Top Brand Bar */}
-        <div className={`flex items-center justify-between px-4 py-4 border-b border-white/5`} dir={isRtl ? 'rtl' : 'ltr'}>
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-fuchsia-900/30">
+        {/* ========================================================================= */}
+        {/* Top Header: Logo Brand + Quick Collapse Toggle + Notifications             */}
+        {/* ========================================================================= */}
+        <div className="flex items-center justify-between px-3.5 py-4 border-b border-white/5" dir={isRtl ? 'rtl' : 'ltr'}>
+          <Link href="/" className="flex items-center gap-2.5 group overflow-hidden">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-600 via-indigo-600 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-violet-900/40 shrink-0 group-hover:scale-105 transition-transform">
               <span className="text-white font-black text-sm">N</span>
             </div>
-            <span className="font-bold text-white/90 text-sm tracking-tight group-hover:text-white transition-colors">
-              NexMedia
-            </span>
+            {(!isSidebarCollapsed || isOpen) && (
+              <span className="font-bold text-white/95 text-sm tracking-tight group-hover:text-white transition-colors truncate">
+                NexMedia
+              </span>
+            )}
           </Link>
-          <div className="flex items-center gap-2">
-            {/* Go to Home */}
-            <Link
-              href="/"
-              className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all"
-              title={isRtl ? 'الرئيسية' : 'Home'}
+
+          <div className="flex items-center gap-1">
+            {/* Desktop Collapse / Expand Button */}
+            <button
+              onClick={toggleSidebarCollapse}
+              className="hidden lg:flex w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 items-center justify-center text-white/50 hover:text-white transition-all"
+              title={isSidebarCollapsed ? (isRtl ? "توسيع القائمة" : "Expand Sidebar") : (isRtl ? "تصغير القائمة" : "Collapse Sidebar")}
             >
-              <Home className="w-4 h-4" />
-            </Link>
+              {isRtl ? (
+                isSidebarCollapsed ? <ChevronsLeft className="w-4 h-4" /> : <ChevronsRight className="w-4 h-4" />
+              ) : (
+                isSidebarCollapsed ? <ChevronsRight className="w-4 h-4" /> : <ChevronsLeft className="w-4 h-4" />
+              )}
+            </button>
 
             {/* Notifications Bell */}
             <div className="relative" ref={notifRef}>
               <button
                 onClick={() => { setNotificationsOpen(!notificationsOpen); setHasUnread(false); }}
-                className="relative w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all"
+                className="relative w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all"
                 title={isRtl ? 'الإشعارات' : 'Notifications'}
               >
-                <Bell className="w-4 h-4" />
+                <Bell className="w-3.5 h-3.5" />
                 {hasUnread && (
                   <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
                 )}
@@ -293,10 +360,10 @@ export default function ToolsSidebar() {
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className={`absolute top-full mt-2 w-72 bg-[#0d001a] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden ${isRtl ? 'left-0' : 'right-0'}`}
+                    className={`absolute top-full mt-2 w-72 bg-[#0d001a] border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden ${isRtl ? 'left-0' : 'right-0'}`}
                   >
                     <div className="p-3 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
-                      <h3 className="font-bold text-sm text-white">{isRtl ? 'الإشعارات' : 'Notifications'}</h3>
+                      <h3 className="font-bold text-xs text-white">{isRtl ? 'الإشعارات' : 'Notifications'}</h3>
                     </div>
                     <div className="max-h-80 overflow-y-auto">
                       {notifications.length === 0 ? (
@@ -308,13 +375,10 @@ export default function ToolsSidebar() {
                           <Link href={sanitizeNotifUrl(notif.url)} key={notif.id} onClick={() => setNotificationsOpen(false)}>
                             <div className="p-3 border-b border-white/5 hover:bg-white/5 transition-colors cursor-pointer group">
                               <div className="flex items-start gap-2">
-                                <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${notif.type === 'success' ? 'bg-emerald-500' : notif.type === 'error' ? 'bg-red-500' : 'bg-fuchsia-500'}`} />
+                                <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${notif.type === 'success' ? 'bg-emerald-500' : notif.type === 'error' ? 'bg-red-500' : 'bg-violet-500'}`} />
                                 <div>
-                                  <h4 className="text-sm font-semibold text-white/90 group-hover:text-white">{notif.title}</h4>
-                                  <p className="text-xs text-white/50 mt-1 leading-relaxed">{notif.message}</p>
-                                  <span className="text-[10px] text-white/30 mt-2 block">
-                                    {notif.time.toLocaleTimeString(isRtl ? 'ar-EG' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
-                                  </span>
+                                  <h4 className="text-xs font-semibold text-white/90 group-hover:text-white">{notif.title}</h4>
+                                  <p className="text-[11px] text-white/50 mt-0.5 leading-relaxed">{notif.message}</p>
                                 </div>
                               </div>
                             </div>
@@ -330,234 +394,309 @@ export default function ToolsSidebar() {
             {/* Mobile close */}
             <button
               onClick={() => setIsOpen(false)}
-              className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all lg:hidden"
+              className="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all lg:hidden"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* User Credits Badge */}
+        {/* ========================================================================= */}
+        {/* 2. Glassmorphic User & Wallet Card (Collapsible)                          */}
+        {/* ========================================================================= */}
         {user && (
-          <div className="px-4 py-3 border-b border-white/5" dir={isRtl ? 'rtl' : 'ltr'}>
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between">
-                <Link
-                  href="/profile"
-                  className="flex items-center justify-between cursor-pointer group"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-md shadow-fuchsia-900/20">
-                      <span className="text-white text-xs font-bold">
+          <div className="px-3 py-3 border-b border-white/5" dir={isRtl ? 'rtl' : 'ltr'}>
+            {!isSidebarCollapsed || isOpen ? (
+              <div className="space-y-2.5">
+                {/* User Row */}
+                <div className="flex items-center justify-between">
+                  <Link href="/profile" className="flex items-center gap-2 group truncate">
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-md shadow-violet-900/30 shrink-0">
+                      <span className="text-white text-[11px] font-black">
                         {user.fullName?.charAt(0)?.toUpperCase() || 'U'}
                       </span>
                     </div>
-                    <span className="text-white/80 group-hover:text-white text-xs font-semibold truncate max-w-[90px] transition-colors">
+                    <span className="text-white/80 group-hover:text-white text-xs font-semibold truncate transition-colors">
                       {user.fullName || user.email}
                     </span>
-                  </div>
-                </Link>
-                <Link
-                  href="/affiliate"
-                  className="text-[10px] bg-violet-600/20 text-violet-300 border border-violet-500/30 px-2 py-0.5 rounded-full hover:bg-violet-500 hover:text-white transition-colors"
-                >
-                  {isRtl ? 'الأفلييت' : 'Affiliate'}
-                </Link>
-              </div>
-            
-            {/* Credits / Wallet */}
-            <div className="relative" ref={walletRef}>
-              <div 
-                className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:bg-white/10 hover:border-white/20 transition-all group"
-                onClick={() => setWalletsExpanded(!walletsExpanded)}
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-fuchsia-500/20 to-violet-500/20 flex items-center justify-center group-hover:scale-105 transition-transform">
-                    <Zap className="w-4 h-4 text-fuchsia-400" />
-                  </div>
-                  <span className="text-sm font-semibold text-white/90 group-hover:text-white transition-colors">
-                    {isRtl ? 'الرصيد' : 'Credits'}
-                  </span>
+                  </Link>
+                  <Link
+                    href="/pricing"
+                    className="text-[10px] bg-gradient-to-r from-violet-600/30 to-fuchsia-600/30 hover:from-violet-600/50 hover:to-fuchsia-600/50 text-violet-200 border border-violet-500/30 px-2 py-0.5 rounded-md font-bold flex items-center gap-1 transition-all"
+                  >
+                    <Sparkles className="w-2.5 h-2.5 text-violet-300" />
+                    <span>{isRtl ? "ترقية" : "Upgrade"}</span>
+                  </Link>
                 </div>
 
-                <div className="flex items-center gap-1.5">
-                  <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-fuchsia-500/10 border border-fuchsia-500/20 group-hover:bg-fuchsia-500/20 transition-colors">
-                    <Wallet className="w-3 h-3 text-fuchsia-400" />
-                    <span className="text-fuchsia-300 text-[11px] font-bold">
-                      {Number(user.standardCredits || 0).toFixed(0)}
-                    </span>
-                  </div>
-                  <ChevronDown className={`w-3.5 h-3.5 text-white/40 group-hover:text-white/70 transition-all duration-300 ${walletsExpanded ? 'rotate-180' : ''}`} />
-                </div>
-              </div>
-
-              <AnimatePresence>
-                {walletsExpanded && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className={`absolute bottom-full mb-2 w-full bg-[#0d001a] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden ${isRtl ? 'left-0' : 'right-0'}`}
+                {/* Glassmorphic Wallet Card */}
+                <div className="relative" ref={walletRef}>
+                  <div
+                    onClick={() => setWalletsExpanded(!walletsExpanded)}
+                    className="p-2.5 rounded-xl bg-gradient-to-b from-white/[0.07] to-white/[0.02] border border-white/10 hover:border-violet-500/40 shadow-inner cursor-pointer transition-all group"
                   >
-                    <div className="p-3 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
-                      <h3 className="font-bold text-sm text-white">{isRtl ? 'المحافظ' : 'Wallets'}</h3>
-                    </div>
-                    <div className="flex flex-col gap-1.5 p-2 max-h-80 overflow-y-auto">
-                        <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/[0.02] border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all group/wallet relative overflow-hidden">
-                          <div className="absolute inset-0 bg-gradient-to-r from-fuchsia-500/0 via-fuchsia-500/0 to-fuchsia-500/[0.05] opacity-0 group-hover/wallet:opacity-100 transition-opacity" />
-                          <div className="flex items-center gap-2 relative z-10">
-                            <div className="w-1.5 h-1.5 rounded-full bg-fuchsia-400/50 group-hover/wallet:bg-fuchsia-400 group-hover/wallet:shadow-[0_0_8px_rgba(232,121,249,0.8)] transition-all" />
-                            <span className="text-white/60 group-hover/wallet:text-white/90 text-[11px] font-medium tracking-wide transition-colors">{isRtl ? 'الرصيد العادي' : 'Standard Credits'}</span>
-                          </div>
-                          <div className="flex items-center gap-1 relative z-10">
-                            <span className="text-white/90 group-hover/wallet:text-white text-[12px] font-bold transition-colors">{Number(user.standardCredits || 0).toFixed(1)}</span>
-                            <span className="text-fuchsia-400/50 text-[9px] font-bold uppercase tracking-wider">CR</span>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/[0.02] border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all group/wallet relative overflow-hidden mt-1">
-                          <div className="absolute inset-0 bg-gradient-to-r from-amber-500/0 via-amber-500/0 to-amber-500/[0.05] opacity-0 group-hover/wallet:opacity-100 transition-opacity" />
-                          <div className="flex items-center gap-2 relative z-10">
-                            <div className="w-1.5 h-1.5 rounded-full bg-amber-400/50 group-hover/wallet:bg-amber-400 group-hover/wallet:shadow-[0_0_8px_rgba(251,191,36,0.8)] transition-all" />
-                            <span className="text-white/60 group-hover/wallet:text-white/90 text-[11px] font-medium tracking-wide transition-colors">{isRtl ? 'الرصيد المميز' : 'Premium Credits'}</span>
-                          </div>
-                          <div className="flex items-center gap-1 relative z-10">
-                            <span className="text-white/90 group-hover/wallet:text-white text-[12px] font-bold transition-colors">{Number(user.premiumCredits || 0).toFixed(1)}</span>
-                            <span className="text-amber-400/50 text-[9px] font-bold uppercase tracking-wider">CR</span>
-                          </div>
-                        </div>
-
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-            
-
-            </div>
-          </div>
-        )}
-
-        {/* Tools List */}
-        <div className="p-4 flex-1 overflow-y-auto">
-          <div className="text-xs font-bold text-white/25 uppercase tracking-widest mb-4 px-2">
-            {isRtl ? 'أدوات الاستوديو' : 'Studio Tools'}
-          </div>
-
-          <div className="flex flex-col gap-3">
-            {toolCategories.map((category) => {
-              const isExpanded = expandedCategories[category.id];
-              const CategoryIcon = category.icon;
-              return (
-                <div key={category.id} className="flex flex-col gap-1">
-                  <button
-                    onClick={() => toggleCategory(category.id)}
-                    className="flex items-center justify-between w-full px-2 py-1.5 text-white/40 hover:text-white/80 transition-colors group"
-                  >
-                    <div className="flex items-center gap-2">
-                      <CategoryIcon className="w-4 h-4" />
-                      <span className="font-bold text-xs">{isRtl ? category.labelAr : category.labelEn}</span>
-                    </div>
-                    <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
-                  </button>
-
-                  <AnimatePresence initial={false}>
-                    {isExpanded && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="flex flex-col gap-1 overflow-hidden"
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-1.5">
+                        <Wallet className="w-3.5 h-3.5 text-violet-400" />
+                        <span className="text-xs font-bold text-white/90">
+                          {isRtl ? "رصيد المحفظة" : "Credits Wallet"}
+                        </span>
+                      </div>
+                      <Link
+                        href="/pricing"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-[10px] text-amber-300 hover:text-amber-200 flex items-center gap-0.5 font-bold"
                       >
-                        {category.tools.map((tool) => {
-                          const isActive = pathname.includes(tool.id);
-                          const Icon = tool.icon;
-                          
-                          // Determine status
-                          let status = 'active';
-                          if (toolConfigs) {
-                            const routeMapping: Record<string, string[]> = {
-                              "image-to-video": ["image-to-video"],
-                              "text-to-video": ["text-to-video"],
-                              "reference-to-video": ["reference-to-video"],
-                              "text-to-image": ["text-to-image"],
-                              "advanced-lip-sync": ["kling_advanced_lip_sync", "vidu_advanced_lip_sync"],
-                              "text-to-voice": ["text-to-voice"],
-                              "voice-to-text": ["voice-to-text"],
-                              "motion-control": ["motion-control"]
-                            };
-                            let mappedKeys = routeMapping[tool.id];
-                            if (!mappedKeys) {
-                              const fuzzyKey = Object.keys(toolConfigs).find(k => k.includes(tool.id.replace(/-/g, '_')));
-                              if (fuzzyKey) mappedKeys = [fuzzyKey];
-                            }
-                            if (mappedKeys && mappedKeys.length > 0) {
-                              const relevantConfigs = mappedKeys.map(k => toolConfigs[k]).filter(Boolean);
-                              if (relevantConfigs.length > 0) {
-                                if (relevantConfigs.some(c => c.isMaintenanceMode)) status = 'maintenance';
-                                else if (relevantConfigs.some(c => c.isComingSoon)) status = 'coming_soon';
-                              }
-                            }
-                          }
+                        <Plus className="w-2.5 h-2.5" />
+                        <span>{isRtl ? "شحن" : "Top Up"}</span>
+                      </Link>
+                    </div>
 
-                          return (
-                            <Link
-                              key={tool.id}
-                              href={tool.href}
-                              onClick={() => setIsOpen(false)}
-                              className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group border relative overflow-hidden ${isActive
-                                  ? `bg-white/8 text-white ${tool.activeBorder}`
-                                  : 'text-white/50 hover:bg-white/5 hover:text-white border-transparent'
-                                }`}
-                              dir={isRtl ? 'rtl' : 'ltr'}
-                            >
-                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${isActive ? tool.bg : 'bg-white/5 group-hover:bg-white/8'
-                                }`}>
-                                <Icon className={`w-4 h-4 ${isActive ? tool.color : 'text-white/40 group-hover:text-white/70'}`} />
-                              </div>
-                              <span className="font-medium text-[13px] leading-tight flex-1">
-                                {isRtl ? tool.labelAr : tool.labelEn}
-                              </span>
-                              
-                              {status === 'maintenance' && (
-                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 whitespace-nowrap">
-                                  {isRtl ? 'صيانة' : 'Maint.'}
-                                </span>
-                              )}
-                              {status === 'coming_soon' && (
-                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 whitespace-nowrap">
-                                  {isRtl ? 'قريباً' : 'Soon'}
-                                </span>
-                              )}
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-lg font-black text-amber-300 font-mono">
+                        {totalCredits.toLocaleString()}
+                      </span>
+                      <span className="text-[10px] text-white/40 font-mono uppercase">Credits</span>
+                    </div>
 
-                              {isActive && status === 'active' && (
-                                <div className={`w-1.5 h-1.5 rounded-full ${tool.color.replace('text-', 'bg-')} ${isRtl ? 'mr-auto' : 'ml-auto'} opacity-80`} />
-                              )}
-                            </Link>
-                          );
-                        })}
+                    {/* Progress Ratio Bar */}
+                    <div className="w-full h-1.5 bg-black/40 rounded-full overflow-hidden mt-1.5 flex">
+                      <div 
+                        className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500" 
+                        style={{ width: `${Math.min(100, (user.standardCredits / Math.max(1, totalCredits)) * 100)}%` }} 
+                      />
+                      <div 
+                        className="h-full bg-gradient-to-r from-amber-400 to-orange-400" 
+                        style={{ width: `${Math.min(100, (user.premiumCredits / Math.max(1, totalCredits)) * 100)}%` }} 
+                      />
+                    </div>
+                  </div>
+
+                  {/* Expanded Wallet Breakdown */}
+                  <AnimatePresence>
+                    {walletsExpanded && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 5 }}
+                        className="mt-1.5 p-2 bg-[#0c0218] border border-white/10 rounded-xl space-y-1.5 text-xs shadow-xl"
+                      >
+                        <div className="flex justify-between items-center px-1 text-white/60">
+                          <span>{isRtl ? "رصيد قياسي:" : "Standard Credits:"}</span>
+                          <span className="font-bold text-violet-300 font-mono">{Number(user.standardCredits || 0).toFixed(1)}</span>
+                        </div>
+                        <div className="flex justify-between items-center px-1 text-white/60">
+                          <span>{isRtl ? "رصيد مميز:" : "Premium Credits:"}</span>
+                          <span className="font-bold text-amber-300 font-mono">{Number(user.premiumCredits || 0).toFixed(1)}</span>
+                        </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
                 </div>
-              );
-            })}
+              </div>
+            ) : (
+              /* Compact Avatar & Wallet Icon in Collapsed Rail */
+              <div className="flex flex-col items-center gap-2">
+                <Link href="/profile" title={user.fullName || user.email} className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-md">
+                  <span className="text-white text-xs font-black">{user.fullName?.charAt(0)?.toUpperCase() || 'U'}</span>
+                </Link>
+                <Link href="/pricing" title={`${totalCredits} Credits`} className="w-8 h-8 rounded-xl bg-white/5 hover:bg-violet-500/20 border border-white/10 flex items-center justify-center text-amber-300">
+                  <Wallet className="w-4 h-4" />
+                </Link>
+              </div>
+            )}
           </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* 3. Live Queue & History Hub Shortcut                                      */}
+        {/* ========================================================================= */}
+        <div className="px-3 pt-3" dir={isRtl ? 'rtl' : 'ltr'}>
+          <Link
+            href="/history"
+            onClick={() => setIsOpen(false)}
+            className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all group relative overflow-hidden ${
+              pathname.includes('/history')
+                ? "bg-gradient-to-r from-violet-600/30 to-fuchsia-600/15 border-violet-500/40 text-white shadow-[0_0_15px_rgba(139,92,246,0.2)]"
+                : "bg-white/[0.03] hover:bg-white/[0.07] border-white/10 hover:border-white/20 text-white/70 hover:text-white"
+            } ${isSidebarCollapsed && !isOpen ? 'justify-center !px-0' : ''}`}
+            title={isRtl ? "سجل العمليات والمشاريع" : "History & Projects"}
+          >
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+              pathname.includes('/history') ? 'bg-violet-500/20 text-violet-300' : 'bg-white/5 text-white/60 group-hover:text-white'
+            }`}>
+              <History className="w-4 h-4" />
+            </div>
+
+            {(!isSidebarCollapsed || isOpen) && (
+              <div className="flex-1 truncate">
+                <span className="text-xs font-bold block leading-tight">
+                  {isRtl ? "سجل المشاريع والعمليات" : "History & Projects"}
+                </span>
+                <span className="text-[10px] text-white/40 block">
+                  {isRtl ? "متابعة وتحميل نتائج التوليد" : "Track and download results"}
+                </span>
+              </div>
+            )}
+
+            {/* Live Queue Pulse Badge */}
+            {activeTasksCount > 0 ? (
+              <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-md bg-violet-500/20 text-violet-300 border border-violet-500/40 flex items-center gap-1 shrink-0 ${
+                isSidebarCollapsed && !isOpen ? 'absolute top-1 right-1' : ''
+              }`}>
+                <Loader2 className="w-2.5 h-2.5 animate-spin text-violet-400" />
+                {(!isSidebarCollapsed || isOpen) && <span>{activeTasksCount} {isRtl ? "قيد الرندر" : "Active"}</span>}
+              </span>
+            ) : null}
+          </Link>
         </div>
 
-        {/* Bottom: Logout */}
-        <div className="p-4 border-t border-white/5">
+        {/* ========================================================================= */}
+        {/* 4. Categorized Studio Tools Navigation with Vibrant Accents & Glow        */}
+        {/* ========================================================================= */}
+        <div className="p-3 flex-1 overflow-y-auto space-y-4 custom-scrollbar">
+          {toolCategories.map((category) => {
+            const isExpanded = expandedCategories[category.id];
+            const CategoryIcon = category.icon;
+
+            return (
+              <div key={category.id} className="space-y-1">
+                {/* Category Header */}
+                {(!isSidebarCollapsed || isOpen) ? (
+                  <button
+                    onClick={() => toggleCategory(category.id)}
+                    className="flex items-center justify-between w-full px-2 py-1 text-white/40 hover:text-white/80 transition-colors group text-start"
+                  >
+                    <div className="flex items-center gap-2">
+                      <CategoryIcon className={`w-3.5 h-3.5 ${category.accentText}`} />
+                      <span className="font-bold text-[11px] uppercase tracking-wider text-white/60">
+                        {isRtl ? category.labelAr : category.labelEn}
+                      </span>
+                    </div>
+                    <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
+                  </button>
+                ) : (
+                  <div className="h-px bg-white/5 my-2" />
+                )}
+
+                {/* Tools Items */}
+                <AnimatePresence initial={false}>
+                  {(isExpanded || (isSidebarCollapsed && !isOpen)) && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="flex flex-col gap-1 overflow-hidden"
+                    >
+                      {category.tools.map((tool) => {
+                        const isActive = pathname.includes(tool.id);
+                        const Icon = tool.icon;
+
+                        // Status resolution
+                        let status = 'active';
+                        if (toolConfigs) {
+                          const routeMapping: Record<string, string[]> = {
+                            "image-to-video": ["image-to-video"],
+                            "text-to-video": ["text-to-video"],
+                            "reference-to-video": ["reference-to-video"],
+                            "text-to-image": ["text-to-image"],
+                            "advanced-lip-sync": ["kling_advanced_lip_sync", "vidu_advanced_lip_sync"],
+                            "text-to-voice": ["text-to-voice"],
+                            "voice-to-text": ["voice-to-text"],
+                            "motion-control": ["motion-control"]
+                          };
+                          let mappedKeys = routeMapping[tool.id];
+                          if (!mappedKeys) {
+                            const fuzzyKey = Object.keys(toolConfigs).find(k => k.includes(tool.id.replace(/-/g, '_')));
+                            if (fuzzyKey) mappedKeys = [fuzzyKey];
+                          }
+                          if (mappedKeys && mappedKeys.length > 0) {
+                            const relevantConfigs = mappedKeys.map(k => toolConfigs[k]).filter(Boolean);
+                            if (relevantConfigs.length > 0) {
+                              if (relevantConfigs.some(c => c.isMaintenanceMode)) status = 'maintenance';
+                              else if (relevantConfigs.some(c => c.isComingSoon)) status = 'coming_soon';
+                            }
+                          }
+                        }
+
+                        return (
+                          <Link
+                            key={tool.id}
+                            href={tool.href}
+                            onClick={() => setIsOpen(false)}
+                            className={`flex items-center gap-2.5 px-2.5 py-2 rounded-xl transition-all group border relative overflow-hidden ${
+                              isActive
+                                ? `${tool.activeBg} text-white ${tool.activeBorder}`
+                                : 'text-white/50 hover:bg-white/[0.05] hover:text-white border-transparent'
+                            } ${isSidebarCollapsed && !isOpen ? 'justify-center !px-0' : ''}`}
+                            dir={isRtl ? 'rtl' : 'ltr'}
+                            title={isRtl ? tool.labelAr : tool.labelEn}
+                          >
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                              isActive ? 'bg-white/10' : 'bg-white/5 group-hover:bg-white/8'
+                            }`}>
+                              <Icon className={`w-4 h-4 ${isActive ? tool.color : 'text-white/40 group-hover:text-white/70'}`} />
+                            </div>
+
+                            {(!isSidebarCollapsed || isOpen) && (
+                              <span className="font-medium text-xs leading-tight flex-1 truncate">
+                                {isRtl ? tool.labelAr : tool.labelEn}
+                              </span>
+                            )}
+
+                            {/* Status Badges */}
+                            {(!isSidebarCollapsed || isOpen) && (
+                              <>
+                                {status === 'maintenance' && (
+                                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 whitespace-nowrap">
+                                    {isRtl ? 'صيانة' : 'Maint.'}
+                                  </span>
+                                )}
+                                {status === 'coming_soon' && (
+                                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 whitespace-nowrap">
+                                    {isRtl ? 'قريباً' : 'Soon'}
+                                  </span>
+                                )}
+                              </>
+                            )}
+
+                            {/* Active Glowing Dot */}
+                            {isActive && status === 'active' && (
+                              <div className={`w-1.5 h-1.5 rounded-full ${tool.dotColor} shadow-[0_0_8px_currentColor] ${
+                                isSidebarCollapsed && !isOpen ? 'absolute top-1.5 right-1.5' : (isRtl ? 'mr-auto' : 'ml-auto')
+                              }`} />
+                            )}
+                          </Link>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ========================================================================= */}
+        {/* Bottom Footer: Logout & Home                                              */}
+        {/* ========================================================================= */}
+        <div className="p-3 border-t border-white/5 flex flex-col gap-1.5" dir={isRtl ? 'rtl' : 'ltr'}>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/40 hover:text-red-400 hover:bg-red-500/5 border border-transparent hover:border-red-500/10 transition-all group"
-            dir={isRtl ? 'rtl' : 'ltr'}
+            className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-white/40 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all group ${
+              isSidebarCollapsed && !isOpen ? 'justify-center !px-0' : ''
+            }`}
+            title={isRtl ? 'تسجيل الخروج' : 'Logout'}
           >
-            <div className="w-9 h-9 rounded-lg bg-white/5 group-hover:bg-red-500/10 flex items-center justify-center flex-shrink-0 transition-colors">
+            <div className="w-8 h-8 rounded-lg bg-white/5 group-hover:bg-red-500/10 flex items-center justify-center shrink-0 transition-colors">
               <LogOut className="w-4 h-4" />
             </div>
-            <span className="font-medium text-sm">{isRtl ? 'تسجيل الخروج' : 'Logout'}</span>
+            {(!isSidebarCollapsed || isOpen) && (
+              <span className="font-medium text-xs">{isRtl ? 'تسجيل الخروج' : 'Logout'}</span>
+            )}
           </button>
         </div>
+
       </div>
     </>
   );
