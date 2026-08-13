@@ -1,22 +1,20 @@
-﻿{
+{
   "$schema": "https://json.schemastore.org/launchsettings.json",
   "profiles": {
     "http": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "launchBrowser": true,
-      "applicationUrl": "http://localhost:5208",
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:8080",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
-    },
-    "https": {
-      "commandName": "Project",
-      "dotnetRunMessages": true,
-      "launchBrowser": true,
-      "applicationUrl": "https://localhost:7050;http://localhost:5208",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "S3_ENDPOINT": "t3.storageapi.dev",
+        "AWS_ACCESS_KEY_ID": "tid_iQGfEXCfaCZBBfVfGuzuwMDuF_I_GUiLSXaSRtTRJTHQIB_dJz",
+        "AWS_SECRET_ACCESS_KEY": "tsec_vjmDM-BldwbOkYJstEGWMYZypqTyGe-KEXCk7o5g676Zn1DXFsGl6b5t+JutrhcNtxkD7h",
+        "S3_REGION": "auto",
+        "S3_BUCKET_NAME": "embedded-pod-9ywbmx4sr0-x",
+        "S3_USE_SSL": "true",
+        "MINIO_PUBLIC_ENDPOINT": "t3.storageapi.dev"
       }
     }
   }

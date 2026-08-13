@@ -1,0 +1,568 @@
+2026-08-14 00:06:56.968 +03:00 [ERR] Failed executing DbCommand (353ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT t."Id", t."ActiveFromTime", t."ActiveToTime", t."MaxDailyRequests", t."MaxRequestsPerMinute", t."ModelName", t."ProviderName", t."QualityLevel", t."ToolConfigurationId", t0."Id", t0."AdditionalSettings", t0."AllowPremiumCredits", t0."AllowStandardCredits", t0."IsActive", t0."IsComingSoon", t0."IsMaintenanceMode", t0."ToolName", t0."UpdatedAt"
+FROM "ToolRoutingRules" AS t
+INNER JOIN "ToolConfigurations" AS t0 ON t."ToolConfigurationId" = t0."Id"
+WHERE t."ProviderName" = 'CometAPI' AND t0."ToolName" IN ('kling_avatar_image2video', 'kling_advanced_lip_sync')
+2026-08-14 00:06:57.010 +03:00 [ERR] An exception occurred while iterating over the results of a query for context type 'NexClone.Backend.Infrastructure.Data.ApplicationDbContext'.
+Npgsql.PostgresException (0x80004005): 42703: column t0.AllowPremiumCredits does not exist
+
+POSITION: 212
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult()
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(CommandBehavior behavior)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReader(CommandBehavior behavior)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReader(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.InitializeReader(Enumerator enumerator)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.<>c.<MoveNext>b__21_0(DbContext _, Enumerator enumerator)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.Execute[TState,TResult](TState state, Func`3 operation, Func`3 verifySucceeded)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.MoveNext()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column t0.AllowPremiumCredits does not exist
+    Position: 212
+    File: parse_relation.c
+    Line: 3822
+    Routine: errorMissingColumn
+Npgsql.PostgresException (0x80004005): 42703: column t0.AllowPremiumCredits does not exist
+
+POSITION: 212
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult()
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(CommandBehavior behavior)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReader(CommandBehavior behavior)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReader(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.InitializeReader(Enumerator enumerator)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.<>c.<MoveNext>b__21_0(DbContext _, Enumerator enumerator)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.Execute[TState,TResult](TState state, Func`3 operation, Func`3 verifySucceeded)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.MoveNext()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column t0.AllowPremiumCredits does not exist
+    Position: 212
+    File: parse_relation.c
+    Line: 3822
+    Routine: errorMissingColumn
+2026-08-14 00:08:14.319 +03:00 [ERR] Failed executing DbCommand (230ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT t."Id", t."ActiveFromTime", t."ActiveToTime", t."MaxDailyRequests", t."MaxRequestsPerMinute", t."ModelName", t."ProviderName", t."QualityLevel", t."ToolConfigurationId", t0."Id", t0."AdditionalSettings", t0."AllowPremiumCredits", t0."AllowStandardCredits", t0."IsActive", t0."IsComingSoon", t0."IsMaintenanceMode", t0."ToolName", t0."UpdatedAt"
+FROM "ToolRoutingRules" AS t
+INNER JOIN "ToolConfigurations" AS t0 ON t."ToolConfigurationId" = t0."Id"
+WHERE t."ProviderName" = 'CometAPI' AND t0."ToolName" IN ('kling_avatar_image2video', 'kling_advanced_lip_sync')
+2026-08-14 00:08:14.358 +03:00 [ERR] An exception occurred while iterating over the results of a query for context type 'NexClone.Backend.Infrastructure.Data.ApplicationDbContext'.
+Npgsql.PostgresException (0x80004005): 42703: column t0.AllowPremiumCredits does not exist
+
+POSITION: 212
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult()
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(CommandBehavior behavior)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReader(CommandBehavior behavior)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReader(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.InitializeReader(Enumerator enumerator)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.<>c.<MoveNext>b__21_0(DbContext _, Enumerator enumerator)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.Execute[TState,TResult](TState state, Func`3 operation, Func`3 verifySucceeded)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.MoveNext()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column t0.AllowPremiumCredits does not exist
+    Position: 212
+    File: parse_relation.c
+    Line: 3822
+    Routine: errorMissingColumn
+Npgsql.PostgresException (0x80004005): 42703: column t0.AllowPremiumCredits does not exist
+
+POSITION: 212
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult()
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(CommandBehavior behavior)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReader(CommandBehavior behavior)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReader(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.InitializeReader(Enumerator enumerator)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.<>c.<MoveNext>b__21_0(DbContext _, Enumerator enumerator)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.Execute[TState,TResult](TState state, Func`3 operation, Func`3 verifySucceeded)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.MoveNext()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column t0.AllowPremiumCredits does not exist
+    Position: 212
+    File: parse_relation.c
+    Line: 3822
+    Routine: errorMissingColumn
+2026-08-14 00:09:22.888 +03:00 [ERR] Failed executing DbCommand (296ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT t."Id", t."ActiveFromTime", t."ActiveToTime", t."MaxDailyRequests", t."MaxRequestsPerMinute", t."ModelName", t."ProviderName", t."QualityLevel", t."ToolConfigurationId", t0."Id", t0."AdditionalSettings", t0."AllowPremiumCredits", t0."AllowStandardCredits", t0."IsActive", t0."IsComingSoon", t0."IsMaintenanceMode", t0."ToolName", t0."UpdatedAt"
+FROM "ToolRoutingRules" AS t
+INNER JOIN "ToolConfigurations" AS t0 ON t."ToolConfigurationId" = t0."Id"
+WHERE t."ProviderName" = 'CometAPI' AND t0."ToolName" IN ('kling_avatar_image2video', 'kling_advanced_lip_sync')
+2026-08-14 00:09:22.926 +03:00 [ERR] An exception occurred while iterating over the results of a query for context type 'NexClone.Backend.Infrastructure.Data.ApplicationDbContext'.
+Npgsql.PostgresException (0x80004005): 42703: column t0.AllowPremiumCredits does not exist
+
+POSITION: 212
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult()
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(CommandBehavior behavior)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReader(CommandBehavior behavior)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReader(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.InitializeReader(Enumerator enumerator)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.<>c.<MoveNext>b__21_0(DbContext _, Enumerator enumerator)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.Execute[TState,TResult](TState state, Func`3 operation, Func`3 verifySucceeded)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.MoveNext()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column t0.AllowPremiumCredits does not exist
+    Position: 212
+    File: parse_relation.c
+    Line: 3822
+    Routine: errorMissingColumn
+Npgsql.PostgresException (0x80004005): 42703: column t0.AllowPremiumCredits does not exist
+
+POSITION: 212
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult()
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(CommandBehavior behavior)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReader(CommandBehavior behavior)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReader(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.InitializeReader(Enumerator enumerator)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.<>c.<MoveNext>b__21_0(DbContext _, Enumerator enumerator)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.Execute[TState,TResult](TState state, Func`3 operation, Func`3 verifySucceeded)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.MoveNext()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column t0.AllowPremiumCredits does not exist
+    Position: 212
+    File: parse_relation.c
+    Line: 3822
+    Routine: errorMissingColumn
+2026-08-14 00:10:53.327 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-14 00:11:21.349 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-14 00:11:28.361 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-14 00:11:28.735 +03:00 [ERR] Failed executing DbCommand (274ms) [Parameters=[@now='?' (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+SELECT s."Id", s."CreatedAt", s."EndDate", s."PlanId", s."StartDate", s."Status", s."UserId", p."Id", p."AffiliateFirstCommissionType", p."AffiliateFirstCommissionValueEgp", p."AffiliateFirstCommissionValueUsd", p."AffiliateRecurringCommissionType", p."AffiliateRecurringCommissionValueEgp", p."AffiliateRecurringCommissionValueUsd", p."AllowedVoices", p."AvatarVideoCostPerGeneration", p."AvatarVideoEnabled", p."AvatarVideoMaxAudioFileSizeMb", p."AvatarVideoMaxCharsPerRequest", p."AvatarVideoMaxFileSizeMb", p."AvatarVideoProCost", p."CreatedAt", p."Description", p."DescriptionAr", p."DurationDays", p."Features", p."FeaturesAr", p."FixedFeeEgp", p."FixedFeeUsd", p."GracePeriodDays", p."IsDefaultRegistrationPlan", p."IsDeleted", p."IsFreeTrial", p."LipSyncCostPerGeneration", p."LipSyncCostPerSecond", p."LipSyncEnabled", p."LipSyncMaxAudioFileSizeMb", p."LipSyncMaxDurationSeconds", p."LipSyncMaxVideoFileSizeMb", p."MonthlyCredits", p."MotionControlCostPerGeneration", p."MotionControlEnabled", p."MotionControlMaxImageFileSizeMb", p."MotionControlMaxVideoFileSizeMb", p."MotionControlProCost", p."Name", p."NameAr", p."PremiumCredits", p."PriceEgp", p."PriceUsd", p."StandardCredits", p."SttCostPerMinute", p."SttEnabled", p."SttMaxFileSizeMb", p."TaxPercentageEgp", p."TaxPercentageUsd", p."TtsCharactersBlock", p."TtsCostPerChar", p."TtsCostPerCharHigh", p."TtsCustomInstructionsEnabled", p."TtsEnabled", p."TtsMaxCharsPerRequest", a."Id", a."AccessFailedCount", a."ConcurrencyStamp", a."Country", a."CreatedAt", a."Email", a."EmailConfirmed", a."FullName", a."ImageUrl", a."IsActive", a."IsStaff", a."IsSuperAdmin", a."IsVerified", a."LastVerificationEmailSentAt", a."LockoutEnabled", a."LockoutEnd", a."NormalizedEmail", a."NormalizedUserName", a."PasswordHash", a."PhoneNumber", a."PhoneNumberConfirmed", a."PremiumCredits", a."SecurityStamp", a."StandardCredits", a."TwoFactorEnabled", a."UserName", a."VisibleAdminSections"
+FROM "Subscriptions" AS s
+INNER JOIN "Plans" AS p ON s."PlanId" = p."Id"
+INNER JOIN "AspNetUsers" AS a ON s."UserId" = a."Id"
+WHERE s."Status" = 'active' AND s."EndDate" <= @now
+2026-08-14 00:11:28.760 +03:00 [ERR] An exception occurred while iterating over the results of a query for context type 'NexClone.Backend.Infrastructure.Data.ApplicationDbContext'.
+Npgsql.PostgresException (0x80004005): 42703: column p.FeaturesAr does not exist
+
+POSITION: 619
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column p.FeaturesAr does not exist
+    Hint: Perhaps you meant to reference the column "p.Features".
+    Position: 619
+    File: parse_relation.c
+    Line: 3829
+    Routine: errorMissingColumn
+Npgsql.PostgresException (0x80004005): 42703: column p.FeaturesAr does not exist
+
+POSITION: 619
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column p.FeaturesAr does not exist
+    Hint: Perhaps you meant to reference the column "p.Features".
+    Position: 619
+    File: parse_relation.c
+    Line: 3829
+    Routine: errorMissingColumn
+2026-08-14 00:11:28.764 +03:00 [ERR] Error occurred executing CheckSubscriptionsAsync.
+Npgsql.PostgresException (0x80004005): 42703: column p.FeaturesAr does not exist
+
+POSITION: 619
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at NexClone.Backend.Application.BackgroundJobs.SubscriptionStatusService.CheckSubscriptionsAsync() in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Application\BackgroundJobs\SubscriptionStatusService.cs:line 56
+   at NexClone.Backend.Application.BackgroundJobs.SubscriptionStatusService.ExecuteAsync(CancellationToken stoppingToken) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Application\BackgroundJobs\SubscriptionStatusService.cs:line 32
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column p.FeaturesAr does not exist
+    Hint: Perhaps you meant to reference the column "p.Features".
+    Position: 619
+    File: parse_relation.c
+    Line: 3829
+    Routine: errorMissingColumn
+2026-08-14 00:11:31.547 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-14 00:11:31.548 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-14 00:11:31.548 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-14 00:11:31.548 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-14 00:11:31.548 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-14 00:11:31.548 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-14 00:11:31.857 +03:00 [INF] Server desktop-rjppsk4:28456:e2266b81 successfully announced in 241.1597 ms
+2026-08-14 00:11:31.863 +03:00 [INF] Server desktop-rjppsk4:28456:e2266b81 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-14 00:11:31.875 +03:00 [INF] Server desktop-rjppsk4:28456:e2266b81 all the dispatchers started
+2026-08-14 00:13:06.401 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-14 00:13:16.175 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-14 00:13:18.424 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-14 00:13:18.808 +03:00 [ERR] Failed executing DbCommand (244ms) [Parameters=[@now='?' (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+SELECT s."Id", s."CreatedAt", s."EndDate", s."PlanId", s."StartDate", s."Status", s."UserId", p."Id", p."AffiliateFirstCommissionType", p."AffiliateFirstCommissionValueEgp", p."AffiliateFirstCommissionValueUsd", p."AffiliateRecurringCommissionType", p."AffiliateRecurringCommissionValueEgp", p."AffiliateRecurringCommissionValueUsd", p."AllowedVoices", p."AvatarVideoCostPerGeneration", p."AvatarVideoEnabled", p."AvatarVideoMaxAudioFileSizeMb", p."AvatarVideoMaxCharsPerRequest", p."AvatarVideoMaxFileSizeMb", p."AvatarVideoProCost", p."CreatedAt", p."Description", p."DescriptionAr", p."DurationDays", p."Features", p."FeaturesAr", p."FixedFeeEgp", p."FixedFeeUsd", p."GracePeriodDays", p."IsDefaultRegistrationPlan", p."IsDeleted", p."IsFreeTrial", p."LipSyncCostPerGeneration", p."LipSyncCostPerSecond", p."LipSyncEnabled", p."LipSyncMaxAudioFileSizeMb", p."LipSyncMaxDurationSeconds", p."LipSyncMaxVideoFileSizeMb", p."MonthlyCredits", p."MotionControlCostPerGeneration", p."MotionControlEnabled", p."MotionControlMaxImageFileSizeMb", p."MotionControlMaxVideoFileSizeMb", p."MotionControlProCost", p."Name", p."NameAr", p."PremiumCredits", p."PriceEgp", p."PriceUsd", p."StandardCredits", p."SttCostPerMinute", p."SttEnabled", p."SttMaxFileSizeMb", p."TaxPercentageEgp", p."TaxPercentageUsd", p."TtsCharactersBlock", p."TtsCostPerChar", p."TtsCostPerCharHigh", p."TtsCustomInstructionsEnabled", p."TtsEnabled", p."TtsMaxCharsPerRequest", a."Id", a."AccessFailedCount", a."ConcurrencyStamp", a."Country", a."CreatedAt", a."Email", a."EmailConfirmed", a."FullName", a."ImageUrl", a."IsActive", a."IsStaff", a."IsSuperAdmin", a."IsVerified", a."LastVerificationEmailSentAt", a."LockoutEnabled", a."LockoutEnd", a."NormalizedEmail", a."NormalizedUserName", a."PasswordHash", a."PhoneNumber", a."PhoneNumberConfirmed", a."PremiumCredits", a."SecurityStamp", a."StandardCredits", a."TwoFactorEnabled", a."UserName", a."VisibleAdminSections"
+FROM "Subscriptions" AS s
+INNER JOIN "Plans" AS p ON s."PlanId" = p."Id"
+INNER JOIN "AspNetUsers" AS a ON s."UserId" = a."Id"
+WHERE s."Status" = 'active' AND s."EndDate" <= @now
+2026-08-14 00:13:18.823 +03:00 [ERR] An exception occurred while iterating over the results of a query for context type 'NexClone.Backend.Infrastructure.Data.ApplicationDbContext'.
+Npgsql.PostgresException (0x80004005): 42703: column p.PremiumCredits does not exist
+
+POSITION: 1126
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column p.PremiumCredits does not exist
+    Hint: Perhaps you meant to reference the column "a.PremiumCredits".
+    Position: 1126
+    File: parse_relation.c
+    Line: 3829
+    Routine: errorMissingColumn
+Npgsql.PostgresException (0x80004005): 42703: column p.PremiumCredits does not exist
+
+POSITION: 1126
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column p.PremiumCredits does not exist
+    Hint: Perhaps you meant to reference the column "a.PremiumCredits".
+    Position: 1126
+    File: parse_relation.c
+    Line: 3829
+    Routine: errorMissingColumn
+2026-08-14 00:13:18.827 +03:00 [ERR] Error occurred executing CheckSubscriptionsAsync.
+Npgsql.PostgresException (0x80004005): 42703: column p.PremiumCredits does not exist
+
+POSITION: 1126
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at NexClone.Backend.Application.BackgroundJobs.SubscriptionStatusService.CheckSubscriptionsAsync() in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Application\BackgroundJobs\SubscriptionStatusService.cs:line 56
+   at NexClone.Backend.Application.BackgroundJobs.SubscriptionStatusService.ExecuteAsync(CancellationToken stoppingToken) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Application\BackgroundJobs\SubscriptionStatusService.cs:line 32
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column p.PremiumCredits does not exist
+    Hint: Perhaps you meant to reference the column "a.PremiumCredits".
+    Position: 1126
+    File: parse_relation.c
+    Line: 3829
+    Routine: errorMissingColumn
+2026-08-14 00:13:22.225 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-14 00:13:22.225 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-14 00:13:22.226 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-14 00:13:22.226 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-14 00:13:22.226 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-14 00:13:22.226 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-14 00:13:22.754 +03:00 [INF] Server desktop-rjppsk4:30180:1c892184 successfully announced in 517.3245 ms
+2026-08-14 00:13:22.756 +03:00 [INF] Server desktop-rjppsk4:30180:1c892184 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-14 00:13:22.768 +03:00 [INF] Server desktop-rjppsk4:30180:1c892184 all the dispatchers started
+2026-08-14 00:15:28.708 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-14 00:15:37.608 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-14 00:15:41.279 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-14 00:15:42.143 +03:00 [ERR] Failed executing DbCommand (769ms) [Parameters=[@now='?' (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+SELECT s."Id", s."CreatedAt", s."EndDate", s."PlanId", s."StartDate", s."Status", s."UserId", p."Id", p."AffiliateFirstCommissionType", p."AffiliateFirstCommissionValueEgp", p."AffiliateFirstCommissionValueUsd", p."AffiliateRecurringCommissionType", p."AffiliateRecurringCommissionValueEgp", p."AffiliateRecurringCommissionValueUsd", p."AllowedVoices", p."AvatarVideoCostPerGeneration", p."AvatarVideoEnabled", p."AvatarVideoMaxAudioFileSizeMb", p."AvatarVideoMaxCharsPerRequest", p."AvatarVideoMaxFileSizeMb", p."AvatarVideoProCost", p."CreatedAt", p."Description", p."DescriptionAr", p."DurationDays", p."Features", p."FeaturesAr", p."FixedFeeEgp", p."FixedFeeUsd", p."GracePeriodDays", p."IsDefaultRegistrationPlan", p."IsDeleted", p."IsFreeTrial", p."LipSyncCostPerGeneration", p."LipSyncCostPerSecond", p."LipSyncEnabled", p."LipSyncMaxAudioFileSizeMb", p."LipSyncMaxDurationSeconds", p."LipSyncMaxVideoFileSizeMb", p."MonthlyCredits", p."MotionControlCostPerGeneration", p."MotionControlEnabled", p."MotionControlMaxImageFileSizeMb", p."MotionControlMaxVideoFileSizeMb", p."MotionControlProCost", p."Name", p."NameAr", p."PremiumCredits", p."PriceEgp", p."PriceUsd", p."StandardCredits", p."SttCostPerMinute", p."SttEnabled", p."SttMaxFileSizeMb", p."TaxPercentageEgp", p."TaxPercentageUsd", p."TtsCharactersBlock", p."TtsCostPerChar", p."TtsCostPerCharHigh", p."TtsCustomInstructionsEnabled", p."TtsEnabled", p."TtsMaxCharsPerRequest", a."Id", a."AccessFailedCount", a."ConcurrencyStamp", a."Country", a."CreatedAt", a."Email", a."EmailConfirmed", a."FullName", a."ImageUrl", a."IsActive", a."IsStaff", a."IsSuperAdmin", a."IsVerified", a."LastVerificationEmailSentAt", a."LockoutEnabled", a."LockoutEnd", a."NormalizedEmail", a."NormalizedUserName", a."PasswordHash", a."PhoneNumber", a."PhoneNumberConfirmed", a."PremiumCredits", a."SecurityStamp", a."StandardCredits", a."TwoFactorEnabled", a."UserName", a."VisibleAdminSections"
+FROM "Subscriptions" AS s
+INNER JOIN "Plans" AS p ON s."PlanId" = p."Id"
+INNER JOIN "AspNetUsers" AS a ON s."UserId" = a."Id"
+WHERE s."Status" = 'active' AND s."EndDate" <= @now
+2026-08-14 00:15:42.159 +03:00 [ERR] An exception occurred while iterating over the results of a query for context type 'NexClone.Backend.Infrastructure.Data.ApplicationDbContext'.
+Npgsql.PostgresException (0x80004005): 42703: column a.IsSuperAdmin does not exist
+
+POSITION: 1611
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column a.IsSuperAdmin does not exist
+    Position: 1611
+    File: parse_relation.c
+    Line: 3822
+    Routine: errorMissingColumn
+Npgsql.PostgresException (0x80004005): 42703: column a.IsSuperAdmin does not exist
+
+POSITION: 1611
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column a.IsSuperAdmin does not exist
+    Position: 1611
+    File: parse_relation.c
+    Line: 3822
+    Routine: errorMissingColumn
+2026-08-14 00:15:42.162 +03:00 [ERR] Error occurred executing CheckSubscriptionsAsync.
+Npgsql.PostgresException (0x80004005): 42703: column a.IsSuperAdmin does not exist
+
+POSITION: 1611
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at NexClone.Backend.Application.BackgroundJobs.SubscriptionStatusService.CheckSubscriptionsAsync() in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Application\BackgroundJobs\SubscriptionStatusService.cs:line 56
+   at NexClone.Backend.Application.BackgroundJobs.SubscriptionStatusService.ExecuteAsync(CancellationToken stoppingToken) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Application\BackgroundJobs\SubscriptionStatusService.cs:line 32
+  Exception data:
+    Severity: ERROR
+    SqlState: 42703
+    MessageText: column a.IsSuperAdmin does not exist
+    Position: 1611
+    File: parse_relation.c
+    Line: 3822
+    Routine: errorMissingColumn
+2026-08-14 00:15:45.800 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-14 00:15:45.801 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-14 00:15:45.801 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-14 00:15:45.801 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-14 00:15:45.801 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-14 00:15:45.801 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-14 00:15:46.283 +03:00 [INF] Server desktop-rjppsk4:35272:e223d194 successfully announced in 456.98 ms
+2026-08-14 00:15:46.285 +03:00 [INF] Server desktop-rjppsk4:35272:e223d194 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-14 00:15:46.297 +03:00 [INF] Server desktop-rjppsk4:35272:e223d194 all the dispatchers started
+2026-08-14 00:17:20.291 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-14 00:17:29.584 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-14 00:17:33.320 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-14 00:17:37.056 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-14 00:17:37.056 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-14 00:17:37.057 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-14 00:17:37.057 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-14 00:17:37.057 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-14 00:17:37.057 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-14 00:17:37.946 +03:00 [INF] Server desktop-rjppsk4:34952:8438ed4a successfully announced in 878.4449 ms
+2026-08-14 00:17:37.951 +03:00 [INF] Server desktop-rjppsk4:34952:8438ed4a is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-14 00:17:37.964 +03:00 [INF] Server desktop-rjppsk4:34952:8438ed4a all the dispatchers started
+2026-08-14 00:17:38.854 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-14 00:17:49.174 +03:00 [INF] [Email Task] Sending email to mustafismail2015@gmail.com
+2026-08-14 00:17:49.607 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:17:49.609 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:17:50.352 +03:00 [INF] Received HTTP response headers after 741.3972ms - 201
+2026-08-14 00:17:50.355 +03:00 [INF] End processing HTTP request after 753.1618ms - 201
+2026-08-14 00:17:50.357 +03:00 [INF] [Email Task] Email sent to mustafismail2015@gmail.com successfully.
+2026-08-14 00:17:56.541 +03:00 [INF] [Email Task] Sending email to test1@example.com
+2026-08-14 00:17:56.990 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:17:56.990 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:17:57.328 +03:00 [INF] Received HTTP response headers after 338.2544ms - 201
+2026-08-14 00:17:57.329 +03:00 [INF] End processing HTTP request after 339.3016ms - 201
+2026-08-14 00:17:57.329 +03:00 [INF] [Email Task] Email sent to test1@example.com successfully.
+2026-08-14 00:18:01.308 +03:00 [INF] [Email Task] Sending email to test2@example.com
+2026-08-14 00:18:01.598 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:18:01.598 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:18:01.778 +03:00 [INF] Received HTTP response headers after 179.4702ms - 201
+2026-08-14 00:18:01.778 +03:00 [INF] End processing HTTP request after 180.1806ms - 201
+2026-08-14 00:18:01.778 +03:00 [INF] [Email Task] Email sent to test2@example.com successfully.
+2026-08-14 00:18:03.956 +03:00 [INF] [Email Task] Sending email to test_fp1@example.com
+2026-08-14 00:18:04.259 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:18:04.259 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:18:04.438 +03:00 [INF] Received HTTP response headers after 178.6208ms - 201
+2026-08-14 00:18:04.438 +03:00 [INF] End processing HTTP request after 179.0446ms - 201
+2026-08-14 00:18:04.438 +03:00 [INF] [Email Task] Email sent to test_fp1@example.com successfully.
+2026-08-14 00:18:08.671 +03:00 [INF] [Email Task] Sending email to test_fp2@example.com
+2026-08-14 00:18:09.319 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:18:09.319 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:18:09.916 +03:00 [INF] Received HTTP response headers after 596.7568ms - 201
+2026-08-14 00:18:09.916 +03:00 [INF] End processing HTTP request after 597.1398ms - 201
+2026-08-14 00:18:09.916 +03:00 [INF] [Email Task] Email sent to test_fp2@example.com successfully.
+2026-08-14 00:18:14.649 +03:00 [INF] [Email Task] Sending email to test_fp5@example.com
+2026-08-14 00:18:15.344 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:18:15.344 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:18:15.686 +03:00 [INF] Received HTTP response headers after 342.2498ms - 201
+2026-08-14 00:18:15.686 +03:00 [INF] End processing HTTP request after 342.9511ms - 201
+2026-08-14 00:18:15.687 +03:00 [INF] [Email Task] Email sent to test_fp5@example.com successfully.
+2026-08-14 00:18:20.514 +03:00 [INF] [Email Task] Sending email to test_fp7@example.com
+2026-08-14 00:18:20.951 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:18:20.952 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:18:21.341 +03:00 [INF] Received HTTP response headers after 389.4039ms - 201
+2026-08-14 00:18:21.341 +03:00 [INF] End processing HTTP request after 390.2476ms - 201
+2026-08-14 00:18:21.342 +03:00 [INF] [Email Task] Email sent to test_fp7@example.com successfully.
+2026-08-14 00:18:23.684 +03:00 [INF] [Email Task] Sending email to testuser_txitg@example.com
+2026-08-14 00:18:24.250 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:18:24.250 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:18:24.676 +03:00 [INF] Received HTTP response headers after 425.0158ms - 201
+2026-08-14 00:18:24.676 +03:00 [INF] End processing HTTP request after 425.5556ms - 201
+2026-08-14 00:18:24.676 +03:00 [INF] [Email Task] Email sent to testuser_txitg@example.com successfully.
+2026-08-14 00:18:30.472 +03:00 [INF] [Email Task] Sending email to testuser_roscw@example.com
+2026-08-14 00:18:30.729 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:18:30.729 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:18:30.934 +03:00 [INF] Received HTTP response headers after 204.3924ms - 201
+2026-08-14 00:18:30.934 +03:00 [INF] End processing HTTP request after 204.7375ms - 201
+2026-08-14 00:18:30.934 +03:00 [INF] [Email Task] Email sent to testuser_roscw@example.com successfully.
+2026-08-14 00:18:36.935 +03:00 [INF] [Email Task] Sending email to testuser_k9qls@example.com
+2026-08-14 00:18:37.175 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:18:37.175 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:18:37.365 +03:00 [INF] Received HTTP response headers after 190.06ms - 201
+2026-08-14 00:18:37.366 +03:00 [INF] End processing HTTP request after 190.3091ms - 201
+2026-08-14 00:18:37.366 +03:00 [INF] [Email Task] Email sent to testuser_k9qls@example.com successfully.
+2026-08-14 00:18:41.252 +03:00 [INF] [Email Task] Sending email to sec_4089@pm.me
+2026-08-14 00:18:41.555 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:18:41.556 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:18:41.747 +03:00 [INF] Received HTTP response headers after 191.3442ms - 201
+2026-08-14 00:18:41.747 +03:00 [INF] End processing HTTP request after 191.669ms - 201
+2026-08-14 00:18:41.747 +03:00 [INF] [Email Task] Email sent to sec_4089@pm.me successfully.
+2026-08-14 00:18:46.259 +03:00 [INF] [Email Task] Sending email to root_4117@protonmail.com
+2026-08-14 00:18:46.866 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:18:46.867 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:18:47.411 +03:00 [INF] Received HTTP response headers after 544.1931ms - 201
+2026-08-14 00:18:47.411 +03:00 [INF] End processing HTTP request after 544.8593ms - 201
+2026-08-14 00:18:47.411 +03:00 [INF] [Email Task] Email sent to root_4117@protonmail.com successfully.
+2026-08-14 00:18:50.968 +03:00 [INF] Processed 0 freezes and 14 expirations.
+2026-08-14 00:18:51.844 +03:00 [INF] [Email Task] Sending email to god_4199@protonmail.com
+2026-08-14 00:18:52.140 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:18:52.140 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:18:52.318 +03:00 [INF] Received HTTP response headers after 177.3321ms - 201
+2026-08-14 00:18:52.318 +03:00 [INF] End processing HTTP request after 177.8058ms - 201
+2026-08-14 00:18:52.318 +03:00 [INF] [Email Task] Email sent to god_4199@protonmail.com successfully.
+2026-08-14 00:18:55.604 +03:00 [INF] [Email Task] Sending email to god_4218@protonmail.com
+2026-08-14 00:18:55.835 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:18:55.835 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 00:18:56.008 +03:00 [INF] Received HTTP response headers after 172.9979ms - 201
+2026-08-14 00:18:56.009 +03:00 [INF] End processing HTTP request after 173.6041ms - 201
+2026-08-14 00:18:56.009 +03:00 [INF] [Email Task] Email sent to god_4218@protonmail.com successfully.
+2026-08-14 00:22:39.090 +03:00 [INF] 2 servers were removed due to timeout

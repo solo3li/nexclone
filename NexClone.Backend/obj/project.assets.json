@@ -3591,19 +3591,19 @@
     ]
   },
   "packageFolders": {
-    "/root/.nuget/packages/": {}
+    "C:\\Users\\solo\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/app/NexClone.Backend.csproj",
+      "projectUniqueName": "C:\\Users\\solo\\Desktop\\nexcole\\nexclone\\NexClone.Backend\\NexClone.Backend.csproj",
       "projectName": "NexClone.Backend",
-      "projectPath": "/app/NexClone.Backend.csproj",
-      "packagesPath": "/root/.nuget/packages/",
-      "outputPath": "/app/obj/",
+      "projectPath": "C:\\Users\\solo\\Desktop\\nexcole\\nexclone\\NexClone.Backend\\NexClone.Backend.csproj",
+      "packagesPath": "C:\\Users\\solo\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\solo\\Desktop\\nexcole\\nexclone\\NexClone.Backend\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/root/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\solo\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
@@ -3628,7 +3628,7 @@
         "auditLevel": "low",
         "auditMode": "all"
       },
-      "SdkAnalysisLevel": "10.0.300"
+      "SdkAnalysisLevel": "10.0.400"
     },
     "frameworks": {
       "net10.0": {
@@ -3725,7 +3725,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/10.0.302/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.400/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.AspNetCore": "(,10.0.32767]",
           "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",
