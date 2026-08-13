@@ -60,7 +60,8 @@ namespace NexClone.Backend.Infrastructure.Consumers
                     string imageUrl = "";
                     if (message.Image1Bytes != null)
                     {
-                        imageUrl = await _mediaService.UploadFileAsync(message.Image1Bytes, $"image2video_{Guid.NewGuid()}.jpg", message.Image1ContentType);
+                        using var ms = new System.IO.MemoryStream(message.Image1Bytes);
+                        imageUrl = await _mediaService.UploadFileAsync(ms, $"image2video_{Guid.NewGuid()}.jpg", message.Image1ContentType);
                     }
                     payload = new {
                         model = message.Model,
@@ -74,9 +75,9 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 else if (message.ToolType == "reference-to-video")
                 {
                     var images = new System.Collections.Generic.List<string>();
-                    if (message.Image1Bytes != null) images.Add(await _mediaService.UploadFileAsync(message.Image1Bytes, $"ref_{Guid.NewGuid()}.jpg", message.Image1ContentType));
-                    if (message.Image2Bytes != null) images.Add(await _mediaService.UploadFileAsync(message.Image2Bytes, $"ref_{Guid.NewGuid()}.jpg", message.Image2ContentType));
-                    if (message.Image3Bytes != null) images.Add(await _mediaService.UploadFileAsync(message.Image3Bytes, $"ref_{Guid.NewGuid()}.jpg", message.Image3ContentType));
+                    if (message.Image1Bytes != null) { using var ms = new System.IO.MemoryStream(message.Image1Bytes); images.Add(await _mediaService.UploadFileAsync(ms, $"ref_{Guid.NewGuid()}.jpg", message.Image1ContentType)); }
+                    if (message.Image2Bytes != null) { using var ms = new System.IO.MemoryStream(message.Image2Bytes); images.Add(await _mediaService.UploadFileAsync(ms, $"ref_{Guid.NewGuid()}.jpg", message.Image2ContentType)); }
+                    if (message.Image3Bytes != null) { using var ms = new System.IO.MemoryStream(message.Image3Bytes); images.Add(await _mediaService.UploadFileAsync(ms, $"ref_{Guid.NewGuid()}.jpg", message.Image3ContentType)); }
                     
                     payload = new {
                         model = message.Model,
