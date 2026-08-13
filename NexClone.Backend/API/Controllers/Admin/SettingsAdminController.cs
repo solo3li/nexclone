@@ -107,11 +107,13 @@ namespace NexClone.Backend.API.Controllers.Admin
             {
                 bool isMaintenance = form.ContainsKey($"toolMaintenance_{tool.Id}");
                 bool isComingSoon = form.ContainsKey($"toolComingSoon_{tool.Id}");
+                string additionalSettings = form.ContainsKey($"toolSettings_{tool.Id}") ? form[$"toolSettings_{tool.Id}"].ToString() : tool.AdditionalSettings;
                 
-                if (tool.IsMaintenanceMode != isMaintenance || tool.IsComingSoon != isComingSoon)
+                if (tool.IsMaintenanceMode != isMaintenance || tool.IsComingSoon != isComingSoon || tool.AdditionalSettings != additionalSettings)
                 {
                     tool.IsMaintenanceMode = isMaintenance;
                     tool.IsComingSoon = isComingSoon;
+                    tool.AdditionalSettings = additionalSettings;
                     tool.UpdatedAt = System.DateTime.UtcNow;
                     _context.Update(tool);
                 }

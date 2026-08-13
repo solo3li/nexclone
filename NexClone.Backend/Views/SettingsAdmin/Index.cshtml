@@ -49,21 +49,28 @@
             var tools = (IEnumerable<NexClone.Backend.Core.Entities.ToolConfiguration>)ViewBag.ToolConfigurations;
             foreach (var tool in tools)
             {
-                <div style="display: flex; align-items: center; gap: 2rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #f4f4f4;">
-                    <div style="min-width: 200px; font-weight: 500;">@tool.ToolName</div>
-                    
-                    <div class="bx--form-item bx--checkbox-wrapper" style="margin: 0;">
-                        <input id="toolMaintenance_@(tool.Id)" class="bx--checkbox" type="checkbox" name="toolMaintenance_@(tool.Id)" value="true" @(tool.IsMaintenanceMode ? "checked" : "")>
-                        <label for="toolMaintenance_@(tool.Id)" class="bx--checkbox-label" title="Maintenance Mode">
-                            <span class="bx--checkbox-label-text" style="color: #da1e28;">Maintenance</span>
-                        </label>
-                    </div>
+                <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #f4f4f4;">
+                    <div style="display: flex; align-items: center; gap: 2rem; margin-bottom: 1rem;">
+                        <div style="min-width: 200px; font-weight: 500;">@tool.ToolName</div>
+                        
+                        <div class="bx--form-item bx--checkbox-wrapper" style="margin: 0;">
+                            <input id="toolMaintenance_@(tool.Id)" class="bx--checkbox" type="checkbox" name="toolMaintenance_@(tool.Id)" value="true" @(tool.IsMaintenanceMode ? "checked" : "")>
+                            <label for="toolMaintenance_@(tool.Id)" class="bx--checkbox-label" title="Maintenance Mode">
+                                <span class="bx--checkbox-label-text" style="color: #da1e28;">Maintenance</span>
+                            </label>
+                        </div>
 
-                    <div class="bx--form-item bx--checkbox-wrapper" style="margin: 0;">
-                        <input id="toolComingSoon_@(tool.Id)" class="bx--checkbox" type="checkbox" name="toolComingSoon_@(tool.Id)" value="true" @(tool.IsComingSoon ? "checked" : "")>
-                        <label for="toolComingSoon_@(tool.Id)" class="bx--checkbox-label" title="Coming Soon Mode">
-                            <span class="bx--checkbox-label-text" style="color: #0f62fe;">Coming Soon</span>
-                        </label>
+                        <div class="bx--form-item bx--checkbox-wrapper" style="margin: 0;">
+                            <input id="toolComingSoon_@(tool.Id)" class="bx--checkbox" type="checkbox" name="toolComingSoon_@(tool.Id)" value="true" @(tool.IsComingSoon ? "checked" : "")>
+                            <label for="toolComingSoon_@(tool.Id)" class="bx--checkbox-label" title="Coming Soon Mode">
+                                <span class="bx--checkbox-label-text" style="color: #0f62fe;">Coming Soon</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="bx--form-item">
+                        <label for="toolSettings_@(tool.Id)" class="bx--label">@Localizer["Additional Settings (JSON - Pricing, Configs)"]</label>
+                        <textarea id="toolSettings_@(tool.Id)" class="bx--text-input" name="toolSettings_@(tool.Id)" rows="3" placeholder="{ ... }" style="font-family: monospace; resize: vertical;">@tool.AdditionalSettings</textarea>
                     </div>
                 </div>
             }
