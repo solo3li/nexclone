@@ -85,7 +85,7 @@ describe('Frontend Tool Pages API Bindings', () => {
 
   it('ImageToVideoPage mounts correctly', () => {
     render(<ImageToVideoPage />);
-    expect(screen.getByText(/Image to Video/i)).toBeInTheDocument();
+    expect(screen.getByText(/Source Image/i)).toBeInTheDocument();
   });
 
   it('ReferenceToVideoPage mounts correctly', () => {
@@ -93,9 +93,11 @@ describe('Frontend Tool Pages API Bindings', () => {
     expect(screen.getByText(/Reference Video/i) || screen.getByText(/Reference/i)).toBeInTheDocument();
   });
 
-  it('AdvancedLipSyncPage mounts correctly', () => {
+  it('AdvancedLipSyncPage mounts correctly', async () => {
     render(<AdvancedLipSyncPage />);
-    expect(screen.getByText(/Lip Sync/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/Lip Sync Media Pairing/i) || screen.getByText(/Media Pairing/i)).toBeInTheDocument();
+    });
   });
 });
 
