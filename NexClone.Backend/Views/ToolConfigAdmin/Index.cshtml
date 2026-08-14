@@ -154,13 +154,21 @@
                             var isVideo = toolName != "text-to-image";
                             var costLabel = isVideo ? "Cost per Second ($)" : "Cost per Generation ($)";
 
-                            if (toolName == "text-to-video" || toolName == "image-to-video" || toolName == "reference-to-video")
+                            if (toolName == "text-to-video" || toolName == "image-to-video")
                             {
                                 models.AddRange(new[] { 
                                     "veo 3.1 Fast|720p", "veo 3.1 Fast|1080p", "veo 3.1 Fast|4k",
                                     "veo 3.1 Lite|720p", "veo 3.1 Lite|1080p", "veo 3.1 Lite|4k",
                                     "veo 3.1 Quality|720p", "veo 3.1 Quality|1080p", "veo 3.1 Quality|4k",
                                     "grok-imagine|480p", "grok-imagine|720p", "grok-imagine|1080p"
+                                });
+                            }
+                            else if (toolName == "reference-to-video")
+                            {
+                                models.AddRange(new[] { 
+                                    "veo 3.1 Fast|720p", "veo 3.1 Fast|1080p", "veo 3.1 Fast|4k",
+                                    "veo 3.1 Lite|720p", "veo 3.1 Lite|1080p", "veo 3.1 Lite|4k",
+                                    "veo 3.1 Quality|720p", "veo 3.1 Quality|1080p", "veo 3.1 Quality|4k"
                                 });
                             }
                             else if (toolName == "text-to-image")
