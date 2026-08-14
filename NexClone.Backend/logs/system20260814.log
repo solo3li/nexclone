@@ -600,3 +600,182 @@ POSITION: 1611
 2026-08-14 01:24:28.528 +03:00 [INF] Server desktop-rjppsk4:12728:73052972 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-14 01:24:28.552 +03:00 [INF] Server desktop-rjppsk4:12728:73052972 all the dispatchers started
 2026-08-14 01:29:30.062 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-14 07:27:45.811 +03:00 [ERR] Execution Worker is in the Failed state now due to an exception, execution will be retried in no more than 00:05:00
+Npgsql.NpgsqlException (0x80004005): No such host is known.
+ ---> System.Net.Sockets.SocketException (0x00002AF9): No such host is known.
+   at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlJobQueue.<>c__DisplayClass13_0.<Dequeue_Transaction>b__0()
+   at Hangfire.PostgreSql.Utils.Utils.TryExecute[T](Func`1 func, T& result, Func`2 swallowException, Nullable`1 tryCount)
+   at Hangfire.PostgreSql.PostgreSqlJobQueue.Dequeue_Transaction(String[] queues, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlJobQueue.Dequeue(String[] queues, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlConnection.FetchNextJob(String[] queues, CancellationToken cancellationToken)
+   at Hangfire.Server.Worker.Execute(BackgroundProcessContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\Worker.cs:line 107
+   at Hangfire.Server.BackgroundProcessDispatcherBuilder.ExecuteProcess(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessDispatcherBuilder.cs:line 82
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-14 07:28:00.306 +03:00 [INF] [AffiliateCommissionHoldJob] Running daily hold period check...
+2026-08-14 07:28:00.853 +03:00 [INF] [AffiliateCommissionHoldJob] Completed.
+2026-08-14 19:21:51.460 +03:00 [WRN] hangfire:job:15:state-lock: Failed to remove lock
+Npgsql.NpgsqlException (0x80004005): Exception while reading from stream
+ ---> System.IO.IOException: Unable to read data from the transport connection: An existing connection was forcibly closed by the remote host..
+ ---> System.Net.Sockets.SocketException (10054): An existing connection was forcibly closed by the remote host.
+   at System.Net.Sockets.NetworkStream.Read(Span`1 buffer)
+   --- End of inner exception stack trace ---
+   at System.Net.Sockets.NetworkStream.Read(Span`1 buffer)
+   at System.Net.Security.SslStream.EnsureFullTlsFrameAsync[TIOAdapter](CancellationToken cancellationToken, Int32 estimatedSize)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at System.Net.Security.SslStream.ReadAsyncInternal[TIOAdapter](Memory`1 buffer, CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.Internal.NpgsqlReadBuffer.<Ensure>g__EnsureLong|54_0(NpgsqlReadBuffer buffer, Int32 count, Boolean async, Boolean readingNotifications)
+   at Npgsql.Internal.NpgsqlReadBuffer.<Ensure>g__EnsureLong|54_0(NpgsqlReadBuffer buffer, Int32 count, Boolean async, Boolean readingNotifications)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteNonQuery(Boolean async, CancellationToken cancellationToken)
+   at Dapper.SqlMapper.ExecuteImpl(IDbConnection cnn, CommandDefinition& command) in /_/Dapper/SqlMapper.cs:line 528
+   at Hangfire.PostgreSql.PostgreSqlDistributedLock.LockHandler.TryRemoveLock(String resource, IDbConnection connection, PostgreSqlStorageOptions options, Boolean onlyExpired)
+2026-08-14 19:21:51.565 +03:00 [WRN] hangfire:job:15:state-lock: Failed to acquire lock
+System.InvalidOperationException: Connection is not open
+   at Npgsql.ThrowHelper.ThrowInvalidOperationException(String message)
+   at Npgsql.NpgsqlConnection.CheckReady()
+   at Npgsql.NpgsqlConnection.BeginTransaction(Boolean async, IsolationLevel level, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlDistributedLock.TransactionLockHandler.TryLock(IDbConnection connection, String schemaName, String resource)
+   at Hangfire.PostgreSql.PostgreSqlDistributedLock.LockHandler.Lock(String resource, TimeSpan timeout, IDbConnection connection, PostgreSqlStorageOptions options)
+2026-08-14 19:22:00.001 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-14 19:22:01.643 +03:00 [INF] Execution Worker recovered from the Failed state after 11:54:19.7992771 and is in the Running state now
+2026-08-14 19:22:11.288 +03:00 [WRN] Server desktop-rjppsk4:12728:73052972 was considered dead by other servers, restarting...
+2026-08-14 19:22:11.292 +03:00 [INF] Server desktop-rjppsk4:12728:73052972 caught restart signal...
+2026-08-14 19:22:11.311 +03:00 [WRN] Server desktop-rjppsk4:12728:73052972 stopped non-gracefully due to ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler. Outstanding work on those dispatchers could be aborted, and there can be delays in background processing. This server instance will be incorrectly shown as active for a while. To avoid non-graceful shutdowns, investigate what prevents from stopping gracefully and add CancellationToken support for those methods.
+2026-08-14 19:22:11.572 +03:00 [INF] Server desktop-rjppsk4:12728:73052972 successfully reported itself as stopped in 250.2194 ms
+2026-08-14 19:22:11.574 +03:00 [INF] Server desktop-rjppsk4:12728:73052972 has been stopped in total 269.5711 ms
+2026-08-14 19:22:11.823 +03:00 [INF] Server desktop-rjppsk4:12728:295f3896 successfully announced in 245.9977 ms
+2026-08-14 19:22:11.829 +03:00 [INF] Server desktop-rjppsk4:12728:295f3896 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-14 19:22:13.370 +03:00 [INF] Server desktop-rjppsk4:12728:295f3896 all the dispatchers started
+2026-08-14 19:36:30.986 +03:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/submit
+2026-08-14 19:36:30.992 +03:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/submit
+2026-08-14 19:36:32.636 +03:00 [INF] Received HTTP response headers after 1636.4958ms - 404
+2026-08-14 19:36:32.646 +03:00 [INF] End processing HTTP request after 1678.9869ms - 404
+2026-08-14 19:36:32.650 +03:00 [ERR] Error processing video tool task.
+System.Exception: Crun AI submit failed: {"code":404,"message":"resource not found","path":"/api/v1/client/job/submit"}
+   at NexClone.Backend.Infrastructure.Consumers.VideoToolConsumer.Consume(VideoToolMessage message) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\Consumers\VideoToolConsumer.cs:line 100
+2026-08-14 19:42:49.197 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-14 19:42:56.060 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-14 19:42:58.772 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-14 19:42:58.951 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-14 19:42:58.951 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-14 19:42:58.953 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-14 19:42:58.953 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-14 19:42:58.954 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-14 19:42:58.954 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-14 19:42:59.765 +03:00 [INF] Server desktop-rjppsk4:1356:2c1c2924 successfully announced in 779.7047 ms
+2026-08-14 19:42:59.771 +03:00 [INF] Server desktop-rjppsk4:1356:2c1c2924 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-14 19:42:59.800 +03:00 [INF] Server desktop-rjppsk4:1356:2c1c2924 all the dispatchers started
+2026-08-14 19:43:27.809 +03:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-14 19:43:27.812 +03:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-14 19:43:28.810 +03:00 [INF] Received HTTP response headers after 994.8528ms - 200
+2026-08-14 19:43:28.814 +03:00 [INF] End processing HTTP request after 1012.1544ms - 200
+2026-08-14 19:43:39.098 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-14 19:43:39.098 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-14 19:43:39.313 +03:00 [INF] Received HTTP response headers after 214.5676ms - 200
+2026-08-14 19:43:39.313 +03:00 [INF] End processing HTTP request after 216.4813ms - 200
+2026-08-14 19:43:49.318 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-14 19:43:49.319 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-14 19:43:49.535 +03:00 [INF] Received HTTP response headers after 216.5014ms - 200
+2026-08-14 19:43:49.536 +03:00 [INF] End processing HTTP request after 218.0541ms - 200
+2026-08-14 19:43:59.542 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-14 19:43:59.543 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-14 19:43:59.757 +03:00 [INF] Received HTTP response headers after 214.0555ms - 200
+2026-08-14 19:43:59.758 +03:00 [INF] End processing HTTP request after 215.9457ms - 200
+2026-08-14 19:45:05.433 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-14 19:45:12.909 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-14 19:45:16.557 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-14 19:45:16.663 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-14 19:45:16.663 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-14 19:45:16.664 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-14 19:45:16.664 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-14 19:45:16.664 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-14 19:45:16.664 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-14 19:45:17.037 +03:00 [INF] Server desktop-rjppsk4:29328:4229e267 successfully announced in 348.1266 ms
+2026-08-14 19:45:17.043 +03:00 [INF] Server desktop-rjppsk4:29328:4229e267 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-14 19:45:17.066 +03:00 [INF] Server desktop-rjppsk4:29328:4229e267 all the dispatchers started
+2026-08-14 19:45:35.328 +03:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-14 19:45:35.333 +03:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-14 19:45:36.790 +03:00 [INF] Received HTTP response headers after 1452.473ms - 200
+2026-08-14 19:45:36.794 +03:00 [INF] End processing HTTP request after 1478.3612ms - 200
+2026-08-14 19:45:42.135 +03:00 [INF] [LipSync Task 4ea64605-b0b6-4c55-abd3-4c588cb4b3c0] Started consumer.
+2026-08-14 19:45:46.023 +03:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-14 19:45:46.024 +03:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-14 19:45:47.352 +03:00 [INF] Received HTTP response headers after 1328.1561ms - 422
+2026-08-14 19:45:47.352 +03:00 [INF] End processing HTTP request after 1328.9818ms - 422
+2026-08-14 19:45:47.353 +03:00 [ERR] [LipSync Task 4ea64605-b0b6-4c55-abd3-4c588cb4b3c0] Failed
+System.Exception: Crun AI API Error: {"code":422,"message":"Failed to get the video[https://t3.storageapi.dev/embedded-pod-9ywbmx4sr0-x/lipsync/019eddb5b1f27d14a54d7b8adab4fc43/2026-08/bab444b2-53b6-4796-823c-0e83e53bc0b1_dummy_video.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=tid_iQGfEXCfaCZBBfVfGuzuwMDuF_I_GUiLSXaSRtTRJTHQIB_dJz%2F20260814%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260814T164545Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=201159c89daf158ccd4de04ab02baf76f7653e924762a76eb54e7572d628e833] duration. error: https://t3.storageapi.dev/embedded-pod-9ywbmx4sr0-x/lipsync/019eddb5b1f27d14a54d7b8adab4fc43/2026-08/bab444b2-53b6-4796-823c-0e83e53bc0b1_dummy_video.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=tid_iQGfEXCfaCZBBfVfGuzuwMDuF_I_GUiLSXaSRtTRJTHQIB_dJz%2F20260814%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20260814T164545Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=201159c89daf158ccd4de04ab02baf76f7653e924762a76eb54e7572d628e833: Invalid data found when processing input\n","data":null}
+   at NexClone.Backend.Infrastructure.Consumers.LipSyncConsumer.Consume(LipSyncMessage message) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\Consumers\LipSyncConsumer.cs:line 75
+2026-08-14 19:45:47.406 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-14 19:45:47.407 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-14 19:45:47.630 +03:00 [INF] Received HTTP response headers after 222.7081ms - 200
+2026-08-14 19:45:47.630 +03:00 [INF] End processing HTTP request after 224.5693ms - 200
+2026-08-14 19:45:57.644 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-14 19:45:57.644 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-14 19:45:58.115 +03:00 [INF] Received HTTP response headers after 470.2374ms - 200
+2026-08-14 19:45:58.116 +03:00 [INF] End processing HTTP request after 472.4847ms - 200
+2026-08-14 19:46:08.131 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-14 19:46:08.132 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-14 19:46:08.715 +03:00 [INF] Received HTTP response headers after 583.42ms - 200
+2026-08-14 19:46:08.715 +03:00 [INF] End processing HTTP request after 584.5152ms - 200
+2026-08-14 19:46:18.720 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-14 19:46:18.721 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-14 19:46:18.988 +03:00 [INF] Received HTTP response headers after 266.7612ms - 200
+2026-08-14 19:46:18.988 +03:00 [INF] End processing HTTP request after 267.9557ms - 200
+2026-08-14 19:46:29.004 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-14 19:46:29.004 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-14 19:46:29.222 +03:00 [INF] Received HTTP response headers after 217.396ms - 200
+2026-08-14 19:46:29.222 +03:00 [INF] End processing HTTP request after 218.6272ms - 200
+2026-08-14 19:46:39.234 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-14 19:46:39.234 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-14 19:46:39.453 +03:00 [INF] Received HTTP response headers after 218.9844ms - 200
+2026-08-14 19:46:39.453 +03:00 [INF] End processing HTTP request after 219.4735ms - 200
+2026-08-14 19:46:49.455 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-14 19:46:49.455 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-14 19:46:49.679 +03:00 [INF] Received HTTP response headers after 224.3067ms - 200
+2026-08-14 19:46:49.680 +03:00 [INF] End processing HTTP request after 225.0659ms - 200
+2026-08-14 19:46:59.690 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-14 19:46:59.690 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-14 19:46:59.950 +03:00 [INF] Received HTTP response headers after 259.6153ms - 200
+2026-08-14 19:46:59.950 +03:00 [INF] End processing HTTP request after 260.2903ms - 200
+2026-08-14 19:47:09.963 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-14 19:47:09.964 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-14 19:47:10.179 +03:00 [INF] Received HTTP response headers after 215.3349ms - 200
+2026-08-14 19:47:10.180 +03:00 [INF] End processing HTTP request after 216.2602ms - 200
+2026-08-14 19:47:20.180 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-14 19:47:20.181 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-14 19:47:20.401 +03:00 [INF] Received HTTP response headers after 219.7584ms - 200
+2026-08-14 19:47:20.401 +03:00 [INF] End processing HTTP request after 220.5155ms - 200
+2026-08-14 19:47:20.982 +03:00 [INF] [Email] Queuing video completion email to admin@nexmedia.com for task text-to-video Generation
+2026-08-14 19:47:27.602 +03:00 [INF] [Email Task] Sending email to admin@nexmedia.com
+2026-08-14 19:47:27.937 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 19:47:27.937 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 19:47:28.310 +03:00 [INF] Received HTTP response headers after 372.8145ms - 201
+2026-08-14 19:47:28.310 +03:00 [INF] End processing HTTP request after 373.1292ms - 201
+2026-08-14 19:47:28.310 +03:00 [INF] [Email Task] Email sent to admin@nexmedia.com successfully.

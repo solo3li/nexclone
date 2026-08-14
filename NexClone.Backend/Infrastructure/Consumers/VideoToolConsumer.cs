@@ -41,10 +41,10 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 var (apiKey, defaultModel) = await GetToolConfigAsync(message.ToolType);
 
                 var client = _httpClientFactory.CreateClient("AIGateway");
-                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+                client.DefaultRequestHeaders.Add("x-api-key", apiKey);
 
                 object payload = null;
-                string endpoint = "https://api.crun.ai/api/v1/client/job/submit";
+                string endpoint = "https://api.crun.ai/api/v1/client/job/CreateTask";
 
                 string crunModel = ResolveModelId(message.Model, message.ToolType);
 
@@ -52,10 +52,12 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 {
                     payload = new {
                         model = crunModel,
-                        prompt = message.Prompt,
-                        resolution = message.Resolution,
-                        aspect_ratio = !string.IsNullOrEmpty(message.AspectRatio) ? message.AspectRatio : "16:9",
-                        duration = message.Duration > 0 ? message.Duration : (int?)null
+                        input = new {
+                            prompt = message.Prompt,
+                            resolution = message.Resolution,
+                            aspect_ratio = !string.IsNullOrEmpty(message.AspectRatio) ? message.AspectRatio : "16:9",
+                            duration = message.Duration > 0 ? message.Duration : (int?)null
+                        }
                     };
                 }
                 else if (message.ToolType == "image-to-video")
@@ -68,11 +70,13 @@ namespace NexClone.Backend.Infrastructure.Consumers
                     }
                     payload = new {
                         model = crunModel,
-                        image = imageUrl,
-                        prompt = message.Prompt,
-                        mode = message.Mode,
-                        resolution = message.Resolution,
-                        duration = message.Duration > 0 ? message.Duration : (int?)null
+                        input = new {
+                            image = imageUrl,
+                            prompt = message.Prompt,
+                            mode = message.Mode,
+                            resolution = message.Resolution,
+                            duration = message.Duration > 0 ? message.Duration : (int?)null
+                        }
                     };
                 }
                 else if (message.ToolType == "reference-to-video")
@@ -84,10 +88,12 @@ namespace NexClone.Backend.Infrastructure.Consumers
                     
                     payload = new {
                         model = crunModel,
-                        image_urls = images,
-                        prompt = message.Prompt,
-                        resolution = message.Resolution,
-                        aspect_ratio = !string.IsNullOrEmpty(message.AspectRatio) ? message.AspectRatio : "16:9"
+                        input = new {
+                            image_urls = images,
+                            prompt = message.Prompt,
+                            resolution = message.Resolution,
+                            aspect_ratio = !string.IsNullOrEmpty(message.AspectRatio) ? message.AspectRatio : "16:9"
+                        }
                     };
                 }
 

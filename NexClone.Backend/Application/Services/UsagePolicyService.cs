@@ -66,12 +66,12 @@ namespace NexClone.Backend.Application.Services
                     .ThenInclude(s => s.Plan)
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
-            if (user == null) return new ToolPolicy();
+            if (user == null) return new ToolPolicy { Enabled = true };
 
             var activeSubscription = user.Subscriptions
                 .FirstOrDefault(s => s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow);
 
-            if (activeSubscription == null) return new ToolPolicy();
+            if (activeSubscription == null) return new ToolPolicy { Enabled = true };
 
             return GetToolPolicy(activeSubscription.Plan, toolId, quality);
         }
