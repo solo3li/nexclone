@@ -498,3 +498,21 @@ System.InvalidOperationException: An exception has been raised that is likely du
 2026-08-15 00:47:42.072 +03:00 [INF] Execution DelayedJobScheduler recovered from the Failed state after 00:00:47.7692640 and is in the Running state now
 2026-08-15 00:48:32.610 +03:00 [INF] Removed 1 outdated record(s) from 'aggregatedcounter' table.
 2026-08-15 00:48:37.899 +03:00 [INF] Removed 14 outdated record(s) from 'job' table.
+2026-08-15 01:08:20.795 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-15 01:08:29.885 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-15 01:08:32.065 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-15 01:08:32.159 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-15 01:08:32.159 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-15 01:08:32.159 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-15 01:08:32.159 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-15 01:08:32.159 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-15 01:08:32.159 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-15 01:08:33.919 +03:00 [INF] Server desktop-rjppsk4:22936:7f9d4e3f successfully announced in 1746.1286 ms
+2026-08-15 01:08:33.922 +03:00 [INF] Server desktop-rjppsk4:22936:7f9d4e3f is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-15 01:08:33.933 +03:00 [INF] Server desktop-rjppsk4:22936:7f9d4e3f all the dispatchers started
+2026-08-15 01:09:09.193 +03:00 [INF] Onboarded AffiliateProfile 3 for user "01a0021f-35fe-713f-88ad-d70428967d65"
+2026-08-15 01:13:34.411 +03:00 [INF] 1 servers were removed due to timeout

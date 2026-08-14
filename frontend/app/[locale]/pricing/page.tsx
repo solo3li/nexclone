@@ -178,11 +178,6 @@ export default function PricingPage() {
                       <p className="text-gray-400 mt-4 font-medium">
                         {plan.monthlyCredits.toLocaleString()} {isRtl ? 'رصيد مضمن' : 'Credits included'}
                       </p>
-                      {(plan.description || plan.descriptionAr) && (
-                        <p className="text-gray-300 mt-4 text-sm leading-relaxed whitespace-pre-wrap">
-                          {isRtl ? (plan.descriptionAr || plan.description) : (plan.description || plan.descriptionAr)}
-                        </p>
-                      )}
                     </div>
 
                     <div className="space-y-4 flex-grow">
