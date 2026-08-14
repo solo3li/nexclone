@@ -193,7 +193,7 @@ export default function MediaTrimmer({
         {type === "video" ? (
           <video
             ref={mediaRef}
-            src={objectUrl}
+            src={objectUrl || undefined}
             onLoadedMetadata={() => { if (mediaRef.current) setDuration(mediaRef.current.duration); }}
             className="w-full max-h-[200px] object-contain"
             playsInline
@@ -202,7 +202,7 @@ export default function MediaTrimmer({
           <>
             <audio
               ref={mediaRef}
-              src={objectUrl}
+              src={objectUrl || undefined}
               onLoadedMetadata={() => { if (mediaRef.current) setDuration(mediaRef.current.duration); }}
             />
             <div className="flex items-end justify-center h-16 gap-0.5 px-4 py-2">
