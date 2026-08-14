@@ -1007,3 +1007,26 @@ System.Exception: No routing rules configured for 'image-to-video'.
 2026-08-14 23:39:17.936 +03:00 [INF] Server desktop-rjppsk4:19672:da91d44b is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-14 23:39:17.948 +03:00 [INF] Server desktop-rjppsk4:19672:da91d44b all the dispatchers started
 2026-08-14 23:44:18.399 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-14 23:48:04.633 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-14 23:48:10.956 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-14 23:48:13.997 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-14 23:48:14.081 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-14 23:48:14.082 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-14 23:48:14.082 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-14 23:48:14.082 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-14 23:48:14.082 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-14 23:48:14.082 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-14 23:48:14.401 +03:00 [INF] Server desktop-rjppsk4:15216:3e4d4ed2 successfully announced in 304.1207 ms
+2026-08-14 23:48:14.404 +03:00 [INF] Server desktop-rjppsk4:15216:3e4d4ed2 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-14 23:48:14.417 +03:00 [INF] Server desktop-rjppsk4:15216:3e4d4ed2 all the dispatchers started
+2026-08-14 23:53:14.947 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-14 23:58:54.686 +03:00 [INF] [Email Task] Sending email to bd333079@gmail.com
+2026-08-14 23:58:55.008 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 23:58:55.011 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-14 23:58:55.532 +03:00 [INF] Received HTTP response headers after 517.3745ms - 201
+2026-08-14 23:58:55.535 +03:00 [INF] End processing HTTP request after 536.7948ms - 201
+2026-08-14 23:58:55.535 +03:00 [INF] [Email Task] Email sent to bd333079@gmail.com successfully.

@@ -1,0 +1,7 @@
+2026-08-15 00:04:34.969 +03:00 [INF] Onboarded AffiliateProfile 2 for user "01a00211-fc77-7449-ae1f-90be52e4c3e6"
+2026-08-15 00:13:25.114 +03:00 [INF] [Email Task] Sending email to m83448421@gmail.com
+2026-08-15 00:13:25.470 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-15 00:13:25.470 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-15 00:13:25.947 +03:00 [INF] Received HTTP response headers after 476.3276ms - 201
+2026-08-15 00:13:25.948 +03:00 [INF] End processing HTTP request after 479.2216ms - 201
+2026-08-15 00:13:25.948 +03:00 [INF] [Email Task] Email sent to m83448421@gmail.com successfully.
