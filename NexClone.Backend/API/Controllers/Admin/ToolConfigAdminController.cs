@@ -31,7 +31,7 @@ namespace NexClone.Backend.API.Controllers.Admin
                 ViewBag.Providers = new SelectList(providers);
 
 
-                var tools = new[] { "text-to-voice", "voice-to-text", "image-to-video", "advanced-lip-sync", "motion-control" };
+                var tools = new[] { "text-to-voice", "voice-to-text", "image-to-video", "advanced-lip-sync", "motion-control", "text-to-video", "text-to-image", "reference-to-video" };
                 
                 var toolConfigs = new Dictionary<string, ToolConfiguration>();
                 var concurrencyLimits = new Dictionary<string, int>();
