@@ -21,6 +21,8 @@ namespace NexClone.Backend.Application.Services
         public bool StopOnCancellation { get; set; }
         public decimal MinPayoutUsd { get; set; }
         public decimal MinPayoutEgp { get; set; }
+        public int MaxRecurringMonths { get; set; }
+        public int MaxInactivityDays { get; set; }
     }
 
     public class AffiliateCurrencyBalance
@@ -56,6 +58,8 @@ namespace NexClone.Backend.Application.Services
         private const string KEY_STOP_ON_CANCEL = "Affiliate.StopOnCancellation";
         private const string KEY_MIN_USD = "Affiliate.MinPayoutUsd";
         private const string KEY_MIN_EGP = "Affiliate.MinPayoutEgp";
+        private const string KEY_MAX_MONTHS = "Affiliate.MaxRecurringMonths";
+        private const string KEY_MAX_INACTIVITY = "Affiliate.MaxInactivityDays";
 
         public AffiliateService(ApplicationDbContext db, ILogger<AffiliateService> logger)
         {
@@ -70,7 +74,8 @@ namespace NexClone.Backend.Application.Services
             var keys = new[]
             {
                 KEY_ENABLED, KEY_HOLD, KEY_ATTRIBUTION,
-                KEY_RECURRING, KEY_STOP_ON_CANCEL, KEY_MIN_USD, KEY_MIN_EGP
+                KEY_RECURRING, KEY_STOP_ON_CANCEL, KEY_MIN_USD, KEY_MIN_EGP,
+                KEY_MAX_MONTHS, KEY_MAX_INACTIVITY
             };
             var settings = await _db.AppSettings
                 .Where(s => keys.Contains(s.Key))
@@ -85,6 +90,8 @@ namespace NexClone.Backend.Application.Services
                 StopOnCancellation  = GetBool(settings, KEY_STOP_ON_CANCEL, true),
                 MinPayoutUsd        = GetDecimal(settings, KEY_MIN_USD, 50),
                 MinPayoutEgp        = GetDecimal(settings, KEY_MIN_EGP, 500),
+                MaxRecurringMonths  = GetInt(settings, KEY_MAX_MONTHS, 0),
+                MaxInactivityDays   = GetInt(settings, KEY_MAX_INACTIVITY, 0),
             };
         }
 
@@ -97,19 +104,43 @@ namespace NexClone.Backend.Application.Services
             await UpsertSettingAsync(KEY_STOP_ON_CANCEL, dto.StopOnCancellation.ToString().ToLower(), "Stop recurring commissions when subscription is cancelled");
             await UpsertSettingAsync(KEY_MIN_USD, dto.MinPayoutUsd.ToString("F2"), "Minimum payout amount in USD");
             await UpsertSettingAsync(KEY_MIN_EGP, dto.MinPayoutEgp.ToString("F2"), "Minimum payout amount in EGP");
+            await UpsertSettingAsync(KEY_MAX_MONTHS, dto.MaxRecurringMonths.ToString(), "Max months for recurring commissions (0 for unlimited)");
+            await UpsertSettingAsync(KEY_MAX_INACTIVITY, dto.MaxInactivityDays.ToString(), "Max days of inactivity before referral link drops (0 for unlimited)");
             await _db.SaveChangesAsync();
         }
 
         // ─── Profile ─────────────────────────────────────────────────────────
 
-        public async Task<AffiliateProfile> GetOrCreateProfileAsync(Guid userId)
+        public async Task<AffiliateProfile?> GetProfileAsync(Guid userId)
         {
-            var profile = await _db.AffiliateProfiles
+            return await _db.AffiliateProfiles
                 .FirstOrDefaultAsync(p => p.UserId == userId);
+        }
 
-            if (profile != null) return profile;
+        public class OnboardDto
+        {
+            public string MobileNumber { get; set; } = string.Empty;
+            public string? TelegramUsername { get; set; }
+            public string? WhatsappNumber { get; set; }
+            public string? FacebookAccount { get; set; }
+        }
 
-            // Generate unique referral code from user id prefix
+        public async Task<(bool Success, string Error, AffiliateProfile? Profile)> OnboardProfileAsync(Guid userId, OnboardDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.MobileNumber))
+                return (false, "Mobile number is required.", null);
+
+            if (string.IsNullOrWhiteSpace(dto.TelegramUsername) && 
+                string.IsNullOrWhiteSpace(dto.WhatsappNumber) && 
+                string.IsNullOrWhiteSpace(dto.FacebookAccount))
+            {
+                return (false, "At least one additional contact method (Telegram, WhatsApp, or Facebook) is required.", null);
+            }
+
+            var profile = await GetProfileAsync(userId);
+            if (profile != null)
+                return (false, "User is already an affiliate.", profile);
+
             var code = await GenerateUniqueCodeAsync();
             var count = await _db.AffiliateProfiles.CountAsync() + 1;
 
@@ -118,14 +149,20 @@ namespace NexClone.Backend.Application.Services
                 UserId = userId,
                 AffiliateDisplayId = $"AF-{count:D5}",
                 ReferralCode = code,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                IsActive = true,
+                MobileNumber = dto.MobileNumber,
+                TelegramUsername = dto.TelegramUsername,
+                WhatsappNumber = dto.WhatsappNumber,
+                FacebookAccount = dto.FacebookAccount,
+                PolicyAcceptedAt = DateTime.UtcNow
             };
 
             _db.AffiliateProfiles.Add(profile);
             await _db.SaveChangesAsync();
 
-            _logger.LogInformation("Created AffiliateProfile {Id} for user {UserId}", profile.Id, userId);
-            return profile;
+            _logger.LogInformation("Onboarded AffiliateProfile {Id} for user {UserId}", profile.Id, userId);
+            return (true, string.Empty, profile);
         }
 
         // ─── Referral Tracking ────────────────────────────────────────────────
@@ -348,6 +385,39 @@ namespace NexClone.Backend.Application.Services
 
             var plan = await _db.Plans.FindAsync(payment.PlanId.Value);
             if (plan == null) return;
+
+            // Enforcement: Max Inactivity Days
+            if (settings.MaxInactivityDays > 0)
+            {
+                var lastCommission = await _db.AffiliateCommissions
+                    .Where(c => c.AffiliateReferralId == referral.Id)
+                    .OrderByDescending(c => c.CreatedAt)
+                    .FirstOrDefaultAsync();
+
+                var referenceDate = lastCommission != null ? lastCommission.CreatedAt : referral.ClickedAt;
+                if ((DateTime.UtcNow - referenceDate).TotalDays > settings.MaxInactivityDays)
+                {
+                    _logger.LogInformation("Skipping commission and unlinking referral — inactivity period of {Days} days exceeded for referral {ReferralId}", settings.MaxInactivityDays, referral.Id);
+                    referral.ReferredUserId = null; // Unlink permanently
+                    await _db.SaveChangesAsync();
+                    return;
+                }
+            }
+
+            // Enforcement: Max Recurring Months
+            if (isRecurring && settings.MaxRecurringMonths > 0)
+            {
+                var firstCommission = await _db.AffiliateCommissions
+                    .Where(c => c.AffiliateReferralId == referral.Id)
+                    .OrderBy(c => c.CreatedAt)
+                    .FirstOrDefaultAsync();
+
+                if (firstCommission != null && firstCommission.CreatedAt.AddMonths(settings.MaxRecurringMonths) < DateTime.UtcNow)
+                {
+                    _logger.LogInformation("Skipping commission — max recurring months ({MaxMonths}) exceeded for referral {ReferralId}", settings.MaxRecurringMonths, referral.Id);
+                    return; // Just skip
+                }
+            }
 
             decimal commissionAmount = 0;
             decimal rate = 0;

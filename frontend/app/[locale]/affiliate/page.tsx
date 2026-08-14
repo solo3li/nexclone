@@ -15,6 +15,7 @@ import AffiliateReferralsTable from '@/components/affiliate/AffiliateReferralsTa
 import AffiliateCommissionsTable from '@/components/affiliate/AffiliateCommissionsTable';
 import AffiliateWithdrawalForm from '@/components/affiliate/AffiliateWithdrawalForm';
 import AffiliatePayoutsTable from '@/components/affiliate/AffiliatePayoutsTable';
+import AffiliateOnboardingForm from '@/components/affiliate/AffiliateOnboardingForm';
 
 const TABS = [
   { id: 'overview',     labelEn: 'Overview',      labelAr: 'نظرة عامة' },
@@ -35,7 +36,7 @@ export default function AffiliatePage() {
   const {
     profile, stats, balances, referrals, commissions, payouts,
     fetchProfile, fetchStats, fetchBalances, fetchReferrals, fetchCommissions, fetchPayouts,
-    isLoading
+    isLoading, error
   } = useAffiliateStore();
 
   useEffect(() => {
@@ -49,6 +50,7 @@ export default function AffiliatePage() {
     }
   }, [isAuthenticated, isInitializing]);
 
+  const needsOnboarding = error?.includes('onboard') || (!profile && !isLoading && !isInitializing && isAuthenticated);
 
   return (
     <div className="relative min-h-screen bg-[#0a0a0a] text-white overflow-hidden" dir={isRtl ? 'rtl' : 'ltr'}>
@@ -65,6 +67,10 @@ export default function AffiliatePage() {
       ) : !isAuthenticated ? (
         <div className="min-h-screen flex items-center justify-center text-white/60">
           {isRtl ? 'يرجى تسجيل الدخول للوصول إلى لوحة الإحالة.' : 'Please log in to access your affiliate dashboard.'}
+        </div>
+      ) : needsOnboarding ? (
+        <div className="relative z-10 pt-28 pb-24 px-4">
+          <AffiliateOnboardingForm />
         </div>
       ) : (
 

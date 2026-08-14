@@ -49,13 +49,42 @@ namespace NexClone.Backend.API.Controllers.Client
             var userId = GetCurrentUserId();
             if (userId == Guid.Empty) return Unauthorized();
 
-            var profile = await _affiliateService.GetOrCreateProfileAsync(userId);
+            var profile = await _affiliateService.GetProfileAsync(userId);
+            if (profile == null) return NotFound(new { error = "Affiliate profile not found. Please onboard." });
 
             var siteUrl = Environment.GetEnvironmentVariable("NEXT_PUBLIC_SITE_URL") ?? "https://nexmediaai.com";
 
             return Ok(new
             {
                 id = profile.Id,
+                affiliateDisplayId = profile.AffiliateDisplayId,
+                referralCode = profile.ReferralCode,
+                referralLink = $"{siteUrl}/register?ref={profile.ReferralCode}",
+                isActive = profile.IsActive,
+                totalClicks = profile.TotalClicks,
+                createdAt = profile.CreatedAt
+            });
+        }
+
+        // ─────────────────────────────────────────────
+        //  POST /api/affiliate/onboard
+        // ─────────────────────────────────────────────
+
+        [HttpPost("onboard")]
+        public async Task<IActionResult> Onboard([FromBody] AffiliateService.OnboardDto dto)
+        {
+            var userId = GetCurrentUserId();
+            if (userId == Guid.Empty) return Unauthorized();
+
+            var (success, error, profile) = await _affiliateService.OnboardProfileAsync(userId, dto);
+            
+            if (!success) return BadRequest(new { error });
+
+            var siteUrl = Environment.GetEnvironmentVariable("NEXT_PUBLIC_SITE_URL") ?? "https://nexmediaai.com";
+
+            return Ok(new
+            {
+                id = profile!.Id,
                 affiliateDisplayId = profile.AffiliateDisplayId,
                 referralCode = profile.ReferralCode,
                 referralLink = $"{siteUrl}/register?ref={profile.ReferralCode}",
@@ -201,7 +230,8 @@ namespace NexClone.Backend.API.Controllers.Client
             var method = string.IsNullOrWhiteSpace(request.PayoutMethod) ? "Manual" : request.PayoutMethod;
             var account = string.IsNullOrWhiteSpace(request.PayoutAccount) ? "Manual Request" : request.PayoutAccount;
 
-            var profile = await _affiliateService.GetOrCreateProfileAsync(userId);
+            var profile = await _affiliateService.GetProfileAsync(userId);
+            if (profile == null) return NotFound(new { error = "Affiliate profile not found. Please onboard." });
 
             var (success, error) = await _affiliateService.RequestPayoutAsync(
                 profile.Id,

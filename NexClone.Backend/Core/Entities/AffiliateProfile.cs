@@ -30,6 +30,20 @@ namespace NexClone.Backend.Core.Entities
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        // Onboarding Fields
+        [MaxLength(20)]
+        public string? MobileNumber { get; set; }
+
+        [MaxLength(100)]
+        public string? TelegramUsername { get; set; }
+
+        [MaxLength(20)]
+        public string? WhatsappNumber { get; set; }
+
+        [MaxLength(200)]
+        public string? FacebookAccount { get; set; }
+
+        public DateTime? PolicyAcceptedAt { get; set; }
         // Navigation
         [ForeignKey(nameof(UserId))]
         public ApplicationUser User { get; set; } = null!;

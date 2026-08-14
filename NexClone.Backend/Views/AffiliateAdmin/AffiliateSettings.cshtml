@@ -75,6 +75,24 @@
             </div>
         </div>
 
+        <!-- Limits -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.5rem;">
+            <div class="bx--form-item">
+                <label for="MaxRecurringMonths" class="bx--label">Max Recurring Months (0 for unlimited)</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="MaxRecurringMonths" type="number" min="0" max="120" class="bx--text-input"
+                           name="MaxRecurringMonths" value="@Model.MaxRecurringMonths" />
+                </div>
+            </div>
+            <div class="bx--form-item">
+                <label for="MaxInactivityDays" class="bx--label">Max Inactivity Days (0 for unlimited)</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="MaxInactivityDays" type="number" min="0" max="3650" class="bx--text-input"
+                           name="MaxInactivityDays" value="@Model.MaxInactivityDays" />
+                </div>
+            </div>
+        </div>
+
         <!-- Minimum Payout -->
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.5rem;">
             <div class="bx--form-item">

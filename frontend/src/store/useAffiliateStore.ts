@@ -88,6 +88,7 @@ interface AffiliateStore {
   fetchCommissions: () => Promise<void>;
   fetchPayouts: () => Promise<void>;
   requestPayout: (data: PayoutRequest) => Promise<{ success: boolean; error?: string }>;
+  onboardProfile: (data: { mobileNumber: string; telegramUsername?: string; whatsappNumber?: string; facebookAccount?: string }) => Promise<{ success: boolean; error?: string }>;
 }
 
 export const useAffiliateStore = create<AffiliateStore>((set, get) => ({
@@ -153,6 +154,16 @@ export const useAffiliateStore = create<AffiliateStore>((set, get) => ({
       return { success: true };
     } catch (e: any) {
       return { success: false, error: e?.response?.data?.error || 'Failed to submit payout request' };
+    }
+  },
+
+  onboardProfile: async (data) => {
+    try {
+      const res = await api.post('/api/affiliate/onboard', data);
+      set({ profile: res.data, error: null });
+      return { success: true };
+    } catch (e: any) {
+      return { success: false, error: e?.response?.data?.error || 'Failed to onboard affiliate profile' };
     }
   },
 }));
