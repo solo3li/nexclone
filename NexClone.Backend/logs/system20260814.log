@@ -904,3 +904,20 @@ System.Exception: No routing rules configured for 'image-to-video'.
 2026-08-14 20:38:55.202 +03:00 [INF] Server desktop-rjppsk4:2932:ef74207c successfully announced in 278.7224 ms
 2026-08-14 20:38:55.207 +03:00 [INF] Server desktop-rjppsk4:2932:ef74207c is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-14 20:38:55.234 +03:00 [INF] Server desktop-rjppsk4:2932:ef74207c all the dispatchers started
+2026-08-14 20:43:56.046 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-14 21:03:22.775 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-14 21:03:32.418 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-14 21:03:37.624 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-14 21:03:37.778 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-14 21:03:37.778 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-14 21:03:37.779 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-14 21:03:37.779 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-14 21:03:37.779 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-14 21:03:37.780 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-14 21:03:38.235 +03:00 [INF] Server desktop-rjppsk4:23944:6e29ee5c successfully announced in 429.6459 ms
+2026-08-14 21:03:38.242 +03:00 [INF] Server desktop-rjppsk4:23944:6e29ee5c is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-14 21:03:38.266 +03:00 [INF] Server desktop-rjppsk4:23944:6e29ee5c all the dispatchers started

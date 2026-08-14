@@ -154,10 +154,19 @@
                             var isVideo = toolName != "text-to-image";
                             var costLabel = isVideo ? "Cost per Second ($)" : "Cost per Generation ($)";
 
-                            if (toolName == "text-to-video") models.AddRange(new[] { "grok-imagine/t2v", "kling/t2v", "luma/t2v", "runway/gen3" });
-                            else if (toolName == "image-to-video") models.AddRange(new[] { "grok-imagine/i2v", "kling/i2v", "luma/i2v", "runway/gen3" });
-                            else if (toolName == "reference-to-video") models.AddRange(new[] { "grok-imagine/r2v" });
-                            else if (toolName == "text-to-image") models.AddRange(new[] { "grok-imagine/t2i", "flux/pro", "midjourney/v6" });
+                            if (toolName == "text-to-video" || toolName == "image-to-video" || toolName == "reference-to-video")
+                            {
+                                models.AddRange(new[] { 
+                                    "veo 3.1 Fast|720p", "veo 3.1 Fast|1080p", "veo 3.1 Fast|4k",
+                                    "veo 3.1 Lite|720p", "veo 3.1 Lite|1080p", "veo 3.1 Lite|4k",
+                                    "veo 3.1 Quality|720p", "veo 3.1 Quality|1080p", "veo 3.1 Quality|4k",
+                                    "grok-imagine|480p", "grok-imagine|720p", "grok-imagine|1080p"
+                                });
+                            }
+                            else if (toolName == "text-to-image")
+                            {
+                                models.AddRange(new[] { "grok-imagine|t2i", "grok-imagine|i2i" });
+                            }
 
                             // Try to parse existing prices from config.AdditionalSettings
                             var currentPrices = new Dictionary<string, decimal>();
@@ -200,12 +209,14 @@
                             </div>
                         }
 
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                            <h3 class="bx--type-productive-heading-03">@Localizer["Routing Rules (Models)"]</h3>
-                            <button type="button" class="bx--btn bx--btn--sm bx--btn--secondary" onclick="addRule('@toolName')">
-                                @Localizer["+ Add Model"]
-                            </button>
-                        </div>
+                        @if (toolName != "text-to-video" && toolName != "image-to-video" && toolName != "reference-to-video" && toolName != "text-to-image")
+                        {
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <h3 class="bx--type-productive-heading-03">@Localizer["Routing Rules (Models)"]</h3>
+                                <button type="button" class="bx--btn bx--btn--sm bx--btn--secondary" onclick="addRule('@toolName')">
+                                    @Localizer["+ Add Model"]
+                                </button>
+                            </div>
                         
                         <div id="rules-container-@toolName" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;">
                             @{
@@ -275,6 +286,7 @@
                                 </div>
                             }
                         </div>
+                        }
 
                         <button type="submit" class="bx--btn bx--btn--primary">Save @toolName.ToUpper() Settings</button>
                     </form>

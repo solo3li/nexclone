@@ -121,6 +121,20 @@ namespace NexClone.Backend.API.Controllers.Admin
 
                     _context.ToolRoutingRules.RemoveRange(existing.RoutingRules);
                     
+                    if (config.ToolName == "text-to-video" || config.ToolName == "image-to-video" || 
+                        config.ToolName == "reference-to-video" || config.ToolName == "text-to-image")
+                    {
+                        // Add a default routing rule for these tools since we hid the UI
+                        config.RoutingRules = new List<ToolRoutingRule>
+                        {
+                            new ToolRoutingRule
+                            {
+                                ProviderName = "Crun AI",
+                                ToolConfigurationId = existing.Id
+                            }
+                        };
+                    }
+
                     if (config.RoutingRules != null)
                     {
                         foreach (var rule in config.RoutingRules)
@@ -136,6 +150,20 @@ namespace NexClone.Backend.API.Controllers.Admin
                 {
                     config.Id = Guid.NewGuid();
                     config.UpdatedAt = DateTime.UtcNow;
+
+                    if (config.ToolName == "text-to-video" || config.ToolName == "image-to-video" || 
+                        config.ToolName == "reference-to-video" || config.ToolName == "text-to-image")
+                    {
+                        config.RoutingRules = new List<ToolRoutingRule>
+                        {
+                            new ToolRoutingRule
+                            {
+                                ProviderName = "Crun AI",
+                                ToolConfigurationId = config.Id
+                            }
+                        };
+                    }
+
                     if (config.RoutingRules != null)
                     {
                         foreach (var rule in config.RoutingRules)
