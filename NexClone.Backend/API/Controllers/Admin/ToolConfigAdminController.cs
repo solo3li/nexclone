@@ -68,10 +68,44 @@ namespace NexClone.Backend.API.Controllers.Admin
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SaveConfig(ToolConfiguration config, [FromForm] int? MaxConcurrentOperations)
+        public async Task<IActionResult> SaveConfig(ToolConfiguration config, [FromForm] int? MaxConcurrentOperations, [FromForm] System.Collections.Generic.Dictionary<string, decimal> ModelCosts)
         {
             if (ModelState.IsValid)
             {
+                if (ModelCosts != null && ModelCosts.Count > 0 && 
+                    (config.ToolName == "text-to-video" || config.ToolName == "image-to-video" || 
+                     config.ToolName == "reference-to-video" || config.ToolName == "text-to-image"))
+                {
+                    bool isVideo = config.ToolName != "text-to-image";
+                    var settingsDict = new System.Collections.Generic.Dictionary<string, object>();
+                    foreach (var kvp in ModelCosts)
+                    {
+                        var modelName = kvp.Key;
+                        var cost = kvp.Value;
+                        if (isVideo)
+                        {
+                            settingsDict[modelName] = new
+                            {
+                                IsPerSecond = true,
+                                BaseCost = 0m,
+                                CostPerSecond = new System.Collections.Generic.Dictionary<string, decimal> { { "default", cost } },
+                                FixedCost = new System.Collections.Generic.Dictionary<string, decimal>()
+                            };
+                        }
+                        else
+                        {
+                            settingsDict[modelName] = new
+                            {
+                                IsPerSecond = false,
+                                BaseCost = 0m,
+                                CostPerSecond = new System.Collections.Generic.Dictionary<string, decimal>(),
+                                FixedCost = new System.Collections.Generic.Dictionary<string, decimal> { { "default", cost } }
+                            };
+                        }
+                    }
+                    config.AdditionalSettings = System.Text.Json.JsonSerializer.Serialize(settingsDict);
+                }
+
                 var existing = await _context.ToolConfigurations
                     .Include(c => c.RoutingRules)
                     .FirstOrDefaultAsync(c => c.ToolName == config.ToolName);

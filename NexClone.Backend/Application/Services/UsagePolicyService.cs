@@ -281,16 +281,18 @@ namespace NexClone.Backend.Application.Services
 
                             if (settings.TryGetValue(modelName, out var mConfig))
                             {
-                                if (mConfig.IsPerSecond)
-                                {
-                                    decimal cps = mConfig.CostPerSecond.ContainsKey(res) ? mConfig.CostPerSecond[res] : 0;
-                                    totalCost = mConfig.BaseCost + (amountForCost * cps);
-                                }
-                                else
-                                {
-                                    decimal fc = mConfig.FixedCost.ContainsKey(res) ? mConfig.FixedCost[res] : 0;
-                                    totalCost = fc;
-                                }
+                                  if (mConfig.IsPerSecond)
+                                  {
+                                      decimal cps = mConfig.CostPerSecond.ContainsKey(res) ? mConfig.CostPerSecond[res] : 
+                                                    (mConfig.CostPerSecond.ContainsKey("default") ? mConfig.CostPerSecond["default"] : 0);
+                                      totalCost = mConfig.BaseCost + (amountForCost * cps);
+                                  }
+                                  else
+                                  {
+                                      decimal fc = mConfig.FixedCost.ContainsKey(res) ? mConfig.FixedCost[res] : 
+                                                   (mConfig.FixedCost.ContainsKey("default") ? mConfig.FixedCost["default"] : 0);
+                                      totalCost = fc;
+                                  }
                                 priceFound = true;
                             }
                         }
