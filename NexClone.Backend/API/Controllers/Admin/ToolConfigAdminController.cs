@@ -23,47 +23,59 @@ namespace NexClone.Backend.API.Controllers.Admin
         {
             try
             {
-                ViewData["Title"] = "Tool Settings";
+                ViewData["Title"] = "Tool Settings Dashboard";
                 
-                var allConfigs = await _context.ToolConfigurations.Include(c => c.RoutingRules).ToListAsync();
-                var providers = await _context.ApiConfigurations.Where(a => a.IsActive).Select(a => a.ProviderName).ToListAsync();
-                
-                ViewBag.Providers = new SelectList(providers);
-
-
+                var allConfigs = await _context.ToolConfigurations.ToListAsync();
                 var tools = new[] { "text-to-voice", "voice-to-text", "image-to-video", "advanced-lip-sync", "motion-control", "text-to-video", "text-to-image", "reference-to-video" };
                 
                 var toolConfigs = new Dictionary<string, ToolConfiguration>();
-                var concurrencyLimits = new Dictionary<string, int>();
 
                 foreach (var t in tools)
                 {
                     var config = allConfigs.FirstOrDefault(c => c.ToolName == t);
                     if (config == null)
                     {
-                        config = new ToolConfiguration { ToolName = t, Id = Guid.NewGuid() };
+                        config = new ToolConfiguration { ToolName = t, IsActive = false, Id = Guid.NewGuid() };
                     }
                     toolConfigs[t] = config;
-
-                    var settingKey = $"Concurrency_{t}";
-                    var setting = await _context.AppSettings.FirstOrDefaultAsync(s => s.Key == settingKey);
-                    if (setting != null && int.TryParse(setting.Value, out int limit))
-                    {
-                        concurrencyLimits[t] = limit;
-                    }
-                    else
-                    {
-                        concurrencyLimits[t] = 10; // Default limit
-                    }
                 }
 
-                ViewBag.ConcurrencyLimits = concurrencyLimits;
                 return View(toolConfigs);
             }
             catch (Exception ex)
             {
                 return Content($"ERROR: {ex.Message}\n{ex.StackTrace}\n{ex.InnerException?.Message}");
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return RedirectToAction(nameof(Index));
+
+            ViewData["Title"] = $"Manage {id.ToUpper().Replace("-", " ")}";
+            
+            var config = await _context.ToolConfigurations.Include(c => c.RoutingRules).FirstOrDefaultAsync(c => c.ToolName == id);
+            if (config == null)
+            {
+                config = new ToolConfiguration { ToolName = id, Id = Guid.NewGuid() };
+            }
+
+            var providers = await _context.ApiConfigurations.Where(a => a.IsActive).Select(a => a.ProviderName).ToListAsync();
+            ViewBag.Providers = new SelectList(providers);
+
+            var settingKey = $"Concurrency_{id}";
+            var setting = await _context.AppSettings.FirstOrDefaultAsync(s => s.Key == settingKey);
+            if (setting != null && int.TryParse(setting.Value, out int limit))
+            {
+                ViewBag.MaxConcurrentOperations = limit;
+            }
+            else
+            {
+                ViewBag.MaxConcurrentOperations = 10;
+            }
+
+            return View(config);
         }
 
         [HttpPost]
@@ -180,30 +192,25 @@ namespace NexClone.Backend.API.Controllers.Admin
                     if (setting != null)
                     {
                         setting.Value = MaxConcurrentOperations.Value.ToString();
-                        setting.UpdatedAt = DateTime.UtcNow;
                         _context.Update(setting);
                     }
                     else
                     {
-                        _context.AppSettings.Add(new AppSetting
+                        _context.AppSettings.Add(new Core.Entities.AppSetting
                         {
                             Key = settingKey,
-                            Value = MaxConcurrentOperations.Value.ToString(),
-                            Description = $"Max concurrent operations for {config.ToolName}",
-                            UpdatedAt = DateTime.UtcNow
+                            Value = MaxConcurrentOperations.Value.ToString()
                         });
                     }
                 }
 
                 await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource>>()["Settings saved successfully."].Value;
+                TempData["SuccessMessage"] = "Configuration saved successfully.";
+                return RedirectToAction(nameof(Edit), new { id = config.ToolName });
             }
-            else
-            {
-                var errors = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
-                TempData["ErrorMessage"] = HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource>>()["Failed to save settings."].Value + " " + errors;
-            }
-            return RedirectToAction(nameof(Index));
+            
+            TempData["ErrorMessage"] = "Failed to save configuration.";
+            return RedirectToAction(nameof(Edit), new { id = config.ToolName });
         }
     }
 }

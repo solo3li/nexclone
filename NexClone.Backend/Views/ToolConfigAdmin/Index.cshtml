@@ -2,9 +2,86 @@
 @inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 
 @{
-    ViewData["Title"] = "Tool Settings";
-    var providers = ViewBag.Providers as SelectList;
+    ViewData["Title"] = "Tool Settings Dashboard";
 }
+
+<style>
+    .tool-card {
+        background: #ffffff;
+        border: 1px solid #e0e0e0;
+        padding: 1.5rem;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        text-decoration: none;
+        color: inherit;
+    }
+    .tool-card:hover {
+        border-color: #0f62fe;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+    .tool-icon {
+        width: 48px;
+        height: 48px;
+        background: #f4f4f4;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        color: #0f62fe;
+    }
+    .tool-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        text-transform: capitalize;
+    }
+    .tool-status {
+        margin-top: auto;
+        padding-top: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    .status-active {
+        background: #defbe6;
+        color: #198038;
+    }
+    .status-maintenance {
+        background: #fcf1cd;
+        color: #f1c21b;
+    }
+    .status-comingsoon {
+        background: #e5f6ff;
+        color: #00539a;
+    }
+    .status-inactive {
+        background: #f4f4f4;
+        color: #525252;
+    }
+    .manage-btn {
+        color: #0f62fe;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+    }
+    .manage-btn svg {
+        margin-left: 0.5rem;
+        transition: transform 0.2s ease;
+    }
+    .tool-card:hover .manage-btn svg {
+        transform: translateX(4px);
+    }
+</style>
 
 <div class="bx--grid bx--grid--full-width">
     <div class="bx--row" style="margin-bottom: 2rem;">
@@ -14,22 +91,9 @@
         </div>
     </div>
 
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div data-notification class="bx--inline-notification bx--inline-notification--success" role="alert" style="margin-bottom: 1rem;">
-            <div class="bx--inline-notification__details">
-                <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bx--inline-notification__icon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M10,1c-4.9,0-9,4.1-9,9s4.1,9,9,9s9-4.1,9-9S14.9,1,10,1z M8.7,13.5l-3.2-3.2l1-1l2.2,2.2l4.8-4.8l1,1L8.7,13.5z"></path></svg>
-                <div class="bx--inline-notification__text-wrapper">
-                    <p class="bx--inline-notification__title">@Localizer["Success"]</p>
-                    <p class="bx--inline-notification__subtitle">@TempData["SuccessMessage"]</p>
-                </div>
-            </div>
-        </div>
-    }
-
     @if (TempData["ErrorMessage"] != null)
     {
-        <div data-notification class="bx--inline-notification bx--inline-notification--error" role="alert" style="margin-bottom: 1rem;">
+        <div data-notification class="bx--inline-notification bx--inline-notification--error" role="alert" style="margin-bottom: 2rem;">
             <div class="bx--inline-notification__details">
                 <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bx--inline-notification__icon" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M10,1c-5,0-9,4-9,9s4,9,9,9s9-4,9-9S15,1,10,1z M13.5,14.5l-8-8l1-1l8,8L13.5,14.5z"></path></svg>
                 <div class="bx--inline-notification__text-wrapper">
@@ -41,392 +105,54 @@
     }
 
     <div class="bx--row">
-        <div class="bx--col">
-            <div data-tabs class="bx--tabs">
-                <ul class="bx--tabs__nav bx--tabs__nav--hidden" role="tablist">
-                    @{ int i = 0; }
-                    @foreach (var tool in Model.Keys)
-                    {
-                        <li class="bx--tabs__nav-item @(i == 0 ? "bx--tabs__nav-item--selected" : "")" data-target=".tab-panel-@tool" role="tab" aria-selected="@(i == 0 ? "true" : "false")">
-                            <a tabindex="0" id="tab-link-@tool" class="bx--tabs__nav-link" href="javascript:void(0)" role="tab" aria-controls="tab-panel-@tool">
-                                @tool.ToUpper().Replace("-", " ")
-                            </a>
-                        </li>
-                        i++;
-                    }
-                </ul>
-            </div>
-        </div>
-    </div>
-
-    @{ int j = 0; }
-    @foreach (var kvp in Model)
-    {
-        var toolName = kvp.Key;
-        var config = kvp.Value;
-        
-        <div id="tab-panel-@toolName" class="tab-panel-@toolName" role="tabpanel" aria-labelledby="tab-link-@toolName" aria-hidden="@(j == 0 ? "false" : "true")" @(j != 0 ? "hidden" : "")>
-            <div class="bx--row" style="margin-top: 2rem;">
-                <div class="bx--col-lg-12">
-                    <form asp-action="SaveConfig" method="post" class="bx--form">
-                        <input type="hidden" name="ToolName" value="@toolName" />
-                        
-                        <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem;">
-                            <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem;">@Localizer["General Settings"]</h3>
-                            
-                            <div class="bx--form-item" style="margin-bottom: 1.5rem;">
-                                <div class="bx--toggle-c">
-                                    <input type="checkbox" id="IsActive-@toolName" class="bx--toggle-input" name="IsActive" value="true" @(config.IsActive ? "checked" : "")>
-                                    <input type="hidden" name="IsActive" value="false">
-                                    <label for="IsActive-@toolName" class="bx--toggle-input__label" aria-label="Toggle">
-                                        <span class="bx--toggle__switch">
-                                            <span class="bx--toggle__text--left" aria-hidden="true">@Localizer["Off"]</span>
-                                            <span class="bx--toggle__text--right" aria-hidden="true">@Localizer["On"]</span>
-                                        </span>
-                                        <span style="margin-left: 1rem;">@Localizer["Is Active (Enable/Disable Tool)"]</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="bx--form-item" style="margin-bottom: 1rem;">
-                                <div class="bx--toggle-c">
-                                    <input type="checkbox" id="IsMaintenanceMode-@toolName" class="bx--toggle-input" name="IsMaintenanceMode" value="true" @(config.IsMaintenanceMode ? "checked" : "")>
-                                    <input type="hidden" name="IsMaintenanceMode" value="false">
-                                    <label for="IsMaintenanceMode-@toolName" class="bx--toggle-input__label" aria-label="Toggle">
-                                        <span class="bx--toggle__switch">
-                                            <span class="bx--toggle__text--left" aria-hidden="true">@Localizer["Off"]</span>
-                                            <span class="bx--toggle__text--right" aria-hidden="true">@Localizer["On"]</span>
-                                        </span>
-                                        <span style="margin-left: 1rem;">@Localizer["Maintenance Mode"]</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="bx--form-item" style="margin-bottom: 2rem;">
-                                <div class="bx--toggle-c">
-                                    <input type="checkbox" id="IsComingSoon-@toolName" class="bx--toggle-input" name="IsComingSoon" value="true" @(config.IsComingSoon ? "checked" : "")>
-                                    <input type="hidden" name="IsComingSoon" value="false">
-                                    <label for="IsComingSoon-@toolName" class="bx--toggle-input__label" aria-label="Toggle">
-                                        <span class="bx--toggle__switch">
-                                            <span class="bx--toggle__text--left" aria-hidden="true">@Localizer["Off"]</span>
-                                            <span class="bx--toggle__text--right" aria-hidden="true">@Localizer["On"]</span>
-                                        </span>
-                                        <span style="margin-left: 1rem;">@Localizer["Coming Soon Mode"]</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="bx--form-item" style="margin-bottom: 2rem;">
-                                <label class="bx--label">@Localizer["Allowed Wallets for Deduction"]</label>
-                                <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
-                                    <div class="bx--checkbox-wrapper">
-                                        <input id="AllowStandard-@toolName" class="bx--checkbox" type="checkbox" value="true" name="AllowStandardCredits" @(config.AllowStandardCredits ? "checked" : "")>
-                                        <input type="hidden" value="false" name="AllowStandardCredits">
-                                        <label for="AllowStandard-@toolName" class="bx--checkbox-label">
-                                            <span class="bx--checkbox-label-text">Standard Credits</span>
-                                        </label>
-                                    </div>
-                                    <div class="bx--checkbox-wrapper">
-                                        <input id="AllowPremium-@toolName" class="bx--checkbox" type="checkbox" value="true" name="AllowPremiumCredits" @(config.AllowPremiumCredits ? "checked" : "")>
-                                        <input type="hidden" value="false" name="AllowPremiumCredits">
-                                        <label for="AllowPremium-@toolName" class="bx--checkbox-label">
-                                            <span class="bx--checkbox-label-text">Premium Credits</span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="bx--form__helper-text" style="margin-top: 0.5rem;">@Localizer["Standard Credits are prioritized for deduction. If insufficient, Premium Credits will cover the remainder if checked."]</div>
-                            </div>
-
-                            <div class="bx--form-item" style="margin-top: 1rem;">
-                                <label for="MaxConcurrentOperations-@toolName" class="bx--label">@Localizer["Max Concurrent Operations"]</label>
-                                @{
-                                    var limits = ViewBag.ConcurrencyLimits as Dictionary<string, int>;
-                                    int currentLimit = limits != null && limits.ContainsKey(toolName) ? limits[toolName] : 10;
-                                }
-                                <input id="MaxConcurrentOperations-@toolName" type="number" class="bx--text-input" name="MaxConcurrentOperations" value="@currentLimit" min="1" max="1000">
-                                <div class="bx--form__helper-text">@Localizer["Limit the number of background jobs running at the same time for this tool."]</div>
-                            </div>
-                        </div>
-
-                        @if (toolName == "text-to-video" || toolName == "image-to-video" || toolName == "reference-to-video" || toolName == "text-to-image")
-                        {
-                            var models = new List<string>();
-                            var isVideo = toolName != "text-to-image";
-                            var costLabel = isVideo ? "Cost per Second ($)" : "Cost per Generation ($)";
-
-                            if (toolName == "text-to-video" || toolName == "image-to-video")
-                            {
-                                models.AddRange(new[] { 
-                                    "veo 3.1 Fast|720p", "veo 3.1 Fast|1080p", "veo 3.1 Fast|4k",
-                                    "veo 3.1 Lite|720p", "veo 3.1 Lite|1080p", "veo 3.1 Lite|4k",
-                                    "veo 3.1 Quality|720p", "veo 3.1 Quality|1080p", "veo 3.1 Quality|4k",
-                                    "grok-imagine|480p", "grok-imagine|720p", "grok-imagine|1080p"
-                                });
-                            }
-                            else if (toolName == "reference-to-video")
-                            {
-                                models.AddRange(new[] { 
-                                    "veo 3.1 Fast|720p", "veo 3.1 Fast|1080p", "veo 3.1 Fast|4k",
-                                    "veo 3.1 Lite|720p", "veo 3.1 Lite|1080p", "veo 3.1 Lite|4k",
-                                    "veo 3.1 Quality|720p", "veo 3.1 Quality|1080p", "veo 3.1 Quality|4k"
-                                });
-                            }
-                            else if (toolName == "text-to-image")
-                            {
-                                models.AddRange(new[] { "grok-imagine|t2i", "grok-imagine|i2i" });
-                            }
-
-                            // Try to parse existing prices from config.AdditionalSettings
-                            var currentPrices = new Dictionary<string, decimal>();
-                            if (!string.IsNullOrEmpty(config.AdditionalSettings))
-                            {
-                                try {
-                                    var jDoc = System.Text.Json.JsonDocument.Parse(config.AdditionalSettings);
-                                    foreach (var prop in jDoc.RootElement.EnumerateObject())
-                                    {
-                                        var mConfig = prop.Value;
-                                        if (mConfig.TryGetProperty("IsPerSecond", out var isPerSecProp) && isPerSecProp.GetBoolean())
-                                        {
-                                            if (mConfig.TryGetProperty("CostPerSecond", out var cps) && cps.TryGetProperty("default", out var cpsVal))
-                                                currentPrices[prop.Name] = cpsVal.GetDecimal();
-                                        }
-                                        else
-                                        {
-                                            if (mConfig.TryGetProperty("FixedCost", out var fc) && fc.TryGetProperty("default", out var fcVal))
-                                                currentPrices[prop.Name] = fcVal.GetDecimal();
-                                        }
-                                    }
-                                } catch {}
-                            }
-
-                            <div class="bx--form-item" style="margin-top: 2rem; margin-bottom: 2rem;">
-                                <h4 class="bx--label" style="font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem; color: #0f62fe;">@Localizer["Model Pricing (Automatic)"]</h4>
-                                <div style="display: flex; flex-direction: column; gap: 1rem; background: #f4f4f4; padding: 1.5rem; border-radius: 4px; border-left: 4px solid #0f62fe;">
-                                    @foreach (var m in models)
-                                    {
-                                        var mPrice = currentPrices.ContainsKey(m) ? currentPrices[m] : 0.0m;
-                                        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">
-                                            <label class="bx--label" style="margin: 0; font-weight: bold; width: 250px; font-size: 0.9rem;">@m</label>
-                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                                <input type="number" step="0.0001" min="0" name="ModelCosts[@m]" class="bx--text-input" style="width: 120px;" value="@mPrice" />
-                                                <span class="bx--label" style="margin: 0; color: #525252; width: 150px;">@costLabel</span>
-                                            </div>
-                                        </div>
-                                    }
-                                </div>
-                            </div>
-                        }
-
-                        @if (toolName != "text-to-video" && toolName != "image-to-video" && toolName != "reference-to-video" && toolName != "text-to-image")
-                        {
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                                <h3 class="bx--type-productive-heading-03">@Localizer["Routing Rules (Models)"]</h3>
-                                <button type="button" class="bx--btn bx--btn--sm bx--btn--secondary" onclick="addRule('@toolName')">
-                                    @Localizer["+ Add Model"]
-                                </button>
-                            </div>
-                        
-                        <div id="rules-container-@toolName" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem;">
-                            @{
-                                var sortedRules = config.RoutingRules?.ToList() ?? new List<NexClone.Backend.Core.Entities.ToolRoutingRule>();
-                            }
-                            @for (int r = 0; r < sortedRules.Count; r++)
-                            {
-                                var rule = sortedRules[r];
-                                <div class="rule-block" style="background: #ffffff; padding: 1.5rem; border: 1px solid #e0e0e0; border-left: 4px solid #0f62fe; position: relative;">
-                                    <button type="button" class="bx--btn bx--btn--sm bx--btn--danger" style="position: absolute; top: 1rem; right: 1rem;" onclick="this.closest('.rule-block').remove(); updateRuleIndices('@toolName');">
-                                        @Localizer["Remove"]
-                                    </button>
-                                    
-                                    @if (toolName == "text-to-voice")
-                                    {
-                                        <div class="bx--form-item" style="margin-bottom: 1rem;">
-                                            <label class="bx--label">@Localizer["Quality Level"]</label>
-                                            <select name="RoutingRules[@r].QualityLevel" class="bx--select-input rule-quality-input" required>
-                                                <option value="Standard" selected="@(rule.QualityLevel == "Standard")">Standard</option>
-                                                <option value="High" selected="@(rule.QualityLevel == "High")">High</option>
-                                            </select>
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <input type="hidden" name="RoutingRules[@r].QualityLevel" value="Standard" class="rule-quality-input" />
-                                    }
-                                    
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                                        <div class="bx--form-item">
-                                            <label class="bx--label">@Localizer["Provider Name"]</label>
-                                            <select name="RoutingRules[@r].ProviderName" class="bx--select-input" required>
-                                                <option value="">-- Select Provider --</option>
-                                                @if (providers != null)
-                                                {
-                                                    foreach (var p in providers)
-                                                    {
-                                                        <option value="@p.Text" selected="@(rule.ProviderName == p.Text)">@p.Text</option>
-                                                    }
-                                                }
-                                            </select>
-                                        </div>
-                                        <div class="bx--form-item">
-                                            <label class="bx--label">@Localizer["Model Name (Optional)"]</label>
-                                            <input type="text" name="RoutingRules[@r].ModelName" class="bx--text-input" value="@rule.ModelName" placeholder="e.g. tts-1 or gemini-2.0" />
-                                        </div>
-                                    </div>
-                                    
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
-                                        <div class="bx--form-item">
-                                            <label class="bx--label">@Localizer["Max Daily Requests"]</label>
-                                            <input type="number" name="RoutingRules[@r].MaxDailyRequests" class="bx--text-input" value="@rule.MaxDailyRequests" placeholder="Unlimited" min="1" />
-                                        </div>
-                                        <div class="bx--form-item">
-                                            <label class="bx--label">@Localizer["Max Requests/Min"]</label>
-                                            <input type="number" name="RoutingRules[@r].MaxRequestsPerMinute" class="bx--text-input" value="@rule.MaxRequestsPerMinute" placeholder="Unlimited" min="1" />
-                                        </div>
-                                        <div class="bx--form-item">
-                                            <label class="bx--label">@Localizer["Active From Time"]</label>
-                                            <input type="time" name="RoutingRules[@r].ActiveFromTime" class="bx--text-input" value="@(rule.ActiveFromTime.HasValue ? rule.ActiveFromTime.Value.ToString(@"hh\:mm") : "")" />
-                                        </div>
-                                        <div class="bx--form-item">
-                                            <label class="bx--label">@Localizer["Active To Time"]</label>
-                                            <input type="time" name="RoutingRules[@r].ActiveToTime" class="bx--text-input" value="@(rule.ActiveToTime.HasValue ? rule.ActiveToTime.Value.ToString(@"hh\:mm") : "")" />
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                        }
-
-                        <button type="submit" class="bx--btn bx--btn--primary">Save @toolName.ToUpper() Settings</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-        j++;
-    }
-</div>
-
-@section Scripts {
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const tabs = document.querySelectorAll('.bx--tabs__nav-item');
+        @foreach (var kvp in Model)
+        {
+            var toolName = kvp.Key;
+            var config = kvp.Value;
+            var formattedName = toolName.Replace("-", " ");
             
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    // Remove selected class from all tabs
-                    tabs.forEach(t => t.classList.remove('bx--tabs__nav-item--selected'));
-                    // Add selected class to clicked tab
-                    this.classList.add('bx--tabs__nav-item--selected');
-                    
-                    // Hide all panels
-                    document.querySelectorAll('[role="tabpanel"]').forEach(panel => {
-                        panel.setAttribute('hidden', 'true');
-                        panel.setAttribute('aria-hidden', 'true');
-                    });
-                    
-                    // Show target panel
-                    const target = this.getAttribute('data-target');
-                    const targetPanel = document.querySelector(target);
-                    if (targetPanel) {
-                        targetPanel.removeAttribute('hidden');
-                        targetPanel.setAttribute('aria-hidden', 'false');
-                    }
-                });
-            });
-        });
-
-        // Provider options rendered as a JS array
-        const providerOptions = [
-            @if (providers != null)
-            {
-                foreach (var p in providers)
-                {
-                    <text>
-                    { value: '@p.Text', text: '@p.Text' },
-                    </text>
-                }
+            // Determine Icon based on tool name
+            string iconSvg = "";
+            if (toolName.Contains("video") || toolName == "motion-control" || toolName == "advanced-lip-sync") {
+                iconSvg = "<svg width='24' height='24' viewBox='0 0 32 32' fill='currentColor'><path d='M26,4H6C4.9,4,4,4.9,4,6v20c0,1.1,0.9,2,2,2h20c1.1,0,2-0.9,2-2V6C28,4.9,27.1,4,26,4z M26,26H6V6h20V26z'></path><polygon points='12,10 12,22 22,16'></polygon></svg>";
+            } else if (toolName.Contains("image")) {
+                iconSvg = "<svg width='24' height='24' viewBox='0 0 32 32' fill='currentColor'><path d='M30,8v16c0,1.1-0.9,2-2,2H4c-1.1,0-2-0.9-2-2V8c0-1.1,0.9-2,2-2h24C29.1,6,30,6.9,30,8z M28,8H4v16h24V8z'></path><circle cx='10' cy='13' r='2'></circle><polygon points='16,14 20,18 24,14 28,18 28,24 4,24 4,20 10,14'></polygon></svg>";
+            } else if (toolName.Contains("voice") || toolName.Contains("text")) {
+                iconSvg = "<svg width='24' height='24' viewBox='0 0 32 32' fill='currentColor'><path d='M16,2C8.3,2,2,8.3,2,16s6.3,14,14,14s14-6.3,14-14S23.7,2,16,2z M16,28C9.4,28,4,22.6,4,16S9.4,4,16,4s12,5.4,12,12S22.6,28,16,28z'></path><path d='M11.5,11.5h9v2h-9V11.5z M11.5,15.5h9v2h-9V15.5z M11.5,19.5h5v2h-5V19.5z'></path></svg>";
             }
-        ];
 
-        window.addRule = function(toolName) {
-            const container = document.getElementById(`rules-container-${toolName}`);
-            const count = container.querySelectorAll('.rule-block').length;
-            
-            let optionsHtml = '<option value="">-- Select Provider --</option>';
-            providerOptions.forEach(p => {
-                optionsHtml += `<option value="${p.value}">${p.text}</option>`;
-            });
-
-            const html = `
-                <div class="rule-block" style="background: #ffffff; padding: 1.5rem; border: 1px solid #e0e0e0; border-left: 4px solid #0f62fe; position: relative;">
-                    <button type="button" class="bx--btn bx--btn--sm bx--btn--danger" style="position: absolute; top: 1rem; right: 1rem;" onclick="this.closest('.rule-block').remove(); updateRuleIndices('${toolName}');">
-                        @Localizer["Remove"]
-                    </button>
-                    
-                    ${toolName === "text-to-voice" ? `
-                    <div class="bx--form-item" style="margin-bottom: 1rem;">
-                        <label class="bx--label">@Localizer["Quality Level"]</label>
-                        <select name="RoutingRules[${count}].QualityLevel" class="bx--select-input rule-quality-input" required>
-                            <option value="Standard">Standard</option>
-                            <option value="High">High</option>
-                        </select>
+            <div class="bx--col-sm-4 bx--col-md-4 bx--col-lg-4" style="margin-bottom: 2rem;">
+                <a href="/Admin/ToolConfigAdmin/Edit/@toolName" class="tool-card">
+                    <div class="tool-icon">
+                        @Html.Raw(iconSvg)
                     </div>
-                    ` : `<input type="hidden" name="RoutingRules[${count}].QualityLevel" value="Standard" class="rule-quality-input" />`}
+                    <div class="tool-title">@formattedName</div>
                     
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                        <div class="bx--form-item">
-                            <label class="bx--label">@Localizer["Provider Name"]</label>
-                            <select name="RoutingRules[${count}].ProviderName" class="bx--select-input" required>
-                                ${optionsHtml}
-                            </select>
-                        </div>
-                        <div class="bx--form-item">
-                            <label class="bx--label">@Localizer["Model Name (Optional)"]</label>
-                            <input type="text" name="RoutingRules[${count}].ModelName" class="bx--text-input" placeholder="e.g. tts-1 or gemini-2.0" />
+                    <div class="tool-status">
+                        @if (config.IsComingSoon)
+                        {
+                            <span class="status-badge status-comingsoon">@Localizer["Coming Soon"]</span>
+                        }
+                        else if (config.IsMaintenanceMode)
+                        {
+                            <span class="status-badge status-maintenance">@Localizer["Maintenance"]</span>
+                        }
+                        else if (config.IsActive)
+                        {
+                            <span class="status-badge status-active">@Localizer["Active"]</span>
+                        }
+                        else
+                        {
+                            <span class="status-badge status-inactive">@Localizer["Inactive"]</span>
+                        }
+                        
+                        <div class="manage-btn">
+                            @Localizer["Manage"]
+                            <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="16" height="16" viewBox="0 0 32 32" aria-hidden="true"><path d="M11.59 16L22 5.59 20.59 4.17 8.76 16 20.59 27.83 22 26.41 11.59 16z" transform="rotate(180 16 16)"></path></svg>
                         </div>
                     </div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
-                        <div class="bx--form-item">
-                            <label class="bx--label">@Localizer["Max Daily Requests"]</label>
-                            <input type="number" name="RoutingRules[${count}].MaxDailyRequests" class="bx--text-input" placeholder="Unlimited" min="1" />
-                        </div>
-                        <div class="bx--form-item">
-                            <label class="bx--label">@Localizer["Max Requests/Min"]</label>
-                            <input type="number" name="RoutingRules[${count}].MaxRequestsPerMinute" class="bx--text-input" placeholder="Unlimited" min="1" />
-                        </div>
-                        <div class="bx--form-item">
-                            <label class="bx--label">@Localizer["Active From Time"]</label>
-                            <input type="time" name="RoutingRules[${count}].ActiveFromTime" class="bx--text-input" />
-                        </div>
-                        <div class="bx--form-item">
-                            <label class="bx--label">@Localizer["Active To Time"]</label>
-                            <input type="time" name="RoutingRules[${count}].ActiveToTime" class="bx--text-input" />
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            container.insertAdjacentHTML('beforeend', html);
-        };
-
-        window.updateRuleIndices = function(toolName) {
-            const container = document.getElementById(`rules-container-${toolName}`);
-            const blocks = container.querySelectorAll('.rule-block');
-            
-            blocks.forEach((block, index) => {
-                const qualityInput = block.querySelector('.rule-quality-input');
-                if (qualityInput) qualityInput.name = `RoutingRules[${index}].QualityLevel`;
-                
-                block.querySelector('select[name^="RoutingRules"][name$=".ProviderName"]').name = `RoutingRules[${index}].ProviderName`;
-                block.querySelector('input[name$=".ModelName"]').name = `RoutingRules[${index}].ModelName`;
-                block.querySelector('input[name$=".MaxDailyRequests"]').name = `RoutingRules[${index}].MaxDailyRequests`;
-                
-                const rpmInput = block.querySelector('input[name$=".MaxRequestsPerMinute"]');
-                if (rpmInput) rpmInput.name = `RoutingRules[${index}].MaxRequestsPerMinute`;
-                
-                block.querySelector('input[name$=".ActiveFromTime"]').name = `RoutingRules[${index}].ActiveFromTime`;
-                block.querySelector('input[name$=".ActiveToTime"]').name = `RoutingRules[${index}].ActiveToTime`;
-            });
-        };
-    </script>
-}
+                </a>
+            </div>
+        }
+    </div>
+</div>
