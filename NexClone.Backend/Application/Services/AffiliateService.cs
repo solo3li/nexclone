@@ -119,7 +119,7 @@ namespace NexClone.Backend.Application.Services
 
         public class OnboardDto
         {
-            public string MobileNumber { get; set; } = string.Empty;
+            public string? MobileNumber { get; set; }
             public string? TelegramUsername { get; set; }
             public string? WhatsappNumber { get; set; }
             public string? FacebookAccount { get; set; }
@@ -127,16 +127,6 @@ namespace NexClone.Backend.Application.Services
 
         public async Task<(bool Success, string Error, AffiliateProfile? Profile)> OnboardProfileAsync(Guid userId, OnboardDto dto)
         {
-            if (string.IsNullOrWhiteSpace(dto.MobileNumber))
-                return (false, "Mobile number is required.", null);
-
-            if (string.IsNullOrWhiteSpace(dto.TelegramUsername) && 
-                string.IsNullOrWhiteSpace(dto.WhatsappNumber) && 
-                string.IsNullOrWhiteSpace(dto.FacebookAccount))
-            {
-                return (false, "At least one additional contact method (Telegram, WhatsApp, or Facebook) is required.", null);
-            }
-
             var profile = await GetProfileAsync(userId);
             if (profile != null)
                 return (false, "User is already an affiliate.", profile);
@@ -173,6 +163,9 @@ namespace NexClone.Backend.Application.Services
         /// </summary>
         public async Task<string?> TrackClickAsync(string referralCode)
         {
+            if (string.IsNullOrWhiteSpace(referralCode)) return null;
+            referralCode = referralCode.ToUpper();
+
             var settings = await GetSettingsAsync();
             if (!settings.IsEnabled) {
                 _logger.LogInformation("[Affiliate] TrackClickAsync failed: System is disabled.");
@@ -232,6 +225,7 @@ namespace NexClone.Backend.Application.Services
         public async Task LinkManualReferralAsync(string referralCode, Guid newUserId)
         {
             if (string.IsNullOrWhiteSpace(referralCode)) return;
+            referralCode = referralCode.ToUpper();
 
             var profile = await _db.AffiliateProfiles
                 .FirstOrDefaultAsync(p => p.ReferralCode == referralCode && p.IsActive);

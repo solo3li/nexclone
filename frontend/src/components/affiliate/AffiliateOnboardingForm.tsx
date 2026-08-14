@@ -11,10 +11,6 @@ export default function AffiliateOnboardingForm() {
   
   const { onboardProfile } = useAffiliateStore();
 
-  const [mobileNumber, setMobileNumber] = useState('');
-  const [telegramUsername, setTelegramUsername] = useState('');
-  const [whatsappNumber, setWhatsappNumber] = useState('');
-  const [facebookAccount, setFacebookAccount] = useState('');
   const [policyAccepted, setPolicyAccepted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,14 +19,6 @@ export default function AffiliateOnboardingForm() {
     e.preventDefault();
     setError(null);
 
-    if (!mobileNumber) {
-      setError(isRtl ? 'رقم الهاتف مطلوب.' : 'Mobile number is required.');
-      return;
-    }
-    if (!telegramUsername && !whatsappNumber && !facebookAccount) {
-      setError(isRtl ? 'يجب إدخال وسيلة تواصل إضافية واحدة على الأقل (تليجرام، واتساب، أو فيسبوك).' : 'At least one additional contact method (Telegram, WhatsApp, or Facebook) is required.');
-      return;
-    }
     if (!policyAccepted) {
       setError(isRtl ? 'يجب الموافقة على سياسة الانضمام.' : 'You must accept the affiliate policy.');
       return;
@@ -38,10 +26,10 @@ export default function AffiliateOnboardingForm() {
 
     setIsSubmitting(true);
     const res = await onboardProfile({
-      mobileNumber,
-      telegramUsername: telegramUsername || undefined,
-      whatsappNumber: whatsappNumber || undefined,
-      facebookAccount: facebookAccount || undefined,
+      mobileNumber: "",
+      telegramUsername: "",
+      whatsappNumber: "",
+      facebookAccount: "",
     });
 
     if (!res.success) {
@@ -54,100 +42,54 @@ export default function AffiliateOnboardingForm() {
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="max-w-xl mx-auto mt-10 p-8 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-md"
+      className="max-w-2xl mx-auto mt-16 p-10 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-md text-center"
     >
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">
-          {isRtl ? 'انضم لبرنامج التسويق بالعمولة' : 'Join the Affiliate Program'}
+      <div className="mb-10">
+        <div className="w-20 h-20 mx-auto bg-gradient-to-tr from-violet-500 to-fuchsia-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-violet-500/20">
+          <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400 mb-4">
+          {isRtl ? 'انضم إلينا واربح' : 'Join Us and Earn'}
         </h2>
-        <p className="text-white/60 mt-2 text-sm">
-          {isRtl ? 'يرجى إكمال البيانات التالية للبدء في ربح العمولات.' : 'Please complete the following details to start earning commissions.'}
+        <p className="text-white/70 text-lg leading-relaxed max-w-lg mx-auto">
+          {isRtl 
+            ? 'كن جزءاً من قصة نجاحنا. شارك المنصة مع أصدقائك وجمهورك واحصل على عمولات مجزية ومتكررة عن كل شخص يشترك من خلالك.' 
+            : 'Be part of our success story. Share the platform with your friends and audience to earn rewarding recurring commissions for every subscriber.'}
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-6 max-w-md mx-auto">
         {error && (
           <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm text-center">
             {error}
           </div>
         )}
 
-        <div>
-          <label className="block text-sm font-medium text-white/80 mb-1">
-            {isRtl ? 'رقم الهاتف (مطلوب)' : 'Mobile Number (Required)'}
-          </label>
-          <input
-            type="text"
-            value={mobileNumber}
-            onChange={(e) => setMobileNumber(e.target.value)}
-            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet-500 transition-colors"
-            placeholder={isRtl ? '01xxxxxxxxx' : '+1xxxxxxxxx'}
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-white/80 mb-1">
-            {isRtl ? 'اسم المستخدم على تليجرام' : 'Telegram Username'}
-          </label>
-          <input
-            type="text"
-            value={telegramUsername}
-            onChange={(e) => setTelegramUsername(e.target.value)}
-            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet-500 transition-colors"
-            placeholder="@username"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-white/80 mb-1">
-            {isRtl ? 'رقم الواتساب' : 'WhatsApp Number'}
-          </label>
-          <input
-            type="text"
-            value={whatsappNumber}
-            onChange={(e) => setWhatsappNumber(e.target.value)}
-            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet-500 transition-colors"
-            placeholder={isRtl ? '01xxxxxxxxx' : '+1xxxxxxxxx'}
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-white/80 mb-1">
-            {isRtl ? 'رابط حساب الفيسبوك' : 'Facebook Account Link'}
-          </label>
-          <input
-            type="text"
-            value={facebookAccount}
-            onChange={(e) => setFacebookAccount(e.target.value)}
-            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet-500 transition-colors"
-            placeholder="https://facebook.com/..."
-          />
-        </div>
-
-        <div className="flex items-start gap-3 mt-4">
+        <div className="flex items-start gap-3 text-left rtl:text-right bg-black/20 p-4 rounded-xl border border-white/5">
           <input
             type="checkbox"
             id="policy"
             checked={policyAccepted}
             onChange={(e) => setPolicyAccepted(e.target.checked)}
-            className="mt-1 w-5 h-5 rounded border-white/10 bg-black/40 text-violet-500 focus:ring-violet-500 focus:ring-offset-0"
+            className="mt-1 w-5 h-5 rounded border-white/10 bg-black/40 text-violet-500 focus:ring-violet-500 focus:ring-offset-0 shrink-0"
           />
-          <label htmlFor="policy" className="text-sm text-white/60 cursor-pointer select-none">
+          <label htmlFor="policy" className="text-sm text-white/80 cursor-pointer select-none leading-tight">
             {isRtl 
-              ? 'أوافق على سياسة التسويق بالعمولة والشروط والأحكام الخاصة بالمنصة.' 
-              : 'I agree to the affiliate marketing policy and the platform terms and conditions.'}
+              ? 'أوافق على سياسة التسويق بالعمولة والشروط والأحكام الخاصة بالمنصة للبدء في جني الأرباح.' 
+              : 'I agree to the affiliate marketing policy and the platform terms and conditions to start earning.'}
           </label>
         </div>
 
         <button
           type="submit"
-          disabled={isSubmitting}
-          className="w-full py-4 mt-6 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold hover:opacity-90 transition-opacity disabled:opacity-50"
+          disabled={isSubmitting || !policyAccepted}
+          className="w-full py-4 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white text-lg font-bold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40"
         >
           {isSubmitting 
             ? (isRtl ? 'جاري الانضمام...' : 'Joining...') 
-            : (isRtl ? 'انضمام الآن' : 'Join Now')}
+            : (isRtl ? 'انضم الآن وابدأ الربح' : 'Join Now and Start Earning')}
         </button>
       </form>
     </motion.div>
