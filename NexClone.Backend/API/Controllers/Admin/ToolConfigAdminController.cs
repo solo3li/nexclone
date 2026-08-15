@@ -80,13 +80,12 @@ namespace NexClone.Backend.API.Controllers.Admin
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SaveConfig(ToolConfiguration config, [FromForm] int? MaxConcurrentOperations, [FromForm] System.Collections.Generic.Dictionary<string, decimal> ModelCosts)
+        public async Task<IActionResult> SaveConfig(ToolConfiguration config, [FromForm] int? MaxConcurrentOperations, [FromForm] System.Collections.Generic.Dictionary<string, decimal> ModelCosts, [FromForm] System.Collections.Generic.Dictionary<string, bool> ModelIsPerSecond)
         {
             if (ModelState.IsValid)
             {
                 if (ModelCosts != null && ModelCosts.Count > 0 && 
-                    (config.ToolName == "text-to-video" || config.ToolName == "image-to-video" || 
-                     config.ToolName == "reference-to-video" || config.ToolName == "text-to-image"))
+                    (config.ToolName == "text-to-video" || config.ToolName == "image-to-video" || config.ToolName == "reference-to-video" || config.ToolName == "text-to-image" || config.ToolName == "advanced-lip-sync"))
                 {
                     bool isVideo = config.ToolName != "text-to-image";
                     var settingsDict = new System.Collections.Generic.Dictionary<string, object>();
@@ -94,7 +93,14 @@ namespace NexClone.Backend.API.Controllers.Admin
                     {
                         var modelName = kvp.Key;
                         var cost = kvp.Value;
-                        if (isVideo)
+                        
+                        bool isPerSec = isVideo; // Default behavior
+                        if (ModelIsPerSecond != null && ModelIsPerSecond.ContainsKey(modelName))
+                        {
+                            isPerSec = ModelIsPerSecond[modelName];
+                        }
+
+                        if (isPerSec)
                         {
                             settingsDict[modelName] = new
                             {

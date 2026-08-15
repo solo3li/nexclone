@@ -68,7 +68,7 @@ namespace NexClone.Backend.API.Controllers.AI
                 usageUnits = (decimal)durationSeconds.Value;
             }
 
-            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "vidu_advanced_lip_sync", usageUnits, usageUnits, "Standard", subscriptionId);
+            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "advanced-lip-sync", usageUnits, usageUnits, "vidu-lipsync-std", subscriptionId);
             if (!policyResult.IsAllowed) return BadRequest(new { error = policyResult.ErrorMessage });
 
             return Ok(new { 
@@ -180,7 +180,7 @@ namespace NexClone.Backend.API.Controllers.AI
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
             // Fetch policy for limits validation
-            var policy = await _usagePolicy.GetToolPolicyForUserAsync(userId, "vidu_advanced_lip_sync");
+            var policy = await _usagePolicy.GetToolPolicyForUserAsync(userId, "advanced-lip-sync");
             
             if (!policy.Enabled)
                 return BadRequest(new { error = "Your current plan does not have access to this tool." });
@@ -235,7 +235,7 @@ namespace NexClone.Backend.API.Controllers.AI
 
             // Just charge
             decimal usageAmountForLimits = 0; // Handled explicitly above
-            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "vidu_advanced_lip_sync", usageAmountForLimits, durationUnits, "Standard", subscriptionId);
+            var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, "advanced-lip-sync", usageAmountForLimits, durationUnits, "vidu-lipsync-std", subscriptionId);
             
             if (!policyResult.IsAllowed)
                 return BadRequest(new { error = policyResult.ErrorMessage });

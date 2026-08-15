@@ -43,8 +43,8 @@ namespace NexClone.Backend.Infrastructure.Consumers
             {
                 string toolConfigKey = message.Model switch
                 {
-                    "vidu-lipsync-std" => "vidu_advanced_lip_sync",
-                    _ => "vidu_advanced_lip_sync"
+                    "vidu-lipsync-std" => "advanced-lip-sync",
+                    _ => "advanced-lip-sync"
                 };
 
                 var (apiKey, modelName) = await GetToolConfigAsync(toolConfigKey);

@@ -181,7 +181,7 @@ namespace NexClone.Backend.Application.Services
                 policy.MaxAudioFileSizeMb = plan.AvatarVideoMaxAudioFileSizeMb;
                 policy.MaxCharsPerRequest = plan.AvatarVideoMaxCharsPerRequest;
             }
-            else if (toolId == "vidu_advanced_lip_sync" || toolId == "lipsync")
+            else if (toolId == "advanced-lip-sync" || toolId == "lipsync")
             {
                 policy.Enabled = plan.LipSyncEnabled;
                 
@@ -288,7 +288,7 @@ namespace NexClone.Backend.Application.Services
             decimal totalCost = (toolPolicy.BaseCost ?? 0) + (amountForCost * costPerUnit);
 
             // Dynamic JSON Pricing for new tools
-            if (toolId == "text-to-video" || toolId == "image-to-video" || toolId == "reference-to-video" || toolId == "text-to-image")
+            if (toolId == "text-to-video" || toolId == "image-to-video" || toolId == "reference-to-video" || toolId == "text-to-image" || toolId == "advanced-lip-sync")
             {
                 bool priceFound = false;
                 if (toolConfig != null && !string.IsNullOrEmpty(toolConfig.AdditionalSettings))

@@ -134,11 +134,11 @@
                             </div>
                         </div>
 
-                        @if (toolName == "text-to-video" || toolName == "image-to-video" || toolName == "reference-to-video" || toolName == "text-to-image")
+                        @if (toolName == "text-to-video" || toolName == "image-to-video" || toolName == "reference-to-video" || toolName == "text-to-image" || toolName == "advanced-lip-sync")
                         {
                             var models = new List<string>();
                             var isVideo = toolName != "text-to-image";
-                            var costLabel = isVideo ? "Cost per Second ($)" : "Cost per Generation ($)";
+                            var costLabel = isVideo ? "Cost ($)" : "Cost per Generation ($)";
 
                             if (toolName == "text-to-video" || toolName == "image-to-video")
                             {
@@ -161,9 +161,14 @@
                             {
                                 models.AddRange(new[] { "grok-imagine|t2i", "grok-imagine|i2i" });
                             }
+                            else if (toolName == "advanced-lip-sync")
+                            {
+                                models.AddRange(new[] { "vidu-lipsync-std" });
+                            }
 
                             // Try to parse existing prices from config.AdditionalSettings
                             var currentPrices = new Dictionary<string, decimal>();
+                            var currentPerSec = new Dictionary<string, bool>();
                             if (!string.IsNullOrEmpty(config.AdditionalSettings))
                             {
                                 try {
@@ -173,11 +178,13 @@
                                         var mConfig = prop.Value;
                                         if (mConfig.TryGetProperty("IsPerSecond", out var isPerSecProp) && isPerSecProp.GetBoolean())
                                         {
+                                            currentPerSec[prop.Name] = true;
                                             if (mConfig.TryGetProperty("CostPerSecond", out var cps) && cps.TryGetProperty("default", out var cpsVal))
                                                 currentPrices[prop.Name] = cpsVal.GetDecimal();
                                         }
                                         else
                                         {
+                                            currentPerSec[prop.Name] = false;
                                             if (mConfig.TryGetProperty("FixedCost", out var fc) && fc.TryGetProperty("default", out var fcVal))
                                                 currentPrices[prop.Name] = fcVal.GetDecimal();
                                         }
@@ -191,11 +198,23 @@
                                     @foreach (var m in models)
                                     {
                                         var mPrice = currentPrices.ContainsKey(m) ? currentPrices[m] : 0.0m;
+                                        var isPerSec = currentPerSec.ContainsKey(m) ? currentPerSec[m] : isVideo;
                                         <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">
                                             <label class="bx--label" style="margin: 0; font-weight: bold; width: 250px; font-size: 0.9rem;">@m</label>
-                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                            <div style="display: flex; align-items: center; gap: 1rem;">
                                                 <input type="number" step="0.0001" min="0" name="ModelCosts[@m]" class="bx--text-input" style="width: 120px;" value="@mPrice" />
-                                                <span class="bx--label" style="margin: 0; color: #525252; width: 150px;">@costLabel</span>
+                                                <span class="bx--label" style="margin: 0; color: #525252; width: 80px;">@costLabel</span>
+                                                
+                                                @if (toolName == "advanced-lip-sync")
+                                                {
+                                                    <div class="bx--checkbox-wrapper">
+                                                        <input id="ModelIsPerSecond_@m" class="bx--checkbox" type="checkbox" value="true" name="ModelIsPerSecond[@m]" @(isPerSec ? "checked" : "")>
+                                                        <input type="hidden" value="false" name="ModelIsPerSecond[@m]">
+                                                        <label for="ModelIsPerSecond_@m" class="bx--checkbox-label" title="Charge per second (rounded up to 5s) instead of flat request cost">
+                                                            <span class="bx--checkbox-label-text">Per Second (Round up to 5s)</span>
+                                                        </label>
+                                                    </div>
+                                                }
                                             </div>
                                         </div>
                                     }
@@ -203,7 +222,7 @@
                             </div>
                         }
 
-                        @if (toolName != "text-to-video" && toolName != "image-to-video" && toolName != "reference-to-video" && toolName != "text-to-image")
+                        @if (toolName != "text-to-video" && toolName != "image-to-video" && toolName != "reference-to-video" && toolName != "text-to-image" && toolName != "advanced-lip-sync")
                         {
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                                 <h3 class="bx--type-productive-heading-03">@Localizer["Routing Rules (Models)"]</h3>
