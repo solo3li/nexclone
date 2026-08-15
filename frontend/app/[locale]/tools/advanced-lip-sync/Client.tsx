@@ -267,6 +267,10 @@ function AdvancedLipSyncPage() {
 
   // Submit Handler
   const handleStartLipSync = async () => {
+    if (!isAuthenticated) {
+      window.location.href = `/${locale}/login`;
+      return;
+    }
     if (!videoFile) {
       setError(isRtl ? "الرجاء رفع ملف فيديو يحتوي على وجه المتحدث" : "Please upload a speaker video file");
       return;
@@ -679,7 +683,7 @@ function AdvancedLipSyncPage() {
             <button
               type="button"
               onClick={handleStartLipSync}
-              disabled={isProcessing || !videoFile || !audioFile || !hasSufficientCredits}
+              disabled={isProcessing || !videoFile || !audioFile || (!hasSufficientCredits && isAuthenticated)}
               className={`w-full sm:w-auto px-7 py-3.5 rounded-xl font-extrabold text-sm md:text-base flex items-center justify-center gap-2.5 transition-all shadow-lg ${
                 isProcessing || !videoFile || !audioFile || !hasSufficientCredits
                   ? "bg-white/10 text-white/40 cursor-not-allowed border border-white/5"

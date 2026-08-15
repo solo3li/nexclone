@@ -41,7 +41,14 @@ export default function ToolsAuthGuard({ children }: { children: React.ReactNode
         setIsChecking(false);
       } catch (err: any) {
         if (!isMounted) return;
-        // User not logged in -> redirect to login immediately
+        
+        // Allow guests to view LipSync tool without redirecting
+        if (typeof window !== "undefined" && window.location.pathname.includes("advanced-lip-sync")) {
+          setIsChecking(false);
+          return;
+        }
+
+        // User not logged in -> redirect to login immediately for other tools
         if (typeof window !== "undefined") {
           window.location.href = `/${locale}/login`;
         } else {
