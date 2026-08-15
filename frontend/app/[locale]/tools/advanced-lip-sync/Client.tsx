@@ -47,15 +47,6 @@ interface LipSyncModel {
 
 const LIPSYNC_MODELS: LipSyncModel[] = [
   {
-    id: "kling-lipsync-pro",
-    name: "NexMedia LipSync Pro V1",
-    nameAr: "محرك NexMedia لمزامنة الشفاه",
-    badge: "Ultra Realism",
-    badgeAr: "دقة سينمائية واقعية",
-    desc: "Seamlessly synchronize audio to lip movements with cinematic precision.",
-    descAr: "مطابقة فائقة لمخارج الحروف مع ثبات ملامح الوجه والأسنان"
-  },
-  {
     id: "vidu-lipsync-std",
     name: "Standard Studio Sync",
     nameAr: "استوديو سينك القياسي",
@@ -96,7 +87,7 @@ function AdvancedLipSyncPage() {
   const [showAudioTrimmer, setShowAudioTrimmer] = useState(false);
 
   // Settings State
-  const [selectedModelId, setSelectedModelId] = useState<string>("kling-lipsync-pro");
+  const [selectedModelId, setSelectedModelId] = useState<string>("vidu-lipsync-std");
   const [accuracy, setAccuracy] = useState<string>("studio");
   const [resolution, setResolution] = useState<"1080p" | "720p">("1080p");
   const [expression, setExpression] = useState<string>("natural");

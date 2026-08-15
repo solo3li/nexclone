@@ -1741,3 +1741,65 @@ System.IO.IOException: Failed to bind to address http://127.0.0.1:8080: address 
 2026-08-15 23:18:28.036 +03:00 [INF] Server desktop-rjppsk4:20484:f5e6d4b5 successfully announced in 319.3982 ms
 2026-08-15 23:18:28.039 +03:00 [INF] Server desktop-rjppsk4:20484:f5e6d4b5 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-15 23:18:28.050 +03:00 [INF] Server desktop-rjppsk4:20484:f5e6d4b5 all the dispatchers started
+2026-08-15 23:23:28.657 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-15 23:26:48.283 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-15 23:26:48.576 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-15 23:26:54.338 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-15 23:26:54.608 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-15 23:26:56.560 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-15 23:26:56.633 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-15 23:26:56.633 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-15 23:26:56.634 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-15 23:26:56.634 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-15 23:26:56.634 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-15 23:26:56.634 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-15 23:26:56.946 +03:00 [INF] Server desktop-rjppsk4:11884:3914f209 successfully announced in 299.7103 ms
+2026-08-15 23:26:56.951 +03:00 [INF] Server desktop-rjppsk4:11884:3914f209 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-15 23:26:56.969 +03:00 [INF] Server desktop-rjppsk4:11884:3914f209 all the dispatchers started
+2026-08-15 23:26:59.021 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-15 23:26:59.092 +03:00 [ERR] Hosting failed to start
+System.IO.IOException: Failed to bind to address http://127.0.0.1:8080: address already in use.
+ ---> Microsoft.AspNetCore.Connections.AddressInUseException: Only one usage of each socket address (protocol/network address/port) is normally permitted.
+ ---> System.Net.Sockets.SocketException (10048): Only one usage of each socket address (protocol/network address/port) is normally permitted.
+   at System.Net.Sockets.Socket.UpdateStatusAfterSocketErrorAndThrowException(SocketError error, Boolean disconnectOnFailure, String callerName)
+   at System.Net.Sockets.Socket.DoBind(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   at System.Net.Sockets.Socket.Bind(EndPoint localEP)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportOptions.CreateDefaultBoundListenSocket(EndPoint endpoint)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportFactory.BindAsync(EndPoint endpoint, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Infrastructure.TransportManager.BindAsync(EndPoint endPoint, ConnectionDelegate connectionDelegate, EndpointConfig endpointConfig, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.<>c__DisplayClass28_0`1.<<StartAsync>g__OnBind|0>d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.LocalhostListenOptions.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.AddressesStrategy.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.BindAsync(CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.StartAsync[TContext](IHttpApplication`1 application, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostService.StartAsync(CancellationToken cancellationToken)
+   at Microsoft.Extensions.Hosting.Internal.Host.<StartAsync>b__14_1(IHostedService service, CancellationToken token)
+   at Microsoft.Extensions.Hosting.Internal.Host.ForeachService[T](IEnumerable`1 services, CancellationToken token, Boolean concurrent, Boolean abortOnFirstException, List`1 exceptions, Func`3 operation)
+2026-08-15 23:27:27.233 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-15 23:27:31.895 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-15 23:27:33.599 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-15 23:27:33.661 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-15 23:27:33.661 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-15 23:27:33.661 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-15 23:27:33.661 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-15 23:27:33.661 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-15 23:27:33.661 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-15 23:27:33.913 +03:00 [INF] Server desktop-rjppsk4:17912:23af5f22 successfully announced in 240.8557 ms
+2026-08-15 23:27:33.916 +03:00 [INF] Server desktop-rjppsk4:17912:23af5f22 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-15 23:27:33.928 +03:00 [INF] Server desktop-rjppsk4:17912:23af5f22 all the dispatchers started
+2026-08-15 23:32:34.383 +03:00 [INF] 2 servers were removed due to timeout
