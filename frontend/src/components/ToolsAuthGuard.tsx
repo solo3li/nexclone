@@ -42,8 +42,11 @@ export default function ToolsAuthGuard({ children }: { children: React.ReactNode
       } catch (err: any) {
         if (!isMounted) return;
         
+        // Clear user state since auth failed (token expired/invalid)
+        setUser(null);
+
         // Allow guests to view LipSync tool without redirecting
-        if (typeof window !== "undefined" && window.location.pathname.includes("advanced-lip-sync")) {
+        if (typeof window !== "undefined" && window.location.pathname.toLowerCase().includes("advanced-lip-sync")) {
           setIsChecking(false);
           return;
         }
