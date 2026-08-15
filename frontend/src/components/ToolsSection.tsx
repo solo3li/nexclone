@@ -1,6 +1,7 @@
 "use client";
 import { motion, useMotionValue, useSpring, useTransform, useMotionTemplate } from "framer-motion";
 import { useInView } from "react-intersection-observer";
+import Image from "next/image";
 import {
   Mic,
   Volume2,
@@ -102,10 +103,11 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
 
       {/* Cover Image Container */}
       <div className="relative h-48 w-full overflow-hidden shrink-0 z-0 border-b border-white/10 bg-[#0a0015]/50">
-        <img
+        <Image
           src={tool.image}
           alt={tool.title}
-          className="absolute inset-0 w-full h-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-110 group-hover:opacity-100"
+          fill
+          className="object-cover opacity-90 transition-transform duration-700 group-hover:scale-110 group-hover:opacity-100"
         />
         {/* Subtle gradient fade to smoothly blend into the card body */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#0d011a] via-transparent to-transparent opacity-80" />

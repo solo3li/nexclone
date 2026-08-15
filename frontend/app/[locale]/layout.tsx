@@ -19,28 +19,37 @@ const inter = Inter({
 
 import { MaintenanceScreen } from "../../components/MaintenanceScreen";
 
-export const metadata: Metadata = {
-  title: "NexMedia - AI Tools Platform",
-  description: "Advanced AI tools platform - Text to Voice, Voice to Text, and more powered by AI",
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "NexMedia",
-  },
-  formatDetection: {
-    telephone: false,
-  },
-  icons: {
-    icon: [
-      { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icon-512x512.png", sizes: "512x512", type: "image/png" },
-    ],
-    apple: [
-      { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
-    ],
-  },
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  return {
+    title: "NexMedia - AI Tools Platform",
+    description: "Advanced AI tools platform - Text to Voice, Voice to Text, and more powered by AI",
+    manifest: "/manifest.json",
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "black-translucent",
+      title: "NexMedia",
+    },
+    formatDetection: {
+      telephone: false,
+    },
+    icons: {
+      icon: [
+        { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
+        { url: "/icon-512x512.png", sizes: "512x512", type: "image/png" },
+      ],
+      apple: [
+        { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      ],
+    },
+    alternates: {
+      languages: {
+        'ar': `https://nexclone.com/ar`,
+        'en': `https://nexclone.com/en`,
+      },
+    },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: [

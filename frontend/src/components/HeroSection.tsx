@@ -96,12 +96,39 @@ export default function HeroSection() {
           </span>
         </motion.div>
 
+        {/* Interactive Demo (Micro-interaction) */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.9, duration: 0.6 }}
+          className="max-w-md mx-auto mb-10 bg-white/5 border border-white/10 rounded-2xl p-2 backdrop-blur-sm flex items-center gap-2"
+        >
+          <input
+            type="text"
+            placeholder={locale === 'ar' ? "اكتب كلمة لتسمع السحر..." : "Type a word to hear the magic..."}
+            className="flex-1 bg-transparent border-none outline-none text-white px-4 placeholder:text-white/40"
+            maxLength={30}
+            id="demo-input"
+          />
+          <button
+            onClick={() => {
+              // Mock audio playback for demo
+              const audio = new Audio('/beep_short.ogg');
+              audio.play();
+            }}
+            className="bg-violet-600 hover:bg-violet-500 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors"
+          >
+            <PlayCircle className="w-4 h-4" />
+            {locale === 'ar' ? 'استماع' : 'Listen'}
+          </button>
+        </motion.div>
+
         {/* CTAs */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1, duration: 0.6 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4"
         >
           <a
             href="#tools"
@@ -114,26 +141,35 @@ export default function HeroSection() {
             <ArrowIcon className={`w-5 h-5 relative transition-transform duration-300 ${locale === 'ar' ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
           </a>
         </motion.div>
+        
+        {/* Social Proof Text */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.1, duration: 0.6 }}
+          className="text-white/50 text-sm font-medium mb-12"
+        >
+          {locale === 'ar' ? '✨ انضم لأكثر من 50,000 صانع محتوى يعتمدون على NexMedia' : '✨ Join over 50,000 creators using NexMedia'}
+        </motion.p>
 
-        {/* Stats */}
+        {/* Hero Video Showcase */}
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.2, duration: 0.7 }}
-          className="mt-20 grid grid-cols-3 gap-6 max-w-2xl mx-auto"
+          className="relative max-w-4xl mx-auto rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-violet-500/20"
         >
-          {[
-            { value: locale === 'ar' ? "+٥٠ك" : "50k+", label: t('stats.users.label') },
-            { value: locale === 'ar' ? "٩٩.٩٪" : "99.9%", label: t('stats.uptime.label') },
-            { value: locale === 'ar' ? "+١٢" : "12+", label: t('stats.tools.label') },
-          ].map((stat, i) => (
-            <div key={i} className="text-center">
-              <div className="text-2xl sm:text-3xl font-bold text-white mb-1">
-                {stat.value}
-              </div>
-              <div className="text-sm text-white/50">{stat.label}</div>
-            </div>
-          ))}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0015] via-transparent to-transparent z-10" />
+          <video 
+            autoPlay 
+            loop 
+            muted 
+            playsInline
+            className="w-full h-auto object-cover opacity-80 mix-blend-screen"
+            poster="/dummy.jpg"
+          >
+            <source src="/dummy.mp4" type="video/mp4" />
+          </video>
         </motion.div>
       </div>
 

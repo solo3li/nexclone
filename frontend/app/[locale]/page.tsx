@@ -1,6 +1,3 @@
-"use client";
-
-
 import Navbar from "../../src/components/Navbar";
 import HeroSection from "../../src/components/HeroSection";
 import ToolsSection from "../../src/components/ToolsSection";
@@ -9,8 +6,27 @@ import MobileBottomNav from "../../src/components/MobileBottomNav";
 import CursorGlow from "../../src/components/CursorGlow";
 
 export default function Page() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "NexMedia",
+    "operatingSystem": "Web",
+    "applicationCategory": "MultimediaApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "ratingCount": "5423"
+    }
+  };
+
   return (
     <div className="relative min-h-screen">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {/* Noise texture overlay */}
       <div
         className="fixed inset-0 pointer-events-none z-[1] opacity-[0.03]"
