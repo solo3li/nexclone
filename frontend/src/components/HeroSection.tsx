@@ -84,6 +84,47 @@ export default function HeroSection() {
           className="text-lg sm:text-xl text-white/60 max-w-2xl mx-auto mb-10 leading-relaxed"
         />
 
+        {/* Visual Wow Factor: Animated Audio Wave to AI Text */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.6, duration: 0.8, type: "spring" }}
+          className="mx-auto mb-12 relative w-full max-w-md h-24 flex items-center justify-center gap-1"
+        >
+          {/* Animated bars representing audio */}
+          {[...Array(12)].map((_, i) => (
+            <motion.div
+              key={`bar-${i}`}
+              className="w-1.5 bg-violet-400 rounded-full"
+              animate={{
+                height: ["10px", "40px", "10px"],
+                opacity: [0.3, 1, 0.3],
+                backgroundColor: ["#8b5cf6", "#d946ef", "#8b5cf6"]
+              }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                delay: i * 0.1,
+                ease: "easeInOut"
+              }}
+            />
+          ))}
+          
+          <div className="mx-4 text-violet-400/50">
+            <ArrowIcon className={`w-6 h-6 animate-pulse ${locale === 'ar' ? 'rotate-180' : ''}`} />
+          </div>
+
+          <motion.div
+            className="px-4 py-2 bg-white/5 border border-violet-500/30 rounded-xl backdrop-blur-md shadow-[0_0_20px_rgba(139,92,246,0.3)] text-white font-medium flex items-center gap-2"
+            animate={{
+              boxShadow: ["0 0 20px rgba(139,92,246,0.3)", "0 0 40px rgba(217,70,239,0.6)", "0 0 20px rgba(139,92,246,0.3)"]
+            }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <span className="text-xl">✨</span> {locale === 'ar' ? 'نص ذكي بضغطة زر' : 'AI Magic Instantly'}
+          </motion.div>
+        </motion.div>
+
         {/* Gradient word highlight */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -137,7 +178,7 @@ export default function HeroSection() {
           >
             <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-fuchsia-600 group-hover:from-violet-500 group-hover:to-fuchsia-500 transition-all duration-300" />
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-white/10 transition-opacity duration-300" />
-            <span className="relative">{locale === 'ar' ? 'تجربة مجانية' : 'Start Free Trial'}</span>
+            <span className="relative">{locale === 'ar' ? 'ابدأ تجربتك المجانية' : 'Start Free Trial'}</span>
             <ArrowIcon className={`w-5 h-5 relative transition-transform duration-300 ${locale === 'ar' ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
           </a>
         </motion.div>

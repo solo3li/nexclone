@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Coins, Zap, X, Sparkles } from "lucide-react";
@@ -74,7 +74,7 @@ export default function OnboardingTour() {
             <X className="w-5 h-5" />
           </button>
           <div className="mb-6 flex justify-center">
-            <div className={w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 \}>
+            <div className={`w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 ${currentStep.color}`}>
               <Icon className="w-8 h-8" />
             </div>
           </div>
@@ -88,7 +88,9 @@ export default function OnboardingTour() {
             {steps.map((_, i) => (
               <div
                 key={i}
-                className={h-2 rounded-full transition-all duration-300 \}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  i === step ? "w-8 bg-violet-500" : "w-2 bg-white/20"
+                }`}
               />
             ))}
           </div>

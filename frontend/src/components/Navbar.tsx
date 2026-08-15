@@ -168,6 +168,11 @@ export default function Navbar() {
               <span className={`absolute -bottom-0.5 ${locale === 'ar' ? 'right-0' : 'left-0'} w-full h-px bg-gradient-to-r from-violet-500 to-fuchsia-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ${locale === 'ar' ? 'origin-right' : 'origin-left'}`} />
             </Link>
             
+            <Link href="/blog" className="text-white/70 hover:text-white text-sm font-medium transition-colors duration-200 relative group">
+              {locale === 'ar' ? 'المدونة' : 'Blog'}
+              <span className={`absolute -bottom-0.5 ${locale === 'ar' ? 'right-0' : 'left-0'} w-full h-px bg-gradient-to-r from-violet-500 to-fuchsia-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ${locale === 'ar' ? 'origin-right' : 'origin-left'}`} />
+            </Link>
+            
             <div className="relative group">
               <button className="flex items-center gap-1 text-white/70 hover:text-white text-sm font-medium transition-colors duration-200">
                 {t('tools')}

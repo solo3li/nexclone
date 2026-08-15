@@ -107,6 +107,7 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
           src={tool.image}
           alt={tool.title}
           fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           className="object-cover opacity-90 transition-transform duration-700 group-hover:scale-110 group-hover:opacity-100"
         />
         {/* Subtle gradient fade to smoothly blend into the card body */}
