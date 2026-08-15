@@ -55,7 +55,7 @@ export default function ToolsPage() {
   return (
     <>
       <div className="absolute top-1/4 left-1/4 w-[60%] h-[500px] bg-violet-600/10 blur-[150px] pointer-events-none z-0 rounded-full" />
-      
+
       <div className="container mx-auto px-4 py-8 md:py-16 relative z-10 max-w-6xl">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -69,8 +69,8 @@ export default function ToolsPage() {
             </span>
           </h1>
           <p className="text-white/60 max-w-2xl mx-auto text-lg leading-relaxed">
-            {isRtl 
-              ? 'أهلاً بك في مساحة عملك الإبداعية! اختر الأداة التي تناسب احتياجاتك من القائمة أدناه أو من الشريط الجانبي وابدأ في الإبداع مع تقنيات الذكاء الاصطناعي.' 
+            {isRtl
+              ? 'أهلاً بك في مساحة عملك الإبداعية! اختر الأداة التي تناسب احتياجاتك من القائمة أدناه أو من الشريط الجانبي وابدأ في الإبداع مع تقنيات الذكاء الاصطناعي.'
               : 'Welcome to your creative workspace! Choose the tool that fits your needs from the list below or the sidebar and start creating with AI technologies.'}
           </p>
         </motion.div>
