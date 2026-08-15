@@ -88,15 +88,9 @@ function AdvancedLipSyncPage() {
 
   // Settings State
   const [selectedModelId, setSelectedModelId] = useState<string>("vidu-lipsync-std");
-  const [accuracy, setAccuracy] = useState<string>("studio");
-  const [resolution, setResolution] = useState<"1080p" | "720p">("1080p");
-  const [expression, setExpression] = useState<string>("natural");
 
   // Dropdown UI Open States
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
-  const [isAccDropdownOpen, setIsAccDropdownOpen] = useState(false);
-  const [isResDropdownOpen, setIsResDropdownOpen] = useState(false);
-  const [isExprDropdownOpen, setIsExprDropdownOpen] = useState(false);
 
   // Processing & Polling State
   const [isProcessing, setIsProcessing] = useState(false);
@@ -292,9 +286,6 @@ function AdvancedLipSyncPage() {
       formData.append("video", videoFile);
       formData.append("audio", audioFile);
       formData.append("model", selectedModelId);
-      formData.append("accuracy", accuracy);
-      formData.append("resolution", resolution);
-      formData.append("expression", expression);
 
       const responseData = await startLipsync(formData);
       const taskId = responseData?.id || responseData?.taskId;
@@ -671,10 +662,7 @@ function AdvancedLipSyncPage() {
               <div className="flex items-center justify-center sm:justify-start gap-2 text-xs text-white/50">
                 <span>{isRtl ? "المحرك:" : "Engine:"}</span>
                 <span className="font-bold text-white">{isRtl ? currentModel.nameAr : currentModel.name}</span>
-                <span>•</span>
-                <span className="text-fuchsia-300 font-bold">{resolution}</span>
-                <span>•</span>
-                <span>{accuracy === "studio" ? "Studio Grade" : "Balanced"}</span>
+                
               </div>
               <div className="flex items-center justify-center sm:justify-start gap-2">
                 <span className="text-xs text-white/50">{isRtl ? "التكلفة التقديرية:" : "Estimated Cost:"}</span>
@@ -779,169 +767,6 @@ function AdvancedLipSyncPage() {
                           <p className="text-[10px] text-white/40">{isRtl ? m.descAr : m.desc}</p>
                         </div>
                         {isSelected && <Check className="w-3.5 h-3.5 text-fuchsia-400 shrink-0" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* 2. Phoneme Accuracy Dropdown Select */}
-            <div className="space-y-1.5 relative" ref={accRef}>
-              <label className="text-xs font-bold text-white/80 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-pink-400" />
-                <span>{isRtl ? "دقة مخارج الحروف (Accuracy)" : "Phoneme Accuracy"}</span>
-              </label>
-
-              <button
-                type="button"
-                onClick={() => setIsAccDropdownOpen(!isAccDropdownOpen)}
-                className="w-full bg-[#06010f] border border-white/10 hover:border-pink-500/40 rounded-xl p-3 text-start flex items-center justify-between gap-2.5 transition-all"
-              >
-                <div>
-                  <span className="font-bold text-xs md:text-sm text-white block">
-                    {accuracy === "studio" ? (isRtl ? "Studio Grade (أعلى دقة)" : "Studio Grade") : (isRtl ? "Balanced (متوازن)" : "Balanced")}
-                  </span>
-                  <span className="text-[10px] text-white/40 block">
-                    {accuracy === "studio" ? (isRtl ? "تطابق تام لحركة الفم والأسنان" : "Precise lip & tooth alignment") : (isRtl ? "حركة ناعمة وانسيابية" : "Smooth flow")}
-                  </span>
-                </div>
-                <ChevronDown className={`w-4 h-4 text-white/50 transition-transform duration-200 ${isAccDropdownOpen ? "rotate-180 text-pink-400" : ""}`} />
-              </button>
-
-              {/* Accuracy Dropdown Menu */}
-              {isAccDropdownOpen && (
-                <div className="absolute z-40 top-full mt-1.5 w-full bg-[#0d041c] border border-pink-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
-                  {ACCURACY_OPTIONS.map((opt) => {
-                    const isSelected = accuracy === opt.id;
-                    return (
-                      <button
-                        key={opt.id}
-                        type="button"
-                        onClick={() => { setAccuracy(opt.id); setIsAccDropdownOpen(false); }}
-                        className={`w-full text-start p-2.5 rounded-lg transition-all flex items-center justify-between gap-2 ${
-                          isSelected 
-                            ? "bg-pink-500/20 text-white border border-pink-500/40" 
-                            : "hover:bg-white/5 text-white/70 hover:text-white"
-                        }`}
-                      >
-                        <div>
-                          <span className="font-bold text-xs text-white block">{isRtl ? opt.label : opt.labelEn}</span>
-                          <span className="text-[10px] text-white/40">{isRtl ? opt.descAr : opt.desc}</span>
-                        </div>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-pink-400 shrink-0" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* 3. Output Resolution Dropdown Select */}
-            <div className="space-y-1.5 relative" ref={resRef}>
-              <label className="text-xs font-bold text-white/80 flex items-center gap-1.5">
-                <Monitor className="w-3.5 h-3.5 text-amber-400" />
-                <span>{isRtl ? "دقة الفيديو النهائي" : "Resolution"}</span>
-              </label>
-
-              <button
-                type="button"
-                onClick={() => setIsResDropdownOpen(!isResDropdownOpen)}
-                className="w-full bg-[#06010f] border border-white/10 hover:border-amber-500/40 rounded-xl p-3 text-start flex items-center justify-between gap-2.5 transition-all"
-              >
-                <div>
-                  <span className="font-bold text-xs md:text-sm text-white block">
-                    {resolution === "1080p" ? "1080p Full HD" : "720p HD"}
-                  </span>
-                  <span className="text-[10px] text-white/40 block">
-                    {resolution === "1080p" ? (isRtl ? "أعلى وضوح ونقاء للتفاصيل" : "Full High Definition") : (isRtl ? "دقة قياسية سريعة" : "High Definition")}
-                  </span>
-                </div>
-                <ChevronDown className={`w-4 h-4 text-white/50 transition-transform duration-200 ${isResDropdownOpen ? "rotate-180 text-amber-400" : ""}`} />
-              </button>
-
-              {/* Resolution Dropdown Menu */}
-              {isResDropdownOpen && (
-                <div className="absolute z-30 top-full mt-1.5 w-full bg-[#0d041c] border border-amber-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
-                  <button
-                    type="button"
-                    onClick={() => { setResolution("1080p"); setIsResDropdownOpen(false); }}
-                    className={`w-full text-start p-2.5 rounded-lg transition-all flex items-center justify-between gap-2 ${
-                      resolution === "1080p" 
-                        ? "bg-amber-500/20 text-white border border-amber-500/40" 
-                        : "hover:bg-white/5 text-white/70 hover:text-white"
-                    }`}
-                  >
-                    <div>
-                      <span className="font-bold text-xs text-white block">1080p (Full HD)</span>
-                      <span className="text-[10px] text-white/40">{isRtl ? "موصى به لأعلى واقعية" : "Recommended for realism"}</span>
-                    </div>
-                    {resolution === "1080p" && <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => { setResolution("720p"); setIsResDropdownOpen(false); }}
-                    className={`w-full text-start p-2.5 rounded-lg transition-all flex items-center justify-between gap-2 ${
-                      resolution === "720p" 
-                        ? "bg-amber-500/20 text-white border border-amber-500/40" 
-                        : "hover:bg-white/5 text-white/70 hover:text-white"
-                    }`}
-                  >
-                    <div>
-                      <span className="font-bold text-xs text-white block">720p (HD)</span>
-                      <span className="text-[10px] text-white/40">{isRtl ? "دقة قياسية أسرع" : "Faster rendering"}</span>
-                    </div>
-                    {resolution === "720p" && <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* 4. Facial Emotion & Style Dropdown */}
-            <div className="space-y-1.5 relative" ref={exprRef}>
-              <label className="text-xs font-bold text-white/80 flex items-center gap-1.5">
-                <Smile className="w-3.5 h-3.5 text-violet-400" />
-                <span>{isRtl ? "تعبيرات الوجه والتفاعل" : "Facial Emotion"}</span>
-              </label>
-
-              <button
-                type="button"
-                onClick={() => setIsExprDropdownOpen(!isExprDropdownOpen)}
-                className="w-full bg-[#06010f] border border-white/10 hover:border-violet-500/40 rounded-xl p-3 text-start flex items-center justify-between gap-2.5 transition-all"
-              >
-                <div>
-                  <span className="font-bold text-xs md:text-sm text-white block">
-                    {expression === "natural" ? (isRtl ? "تعبيرات طبيعية ومحايدة" : "Natural & Neutral") : (isRtl ? "تعبيرات حماسية وتفاعلية" : "Expressive & Dynamic")}
-                  </span>
-                  <span className="text-[10px] text-white/40 block">
-                    {expression === "natural" ? (isRtl ? "يحافظ على وضعية الوجه الأصلية" : "Locks original head posture") : (isRtl ? "تفاعل حركي مع نبرات الصوت" : "Dynamic emotional response")}
-                  </span>
-                </div>
-                <ChevronDown className={`w-4 h-4 text-white/50 transition-transform duration-200 ${isExprDropdownOpen ? "rotate-180 text-violet-400" : ""}`} />
-              </button>
-
-              {/* Expression Dropdown Menu */}
-              {isExprDropdownOpen && (
-                <div className="absolute z-20 top-full mt-1.5 w-full bg-[#0d041c] border border-violet-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
-                  {EXPRESSION_OPTIONS.map((opt) => {
-                    const isSelected = expression === opt.id;
-                    return (
-                      <button
-                        key={opt.id}
-                        type="button"
-                        onClick={() => { setExpression(opt.id); setIsExprDropdownOpen(false); }}
-                        className={`w-full text-start p-2.5 rounded-lg transition-all flex items-center justify-between gap-2 ${
-                          isSelected 
-                            ? "bg-violet-500/20 text-white border border-violet-500/40" 
-                            : "hover:bg-white/5 text-white/70 hover:text-white"
-                        }`}
-                      >
-                        <div>
-                          <span className="font-bold text-xs text-white block">{isRtl ? opt.label : opt.labelEn}</span>
-                          <span className="text-[10px] text-white/40">{isRtl ? opt.descAr : opt.desc}</span>
-                        </div>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-violet-400 shrink-0" />}
                       </button>
                     );
                   })}
