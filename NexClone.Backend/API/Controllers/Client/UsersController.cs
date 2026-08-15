@@ -464,7 +464,7 @@ namespace NexClone.Backend.API.Controllers.Client
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,FullName,Email,PhoneNumber,Country,IsStaff,IsSuperAdmin,StandardCredits,PremiumCredits")] ApplicationUser updatedUser, List<string> visibleSections)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,FullName,Email,PhoneNumber,Country,IsStaff,IsSuperAdmin,StandardCredits,PremiumCredits,IsVerified")] ApplicationUser updatedUser, List<string> visibleSections)
         {
             if (id != updatedUser.Id) return NotFound();
 
@@ -478,6 +478,7 @@ namespace NexClone.Backend.API.Controllers.Client
             user.Country = updatedUser.Country;
             user.IsStaff = updatedUser.IsStaff;
             user.IsSuperAdmin = updatedUser.IsSuperAdmin;
+            user.IsVerified = updatedUser.IsVerified;
             user.StandardCredits = updatedUser.StandardCredits;
             user.PremiumCredits = updatedUser.PremiumCredits;
             user.VisibleAdminSections = string.Join(",", visibleSections ?? new List<string>());

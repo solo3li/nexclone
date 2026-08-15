@@ -70,7 +70,15 @@
 
                     <div class="bx--form-item" style="margin-bottom: 1rem;">
                         <div class="bx--checkbox-wrapper">
-                            <input asp-for="IsStaff" type="checkbox" class="bx--checkbox" id="isStaffCheckbox">
+                            
+                    <div class="bx--form-item" style="margin-bottom: 1rem;">
+                        <div class="bx--checkbox-wrapper">
+                            <input asp-for="IsVerified" type="checkbox" class="bx--checkbox" id="isVerifiedCheckbox">
+                            <label for="isVerifiedCheckbox" class="bx--checkbox-label">@Localizer["Account Verified"]</label>
+                        </div>
+                    </div>
+
+                    <input asp-for="IsStaff" type="checkbox" class="bx--checkbox" id="isStaffCheckbox">
                             <label for="isStaffCheckbox" class="bx--checkbox-label">@Localizer["Is Admin / Staff Member"]</label>
                         </div>
                     </div>
