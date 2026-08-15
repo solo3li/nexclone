@@ -48,11 +48,11 @@ interface LipSyncModel {
 const LIPSYNC_MODELS: LipSyncModel[] = [
   {
     id: "kling-lipsync-pro",
-    name: "Kling AI LipSync Pro",
-    nameAr: "محرك كلينج ليب سينك برو",
+    name: "NexMedia LipSync Pro V1",
+    nameAr: "محرك NexMedia لمزامنة الشفاه",
     badge: "Ultra Realism",
     badgeAr: "دقة سينمائية واقعية",
-    desc: "Industry-leading phoneme matching and facial naturalness",
+    desc: "Seamlessly synchronize audio to lip movements with cinematic precision.",
     descAr: "مطابقة فائقة لمخارج الحروف مع ثبات ملامح الوجه والأسنان"
   },
   {

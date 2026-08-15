@@ -1,234 +1,158 @@
 "use client";
-import { motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, PlayCircle } from "lucide-react";
-import { AnimatedText, GlowPulse } from "./AnimatedText";
-import Scene from "./Scene";
-import { useTranslations, useLocale } from "next-intl";
-import { Link, useRouter } from "../i18n/routing";
-import { useAppStore } from "../store/useAppStore";
+import { motion } from 'framer-motion';
+import { useLocale, useTranslations } from 'next-intl';
+import { ArrowRight, ArrowLeft, Sparkles } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useAppStore } from '@/store/useAppStore';
 
 export default function HeroSection() {
-  const t = useTranslations("Hero");
+  const t = useTranslations('Hero');
   const locale = useLocale();
-  const ArrowIcon = locale === 'ar' ? ArrowLeft : ArrowRight;
   const router = useRouter();
-  const { user, isAuthenticated, hasPhoneNumber } = useAppStore();
+  const { isAuthenticated } = useAppStore();
+  const isRtl = locale === 'ar';
+  const ArrowIcon = isRtl ? ArrowLeft : ArrowRight;
 
-  const handleStartForFree = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleStartForFree = (e: React.MouseEvent) => {
     e.preventDefault();
-    const isDesktop = window.innerWidth >= 768;
-    
-    if (isDesktop) {
-      if (isAuthenticated && !hasPhoneNumber) {
-        router.push("/complete-profile");
-      } else {
-        router.push("/tools/text-to-voice");
-      }
+    if (isAuthenticated) {
+      router.push(`/${locale}/tools`);
     } else {
-      // Mobile: scroll to tools section
-      const toolsElement = document.getElementById("tools");
-      if (toolsElement) {
-        toolsElement.scrollIntoView({ behavior: "smooth" });
-      }
+      document.getElementById('auth-modal')?.classList.remove('hidden');
     }
   };
 
+  const toolsMarquee = isRtl 
+    ? ['🎥 توليد فيديو سينمائي', '🎙️ تعليق صوتي بشري', '👄 مزامنة شفاه دقيقة', '🖼️ تحريك صور ثابتة', '✨ نصوص إبداعية'] 
+    : ['🎥 Cinematic Video', '🎙️ Human Voiceover', '👄 Precise Lip Sync', '🖼️ Image Animation', '✨ Creative Text'];
+
+  const modelsMarquee = [
+    '🚀 Google Veo 3.1', '✨ xAI Grok', '⚡ NexMedia Sync Pro', '🗣️ NexMedia Voice', '🧠 NexMedia AI'
+  ];
+
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background Base */}
-      <div className="absolute inset-0 bg-[#0a0015]" />
-      
-      {/* 3D Interactive Scene */}
-      <Scene />
+    <section className="relative h-[100dvh] w-full flex items-center justify-center overflow-hidden bg-[#0a0015]">
+      {/* Dynamic Background Elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-72 md:w-96 h-72 md:h-96 bg-violet-600/20 rounded-full blur-[100px] md:blur-[120px] mix-blend-screen animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-72 md:w-96 h-72 md:h-96 bg-fuchsia-600/20 rounded-full blur-[100px] md:blur-[120px] mix-blend-screen animate-pulse" style={{ animationDelay: '2s' }} />
+        {/* Subtle grid pattern */}
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
+      </div>
 
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0015]/40 to-[#0a0015] pointer-events-none" />
+      <div className="relative z-10 w-full max-w-5xl mx-auto px-4 pt-16 md:pt-20 pb-8 text-center flex flex-col justify-center h-full">
+        
+        {/* Top Badge */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="mx-auto mb-4"
+        >
+          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md text-[10px] md:text-xs font-medium text-white/80 shadow-[0_0_15px_rgba(217,70,239,0.15)]">
+            <Sparkles className="w-3 h-3 md:w-3.5 md:h-3.5 text-fuchsia-400 animate-pulse" />
+            {isRtl ? 'أحدث نماذج الذكاء الاصطناعي العالمية بين يديك' : 'The latest global AI models at your fingertips'}
+          </span>
+        </motion.div>
 
-      {/* Animated Orbs - Desktop only, mobile uses MobileBackground */}
-      <GlowPulse className="hidden md:block w-96 h-96 bg-violet-600/10 blur-3xl top-1/4 right-1/4" />
-      <GlowPulse className="hidden md:block w-72 h-72 bg-fuchsia-600/5 blur-3xl bottom-1/3 left-1/4" />
-      <GlowPulse className="hidden md:block w-64 h-64 bg-purple-700/10 blur-3xl top-1/3 left-1/3" />
-
-
-      {/* Content */}
-      <div className="relative z-10 max-w-5xl mx-auto px-4 pt-32 pb-20 text-center flex flex-col justify-center min-h-screen">
         {/* Headline */}
         <motion.h1
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.7 }}
-          className={`text-4xl sm:text-5xl ${locale === 'ar' ? 'md:text-7xl' : 'md:text-6xl'} font-extrabold text-white leading-tight mb-4 max-w-4xl mx-auto`}
+          transition={{ delay: 0.1, duration: 0.6 }}
+          className={`text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-extrabold text-white leading-tight md:leading-[1.15] mb-3 md:mb-4 max-w-3xl mx-auto tracking-tight`}
         >
-          {locale === 'ar' ? (
+          {isRtl ? (
             <>
-              قوة الذكاء في خدمة{" "}
-              <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
-                إبداعك
-              </span>
+              قوة الذكاء في خدمة <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">إبداعك</span>
             </>
           ) : (
             <>
-              The Power of AI at{" "}
-              <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
-                Your Service
-              </span>
+              The Power of AI at <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">Your Service</span>
             </>
           )}
         </motion.h1>
 
+        {/* Subtitle - Short & Punchy */}
+        <motion.p
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+          className="text-sm sm:text-base text-white/60 max-w-xl mx-auto mb-6 md:mb-8 leading-relaxed font-medium px-2"
+        >
+          {isRtl 
+            ? 'حوّل أفكارك إلى محتوى مذهل. منصة واحدة تمنحك أدوات الذكاء الاصطناعي الأقوى عالمياً لإنشاء المحتوى المرئي والمسموع باحترافية.'
+            : 'Turn your ideas into stunning reality. A single platform giving you the world\'s most powerful AI tools for visual and audio content creation.'}
+        </motion.p>
 
-        {/* Subtitle */}
-        <AnimatedText
-          text={t('subtitle')}
-          as="p"
-          delay={0.5}
-          className="text-lg sm:text-xl text-white/60 max-w-2xl mx-auto mb-10 leading-relaxed"
-        />
-
-        {/* Visual Wow Factor: Animated Audio Wave to AI Text */}
+        {/* CTA Section */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.6, duration: 0.8, type: "spring" }}
-          className="mx-auto mb-12 relative w-full max-w-md h-24 flex items-center justify-center gap-1"
-        >
-          {/* Animated bars representing audio */}
-          {[...Array(12)].map((_, i) => (
-            <motion.div
-              key={`bar-${i}`}
-              className="w-1.5 bg-violet-400 rounded-full"
-              animate={{
-                height: ["10px", "40px", "10px"],
-                opacity: [0.3, 1, 0.3],
-                backgroundColor: ["#8b5cf6", "#d946ef", "#8b5cf6"]
-              }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                delay: i * 0.1,
-                ease: "easeInOut"
-              }}
-            />
-          ))}
-          
-          <div className="mx-4 text-violet-400/50">
-            <ArrowIcon className={`w-6 h-6 animate-pulse ${locale === 'ar' ? 'rotate-180' : ''}`} />
-          </div>
-
-          <motion.div
-            className="px-4 py-2 bg-white/5 border border-violet-500/30 rounded-xl backdrop-blur-md shadow-[0_0_20px_rgba(139,92,246,0.3)] text-white font-medium flex items-center gap-2"
-            animate={{
-              boxShadow: ["0 0 20px rgba(139,92,246,0.3)", "0 0 40px rgba(217,70,239,0.6)", "0 0 20px rgba(139,92,246,0.3)"]
-            }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            <span className="text-xl">✨</span> {locale === 'ar' ? 'نص ذكي بضغطة زر' : 'AI Magic Instantly'}
-          </motion.div>
-        </motion.div>
-
-        {/* Gradient word highlight */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.6 }}
-          className="mb-10"
-        >
-          <span className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
-            {t('highlights')}
-          </span>
-        </motion.div>
-
-        {/* Interactive Demo (Micro-interaction) */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9, duration: 0.6 }}
-          className="max-w-md mx-auto mb-10 bg-white/5 border border-white/10 rounded-2xl p-2 backdrop-blur-sm flex items-center gap-2"
-        >
-          <input
-            type="text"
-            placeholder={locale === 'ar' ? "اكتب كلمة لتسمع السحر..." : "Type a word to hear the magic..."}
-            className="flex-1 bg-transparent border-none outline-none text-white px-4 placeholder:text-white/40"
-            maxLength={30}
-            id="demo-input"
-          />
-          <button
-            onClick={() => {
-              // Mock audio playback for demo
-              const audio = new Audio('/beep_short.ogg');
-              audio.play();
-            }}
-            className="bg-violet-600 hover:bg-violet-500 text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors"
-          >
-            <PlayCircle className="w-4 h-4" />
-            {locale === 'ar' ? 'استماع' : 'Listen'}
-          </button>
-        </motion.div>
-
-        {/* CTAs */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1, duration: 0.6 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4"
+          transition={{ delay: 0.3, duration: 0.5, type: 'spring' }}
+          className="flex flex-col items-center justify-center gap-3 md:gap-4 mb-8 md:mb-12 w-full px-4"
         >
           <a
             href="#tools"
             onClick={handleStartForFree}
-            className="group relative w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-2xl text-white font-bold text-lg overflow-hidden shadow-[0_0_40px_rgba(139,92,246,0.3)] hover:shadow-[0_0_60px_rgba(139,92,246,0.5)] transition-all duration-300 hover:-translate-y-1"
+            className="group relative flex items-center justify-center gap-2 px-6 sm:px-7 py-3 md:py-3.5 rounded-xl text-white font-bold text-base sm:text-lg overflow-hidden shadow-[0_0_30px_rgba(139,92,246,0.25)] hover:shadow-[0_0_50px_rgba(217,70,239,0.4)] transition-all duration-300 hover:-translate-y-0.5 w-full sm:w-auto"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-fuchsia-600 group-hover:from-violet-500 group-hover:to-fuchsia-500 transition-all duration-300" />
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-white/10 transition-opacity duration-300" />
-            <span className="relative">{locale === 'ar' ? 'ابدأ تجربتك المجانية' : 'Start Free Trial'}</span>
-            <ArrowIcon className={`w-5 h-5 relative transition-transform duration-300 ${locale === 'ar' ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
+            <span className="relative">{isRtl ? '🚀 ابدأ تجربتك المجانية الآن' : '🚀 Start Your Free Trial Now'}</span>
+            <ArrowIcon className={`w-4 h-4 md:w-5 md:h-5 relative transition-transform duration-300 ${isRtl ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
           </a>
+          
+          <div className="flex flex-wrap justify-center items-center gap-x-2 gap-y-2 text-[11px] md:text-xs font-medium text-white/50 w-full">
+            <span className="flex items-center gap-1.5 bg-white/5 px-2.5 md:px-3 py-1 rounded-full border border-white/5 backdrop-blur-sm">
+              <span className="text-fuchsia-400 text-xs md:text-sm">🎁</span> {isRtl ? 'متاح 10 كريدت مجاناً للتجربة' : '10 Free Credits for Trial'}
+            </span>
+            <span className="flex items-center gap-1.5 bg-white/5 px-2.5 md:px-3 py-1 rounded-full border border-white/5 backdrop-blur-sm">
+              <span className="text-emerald-400 text-xs md:text-sm">💳</span> {isRtl ? 'لا يتطلب بطاقة ائتمان' : 'No Credit Card Required'}
+            </span>
+          </div>
         </motion.div>
-        
-        {/* Social Proof Text */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.1, duration: 0.6 }}
-          className="text-white/50 text-sm font-medium mb-12"
-        >
-          {locale === 'ar' ? '✨ انضم لأكثر من 50,000 صانع محتوى يعتمدون على NexMedia' : '✨ Join over 50,000 creators using NexMedia'}
-        </motion.p>
 
-        {/* Hero Video Showcase */}
+        {/* Infinite Marquee Section */}
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.2, duration: 0.7 }}
-          className="relative max-w-4xl mx-auto rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-violet-500/20"
+          transition={{ delay: 0.5, duration: 0.8 }}
+          className="relative w-full max-w-4xl mx-auto overflow-hidden mt-auto [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)] md:[mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)]"
+          dir="ltr"
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0015] via-transparent to-transparent z-10" />
-          <video 
-            autoPlay 
-            loop 
-            muted 
-            playsInline
-            className="w-full h-auto object-cover opacity-80 mix-blend-screen"
-            poster="/dummy.jpg"
-          >
-            <source src="/dummy.mp4" type="video/mp4" />
-          </video>
-        </motion.div>
-      </div>
+          {/* Row 1: Tools (Scrolling Left) */}
+          <div className="flex whitespace-nowrap mb-3 md:mb-4">
+            <motion.div
+              className="flex gap-3 md:gap-4 shrink-0 px-2 w-max"
+              animate={{ x: ["0%", "-50%"] }}
+              transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+            >
+              {[...toolsMarquee, ...toolsMarquee, ...toolsMarquee, ...toolsMarquee, ...toolsMarquee, ...toolsMarquee].map((item, i) => (
+                <div key={`tool-${i}`} className="px-4 py-2 md:px-5 md:py-2.5 bg-white/5 border border-white/10 rounded-xl text-white/90 text-xs md:text-sm font-medium backdrop-blur-md shadow-sm">
+                  {item}
+                </div>
+              ))}
+            </motion.div>
+          </div>
 
-      {/* Scroll indicator */}
-      <motion.div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5 }}
-      >
-        <span className="text-white/30 text-xs">{t('scrollDown')}</span>
-        <motion.div
-          className="w-px h-10 bg-gradient-to-b from-violet-500 to-transparent"
-          animate={{ scaleY: [0, 1], opacity: [1, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-        />
-      </motion.div>
+          {/* Row 2: Models (Scrolling Right) */}
+          <div className="flex whitespace-nowrap pb-4 md:pb-6">
+            <motion.div
+              className="flex gap-3 md:gap-4 shrink-0 px-2 w-max"
+              animate={{ x: ["-50%", "0%"] }}
+              transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+            >
+              {[...modelsMarquee, ...modelsMarquee, ...modelsMarquee, ...modelsMarquee, ...modelsMarquee, ...modelsMarquee].map((item, i) => (
+                <div key={`model-${i}`} className="px-4 py-2 md:px-5 md:py-2.5 bg-gradient-to-r from-violet-900/30 to-fuchsia-900/30 border border-violet-500/20 rounded-xl text-violet-100 text-xs md:text-sm font-semibold backdrop-blur-md shadow-[0_0_15px_rgba(139,92,246,0.1)]">
+                  {item}
+                </div>
+              ))}
+            </motion.div>
+          </div>
+        </motion.div>
+
+      </div>
     </section>
   );
 }
-
