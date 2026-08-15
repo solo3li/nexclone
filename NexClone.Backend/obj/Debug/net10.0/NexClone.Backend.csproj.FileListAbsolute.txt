@@ -284,8 +284,12 @@
 /app/obj/Debug/net10.0/NexClone.Backend.pdb
 /app/obj/Debug/net10.0/NexClone.Backend.genruntimeconfig.cache
 /app/obj/Debug/net10.0/ref/NexClone.Backend.dll
+C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\appsettings.Development.json
+C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\appsettings.json
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\Resources\ar.json
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\Resources\en.json
+C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\NexClone.Backend.staticwebassets.runtime.json
+C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\NexClone.Backend.staticwebassets.endpoints.json
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\LatoFont\Lato-Black.ttf
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\LatoFont\Lato-BlackItalic.ttf
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\LatoFont\Lato-Bold.ttf
@@ -305,10 +309,6 @@ C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\LatoFo
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\LatoFont\Lato-Thin.ttf
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\LatoFont\Lato-ThinItalic.ttf
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\LatoFont\OFL.txt
-C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\appsettings.Development.json
-C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\appsettings.json
-C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\NexClone.Backend.staticwebassets.runtime.json
-C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\NexClone.Backend.staticwebassets.endpoints.json
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\NexClone.Backend.exe
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\NexClone.Backend.deps.json
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\NexClone.Backend.runtimeconfig.json
@@ -558,8 +558,8 @@ C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\obj\Debug\net10.0\compre
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\obj\Debug\net10.0\compressed\0gge3thass-{0}-9vr69e8ynj-9vr69e8ynj.gz
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\obj\Debug\net10.0\compressed\fs3skl7aqo-{0}-87fc7y1x7t-87fc7y1x7t.gz
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\obj\Debug\net10.0\compressed\3arcl9lk0b-{0}-mlv21k5csn-mlv21k5csn.gz
-C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\obj\Debug\net10.0\compressed\jcvh88u3rc-{0}-l34glgq1n6-l34glgq1n6.gz
-C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\obj\Debug\net10.0\compressed\uw3cukzy5k-{0}-l34glgq1n6-l34glgq1n6.gz
+C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\obj\Debug\net10.0\compressed\jcvh88u3rc-{0}-oy8019rwca-oy8019rwca.gz
+C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\obj\Debug\net10.0\compressed\uw3cukzy5k-{0}-oy8019rwca-oy8019rwca.gz
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\obj\Debug\net10.0\staticwebassets.build.json
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\obj\Debug\net10.0\staticwebassets.build.json.cache
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\obj\Debug\net10.0\staticwebassets.development.json
