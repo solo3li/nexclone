@@ -1,8 +1,11 @@
 "use client";
 
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocale } from "next-intl";
-import { Link } from "@/i18n/routing";
+import { Link, useRouter } from "@/i18n/routing";
+import { useAppStore } from "@/store/useAppStore";
+import { useAffiliateStore } from "@/store/useAffiliateStore";
 import { DollarSign, Link as LinkIcon, Gift, ArrowRight, ArrowLeft, BarChart3, Users } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -11,6 +14,23 @@ export default function AffiliateProgramClient() {
   const locale = useLocale();
   const isRtl = locale === 'ar';
   const Arrow = isRtl ? ArrowLeft : ArrowRight;
+  const router = useRouter();
+  
+  const { isAuthenticated, isInitializing } = useAppStore();
+  const { profile, fetchProfile, error } = useAffiliateStore();
+
+  useEffect(() => {
+    if (isAuthenticated && !isInitializing) {
+      fetchProfile();
+    }
+  }, [isAuthenticated, isInitializing, fetchProfile]);
+
+  useEffect(() => {
+    // If the user has an active profile and it loaded without error, redirect them to the dashboard directly
+    if (profile && !error) {
+      router.push('/affiliate');
+    }
+  }, [profile, error, router]);
 
   return (
     <div className="min-h-screen bg-[#0a0015] flex flex-col font-sans overflow-hidden">

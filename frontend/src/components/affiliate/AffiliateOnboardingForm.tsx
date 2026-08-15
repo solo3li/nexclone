@@ -12,6 +12,7 @@ export default function AffiliateOnboardingForm() {
   const { onboardProfile } = useAffiliateStore();
 
   const [policyAccepted, setPolicyAccepted] = useState(false);
+  const [whatsappNumber, setWhatsappNumber] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -26,9 +27,9 @@ export default function AffiliateOnboardingForm() {
 
     setIsSubmitting(true);
     const res = await onboardProfile({
-      mobileNumber: "",
+      mobileNumber: whatsappNumber, // Using whatsapp as mobile for now
       telegramUsername: "",
-      whatsappNumber: "",
+      whatsappNumber: whatsappNumber,
       facebookAccount: "",
     });
 
@@ -66,6 +67,23 @@ export default function AffiliateOnboardingForm() {
             {error}
           </div>
         )}
+
+        
+        <div className="flex flex-col gap-2 text-left rtl:text-right">
+          <label htmlFor="whatsapp" className="text-sm text-white/80 font-medium">
+            {isRtl ? 'Ø±Ù‚Ù… Ø§Ù„ÙˆØ§ØªØ³Ø§Ø¨ Ù„Ù„ØªÙˆØ§ØµÙ„' : 'WhatsApp Number for Contact'}
+          </label>
+          <input
+            type="text"
+            id="whatsapp"
+            required
+            value={whatsappNumber}
+            onChange={(e) => setWhatsappNumber(e.target.value)}
+            dir="ltr"
+            placeholder="+201012345678"
+            className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
+          />
+        </div>
 
         <div className="flex items-start gap-3 text-left rtl:text-right bg-black/20 p-4 rounded-xl border border-white/5">
           <input
