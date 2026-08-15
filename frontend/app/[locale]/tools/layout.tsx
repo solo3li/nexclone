@@ -2,6 +2,7 @@ import ToolsSidebar from "../../../src/components/ToolsSidebar";
 import ToolsAuthGuard from "../../../src/components/ToolsAuthGuard";
 import ToolStatusGuard from "../../../src/components/ToolStatusGuard";
 import ToolsWorkspaceWrapper from "../../../src/components/ToolsWorkspaceWrapper";
+import OnboardingTour from "../../../src/components/dashboard/OnboardingTour";
 
 export default async function ToolsLayout({
   children,
@@ -18,6 +19,7 @@ export default async function ToolsLayout({
       <ToolsWorkspaceWrapper>
         <ToolsAuthGuard>
           <ToolStatusGuard>
+            <OnboardingTour />
             {children}
           </ToolStatusGuard>
         </ToolsAuthGuard>

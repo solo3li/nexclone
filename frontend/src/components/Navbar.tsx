@@ -203,6 +203,11 @@ export default function Navbar() {
               {t('pricing')}
               <span className={`absolute -bottom-0.5 ${locale === 'ar' ? 'right-0' : 'left-0'} w-full h-px bg-gradient-to-r from-violet-500 to-fuchsia-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ${locale === 'ar' ? 'origin-right' : 'origin-left'}`} />
             </Link>
+            
+            <Link href="/blog" className="text-white/70 hover:text-white text-sm font-medium transition-colors duration-200 relative group">
+              {locale === 'ar' ? 'المدونة' : 'Blog'}
+              <span className={`absolute -bottom-0.5 ${locale === 'ar' ? 'right-0' : 'left-0'} w-full h-px bg-gradient-to-r from-violet-500 to-fuchsia-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ${locale === 'ar' ? 'origin-right' : 'origin-left'}`} />
+            </Link>
           </div>
 
           {/* CTA & Lang */}
@@ -330,6 +335,9 @@ export default function Navbar() {
               </div>
               <Link href="/pricing" onClick={() => setMenuOpen(false)} className="text-white/80 hover:text-white text-base font-medium py-2 border-b border-white/5 transition-colors">
                 {t('pricing')}
+              </Link>
+              <Link href="/blog" onClick={() => setMenuOpen(false)} className="text-white/80 hover:text-white text-base font-medium py-2 border-b border-white/5 transition-colors">
+                {locale === 'ar' ? 'المدونة' : 'Blog'}
               </Link>
               {isAuthenticated ? (
                 <>

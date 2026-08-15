@@ -137,7 +137,7 @@ export default function HeroSection() {
           >
             <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-fuchsia-600 group-hover:from-violet-500 group-hover:to-fuchsia-500 transition-all duration-300" />
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-white/10 transition-opacity duration-300" />
-            <span className="relative">{t('ctaPrimary')}</span>
+            <span className="relative">{locale === 'ar' ? 'تجربة مجانية' : 'Start Free Trial'}</span>
             <ArrowIcon className={`w-5 h-5 relative transition-transform duration-300 ${locale === 'ar' ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
           </a>
         </motion.div>
