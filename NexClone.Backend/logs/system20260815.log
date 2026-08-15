@@ -2014,3 +2014,4 @@ POSITION: 753
 2026-08-15 23:51:28.498 +03:00 [INF] Server desktop-rjppsk4:12860:3fd341cb successfully announced in 356.4207 ms
 2026-08-15 23:51:28.503 +03:00 [INF] Server desktop-rjppsk4:12860:3fd341cb is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-15 23:51:28.514 +03:00 [INF] Server desktop-rjppsk4:12860:3fd341cb all the dispatchers started
+2026-08-15 23:56:29.147 +03:00 [INF] 2 servers were removed due to timeout

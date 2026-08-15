@@ -284,11 +284,19 @@ namespace NexClone.Backend.API.Controllers.Client
                 return BadRequest(ModelState);
 
             var user = await _userManager.FindByEmailAsync(request.Email);
-            if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
+            if (user == null) {
+                Console.WriteLine($"[LOGIN FAILED] User not found: {request.Email}");
                 return Unauthorized(new { Message = "كلمة المرور أو البريد الإلكتروني غير صحيح." });
+            }
+            if (!await _userManager.CheckPasswordAsync(user, request.Password)) {
+                Console.WriteLine($"[LOGIN FAILED] Wrong password for: {request.Email}");
+                return Unauthorized(new { Message = "كلمة المرور أو البريد الإلكتروني غير صحيح." });
+            }
 
-            if (!user.IsVerified)
+            if (!user.IsVerified) {
+                Console.WriteLine($"[LOGIN FAILED] Unverified user: {request.Email}");
                 return Unauthorized(new { Message = "الرجاء تأكيد بريدك الإلكتروني أولاً قبل تسجيل الدخول.", RequiresVerification = true });
+            }
 
             var ipAddress = Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
             var userAgent = Request.Headers["User-Agent"].ToString() ?? "Unknown";

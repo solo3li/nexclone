@@ -36,6 +36,7 @@ api.interceptors.response.use(
             !path.includes('/forgot-password') && 
             !path.includes('/reset-password') &&
             !path.includes('advanced-lip-sync')) {
+          console.log("[Axios Interceptor] Redirecting to login! Path:", path);
           window.location.href = `/${locale}/login`;
         }
       }
