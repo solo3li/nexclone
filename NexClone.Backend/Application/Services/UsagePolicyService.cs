@@ -29,6 +29,7 @@ namespace NexClone.Backend.Application.Services
         public decimal? CostPerUnit { get; set; }
         public decimal? BaseCost { get; set; }
         public int BlockSize { get; set; } = 1;
+        public int RoundUpToNearest { get; set; } = 1;
     }
 
     public class PolicyValidationResult
@@ -180,11 +181,23 @@ namespace NexClone.Backend.Application.Services
                 policy.MaxAudioFileSizeMb = plan.AvatarVideoMaxAudioFileSizeMb;
                 policy.MaxCharsPerRequest = plan.AvatarVideoMaxCharsPerRequest;
             }
-            else if (toolId == "kling_advanced_lip_sync" || toolId == "lipsync")
+            else if (toolId == "vidu_advanced_lip_sync" || toolId == "lipsync")
             {
                 policy.Enabled = plan.LipSyncEnabled;
-                policy.BaseCost = plan.LipSyncCostPerGeneration;
-                policy.CostPerUnit = plan.LipSyncCostPerSecond;
+                
+                // If checkbox is checked, we charge per second, else we charge per generation
+                if (plan.LipSyncChargePerSecond)
+                {
+                    policy.BaseCost = 0; // No flat fee
+                    policy.CostPerUnit = plan.LipSyncCostPerSecond;
+                    policy.RoundUpToNearest = 5; // To calculate in blocks of 5 seconds
+                }
+                else
+                {
+                    policy.BaseCost = plan.LipSyncCostPerGeneration;
+                    policy.CostPerUnit = 0;
+                }
+
                 policy.MaxVideoFileSizeMb = plan.LipSyncMaxVideoFileSizeMb;
                 policy.MaxAudioFileSizeMb = plan.LipSyncMaxAudioFileSizeMb;
                 policy.MaxDurationSeconds = plan.LipSyncMaxDurationSeconds;
@@ -257,6 +270,11 @@ namespace NexClone.Backend.Application.Services
             decimal costPerUnit = toolPolicy.CostPerUnit ?? GetLegacyCostPerUnit(toolId);
             decimal amountForCost = usageAmountForCost ?? usageAmountForLimits;
             
+            if (toolPolicy.RoundUpToNearest > 1)
+            {
+                amountForCost = Math.Ceiling(amountForCost / toolPolicy.RoundUpToNearest) * toolPolicy.RoundUpToNearest;
+            }
+
             if (toolId == "voice-to-text" && usageAmountForCost == null)
             {
                 amountForCost = usageAmountForLimits / 102400m; 

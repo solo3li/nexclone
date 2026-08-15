@@ -263,13 +263,21 @@
                 <div class="bx--form__helper-text">@Localizer["-1 for unlimited"]</div>
             </div>
 
-            <!-- Lip-Sync -->
+            <!-- Lip-Sync (Vidu) -->
             <div class="bx--form-item bx--checkbox-wrapper">
                 <input type="checkbox" id="LipSyncEnabled" name="LipSyncEnabled" value="true" class="bx--checkbox" @(Model?.LipSyncEnabled != false ? "checked" : "") />
                 <label for="LipSyncEnabled" class="bx--checkbox-label" title="Enable Advanced Lip-Sync">
-                    <span class="bx--checkbox-label-text" style="font-weight: bold;">@Localizer["Enable Advanced Lip-Sync"]</span>
+                    <span class="bx--checkbox-label-text" style="font-weight: bold;">@Localizer["Enable Advanced Lip-Sync (Vidu)"]</span>
                 </label>
                 <input type="hidden" name="LipSyncEnabled" value="false" />
+            </div>
+
+            <div class="bx--form-item bx--checkbox-wrapper">
+                <input type="checkbox" id="LipSyncChargePerSecond" name="LipSyncChargePerSecond" value="true" class="bx--checkbox" @(Model?.LipSyncChargePerSecond == true ? "checked" : "") />
+                <label for="LipSyncChargePerSecond" class="bx--checkbox-label" title="Charge Per Second (Rounded to 5s)">
+                    <span class="bx--checkbox-label-text">@Localizer["Calculate Cost Per Second (Rounded up to 5s) instead of Per Request"]</span>
+                </label>
+                <input type="hidden" name="LipSyncChargePerSecond" value="false" />
             </div>
             <div class="bx--form-item">
                 <label for="LipSyncCostPerGeneration" class="bx--label">@Localizer["Cost Per Generation (Credits)"]</label>

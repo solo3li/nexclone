@@ -68,6 +68,7 @@ namespace NexClone.Backend.Core.Entities
 
         // Advanced Lip-Sync Settings
         public bool LipSyncEnabled { get; set; } = true;
+        public bool LipSyncChargePerSecond { get; set; } = false;
         public decimal LipSyncCostPerGeneration { get; set; } = 1.0m;
         public int LipSyncMaxVideoFileSizeMb { get; set; } = 50;
         public int LipSyncMaxAudioFileSizeMb { get; set; } = 15;
