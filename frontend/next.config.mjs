@@ -4,7 +4,7 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  allowedDevOrigins: ['178.62.192.74', 'localhost'],
+  allowedDevOrigins: ['178.62.192.74', 'localhost', 'uri-kilometers-believed-palmer.trycloudflare.com'],
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -35,6 +35,10 @@ const nextConfig = {
     return {
       beforeFiles: [
         {
+          source: '/api/:path*',
+          destination: 'http://127.0.0.1:8080/api/:path*',
+        },
+        {
           source: '/nexmedia/:path*',
           destination: 'http://minio:9001/nexmedia/:path*',
         },
@@ -44,3 +48,5 @@ const nextConfig = {
 };
 
 export default withNextIntl(nextConfig);
+
+

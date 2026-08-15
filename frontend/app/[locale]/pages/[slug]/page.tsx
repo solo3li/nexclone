@@ -7,7 +7,7 @@ export default async function CustomPage({ params }: { params: Promise<{ locale:
   
   let page = null;
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+    const apiUrl = (process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL) || 'http://localhost:8080';
     const res = await fetch(`${apiUrl}/api/platform/custom-page/${slug}`, { cache: 'no-store' });
     if (!res.ok) {
       return notFound();

@@ -64,7 +64,7 @@ export const viewport: Viewport = {
 async function getPublicSettings() {
   try {
     // Determine internal URL for API fetch
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+    const apiUrl = (process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL) || 'http://localhost:8080';
     const res = await fetch(`${apiUrl}/api/settings/public`, { next: { revalidate: 60 } });
     if (!res.ok) return null;
     return await res.json();
