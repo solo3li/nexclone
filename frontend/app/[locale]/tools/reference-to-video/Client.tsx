@@ -177,9 +177,21 @@ export default function ReferenceToVideoPage() {
     setIsModelDropdownOpen(false);
   };
 
-  // Calculate live estimated cost for Veo (8 seconds)
-  const estimatedCost = useMemo(() => {
-    return currentModel.prices[resolution] || currentModel.prices["1080p"] || 37.5;
+  // Calculate live estimated cost dynamically from backend
+  const [estimatedCost, setEstimatedCost] = useState<number>(37.5);
+  useEffect(() => {
+    let active = true;
+    const fetchCost = async () => {
+      try {
+        // duration is usually fixed at 8s for Veo reference videos
+        const res = await api.get(`/api/video/estimate-tool/reference-to-video?model=${currentModel.id}&resolution=${resolution}&duration=8`);
+        if (active && res.data?.estimatedCost !== undefined) {
+          setEstimatedCost(res.data.estimatedCost);
+        }
+      } catch (err) {}
+    };
+    fetchCost();
+    return () => { active = false; };
   }, [currentModel, resolution]);
 
   // Total balance & check sufficiency

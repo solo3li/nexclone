@@ -164,7 +164,14 @@ namespace NexClone.Backend.API.Controllers.AI
         }
 
         [HttpPost("start-lipsync")]
-        public async Task<IActionResult> StartLipSync([FromForm] IFormFile video, [FromForm] IFormFile audio, [FromForm] int? subscriptionId = null)
+        public async Task<IActionResult> StartLipSync(
+            [FromForm] IFormFile video, 
+            [FromForm] IFormFile audio, 
+            [FromForm] string model = "default", 
+            [FromForm] string accuracy = "high", 
+            [FromForm] string resolution = "1080p", 
+            [FromForm] string expression = "natural", 
+            [FromForm] int? subscriptionId = null)
         {
             if (video == null || video.Length == 0 || audio == null || audio.Length == 0)
                 return BadRequest(new { error = "Video and Audio are required." });
@@ -266,7 +273,11 @@ namespace NexClone.Backend.API.Controllers.AI
                         VideoContentType = videoContentType,
                         AudioBytes = audioBytes,
                         AudioFileName = audioFileName,
-                        AudioContentType = audioContentType
+                        AudioContentType = audioContentType,
+                        Model = model,
+                        Accuracy = accuracy,
+                        Resolution = resolution,
+                        Expression = expression
                     })
                 );
 
@@ -346,6 +357,24 @@ namespace NexClone.Backend.API.Controllers.AI
                 estimatedCost = policyResult.TotalCost, 
 
             });
+        }
+
+        [HttpGet("estimate-tool/{toolType}")]
+        public async Task<IActionResult> EstimateTool(string toolType, [FromQuery] string model = "veo", [FromQuery] string resolution = "1080p", [FromQuery] int duration = 0, [FromQuery] int? subscriptionId = null)
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+
+            if (toolType != "text-to-video" && toolType != "image-to-video" && toolType != "reference-to-video")
+                return BadRequest(new { error = "Invalid tool type." });
+
+            string qualityFormat = $"{model}|{resolution}";
+            decimal usageUnits = model == "grok" && duration > 0 ? duration : 1;
+
+            var policyResult = await _usagePolicy.EstimateCostAsync(userId, toolType, usageUnits, usageUnits, qualityFormat, subscriptionId);
+            if (!policyResult.IsAllowed) return BadRequest(new { error = policyResult.ErrorMessage });
+
+            return Ok(new { estimatedCost = policyResult.TotalCost });
         }
 
         [HttpPost("start-motion-control")]

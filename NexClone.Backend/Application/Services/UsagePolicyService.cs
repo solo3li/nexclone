@@ -240,6 +240,11 @@ namespace NexClone.Backend.Application.Services
                 .ThenBy(s => s.EndDate)
                 .FirstOrDefault();
 
+            if (activeSubscription != null && (activeSubscription.Plan.PriceUsd == 0 || activeSubscription.Plan.IsFreeTrial || activeSubscription.Plan.Name.ToLower().Contains("free")))
+            {
+                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Your credits are frozen while on the Free plan. Please upgrade your plan to continue using the services." };
+            }
+
             var toolPolicy = activeSubscription != null ? GetToolPolicy(activeSubscription.Plan, toolId, quality) : new ToolPolicy { Enabled = true };
             if (activeSubscription == null) toolPolicy.Enabled = true;
 

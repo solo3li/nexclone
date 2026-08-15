@@ -197,14 +197,20 @@ export default function ImageToVideoPage() {
     setIsModelDropdownOpen(false);
   };
 
-  // Calculate live estimated cost
-  const estimatedCost = useMemo(() => {
-    if (currentModel.isPerSecond) {
-      const rate = currentModel.prices[resolution] || 4.5;
-      return +(rate * duration).toFixed(2);
-    } else {
-      return currentModel.prices[resolution] || currentModel.prices["1080p"] || 37.5;
-    }
+  // Calculate live estimated cost dynamically from backend
+  const [estimatedCost, setEstimatedCost] = useState<number>(37.5);
+  useEffect(() => {
+    let active = true;
+    const fetchCost = async () => {
+      try {
+        const res = await api.get(`/api/video/estimate-tool/image-to-video?model=${currentModel.id}&resolution=${resolution}&duration=${duration}`);
+        if (active && res.data?.estimatedCost !== undefined) {
+          setEstimatedCost(res.data.estimatedCost);
+        }
+      } catch (err) {}
+    };
+    fetchCost();
+    return () => { active = false; };
   }, [currentModel, resolution, duration]);
 
   // Total balance & check sufficiency

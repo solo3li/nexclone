@@ -67,6 +67,7 @@ export const API_ENDPOINTS = {
   ESTIMATE_AVATAR: (qs: string) => `/api/video/estimate-avatar${qs}`,
   ESTIMATE_LIPSYNC: (qs: string) => `/api/video/estimate-lipsync${qs}`,
   ESTIMATE_MOTION_CONTROL: (qs: string) => `/api/video/estimate-motion-control${qs}`,
+  ESTIMATE_TOOL: (toolType: string, qs: string) => `/api/video/estimate-tool/${toolType}${qs}`,
   ESTIMATE_VTT: '/api/ai/voice-to-text/estimate',
   ESTIMATE_TTS: '/api/ai/text-to-voice/estimate',
 

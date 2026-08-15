@@ -45,6 +45,10 @@ namespace NexClone.Backend.Core.Messages
         public byte[] AudioBytes { get; set; }
         public string AudioFileName { get; set; }
         public string AudioContentType { get; set; }
+        public string Model { get; set; }
+        public string Accuracy { get; set; }
+        public string Resolution { get; set; }
+        public string Expression { get; set; }
     }
     public class TextToVoiceMessage : IAiTaskMessage
     {

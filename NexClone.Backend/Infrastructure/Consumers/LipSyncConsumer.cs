@@ -41,7 +41,13 @@ namespace NexClone.Backend.Infrastructure.Consumers
 
             try
             {
-                var (apiKey, modelName) = await GetToolConfigAsync("vidu_advanced_lip_sync");
+                string toolConfigKey = message.Model switch
+                {
+                    "vidu-lipsync-std" => "vidu_advanced_lip_sync",
+                    _ => "kling_advanced_lip_sync"
+                };
+
+                var (apiKey, modelName) = await GetToolConfigAsync(toolConfigKey);
                 var client = _httpClientFactory.CreateClient();
                 client.Timeout = TimeSpan.FromMinutes(10);
                 client.DefaultRequestHeaders.Add("x-api-key", apiKey);
