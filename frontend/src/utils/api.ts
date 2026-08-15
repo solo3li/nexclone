@@ -34,7 +34,8 @@ api.interceptors.response.use(
         if (!path.includes('/login') && 
             !path.includes('/register') && 
             !path.includes('/forgot-password') && 
-            !path.includes('/reset-password')) {
+            !path.includes('/reset-password') &&
+            !path.includes('advanced-lip-sync')) {
           window.location.href = `/${locale}/login`;
         }
       }
