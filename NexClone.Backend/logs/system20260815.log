@@ -1650,3 +1650,10 @@ System.IO.IOException: Failed to bind to address http://127.0.0.1:8080: address 
 2026-08-15 22:08:55.520 +03:00 [INF] 1 servers were removed due to timeout
 2026-08-15 22:08:59.973 +03:00 [INF] Removed 2 outdated record(s) from 'aggregatedcounter' table.
 2026-08-15 22:09:06.554 +03:00 [INF] Removed 12 outdated record(s) from 'job' table.
+2026-08-15 22:40:50.744 +03:00 [INF] [Email Task] Sending email to hamed3alii.3@gmail.com
+2026-08-15 22:40:51.016 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-15 22:40:51.020 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-15 22:40:51.366 +03:00 [INF] Received HTTP response headers after 337.6803ms - 201
+2026-08-15 22:40:51.374 +03:00 [INF] End processing HTTP request after 368.2652ms - 201
+2026-08-15 22:40:51.376 +03:00 [INF] [Email Task] Email sent to hamed3alii.3@gmail.com successfully.
+2026-08-15 22:45:29.005 +03:00 [INF] Start installing Hangfire SQL objects...
