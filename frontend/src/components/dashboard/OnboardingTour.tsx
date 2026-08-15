@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Coins, Zap, X, Sparkles, PlayCircle, Video } from "lucide-react";
+import { Coins, Zap, X, Sparkles, Video } from "lucide-react";
 import { useLocale } from "next-intl";
 
 export default function OnboardingTour() {
@@ -11,10 +11,9 @@ export default function OnboardingTour() {
   const isRtl = locale === 'ar';
 
   useEffect(() => {
-    // Check if the user has seen the tour before
-    const hasSeenTour = localStorage.getItem("nexmedia_tour_seen");
-    if (!hasSeenTour) {
-      // Delay opening the tour slightly for a better UX
+    // New cache key v4 to ensure it shows up again
+    const hasSeenTour = localStorage.getItem("nexmedia_tour_seen_v4");
+    if (!hasSeenTour || hasSeenTour === "false") {
       const timer = setTimeout(() => setIsOpen(true), 1500);
       return () => clearTimeout(timer);
     }
@@ -22,31 +21,31 @@ export default function OnboardingTour() {
 
   const closeTour = () => {
     setIsOpen(false);
-    localStorage.setItem("nexmedia_tour_seen", "true");
+    localStorage.setItem("nexmedia_tour_seen_v4", "true");
   };
 
   const steps = [
     {
       title: isRtl ? "مرحباً بك في NexMedia! ✨" : "Welcome to NexMedia! ✨",
-      desc: isRtl ? "لقد تم منحك 10 كريدت مجانية كهدية ترحيبية. دعنا نأخذك في جولة سريعة لمعرفة كيف تبدأ." : "You've been granted 10 free credits. Let's take a quick tour to see how to start.",
+      desc: isRtl ? "لقد تم منحك رصيد مجاني كهدية ترحيبية. دعنا نأخذك في جولة سريعة لمعرفة كيف تبدأ." : "You've been granted free credits as a welcome gift. Let's take a quick tour.",
       icon: Sparkles,
       color: "text-violet-400"
     },
     {
       title: isRtl ? "الرصيد الخاص بك 💰" : "Your Balance 💰",
-      desc: isRtl ? "ستجد رصيدك دائماً في أعلى الشاشة. كل عملية توليد (فيديو، صوت، أو صورة) ستستهلك عدداً معيناً من الكريدت." : "You'll always find your balance at the top. Each generation consumes a specific amount of credits.",
+      desc: isRtl ? "ستجد رصيدك دائماً في الأعلى. كل عملية توليد (فيديو، صوت، أو صورة) ستستهلك عدداً معيناً من الكريدت." : "Your balance is always at the top. Each generation consumes a specific amount of credits.",
       icon: Coins,
       color: "text-amber-400"
     },
     {
       title: isRtl ? "استكشف الأدوات 🎥" : "Explore Tools 🎥",
-      desc: isRtl ? "من القائمة الجانبية يمكنك الوصول إلى توليد الفيديو (Veo & Grok)، التعليق الصوتي، ومزامنة الشفاه. ابدأ الإبداع الآن!" : "From the sidebar, access Video Generation (Veo & Grok), Voiceovers, and Lip Sync. Start creating!",
+      desc: isRtl ? "من القائمة الجانبية يمكنك الوصول إلى كل أدوات توليد الفيديو والتعليق الصوتي. ابدأ الإبداع الآن!" : "From the sidebar, you can access all video generation tools. Start creating!",
       icon: Video,
       color: "text-blue-400"
     },
     {
-      title: isRtl ? "ترقية الباقة ⚡" : "Upgrade Plan ⚡",
-      desc: isRtl ? "عندما ينفد رصيدك المجاني أو تحتاج ميزات احترافية أكثر، يمكنك ترقية باقتك بسهولة وبدون شروط معقدة." : "When you run out of credits or need pro features, you can easily upgrade your plan.",
+      title: isRtl ? "نظام الإحالة ⚡" : "Affiliate System ⚡",
+      desc: isRtl ? "يمكنك ربح عمولة 20% متكررة عن طريق دعوة أصدقائك لاستخدام المنصة! شارك الرابط وابدأ الربح." : "Earn a 20% recurring commission by inviting friends! Share your link and start earning.",
       icon: Zap,
       color: "text-fuchsia-400"
     }
@@ -137,7 +136,7 @@ export default function OnboardingTour() {
                 onClick={closeTour}
                 className="flex-1 bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white py-3 rounded-xl font-bold transition-colors shadow-lg shadow-violet-500/25"
               >
-                {isRtl ? 'يلا نبدأ الإبداع! 🚀' : 'Let\'s Start Creating! 🚀'}
+                {isRtl ? "يلا نبدأ الإبداع! 🚀" : "Let's Start! 🚀"}
               </button>
             )}
           </div>

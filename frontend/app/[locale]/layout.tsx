@@ -9,7 +9,7 @@ import { routing } from '../../src/i18n/routing';
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
   variable: "--font-cairo",
-  weight: ["400", "500", "600", "700", "800", "900"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const inter = Inter({
@@ -75,6 +75,10 @@ async function getPublicSettings() {
 }
 
 import { GoogleAuthProviderWrapper } from "../../components/GoogleAuthProviderWrapper";
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
 
 export default async function RootLayout({
   children,

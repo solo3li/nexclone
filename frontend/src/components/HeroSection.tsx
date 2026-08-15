@@ -1,37 +1,40 @@
 "use client";
+
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useLocale, useTranslations } from 'next-intl';
-import { ArrowRight, ArrowLeft, Sparkles } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useAppStore } from '@/store/useAppStore';
+import { useLocale } from 'next-intl';
+import { ArrowRight, ArrowLeft, Sparkles, Video, Mic, Image as ImageIcon, Play, Sparkle, Film, Fingerprint } from 'lucide-react';
 
 export default function HeroSection() {
-  const t = useTranslations('Hero');
   const locale = useLocale();
-  const router = useRouter();
-  const { isAuthenticated } = useAppStore();
   const isRtl = locale === 'ar';
+  
   const ArrowIcon = isRtl ? ArrowLeft : ArrowRight;
 
-  const handleStartForFree = (e: React.MouseEvent) => {
+  const handleStartForFree = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    if (isAuthenticated) {
-      router.push(`/${locale}/tools`);
-    } else {
-      document.getElementById('auth-modal')?.classList.remove('hidden');
+    const target = document.querySelector('#tools');
+    if (target) {
+      const offset = 80;
+      const elementPosition = target.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
     }
   };
 
-  const toolsMarquee = isRtl 
-    ? ['🎥 توليد فيديو سينمائي', '🎙️ تعليق صوتي بشري', '👄 مزامنة شفاه دقيقة', '🖼️ تحريك صور ثابتة', '✨ نصوص إبداعية'] 
-    : ['🎥 Cinematic Video', '🎙️ Human Voiceover', '👄 Precise Lip Sync', '🖼️ Image Animation', '✨ Creative Text'];
+  const toolsMarquee = [
+    'Lip Sync', 'Image Animation', 'Creative Text', 'Cinematic Video', 'Human Voiceover', 'Precision Avatars'
+  ];
 
   const modelsMarquee = [
-    '🚀 Google Veo 3.1', '✨ xAI Grok', '⚡ NexMedia Sync Pro', '🗣️ NexMedia Voice', '🧠 NexMedia AI'
+    '🚀 Google Veo 3.1', '🔥 xAI Grok', '✨ NexMedia Sync Pro', '🎙️ NexMedia Voice', '🤖 NexMedia AI'
   ];
 
   return (
-    <section className="relative h-[100dvh] w-full flex items-center justify-center overflow-hidden bg-[#0a0015]">
+    <section className="relative min-h-[100dvh] w-full flex items-center justify-center overflow-hidden bg-[#0a0015]">
       {/* Dynamic Background Elements */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-72 md:w-96 h-72 md:h-96 bg-violet-600/20 rounded-full blur-[100px] md:blur-[120px] mix-blend-screen animate-pulse" />
@@ -60,11 +63,11 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.6 }}
-          className={`text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-extrabold text-white leading-tight md:leading-[1.15] mb-3 md:mb-4 max-w-3xl mx-auto tracking-tight`}
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-extrabold text-white leading-tight md:leading-[1.15] mb-3 md:mb-4 max-w-3xl mx-auto tracking-tight"
         >
           {isRtl ? (
             <>
-              قوة الذكاء في خدمة <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">إبداعك</span>
+              قوة الذكاء الاصطناعي في <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">خدمتك</span>
             </>
           ) : (
             <>
@@ -81,7 +84,7 @@ export default function HeroSection() {
           className="text-sm sm:text-base text-white/60 max-w-xl mx-auto mb-6 md:mb-8 leading-relaxed font-medium px-2"
         >
           {isRtl 
-            ? 'حوّل أفكارك إلى محتوى مذهل. منصة واحدة تمنحك أدوات الذكاء الاصطناعي الأقوى عالمياً لإنشاء المحتوى المرئي والمسموع باحترافية.'
+            ? 'حوّل أفكارك إلى واقع مذهل. منصة واحدة تمنحك أقوى أدوات الذكاء الاصطناعي عالمياً لإنشاء المحتوى المرئي والمسموع باحترافية.'
             : 'Turn your ideas into stunning reality. A single platform giving you the world\'s most powerful AI tools for visual and audio content creation.'}
         </motion.p>
 
@@ -105,7 +108,7 @@ export default function HeroSection() {
           
           <div className="flex flex-wrap justify-center items-center gap-x-2 gap-y-2 text-[11px] md:text-xs font-medium text-white/50 w-full">
             <span className="flex items-center gap-1.5 bg-white/5 px-2.5 md:px-3 py-1 rounded-full border border-white/5 backdrop-blur-sm">
-              <span className="text-fuchsia-400 text-xs md:text-sm">🎁</span> {isRtl ? 'متاح 10 كريدت مجاناً للتجربة' : '10 Free Credits for Trial'}
+              <span className="text-fuchsia-400 text-xs md:text-sm">🎁</span> {isRtl ? 'رصيد 10 كريدت مجاني للتجربة' : '10 Free Credits for Trial'}
             </span>
             <span className="flex items-center gap-1.5 bg-white/5 px-2.5 md:px-3 py-1 rounded-full border border-white/5 backdrop-blur-sm">
               <span className="text-emerald-400 text-xs md:text-sm">💳</span> {isRtl ? 'لا يتطلب بطاقة ائتمان' : 'No Credit Card Required'}

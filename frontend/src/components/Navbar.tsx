@@ -208,11 +208,6 @@ export default function Navbar() {
               {t('pricing')}
               <span className={`absolute -bottom-0.5 ${locale === 'ar' ? 'right-0' : 'left-0'} w-full h-px bg-gradient-to-r from-violet-500 to-fuchsia-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ${locale === 'ar' ? 'origin-right' : 'origin-left'}`} />
             </Link>
-            
-            <Link href="/blog" className="text-white/70 hover:text-white text-sm font-medium transition-colors duration-200 relative group">
-              {locale === 'ar' ? 'المدونة' : 'Blog'}
-              <span className={`absolute -bottom-0.5 ${locale === 'ar' ? 'right-0' : 'left-0'} w-full h-px bg-gradient-to-r from-violet-500 to-fuchsia-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ${locale === 'ar' ? 'origin-right' : 'origin-left'}`} />
-            </Link>
           </div>
 
           {/* CTA & Lang */}
@@ -237,7 +232,7 @@ export default function Navbar() {
                   </div>
                 </Link>
                 <Link
-                  href="/affiliate"
+                  href="/affiliate-program"
                   className="px-4 py-2 rounded-xl text-sm font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-colors border border-transparent hover:border-white/10"
                 >
                   {locale === 'ar' ? 'اربح معنا' : 'Earn With Us'}

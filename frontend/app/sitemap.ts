@@ -1,4 +1,4 @@
-﻿import { MetadataRoute } from 'next';
+import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://nexmedia.ai';
@@ -15,14 +15,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   const sitemapEntries = routes.map((route) => ({
-    url: \/ar\,
+    url: `${baseUrl}/ar${route}`,
     lastModified: new Date(),
     changeFrequency: 'weekly' as const,
     priority: route === '' ? 1 : 0.8,
     alternates: {
       languages: {
-        en: \/en\,
-        ar: \/ar\,
+        en: `${baseUrl}/en${route}`,
+        ar: `${baseUrl}/ar${route}`,
       },
     },
   }));
