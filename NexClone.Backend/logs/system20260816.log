@@ -1238,3 +1238,23 @@ DETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error
 2026-08-16 22:42:32.554 +03:00 [INF] Server desktop-rjppsk4:15564:a7206d1a all the dispatchers started
 2026-08-16 22:42:35.646 +03:00 [INF] Removed 1 outdated record(s) from 'aggregatedcounter' table.
 2026-08-16 22:42:45.371 +03:00 [INF] Removed 1 outdated record(s) from 'job' table.
+2026-08-16 22:45:10.047 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-16 22:47:33.144 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-16 23:02:32.050 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-16 23:02:42.442 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-16 23:02:44.672 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-16 23:02:44.812 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-16 23:02:44.813 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-16 23:02:44.813 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-16 23:02:44.813 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-16 23:02:44.813 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-16 23:02:44.814 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-16 23:02:46.791 +03:00 [INF] Server desktop-rjppsk4:22156:4d770791 successfully announced in 1938.0172 ms
+2026-08-16 23:02:46.796 +03:00 [INF] Server desktop-rjppsk4:22156:4d770791 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-16 23:02:46.831 +03:00 [INF] Server desktop-rjppsk4:22156:4d770791 all the dispatchers started
+2026-08-16 23:02:47.337 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-16 23:02:53.292 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.

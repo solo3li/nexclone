@@ -102,6 +102,32 @@ namespace NexClone.Backend.API.Controllers.Admin
                 ViewBag.TextToVideoPricings = t2vPricings;
             }
 
+            if (id == "image-to-video" || id == "reference-to-video")
+            {
+                var i2vSetting = await _context.ImageToVideoSettings.FirstOrDefaultAsync();
+                if (i2vSetting == null)
+                {
+                    i2vSetting = new Core.Entities.ImageToVideoSetting { Id = 1, MaxPromptLength = 5000, MaxImageFileSizeMb = 25, MaxDurationSeconds = 8, MaxConcurrentOperations = 10, IsActive = true };
+                    _context.ImageToVideoSettings.Add(i2vSetting);
+                    await _context.SaveChangesAsync();
+                }
+                ViewBag.ImageToVideoSetting = i2vSetting;
+
+                var i2vPricings = await _context.ImageToVideoModelPricings.ToListAsync();
+                if (i2vPricings.Count == 0)
+                {
+                    i2vPricings = new List<Core.Entities.ImageToVideoModelPricing>
+                    {
+                        new Core.Entities.ImageToVideoModelPricing { ModelName = "veo 3.1 Fast", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 30.0m, FixedCost_1080p = 37.5m, FixedCost_4k = 90.0m, AllowedWallet = "Standard", IsActive = true },
+                        new Core.Entities.ImageToVideoModelPricing { ModelName = "veo 3.1 Lite", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 15.0m, FixedCost_1080p = 22.5m, FixedCost_4k = 75.0m, AllowedWallet = "Standard", IsActive = true },
+                        new Core.Entities.ImageToVideoModelPricing { ModelName = "veo 3.1 Quality", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 225.0m, FixedCost_1080p = 232.5m, FixedCost_4k = 285.0m, AllowedWallet = "Standard", IsActive = true }
+                    };
+                    _context.ImageToVideoModelPricings.AddRange(i2vPricings);
+                    await _context.SaveChangesAsync();
+                }
+                ViewBag.ImageToVideoPricings = i2vPricings;
+            }
+
             if (id == "text-to-image")
             {
                 var t2iSetting = await _context.TextToImageSettings.FirstOrDefaultAsync();
@@ -399,17 +425,42 @@ namespace NexClone.Backend.API.Controllers.Admin
                     }
                     i2vSetting.IsActive = config.IsActive;
                     i2vSetting.MaxConcurrentOperations = MaxConcurrentOperations ?? 10;
+                    if (int.TryParse(Request.Form["MaxPromptLength"].ToString(), out int maxPrompt) && maxPrompt > 0)
+                        i2vSetting.MaxPromptLength = maxPrompt;
+                    if (long.TryParse(Request.Form["MaxImageFileSizeMb"].ToString(), out long maxFileSize) && maxFileSize > 0)
+                        i2vSetting.MaxImageFileSizeMb = maxFileSize;
+                    if (int.TryParse(Request.Form["MaxDurationSeconds"].ToString(), out int maxDur) && maxDur > 0)
+                        i2vSetting.MaxDurationSeconds = maxDur;
                     i2vSetting.UpdatedAt = DateTime.UtcNow;
 
-                    var grokPricing = await _context.ImageToVideoModelPricings.FirstOrDefaultAsync(p => p.ModelName.ToLower().Contains("grok"));
-                    if (grokPricing != null)
-                    {
-                        grokPricing.IsActive = config.IsActive;
-                        grokPricing.AllowedWallet = config.AllowPremiumCredits && !config.AllowStandardCredits ? "Premium" : "Standard";
-                        if (ModelCosts.ContainsKey("grok-imagine|480p")) grokPricing.CostPerSecond_480p = ModelCosts["grok-imagine|480p"];
-                        if (ModelCosts.ContainsKey("grok-imagine|720p")) grokPricing.CostPerSecond_720p = ModelCosts["grok-imagine|720p"];
-                        if (ModelCosts.ContainsKey("grok-imagine|1080p")) grokPricing.CostPerSecond_1080p = ModelCosts["grok-imagine|1080p"];
-                    }
+                    string defaultWallet = config.AllowPremiumCredits && !config.AllowStandardCredits ? "Premium" : (config.AllowStandardCredits && !config.AllowPremiumCredits ? "Standard" : "Both");
+
+                    // Veo Fast
+                    var veoFast = await _context.ImageToVideoModelPricings.FirstOrDefaultAsync(p => p.ModelName == "veo 3.1 Fast");
+                    if (veoFast == null) { veoFast = new Core.Entities.ImageToVideoModelPricing { ModelName = "veo 3.1 Fast", ProviderName = "CrunAI", BillingType = "PerRequest" }; _context.ImageToVideoModelPricings.Add(veoFast); }
+                    veoFast.IsActive = config.IsActive;
+                    veoFast.AllowedWallet = defaultWallet;
+                    if (ModelCosts.ContainsKey("veo 3.1 Fast|720p")) veoFast.FixedCost_720p = ModelCosts["veo 3.1 Fast|720p"];
+                    if (ModelCosts.ContainsKey("veo 3.1 Fast|1080p")) veoFast.FixedCost_1080p = ModelCosts["veo 3.1 Fast|1080p"];
+                    if (ModelCosts.ContainsKey("veo 3.1 Fast|4k")) veoFast.FixedCost_4k = ModelCosts["veo 3.1 Fast|4k"];
+
+                    // Veo Lite
+                    var veoLite = await _context.ImageToVideoModelPricings.FirstOrDefaultAsync(p => p.ModelName == "veo 3.1 Lite");
+                    if (veoLite == null) { veoLite = new Core.Entities.ImageToVideoModelPricing { ModelName = "veo 3.1 Lite", ProviderName = "CrunAI", BillingType = "PerRequest" }; _context.ImageToVideoModelPricings.Add(veoLite); }
+                    veoLite.IsActive = config.IsActive;
+                    veoLite.AllowedWallet = defaultWallet;
+                    if (ModelCosts.ContainsKey("veo 3.1 Lite|720p")) veoLite.FixedCost_720p = ModelCosts["veo 3.1 Lite|720p"];
+                    if (ModelCosts.ContainsKey("veo 3.1 Lite|1080p")) veoLite.FixedCost_1080p = ModelCosts["veo 3.1 Lite|1080p"];
+                    if (ModelCosts.ContainsKey("veo 3.1 Lite|4k")) veoLite.FixedCost_4k = ModelCosts["veo 3.1 Lite|4k"];
+
+                    // Veo Quality
+                    var veoQuality = await _context.ImageToVideoModelPricings.FirstOrDefaultAsync(p => p.ModelName == "veo 3.1 Quality");
+                    if (veoQuality == null) { veoQuality = new Core.Entities.ImageToVideoModelPricing { ModelName = "veo 3.1 Quality", ProviderName = "CrunAI", BillingType = "PerRequest" }; _context.ImageToVideoModelPricings.Add(veoQuality); }
+                    veoQuality.IsActive = config.IsActive;
+                    veoQuality.AllowedWallet = defaultWallet;
+                    if (ModelCosts.ContainsKey("veo 3.1 Quality|720p")) veoQuality.FixedCost_720p = ModelCosts["veo 3.1 Quality|720p"];
+                    if (ModelCosts.ContainsKey("veo 3.1 Quality|1080p")) veoQuality.FixedCost_1080p = ModelCosts["veo 3.1 Quality|1080p"];
+                    if (ModelCosts.ContainsKey("veo 3.1 Quality|4k")) veoQuality.FixedCost_4k = ModelCosts["veo 3.1 Quality|4k"];
                 }
                 else if (config.ToolName == "advanced-lip-sync" || config.ToolName == "vidu_advanced_lip_sync" || config.ToolName == "lipsync")
                 {

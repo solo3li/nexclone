@@ -374,7 +374,132 @@
         </div>
     </div>
 }
-else if (toolName == "image-to-video" || toolName == "reference-to-video" || toolName == "advanced-lip-sync")
+@if (toolName == "reference-to-video")
+{
+    var i2vSetting = ViewBag.ImageToVideoSetting as NexClone.Backend.Core.Entities.ImageToVideoSetting;
+    var i2vPricings = ViewBag.ImageToVideoPricings as List<NexClone.Backend.Core.Entities.ImageToVideoModelPricing> ?? new List<NexClone.Backend.Core.Entities.ImageToVideoModelPricing>();
+    var maxPrompt = i2vSetting?.MaxPromptLength ?? 5000;
+    var maxImageSize = i2vSetting?.MaxImageFileSizeMb ?? 25;
+    var maxDur = i2vSetting?.MaxDurationSeconds ?? 8;
+
+    var veoFast = i2vPricings.FirstOrDefault(p => p.ModelName == "veo 3.1 Fast") ?? new NexClone.Backend.Core.Entities.ImageToVideoModelPricing { FixedCost_720p = 30.0m, FixedCost_1080p = 37.5m, FixedCost_4k = 90.0m };
+    var veoLite = i2vPricings.FirstOrDefault(p => p.ModelName == "veo 3.1 Lite") ?? new NexClone.Backend.Core.Entities.ImageToVideoModelPricing { FixedCost_720p = 15.0m, FixedCost_1080p = 22.5m, FixedCost_4k = 75.0m };
+    var veoQuality = i2vPricings.FirstOrDefault(p => p.ModelName == "veo 3.1 Quality") ?? new NexClone.Backend.Core.Entities.ImageToVideoModelPricing { FixedCost_720p = 225.0m, FixedCost_1080p = 232.5m, FixedCost_4k = 285.0m };
+
+    <!-- General Operational Limits Card -->
+    <div style="background: #ffffff; padding: 1.75rem; border: 1px solid #e0e0e0; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); margin-bottom: 2rem;">
+        <h4 class="bx--label" style="font-weight: 700; font-size: 1rem; margin-bottom: 1.25rem; color: #161616;">@Localizer["Operational Limits & Upload Restrictions"]</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;">
+            <div class="bx--form-item">
+                <label class="bx--label" style="font-weight: 600;">@Localizer["Max Prompt Length (Characters)"]</label>
+                <input type="number" step="1" min="100" max="10000" name="MaxPromptLength" class="bx--text-input" value="@maxPrompt" style="margin-top: 0.25rem; width: 140px;" />
+                <div class="bx--form__helper-text">@Localizer["Maximum character limit for text prompt (Default: 5000)."]</div>
+            </div>
+            <div class="bx--form-item">
+                <label class="bx--label" style="font-weight: 600;">@Localizer["Max Image File Size (MB)"]</label>
+                <input type="number" step="1" min="1" max="100" name="MaxImageFileSizeMb" class="bx--text-input" value="@maxImageSize" style="margin-top: 0.25rem; width: 140px;" />
+                <div class="bx--form__helper-text">@Localizer["Max upload size per reference image (Default: 25 MB)."]</div>
+            </div>
+            <div class="bx--form-item">
+                <label class="bx--label" style="font-weight: 600;">@Localizer["Video Duration (Seconds)"]</label>
+                <input type="number" step="1" min="4" max="8" name="MaxDurationSeconds" class="bx--text-input" value="@maxDur" style="margin-top: 0.25rem; width: 140px;" />
+                <div class="bx--form__helper-text">@Localizer["Duration for Reference to Video (Default: 8s)."]</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Google Veo 3.1 Reference to Video Card -->
+    <div style="background: #ffffff; padding: 1.75rem; border: 1px solid #e0e0e0; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #f4f4f4; padding-bottom: 1rem; margin-bottom: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span style="background: #0f62fe; color: white; font-weight: bold; font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; letter-spacing: 0.5px;">CRUN AI</span>
+                <h3 class="bx--type-productive-heading-03" style="margin: 0; color: #161616;">Veo 3.1 Reference to Video (Google DeepMind)</h3>
+            </div>
+            <span style="background: #e8f8f0; color: #198038; font-weight: 600; font-size: 0.8rem; padding: 4px 12px; border-radius: 4px; border: 1px solid #a7f0ba;">
+                ● @Localizer["Fixed Cost per Video (8s)"]
+            </span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 1.25rem; margin-bottom: 1.5rem;">
+            <!-- Veo Fast -->
+            <div style="background: #fbfbfb; border: 1px solid #e8e8e8; border-radius: 6px; padding: 1.25rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <span style="font-weight: 700; font-size: 1rem; color: #0f62fe;">Veo 3.1 Fast (r2v)</span>
+                    <span style="font-size: 0.8rem; color: #6f6f6f;">Duration: 8s | Up to 3 Reference Images</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label class="bx--label" style="font-size: 0.8rem;">720p Cost (Credits)</label>
+                        <input type="number" step="0.1" min="0" name="ModelCosts[veo 3.1 Fast|720p]" class="bx--text-input" value="@veoFast.FixedCost_720p" />
+                    </div>
+                    <div>
+                        <label class="bx--label" style="font-size: 0.8rem;">1080p Cost (Credits)</label>
+                        <input type="number" step="0.1" min="0" name="ModelCosts[veo 3.1 Fast|1080p]" class="bx--text-input" value="@veoFast.FixedCost_1080p" />
+                    </div>
+                    <div>
+                        <label class="bx--label" style="font-size: 0.8rem;">4k Cost (Credits)</label>
+                        <input type="number" step="0.1" min="0" name="ModelCosts[veo 3.1 Fast|4k]" class="bx--text-input" value="@veoFast.FixedCost_4k" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Veo Lite -->
+            <div style="background: #fbfbfb; border: 1px solid #e8e8e8; border-radius: 6px; padding: 1.25rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <span style="font-weight: 700; font-size: 1rem; color: #0f62fe;">Veo 3.1 Lite (r2v)</span>
+                    <span style="font-size: 0.8rem; color: #6f6f6f;">Duration: 8s | Up to 3 Reference Images</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label class="bx--label" style="font-size: 0.8rem;">720p Cost (Credits)</label>
+                        <input type="number" step="0.1" min="0" name="ModelCosts[veo 3.1 Lite|720p]" class="bx--text-input" value="@veoLite.FixedCost_720p" />
+                    </div>
+                    <div>
+                        <label class="bx--label" style="font-size: 0.8rem;">1080p Cost (Credits)</label>
+                        <input type="number" step="0.1" min="0" name="ModelCosts[veo 3.1 Lite|1080p]" class="bx--text-input" value="@veoLite.FixedCost_1080p" />
+                    </div>
+                    <div>
+                        <label class="bx--label" style="font-size: 0.8rem;">4k Cost (Credits)</label>
+                        <input type="number" step="0.1" min="0" name="ModelCosts[veo 3.1 Lite|4k]" class="bx--text-input" value="@veoLite.FixedCost_4k" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Veo Quality -->
+            <div style="background: #fbfbfb; border: 1px solid #e8e8e8; border-radius: 6px; padding: 1.25rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <span style="font-weight: 700; font-size: 1rem; color: #0f62fe;">Veo 3.1 Quality (r2v)</span>
+                    <span style="font-size: 0.8rem; color: #6f6f6f;">Duration: 8s | Up to 3 Reference Images</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label class="bx--label" style="font-size: 0.8rem;">720p Cost (Credits)</label>
+                        <input type="number" step="0.1" min="0" name="ModelCosts[veo 3.1 Quality|720p]" class="bx--text-input" value="@veoQuality.FixedCost_720p" />
+                    </div>
+                    <div>
+                        <label class="bx--label" style="font-size: 0.8rem;">1080p Cost (Credits)</label>
+                        <input type="number" step="0.1" min="0" name="ModelCosts[veo 3.1 Quality|1080p]" class="bx--text-input" value="@veoQuality.FixedCost_1080p" />
+                    </div>
+                    <div>
+                        <label class="bx--label" style="font-size: 0.8rem;">4k Cost (Credits)</label>
+                        <input type="number" step="0.1" min="0" name="ModelCosts[veo 3.1 Quality|4k]" class="bx--text-input" value="@veoQuality.FixedCost_4k" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="background: #f4f4f4; padding: 1rem 1.25rem; border-radius: 4px; border-left: 4px solid #0f62fe;">
+            <label class="bx--label" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">@Localizer["Supported Specifications"]</label>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
+                <span style="background: white; border: 1px solid #c6c6c6; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; color: #161616;">16:9</span>
+                <span style="background: white; border: 1px solid #c6c6c6; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; color: #161616;">9:16</span>
+                <span style="background: white; border: 1px solid #c6c6c6; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; color: #161616;">Up to 3 Images</span>
+                <span style="background: white; border: 1px solid #c6c6c6; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; color: #161616;">Duration: 8s</span>
+            </div>
+        </div>
+    </div>
+}
+else if (toolName == "image-to-video" || toolName == "advanced-lip-sync")
                         {
                             var models = new List<string>();
                             var isVideo = true;
@@ -387,14 +512,6 @@ else if (toolName == "image-to-video" || toolName == "reference-to-video" || too
                                     "veo 3.1 Lite|720p", "veo 3.1 Lite|1080p", "veo 3.1 Lite|4k",
                                     "veo 3.1 Quality|720p", "veo 3.1 Quality|1080p", "veo 3.1 Quality|4k",
                                     "grok-imagine|480p", "grok-imagine|720p", "grok-imagine|1080p"
-                                });
-                            }
-                            else if (toolName == "reference-to-video")
-                            {
-                                models.AddRange(new[] { 
-                                    "veo 3.1 Fast|720p", "veo 3.1 Fast|1080p", "veo 3.1 Fast|4k",
-                                    "veo 3.1 Lite|720p", "veo 3.1 Lite|1080p", "veo 3.1 Lite|4k",
-                                    "veo 3.1 Quality|720p", "veo 3.1 Quality|1080p", "veo 3.1 Quality|4k"
                                 });
                             }
                             else if (toolName == "advanced-lip-sync")
@@ -460,7 +577,7 @@ else if (toolName == "image-to-video" || toolName == "reference-to-video" || too
                             </div>
                         }
 
-@if (toolName != "text-to-image" && toolName != "text-to-video")
+@if (toolName != "text-to-image" && toolName != "text-to-video" && toolName != "reference-to-video")
                         {
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                                 <h3 class="bx--type-productive-heading-03">@Localizer["Routing Rules (Models)"]</h3>
