@@ -213,6 +213,22 @@ namespace NexClone.Backend.Application.Services
                 policy.MaxVideoFileSizeMb = plan.MotionControlMaxVideoFileSizeMb;
                 policy.MaxImageFileSizeMb = plan.MotionControlMaxImageFileSizeMb;
             }
+            else if (toolId == "text-to-video")
+            {
+                policy.Enabled = plan.TextToVideoEnabled;
+            }
+            else if (toolId == "image-to-video")
+            {
+                policy.Enabled = plan.ImageToVideoEnabled;
+            }
+            else if (toolId == "reference-to-video")
+            {
+                policy.Enabled = plan.ReferenceToVideoEnabled;
+            }
+            else if (toolId == "text-to-image")
+            {
+                policy.Enabled = plan.TextToImageEnabled;
+            }
 
             return policy;
         }

@@ -82,6 +82,12 @@ namespace NexClone.Backend.Core.Entities
         public int MotionControlMaxVideoFileSizeMb { get; set; } = 50;
         public int MotionControlMaxImageFileSizeMb { get; set; } = 15;
 
+        // New AI Tools
+        public bool TextToVideoEnabled { get; set; } = true;
+        public bool ImageToVideoEnabled { get; set; } = true;
+        public bool ReferenceToVideoEnabled { get; set; } = true;
+        public bool TextToImageEnabled { get; set; } = true;
+
         // Free Trial Flag
         public bool IsFreeTrial { get; set; } = false;
 

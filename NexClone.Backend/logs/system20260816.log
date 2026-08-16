@@ -927,3 +927,20 @@ DETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error
 2026-08-16 16:05:33.532 +03:00 [INF] Server desktop-rjppsk4:22212:911ce53b is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-16 16:05:33.542 +03:00 [INF] Server desktop-rjppsk4:22212:911ce53b all the dispatchers started
 2026-08-16 16:10:34.487 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-16 16:15:39.630 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-16 16:15:45.603 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-16 16:15:47.307 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-16 16:15:47.383 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-16 16:15:47.383 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-16 16:15:47.384 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-16 16:15:47.384 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-16 16:15:47.384 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-16 16:15:47.384 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-16 16:15:47.622 +03:00 [INF] Server desktop-rjppsk4:20860:1be67c7b successfully announced in 224.9825 ms
+2026-08-16 16:15:47.625 +03:00 [INF] Server desktop-rjppsk4:20860:1be67c7b is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-16 16:15:47.639 +03:00 [INF] Server desktop-rjppsk4:20860:1be67c7b all the dispatchers started
+2026-08-16 16:20:48.138 +03:00 [INF] 1 servers were removed due to timeout
