@@ -16,7 +16,7 @@ export default function CompleteProfilePage() {
   const ArrowIcon = locale === 'ar' ? ArrowLeft : ArrowRight;
   const router = useRouter();
   
-  const { user, isAuthenticated, hasPhoneNumber, addPhone } = useAuthStore();
+  const { user, isAuthenticated, hasPhoneNumber, addPhone, isInitializing } = useAuthStore();
 
   const [phone, setPhone] = useState("");
   const [countryCode, setCountryCode] = useState("+20");
@@ -24,6 +24,8 @@ export default function CompleteProfilePage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (isInitializing) return;
+
     // If not authenticated, go to login
     if (!isAuthenticated) {
       router.replace("/login");
@@ -31,7 +33,7 @@ export default function CompleteProfilePage() {
       // If already has phone number, go to tools
       router.replace("/tools");
     }
-  }, [isAuthenticated, hasPhoneNumber, router]);
+  }, [isAuthenticated, hasPhoneNumber, isInitializing, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
