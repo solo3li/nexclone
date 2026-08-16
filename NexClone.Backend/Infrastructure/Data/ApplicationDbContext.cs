@@ -70,6 +70,9 @@ namespace NexClone.Backend.Infrastructure.Data
         public DbSet<MotionControlSetting> MotionControlSettings { get; set; } = null!;
         public DbSet<MotionControlModelPricing> MotionControlModelPricings { get; set; } = null!;
 
+        public DbSet<VoiceToTextSetting> VoiceToTextSettings { get; set; } = null!;
+        public DbSet<VoiceToTextModelPricing> VoiceToTextModelPricings { get; set; } = null!;
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

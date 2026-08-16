@@ -59,18 +59,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
 
             try
             {
-                string originalText = "";
-                
-                // Currently only Whisper/OpenAI is implemented for STT
-                if (providerName.Equals("OpenAI", StringComparison.OrdinalIgnoreCase))
-                {
-                    originalText = await CallWhisperApiAsync(audioData, fileName, contentType, apiConfig.ApiKey);
-                }
-                else
-                {
-                    // Fallback to OpenAI if other providers aren't implemented for STT yet
-                    originalText = await CallWhisperApiAsync(audioData, fileName, contentType, apiConfig.ApiKey);
-                }
+                string originalText = await CallTranscriptionApiAsync(audioData, fileName, contentType, apiConfig.ApiKey, modelName ?? "gpt-4o-mini-transcribe");
                 
                 var result = new SttResult
                 {
@@ -152,7 +141,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
             return (rule.ProviderName, rule.ModelName);
         }
 
-        private async Task<string> CallWhisperApiAsync(byte[] audioData, string fileName, string contentType, string apiKey)
+        private async Task<string> CallTranscriptionApiAsync(byte[] audioData, string fileName, string contentType, string apiKey, string modelName = "gpt-4o-mini-transcribe")
         {
             var client = _httpClientFactory.CreateClient();
             client.Timeout = TimeSpan.FromSeconds(300);
@@ -162,11 +151,12 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
             
             // Add file
             var streamContent = new ByteArrayContent(audioData);
-            streamContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+            streamContent.Headers.ContentType = new MediaTypeHeaderValue(string.IsNullOrEmpty(contentType) ? "audio/mpeg" : contentType);
             content.Add(streamContent, "file", fileName);
             
-            // Add model
-            content.Add(new StringContent("whisper-1"), "model");
+            // Add model (default to gpt-4o-mini-transcribe with whisper-1 fallback)
+            string actualModel = string.IsNullOrEmpty(modelName) ? "gpt-4o-mini-transcribe" : modelName;
+            content.Add(new StringContent(actualModel), "model");
             // Add response format
             content.Add(new StringContent("text"), "response_format");
             // Add prompt
@@ -176,11 +166,15 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
 
             if (!response.IsSuccessStatusCode)
             {
+                // Fallback to whisper-1 if gpt-4o-mini-transcribe returned 400/404
+                if (actualModel != "whisper-1")
+                {
+                    return await CallTranscriptionApiAsync(audioData, fileName, contentType, apiKey, "whisper-1");
+                }
                 var error = await response.Content.ReadAsStringAsync();
-                throw new Exception($"OpenAI Whisper API Error: {error}");
+                throw new Exception($"OpenAI Transcription API Error: {error}");
             }
 
-            // when response_format is "text", the response body is just raw text, not JSON
             return await response.Content.ReadAsStringAsync();
         }
 

@@ -195,6 +195,36 @@ namespace NexClone.Backend.API.Controllers.Admin
                 ViewBag.LipSyncPricing = lipPricing;
             }
 
+            if (id == "voice-to-text" || id == "vtt" || id == "stt")
+            {
+                var vttSetting = await _context.VoiceToTextSettings.FirstOrDefaultAsync();
+                if (vttSetting == null)
+                {
+                    vttSetting = new Core.Entities.VoiceToTextSetting { Id = 1, MaxAudioFileSizeMb = 25, MaxAudioDurationMinutes = 10, MaxConcurrentOperations = 10, IsActive = true };
+                    _context.VoiceToTextSettings.Add(vttSetting);
+                    await _context.SaveChangesAsync();
+                }
+                ViewBag.VoiceToTextSetting = vttSetting;
+
+                var vttPricing = await _context.VoiceToTextModelPricings.FirstOrDefaultAsync();
+                if (vttPricing == null)
+                {
+                    vttPricing = new Core.Entities.VoiceToTextModelPricing
+                    {
+                        ModelName = "gpt-4o-mini-transcribe",
+                        ProviderName = "OpenAI",
+                        BillingType = "PerMinute",
+                        CostPerMinute = 1.0m,
+                        CostPerSecond = 0.0167m,
+                        AllowedWallet = "Standard",
+                        IsActive = true
+                    };
+                    _context.VoiceToTextModelPricings.Add(vttPricing);
+                    await _context.SaveChangesAsync();
+                }
+                ViewBag.VoiceToTextPricing = vttPricing;
+            }
+
             return View(config);
         }
 
@@ -596,6 +626,45 @@ namespace NexClone.Backend.API.Controllers.Admin
                         mcPricing.IsActive = config.IsActive;
                         mcPricing.AllowedWallet = config.AllowPremiumCredits && !config.AllowStandardCredits ? "Premium" : "Standard";
                         if (ModelCosts.ContainsKey("default")) mcPricing.CostPerSecond = ModelCosts["default"];
+                    }
+                }
+                else if (config.ToolName == "voice-to-text" || config.ToolName == "vtt" || config.ToolName == "stt")
+                {
+                    var vttSetting = await _context.VoiceToTextSettings.FirstOrDefaultAsync();
+                    if (vttSetting == null)
+                    {
+                        vttSetting = new Core.Entities.VoiceToTextSetting { Id = 1 };
+                        _context.VoiceToTextSettings.Add(vttSetting);
+                    }
+                    vttSetting.IsActive = config.IsActive;
+                    vttSetting.MaxConcurrentOperations = MaxConcurrentOperations ?? 10;
+                    if (long.TryParse(Request.Form["MaxAudioFileSizeMb"].ToString(), out long maxAudSize) && maxAudSize > 0)
+                        vttSetting.MaxAudioFileSizeMb = maxAudSize;
+                    if (int.TryParse(Request.Form["MaxAudioDurationMinutes"].ToString(), out int maxDurMin) && maxDurMin > 0)
+                        vttSetting.MaxAudioDurationMinutes = maxDurMin;
+                    vttSetting.UpdatedAt = DateTime.UtcNow;
+
+                    string defaultWallet = config.AllowPremiumCredits && !config.AllowStandardCredits ? "Premium" : (config.AllowStandardCredits && !config.AllowPremiumCredits ? "Standard" : "Both");
+
+                    var vttPricing = await _context.VoiceToTextModelPricings.FirstOrDefaultAsync();
+                    if (vttPricing == null)
+                    {
+                        vttPricing = new Core.Entities.VoiceToTextModelPricing { ModelName = "gpt-4o-mini-transcribe", ProviderName = "OpenAI", BillingType = "PerMinute" };
+                        _context.VoiceToTextModelPricings.Add(vttPricing);
+                    }
+                    vttPricing.ModelName = "gpt-4o-mini-transcribe";
+                    vttPricing.ProviderName = "OpenAI";
+                    vttPricing.IsActive = config.IsActive;
+                    vttPricing.AllowedWallet = defaultWallet;
+                    if (ModelCosts.ContainsKey("gpt-4o-mini-transcribe"))
+                    {
+                        vttPricing.CostPerMinute = ModelCosts["gpt-4o-mini-transcribe"];
+                        vttPricing.CostPerSecond = Math.Round(vttPricing.CostPerMinute / 60.0m, 4);
+                    }
+                    else if (ModelCosts.ContainsKey("default"))
+                    {
+                        vttPricing.CostPerMinute = ModelCosts["default"];
+                        vttPricing.CostPerSecond = Math.Round(vttPricing.CostPerMinute / 60.0m, 4);
                     }
                 }
 

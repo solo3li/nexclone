@@ -7,6 +7,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Hangfire;
+using Microsoft.EntityFrameworkCore;
 using NexClone.Backend.Core.Messages;
 
 namespace NexClone.Backend.API.Controllers.AI
@@ -57,6 +58,13 @@ namespace NexClone.Backend.API.Controllers.AI
                 return BadRequest(new { error = "Could not retrieve file from storage", details = ex.Message });
             }
 
+            var vttSetting = await _dbContext.VoiceToTextSettings.FirstOrDefaultAsync();
+            long maxBytes = (vttSetting?.MaxAudioFileSizeMb ?? 25) * 1024 * 1024;
+            if (audioData.Length > maxBytes)
+            {
+                return BadRequest(new { error = $"Audio file size exceeds the allowed limit of {vttSetting?.MaxAudioFileSizeMb ?? 25} MB." });
+            }
+
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
@@ -84,6 +92,12 @@ namespace NexClone.Backend.API.Controllers.AI
                 audioDurationMinutes = (double)(audioData.Length / 1024000m); 
                 if (audioDurationMinutes <= 0) audioDurationMinutes = 0.01;
                 Console.WriteLine($"[WARNING] TagLib failed for {request.FileId}. Fallback duration: {audioDurationMinutes} mins. Error: {ex.Message}");
+            }
+
+            int maxDurMin = vttSetting?.MaxAudioDurationMinutes ?? 10;
+            if (audioDurationMinutes > maxDurMin)
+            {
+                return BadRequest(new { error = $"Audio duration ({audioDurationMinutes:F1} mins) exceeds the maximum allowed limit of {maxDurMin} minutes." });
             }
 
             // Round up to the nearest minute (e.g. 1.2 -> 2, 0.5 -> 1)

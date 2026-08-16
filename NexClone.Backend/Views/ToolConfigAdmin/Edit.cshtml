@@ -733,8 +733,74 @@
         </div>
     </div>
 }
+
+@if (toolName == "voice-to-text" || toolName == "vtt" || toolName == "stt")
+{
+    var vttSetting = ViewBag.VoiceToTextSetting as NexClone.Backend.Core.Entities.VoiceToTextSetting;
+    var vttPricing = ViewBag.VoiceToTextPricing as NexClone.Backend.Core.Entities.VoiceToTextModelPricing ?? new NexClone.Backend.Core.Entities.VoiceToTextModelPricing { CostPerMinute = 1.0m };
+    var maxAudMb = vttSetting?.MaxAudioFileSizeMb ?? 25;
+    var maxDurMin = vttSetting?.MaxAudioDurationMinutes ?? 10;
+
+    <!-- General Operational Limits Card -->
+    <div style="background: #ffffff; padding: 1.75rem; border: 1px solid #e0e0e0; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); margin-bottom: 2rem;">
+        <h4 class="bx--label" style="font-weight: 700; font-size: 1rem; margin-bottom: 1.25rem; color: #161616;">@Localizer["Operational Limits & Audio Restrictions"]</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="bx--form-item">
+                <label class="bx--label" style="font-weight: 600;">@Localizer["Max Audio File Size (MB)"]</label>
+                <input type="number" step="1" min="1" max="100" name="MaxAudioFileSizeMb" class="bx--text-input" value="@maxAudMb" style="margin-top: 0.25rem; width: 140px;" />
+                <div class="bx--form__helper-text">@Localizer["Max upload size for voice file (Default: 25 MB)."]</div>
+            </div>
+            <div class="bx--form-item">
+                <label class="bx--label" style="font-weight: 600;">@Localizer["Max Audio Duration (Minutes)"]</label>
+                <input type="number" step="1" min="1" max="60" name="MaxAudioDurationMinutes" class="bx--text-input" value="@maxDurMin" style="margin-top: 0.25rem; width: 140px;" />
+                <div class="bx--form__helper-text">@Localizer["Max duration of audio for transcription (Default: 10 mins)."]</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- OpenAI GPT-4o-mini Transcribe Pricing Card -->
+    <div style="background: #ffffff; padding: 1.75rem; border: 1px solid #e0e0e0; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #f4f4f4; padding-bottom: 1rem; margin-bottom: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span style="background: #10a37f; color: white; font-weight: bold; font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; letter-spacing: 0.5px;">OPENAI</span>
+                <h3 class="bx--type-productive-heading-03" style="margin: 0; color: #161616;">GPT-4o-mini Transcribe (1-Step Engine)</h3>
+            </div>
+            <span style="background: #e8f8f0; color: #198038; font-weight: 600; font-size: 0.8rem; padding: 4px 12px; border-radius: 4px; border: 1px solid #a7f0ba;">
+                ● @Localizer["Cost Per Minute"]
+            </span>
+        </div>
+
+        <div style="background: #fbfbfb; border: 1px solid #e8e8e8; border-radius: 6px; padding: 1.5rem; margin-bottom: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div>
+                    <span style="font-weight: 700; font-size: 1.1rem; color: #10a37f;">🎙️ Audio Speech-to-Text & Realtime Translation</span>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #525252;">Transcribes audio speech into text and simultaneously handles instant translation to any target language in a single API pass.</p>
+                </div>
+                <span style="background: #e6f6f1; color: #0e7058; font-weight: 600; font-size: 0.85rem; padding: 6px 14px; border-radius: 4px; border: 1px solid #b7ebd9;">
+                    @((vttPricing.CostPerMinute / 60.0m).ToString("0.000")) Credits / sec
+                </span>
+            </div>
+
+            <div class="bx--form-item" style="max-width: 320px;">
+                <label class="bx--label" style="font-weight: 600; font-size: 0.95rem;">@Localizer["Cost Per Minute (Credits)"]</label>
+                <input type="number" step="0.01" min="0" name="ModelCosts[gpt-4o-mini-transcribe]" class="bx--text-input" value="@vttPricing.CostPerMinute" style="font-size: 1.15rem; font-weight: bold;" />
+                <div class="bx--form__helper-text">Billed per minute of recorded/uploaded audio duration (Default: 1.0 Credits).</div>
+            </div>
+        </div>
+
+        <div style="background: #f4f4f4; padding: 1rem 1.25rem; border-radius: 4px; border-left: 4px solid #10a37f;">
+            <label class="bx--label" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">@Localizer["Supported Specifications & Features"]</label>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <span style="background: white; border: 1px solid #c6c6c6; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; color: #161616;">Audio Formats: MP3, WAV, M4A, OGG, WebM, FLAC</span>
+                <span style="background: white; border: 1px solid #c6c6c6; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; color: #161616;">Automatic Language Detection</span>
+                <span style="background: white; border: 1px solid #c6c6c6; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; color: #161616;">Direct 1-Step Multilingual Translation</span>
+                <span style="background: white; border: 1px solid #c6c6c6; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; color: #161616;">Whisper-1 Fallback Resilience</span>
+            </div>
+        </div>
+    </div>
+}
                         
-                        @if (toolName != "text-to-video" && toolName != "image-to-video" && toolName != "reference-to-video" && toolName != "text-to-image" && toolName != "advanced-lip-sync")
+                        @if (toolName != "text-to-video" && toolName != "image-to-video" && toolName != "reference-to-video" && toolName != "text-to-image" && toolName != "advanced-lip-sync" && toolName != "voice-to-text" && toolName != "vtt" && toolName != "stt")
                         {
                             <div class="bx--form-item" style="margin-top: 2rem; margin-bottom: 2rem;">
                                 <h4 class="bx--label" style="font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem; color: #0f62fe;">@Localizer["Model Pricing (Flat Rate)"]</h4>
@@ -761,7 +827,7 @@
                             </div>
                         }
 
-@if (toolName != "text-to-image" && toolName != "text-to-video" && toolName != "reference-to-video" && toolName != "image-to-video" && toolName != "advanced-lip-sync")
+@if (toolName != "text-to-image" && toolName != "text-to-video" && toolName != "reference-to-video" && toolName != "image-to-video" && toolName != "advanced-lip-sync" && toolName != "voice-to-text" && toolName != "vtt" && toolName != "stt")
                         {
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                                 <h3 class="bx--type-productive-heading-03">@Localizer["Routing Rules (Models)"]</h3>
