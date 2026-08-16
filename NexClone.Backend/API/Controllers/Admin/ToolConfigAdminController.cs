@@ -266,6 +266,142 @@ namespace NexClone.Backend.API.Controllers.Admin
                     }
                 }
 
+                // Synchronize Dedicated Tool Tables
+                if (config.ToolName == "kling_avatar_image2video" || config.ToolName == "avatar-to-video")
+                {
+                    var avatarSetting = await _context.AvatarToVideoSettings.FirstOrDefaultAsync();
+                    if (avatarSetting == null)
+                    {
+                        avatarSetting = new Core.Entities.AvatarToVideoSetting { Id = 1 };
+                        _context.AvatarToVideoSettings.Add(avatarSetting);
+                    }
+                    avatarSetting.IsActive = config.IsActive;
+                    avatarSetting.MaxConcurrentOperations = MaxConcurrentOperations ?? 10;
+                    avatarSetting.UpdatedAt = DateTime.UtcNow;
+
+                    var avatarPricing = await _context.AvatarToVideoModelPricings.FirstOrDefaultAsync();
+                    if (avatarPricing != null)
+                    {
+                        avatarPricing.IsActive = config.IsActive;
+                        avatarPricing.AllowedWallet = config.AllowPremiumCredits && !config.AllowStandardCredits ? "Premium" : (config.AllowStandardCredits && !config.AllowPremiumCredits ? "Standard" : "Both");
+                        if (ModelCosts.ContainsKey("default")) avatarPricing.UnitCost = ModelCosts["default"];
+                    }
+                }
+                else if (config.ToolName == "text-to-video")
+                {
+                    var t2vSetting = await _context.TextToVideoSettings.FirstOrDefaultAsync();
+                    if (t2vSetting == null)
+                    {
+                        t2vSetting = new Core.Entities.TextToVideoSetting { Id = 1 };
+                        _context.TextToVideoSettings.Add(t2vSetting);
+                    }
+                    t2vSetting.IsActive = config.IsActive;
+                    t2vSetting.MaxConcurrentOperations = MaxConcurrentOperations ?? 10;
+                    t2vSetting.UpdatedAt = DateTime.UtcNow;
+
+                    var grokPricing = await _context.TextToVideoModelPricings.FirstOrDefaultAsync(p => p.ModelName.ToLower().Contains("grok"));
+                    if (grokPricing != null)
+                    {
+                        grokPricing.IsActive = config.IsActive;
+                        grokPricing.AllowedWallet = config.AllowPremiumCredits && !config.AllowStandardCredits ? "Premium" : "Standard";
+                        if (ModelCosts.ContainsKey("grok-imagine|480p")) grokPricing.CostPerSecond_480p = ModelCosts["grok-imagine|480p"];
+                        if (ModelCosts.ContainsKey("grok-imagine|720p")) grokPricing.CostPerSecond_720p = ModelCosts["grok-imagine|720p"];
+                        if (ModelCosts.ContainsKey("grok-imagine|1080p")) grokPricing.CostPerSecond_1080p = ModelCosts["grok-imagine|1080p"];
+                    }
+
+                    var veoPricing = await _context.TextToVideoModelPricings.FirstOrDefaultAsync(p => p.ModelName.ToLower().Contains("veo"));
+                    if (veoPricing != null)
+                    {
+                        veoPricing.IsActive = config.IsActive;
+                        veoPricing.AllowedWallet = config.AllowPremiumCredits && !config.AllowStandardCredits ? "Premium" : "Standard";
+                        if (ModelCosts.ContainsKey("veo 3.1 Fast|720p")) veoPricing.FixedCost_720p = ModelCosts["veo 3.1 Fast|720p"];
+                        if (ModelCosts.ContainsKey("veo 3.1 Fast|1080p")) veoPricing.FixedCost_1080p = ModelCosts["veo 3.1 Fast|1080p"];
+                        if (ModelCosts.ContainsKey("veo 3.1 Fast|4k")) veoPricing.FixedCost_4k = ModelCosts["veo 3.1 Fast|4k"];
+                    }
+                }
+                else if (config.ToolName == "image-to-video" || config.ToolName == "reference-to-video")
+                {
+                    var i2vSetting = await _context.ImageToVideoSettings.FirstOrDefaultAsync();
+                    if (i2vSetting == null)
+                    {
+                        i2vSetting = new Core.Entities.ImageToVideoSetting { Id = 1 };
+                        _context.ImageToVideoSettings.Add(i2vSetting);
+                    }
+                    i2vSetting.IsActive = config.IsActive;
+                    i2vSetting.MaxConcurrentOperations = MaxConcurrentOperations ?? 10;
+                    i2vSetting.UpdatedAt = DateTime.UtcNow;
+
+                    var grokPricing = await _context.ImageToVideoModelPricings.FirstOrDefaultAsync(p => p.ModelName.ToLower().Contains("grok"));
+                    if (grokPricing != null)
+                    {
+                        grokPricing.IsActive = config.IsActive;
+                        grokPricing.AllowedWallet = config.AllowPremiumCredits && !config.AllowStandardCredits ? "Premium" : "Standard";
+                        if (ModelCosts.ContainsKey("grok-imagine|480p")) grokPricing.CostPerSecond_480p = ModelCosts["grok-imagine|480p"];
+                        if (ModelCosts.ContainsKey("grok-imagine|720p")) grokPricing.CostPerSecond_720p = ModelCosts["grok-imagine|720p"];
+                        if (ModelCosts.ContainsKey("grok-imagine|1080p")) grokPricing.CostPerSecond_1080p = ModelCosts["grok-imagine|1080p"];
+                    }
+                }
+                else if (config.ToolName == "advanced-lip-sync" || config.ToolName == "vidu_advanced_lip_sync" || config.ToolName == "lipsync")
+                {
+                    var lipSetting = await _context.LipSyncSettings.FirstOrDefaultAsync();
+                    if (lipSetting == null)
+                    {
+                        lipSetting = new Core.Entities.LipSyncSetting { Id = 1 };
+                        _context.LipSyncSettings.Add(lipSetting);
+                    }
+                    lipSetting.IsActive = config.IsActive;
+                    lipSetting.MaxConcurrentOperations = MaxConcurrentOperations ?? 10;
+                    lipSetting.UpdatedAt = DateTime.UtcNow;
+
+                    var lipPricing = await _context.LipSyncModelPricings.FirstOrDefaultAsync();
+                    if (lipPricing != null)
+                    {
+                        lipPricing.IsActive = config.IsActive;
+                        lipPricing.AllowedWallet = config.AllowPremiumCredits && !config.AllowStandardCredits ? "Premium" : "Standard";
+                        if (ModelCosts.ContainsKey("vidu-lipsync-std")) lipPricing.CostPerSecond = ModelCosts["vidu-lipsync-std"];
+                    }
+                }
+                else if (config.ToolName == "text-to-image")
+                {
+                    var imgSetting = await _context.TextToImageSettings.FirstOrDefaultAsync();
+                    if (imgSetting == null)
+                    {
+                        imgSetting = new Core.Entities.TextToImageSetting { Id = 1 };
+                        _context.TextToImageSettings.Add(imgSetting);
+                    }
+                    imgSetting.IsActive = config.IsActive;
+                    imgSetting.MaxConcurrentOperations = MaxConcurrentOperations ?? 10;
+                    imgSetting.UpdatedAt = DateTime.UtcNow;
+
+                    var imgPricing = await _context.TextToImageModelPricings.FirstOrDefaultAsync();
+                    if (imgPricing != null)
+                    {
+                        imgPricing.IsActive = config.IsActive;
+                        imgPricing.AllowedWallet = config.AllowPremiumCredits && !config.AllowStandardCredits ? "Premium" : "Standard";
+                        if (ModelCosts.ContainsKey("grok-imagine|t2i")) imgPricing.CostPerImage = ModelCosts["grok-imagine|t2i"];
+                    }
+                }
+                else if (config.ToolName == "motion-control" || config.ToolName == "kling_motion_control")
+                {
+                    var mcSetting = await _context.MotionControlSettings.FirstOrDefaultAsync();
+                    if (mcSetting == null)
+                    {
+                        mcSetting = new Core.Entities.MotionControlSetting { Id = 1 };
+                        _context.MotionControlSettings.Add(mcSetting);
+                    }
+                    mcSetting.IsActive = config.IsActive;
+                    mcSetting.MaxConcurrentOperations = MaxConcurrentOperations ?? 10;
+                    mcSetting.UpdatedAt = DateTime.UtcNow;
+
+                    var mcPricing = await _context.MotionControlModelPricings.FirstOrDefaultAsync();
+                    if (mcPricing != null)
+                    {
+                        mcPricing.IsActive = config.IsActive;
+                        mcPricing.AllowedWallet = config.AllowPremiumCredits && !config.AllowStandardCredits ? "Premium" : "Standard";
+                        if (ModelCosts.ContainsKey("default")) mcPricing.CostPerSecond = ModelCosts["default"];
+                    }
+                }
+
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Configuration saved successfully.";
                 return RedirectToAction(nameof(Edit), new { id = config.ToolName });

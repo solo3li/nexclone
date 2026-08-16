@@ -367,6 +367,10 @@ using (var scope = app.Services.CreateScope())
         }
     }
     dbContext.SaveChanges();
+    
+    // Seed new dedicated tool settings & models
+    await NexClone.Backend.DbSeeder.SeedToolTablesAsync(app.Services);
+    await NexClone.Backend.DbSeeder.SeedTtsDataAsync(app.Services);
 }
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

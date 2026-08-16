@@ -51,6 +51,25 @@ namespace NexClone.Backend.Infrastructure.Data
         public DbSet<Emotion> Emotions { get; set; } = null!;
         public DbSet<Style> Styles { get; set; } = null!;
 
+        // Dedicated Tool Settings & Model Pricings
+        public DbSet<AvatarToVideoSetting> AvatarToVideoSettings { get; set; } = null!;
+        public DbSet<AvatarToVideoModelPricing> AvatarToVideoModelPricings { get; set; } = null!;
+
+        public DbSet<TextToVideoSetting> TextToVideoSettings { get; set; } = null!;
+        public DbSet<TextToVideoModelPricing> TextToVideoModelPricings { get; set; } = null!;
+
+        public DbSet<ImageToVideoSetting> ImageToVideoSettings { get; set; } = null!;
+        public DbSet<ImageToVideoModelPricing> ImageToVideoModelPricings { get; set; } = null!;
+
+        public DbSet<LipSyncSetting> LipSyncSettings { get; set; } = null!;
+        public DbSet<LipSyncModelPricing> LipSyncModelPricings { get; set; } = null!;
+
+        public DbSet<TextToImageSetting> TextToImageSettings { get; set; } = null!;
+        public DbSet<TextToImageModelPricing> TextToImageModelPricings { get; set; } = null!;
+
+        public DbSet<MotionControlSetting> MotionControlSettings { get; set; } = null!;
+        public DbSet<MotionControlModelPricing> MotionControlModelPricings { get; set; } = null!;
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
