@@ -30,165 +30,22 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
             if (string.IsNullOrWhiteSpace(text))
                 throw new ArgumentException("Text cannot be empty.");
 
-            var toolConfig = await _dbContext.ToolConfigurations
-                .Include(t => t.RoutingRules)
-                .FirstOrDefaultAsync(t => t.ToolName == "text-to-voice" && t.IsActive);
-            
-            var (providerName, customModelName) = await ResolveProviderAsync(toolConfig, language, quality);
+            // Resolve model based on quality from dedicated pricing table
+            var pricing = await _dbContext.TextToVoiceModelPricings
+                .FirstOrDefaultAsync(p => p.QualityLevel.ToLower() == quality.ToLower() && p.IsActive);
 
-            var apiConfig = await _dbContext.ApiConfigurations.FirstOrDefaultAsync(c => c.ProviderName == providerName && c.IsActive);
-            if (apiConfig == null)
-                throw new Exception($"No active configuration found for provider '{providerName}'.");
+            string modelName = pricing?.ModelName ?? (
+                quality.Equals("High", StringComparison.OrdinalIgnoreCase) ? "gemini-3.1-flash-tts-preview" :
+                quality.Equals("Medium", StringComparison.OrdinalIgnoreCase) ? "gemini-2.5-pro-preview-tts" :
+                "gemini-2.5-flash-preview-tts"
+            );
 
-            if (providerName.Equals("Gemini", StringComparison.OrdinalIgnoreCase))
-            {
-                try
-                {
-                    var result = await GenerateGeminiAudioAsync(text, voiceName, styleInstruction, apiConfig, customModelName);
-                    return (result.Item1, result.Item2, result.Item3, providerName, customModelName ?? "gemini-2.5-flash-preview-tts");
-                }
-                catch (Exception geminiEx)
-                {
-                    // Gemini refused or failed — fall back to OpenAI
-                    var openAiConfig = await _dbContext.ApiConfigurations.FirstOrDefaultAsync(c => c.ProviderName == "OpenAI" && c.IsActive);
-                    if (openAiConfig != null)
-                    {
-                        var fallbackResult = await GenerateOpenAiAudioAsync(text, voiceName, openAiConfig, null);
-                        return (fallbackResult.Item1, fallbackResult.Item2, fallbackResult.Item3, "OpenAI", "tts-1");
-                    }
-                    // No OpenAI fallback available — rethrow original Gemini error
-                    throw new Exception($"Gemini TTS failed and no OpenAI fallback is configured. Gemini error: {geminiEx.Message}");
-                }
-            }
-            else if (providerName.Equals("Darijat", StringComparison.OrdinalIgnoreCase))
-            {
-                try
-                {
-                    var result = await GenerateDarijatAudioAsync(text, voiceName, styleInstruction, apiConfig);
-                    return (result.Item1, result.Item2, result.Item3, providerName, customModelName ?? "darijat-voice");
-                }
-                catch (Exception darijatEx)
-                {
-                    // Darijat failed — fall back to OpenAI
-                    var openAiConfig = await _dbContext.ApiConfigurations.FirstOrDefaultAsync(c => c.ProviderName == "OpenAI" && c.IsActive);
-                    if (openAiConfig != null)
-                    {
-                        var fallbackResult = await GenerateOpenAiAudioAsync(text, voiceName, openAiConfig, null);
-                        return (fallbackResult.Item1, fallbackResult.Item2, fallbackResult.Item3, "OpenAI", "tts-1");
-                    }
-                    throw new Exception($"Darijat TTS failed and no OpenAI fallback is configured. Darijat error: {darijatEx.Message}");
-                }
-            }
-            else
-            {
-                // Default to OpenAI
-                var result = await GenerateOpenAiAudioAsync(text, voiceName, apiConfig, customModelName);
-                return (result.Item1, result.Item2, result.Item3, providerName, customModelName ?? "tts-1");
-            }
-        }
+            var apiConfig = await _dbContext.ApiConfigurations.FirstOrDefaultAsync(c => c.ProviderName == "Gemini" && c.IsActive);
+            if (apiConfig == null || string.IsNullOrWhiteSpace(apiConfig.ApiKey))
+                throw new Exception("No active configuration or API Key found for provider 'Gemini'.");
 
-        private async Task<(string ProviderName, string ModelName)> ResolveProviderAsync(ToolConfiguration config, string language, string quality)
-        {
-            var isArabic = language?.ToLower() == "arabic";
-            var hasGemini = await _dbContext.ApiConfigurations.AnyAsync(c => c.ProviderName == "Gemini" && c.IsActive);
-            var hasDarijat = await _dbContext.ApiConfigurations.AnyAsync(c => c.ProviderName == "Darijat" && c.IsActive);
-            
-            // Hardcoded logic for High Quality as requested by user
-            if (quality == "High" && hasGemini && isArabic)
-            {
-                var currentDate = DateTime.UtcNow.Date;
-                var toolName = config?.ToolName ?? "text-to-voice";
-                
-                var model1 = "gemini-3.1-flash-tts-preview";
-                var count1 = await _dbContext.GenerationHistories.CountAsync(h => h.Type == toolName && h.ResultText == model1 && h.CreatedAt >= currentDate);
-                
-                if (count1 < 95) 
-                {
-                    return ("Gemini", model1);
-                }
-
-                var model2 = "gemini-2.5-pro-tts";
-                var count2 = await _dbContext.GenerationHistories.CountAsync(h => h.Type == toolName && h.ResultText == model2 && h.CreatedAt >= currentDate);
-                
-                if (count2 < 95) 
-                {
-                    return ("Gemini", model2);
-                }
-
-                throw new Exception("يوجد ضغط حاليا الرجاء التحويل لجودة اخرى او الانتظار حتى يقل الضغط");
-            }
-
-            if (config == null || config.RoutingRules == null || !config.RoutingRules.Any())
-            {
-                // Default logic if no ToolConfiguration or rules are set
-                string provider = "OpenAI";
-                if (isArabic)
-                {
-                    provider = hasGemini ? "Gemini" : "Darijat";
-                }
-                return (provider, provider == "Gemini" ? "gemini-2.5-flash-preview-tts" : null);
-            }
-
-            var rules = config.RoutingRules
-                .Where(r => r.QualityLevel == quality)
-                .OrderBy(r => r.Id)
-                .ToList();
-
-            if (!rules.Any())
-            {
-                // Fallback to Standard or first available rule if requested quality doesn't exist
-                var fallbackRule = config.RoutingRules.FirstOrDefault(r => r.QualityLevel == "Standard") ?? config.RoutingRules.FirstOrDefault();
-                if (fallbackRule != null)
-                {
-                    rules.Add(fallbackRule);
-                }
-            }
-
-            var today = DateTime.UtcNow.Date;
-            var now = DateTime.UtcNow.TimeOfDay;
-            var oneMinuteAgo = DateTime.UtcNow.AddMinutes(-1);
-
-            foreach (var rule in rules)
-            {
-                // Time check
-                if (rule.ActiveFromTime.HasValue && rule.ActiveToTime.HasValue)
-                {
-                    if (rule.ActiveFromTime <= rule.ActiveToTime)
-                    {
-                        if (now < rule.ActiveFromTime || now > rule.ActiveToTime)
-                            continue;
-                    }
-                    else // wraps around midnight
-                    {
-                        if (now < rule.ActiveFromTime && now > rule.ActiveToTime)
-                            continue;
-                    }
-                }
-
-                // Quota Check
-                if (rule.MaxDailyRequests.HasValue)
-                {
-                    // Match the model exactly to allow fallback sequence for same tool
-                    var dailyCount = await _dbContext.GenerationHistories
-                        .CountAsync(h => h.Type == config.ToolName && h.ResultText == rule.ModelName && h.CreatedAt >= today);
-                    
-                    if (dailyCount >= rule.MaxDailyRequests.Value)
-                        continue;
-                }
-
-                if (rule.MaxRequestsPerMinute.HasValue)
-                {
-                    var minuteCount = await _dbContext.GenerationHistories
-                        .CountAsync(h => h.Type == config.ToolName && h.ResultText == rule.ModelName && h.CreatedAt >= oneMinuteAgo);
-
-                    if (minuteCount >= rule.MaxRequestsPerMinute.Value)
-                        continue;
-                }
-
-                return (rule.ProviderName, rule.ModelName);
-            }
-
-            throw new Exception("يوجد ضغط حاليا الرجاء التحويل لجودة اخرى او الانتظار حتى يقل الضغط");
+            var result = await GenerateGeminiAudioAsync(text, voiceName, styleInstruction, apiConfig, modelName);
+            return (result.Item1, result.Item2, result.Item3, "Gemini", modelName);
         }
 
         private async Task<(Stream, string, string)> GenerateOpenAiAudioAsync(string text, string voiceName, ApiConfiguration config, string customModelName = null)

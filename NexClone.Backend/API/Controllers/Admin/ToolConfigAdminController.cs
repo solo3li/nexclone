@@ -225,6 +225,32 @@ namespace NexClone.Backend.API.Controllers.Admin
                 ViewBag.VoiceToTextPricing = vttPricing;
             }
 
+            if (id == "text-to-voice" || id == "tts")
+            {
+                var ttsSetting = await _context.TextToVoiceSettings.FirstOrDefaultAsync();
+                if (ttsSetting == null)
+                {
+                    ttsSetting = new Core.Entities.TextToVoiceSetting { Id = 1, MaxTextLength = 5000, MaxConcurrentOperations = 10, IsActive = true };
+                    _context.TextToVoiceSettings.Add(ttsSetting);
+                    await _context.SaveChangesAsync();
+                }
+                ViewBag.TextToVoiceSetting = ttsSetting;
+
+                var ttsPricings = await _context.TextToVoiceModelPricings.ToListAsync();
+                if (!ttsPricings.Any())
+                {
+                    ttsPricings = new List<Core.Entities.TextToVoiceModelPricing>
+                    {
+                        new Core.Entities.TextToVoiceModelPricing { QualityLevel = "Standard", ModelName = "gemini-2.5-flash-preview-tts", ProviderName = "Gemini", CostPerChar = 0.001m, AllowedWallet = "Standard", IsActive = true },
+                        new Core.Entities.TextToVoiceModelPricing { QualityLevel = "Medium", ModelName = "gemini-2.5-pro-preview-tts", ProviderName = "Gemini", CostPerChar = 0.005m, AllowedWallet = "Standard", IsActive = true },
+                        new Core.Entities.TextToVoiceModelPricing { QualityLevel = "High", ModelName = "gemini-3.1-flash-tts-preview", ProviderName = "Gemini", CostPerChar = 0.010m, AllowedWallet = "Standard", IsActive = true }
+                    };
+                    _context.TextToVoiceModelPricings.AddRange(ttsPricings);
+                    await _context.SaveChangesAsync();
+                }
+                ViewBag.TextToVoicePricings = ttsPricings;
+            }
+
             return View(config);
         }
 
@@ -666,6 +692,63 @@ namespace NexClone.Backend.API.Controllers.Admin
                         vttPricing.CostPerMinute = ModelCosts["default"];
                         vttPricing.CostPerSecond = Math.Round(vttPricing.CostPerMinute / 60.0m, 4);
                     }
+                }
+                else if (config.ToolName == "text-to-voice" || config.ToolName == "tts")
+                {
+                    var ttsSetting = await _context.TextToVoiceSettings.FirstOrDefaultAsync();
+                    if (ttsSetting == null)
+                    {
+                        ttsSetting = new Core.Entities.TextToVoiceSetting { Id = 1 };
+                        _context.TextToVoiceSettings.Add(ttsSetting);
+                    }
+                    ttsSetting.IsActive = config.IsActive;
+                    ttsSetting.MaxConcurrentOperations = MaxConcurrentOperations ?? 10;
+                    if (int.TryParse(Request.Form["MaxTextLength"].ToString(), out int maxLen) && maxLen > 0)
+                        ttsSetting.MaxTextLength = maxLen;
+                    ttsSetting.UpdatedAt = DateTime.UtcNow;
+
+                    string defaultWallet = config.AllowPremiumCredits && !config.AllowStandardCredits ? "Premium" : (config.AllowStandardCredits && !config.AllowPremiumCredits ? "Standard" : "Both");
+
+                    var ttsPricings = await _context.TextToVoiceModelPricings.ToListAsync();
+
+                    var stdPricing = ttsPricings.FirstOrDefault(p => p.QualityLevel == "Standard");
+                    if (stdPricing == null)
+                    {
+                        stdPricing = new Core.Entities.TextToVoiceModelPricing { QualityLevel = "Standard", ModelName = "gemini-2.5-flash-preview-tts", ProviderName = "Gemini", CostPerChar = 0.001m };
+                        _context.TextToVoiceModelPricings.Add(stdPricing);
+                    }
+                    stdPricing.ModelName = "gemini-2.5-flash-preview-tts";
+                    stdPricing.ProviderName = "Gemini";
+                    stdPricing.IsActive = config.IsActive;
+                    stdPricing.AllowedWallet = defaultWallet;
+                    if (ModelCosts.ContainsKey("Standard")) stdPricing.CostPerChar = ModelCosts["Standard"];
+                    else if (ModelCosts.ContainsKey("gemini-2.5-flash-preview-tts")) stdPricing.CostPerChar = ModelCosts["gemini-2.5-flash-preview-tts"];
+
+                    var medPricing = ttsPricings.FirstOrDefault(p => p.QualityLevel == "Medium");
+                    if (medPricing == null)
+                    {
+                        medPricing = new Core.Entities.TextToVoiceModelPricing { QualityLevel = "Medium", ModelName = "gemini-2.5-pro-preview-tts", ProviderName = "Gemini", CostPerChar = 0.005m };
+                        _context.TextToVoiceModelPricings.Add(medPricing);
+                    }
+                    medPricing.ModelName = "gemini-2.5-pro-preview-tts";
+                    medPricing.ProviderName = "Gemini";
+                    medPricing.IsActive = config.IsActive;
+                    medPricing.AllowedWallet = defaultWallet;
+                    if (ModelCosts.ContainsKey("Medium")) medPricing.CostPerChar = ModelCosts["Medium"];
+                    else if (ModelCosts.ContainsKey("gemini-2.5-pro-preview-tts")) medPricing.CostPerChar = ModelCosts["gemini-2.5-pro-preview-tts"];
+
+                    var highPricing = ttsPricings.FirstOrDefault(p => p.QualityLevel == "High");
+                    if (highPricing == null)
+                    {
+                        highPricing = new Core.Entities.TextToVoiceModelPricing { QualityLevel = "High", ModelName = "gemini-3.1-flash-tts-preview", ProviderName = "Gemini", CostPerChar = 0.010m };
+                        _context.TextToVoiceModelPricings.Add(highPricing);
+                    }
+                    highPricing.ModelName = "gemini-3.1-flash-tts-preview";
+                    highPricing.ProviderName = "Gemini";
+                    highPricing.IsActive = config.IsActive;
+                    highPricing.AllowedWallet = defaultWallet;
+                    if (ModelCosts.ContainsKey("High")) highPricing.CostPerChar = ModelCosts["High"];
+                    else if (ModelCosts.ContainsKey("gemini-3.1-flash-tts-preview")) highPricing.CostPerChar = ModelCosts["gemini-3.1-flash-tts-preview"];
                 }
 
                 await _context.SaveChangesAsync();

@@ -799,35 +799,139 @@
         </div>
     </div>
 }
+
+@if (toolName == "text-to-voice" || toolName == "tts")
+{
+    var ttsSetting = ViewBag.TextToVoiceSetting as NexClone.Backend.Core.Entities.TextToVoiceSetting;
+    var ttsPricings = ViewBag.TextToVoicePricings as List<NexClone.Backend.Core.Entities.TextToVoiceModelPricing> ?? new List<NexClone.Backend.Core.Entities.TextToVoiceModelPricing>();
+    var maxChars = ttsSetting?.MaxTextLength ?? 5000;
+
+    var stdPrice = ttsPricings.FirstOrDefault(p => p.QualityLevel == "Standard")?.CostPerChar ?? 0.001m;
+    var medPrice = ttsPricings.FirstOrDefault(p => p.QualityLevel == "Medium")?.CostPerChar ?? 0.005m;
+    var highPrice = ttsPricings.FirstOrDefault(p => p.QualityLevel == "High")?.CostPerChar ?? 0.010m;
+
+    <!-- General Operational Limits Card -->
+    <div style="background: #ffffff; padding: 1.75rem; border: 1px solid #e0e0e0; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); margin-bottom: 2rem;">
+        <h4 class="bx--label" style="font-weight: 700; font-size: 1rem; margin-bottom: 1.25rem; color: #161616;">@Localizer["Operational Limits & Character Restrictions"]</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="bx--form-item">
+                <label class="bx--label" style="font-weight: 600;">@Localizer["Max Text Length (Characters)"]</label>
+                <input type="number" step="100" min="100" max="50000" name="MaxTextLength" class="bx--text-input" value="@maxChars" style="margin-top: 0.25rem; width: 140px;" />
+                <div class="bx--form__helper-text">@Localizer["Max character length per TTS request (Default: 5000 chars)."]</div>
+            </div>
+            <div class="bx--form-item">
+                <label class="bx--label" style="font-weight: 600;">@Localizer["Voice Profiles Management"]</label>
+                <div style="margin-top: 0.5rem;">
+                    <a href="/Admin/VoicesAdmin" class="bx--btn bx--btn--sm bx--btn--tertiary" style="text-decoration: none;">
+                        🎙️ @Localizer["Manage Voices, Dialects & Styles"]
+                    </a>
+                </div>
+                <div class="bx--form__helper-text">@Localizer["Voice access permissions are configured inside each Plan."]</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Google Gemini TTS Models Pricing Cards -->
+    <div style="background: #ffffff; padding: 1.75rem; border: 1px solid #e0e0e0; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #f4f4f4; padding-bottom: 1rem; margin-bottom: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span style="background: #4285f4; color: white; font-weight: bold; font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; letter-spacing: 0.5px;">GOOGLE GEMINI</span>
+                <h3 class="bx--type-productive-heading-03" style="margin: 0; color: #161616;">Text to Voice Multi-Tier Engine (Exclusive Provider)</h3>
+            </div>
+            <span style="background: #edf5ff; color: #0043ce; font-weight: 600; font-size: 0.8rem; padding: 4px 12px; border-radius: 4px; border: 1px solid #a6c8ff;">
+                ● @Localizer["Per-Character Billing"]
+            </span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <!-- 1. Standard: Gemini 2.5 Flash -->
+            <div style="background: #fbfbfb; border: 1px solid #e8e8e8; border-radius: 6px; padding: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="background: #e8f8f0; color: #198038; font-weight: 700; font-size: 0.8rem; padding: 3px 8px; border-radius: 4px;">STANDARD QUALITY</span>
+                            <span style="font-weight: 700; font-size: 1.1rem; color: #161616;">Gemini 2.5 Flash TTS</span>
+                        </div>
+                        <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #525252;">Fast, cost-efficient speech generation for real-time applications and quick dialogues.</p>
+                    </div>
+                    <span style="background: #eef3fe; color: #0f62fe; font-weight: 600; font-size: 0.85rem; padding: 6px 14px; border-radius: 4px; border: 1px solid #c9deff;">
+                        @((stdPrice * 1000m).ToString("0.00")) Credits / 1,000 chars
+                    </span>
+                </div>
+                <div class="bx--form-item" style="max-width: 320px;">
+                    <label class="bx--label" style="font-weight: 600; font-size: 0.95rem;">@Localizer["Cost Per Character (Credits)"]</label>
+                    <input type="number" step="0.0001" min="0" name="ModelCosts[Standard]" class="bx--text-input" value="@stdPrice" style="font-size: 1.15rem; font-weight: bold;" />
+                    <div class="bx--form__helper-text">Model: gemini-2.5-flash-preview-tts (Default: 0.001 Credits/char = 1.0 Credit/1k).</div>
+                </div>
+            </div>
+
+            <!-- 2. Medium: Gemini 2.5 Pro -->
+            <div style="background: #fbfbfb; border: 1px solid #e8e8e8; border-radius: 6px; padding: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="background: #edf5ff; color: #0043ce; font-weight: 700; font-size: 0.8rem; padding: 3px 8px; border-radius: 4px;">MEDIUM QUALITY</span>
+                            <span style="font-weight: 700; font-size: 1.1rem; color: #161616;">Gemini 2.5 Pro TTS</span>
+                        </div>
+                        <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #525252;">Advanced high-fidelity voice synthesis for long-form reading, audiobooks, and complex narration.</p>
+                    </div>
+                    <span style="background: #eef3fe; color: #0f62fe; font-weight: 600; font-size: 0.85rem; padding: 6px 14px; border-radius: 4px; border: 1px solid #c9deff;">
+                        @((medPrice * 1000m).ToString("0.00")) Credits / 1,000 chars
+                    </span>
+                </div>
+                <div class="bx--form-item" style="max-width: 320px;">
+                    <label class="bx--label" style="font-weight: 600; font-size: 0.95rem;">@Localizer["Cost Per Character (Credits)"]</label>
+                    <input type="number" step="0.0001" min="0" name="ModelCosts[Medium]" class="bx--text-input" value="@medPrice" style="font-size: 1.15rem; font-weight: bold;" />
+                    <div class="bx--form__helper-text">Model: gemini-2.5-pro-preview-tts (Default: 0.005 Credits/char = 5.0 Credits/1k).</div>
+                </div>
+            </div>
+
+            <!-- 3. High: Gemini 3.1 Flash -->
+            <div style="background: #fbfbfb; border: 1px solid #e8e8e8; border-radius: 6px; padding: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="background: #f6f2ff; color: #6929c4; font-weight: 700; font-size: 0.8rem; padding: 3px 8px; border-radius: 4px;">HIGH / ULTRA QUALITY</span>
+                            <span style="font-weight: 700; font-size: 1.1rem; color: #161616;">Gemini 3.1 Flash TTS</span>
+                        </div>
+                        <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #525252;">State-of-the-art audio generator with natural style, tone, pace, emotion, and accent manipulation tags.</p>
+                    </div>
+                    <span style="background: #eef3fe; color: #0f62fe; font-weight: 600; font-size: 0.85rem; padding: 6px 14px; border-radius: 4px; border: 1px solid #c9deff;">
+                        @((highPrice * 1000m).ToString("0.00")) Credits / 1,000 chars
+                    </span>
+                </div>
+                <div class="bx--form-item" style="max-width: 320px;">
+                    <label class="bx--label" style="font-weight: 600; font-size: 0.95rem;">@Localizer["Cost Per Character (Credits)"]</label>
+                    <input type="number" step="0.0001" min="0" name="ModelCosts[High]" class="bx--text-input" value="@highPrice" style="font-size: 1.15rem; font-weight: bold;" />
+                    <div class="bx--form__helper-text">Model: gemini-3.1-flash-tts-preview (Default: 0.010 Credits/char = 10.0 Credits/1k).</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="background: #f4f4f4; padding: 1rem 1.25rem; border-radius: 4px; border-left: 4px solid #4285f4;">
+            <label class="bx--label" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">@Localizer["Supported Specifications & Capabilities"]</label>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <span style="background: white; border: 1px solid #c6c6c6; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; color: #161616;">Exclusive Provider: Google Gemini</span>
+                <span style="background: white; border: 1px solid #c6c6c6; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; color: #161616;">Multi-Dialect & Emotion Control</span>
+                <span style="background: white; border: 1px solid #c6c6c6; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; color: #161616;">Plan-Based Voice Whitelisting</span>
+                <span style="background: white; border: 1px solid #c6c6c6; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; color: #161616;">Lossless 24kHz WAV & Audio Streaming</span>
+            </div>
+        </div>
+    </div>
+}
                         
-                        @if (toolName != "text-to-video" && toolName != "image-to-video" && toolName != "reference-to-video" && toolName != "text-to-image" && toolName != "advanced-lip-sync" && toolName != "voice-to-text" && toolName != "vtt" && toolName != "stt")
+                        @if (toolName != "text-to-video" && toolName != "image-to-video" && toolName != "reference-to-video" && toolName != "text-to-image" && toolName != "advanced-lip-sync" && toolName != "voice-to-text" && toolName != "vtt" && toolName != "stt" && toolName != "text-to-voice" && toolName != "tts")
                         {
                             <div class="bx--form-item" style="margin-top: 2rem; margin-bottom: 2rem;">
                                 <h4 class="bx--label" style="font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem; color: #0f62fe;">@Localizer["Model Pricing (Flat Rate)"]</h4>
                                 <div style="background: #f4f4f4; padding: 1.5rem; border-radius: 4px; border-left: 4px solid #0f62fe;">
-                                    @if (toolName == "text-to-voice")
-                                    {
-                                        <div style="display: flex; gap: 2rem;">
-                                            <div>
-                                                <label class="bx--label">Cost Per Char (Standard)</label>
-                                                <input type="number" step="0.0001" min="0" name="ModelCosts[default]" class="bx--text-input" style="width: 150px;" value="@(currentPrices.ContainsKey("default") ? currentPrices["default"] : 0.001m)" />
-                                            </div>
-                                            <div>
-                                                <label class="bx--label">Cost Per Char (High/Premium)</label>
-                                                <input type="number" step="0.0001" min="0" name="ModelCosts[High]" class="bx--text-input" style="width: 150px;" value="@(currentPrices.ContainsKey("High") ? currentPrices["High"] : 0.01m)" />
-                                            </div>
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <label class="bx--label">Cost Per Unit (Credits)</label>
-                                        <input type="number" step="0.0001" min="0" name="ModelCosts[default]" class="bx--text-input" style="width: 150px;" value="@(currentPrices.ContainsKey("default") ? currentPrices["default"] : 1.0m)" />
-                                    }
+                                    <label class="bx--label">Cost Per Unit (Credits)</label>
+                                    <input type="number" step="0.0001" min="0" name="ModelCosts[default]" class="bx--text-input" style="width: 150px;" value="@(currentPrices.ContainsKey("default") ? currentPrices["default"] : 1.0m)" />
                                 </div>
                             </div>
                         }
 
-@if (toolName != "text-to-image" && toolName != "text-to-video" && toolName != "reference-to-video" && toolName != "image-to-video" && toolName != "advanced-lip-sync" && toolName != "voice-to-text" && toolName != "vtt" && toolName != "stt")
+@if (toolName != "text-to-image" && toolName != "text-to-video" && toolName != "reference-to-video" && toolName != "image-to-video" && toolName != "advanced-lip-sync" && toolName != "voice-to-text" && toolName != "vtt" && toolName != "stt" && toolName != "text-to-voice" && toolName != "tts")
                         {
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                                 <h3 class="bx--type-productive-heading-03">@Localizer["Routing Rules (Models)"]</h3>

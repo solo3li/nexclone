@@ -73,6 +73,9 @@ namespace NexClone.Backend.Infrastructure.Data
         public DbSet<VoiceToTextSetting> VoiceToTextSettings { get; set; } = null!;
         public DbSet<VoiceToTextModelPricing> VoiceToTextModelPricings { get; set; } = null!;
 
+        public DbSet<TextToVoiceSetting> TextToVoiceSettings { get; set; } = null!;
+        public DbSet<TextToVoiceModelPricing> TextToVoiceModelPricings { get; set; } = null!;
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

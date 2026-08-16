@@ -100,3 +100,25 @@ POSITION: 41
 2026-08-17 00:22:42.102 +03:00 [INF] Server desktop-rjppsk4:17420:2fa31669 successfully announced in 2267.6829 ms
 2026-08-17 00:22:42.108 +03:00 [INF] Server desktop-rjppsk4:17420:2fa31669 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-17 00:22:42.118 +03:00 [INF] Server desktop-rjppsk4:17420:2fa31669 all the dispatchers started
+2026-08-17 00:25:15.540 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 00:25:15.777 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 00:27:43.278 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-17 00:43:34.164 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-17 00:43:43.886 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-17 00:43:49.011 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-17 00:43:49.080 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-17 00:43:49.080 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-17 00:43:49.081 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-17 00:43:49.081 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-17 00:43:49.081 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-17 00:43:49.081 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-17 00:43:53.034 +03:00 [INF] Server desktop-rjppsk4:6868:decaccfb successfully announced in 3941.8168 ms
+2026-08-17 00:43:53.038 +03:00 [INF] Server desktop-rjppsk4:6868:decaccfb is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-17 00:43:53.051 +03:00 [INF] Server desktop-rjppsk4:6868:decaccfb all the dispatchers started
+2026-08-17 00:45:57.566 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 00:45:57.825 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 00:46:06.939 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.

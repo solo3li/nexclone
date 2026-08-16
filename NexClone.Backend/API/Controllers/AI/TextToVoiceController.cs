@@ -39,6 +39,16 @@ namespace NexClone.Backend.API.Controllers.AI
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            var ttsSetting = await _dbContext.TextToVoiceSettings.FirstOrDefaultAsync();
+            if (ttsSetting != null && !ttsSetting.IsActive)
+                return BadRequest(new { error = "Text to Voice is currently disabled." });
+
+            int maxLen = ttsSetting?.MaxTextLength ?? 5000;
+            if (request.Text.Length > maxLen)
+            {
+                return BadRequest(new { error = $"Text length ({request.Text.Length} chars) exceeds the maximum allowed limit of {maxLen} characters." });
+            }
+
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 

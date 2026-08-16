@@ -474,6 +474,28 @@ namespace NexClone.Backend.Application.Services
                     allowPremium = pricing.AllowedWallet.Equals("Premium", StringComparison.OrdinalIgnoreCase) || pricing.AllowedWallet.Equals("Both", StringComparison.OrdinalIgnoreCase);
                 }
             }
+            // 8. Check dedicated table: Text to Voice (TTS)
+            else if (toolId == "text-to-voice" || toolId == "tts")
+            {
+                var ttsSetting = await _context.TextToVoiceSettings.FirstOrDefaultAsync();
+                if (ttsSetting != null && !ttsSetting.IsActive)
+                    return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Text to Voice is currently disabled." };
+
+                string qTier = string.IsNullOrEmpty(modelName) || modelName.Equals("default", StringComparison.OrdinalIgnoreCase) ? (string.IsNullOrEmpty(resolution) ? "Standard" : resolution) : modelName;
+                var pricing = await _context.TextToVoiceModelPricings
+                    .FirstOrDefaultAsync(p => p.QualityLevel.ToLower() == qTier.ToLower() && p.IsActive)
+                    ?? await _context.TextToVoiceModelPricings.FirstOrDefaultAsync(p => p.IsActive);
+
+                if (pricing != null)
+                {
+                    decimal charCount = amountForCost > 0 ? amountForCost : usageAmountForLimits;
+                    if (charCount <= 0) charCount = 100;
+                    totalCost = pricing.BaseCost + (charCount * pricing.CostPerChar);
+                    if (totalCost < 0.001m) totalCost = 0.001m;
+                    allowStandard = pricing.AllowedWallet.Equals("Standard", StringComparison.OrdinalIgnoreCase) || pricing.AllowedWallet.Equals("Both", StringComparison.OrdinalIgnoreCase);
+                    allowPremium = pricing.AllowedWallet.Equals("Premium", StringComparison.OrdinalIgnoreCase) || pricing.AllowedWallet.Equals("Both", StringComparison.OrdinalIgnoreCase);
+                }
+            }
             // Fallback for tools with JSON settings (including TTS/VTT or legacy)
             else if (toolConfig != null && !string.IsNullOrEmpty(toolConfig.AdditionalSettings))
             {
