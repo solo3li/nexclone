@@ -277,11 +277,10 @@ namespace NexClone.Backend.Application.Services
             var toolPolicy = activeSubscription != null ? GetToolPolicy(activeSubscription.Plan, toolId, quality) : new ToolPolicy { Enabled = true };
             if (activeSubscription == null) toolPolicy.Enabled = true;
 
-            if (toolId == "text-to-voice" && toolPolicy.MaxCharsPerRequest != -1 && usageAmountForLimits > toolPolicy.MaxCharsPerRequest)
-                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"Your current plan allows a maximum of {toolPolicy.MaxCharsPerRequest} characters per request." };
-            
-            if (toolId == "voice-to-text" && toolPolicy.MaxFileSizeMb != -1 && usageAmountForLimits > (toolPolicy.MaxFileSizeMb * 1024 * 1024))
-                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = $"File too large. Maximum allowed size is {toolPolicy.MaxFileSizeMb}MB." };
+            if (!toolPolicy.Enabled)
+            {
+                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Your current plan does not include access to this tool. Please upgrade your plan." };
+            }
 
             decimal costPerUnit = toolPolicy.CostPerUnit ?? GetLegacyCostPerUnit(toolId);
             decimal amountForCost = usageAmountForCost ?? usageAmountForLimits;

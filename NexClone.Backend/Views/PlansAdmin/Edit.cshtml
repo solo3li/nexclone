@@ -119,6 +119,7 @@
                 <strong>Note:</strong> You can configure Wallet Allocations (which wallet gets how many credits) and Tool Overrides (which tool deducts from which wallet) by clicking the <strong>Wallets</strong> button on the main Plans list.
             </p>
         </div>
+
         <h4 style="margin-bottom: 1.5rem; font-weight: 400; font-size: 1.25rem;">@Localizer["Economy Limits"]</h4>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem;">
@@ -136,42 +137,109 @@
             </div>
         </div>
 
-        <h4 style="margin-bottom: 1.5rem; font-weight: 400; font-size: 1.1rem;">@Localizer["Text-to-Voice (TTS) Settings"]</h4>
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem; background: #f4f4f4; padding: 1.5rem;">
-            <div class="bx--form-item bx--checkbox-wrapper">
-                <input type="checkbox" id="TtsEnabled" name="TtsEnabled" value="true" class="bx--checkbox" @(Model.TtsEnabled ? "checked" : "") />
-                <label for="TtsEnabled" class="bx--checkbox-label" title="Enable TTS">
-                    <span class="bx--checkbox-label-text" style="font-weight: bold;">@Localizer["Enable TTS"]</span>
-                </label>
-                <input type="hidden" name="TtsEnabled" value="false" />
-            </div>
-            <div class="bx--form-item">
-                <label for="TtsMaxCharsPerRequest" class="bx--label">@Localizer["Max Chars per request"]</label>
-                <div class="bx--text-input__field-wrapper">
-                    <input id="TtsMaxCharsPerRequest" type="number" class="bx--text-input" name="TtsMaxCharsPerRequest" required min="-1" value="@Model.TtsMaxCharsPerRequest">
+        <!-- AI Tools & Feature Access Permissions -->
+        <h4 style="margin-bottom: 1.5rem; font-weight: 400; font-size: 1.25rem;">@Localizer["AI Tools Access & Permissions"]</h4>
+        <div style="background: #ffffff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 1.75rem; box-shadow: 0 2px 6px rgba(0,0,0,0.04); margin-bottom: 2.5rem;">
+            <p style="margin: 0 0 1.25rem 0; font-size: 0.9rem; color: #525252;">
+                @Localizer["Select which AI features and tools subscribers of this plan have permission to access. Operational limits and pricing are managed centrally in each tool's settings."]
+            </p>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+                <!-- 1. Text to Image -->
+                <div style="background: #fbfbfb; border: 1px solid #e8e8e8; border-radius: 4px; padding: 1rem;">
+                    <div class="bx--checkbox-wrapper">
+                        <input type="checkbox" id="TextToImageEnabled" name="TextToImageEnabled" value="true" class="bx--checkbox" @(Model?.TextToImageEnabled != false ? "checked" : "") />
+                        <label for="TextToImageEnabled" class="bx--checkbox-label">
+                            <span class="bx--checkbox-label-text" style="font-weight: 700;">🖼️ @Localizer["Text to Image"]</span>
+                        </label>
+                        <input type="hidden" name="TextToImageEnabled" value="false" />
+                    </div>
                 </div>
-                <div class="bx--form__helper-text">@Localizer["-1 for unlimited"]</div>
-            </div>
-            <div class="bx--form-item">
-                <label for="TtsCharactersBlock" class="bx--label">@Localizer["Characters Block Size"]</label>
-                <div class="bx--text-input__field-wrapper">
-                    <input id="TtsCharactersBlock" type="number" class="bx--text-input" name="TtsCharactersBlock" required min="1" value="@Model.TtsCharactersBlock">
+
+                <!-- 2. Text to Video -->
+                <div style="background: #fbfbfb; border: 1px solid #e8e8e8; border-radius: 4px; padding: 1rem;">
+                    <div class="bx--checkbox-wrapper">
+                        <input type="checkbox" id="TextToVideoEnabled" name="TextToVideoEnabled" value="true" class="bx--checkbox" @(Model?.TextToVideoEnabled != false ? "checked" : "") />
+                        <label for="TextToVideoEnabled" class="bx--checkbox-label">
+                            <span class="bx--checkbox-label-text" style="font-weight: 700;">🎬 @Localizer["Text to Video"]</span>
+                        </label>
+                        <input type="hidden" name="TextToVideoEnabled" value="false" />
+                    </div>
                 </div>
-                <div class="bx--form__helper-text">@Localizer["Cost will be calculated per this amount"]</div>
+
+                <!-- 3. Image to Video -->
+                <div style="background: #fbfbfb; border: 1px solid #e8e8e8; border-radius: 4px; padding: 1rem;">
+                    <div class="bx--checkbox-wrapper">
+                        <input type="checkbox" id="ImageToVideoEnabled" name="ImageToVideoEnabled" value="true" class="bx--checkbox" @(Model?.ImageToVideoEnabled != false ? "checked" : "") />
+                        <label for="ImageToVideoEnabled" class="bx--checkbox-label">
+                            <span class="bx--checkbox-label-text" style="font-weight: 700;">🎞️ @Localizer["Image to Video"]</span>
+                        </label>
+                        <input type="hidden" name="ImageToVideoEnabled" value="false" />
+                    </div>
+                </div>
+
+                <!-- 4. Reference to Video -->
+                <div style="background: #fbfbfb; border: 1px solid #e8e8e8; border-radius: 4px; padding: 1rem;">
+                    <div class="bx--checkbox-wrapper">
+                        <input type="checkbox" id="ReferenceToVideoEnabled" name="ReferenceToVideoEnabled" value="true" class="bx--checkbox" @(Model?.ReferenceToVideoEnabled != false ? "checked" : "") />
+                        <label for="ReferenceToVideoEnabled" class="bx--checkbox-label">
+                            <span class="bx--checkbox-label-text" style="font-weight: 700;">📽️ @Localizer["Reference to Video"]</span>
+                        </label>
+                        <input type="hidden" name="ReferenceToVideoEnabled" value="false" />
+                    </div>
+                </div>
+
+                <!-- 5. Advanced Lip-Sync -->
+                <div style="background: #fbfbfb; border: 1px solid #e8e8e8; border-radius: 4px; padding: 1rem;">
+                    <div class="bx--checkbox-wrapper">
+                        <input type="checkbox" id="LipSyncEnabled" name="LipSyncEnabled" value="true" class="bx--checkbox" @(Model?.LipSyncEnabled != false ? "checked" : "") />
+                        <label for="LipSyncEnabled" class="bx--checkbox-label">
+                            <span class="bx--checkbox-label-text" style="font-weight: 700;">👄 @Localizer["Advanced Lip-Sync"]</span>
+                        </label>
+                        <input type="hidden" name="LipSyncEnabled" value="false" />
+                    </div>
+                </div>
+
+                <!-- 6. Motion Control -->
+                <div style="background: #fbfbfb; border: 1px solid #e8e8e8; border-radius: 4px; padding: 1rem;">
+                    <div class="bx--checkbox-wrapper">
+                        <input type="checkbox" id="MotionControlEnabled" name="MotionControlEnabled" value="true" class="bx--checkbox" @(Model?.MotionControlEnabled != false ? "checked" : "") />
+                        <label for="MotionControlEnabled" class="bx--checkbox-label">
+                            <span class="bx--checkbox-label-text" style="font-weight: 700;">🕺 @Localizer["Motion Control"]</span>
+                        </label>
+                        <input type="hidden" name="MotionControlEnabled" value="false" />
+                    </div>
+                </div>
+
+                <!-- 7. Voice to Text (STT) -->
+                <div style="background: #fbfbfb; border: 1px solid #e8e8e8; border-radius: 4px; padding: 1rem;">
+                    <div class="bx--checkbox-wrapper">
+                        <input type="checkbox" id="SttEnabled" name="SttEnabled" value="true" class="bx--checkbox" @(Model?.SttEnabled != false ? "checked" : "") />
+                        <label for="SttEnabled" class="bx--checkbox-label">
+                            <span class="bx--checkbox-label-text" style="font-weight: 700;">🎙️ @Localizer["Voice to Text (VTT)"]</span>
+                        </label>
+                        <input type="hidden" name="SttEnabled" value="false" />
+                    </div>
+                </div>
+
+                <!-- 8. Text to Voice (TTS) -->
+                <div style="background: #fbfbfb; border: 1px solid #e8e8e8; border-radius: 4px; padding: 1rem;">
+                    <div class="bx--checkbox-wrapper">
+                        <input type="checkbox" id="TtsEnabled" name="TtsEnabled" value="true" class="bx--checkbox" @(Model?.TtsEnabled != false ? "checked" : "") />
+                        <label for="TtsEnabled" class="bx--checkbox-label">
+                            <span class="bx--checkbox-label-text" style="font-weight: 700;">🗣️ @Localizer["Text to Voice (TTS)"]</span>
+                        </label>
+                        <input type="hidden" name="TtsEnabled" value="false" />
+                    </div>
+                </div>
             </div>
-            
-                <!-- Removed Medium Cost -->
-            
-            <div class="bx--form-item bx--checkbox-wrapper">
-                <input type="checkbox" id="TtsCustomInstructionsEnabled" name="TtsCustomInstructionsEnabled" value="true" class="bx--checkbox" @(Model.TtsCustomInstructionsEnabled ? "checked" : "") />
-                <label for="TtsCustomInstructionsEnabled" class="bx--checkbox-label" title="Enable Custom Instructions">
-                    <span class="bx--checkbox-label-text" style="font-weight: bold;">@Localizer["Enable Custom Instructions"]</span>
-                </label>
-                <input type="hidden" name="TtsCustomInstructionsEnabled" value="false" />
-            </div>
-            <div class="bx--form-item" style="grid-column: span 3;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                    <label class="bx--label" style="margin-bottom: 0;">@Localizer["Allowed Voices (Select multiple. Leave empty for all voices)"]</label>
+
+            <!-- Allowed Voices for TTS -->
+            <div class="bx--form-item">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <label class="bx--label" style="font-weight: 700; font-size: 0.95rem; margin-bottom: 0; color: #161616;">
+                        🗣️ @Localizer["Allowed TTS Voices for this Plan (Leave empty for all voices)"]
+                    </label>
                     <div class="bx--checkbox-wrapper">
                         <input type="checkbox" id="selectAllVoices" class="bx--checkbox" />
                         <label for="selectAllVoices" class="bx--checkbox-label">
@@ -179,12 +247,12 @@
                         </label>
                     </div>
                 </div>
-                <div style="max-height: 200px; overflow-y: auto; border: 1px solid #e0e0e0; padding: 1rem; background: #fff; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
+                <div style="max-height: 220px; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 4px; padding: 1rem; background: #fff; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
                     @if (ViewBag.AllVoices != null)
                     {
                         foreach (var voice in ViewBag.AllVoices as List<NexClone.Backend.Core.Entities.Voice>)
                         {
-                            bool isChecked = Model.AllowedVoices != null && Model.AllowedVoices.Split(',').Contains(voice.VoiceName);
+                            bool isChecked = Model?.AllowedVoices != null && Model.AllowedVoices.Split(',').Contains(voice.VoiceName);
                             <div class="bx--checkbox-wrapper">
                                 <input type="checkbox" id="voice_@voice.VoiceName" name="selectedVoices" value="@voice.VoiceName" class="bx--checkbox" @(isChecked ? "checked" : "") />
                                 <label for="voice_@voice.VoiceName" class="bx--checkbox-label" title="@voice.Name">
@@ -197,160 +265,7 @@
             </div>
         </div>
 
-        <h4 style="margin-bottom: 1.5rem; font-weight: 400; font-size: 1.1rem;">@Localizer["Voice-to-Text (STT) Settings"]</h4>
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem; background: #f4f4f4; padding: 1.5rem;">
-            <div class="bx--form-item bx--checkbox-wrapper">
-                <input type="checkbox" id="SttEnabled" name="SttEnabled" value="true" class="bx--checkbox" @(Model.SttEnabled ? "checked" : "") />
-                <label for="SttEnabled" class="bx--checkbox-label" title="Enable STT">
-                    <span class="bx--checkbox-label-text" style="font-weight: bold;">@Localizer["Enable STT"]</span>
-                </label>
-                <input type="hidden" name="SttEnabled" value="false" />
-            </div>
-            <div class="bx--form-item">
-                <label for="SttMaxFileSizeMb" class="bx--label">@Localizer["Max File Size (MB)"]</label>
-                <div class="bx--text-input__field-wrapper">
-                    <input id="SttMaxFileSizeMb" type="number" class="bx--text-input" name="SttMaxFileSizeMb" required min="-1" value="@Model.SttMaxFileSizeMb">
-                </div>
-                <div class="bx--form__helper-text">@Localizer["-1 for unlimited"]</div>
-            </div>
-            
-        </div>
-
-        
-        <h4 style="margin-bottom: 1.5rem; font-weight: 400; font-size: 1.1rem;">@Localizer["Video & Image Generation Settings"]</h4>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; background: #f4f4f4; padding: 1.5rem;">
-            <div class="bx--form-item bx--checkbox-wrapper">
-                <input type="checkbox" id="TextToVideoEnabled" name="TextToVideoEnabled" value="true" class="bx--checkbox" @(Model?.TextToVideoEnabled != false ? "checked" : "") />
-                <label for="TextToVideoEnabled" class="bx--checkbox-label">
-                    <span class="bx--checkbox-label-text" style="font-weight: bold;">@Localizer["Enable Text-to-Video"]</span>
-                </label>
-                <input type="hidden" name="TextToVideoEnabled" value="false" />
-            </div>
-            
-            <div class="bx--form-item bx--checkbox-wrapper">
-                <input type="checkbox" id="ImageToVideoEnabled" name="ImageToVideoEnabled" value="true" class="bx--checkbox" @(Model?.ImageToVideoEnabled != false ? "checked" : "") />
-                <label for="ImageToVideoEnabled" class="bx--checkbox-label">
-                    <span class="bx--checkbox-label-text" style="font-weight: bold;">@Localizer["Enable Image-to-Video"]</span>
-                </label>
-                <input type="hidden" name="ImageToVideoEnabled" value="false" />
-            </div>
-            
-            <div class="bx--form-item bx--checkbox-wrapper">
-                <input type="checkbox" id="ReferenceToVideoEnabled" name="ReferenceToVideoEnabled" value="true" class="bx--checkbox" @(Model?.ReferenceToVideoEnabled != false ? "checked" : "") />
-                <label for="ReferenceToVideoEnabled" class="bx--checkbox-label">
-                    <span class="bx--checkbox-label-text" style="font-weight: bold;">@Localizer["Enable Reference-to-Video"]</span>
-                </label>
-                <input type="hidden" name="ReferenceToVideoEnabled" value="false" />
-            </div>
-            
-            <div class="bx--form-item bx--checkbox-wrapper">
-                <input type="checkbox" id="TextToImageEnabled" name="TextToImageEnabled" value="true" class="bx--checkbox" @(Model?.TextToImageEnabled != false ? "checked" : "") />
-                <label for="TextToImageEnabled" class="bx--checkbox-label">
-                    <span class="bx--checkbox-label-text" style="font-weight: bold;">@Localizer["Enable Text-to-Image"]</span>
-                </label>
-                <input type="hidden" name="TextToImageEnabled" value="false" />
-            </div>
-        </div>
-
-        <h4 style="margin-bottom: 1.5rem; font-weight: 400; font-size: 1.1rem;">@Localizer["Avatar Video & Lip-Sync Settings"]</h4>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem; background: #f4f4f4; padding: 1.5rem;">
-            <!-- Avatar Video -->
-            <div class="bx--form-item bx--checkbox-wrapper">
-                <input type="checkbox" id="AvatarVideoEnabled" name="AvatarVideoEnabled" value="true" class="bx--checkbox" @(Model.AvatarVideoEnabled ? "checked" : "") />
-                <label for="AvatarVideoEnabled" class="bx--checkbox-label" title="Enable Avatar Image-to-Video">
-                    <span class="bx--checkbox-label-text" style="font-weight: bold;">@Localizer["Enable Avatar Video"]</span>
-                </label>
-                <input type="hidden" name="AvatarVideoEnabled" value="false" />
-            </div>
-            
-            
-            
-            <div class="bx--form-item">
-                <label for="AvatarVideoMaxFileSizeMb" class="bx--label">@Localizer["Max Image Size (MB)"]</label>
-                <div class="bx--text-input__field-wrapper">
-                    <input id="AvatarVideoMaxFileSizeMb" type="number" class="bx--text-input" name="AvatarVideoMaxFileSizeMb" required min="-1" value="@Model.AvatarVideoMaxFileSizeMb">
-                </div>
-                <div class="bx--form__helper-text">@Localizer["-1 for unlimited"]</div>
-            </div>
-            <div class="bx--form-item">
-                <label for="AvatarVideoMaxAudioFileSizeMb" class="bx--label">@Localizer["Max Audio Size (MB)"]</label>
-                <div class="bx--text-input__field-wrapper">
-                    <input id="AvatarVideoMaxAudioFileSizeMb" type="number" class="bx--text-input" name="AvatarVideoMaxAudioFileSizeMb" required min="-1" value="@Model.AvatarVideoMaxAudioFileSizeMb">
-                </div>
-                <div class="bx--form__helper-text">@Localizer["-1 for unlimited"]</div>
-            </div>
-            <div class="bx--form-item">
-                <label for="AvatarVideoMaxCharsPerRequest" class="bx--label">@Localizer["Max Prompt Characters"]</label>
-                <div class="bx--text-input__field-wrapper">
-                    <input id="AvatarVideoMaxCharsPerRequest" type="number" class="bx--text-input" name="AvatarVideoMaxCharsPerRequest" required min="-1" value="@Model.AvatarVideoMaxCharsPerRequest">
-                </div>
-                <div class="bx--form__helper-text">@Localizer["-1 for unlimited"]</div>
-            </div>
-
-            <!-- Lip-Sync (Vidu) -->
-            <div class="bx--form-item bx--checkbox-wrapper">
-                <input type="checkbox" id="LipSyncEnabled" name="LipSyncEnabled" value="true" class="bx--checkbox" @(Model.LipSyncEnabled ? "checked" : "") />
-                <label for="LipSyncEnabled" class="bx--checkbox-label" title="Enable Advanced Lip-Sync">
-                    <span class="bx--checkbox-label-text" style="font-weight: bold;">@Localizer["Enable Advanced Lip-Sync (Vidu)"]</span>
-                </label>
-                <input type="hidden" name="LipSyncEnabled" value="false" />
-            </div>
-            
-            
-
-            
-            <div class="bx--form-item">
-                <label for="LipSyncMaxVideoFileSizeMb" class="bx--label">@Localizer["Max Video Size (MB)"]</label>
-                <div class="bx--text-input__field-wrapper">
-                    <input id="LipSyncMaxVideoFileSizeMb" type="number" class="bx--text-input" name="LipSyncMaxVideoFileSizeMb" required min="-1" value="@Model.LipSyncMaxVideoFileSizeMb">
-                </div>
-                <div class="bx--form__helper-text">@Localizer["-1 for unlimited"]</div>
-            </div>
-            <div class="bx--form-item">
-                <label for="LipSyncMaxAudioFileSizeMb" class="bx--label">@Localizer["Max Audio Size (MB)"]</label>
-                <div class="bx--text-input__field-wrapper">
-                    <input id="LipSyncMaxAudioFileSizeMb" type="number" class="bx--text-input" name="LipSyncMaxAudioFileSizeMb" required min="-1" value="@Model.LipSyncMaxAudioFileSizeMb">
-                </div>
-                <div class="bx--form__helper-text">@Localizer["-1 for unlimited"]</div>
-            </div>
-            <div class="bx--form-item">
-                <label for="LipSyncMaxDurationSeconds" class="bx--label">@Localizer["Max Duration (Seconds)"]</label>
-                <div class="bx--text-input__field-wrapper">
-                    <input id="LipSyncMaxDurationSeconds" type="number" class="bx--text-input" name="LipSyncMaxDurationSeconds" required min="1" value="@Model.LipSyncMaxDurationSeconds">
-                </div>
-            </div>
-            
-        </div>
-
-        <!-- Motion Control Section -->
-        <h4 class="bx--type-productive-heading-03" style="margin-top: 2rem; margin-bottom: 1rem;">@Localizer["Motion Transfer Settings"]</h4>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; background: #ffffff; padding: 1.5rem; border: 1px solid #e0e0e0; margin-bottom: 2rem;">
-            <div class="bx--form-item bx--checkbox-wrapper">
-                <input type="checkbox" id="MotionControlEnabled" name="MotionControlEnabled" value="true" class="bx--checkbox" @(Model.MotionControlEnabled ? "checked" : "") />
-                <label for="MotionControlEnabled" class="bx--checkbox-label" title="Enable Motion Transfer">
-                    <span class="bx--checkbox-label-text" style="font-weight: bold;">@Localizer["Enable Motion Transfer"]</span>
-                </label>
-                <input type="hidden" name="MotionControlEnabled" value="false" />
-            </div>
-            
-            
-            <div class="bx--form-item">
-                <label for="MotionControlMaxVideoFileSizeMb" class="bx--label">@Localizer["Max Reference Video Size (MB)"]</label>
-                <div class="bx--text-input__field-wrapper">
-                    <input id="MotionControlMaxVideoFileSizeMb" type="number" class="bx--text-input" name="MotionControlMaxVideoFileSizeMb" required min="-1" value="@Model.MotionControlMaxVideoFileSizeMb">
-                </div>
-                <div class="bx--form__helper-text">@Localizer["-1 for unlimited"]</div>
-            </div>
-            <div class="bx--form-item">
-                <label for="MotionControlMaxImageFileSizeMb" class="bx--label">@Localizer["Max Image Size (MB)"]</label>
-                <div class="bx--text-input__field-wrapper">
-                    <input id="MotionControlMaxImageFileSizeMb" type="number" class="bx--text-input" name="MotionControlMaxImageFileSizeMb" required min="-1" value="@Model.MotionControlMaxImageFileSizeMb">
-                </div>
-                <div class="bx--form__helper-text">@Localizer["-1 for unlimited"]</div>
-            </div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
             <div class="bx--form-item bx--checkbox-wrapper">
                 <input type="checkbox" id="IsDefaultRegistrationPlan" name="IsDefaultRegistrationPlan" value="true" class="bx--checkbox" @(Model.IsDefaultRegistrationPlan ? "checked" : "") />
                 <label for="IsDefaultRegistrationPlan" class="bx--checkbox-label" title="Set as Default Registration Plan">
@@ -367,7 +282,9 @@
                 </label>
                 <input type="hidden" name="IsFreeTrial" value="false" />
             </div>
-            <!-- ── Affiliate Commission Settings ─────────────────────────────────── -->
+        </div>
+
+        <!-- ── Affiliate Commission Settings ─────────────────────────────────── -->
         <hr style="border:0; border-top: 1px solid #393939; margin-top: 2rem; margin-bottom: 2rem;" />
         <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem;">🤝 Affiliate Commission Settings</h3>
         <p style="margin-bottom: 1.5rem; color: #a8a8a8;">

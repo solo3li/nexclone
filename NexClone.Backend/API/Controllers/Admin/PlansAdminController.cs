@@ -159,31 +159,14 @@ namespace NexClone.Backend.API.Controllers.Admin
                 existingPlan.FixedFeeEgp = plan.FixedFeeEgp;
 
                 existingPlan.TtsEnabled = plan.TtsEnabled;
-                existingPlan.TtsMaxCharsPerRequest = plan.TtsMaxCharsPerRequest;
-                existingPlan.TtsCharactersBlock = plan.TtsCharactersBlock;
-                existingPlan.TtsCostPerChar = plan.TtsCostPerChar;
-                existingPlan.TtsCostPerCharHigh = plan.TtsCostPerCharHigh;
-                existingPlan.TtsCustomInstructionsEnabled = plan.TtsCustomInstructionsEnabled;
-
                 existingPlan.SttEnabled = plan.SttEnabled;
-                existingPlan.SttMaxFileSizeMb = plan.SttMaxFileSizeMb;
-                existingPlan.SttCostPerMinute = plan.SttCostPerMinute;
-
                 existingPlan.AvatarVideoEnabled = plan.AvatarVideoEnabled;
-                existingPlan.AvatarVideoCostPerGeneration = plan.AvatarVideoCostPerGeneration;
-                existingPlan.AvatarVideoProCost = plan.AvatarVideoProCost;
-                existingPlan.AvatarVideoMaxFileSizeMb = plan.AvatarVideoMaxFileSizeMb;
-                existingPlan.AvatarVideoMaxCharsPerRequest = plan.AvatarVideoMaxCharsPerRequest;
-
+                existingPlan.TextToVideoEnabled = plan.TextToVideoEnabled;
+                existingPlan.ImageToVideoEnabled = plan.ImageToVideoEnabled;
+                existingPlan.ReferenceToVideoEnabled = plan.ReferenceToVideoEnabled;
+                existingPlan.TextToImageEnabled = plan.TextToImageEnabled;
                 existingPlan.LipSyncEnabled = plan.LipSyncEnabled;
-                existingPlan.LipSyncCostPerGeneration = plan.LipSyncCostPerGeneration;
-                existingPlan.LipSyncCostPerSecond = plan.LipSyncCostPerSecond;
-
                 existingPlan.MotionControlEnabled = plan.MotionControlEnabled;
-                existingPlan.MotionControlCostPerGeneration = plan.MotionControlCostPerGeneration;
-                existingPlan.MotionControlProCost = plan.MotionControlProCost;
-                existingPlan.MotionControlMaxVideoFileSizeMb = plan.MotionControlMaxVideoFileSizeMb;
-                existingPlan.MotionControlMaxImageFileSizeMb = plan.MotionControlMaxImageFileSizeMb;
 
                 existingPlan.IsFreeTrial = plan.IsFreeTrial;
                 
