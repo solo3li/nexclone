@@ -154,64 +154,22 @@ namespace NexClone.Backend.Application.Services
             if (toolId == "text-to-voice")
             {
                 policy.Enabled = plan.TtsEnabled;
-                policy.MaxCharsPerRequest = plan.TtsMaxCharsPerRequest;
-                
-                if (quality == "High")
-                    policy.CostPerUnit = plan.TtsCostPerCharHigh;
-                else
-                    policy.CostPerUnit = plan.TtsCostPerChar;
-                    
-                policy.BlockSize = plan.TtsCharactersBlock;
             }
             else if (toolId == "voice-to-text")
             {
                 policy.Enabled = plan.SttEnabled;
-                policy.MaxFileSizeMb = plan.SttMaxFileSizeMb;
-                policy.CostPerUnit = plan.SttCostPerMinute;
             }
-            else if (toolId == "kling_avatar_image2video")
+            else if (toolId == "kling_avatar_image2video" || toolId == "avatar-to-video")
             {
                 policy.Enabled = plan.AvatarVideoEnabled;
-                if (quality == "pro")
-                    policy.CostPerUnit = plan.AvatarVideoProCost;
-                else
-                    policy.CostPerUnit = plan.AvatarVideoCostPerGeneration;
-                
-                policy.MaxImageFileSizeMb = plan.AvatarVideoMaxFileSizeMb;
-                policy.MaxAudioFileSizeMb = plan.AvatarVideoMaxAudioFileSizeMb;
-                policy.MaxCharsPerRequest = plan.AvatarVideoMaxCharsPerRequest;
             }
             else if (toolId == "advanced-lip-sync" || toolId == "lipsync")
             {
                 policy.Enabled = plan.LipSyncEnabled;
-                
-                // If checkbox is checked, we charge per second, else we charge per generation
-                if (plan.LipSyncChargePerSecond)
-                {
-                    policy.BaseCost = 0; // No flat fee
-                    policy.CostPerUnit = plan.LipSyncCostPerSecond;
-                    policy.RoundUpToNearest = 5; // To calculate in blocks of 5 seconds
-                }
-                else
-                {
-                    policy.BaseCost = plan.LipSyncCostPerGeneration;
-                    policy.CostPerUnit = 0;
-                }
-
-                policy.MaxVideoFileSizeMb = plan.LipSyncMaxVideoFileSizeMb;
-                policy.MaxAudioFileSizeMb = plan.LipSyncMaxAudioFileSizeMb;
-                policy.MaxDurationSeconds = plan.LipSyncMaxDurationSeconds;
             }
             else if (toolId == "kling_motion_control" || toolId == "motion-control")
             {
                 policy.Enabled = plan.MotionControlEnabled;
-                if (quality == "pro")
-                    policy.CostPerUnit = plan.MotionControlProCost;
-                else
-                    policy.CostPerUnit = plan.MotionControlCostPerGeneration;
-                
-                policy.MaxVideoFileSizeMb = plan.MotionControlMaxVideoFileSizeMb;
-                policy.MaxImageFileSizeMb = plan.MotionControlMaxImageFileSizeMb;
             }
             else if (toolId == "text-to-video")
             {

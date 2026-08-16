@@ -481,6 +481,9 @@ namespace NexClone.Backend.API.Controllers.Client
             user.IsVerified = updatedUser.IsVerified;
             user.StandardCredits = updatedUser.StandardCredits;
             user.PremiumCredits = updatedUser.PremiumCredits;
+            user.IsVerified = updatedUser.IsVerified;
+            user.StandardCredits = updatedUser.StandardCredits;
+            user.PremiumCredits = updatedUser.PremiumCredits;
             user.VisibleAdminSections = string.Join(",", visibleSections ?? new List<string>());
 
             try
@@ -561,74 +564,6 @@ namespace NexClone.Backend.API.Controllers.Client
             }
 
             return Ok();
-        }
-        [HttpGet("seed")]
-        public async Task<IActionResult> Seed([FromServices] Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> userManager)
-        {
-            // SECURITY: This endpoint is only available in Development environment
-            if (!_env.IsDevelopment())
-            {
-                return NotFound();
-            }
-            if (!await _context.Plans.AnyAsync(p => p.Name == "Free Tier"))
-            {
-                _context.Plans.Add(new Plan { 
-                    Name = "Free Tier", 
-                    NameAr = "الباقة المجانية",
-                    Description = "Get started with limited features.",
-                    DescriptionAr = "ابدأ بخصائص محدودة.",
-                    PriceUsd = 0, PriceEgp = 0, 
-                    DurationDays = 30, MonthlyCredits = 50, 
-                    TtsEnabled = true, TtsMaxCharsPerRequest = 250, TtsCostPerChar = 0.01m,
-                    SttEnabled = true, SttMaxFileSizeMb = 5, SttCostPerMinute = 1.0m,
-                    IsFreeTrial = true,
-                    CreatedAt = DateTime.UtcNow 
-                });
-            }
-            if (!await _context.Plans.AnyAsync(p => p.Name == "Pro Tier"))
-            {
-                _context.Plans.Add(new Plan { 
-                    Name = "Pro Tier", 
-                    NameAr = "الباقة الاحترافية",
-                    Description = "Best for professionals and creators.",
-                    DescriptionAr = "الأفضل للمحترفين وصناع المحتوى.",
-                    PriceUsd = 15, PriceEgp = 750, 
-                    DurationDays = 30, MonthlyCredits = 2500, 
-                    TtsEnabled = true, TtsMaxCharsPerRequest = 2000, TtsCostPerChar = 0.005m,
-                    SttEnabled = true, SttMaxFileSizeMb = 25, SttCostPerMinute = 0.5m,
-                    IsFreeTrial = false,
-                    CreatedAt = DateTime.UtcNow 
-                });
-            }
-            if (!await _context.Plans.AnyAsync(p => p.Name == "Enterprise Tier"))
-            {
-                _context.Plans.Add(new Plan { 
-                    Name = "Enterprise Tier", 
-                    NameAr = "باقة الشركات",
-                    Description = "Unlimited access for heavy users and teams.",
-                    DescriptionAr = "وصول غير محدود للمستخدمين بكثافة والفرق.",
-                    PriceUsd = 49, PriceEgp = 2450, 
-                    DurationDays = 30, MonthlyCredits = 10000, 
-                    TtsEnabled = true, TtsMaxCharsPerRequest = -1, TtsCostPerChar = 0.002m,
-                    SttEnabled = true, SttMaxFileSizeMb = -1, SttCostPerMinute = 0.2m,
-                    IsFreeTrial = false,
-                    CreatedAt = DateTime.UtcNow 
-                });
-            }
-            await _context.SaveChangesAsync();
-
-            // Seed Users
-            string[] emails = { "user1@test.com", "user2@test.com", "user3@test.com" };
-            foreach (var email in emails)
-            {
-                if (await userManager.FindByEmailAsync(email) == null)
-                {
-                    var user = new ApplicationUser { UserName = email, Email = email, FullName = email.Split('@')[0], EmailConfirmed = true };
-                    await userManager.CreateAsync(user, "Password123!");
-                }
-            }
-
-            return Content("Seeded");
         }
 
         [HttpPost]

@@ -21,7 +21,7 @@
                             <th><span class="bx--table-header-label">@Localizer["Grace Period"]</span></th>
                             <th><span class="bx--table-header-label">@Localizer["Price (USD)"]</span></th>
                             <th><span class="bx--table-header-label">@Localizer["Price (EGP)"]</span></th>
-                            <th><span class="bx--table-header-label">@Localizer["Monthly Credits"]</span></th>
+                            <th><span class="bx--table-header-label">@Localizer["Credits (Std / Prem)"]</span></th>
                             <th><span class="bx--table-header-label">@Localizer["Allowed Tools"]</span></th>
                             <th><span class="bx--table-header-label">@Localizer["Actions"]</span></th>
                         </tr>
@@ -36,13 +36,33 @@
                                     {
                                         <span style="background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-left: 0.5rem;">@Localizer["Free Trial"]</span>
                                     }
+                                    @if (item.IsDefaultRegistrationPlan)
+                                    {
+                                        <span style="background: #dcfce7; color: #15803d; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-left: 0.5rem;">@Localizer["Default"]</span>
+                                    }
                                 </td>
                                 <td>@item.DurationDays</td>
                                 <td>@item.GracePeriodDays days</td>
                                 <td>$@item.PriceUsd</td>
                                 <td>EGP @item.PriceEgp</td>
-                                <td>@item.MonthlyCredits</td>
-                                <td><small>TTS: @(item.TtsEnabled ? $"Std: ${item.TtsCostPerChar} | High: ${item.TtsCostPerCharHigh} (per {item.TtsCharactersBlock} chars)" : "Off") | <strong>STT:</strong> @(item.SttEnabled ? "Yes" : "No") | Cost: $@item.SttCostPerMinute / Min</small></td>
+                                <td>
+                                    <div style="font-size: 0.85rem;">
+                                        <span style="color: #0f62fe; font-weight: 600;">@item.StandardCredits Std</span> / 
+                                        <span style="color: #8a3ffc; font-weight: 600;">@item.PremiumCredits Prem</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: 4px; flex-wrap: wrap; max-width: 250px;">
+                                        @if (item.TextToImageEnabled) { <span class="bx--tag bx--tag--cool-gray" style="font-size: 0.7rem; margin: 0;">T2I</span> }
+                                        @if (item.TextToVideoEnabled) { <span class="bx--tag bx--tag--blue" style="font-size: 0.7rem; margin: 0;">T2V</span> }
+                                        @if (item.ImageToVideoEnabled) { <span class="bx--tag bx--tag--teal" style="font-size: 0.7rem; margin: 0;">I2V</span> }
+                                        @if (item.ReferenceToVideoEnabled) { <span class="bx--tag bx--tag--cyan" style="font-size: 0.7rem; margin: 0;">R2V</span> }
+                                        @if (item.LipSyncEnabled) { <span class="bx--tag bx--tag--magenta" style="font-size: 0.7rem; margin: 0;">LipSync</span> }
+                                        @if (item.MotionControlEnabled) { <span class="bx--tag bx--tag--purple" style="font-size: 0.7rem; margin: 0;">Motion</span> }
+                                        @if (item.SttEnabled) { <span class="bx--tag bx--tag--green" style="font-size: 0.7rem; margin: 0;">VTT</span> }
+                                        @if (item.TtsEnabled) { <span class="bx--tag bx--tag--warm-gray" style="font-size: 0.7rem; margin: 0;">TTS</span> }
+                                    </div>
+                                </td>
                                 <td>
                                     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                                         <a href="@Url.Action("ManageGateways", new { id = item.Id })" class="bx--btn bx--btn--sm bx--btn--primary" title="Payment Gateways">💳 Gateways</a>

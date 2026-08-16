@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Security.Claims;
+using System.Collections.Generic;
 
 namespace NexClone.Backend.API.Controllers.Client
 {
@@ -57,36 +58,6 @@ namespace NexClone.Backend.API.Controllers.Client
                 .Where(p => !p.IsDefaultRegistrationPlan && !p.IsDeleted)
                 .OrderBy(p => p.PriceUsd)
                 .ToListAsync();
-
-            var tools = await _context.ToolConfigurations.ToListAsync();
-            decimal GetDynamicCost(string toolName, string modelKey, decimal fallback)
-            {
-                var tool = tools.FirstOrDefault(t => t.ToolName == toolName);
-                if (tool != null && !string.IsNullOrEmpty(tool.AdditionalSettings))
-                {
-                    try
-                    {
-                        using var doc = System.Text.Json.JsonDocument.Parse(tool.AdditionalSettings);
-                        if (doc.RootElement.TryGetProperty(modelKey, out var modelNode) || doc.RootElement.TryGetProperty("default", out modelNode))
-                        {
-                            if (modelNode.TryGetProperty("CostPerSecond", out var cps) && cps.TryGetProperty("default", out var cpsVal)) return cpsVal.GetDecimal();
-                            if (modelNode.TryGetProperty("FixedCost", out var fc) && fc.TryGetProperty("default", out var fcVal)) return fcVal.GetDecimal();
-                        }
-                    }
-                    catch { }
-                }
-                return fallback;
-            }
-
-            foreach (var p in plans)
-            {
-                p.TtsCostPerChar = GetDynamicCost("text-to-voice", "default", p.TtsCostPerChar);
-                p.TtsCostPerCharHigh = GetDynamicCost("text-to-voice", "high", p.TtsCostPerCharHigh);
-                p.AvatarVideoCostPerGeneration = GetDynamicCost("kling_avatar_image2video", "default", p.AvatarVideoCostPerGeneration);
-                p.AvatarVideoProCost = GetDynamicCost("kling_avatar_image2video", "pro", p.AvatarVideoProCost);
-                p.LipSyncCostPerGeneration = GetDynamicCost("advanced-lip-sync", "default", p.LipSyncCostPerGeneration);
-                p.SttCostPerMinute = GetDynamicCost("voice-to-text", "default", p.SttCostPerMinute);
-            }
 
             return Ok(plans);
         }
@@ -157,13 +128,14 @@ namespace NexClone.Backend.API.Controllers.Client
         [HttpGet("tts-config")]
         public async Task<IActionResult> GetTtsConfig()
         {
-            int maxChars = 150; // Default
-            bool customInstructionsEnabled = false;
+            var ttsSetting = await _context.TextToVoiceSettings.FirstOrDefaultAsync();
+            int maxChars = ttsSetting?.MaxTextLength ?? 5000;
+            bool customInstructionsEnabled = true;
             List<string> allowedVoices = null;
 
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
-                var userIdStr = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+                var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 if (Guid.TryParse(userIdStr, out var userId))
                 {
                     var activeSubscription = await _context.Subscriptions
@@ -174,8 +146,6 @@ namespace NexClone.Backend.API.Controllers.Client
 
                     if (activeSubscription?.Plan != null)
                     {
-                        maxChars = activeSubscription.Plan.TtsMaxCharsPerRequest;
-                        customInstructionsEnabled = activeSubscription.Plan.TtsCustomInstructionsEnabled;
                         if (!string.IsNullOrEmpty(activeSubscription.Plan.AllowedVoices))
                         {
                             allowedVoices = activeSubscription.Plan.AllowedVoices.Split(',').Select(v => v.Trim()).ToList();

@@ -45,48 +45,17 @@ namespace NexClone.Backend.Core.Entities
         public decimal MonthlyCredits { get; set; } = 0;
         public decimal StandardCredits { get; set; } = 0;
         public decimal PremiumCredits { get; set; } = 0;
-        // Text-To-Voice (TTS) Settings
-        public bool TtsEnabled { get; set; } = true;
-        public int TtsMaxCharsPerRequest { get; set; } = 3000;
-        public int TtsCharactersBlock { get; set; } = 1;
-        public decimal TtsCostPerChar { get; set; } = 0.001m;
-        public decimal TtsCostPerCharHigh { get; set; } = 0.01m;
-        public bool TtsCustomInstructionsEnabled { get; set; } = false;
 
-        // Voice-To-Text (STT) Settings
-        public bool SttEnabled { get; set; } = true;
-        public int SttMaxFileSizeMb { get; set; } = 25;
-        public decimal SttCostPerMinute { get; set; } = 1.0m;
-
-        // Avatar Image-to-Video Settings
-        public bool AvatarVideoEnabled { get; set; } = true;
-        public decimal AvatarVideoCostPerGeneration { get; set; } = 1.0m;
-        public decimal AvatarVideoProCost { get; set; } = 2.0m;
-        public int AvatarVideoMaxFileSizeMb { get; set; } = 15;
-        public int AvatarVideoMaxAudioFileSizeMb { get; set; } = 15;
-        public int AvatarVideoMaxCharsPerRequest { get; set; } = 500;
-
-        // Advanced Lip-Sync Settings
-        public bool LipSyncEnabled { get; set; } = true;
-        public bool LipSyncChargePerSecond { get; set; } = false;
-        public decimal LipSyncCostPerGeneration { get; set; } = 1.0m;
-        public int LipSyncMaxVideoFileSizeMb { get; set; } = 50;
-        public int LipSyncMaxAudioFileSizeMb { get; set; } = 15;
-        public int LipSyncMaxDurationSeconds { get; set; } = 60;
-        public decimal LipSyncCostPerSecond { get; set; } = 0.2m;
-
-        // Motion Control Settings
-        public bool MotionControlEnabled { get; set; } = true;
-        public decimal MotionControlCostPerGeneration { get; set; } = 1.0m;
-        public decimal MotionControlProCost { get; set; } = 2.0m;
-        public int MotionControlMaxVideoFileSizeMb { get; set; } = 50;
-        public int MotionControlMaxImageFileSizeMb { get; set; } = 15;
-
-        // New AI Tools
+        // AI Tools Access Permissions (8 Tools)
+        public bool TextToImageEnabled { get; set; } = true;
         public bool TextToVideoEnabled { get; set; } = true;
         public bool ImageToVideoEnabled { get; set; } = true;
         public bool ReferenceToVideoEnabled { get; set; } = true;
-        public bool TextToImageEnabled { get; set; } = true;
+        public bool LipSyncEnabled { get; set; } = true;
+        public bool MotionControlEnabled { get; set; } = true;
+        public bool SttEnabled { get; set; } = true;
+        public bool TtsEnabled { get; set; } = true;
+        public bool AvatarVideoEnabled { get; set; } = true;
 
         // Free Trial Flag
         public bool IsFreeTrial { get; set; } = false;
@@ -97,7 +66,7 @@ namespace NexClone.Backend.Core.Entities
         // Default Registration Plan
         public bool IsDefaultRegistrationPlan { get; set; } = false;
 
-        // Affiliate Commission Settings (under the ONE global Affiliate System)
+        // Affiliate Commission Settings
         [MaxLength(50)]
         public string AffiliateFirstCommissionType { get; set; } = "Percentage"; // "Percentage" or "Fixed"
         public decimal AffiliateFirstCommissionValueUsd { get; set; } = 0;
