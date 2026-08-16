@@ -126,37 +126,39 @@ namespace NexClone.Backend.API.Controllers.Admin
                 if (ModelCosts != null && ModelCosts.Any())
                 {
                     bool isVideo = config.ToolName != "text-to-image";
-                    var settingsDict = new System.Collections.Generic.Dictionary<string, object>();
+                    var settingsDict = new System.Collections.Generic.Dictionary<string, NexClone.Backend.Application.Services.ModelPricingConfig>();
                     foreach (var kvp in ModelCosts)
                     {
-                        var modelName = kvp.Key;
+                        var rawKey = kvp.Key;
                         var cost = kvp.Value;
-                        
+
+                        var parts = rawKey.Split('|');
+                        var modelName = parts[0];
+                        var res = parts.Length > 1 ? parts[1].ToLower() : "default";
+
                         bool isPerSec = isVideo; // Default behavior
-                        if (ModelIsPerSecond != null && ModelIsPerSecond.ContainsKey(modelName))
+                        if (ModelIsPerSecond != null && ModelIsPerSecond.ContainsKey(rawKey))
                         {
-                            isPerSec = ModelIsPerSecond[modelName];
+                            isPerSec = ModelIsPerSecond[rawKey];
+                        }
+
+                        if (!settingsDict.TryGetValue(modelName, out var mConfig))
+                        {
+                            mConfig = new NexClone.Backend.Application.Services.ModelPricingConfig
+                            {
+                                IsPerSecond = isPerSec,
+                                BaseCost = 0m
+                            };
+                            settingsDict[modelName] = mConfig;
                         }
 
                         if (isPerSec)
                         {
-                            settingsDict[modelName] = new
-                            {
-                                IsPerSecond = true,
-                                BaseCost = 0m,
-                                CostPerSecond = new System.Collections.Generic.Dictionary<string, decimal> { { "default", cost } },
-                                FixedCost = new System.Collections.Generic.Dictionary<string, decimal>()
-                            };
+                            mConfig.CostPerSecond[res] = cost;
                         }
                         else
                         {
-                            settingsDict[modelName] = new
-                            {
-                                IsPerSecond = false,
-                                BaseCost = 0m,
-                                CostPerSecond = new System.Collections.Generic.Dictionary<string, decimal>(),
-                                FixedCost = new System.Collections.Generic.Dictionary<string, decimal> { { "default", cost } }
-                            };
+                            mConfig.FixedCost[res] = cost;
                         }
                     }
                     config.AdditionalSettings = System.Text.Json.JsonSerializer.Serialize(settingsDict);
