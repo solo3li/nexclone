@@ -245,17 +245,7 @@ namespace NexClone.Backend
 
             if (!await context.LipSyncModelPricings.AnyAsync())
             {
-                context.LipSyncModelPricings.AddRange(
-                    new LipSyncModelPricing
-                    {
-                        ModelName = "vidu-lipsync-tts",
-                        ProviderName = "CrunAI",
-                        BillingType = "Per5Seconds",
-                        BaseCost = 18.0m,
-                        CostPerSecond = 3.6m,
-                        AllowedWallet = "Standard",
-                        IsActive = true
-                    },
+                context.LipSyncModelPricings.Add(
                     new LipSyncModelPricing
                     {
                         ModelName = "vidu-lipsync-audio",

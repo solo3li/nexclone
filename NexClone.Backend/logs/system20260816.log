@@ -1319,3 +1319,4 @@ System.InvalidOperationException: Connection is not open
 2026-08-16 23:49:11.930 +03:00 [INF] Server desktop-rjppsk4:10552:b3d409a7 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-16 23:49:11.940 +03:00 [INF] Server desktop-rjppsk4:10552:b3d409a7 all the dispatchers started
 2026-08-16 23:54:12.692 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-16 23:55:34.019 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.

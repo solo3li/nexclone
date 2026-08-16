@@ -168,31 +168,31 @@ namespace NexClone.Backend.API.Controllers.Admin
                 }
                 ViewBag.LipSyncSetting = lipSetting;
 
-                var lipPricings = await _context.LipSyncModelPricings.ToListAsync();
-                if (lipPricings.Count == 0)
+                var lipPricing = await _context.LipSyncModelPricings.FirstOrDefaultAsync(p => p.ModelName == "vidu-lipsync-audio" || p.ModelName == "audio" || p.ModelName == "vidu_advanced_lip_sync" || p.ModelName == "vidu-lipsync-std");
+                if (lipPricing == null)
                 {
-                    lipPricings = new List<Core.Entities.LipSyncModelPricing>
+                    lipPricing = new Core.Entities.LipSyncModelPricing
                     {
-                        new Core.Entities.LipSyncModelPricing { ModelName = "vidu-lipsync-tts", ProviderName = "CrunAI", BillingType = "Per5Seconds", BaseCost = 18.0m, CostPerSecond = 3.6m, AllowedWallet = "Standard", IsActive = true },
-                        new Core.Entities.LipSyncModelPricing { ModelName = "vidu-lipsync-audio", ProviderName = "CrunAI", BillingType = "Per5Seconds", BaseCost = 12.0m, CostPerSecond = 2.4m, AllowedWallet = "Standard", IsActive = true }
+                        ModelName = "vidu-lipsync-audio",
+                        ProviderName = "CrunAI",
+                        BillingType = "Per5Seconds",
+                        BaseCost = 12.0m,
+                        CostPerSecond = 2.4m,
+                        AllowedWallet = "Standard",
+                        IsActive = true
                     };
-                    _context.LipSyncModelPricings.AddRange(lipPricings);
+                    _context.LipSyncModelPricings.Add(lipPricing);
                     await _context.SaveChangesAsync();
                 }
-                else if (lipPricings.Count == 1)
+                else
                 {
-                    var existing = lipPricings[0];
-                    existing.ModelName = "vidu-lipsync-tts";
-                    if (existing.BaseCost <= 0) existing.BaseCost = 18.0m;
-                    existing.CostPerSecond = Math.Round(existing.BaseCost / 5.0m, 2);
-                    existing.BillingType = "Per5Seconds";
-
-                    var audioPricing = new Core.Entities.LipSyncModelPricing { ModelName = "vidu-lipsync-audio", ProviderName = "CrunAI", BillingType = "Per5Seconds", BaseCost = 12.0m, CostPerSecond = 2.4m, AllowedWallet = "Standard", IsActive = true };
-                    _context.LipSyncModelPricings.Add(audioPricing);
+                    lipPricing.ModelName = "vidu-lipsync-audio";
+                    if (lipPricing.BaseCost <= 0) lipPricing.BaseCost = 12.0m;
+                    lipPricing.CostPerSecond = Math.Round(lipPricing.BaseCost / 5.0m, 2);
+                    lipPricing.BillingType = "Per5Seconds";
                     await _context.SaveChangesAsync();
-                    lipPricings.Add(audioPricing);
                 }
-                ViewBag.LipSyncPricings = lipPricings;
+                ViewBag.LipSyncPricing = lipPricing;
             }
 
             return View(config);
@@ -537,20 +537,10 @@ namespace NexClone.Backend.API.Controllers.Admin
 
                     string defaultWallet = config.AllowPremiumCredits && !config.AllowStandardCredits ? "Premium" : (config.AllowStandardCredits && !config.AllowPremiumCredits ? "Standard" : "Both");
 
-                    // TTS LipSync
-                    var ttsPricing = await _context.LipSyncModelPricings.FirstOrDefaultAsync(p => p.ModelName == "vidu-lipsync-tts" || p.ModelName == "tts");
-                    if (ttsPricing == null) { ttsPricing = new Core.Entities.LipSyncModelPricing { ModelName = "vidu-lipsync-tts", ProviderName = "CrunAI", BillingType = "Per5Seconds" }; _context.LipSyncModelPricings.Add(ttsPricing); }
-                    ttsPricing.IsActive = config.IsActive;
-                    ttsPricing.AllowedWallet = defaultWallet;
-                    if (ModelCosts.ContainsKey("vidu-lipsync-tts"))
-                    {
-                        ttsPricing.BaseCost = ModelCosts["vidu-lipsync-tts"];
-                        ttsPricing.CostPerSecond = Math.Round(ttsPricing.BaseCost / 5.0m, 2);
-                    }
-
                     // Audio LipSync
                     var audioPricing = await _context.LipSyncModelPricings.FirstOrDefaultAsync(p => p.ModelName == "vidu-lipsync-audio" || p.ModelName == "audio" || p.ModelName == "vidu_advanced_lip_sync" || p.ModelName == "vidu-lipsync-std");
                     if (audioPricing == null) { audioPricing = new Core.Entities.LipSyncModelPricing { ModelName = "vidu-lipsync-audio", ProviderName = "CrunAI", BillingType = "Per5Seconds" }; _context.LipSyncModelPricings.Add(audioPricing); }
+                    audioPricing.ModelName = "vidu-lipsync-audio";
                     audioPricing.IsActive = config.IsActive;
                     audioPricing.AllowedWallet = defaultWallet;
                     if (ModelCosts.ContainsKey("vidu-lipsync-audio"))
