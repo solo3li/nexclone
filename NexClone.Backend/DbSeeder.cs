@@ -108,8 +108,8 @@ namespace NexClone.Backend
                 {
                     Id = 1,
                     IsActive = true,
-                    MaxPromptLength = 1000,
-                    MaxDurationSeconds = 30,
+                    MaxPromptLength = 5000,
+                    MaxDurationSeconds = 20,
                     DefaultResolution = "720p",
                     MaxConcurrentOperations = 10
                 });
@@ -120,25 +120,46 @@ namespace NexClone.Backend
                 context.TextToVideoModelPricings.AddRange(
                     new TextToVideoModelPricing
                     {
-                        ModelName = "grok",
-                        ProviderName = "CrunAI",
-                        BillingType = "PerSecond",
-                        CostPerSecond_480p = 2.4m,
-                        CostPerSecond_720p = 4.5m,
-                        CostPerSecond_1080p = 8.0m,
-                        CostPerSecond_4k = 15.0m,
-                        AllowedWallet = "Premium",
-                        IsActive = true
-                    },
-                    new TextToVideoModelPricing
-                    {
-                        ModelName = "veo",
+                        ModelName = "veo 3.1 Fast",
                         ProviderName = "CrunAI",
                         BillingType = "PerRequest",
                         FixedCost_720p = 30.0m,
                         FixedCost_1080p = 37.5m,
                         FixedCost_4k = 90.0m,
-                        AllowedWallet = "Premium",
+                        AllowedWallet = "Standard",
+                        IsActive = true
+                    },
+                    new TextToVideoModelPricing
+                    {
+                        ModelName = "veo 3.1 Lite",
+                        ProviderName = "CrunAI",
+                        BillingType = "PerRequest",
+                        FixedCost_720p = 15.0m,
+                        FixedCost_1080p = 22.5m,
+                        FixedCost_4k = 75.0m,
+                        AllowedWallet = "Standard",
+                        IsActive = true
+                    },
+                    new TextToVideoModelPricing
+                    {
+                        ModelName = "veo 3.1 Quality",
+                        ProviderName = "CrunAI",
+                        BillingType = "PerRequest",
+                        FixedCost_720p = 225.0m,
+                        FixedCost_1080p = 232.5m,
+                        FixedCost_4k = 285.0m,
+                        AllowedWallet = "Standard",
+                        IsActive = true
+                    },
+                    new TextToVideoModelPricing
+                    {
+                        ModelName = "grok-imagine",
+                        ProviderName = "CrunAI",
+                        BillingType = "PerSecond",
+                        CostPerSecond_480p = 2.4m,
+                        CostPerSecond_720p = 4.5m,
+                        CostPerSecond_1080p = 8.0m,
+                        AllowedWallet = "Standard",
                         IsActive = true
                     }
                 );
