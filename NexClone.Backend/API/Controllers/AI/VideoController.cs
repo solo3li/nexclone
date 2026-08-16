@@ -392,6 +392,18 @@ namespace NexClone.Backend.API.Controllers.AI
                 return BadRequest(new { error = "Image is required." });
             if (video == null || video.Length == 0)
                 return BadRequest(new { error = "Video is required." });
+
+            var mcSetting = await _dbContext.MotionControlSettings.FirstOrDefaultAsync();
+            if (mcSetting != null && !mcSetting.IsActive)
+                return BadRequest(new { error = "Motion Control is currently disabled." });
+
+            long maxImgMb = mcSetting?.MaxImageFileSizeMb ?? 25;
+            if (image.Length > maxImgMb * 1024 * 1024)
+                return BadRequest(new { error = $"Image file exceeds the maximum allowed limit of {maxImgMb}MB." });
+
+            long maxVidMb = mcSetting?.MaxVideoFileSizeMb ?? 100;
+            if (video.Length > maxVidMb * 1024 * 1024)
+                return BadRequest(new { error = $"Video file exceeds the maximum allowed limit of {maxVidMb}MB." });
                 
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();

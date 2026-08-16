@@ -449,7 +449,15 @@ namespace NexClone.Backend.Application.Services
                 var pricing = await _context.MotionControlModelPricings.FirstOrDefaultAsync(p => p.IsActive);
                 if (pricing != null)
                 {
-                    totalCost = pricing.BaseCost + (amountForCost * pricing.CostPerSecond);
+                    if (pricing.BillingType == "PerSecond")
+                    {
+                        decimal sec = amountForCost > 0 ? amountForCost : 5.0m;
+                        totalCost = pricing.BaseCost + (sec * pricing.CostPerSecond);
+                    }
+                    else
+                    {
+                        totalCost = pricing.BaseCost + pricing.CostPerGeneration;
+                    }
                     allowStandard = pricing.AllowedWallet.Equals("Standard", StringComparison.OrdinalIgnoreCase) || pricing.AllowedWallet.Equals("Both", StringComparison.OrdinalIgnoreCase);
                     allowPremium = pricing.AllowedWallet.Equals("Premium", StringComparison.OrdinalIgnoreCase) || pricing.AllowedWallet.Equals("Both", StringComparison.OrdinalIgnoreCase);
                 }

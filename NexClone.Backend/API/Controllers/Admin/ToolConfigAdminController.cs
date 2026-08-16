@@ -157,6 +157,36 @@ namespace NexClone.Backend.API.Controllers.Admin
                 ViewBag.TextToImageModelPricing = t2iPricing;
             }
 
+            if (id == "motion-control" || id == "kling_motion_control")
+            {
+                var mcSetting = await _context.MotionControlSettings.FirstOrDefaultAsync();
+                if (mcSetting == null)
+                {
+                    mcSetting = new Core.Entities.MotionControlSetting { Id = 1, MaxVideoFileSizeMb = 100, MaxImageFileSizeMb = 25, MaxDurationSeconds = 30, MaxConcurrentOperations = 10, IsActive = true };
+                    _context.MotionControlSettings.Add(mcSetting);
+                    await _context.SaveChangesAsync();
+                }
+                ViewBag.MotionControlSetting = mcSetting;
+
+                var mcPricing = await _context.MotionControlModelPricings.FirstOrDefaultAsync();
+                if (mcPricing == null)
+                {
+                    mcPricing = new Core.Entities.MotionControlModelPricing
+                    {
+                        ModelName = "kling-motion-control",
+                        ProviderName = "KlingAI",
+                        BillingType = "FlatRate",
+                        CostPerGeneration = 20.0m,
+                        CostPerSecond = 2.0m,
+                        AllowedWallet = "Standard",
+                        IsActive = true
+                    };
+                    _context.MotionControlModelPricings.Add(mcPricing);
+                    await _context.SaveChangesAsync();
+                }
+                ViewBag.MotionControlPricing = mcPricing;
+            }
+
             if (id == "advanced-lip-sync" || id == "vidu_advanced_lip_sync" || id == "lipsync")
             {
                 var lipSetting = await _context.LipSyncSettings.FirstOrDefaultAsync();
@@ -644,14 +674,36 @@ namespace NexClone.Backend.API.Controllers.Admin
                     }
                     mcSetting.IsActive = config.IsActive;
                     mcSetting.MaxConcurrentOperations = MaxConcurrentOperations ?? 10;
+                    if (long.TryParse(Request.Form["MaxVideoFileSizeMb"].ToString(), out long maxVidSize) && maxVidSize > 0)
+                        mcSetting.MaxVideoFileSizeMb = maxVidSize;
+                    if (long.TryParse(Request.Form["MaxImageFileSizeMb"].ToString(), out long maxImgSize) && maxImgSize > 0)
+                        mcSetting.MaxImageFileSizeMb = maxImgSize;
+                    if (int.TryParse(Request.Form["MaxDurationSeconds"].ToString(), out int maxDur) && maxDur > 0)
+                        mcSetting.MaxDurationSeconds = maxDur;
                     mcSetting.UpdatedAt = DateTime.UtcNow;
 
+                    string defaultWallet = config.AllowPremiumCredits && !config.AllowStandardCredits ? "Premium" : (config.AllowStandardCredits && !config.AllowPremiumCredits ? "Standard" : "Both");
+
                     var mcPricing = await _context.MotionControlModelPricings.FirstOrDefaultAsync();
-                    if (mcPricing != null)
+                    if (mcPricing == null)
                     {
-                        mcPricing.IsActive = config.IsActive;
-                        mcPricing.AllowedWallet = config.AllowPremiumCredits && !config.AllowStandardCredits ? "Premium" : "Standard";
-                        if (ModelCosts.ContainsKey("default")) mcPricing.CostPerSecond = ModelCosts["default"];
+                        mcPricing = new Core.Entities.MotionControlModelPricing { ModelName = "kling-motion-control", ProviderName = "KlingAI", BillingType = "FlatRate" };
+                        _context.MotionControlModelPricings.Add(mcPricing);
+                    }
+                    mcPricing.ModelName = "kling-motion-control";
+                    mcPricing.ProviderName = "KlingAI";
+                    mcPricing.IsActive = config.IsActive;
+                    mcPricing.AllowedWallet = defaultWallet;
+                    
+                    if (ModelCosts.ContainsKey("kling-motion-control"))
+                    {
+                        mcPricing.CostPerGeneration = ModelCosts["kling-motion-control"];
+                        mcPricing.CostPerSecond = Math.Round(mcPricing.CostPerGeneration / 10.0m, 2);
+                    }
+                    else if (ModelCosts.ContainsKey("default"))
+                    {
+                        mcPricing.CostPerGeneration = ModelCosts["default"];
+                        mcPricing.CostPerSecond = Math.Round(mcPricing.CostPerGeneration / 10.0m, 2);
                     }
                 }
                 else if (config.ToolName == "voice-to-text" || config.ToolName == "vtt" || config.ToolName == "stt")

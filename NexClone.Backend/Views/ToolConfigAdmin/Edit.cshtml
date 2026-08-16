@@ -919,8 +919,88 @@
         </div>
     </div>
 }
+
+@if (toolName == "motion-control" || toolName == "kling_motion_control")
+{
+    var mcSetting = ViewBag.MotionControlSetting as NexClone.Backend.Core.Entities.MotionControlSetting;
+    var mcPricing = ViewBag.MotionControlPricing as NexClone.Backend.Core.Entities.MotionControlModelPricing;
+    var maxVid = mcSetting?.MaxVideoFileSizeMb ?? 100;
+    var maxImg = mcSetting?.MaxImageFileSizeMb ?? 25;
+    var maxDur = mcSetting?.MaxDurationSeconds ?? 30;
+    var costPerGen = mcPricing?.CostPerGeneration ?? 20.0m;
+
+    <!-- General Operational Limits Card -->
+    <div style="background: #ffffff; padding: 1.75rem; border: 1px solid #e0e0e0; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); margin-bottom: 2rem;">
+        <h4 class="bx--label" style="font-weight: 700; font-size: 1rem; margin-bottom: 1.25rem; color: #161616;">@Localizer["Operational Limits & File Restrictions"]</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;">
+            <div class="bx--form-item">
+                <label class="bx--label" style="font-weight: 600;">@Localizer["Max Video Size (MB)"]</label>
+                <input type="number" step="1" min="1" max="1000" name="MaxVideoFileSizeMb" class="bx--text-input" value="@maxVid" style="margin-top: 0.25rem; width: 140px;" />
+                <div class="bx--form__helper-text">@Localizer["Max motion video file size (Default: 100MB)."]</div>
+            </div>
+            <div class="bx--form-item">
+                <label class="bx--label" style="font-weight: 600;">@Localizer["Max Image Size (MB)"]</label>
+                <input type="number" step="1" min="1" max="100" name="MaxImageFileSizeMb" class="bx--text-input" value="@maxImg" style="margin-top: 0.25rem; width: 140px;" />
+                <div class="bx--form__helper-text">@Localizer["Max source image file size (Default: 25MB)."]</div>
+            </div>
+            <div class="bx--form-item">
+                <label class="bx--label" style="font-weight: 600;">@Localizer["Max Motion Duration (Sec)"]</label>
+                <input type="number" step="1" min="1" max="300" name="MaxDurationSeconds" class="bx--text-input" value="@maxDur" style="margin-top: 0.25rem; width: 140px;" />
+                <div class="bx--form__helper-text">@Localizer["Max reference video length (Default: 30s)."]</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kling Motion Control Model Pricing Card -->
+    <div style="background: #ffffff; padding: 1.75rem; border: 1px solid #e0e0e0; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #f4f4f4; padding-bottom: 1rem; margin-bottom: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span style="background: #10b981; color: white; font-weight: bold; font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; letter-spacing: 0.5px;">KLING AI</span>
+                <h3 class="bx--type-productive-heading-03" style="margin: 0; color: #161616;">Kling Motion Control Engine (Image-to-Motion Video)</h3>
+            </div>
+            <span style="background: #eef3fe; color: #0f62fe; font-weight: 600; font-size: 0.8rem; padding: 4px 12px; border-radius: 4px; border: 1px solid #c9deff;">
+                ● @Localizer["Flat Rate Per Generation"]
+            </span>
+        </div>
+
+        <div style="background: #fbfbfb; border: 1px solid #e8e8e8; border-radius: 6px; padding: 1.5rem; margin-bottom: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <div>
+                    <h5 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #161616;">kling-motion-control</h5>
+                    <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #525252;">Transforms static subject images into dynamic video conforming to reference motion gestures and skeleton trajectories.</p>
+                </div>
+                <span style="background: #e8f8f0; color: #198038; font-weight: 700; font-size: 0.9rem; padding: 6px 14px; border-radius: 4px; border: 1px solid #a7f3d0;">
+                    @costPerGen.ToString("0.00") Credits / Generation
+                </span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div class="bx--form-item">
+                    <label class="bx--label" style="font-weight: 600; font-size: 0.95rem;">@Localizer["Cost Per Video Generation (Credits)"]</label>
+                    <input type="number" step="0.5" min="0" name="ModelCosts[kling-motion-control]" class="bx--text-input" value="@costPerGen" style="font-size: 1.15rem; font-weight: bold; width: 160px;" />
+                    <div class="bx--form__helper-text">@Localizer["Fixed credits charged per Motion Control generation (Default: 20.0 Credits)."]</div>
+                </div>
+                <div class="bx--form-item">
+                    <label class="bx--label" style="font-weight: 600; font-size: 0.95rem;">@Localizer["Billing Resolution Base"]</label>
+                    <input type="text" readonly class="bx--text-input" value="720p / 1080p Supported" style="background: #f4f4f4; color: #525252;" />
+                    <div class="bx--form__helper-text">Orientation: front / auto-fit, rendering speed: std / pro.</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="background: #f4f4f4; padding: 1rem 1.25rem; border-radius: 4px; border-left: 4px solid #10b981;">
+            <label class="bx--label" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">@Localizer["Supported Specifications & Capabilities"]</label>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <span style="background: white; border: 1px solid #c6c6c6; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; color: #161616;">Engine: Kling AI Motion Control</span>
+                <span style="background: white; border: 1px solid #c6c6c6; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; color: #161616;">Full Skeleton & Gesture Transfer</span>
+                <span style="background: white; border: 1px solid #c6c6c6; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; color: #161616;">Prompt Conditioning & Orientation Guidance</span>
+                <span style="background: white; border: 1px solid #c6c6c6; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; color: #161616;">Original Sound Synchronization</span>
+            </div>
+        </div>
+    </div>
+}
                         
-                        @if (toolName != "text-to-video" && toolName != "image-to-video" && toolName != "reference-to-video" && toolName != "text-to-image" && toolName != "advanced-lip-sync" && toolName != "voice-to-text" && toolName != "vtt" && toolName != "stt" && toolName != "text-to-voice" && toolName != "tts")
+                        @if (toolName != "text-to-video" && toolName != "image-to-video" && toolName != "reference-to-video" && toolName != "text-to-image" && toolName != "advanced-lip-sync" && toolName != "voice-to-text" && toolName != "vtt" && toolName != "stt" && toolName != "text-to-voice" && toolName != "tts" && toolName != "motion-control" && toolName != "kling_motion_control")
                         {
                             <div class="bx--form-item" style="margin-top: 2rem; margin-bottom: 2rem;">
                                 <h4 class="bx--label" style="font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem; color: #0f62fe;">@Localizer["Model Pricing (Flat Rate)"]</h4>
@@ -931,7 +1011,7 @@
                             </div>
                         }
 
-@if (toolName != "text-to-image" && toolName != "text-to-video" && toolName != "reference-to-video" && toolName != "image-to-video" && toolName != "advanced-lip-sync" && toolName != "voice-to-text" && toolName != "vtt" && toolName != "stt" && toolName != "text-to-voice" && toolName != "tts")
+@if (toolName != "text-to-image" && toolName != "text-to-video" && toolName != "reference-to-video" && toolName != "image-to-video" && toolName != "advanced-lip-sync" && toolName != "voice-to-text" && toolName != "vtt" && toolName != "stt" && toolName != "text-to-voice" && toolName != "tts" && toolName != "motion-control" && toolName != "kling_motion_control")
                         {
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                                 <h3 class="bx--type-productive-heading-03">@Localizer["Routing Rules (Models)"]</h3>
