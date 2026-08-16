@@ -107,7 +107,7 @@ namespace NexClone.Backend.API.Controllers.Admin
                 var i2vSetting = await _context.ImageToVideoSettings.FirstOrDefaultAsync();
                 if (i2vSetting == null)
                 {
-                    i2vSetting = new Core.Entities.ImageToVideoSetting { Id = 1, MaxPromptLength = 5000, MaxImageFileSizeMb = 25, MaxDurationSeconds = 8, MaxConcurrentOperations = 10, IsActive = true };
+                    i2vSetting = new Core.Entities.ImageToVideoSetting { Id = 1, MaxPromptLength = 5000, MaxImageFileSizeMb = 25, MaxDurationSeconds = 20, MaxConcurrentOperations = 10, IsActive = true };
                     _context.ImageToVideoSettings.Add(i2vSetting);
                     await _context.SaveChangesAsync();
                 }
@@ -120,10 +120,18 @@ namespace NexClone.Backend.API.Controllers.Admin
                     {
                         new Core.Entities.ImageToVideoModelPricing { ModelName = "veo 3.1 Fast", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 30.0m, FixedCost_1080p = 37.5m, FixedCost_4k = 90.0m, AllowedWallet = "Standard", IsActive = true },
                         new Core.Entities.ImageToVideoModelPricing { ModelName = "veo 3.1 Lite", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 15.0m, FixedCost_1080p = 22.5m, FixedCost_4k = 75.0m, AllowedWallet = "Standard", IsActive = true },
-                        new Core.Entities.ImageToVideoModelPricing { ModelName = "veo 3.1 Quality", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 225.0m, FixedCost_1080p = 232.5m, FixedCost_4k = 285.0m, AllowedWallet = "Standard", IsActive = true }
+                        new Core.Entities.ImageToVideoModelPricing { ModelName = "veo 3.1 Quality", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 225.0m, FixedCost_1080p = 232.5m, FixedCost_4k = 285.0m, AllowedWallet = "Standard", IsActive = true },
+                        new Core.Entities.ImageToVideoModelPricing { ModelName = "grok-imagine", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 2.4m, CostPerSecond_720p = 4.5m, CostPerSecond_1080p = 8.0m, AllowedWallet = "Standard", IsActive = true }
                     };
                     _context.ImageToVideoModelPricings.AddRange(i2vPricings);
                     await _context.SaveChangesAsync();
+                }
+                else if (id == "image-to-video" && !i2vPricings.Any(p => p.ModelName.ToLower().Contains("grok")))
+                {
+                    var grokPricing = new Core.Entities.ImageToVideoModelPricing { ModelName = "grok-imagine", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 2.4m, CostPerSecond_720p = 4.5m, CostPerSecond_1080p = 8.0m, AllowedWallet = "Standard", IsActive = true };
+                    _context.ImageToVideoModelPricings.Add(grokPricing);
+                    await _context.SaveChangesAsync();
+                    i2vPricings.Add(grokPricing);
                 }
                 ViewBag.ImageToVideoPricings = i2vPricings;
             }
@@ -461,6 +469,15 @@ namespace NexClone.Backend.API.Controllers.Admin
                     if (ModelCosts.ContainsKey("veo 3.1 Quality|720p")) veoQuality.FixedCost_720p = ModelCosts["veo 3.1 Quality|720p"];
                     if (ModelCosts.ContainsKey("veo 3.1 Quality|1080p")) veoQuality.FixedCost_1080p = ModelCosts["veo 3.1 Quality|1080p"];
                     if (ModelCosts.ContainsKey("veo 3.1 Quality|4k")) veoQuality.FixedCost_4k = ModelCosts["veo 3.1 Quality|4k"];
+
+                    // Grok Imagine Video
+                    var grokPricing = await _context.ImageToVideoModelPricings.FirstOrDefaultAsync(p => p.ModelName.ToLower().Contains("grok"));
+                    if (grokPricing == null) { grokPricing = new Core.Entities.ImageToVideoModelPricing { ModelName = "grok-imagine", ProviderName = "CrunAI", BillingType = "PerSecond" }; _context.ImageToVideoModelPricings.Add(grokPricing); }
+                    grokPricing.IsActive = config.IsActive;
+                    grokPricing.AllowedWallet = defaultWallet;
+                    if (ModelCosts.ContainsKey("grok-imagine|480p")) grokPricing.CostPerSecond_480p = ModelCosts["grok-imagine|480p"];
+                    if (ModelCosts.ContainsKey("grok-imagine|720p")) grokPricing.CostPerSecond_720p = ModelCosts["grok-imagine|720p"];
+                    if (ModelCosts.ContainsKey("grok-imagine|1080p")) grokPricing.CostPerSecond_1080p = ModelCosts["grok-imagine|1080p"];
                 }
                 else if (config.ToolName == "advanced-lip-sync" || config.ToolName == "vidu_advanced_lip_sync" || config.ToolName == "lipsync")
                 {

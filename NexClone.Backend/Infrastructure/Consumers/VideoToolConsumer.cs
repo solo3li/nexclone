@@ -63,18 +63,26 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 else if (message.ToolType == "image-to-video")
                 {
                     string imageUrl = "";
+                    string endFrameUrl = null;
                     if (message.Image1Bytes != null)
                     {
                         using var ms = new System.IO.MemoryStream(message.Image1Bytes);
                         imageUrl = await _mediaService.UploadFileAsync(ms, $"image2video_{Guid.NewGuid()}.jpg", message.Image1ContentType);
                     }
+                    if (message.Image2Bytes != null)
+                    {
+                        using var ms = new System.IO.MemoryStream(message.Image2Bytes);
+                        endFrameUrl = await _mediaService.UploadFileAsync(ms, $"image2video_end_{Guid.NewGuid()}.jpg", message.Image2ContentType);
+                    }
                     payload = new {
                         model = crunModel,
                         input = new {
                             image = imageUrl,
+                            end_image = endFrameUrl,
                             prompt = message.Prompt,
                             mode = message.Mode,
                             resolution = message.Resolution,
+                            aspect_ratio = !string.IsNullOrEmpty(message.AspectRatio) ? message.AspectRatio : "16:9",
                             duration = message.Duration > 0 ? message.Duration : (int?)null
                         }
                     };

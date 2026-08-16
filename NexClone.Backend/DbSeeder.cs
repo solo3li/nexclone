@@ -173,7 +173,7 @@ namespace NexClone.Backend
                     Id = 1,
                     IsActive = true,
                     MaxImageFileSizeMb = 25,
-                    MaxDurationSeconds = 8,
+                    MaxDurationSeconds = 20,
                     MaxPromptLength = 5000,
                     MaxConcurrentOperations = 10
                 });
@@ -212,6 +212,17 @@ namespace NexClone.Backend
                         FixedCost_720p = 225.0m,
                         FixedCost_1080p = 232.5m,
                         FixedCost_4k = 285.0m,
+                        AllowedWallet = "Standard",
+                        IsActive = true
+                    },
+                    new ImageToVideoModelPricing
+                    {
+                        ModelName = "grok-imagine",
+                        ProviderName = "CrunAI",
+                        BillingType = "PerSecond",
+                        CostPerSecond_480p = 2.4m,
+                        CostPerSecond_720p = 4.5m,
+                        CostPerSecond_1080p = 8.0m,
                         AllowedWallet = "Standard",
                         IsActive = true
                     }
