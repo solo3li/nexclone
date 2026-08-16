@@ -175,6 +175,11 @@ namespace NexClone.Backend.API.Controllers.Admin
                     existing.AllowPremiumCredits = config.AllowPremiumCredits;
                     existing.UpdatedAt = DateTime.UtcNow;
 
+                    if (ModelCosts != null && ModelCosts.Any())
+                    {
+                        existing.AdditionalSettings = config.AdditionalSettings;
+                    }
+
                     _context.ToolRoutingRules.RemoveRange(existing.RoutingRules);
                     
                     if (config.ToolName == "text-to-video" || config.ToolName == "image-to-video" || 

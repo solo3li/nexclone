@@ -995,3 +995,21 @@ DETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error
 2026-08-16 16:51:09.452 +03:00 [INF] Server desktop-rjppsk4:21760:f27f3737 successfully announced in 2725.9518 ms
 2026-08-16 16:51:09.457 +03:00 [INF] Server desktop-rjppsk4:21760:f27f3737 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-16 16:51:09.473 +03:00 [INF] Server desktop-rjppsk4:21760:f27f3737 all the dispatchers started
+2026-08-16 16:55:20.105 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-16 16:55:26.208 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-16 16:55:28.624 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-16 16:55:28.764 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-16 16:55:28.764 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-16 16:55:28.765 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-16 16:55:28.765 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-16 16:55:28.765 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-16 16:55:28.765 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-16 16:55:29.110 +03:00 [INF] Server desktop-rjppsk4:21040:b3b001db successfully announced in 309.961 ms
+2026-08-16 16:55:29.117 +03:00 [INF] Server desktop-rjppsk4:21040:b3b001db is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-16 16:55:29.214 +03:00 [INF] Server desktop-rjppsk4:21040:b3b001db all the dispatchers started
+2026-08-16 16:55:29.441 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-16 17:00:29.743 +03:00 [INF] 1 servers were removed due to timeout
