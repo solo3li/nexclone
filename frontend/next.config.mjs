@@ -4,7 +4,12 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  allowedDevOrigins: ['178.62.192.74', 'localhost', 'filters-leisure-marion-healthcare.trycloudflare.com'],
+  allowedDevOrigins: [
+    '178.62.192.74', 
+    'localhost', 
+    'filters-leisure-marion-healthcare.trycloudflare.com',
+    'brass-chevy-remarkable-amazing.trycloudflare.com'
+  ],
   typescript: {
     ignoreBuildErrors: true,
   },
