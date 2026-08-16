@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\Users\\solo\\Desktop\\nexcole\\nexclone\\NexClone.Backend\\NexClone.Backend.csproj": {}
+    "C:\\Users\\solo\\Desktop\\nexcole\\nexclone\\NexClone.Backend\\NexClone.Backend.csproj": {}
   },
   "projects": {
-    "c:\\Users\\solo\\Desktop\\nexcole\\nexclone\\NexClone.Backend\\NexClone.Backend.csproj": {
+    "C:\\Users\\solo\\Desktop\\nexcole\\nexclone\\NexClone.Backend\\NexClone.Backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\Users\\solo\\Desktop\\nexcole\\nexclone\\NexClone.Backend\\NexClone.Backend.csproj",
+        "projectUniqueName": "C:\\Users\\solo\\Desktop\\nexcole\\nexclone\\NexClone.Backend\\NexClone.Backend.csproj",
         "projectName": "NexClone.Backend",
-        "projectPath": "c:\\Users\\solo\\Desktop\\nexcole\\nexclone\\NexClone.Backend\\NexClone.Backend.csproj",
+        "projectPath": "C:\\Users\\solo\\Desktop\\nexcole\\nexclone\\NexClone.Backend\\NexClone.Backend.csproj",
         "packagesPath": "C:\\Users\\solo\\.nuget\\packages\\",
-        "outputPath": "c:\\Users\\solo\\Desktop\\nexcole\\nexclone\\NexClone.Backend\\obj\\",
+        "outputPath": "C:\\Users\\solo\\Desktop\\nexcole\\nexclone\\NexClone.Backend\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\solo\\AppData\\Roaming\\NuGet\\NuGet.Config"

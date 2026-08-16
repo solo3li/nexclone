@@ -9,6 +9,7 @@ const nextConfig = {
     'localhost', 
     'filters-leisure-marion-healthcare.trycloudflare.com',
     'lab-contain-meal-density.trycloudflare.com',
+    'guys-industry-exercise-suffering.trycloudflare.com',
   ],
   typescript: {
     ignoreBuildErrors: true,

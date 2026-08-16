@@ -85,6 +85,12 @@ namespace NexClone.Backend.API.Controllers.Admin
             // Set defaults for missing fields from the form
             if (string.IsNullOrEmpty(plan.NameAr)) plan.NameAr = plan.Name;
             
+            if (plan.FixedFeeUsd > 0) plan.TaxPercentageUsd = 0;
+            if (plan.TaxPercentageUsd > 0) plan.FixedFeeUsd = 0;
+            
+            if (plan.FixedFeeEgp > 0) plan.TaxPercentageEgp = 0;
+            if (plan.TaxPercentageEgp > 0) plan.FixedFeeEgp = 0;
+            
             if (selectedVoices != null && selectedVoices.Any())
             {
                 plan.AllowedVoices = string.Join(",", selectedVoices);
@@ -141,6 +147,11 @@ namespace NexClone.Backend.API.Controllers.Admin
                 existingPlan.MonthlyCredits = plan.MonthlyCredits;
                 existingPlan.StandardCredits = plan.StandardCredits;
                 existingPlan.PremiumCredits = plan.PremiumCredits;
+
+                if (plan.FixedFeeUsd > 0) plan.TaxPercentageUsd = 0;
+                if (plan.TaxPercentageUsd > 0) plan.FixedFeeUsd = 0;
+                if (plan.FixedFeeEgp > 0) plan.TaxPercentageEgp = 0;
+                if (plan.TaxPercentageEgp > 0) plan.FixedFeeEgp = 0;
 
                 existingPlan.TaxPercentageUsd = plan.TaxPercentageUsd;
                 existingPlan.TaxPercentageEgp = plan.TaxPercentageEgp;

@@ -80,8 +80,29 @@ namespace NexClone.Backend.API.Controllers.Admin
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SaveConfig(ToolConfiguration config, int? MaxConcurrentOperations, Dictionary<string, decimal> ModelCosts, Dictionary<string, bool> ModelIsPerSecond)
+        public async Task<IActionResult> SaveConfig(ToolConfiguration config, int? MaxConcurrentOperations)
         {
+            var ModelCosts = new Dictionary<string, decimal>();
+            var ModelIsPerSecond = new Dictionary<string, bool>();
+
+            foreach (var key in Request.Form.Keys)
+            {
+                if (key.StartsWith("ModelCosts["))
+                {
+                    var mKey = key.Substring(11, key.Length - 12);
+                    if (decimal.TryParse(Request.Form[key].ToString(), out decimal val))
+                    {
+                        ModelCosts[mKey] = val;
+                    }
+                }
+                else if (key.StartsWith("ModelIsPerSecond["))
+                {
+                    var mKey = key.Substring(17, key.Length - 18);
+                    var valStr = Request.Form[key].ToString();
+                    ModelIsPerSecond[mKey] = valStr.Contains("true", StringComparison.OrdinalIgnoreCase);
+                }
+            }
+
             // Clear validation errors for implicitly required navigation properties or optional strings
             var keysToRemove = ModelState.Keys.Where(k => 
                 k.Contains("ToolConfiguration") || 
@@ -102,8 +123,7 @@ namespace NexClone.Backend.API.Controllers.Admin
 
             if (ModelState.IsValid)
             {
-                if (ModelCosts != null && ModelCosts.Count > 0 && 
-                    (config.ToolName == "text-to-video" || config.ToolName == "image-to-video" || config.ToolName == "reference-to-video" || config.ToolName == "text-to-image" || config.ToolName == "advanced-lip-sync"))
+                if (ModelCosts != null && ModelCosts.Any())
                 {
                     bool isVideo = config.ToolName != "text-to-image";
                     var settingsDict = new System.Collections.Generic.Dictionary<string, object>();
@@ -158,7 +178,7 @@ namespace NexClone.Backend.API.Controllers.Admin
                     _context.ToolRoutingRules.RemoveRange(existing.RoutingRules);
                     
                     if (config.ToolName == "text-to-video" || config.ToolName == "image-to-video" || 
-                        config.ToolName == "reference-to-video" || config.ToolName == "text-to-image")
+                        config.ToolName == "reference-to-video" || config.ToolName == "text-to-image" || config.ToolName == "advanced-lip-sync")
                     {
                         // Add a default routing rule for these tools since we hid the UI
                         config.RoutingRules = new List<ToolRoutingRule>
@@ -166,6 +186,7 @@ namespace NexClone.Backend.API.Controllers.Admin
                             new ToolRoutingRule
                             {
                                 ProviderName = "Crun AI",
+                                ModelName = "Default",
                                 ToolConfigurationId = existing.Id
                             }
                         };
@@ -175,6 +196,9 @@ namespace NexClone.Backend.API.Controllers.Admin
                     {
                         foreach (var rule in config.RoutingRules)
                         {
+                            if (string.IsNullOrWhiteSpace(rule.ModelName) && string.IsNullOrWhiteSpace(rule.ProviderName)) continue;
+                            if (string.IsNullOrWhiteSpace(rule.ModelName)) rule.ModelName = "Default";
+                            
                             rule.ToolConfigurationId = existing.Id;
                             _context.ToolRoutingRules.Add(rule);
                         }
@@ -188,13 +212,14 @@ namespace NexClone.Backend.API.Controllers.Admin
                     config.UpdatedAt = DateTime.UtcNow;
 
                     if (config.ToolName == "text-to-video" || config.ToolName == "image-to-video" || 
-                        config.ToolName == "reference-to-video" || config.ToolName == "text-to-image")
+                        config.ToolName == "reference-to-video" || config.ToolName == "text-to-image" || config.ToolName == "advanced-lip-sync")
                     {
                         config.RoutingRules = new List<ToolRoutingRule>
                         {
                             new ToolRoutingRule
                             {
                                 ProviderName = "Crun AI",
+                                ModelName = "Default",
                                 ToolConfigurationId = config.Id
                             }
                         };
@@ -202,8 +227,14 @@ namespace NexClone.Backend.API.Controllers.Admin
 
                     if (config.RoutingRules != null)
                     {
+                        config.RoutingRules = config.RoutingRules
+                            .Where(r => !string.IsNullOrWhiteSpace(r.ModelName) || !string.IsNullOrWhiteSpace(r.ProviderName))
+                            .ToList();
+                            
                         foreach (var rule in config.RoutingRules)
                         {
+                            if (string.IsNullOrWhiteSpace(rule.ModelName)) rule.ModelName = "Default";
+                            
                             rule.ToolConfigurationId = config.Id;
                         }
                     }

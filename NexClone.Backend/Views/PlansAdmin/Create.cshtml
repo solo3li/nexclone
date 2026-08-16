@@ -153,19 +153,9 @@
                 </div>
                 <div class="bx--form__helper-text">@Localizer["Cost will be calculated per this amount"]</div>
             </div>
-            <div class="bx--form-item">
-                <label for="TtsCostPerChar" class="bx--label">@Localizer["Cost Standard (per Block)"]</label>
-                <div class="bx--text-input__field-wrapper">
-                    <input id="TtsCostPerChar" type="number" class="bx--text-input" name="TtsCostPerChar" required min="0" step="0.0001" value="@(Model?.TtsCostPerChar ?? 1.0m)">
-                </div>
-            </div>
+            
                 <!-- Removed Medium Cost -->
-            <div class="bx--form-item">
-                <label for="TtsCostPerCharHigh" class="bx--label">@Localizer["Cost High (per Block)"]</label>
-                <div class="bx--text-input__field-wrapper">
-                    <input id="TtsCostPerCharHigh" type="number" class="bx--text-input" name="TtsCostPerCharHigh" required min="0" step="0.0001" value="1.0">
-                </div>
-            </div>
+            
             <div class="bx--form-item bx--checkbox-wrapper">
                 <input type="checkbox" id="TtsCustomInstructionsEnabled" name="TtsCustomInstructionsEnabled" value="true" class="bx--checkbox" />
                 <label for="TtsCustomInstructionsEnabled" class="bx--checkbox-label" title="Enable Custom Instructions">
@@ -216,10 +206,7 @@
                 </div>
                 <div class="bx--form__helper-text">@Localizer["-1 for unlimited"]</div>
             </div>
-            <div class="bx--form-item">
-                <label for="SttCostPerMinute" class="bx--label">@Localizer["Cost Per Minute (Credits)"]</label>
-                <input id="SttCostPerMinute" name="SttCostPerMinute" type="number" step="0.0001" class="bx--text-input" value="@(Model?.SttCostPerMinute ?? 1.0m)" />
-            </div>
+            
         </div>
 
         <h4 style="margin-bottom: 1.5rem; font-weight: 400; font-size: 1.1rem;">@Localizer["Avatar Video & Lip-Sync Settings"]</h4>
@@ -232,15 +219,9 @@
                 </label>
                 <input type="hidden" name="AvatarVideoEnabled" value="false" />
             </div>
-            <div class="bx--form-item">
-                <label for="AvatarVideoCostPerGeneration" class="bx--label">@Localizer["Cost Per Generation (Credits) - Standard"]</label>
-                <input id="AvatarVideoCostPerGeneration" name="AvatarVideoCostPerGeneration" type="number" step="0.01" class="bx--text-input" value="@(Model?.AvatarVideoCostPerGeneration ?? 1.0m)" />
-            </div>
             
-            <div class="bx--form-item">
-                <label for="AvatarVideoProCost" class="bx--label">@Localizer["Cost Per Generation (Credits) - Fast"]</label>
-                <input id="AvatarVideoProCost" name="AvatarVideoProCost" type="number" step="0.01" class="bx--text-input" value="@(Model?.AvatarVideoProCost ?? 2.0m)" />
-            </div>
+            
+            
             <div class="bx--form-item">
                 <label for="AvatarVideoMaxFileSizeMb" class="bx--label">@Localizer["Max Image Size (MB)"]</label>
                 <div class="bx--text-input__field-wrapper">
@@ -272,17 +253,8 @@
                 <input type="hidden" name="LipSyncEnabled" value="false" />
             </div>
 
-            <div class="bx--form-item bx--checkbox-wrapper">
-                <input type="checkbox" id="LipSyncChargePerSecond" name="LipSyncChargePerSecond" value="true" class="bx--checkbox" @(Model?.LipSyncChargePerSecond == true ? "checked" : "") />
-                <label for="LipSyncChargePerSecond" class="bx--checkbox-label" title="Charge Per Second (Rounded to 5s)">
-                    <span class="bx--checkbox-label-text">@Localizer["Calculate Cost Per Second (Rounded up to 5s) instead of Per Request"]</span>
-                </label>
-                <input type="hidden" name="LipSyncChargePerSecond" value="false" />
-            </div>
-            <div class="bx--form-item">
-                <label for="LipSyncCostPerGeneration" class="bx--label">@Localizer["Cost Per Generation (Credits)"]</label>
-                <input id="LipSyncCostPerGeneration" name="LipSyncCostPerGeneration" type="number" step="0.01" class="bx--text-input" value="@(Model?.LipSyncCostPerGeneration ?? 1.0m)" />
-            </div>
+            
+            
             <div class="bx--form-item">
                 <label for="LipSyncMaxVideoFileSizeMb" class="bx--label">@Localizer["Max Video Size (MB)"]</label>
                 <div class="bx--text-input__field-wrapper">
@@ -303,11 +275,7 @@
                     <input id="LipSyncMaxDurationSeconds" type="number" class="bx--text-input" name="LipSyncMaxDurationSeconds" required min="1" value="@(Model?.LipSyncMaxDurationSeconds ?? 60)">
                 </div>
             </div>
-            <div class="bx--form-item">
-                <label for="LipSyncCostPerSecond" class="bx--label">@Localizer["Cost Per Second (Credits)"]</label>
-                <input id="LipSyncCostPerSecond" name="LipSyncCostPerSecond" type="number" step="0.001" class="bx--text-input" value="@(Model?.LipSyncCostPerSecond ?? 0.2m)" />
-                <div class="bx--form__helper-text">@Localizer["Credits charged per rounded 5 seconds"]</div>
-            </div>
+            
         </div>
 
         <!-- Motion Control Section -->
@@ -320,14 +288,8 @@
                 </label>
                 <input type="hidden" name="MotionControlEnabled" value="false" />
             </div>
-            <div class="bx--form-item">
-                <label for="MotionControlCostPerGeneration" class="bx--label">@Localizer["Standard Cost Per Generation (Credits)"]</label>
-                <input id="MotionControlCostPerGeneration" name="MotionControlCostPerGeneration" type="number" step="0.01" class="bx--text-input" value="@(Model?.MotionControlCostPerGeneration ?? 1.0m)" />
-            </div>
-            <div class="bx--form-item">
-                <label for="MotionControlProCost" class="bx--label">@Localizer["Pro Cost Per Generation (Credits)"]</label>
-                <input id="MotionControlProCost" name="MotionControlProCost" type="number" step="0.01" class="bx--text-input" value="@(Model?.MotionControlProCost ?? 2.0m)" />
-            </div>
+            
+            
             <div class="bx--form-item">
                 <label for="MotionControlMaxVideoFileSizeMb" class="bx--label">@Localizer["Max Reference Video Size (MB)"]</label>
                 <div class="bx--text-input__field-wrapper">
@@ -468,5 +430,40 @@
                 cb.addEventListener('change', updateSelectAll);
             });
         }
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        function handleTaxInputs(percId, fixedId) {
+            const percEl = document.getElementById(percId);
+            const fixedEl = document.getElementById(fixedId);
+            if (!percEl || !fixedEl) return;
+
+            function updateState() {
+                const percVal = parseFloat(percEl.value) || 0;
+                const fixedVal = parseFloat(fixedEl.value) || 0;
+                if (percVal > 0) {
+                    fixedEl.value = '0';
+                    fixedEl.setAttribute('readonly', true);
+                } else {
+                    fixedEl.removeAttribute('readonly');
+                }
+                
+                if (fixedVal > 0) {
+                    percEl.value = '0';
+                    percEl.setAttribute('readonly', true);
+                } else {
+                    percEl.removeAttribute('readonly');
+                }
+            }
+
+            percEl.addEventListener('input', updateState);
+            fixedEl.addEventListener('input', updateState);
+            updateState();
+        }
+
+        handleTaxInputs('TaxPercentageUsd', 'FixedFeeUsd');
+        handleTaxInputs('TaxPercentageEgp', 'FixedFeeEgp');
     });
 </script>

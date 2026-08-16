@@ -20,269 +20,269 @@ build_property.TargetFrameworkVersion = v10.0
 build_property.EntryPointFilePath = 
 build_property.RootNamespace = NexClone.Backend
 build_property.RootNamespace = NexClone.Backend
-build_property.ProjectDir = c:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\
+build_property.ProjectDir = C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 10.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = c:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend
+build_property.MSBuildProjectDirectory = C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend
 build_property._RazorSourceGeneratorDebug = 
 build_property.EffectiveAnalysisLevelStyle = 10.0
 build_property.EnableCodeStyleSeverity = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/AdminAuth/AccessDenied.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/AdminAuth/AccessDenied.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5BdXRoXEFjY2Vzc0RlbmllZC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/AdminAuth/Login.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/AdminAuth/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5BdXRoXExvZ2luLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/AffiliateAdmin/Affiliates.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/AffiliateAdmin/Affiliates.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWZmaWxpYXRlQWRtaW5cQWZmaWxpYXRlcy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/AffiliateAdmin/AffiliateSettings.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/AffiliateAdmin/AffiliateSettings.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWZmaWxpYXRlQWRtaW5cQWZmaWxpYXRlU2V0dGluZ3MuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/AffiliateAdmin/Details.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/AffiliateAdmin/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWZmaWxpYXRlQWRtaW5cRGV0YWlscy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/AffiliateAdmin/Index.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/AffiliateAdmin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWZmaWxpYXRlQWRtaW5cSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/AffiliateAdmin/PayoutRequests.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/AffiliateAdmin/PayoutRequests.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWZmaWxpYXRlQWRtaW5cUGF5b3V0UmVxdWVzdHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/ApiConfigAdmin/Create.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/ApiConfigAdmin/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXBpQ29uZmlnQWRtaW5cQ3JlYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/ApiConfigAdmin/Edit.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/ApiConfigAdmin/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXBpQ29uZmlnQWRtaW5cRWRpdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/ApiConfigAdmin/Index.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/ApiConfigAdmin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXBpQ29uZmlnQWRtaW5cSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/BlogAdmin/Comments.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/BlogAdmin/Comments.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQmxvZ0FkbWluXENvbW1lbnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/BlogAdmin/Create.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/BlogAdmin/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQmxvZ0FkbWluXENyZWF0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/BlogAdmin/Edit.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/BlogAdmin/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQmxvZ0FkbWluXEVkaXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/BlogAdmin/Index.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/BlogAdmin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQmxvZ0FkbWluXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Checkout/Pay.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Checkout/Pay.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2hlY2tvdXRcUGF5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Checkout/PayPalCheckout.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Checkout/PayPalCheckout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2hlY2tvdXRcUGF5UGFsQ2hlY2tvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/CustomPagesAdmin/Create.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/CustomPagesAdmin/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ3VzdG9tUGFnZXNBZG1pblxDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/CustomPagesAdmin/Edit.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/CustomPagesAdmin/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ3VzdG9tUGFnZXNBZG1pblxFZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/CustomPagesAdmin/Index.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/CustomPagesAdmin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ3VzdG9tUGFnZXNBZG1pblxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/HistoryAdmin/Details.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/HistoryAdmin/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSGlzdG9yeUFkbWluXERldGFpbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/HistoryAdmin/Index.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/HistoryAdmin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSGlzdG9yeUFkbWluXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Home/Index.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Home/Privacy.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Home/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/LogsAdmin/Index.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/LogsAdmin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTG9nc0FkbWluXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/MailingAdmin/CreateTemplate.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/MailingAdmin/CreateTemplate.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFpbGluZ0FkbWluXENyZWF0ZVRlbXBsYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/MailingAdmin/EditTemplate.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/MailingAdmin/EditTemplate.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFpbGluZ0FkbWluXEVkaXRUZW1wbGF0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/MailingAdmin/Index.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/MailingAdmin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFpbGluZ0FkbWluXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/MailingAdmin/SendMail.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/MailingAdmin/SendMail.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFpbGluZ0FkbWluXFNlbmRNYWlsLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/MailingAdmin/Settings.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/MailingAdmin/Settings.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFpbGluZ0FkbWluXFNldHRpbmdzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/MailingAdmin/Templates.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/MailingAdmin/Templates.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFpbGluZ0FkbWluXFRlbXBsYXRlcy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/ManualPaymentMethodsAdmin/Create.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/ManualPaymentMethodsAdmin/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFudWFsUGF5bWVudE1ldGhvZHNBZG1pblxDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/ManualPaymentMethodsAdmin/Edit.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/ManualPaymentMethodsAdmin/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFudWFsUGF5bWVudE1ldGhvZHNBZG1pblxFZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/ManualPaymentMethodsAdmin/Index.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/ManualPaymentMethodsAdmin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFudWFsUGF5bWVudE1ldGhvZHNBZG1pblxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/ManualPaymentsAdmin/Details.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/ManualPaymentsAdmin/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFudWFsUGF5bWVudHNBZG1pblxEZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/ManualPaymentsAdmin/Index.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/ManualPaymentsAdmin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWFudWFsUGF5bWVudHNBZG1pblxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/PaymentConfigAdmin/Create.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/PaymentConfigAdmin/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGF5bWVudENvbmZpZ0FkbWluXENyZWF0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/PaymentConfigAdmin/Edit.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/PaymentConfigAdmin/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGF5bWVudENvbmZpZ0FkbWluXEVkaXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/PaymentConfigAdmin/Index.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/PaymentConfigAdmin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGF5bWVudENvbmZpZ0FkbWluXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/PlansAdmin/Create.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/PlansAdmin/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGxhbnNBZG1pblxDcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/PlansAdmin/Edit.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/PlansAdmin/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGxhbnNBZG1pblxFZGl0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/PlansAdmin/Index.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/PlansAdmin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGxhbnNBZG1pblxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/PlansAdmin/ManageGateways.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/PlansAdmin/ManageGateways.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGxhbnNBZG1pblxNYW5hZ2VHYXRld2F5cy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Plans/Index.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Plans/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGxhbnNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/SettingsAdmin/Index.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/SettingsAdmin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2V0dGluZ3NBZG1pblxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Shared/Error.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Shared/_ValidationScriptsPartial.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/SocialLinksAdmin/Index.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/SocialLinksAdmin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU29jaWFsTGlua3NBZG1pblxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Subscriptions/Details.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Subscriptions/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3Vic2NyaXB0aW9uc1xEZXRhaWxzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Subscriptions/Index.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Subscriptions/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3Vic2NyaXB0aW9uc1xJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/SystemUpdatesAdmin/Create.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/SystemUpdatesAdmin/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3lzdGVtVXBkYXRlc0FkbWluXENyZWF0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/SystemUpdatesAdmin/Edit.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/SystemUpdatesAdmin/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3lzdGVtVXBkYXRlc0FkbWluXEVkaXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/SystemUpdatesAdmin/Index.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/SystemUpdatesAdmin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3lzdGVtVXBkYXRlc0FkbWluXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/TicketsAdmin/Chat.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/TicketsAdmin/Chat.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGlja2V0c0FkbWluXENoYXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/TicketsAdmin/Index.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/TicketsAdmin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGlja2V0c0FkbWluXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/ToolConfigAdmin/Edit.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/ToolConfigAdmin/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVG9vbENvbmZpZ0FkbWluXEVkaXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/ToolConfigAdmin/Index.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/ToolConfigAdmin/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVG9vbENvbmZpZ0FkbWluXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Users/Create.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Users/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlcnNcQ3JlYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Users/Details.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Users/Details.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlcnNcRGV0YWlscy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Users/Edit.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Users/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlcnNcRWRpdC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Users/Index.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Users/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlcnNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Voices/Index.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Voices/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVm9pY2VzXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/_ViewImports.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/_ViewStart.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[c:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Shared/_Layout.cshtml]
+[C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-ovwkfxxt4m

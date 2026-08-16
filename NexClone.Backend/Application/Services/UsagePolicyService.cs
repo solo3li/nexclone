@@ -287,45 +287,48 @@ namespace NexClone.Backend.Application.Services
 
             decimal totalCost = (toolPolicy.BaseCost ?? 0) + (amountForCost * costPerUnit);
 
-            // Dynamic JSON Pricing for new tools
-            if (toolId == "text-to-video" || toolId == "image-to-video" || toolId == "reference-to-video" || toolId == "text-to-image" || toolId == "advanced-lip-sync")
+            var parts = quality.Split('|');
+            var modelName = parts[0];
+            var resolution = parts.Length > 1 ? parts[1] : "default";
+
+            // Dynamic JSON Pricing
+            if (toolConfig != null && !string.IsNullOrEmpty(toolConfig.AdditionalSettings))
             {
                 bool priceFound = false;
-                if (toolConfig != null && !string.IsNullOrEmpty(toolConfig.AdditionalSettings))
+                try
                 {
-                    try
+                    using var doc = JsonDocument.Parse(toolConfig.AdditionalSettings);
+                    var modelNameLower = modelName.ToLower();
+                    
+                    JsonElement mConfigEl;
+                    bool hasConfig = doc.RootElement.TryGetProperty(modelNameLower, out mConfigEl);
+                    if (!hasConfig) hasConfig = doc.RootElement.TryGetProperty("default", out mConfigEl);
+                    
+                    if (hasConfig)
                     {
-                        var settings = JsonSerializer.Deserialize<System.Collections.Generic.Dictionary<string, ModelPricingConfig>>(toolConfig.AdditionalSettings, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                        if (settings != null)
+                        var mConfig = JsonSerializer.Deserialize<ModelPricingConfig>(mConfigEl.GetRawText(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                        if (mConfig != null)
                         {
-                            var parts = quality.Split('|');
-                            var modelName = parts[0].ToLower();
-                            var res = parts.Length > 1 ? parts[1].ToLower() : "default";
-
-                            if (settings.TryGetValue(modelName, out var mConfig))
+                            string res = resolution.ToLower();
+                            if (mConfig.IsPerSecond)
                             {
-                                  if (mConfig.IsPerSecond)
-                                  {
-                                      decimal cps = mConfig.CostPerSecond.ContainsKey(res) ? mConfig.CostPerSecond[res] : 
-                                                    (mConfig.CostPerSecond.ContainsKey("default") ? mConfig.CostPerSecond["default"] : 0);
-                                      totalCost = mConfig.BaseCost + (amountForCost * cps);
-                                  }
-                                  else
-                                  {
-                                      decimal fc = mConfig.FixedCost.ContainsKey(res) ? mConfig.FixedCost[res] : 
-                                                   (mConfig.FixedCost.ContainsKey("default") ? mConfig.FixedCost["default"] : 0);
-                                      totalCost = fc;
-                                  }
-                                priceFound = true;
+                                decimal cps = mConfig.CostPerSecond.ContainsKey(res) ? mConfig.CostPerSecond[res] : 
+                                              (mConfig.CostPerSecond.ContainsKey("default") ? mConfig.CostPerSecond["default"] : 0);
+                                totalCost = mConfig.BaseCost + (amountForCost * cps);
                             }
+                            else
+                            {
+                                decimal fc = mConfig.FixedCost.ContainsKey(res) ? mConfig.FixedCost[res] : 
+                                             (mConfig.FixedCost.ContainsKey("default") ? mConfig.FixedCost["default"] : 0);
+                                totalCost = mConfig.BaseCost + (amountForCost * fc);
+                            }
+                            priceFound = true;
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error parsing JSON config for {toolId}: {ex.Message}");
-                    }
                 }
+                catch { }
 
+                // Fallback for hardcoded tools if not in JSON (we can remove this later, but safe to keep for now)
                 if (!priceFound)
                 {
                     if (toolId == "text-to-image")
@@ -334,30 +337,26 @@ namespace NexClone.Backend.Application.Services
                     }
                     else
                     {
-                        var parts = quality.Split('|');
-                        var modelName = parts[0].ToLower();
-                        var res = parts.Length > 1 ? parts[1].ToLower() : "1080p";
-
                         if (modelName.Contains("grok"))
                         {
                             // Grok Imagine: 480p = 2.4/s, 720p = 4.5/s, 1080p = 8.0/s
-                            decimal cps = res == "480p" ? 2.4m : (res == "720p" ? 4.5m : 8.0m);
+                            decimal cps = resolution == "480p" ? 2.4m : (resolution == "720p" ? 4.5m : 8.0m);
                             totalCost = amountForCost * cps;
                         }
                         else if (modelName.Contains("lite"))
                         {
                             // Veo 3.1 Lite: 720p = 15, 1080p = 22.5, 4k = 75
-                            totalCost = res == "720p" ? 15m : (res == "4k" ? 75m : 22.5m);
+                            totalCost = resolution == "720p" ? 15m : (resolution == "4k" ? 75m : 22.5m);
                         }
                         else if (modelName.Contains("fast"))
                         {
                             // Veo 3.1 Fast: 720p = 30, 1080p = 37.5, 4k = 90
-                            totalCost = res == "720p" ? 30m : (res == "4k" ? 90m : 37.5m);
+                            totalCost = resolution == "720p" ? 30m : (resolution == "4k" ? 90m : 37.5m);
                         }
                         else // Quality / Standard Veo 3.1
                         {
                             // Veo 3.1 Quality: 720p = 225, 1080p = 232.5, 4k = 285
-                            totalCost = res == "720p" ? 225m : (res == "4k" ? 285m : 232.5m);
+                            totalCost = resolution == "720p" ? 225m : (resolution == "4k" ? 285m : 232.5m);
                         }
                     }
                 }
