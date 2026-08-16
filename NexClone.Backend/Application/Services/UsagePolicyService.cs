@@ -415,7 +415,11 @@ namespace NexClone.Backend.Application.Services
                 var pricing = await _context.LipSyncModelPricings.FirstOrDefaultAsync(p => p.IsActive);
                 if (pricing != null)
                 {
-                    totalCost = pricing.BaseCost + (pricing.BillingType == "PerSecond" ? (amountForCost * pricing.CostPerSecond) : pricing.CostPerSecond);
+                    double dur = (double)amountForCost;
+                    if (dur <= 0) dur = 5.0;
+                    int blocks = (int)Math.Ceiling(dur / 5.0);
+                    decimal costPerBlock = pricing.BaseCost > 0 ? pricing.BaseCost : (pricing.CostPerSecond * 5.0m > 0 ? pricing.CostPerSecond * 5.0m : 12.0m);
+                    totalCost = blocks * costPerBlock;
                     allowStandard = pricing.AllowedWallet.Equals("Standard", StringComparison.OrdinalIgnoreCase) || pricing.AllowedWallet.Equals("Both", StringComparison.OrdinalIgnoreCase);
                     allowPremium = pricing.AllowedWallet.Equals("Premium", StringComparison.OrdinalIgnoreCase) || pricing.AllowedWallet.Equals("Both", StringComparison.OrdinalIgnoreCase);
                 }

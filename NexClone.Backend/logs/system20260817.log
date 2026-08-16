@@ -1,1 +1,34 @@
 2026-08-17 00:01:05.971 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-17 00:01:17.367 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-17 00:01:20.986 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-17 00:01:21.147 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-17 00:01:21.148 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-17 00:01:21.148 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-17 00:01:21.149 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-17 00:01:21.149 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-17 00:01:21.149 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-17 00:01:25.409 +03:00 [INF] Server desktop-rjppsk4:4584:b66fcae4 successfully announced in 4236.11 ms
+2026-08-17 00:01:25.412 +03:00 [INF] Server desktop-rjppsk4:4584:b66fcae4 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-17 00:01:25.421 +03:00 [INF] Server desktop-rjppsk4:4584:b66fcae4 all the dispatchers started
+2026-08-17 00:01:41.096 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 00:05:49.634 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-17 00:05:59.881 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-17 00:06:04.146 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-17 00:06:04.212 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-17 00:06:04.212 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-17 00:06:04.213 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-17 00:06:04.213 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-17 00:06:04.213 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-17 00:06:04.213 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-17 00:06:07.455 +03:00 [INF] Server desktop-rjppsk4:10248:de05f096 successfully announced in 3230.7922 ms
+2026-08-17 00:06:07.459 +03:00 [INF] Server desktop-rjppsk4:10248:de05f096 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-17 00:06:07.471 +03:00 [INF] Server desktop-rjppsk4:10248:de05f096 all the dispatchers started
+2026-08-17 00:06:07.771 +03:00 [INF] 1 servers were removed due to timeout
