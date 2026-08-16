@@ -80,8 +80,26 @@ namespace NexClone.Backend.API.Controllers.Admin
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SaveConfig(ToolConfiguration config, [FromForm] int? MaxConcurrentOperations, [FromForm] System.Collections.Generic.Dictionary<string, decimal> ModelCosts, [FromForm] System.Collections.Generic.Dictionary<string, bool> ModelIsPerSecond)
+        public async Task<IActionResult> SaveConfig(ToolConfiguration config, int? MaxConcurrentOperations, Dictionary<string, decimal> ModelCosts, Dictionary<string, bool> ModelIsPerSecond)
         {
+            // Clear validation errors for implicitly required navigation properties or optional strings
+            var keysToRemove = ModelState.Keys.Where(k => 
+                k.Contains("ToolConfiguration") || 
+                k.Contains("ModelName") || 
+                k == "Id").ToList();
+
+            foreach (var key in keysToRemove)
+            {
+                ModelState.Remove(key);
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var errors = string.Join(" | ", ModelState.Where(ms => ms.Value.Errors.Any()).Select(ms => ms.Key + ": " + string.Join(", ", ms.Value.Errors.Select(e => e.ErrorMessage))));
+                TempData["ErrorMessage"] = "Validation failed: " + errors;
+                return RedirectToAction(nameof(Edit), new { id = config.ToolName });
+            }
+
             if (ModelState.IsValid)
             {
                 if (ModelCosts != null && ModelCosts.Count > 0 && 

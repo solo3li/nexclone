@@ -13,7 +13,13 @@ class SignalRService {
         
         this.connection = new signalR.HubConnectionBuilder()
             .withUrl(`${backendUrl}/hubs/notification`, {
-                withCredentials: true
+                withCredentials: true,
+                accessTokenFactory: () => {
+                    if (typeof window !== 'undefined') {
+                        return localStorage.getItem('accessToken') || '';
+                    }
+                    return '';
+                }
             })
             .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
             .configureLogging(signalR.LogLevel.Warning)

@@ -11,36 +11,34 @@ const api = axios.create({
 // ─── Request Interceptor ────────────────────────────────────────────────────
 api.interceptors.request.use(
   (config) => {
-    // The HttpOnly cookie 'jwt' is automatically sent due to withCredentials: true
+    // Fallback: If third-party cookies are blocked (Incognito over Cloudflare Tunnel), 
+    // send the token via Authorization header as well.
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('accessToken');
+      if (token) {
+        if (!config.headers) {
+          config.headers = {} as any;
+        }
+        if (typeof config.headers.set === 'function') {
+          config.headers.set('Authorization', `Bearer ${token}`);
+        } else {
+          config.headers['Authorization'] = `Bearer ${token}`;
+        }
+      }
+    }
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// ─── Response Interceptor ─────────────────────────────
+// ─── Response Interceptor ──────────────────────────────
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // If 401 Unauthorized, redirect to login
-    if (
-      error.response?.status === 401 &&
-      !error.config.url?.includes('/api/auth/login') &&
-      !error.config.url?.includes('/api/auth/register') &&
-      !error.config.url?.includes('/api/auth/me')
-    ) {
-      if (typeof window !== 'undefined') {
-        const locale = document.documentElement.lang || 'ar';
-        const path = window.location.pathname;
-        if (!path.includes('/login') && 
-            !path.includes('/register') && 
-            !path.includes('/forgot-password') && 
-            !path.includes('/reset-password') &&
-            !path.includes('advanced-lip-sync')) {
-          console.log("[Axios Interceptor] Redirecting to login! Path:", path);
-          window.location.href = `/${locale}/login`;
-        }
-      }
-    }
+    // Only log the error here, let the components handle the redirects themselves
+    // if (error.response?.status === 401) {
+    //   console.log("[Axios Interceptor] 401 Unauthorized for URL:", error.config?.url);
+    // }
     return Promise.reject(error);
   }
 );

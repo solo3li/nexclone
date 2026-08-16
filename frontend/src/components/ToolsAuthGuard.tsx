@@ -25,16 +25,20 @@ export default function ToolsAuthGuard({ children }: { children: React.ReactNode
 
     const checkAccess = async () => {
       try {
-        const res = await api.get('/api/auth/me');
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+          throw new Error("No token");
+        }
+
+        const res = await api.get('/api/auth/me', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
         if (!isMounted) return;
         setUser(res.data);
 
         if (!res.data?.hasPhoneNumber) {
-          if (typeof window !== "undefined") {
-            window.location.href = `/${locale}/complete-profile`;
-          } else {
-            router.push("/complete-profile");
-          }
+          router.replace("/complete-profile");
           return;
         }
 
@@ -42,26 +46,14 @@ export default function ToolsAuthGuard({ children }: { children: React.ReactNode
       } catch (err: any) {
         if (!isMounted) return;
         
+        console.error("[ToolsAuthGuard] Token validation failed! Error:", err.message, err.response?.status, err.response?.data);
+        
         // Clear user state since auth failed (token expired/invalid)
         setUser(null);
-
-        console.log("[ToolsAuthGuard] Catch block. Path:", typeof window !== "undefined" ? window.location.pathname : "SSR");
-
-        // Allow guests to view LipSync tool without redirecting
-        if (typeof window !== "undefined" && window.location.pathname.toLowerCase().includes("advanced-lip-sync")) {
-          console.log("[ToolsAuthGuard] Bypassing redirect for LipSync");
-          setIsChecking(false);
-          return;
-        }
-
-        console.log("[ToolsAuthGuard] Redirecting to login!");
+        localStorage.removeItem('accessToken');
 
         // User not logged in -> redirect to login immediately for other tools
-        if (typeof window !== "undefined") {
-          window.location.href = `/${locale}/login`;
-        } else {
-          router.push("/login");
-        }
+        router.replace("/login");
       }
     };
     

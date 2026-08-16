@@ -53,12 +53,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   login: async (credentials) => {
     const res = await api.post(API_ENDPOINTS.LOGIN, credentials);
+    if (res.data?.token) {
+      localStorage.setItem('accessToken', res.data.token);
+    }
     await get().fetchMe();
     return res.data;
   },
 
   register: async (data) => {
     const res = await api.post(API_ENDPOINTS.REGISTER, data);
+    if (res.data?.token) {
+      localStorage.setItem('accessToken', res.data.token);
+    }
     return res.data;
   },
 
@@ -68,6 +74,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (e) {
       console.error("Logout API failed", e);
     } finally {
+      localStorage.removeItem('accessToken');
       set({ user: null, isAuthenticated: false, hasPhoneNumber: false });
     }
   },
@@ -83,6 +90,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
       return res.data;
     } catch (error) {
+      localStorage.removeItem('accessToken');
       set({ 
         user: null, 
         isAuthenticated: false, 
@@ -95,6 +103,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   googleLogin: async (data: { token: string, refCode?: string }) => {
     const res = await api.post(API_ENDPOINTS.GOOGLE_LOGIN, data);
+    if (res.data?.token) {
+      localStorage.setItem('accessToken', res.data.token);
+    }
     await get().fetchMe();
     return res.data;
   },

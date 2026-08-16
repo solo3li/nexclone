@@ -267,11 +267,11 @@ function AdvancedLipSyncPage() {
 
   // Submit Handler
   const handleStartLipSync = async () => {
-    if (!isAuthenticated) {
-      console.log("[LipSync Client] Start clicked, but not authenticated! Redirecting...");
-      window.location.href = `/${locale}/login`;
-      return;
-    }
+      if (!isAuthenticated) {
+        console.log("[LipSync Client] Start clicked, but not authenticated! Redirecting...");
+        router.replace("/login");
+        return;
+      }
     if (!videoFile) {
       setError(isRtl ? "الرجاء رفع ملف فيديو يحتوي على وجه المتحدث" : "Please upload a speaker video file");
       return;

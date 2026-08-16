@@ -63,7 +63,6 @@
                             <div class="bx--form-item" style="margin-bottom: 1.5rem;">
                                 <div class="bx--toggle-c">
                                     <input type="checkbox" id="IsActive-@toolName" class="bx--toggle-input" name="IsActive" value="true" @(config.IsActive ? "checked" : "")>
-                                    <input type="hidden" name="IsActive" value="false">
                                     <label for="IsActive-@toolName" class="bx--toggle-input__label" aria-label="Toggle">
                                         <span class="bx--toggle__switch">
                                             <span class="bx--toggle__text--left" aria-hidden="true">@Localizer["Off"]</span>
@@ -71,13 +70,13 @@
                                         </span>
                                         <span style="margin-left: 1rem;">@Localizer["Is Active (Enable/Disable Tool)"]</span>
                                     </label>
+                                    <input type="hidden" name="IsActive" value="false">
                                 </div>
                             </div>
 
                             <div class="bx--form-item" style="margin-bottom: 1rem;">
                                 <div class="bx--toggle-c">
                                     <input type="checkbox" id="IsMaintenanceMode-@toolName" class="bx--toggle-input" name="IsMaintenanceMode" value="true" @(config.IsMaintenanceMode ? "checked" : "")>
-                                    <input type="hidden" name="IsMaintenanceMode" value="false">
                                     <label for="IsMaintenanceMode-@toolName" class="bx--toggle-input__label" aria-label="Toggle">
                                         <span class="bx--toggle__switch">
                                             <span class="bx--toggle__text--left" aria-hidden="true">@Localizer["Off"]</span>
@@ -85,20 +84,24 @@
                                         </span>
                                         <span style="margin-left: 1rem;">@Localizer["Maintenance Mode"]</span>
                                     </label>
+                                    <input type="hidden" name="IsMaintenanceMode" value="false">
                                 </div>
                             </div>
 
                             <div class="bx--form-item" style="margin-bottom: 2rem;">
                                 <div class="bx--toggle-c">
                                     <input type="checkbox" id="IsComingSoon-@toolName" class="bx--toggle-input" name="IsComingSoon" value="true" @(config.IsComingSoon ? "checked" : "")>
-                                    <input type="hidden" name="IsComingSoon" value="false">
                                     <label for="IsComingSoon-@toolName" class="bx--toggle-input__label" aria-label="Toggle">
                                         <span class="bx--toggle__switch">
                                             <span class="bx--toggle__text--left" aria-hidden="true">@Localizer["Off"]</span>
+                                            <span class="bx--toggle__appearance">
+                                                <svg class="bx--toggle__check" width="6px" height="5px" viewBox="0 0 6 5"><path d="M2.2 2.7L5 0 6 1 2.2 5 0 2.7 1 1.5z"/></svg>
+                                            </span>
                                             <span class="bx--toggle__text--right" aria-hidden="true">@Localizer["On"]</span>
                                         </span>
-                                        <span style="margin-left: 1rem;">@Localizer["Coming Soon Mode"]</span>
+                                        <span style="margin-left: 1rem;">@Localizer["Coming Soon"]</span>
                                     </label>
+                                    <input type="hidden" name="IsComingSoon" value="false">
                                 </div>
                             </div>
 
@@ -107,17 +110,17 @@
                                 <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
                                     <div class="bx--checkbox-wrapper">
                                         <input id="AllowStandard-@toolName" class="bx--checkbox" type="checkbox" value="true" name="AllowStandardCredits" @(config.AllowStandardCredits ? "checked" : "")>
-                                        <input type="hidden" value="false" name="AllowStandardCredits">
                                         <label for="AllowStandard-@toolName" class="bx--checkbox-label">
                                             <span class="bx--checkbox-label-text">Standard Credits</span>
                                         </label>
+                                        <input type="hidden" value="false" name="AllowStandardCredits">
                                     </div>
                                     <div class="bx--checkbox-wrapper">
                                         <input id="AllowPremium-@toolName" class="bx--checkbox" type="checkbox" value="true" name="AllowPremiumCredits" @(config.AllowPremiumCredits ? "checked" : "")>
-                                        <input type="hidden" value="false" name="AllowPremiumCredits">
                                         <label for="AllowPremium-@toolName" class="bx--checkbox-label">
                                             <span class="bx--checkbox-label-text">Premium Credits</span>
                                         </label>
+                                        <input type="hidden" value="false" name="AllowPremiumCredits">
                                     </div>
                                 </div>
                                 <div class="bx--form__helper-text" style="margin-top: 0.5rem;">@Localizer["Standard Credits are prioritized for deduction. If insufficient, Premium Credits will cover the remainder if checked."]</div>
@@ -209,10 +212,10 @@
                                                 {
                                                     <div class="bx--checkbox-wrapper">
                                                         <input id="ModelIsPerSecond_@m" class="bx--checkbox" type="checkbox" value="true" name="ModelIsPerSecond[@m]" @(isPerSec ? "checked" : "")>
-                                                        <input type="hidden" value="false" name="ModelIsPerSecond[@m]">
                                                         <label for="ModelIsPerSecond_@m" class="bx--checkbox-label" title="Charge per second (rounded up to 5s) instead of flat request cost">
                                                             <span class="bx--checkbox-label-text">Per Second (Round up to 5s)</span>
                                                         </label>
+                                                        <input type="hidden" value="false" name="ModelIsPerSecond[@m]">
                                                     </div>
                                                 }
                                             </div>

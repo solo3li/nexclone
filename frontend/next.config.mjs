@@ -8,7 +8,7 @@ const nextConfig = {
     '178.62.192.74', 
     'localhost', 
     'filters-leisure-marion-healthcare.trycloudflare.com',
-    'brass-chevy-remarkable-amazing.trycloudflare.com'
+    'lab-contain-meal-density.trycloudflare.com',
   ],
   typescript: {
     ignoreBuildErrors: true,
