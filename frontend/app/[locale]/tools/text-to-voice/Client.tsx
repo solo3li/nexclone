@@ -118,7 +118,7 @@ function TextToVoicePage() {
   }, []);
 
   useEffect(() => {
-    setEstimatedCost(1);
+    setEstimatedCost(Math.max((text.length * (selectedQuality === 'High' ? (user?.activePlan?.ttsCostPerCharHigh ?? 0.01) : (user?.activePlan?.ttsCostPerChar ?? 0.001))), 0.0001));
     setChargedWallet(null);
     setChargedWalletIcon(null);
   }, [text]);
