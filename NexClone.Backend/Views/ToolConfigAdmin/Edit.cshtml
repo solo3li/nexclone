@@ -166,11 +166,58 @@
                                 } catch {}
                             }
 }
-@if (toolName == "text-to-video" || toolName == "image-to-video" || toolName == "reference-to-video" || toolName == "text-to-image" || toolName == "advanced-lip-sync")
+@if (toolName == "text-to-image")
+{
+    var t2iSetting = ViewBag.TextToImageSetting as NexClone.Backend.Core.Entities.TextToImageSetting;
+    var t2iPricing = ViewBag.TextToImageModelPricing as NexClone.Backend.Core.Entities.TextToImageModelPricing;
+    var maxPrompt = t2iSetting?.MaxPromptLength ?? 5000;
+    var imgCost = t2iPricing?.CostPerImage ?? 4.0m;
+
+    <div style="background: #ffffff; padding: 1.75rem; border: 1px solid #e0e0e0; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #f4f4f4; padding-bottom: 1rem; margin-bottom: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span style="background: #0f62fe; color: white; font-weight: bold; font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; letter-spacing: 0.5px;">CRUN AI</span>
+                <h3 class="bx--type-productive-heading-03" style="margin: 0; color: #161616;">Grok Imagine (Text to Image)</h3>
+            </div>
+            <span style="background: #e8f8f0; color: #198038; font-weight: 600; font-size: 0.8rem; padding: 4px 12px; border-radius: 4px; border: 1px solid #a7f0ba;">
+                ● @Localizer["Static Active Model"]
+            </span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <div class="bx--form-item">
+                <label class="bx--label" style="font-weight: 600;">@Localizer["Cost per Generation (Credits)"]</label>
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.25rem;">
+                    <input type="number" step="0.01" min="0" name="ModelCosts[grok-imagine]" class="bx--text-input" value="@imgCost" style="font-size: 1.1rem; font-weight: bold; width: 140px;" />
+                    <span style="color: #525252; font-weight: 500;">Credits / Image</span>
+                </div>
+                <div class="bx--form__helper-text">@Localizer["The amount deducted from user wallet per generated image."]</div>
+            </div>
+
+            <div class="bx--form-item">
+                <label class="bx--label" style="font-weight: 600;">@Localizer["Max Prompt Length (Characters)"]</label>
+                <input type="number" step="1" min="100" max="10000" name="MaxPromptLength" class="bx--text-input" value="@maxPrompt" style="margin-top: 0.25rem; width: 140px;" />
+                <div class="bx--form__helper-text">@Localizer["Maximum character limit for user text prompt (Default: 5000)."]</div>
+            </div>
+        </div>
+
+        <div style="background: #f4f4f4; padding: 1rem 1.25rem; border-radius: 4px; border-left: 4px solid #0f62fe;">
+            <label class="bx--label" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">@Localizer["Supported Aspect Ratios (Fixed)"]</label>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <span style="background: white; border: 1px solid #c6c6c6; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; color: #161616;">16:9</span>
+                <span style="background: white; border: 1px solid #c6c6c6; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; color: #161616;">9:16</span>
+                <span style="background: white; border: 1px solid #c6c6c6; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; color: #161616;">1:1</span>
+                <span style="background: white; border: 1px solid #c6c6c6; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; color: #161616;">3:2</span>
+                <span style="background: white; border: 1px solid #c6c6c6; padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; color: #161616;">2:3</span>
+            </div>
+        </div>
+    </div>
+}
+else if (toolName == "text-to-video" || toolName == "image-to-video" || toolName == "reference-to-video" || toolName == "advanced-lip-sync")
                         {
                             var models = new List<string>();
-                            var isVideo = toolName != "text-to-image";
-                            var costLabel = isVideo ? "Cost ($)" : "Cost per Generation ($)";
+                            var isVideo = true;
+                            var costLabel = "Cost ($)";
 
                             if (toolName == "text-to-video" || toolName == "image-to-video")
                             {
@@ -188,10 +235,6 @@
                                     "veo 3.1 Lite|720p", "veo 3.1 Lite|1080p", "veo 3.1 Lite|4k",
                                     "veo 3.1 Quality|720p", "veo 3.1 Quality|1080p", "veo 3.1 Quality|4k"
                                 });
-                            }
-                            else if (toolName == "text-to-image")
-                            {
-                                models.AddRange(new[] { "grok-imagine|t2i", "grok-imagine|i2i" });
                             }
                             else if (toolName == "advanced-lip-sync")
                             {
@@ -216,7 +259,7 @@
                                                     <div class="bx--checkbox-wrapper">
                                                         <input id="ModelIsPerSecond_@m" class="bx--checkbox" type="checkbox" value="true" name="ModelIsPerSecond[@m]" @(isPerSec ? "checked" : "")>
                                                         <label for="ModelIsPerSecond_@m" class="bx--checkbox-label" title="Charge per second (rounded up to 5s) instead of flat request cost">
-                                                            <span class="bx--checkbox-label-text">Per Second (Round up to 5s)</span>
+                                                             <span class="bx--checkbox-label-text">Per Second (Round up to 5s)</span>
                                                         </label>
                                                         <input type="hidden" value="false" name="ModelIsPerSecond[@m]">
                                                     </div>
@@ -256,7 +299,7 @@
                             </div>
                         }
 
-@if (true)
+@if (toolName != "text-to-image")
                         {
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                                 <h3 class="bx--type-productive-heading-03">@Localizer["Routing Rules (Models)"]</h3>

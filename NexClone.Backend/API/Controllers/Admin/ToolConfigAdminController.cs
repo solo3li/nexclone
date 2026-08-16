@@ -75,6 +75,27 @@ namespace NexClone.Backend.API.Controllers.Admin
                 ViewBag.MaxConcurrentOperations = 10;
             }
 
+            if (id == "text-to-image")
+            {
+                var t2iSetting = await _context.TextToImageSettings.FirstOrDefaultAsync();
+                if (t2iSetting == null)
+                {
+                    t2iSetting = new Core.Entities.TextToImageSetting { Id = 1, MaxPromptLength = 5000, MaxConcurrentOperations = 10, IsActive = true };
+                    _context.TextToImageSettings.Add(t2iSetting);
+                    await _context.SaveChangesAsync();
+                }
+                ViewBag.TextToImageSetting = t2iSetting;
+
+                var t2iPricing = await _context.TextToImageModelPricings.FirstOrDefaultAsync();
+                if (t2iPricing == null)
+                {
+                    t2iPricing = new Core.Entities.TextToImageModelPricing { ModelName = "grok-imagine", ProviderName = "CrunAI", CostPerImage = 4.0m, AllowedWallet = "Standard", IsActive = true };
+                    _context.TextToImageModelPricings.Add(t2iPricing);
+                    await _context.SaveChangesAsync();
+                }
+                ViewBag.TextToImageModelPricing = t2iPricing;
+            }
+
             return View(config);
         }
 
@@ -371,15 +392,24 @@ namespace NexClone.Backend.API.Controllers.Admin
                     }
                     imgSetting.IsActive = config.IsActive;
                     imgSetting.MaxConcurrentOperations = MaxConcurrentOperations ?? 10;
+                    if (int.TryParse(Request.Form["MaxPromptLength"].ToString(), out int maxPrompt) && maxPrompt > 0)
+                    {
+                        imgSetting.MaxPromptLength = maxPrompt;
+                    }
                     imgSetting.UpdatedAt = DateTime.UtcNow;
 
                     var imgPricing = await _context.TextToImageModelPricings.FirstOrDefaultAsync();
-                    if (imgPricing != null)
+                    if (imgPricing == null)
                     {
-                        imgPricing.IsActive = config.IsActive;
-                        imgPricing.AllowedWallet = config.AllowPremiumCredits && !config.AllowStandardCredits ? "Premium" : "Standard";
-                        if (ModelCosts.ContainsKey("grok-imagine|t2i")) imgPricing.CostPerImage = ModelCosts["grok-imagine|t2i"];
+                        imgPricing = new Core.Entities.TextToImageModelPricing { ModelName = "grok-imagine", ProviderName = "CrunAI" };
+                        _context.TextToImageModelPricings.Add(imgPricing);
                     }
+                    imgPricing.IsActive = config.IsActive;
+                    imgPricing.AllowedWallet = config.AllowPremiumCredits && !config.AllowStandardCredits ? "Premium" : (config.AllowStandardCredits && !config.AllowPremiumCredits ? "Standard" : "Both");
+                    
+                    if (ModelCosts.ContainsKey("grok-imagine")) imgPricing.CostPerImage = ModelCosts["grok-imagine"];
+                    else if (ModelCosts.ContainsKey("grok-imagine|t2i")) imgPricing.CostPerImage = ModelCosts["grok-imagine|t2i"];
+                    else if (ModelCosts.ContainsKey("default")) imgPricing.CostPerImage = ModelCosts["default"];
                 }
                 else if (config.ToolName == "motion-control" || config.ToolName == "kling_motion_control")
                 {

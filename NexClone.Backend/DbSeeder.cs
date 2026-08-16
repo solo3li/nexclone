@@ -222,7 +222,7 @@ namespace NexClone.Backend
                 {
                     Id = 1,
                     IsActive = true,
-                    MaxPromptLength = 1000,
+                    MaxPromptLength = 5000,
                     MaxConcurrentOperations = 10
                 });
             }
@@ -231,10 +231,10 @@ namespace NexClone.Backend
             {
                 context.TextToImageModelPricings.Add(new TextToImageModelPricing
                 {
-                    ModelName = "default",
+                    ModelName = "grok-imagine",
                     ProviderName = "CrunAI",
                     BillingType = "PerRequest",
-                    CostPerImage = 5.0m,
+                    CostPerImage = 4.0m,
                     BaseCost = 0m,
                     AllowedWallet = "Standard",
                     IsActive = true
