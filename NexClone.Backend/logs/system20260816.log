@@ -1183,3 +1183,4 @@ DETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error
 2026-08-16 17:15:56.337 +03:00 [INF] Server desktop-rjppsk4:17556:de393400 successfully announced in 743.0397 ms
 2026-08-16 17:15:56.342 +03:00 [INF] Server desktop-rjppsk4:17556:de393400 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-16 17:15:56.366 +03:00 [INF] Server desktop-rjppsk4:17556:de393400 all the dispatchers started
+2026-08-16 17:20:57.326 +03:00 [INF] 1 servers were removed due to timeout
