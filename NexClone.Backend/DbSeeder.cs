@@ -245,16 +245,28 @@ namespace NexClone.Backend
 
             if (!await context.LipSyncModelPricings.AnyAsync())
             {
-                context.LipSyncModelPricings.Add(new LipSyncModelPricing
-                {
-                    ModelName = "vidu_advanced_lip_sync",
-                    ProviderName = "CrunAI",
-                    BillingType = "PerSecond",
-                    CostPerSecond = 0.5m,
-                    BaseCost = 0m,
-                    AllowedWallet = "Standard",
-                    IsActive = true
-                });
+                context.LipSyncModelPricings.AddRange(
+                    new LipSyncModelPricing
+                    {
+                        ModelName = "vidu-lipsync-tts",
+                        ProviderName = "CrunAI",
+                        BillingType = "Per5Seconds",
+                        BaseCost = 18.0m,
+                        CostPerSecond = 3.6m,
+                        AllowedWallet = "Standard",
+                        IsActive = true
+                    },
+                    new LipSyncModelPricing
+                    {
+                        ModelName = "vidu-lipsync-audio",
+                        ProviderName = "CrunAI",
+                        BillingType = "Per5Seconds",
+                        BaseCost = 12.0m,
+                        CostPerSecond = 2.4m,
+                        AllowedWallet = "Standard",
+                        IsActive = true
+                    }
+                );
             }
 
             // 5. Text to Image

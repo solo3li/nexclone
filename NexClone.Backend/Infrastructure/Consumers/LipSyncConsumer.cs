@@ -60,9 +60,11 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 string audioKey = await _mediaService.UploadFileAsync(audioStream, $"lipsync/{message.UserId:N}/{DateTime.UtcNow:yyyy-MM}/{Guid.NewGuid()}_{message.AudioFileName}", message.AudioContentType);
                 string audioUrl = await _mediaService.GetFileUrlAsync(audioKey);
 
+                string crunModel = string.IsNullOrEmpty(modelName) || modelName == "default" ? "shengshu/vidu-lipsync" : modelName;
+
                 var payload = new
                 {
-                    model = modelName,
+                    model = crunModel,
                     input = new 
                     {
                         video_url = videoUrl,

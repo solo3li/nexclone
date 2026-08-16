@@ -1275,3 +1275,47 @@ DETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error
 2026-08-16 23:14:27.281 +03:00 [INF] Server desktop-rjppsk4:23996:8a73ecf0 successfully announced in 3013.8473 ms
 2026-08-16 23:14:27.287 +03:00 [INF] Server desktop-rjppsk4:23996:8a73ecf0 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-16 23:14:27.321 +03:00 [INF] Server desktop-rjppsk4:23996:8a73ecf0 all the dispatchers started
+2026-08-16 23:15:09.479 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-16 23:19:27.898 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-16 23:24:06.260 +03:00 [WRN] hangfire:locks:schedulepoller: Failed to remove lock
+Npgsql.NpgsqlException (0x80004005): Exception while writing to stream
+ ---> System.IO.IOException: Unable to write data to the transport connection: An existing connection was forcibly closed by the remote host..
+ ---> System.Net.Sockets.SocketException (10054): An existing connection was forcibly closed by the remote host.
+   at System.Net.Security.SslStream.WriteAsyncInternal[TIOAdapter](ReadOnlyMemory`1 buffer, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at System.Net.Security.SslStream.WriteAsyncInternal[TIOAdapter](ReadOnlyMemory`1 buffer, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlWriteBuffer.Flush(Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlWriteBuffer.Flush(Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.<Write>g__WriteExecute|103_0(NpgsqlConnector connector, Boolean async, Boolean flush, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteNonQuery(Boolean async, CancellationToken cancellationToken)
+   at Dapper.SqlMapper.ExecuteImpl(IDbConnection cnn, CommandDefinition& command) in /_/Dapper/SqlMapper.cs:line 528
+   at Hangfire.PostgreSql.PostgreSqlDistributedLock.LockHandler.TryRemoveLock(String resource, IDbConnection connection, PostgreSqlStorageOptions options, Boolean onlyExpired)
+2026-08-16 23:24:06.308 +03:00 [WRN] hangfire:locks:schedulepoller: Failed to acquire lock
+System.InvalidOperationException: Connection is not open
+   at Npgsql.ThrowHelper.ThrowInvalidOperationException(String message)
+   at Npgsql.NpgsqlConnection.CheckReady()
+   at Npgsql.NpgsqlConnection.BeginTransaction(Boolean async, IsolationLevel level, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlDistributedLock.TransactionLockHandler.TryLock(IDbConnection connection, String schemaName, String resource)
+   at Hangfire.PostgreSql.PostgreSqlDistributedLock.LockHandler.Lock(String resource, TimeSpan timeout, IDbConnection connection, PostgreSqlStorageOptions options)
+2026-08-16 23:25:13.295 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-16 23:25:13.687 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-16 23:25:38.774 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-16 23:48:50.556 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-16 23:49:02.746 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-16 23:49:08.187 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-16 23:49:08.260 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-16 23:49:08.261 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-16 23:49:08.261 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-16 23:49:08.261 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-16 23:49:08.261 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-16 23:49:08.261 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-16 23:49:11.925 +03:00 [INF] Server desktop-rjppsk4:10552:b3d409a7 successfully announced in 3651.0503 ms
+2026-08-16 23:49:11.930 +03:00 [INF] Server desktop-rjppsk4:10552:b3d409a7 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-16 23:49:11.940 +03:00 [INF] Server desktop-rjppsk4:10552:b3d409a7 all the dispatchers started
+2026-08-16 23:54:12.692 +03:00 [INF] 1 servers were removed due to timeout
