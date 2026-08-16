@@ -76,3 +76,6 @@ Npgsql.NpgsqlException (0x80004005): No such host is known.
 2026-08-16 02:49:35.875 +03:00 [INF] Execution RecurringJobScheduler recovered from the Failed state after 00:00:25.3582623 and is in the Running state now
 2026-08-16 02:49:36.754 +03:00 [INF] Server desktop-rjppsk4:19764:c528a85f is now able to continue sending heartbeats
 2026-08-16 02:49:38.189 +03:00 [INF] Execution DelayedJobScheduler recovered from the Failed state after 00:00:27.4778973 and is in the Running state now
+2026-08-16 03:00:11.762 +03:00 [INF] [AffiliateCommissionHoldJob] Running daily hold period check...
+2026-08-16 03:00:12.028 +03:00 [INF] [AffiliateCommissionHoldJob] Completed.
+2026-08-16 03:00:15.327 +03:00 [INF] Execution Worker recovered from the Faulted state after 00:23:49.6762446 and is in the Running state now
