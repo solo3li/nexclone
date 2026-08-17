@@ -146,6 +146,7 @@ export default function TextToImagePage() {
         if (active && res.data?.pricings) {
           const pricings = res.data.pricings;
           setModelOptions(prev => prev.map(m => {
+            const normM = m.id.toLowerCase().replace(/[-_ .]/g, '');
             let found = pricings.find((p: any) => {
               const normP = (p.modelName || '').toLowerCase().replace(/[-_ .]/g, '');
               return normP === normM || normP.includes(normM) || normM.includes(normP);
