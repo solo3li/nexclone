@@ -96,3 +96,48 @@
 2026-08-18 00:35:26.749 +03:00 [INF] Sending HTTP request POST https://api-m.sandbox.paypal.com/v2/checkout/orders
 2026-08-18 00:35:27.585 +03:00 [INF] Received HTTP response headers after 835.1882ms - 201
 2026-08-18 00:35:27.585 +03:00 [INF] End processing HTTP request after 836.5081ms - 201
+2026-08-18 00:36:50.937 +03:00 [INF] Start processing HTTP request POST https://api-m.sandbox.paypal.com/v1/oauth2/token
+2026-08-18 00:36:50.938 +03:00 [INF] Sending HTTP request POST https://api-m.sandbox.paypal.com/v1/oauth2/token
+2026-08-18 00:36:51.424 +03:00 [INF] Received HTTP response headers after 485.2649ms - 200
+2026-08-18 00:36:51.424 +03:00 [INF] End processing HTTP request after 487.0142ms - 200
+2026-08-18 00:36:51.681 +03:00 [INF] Start processing HTTP request POST https://api-m.sandbox.paypal.com/v2/checkout/orders
+2026-08-18 00:36:51.682 +03:00 [INF] Sending HTTP request POST https://api-m.sandbox.paypal.com/v2/checkout/orders
+2026-08-18 00:36:52.085 +03:00 [INF] Received HTTP response headers after 402.7914ms - 201
+2026-08-18 00:36:52.085 +03:00 [INF] End processing HTTP request after 403.8154ms - 201
+2026-08-18 00:36:53.674 +03:00 [INF] Start processing HTTP request POST https://api-m.sandbox.paypal.com/v1/oauth2/token
+2026-08-18 00:36:53.675 +03:00 [INF] Sending HTTP request POST https://api-m.sandbox.paypal.com/v1/oauth2/token
+2026-08-18 00:36:53.981 +03:00 [INF] Received HTTP response headers after 306.0299ms - 200
+2026-08-18 00:36:53.982 +03:00 [INF] End processing HTTP request after 307.6423ms - 200
+2026-08-18 00:36:54.289 +03:00 [INF] Start processing HTTP request POST https://api-m.sandbox.paypal.com/v2/checkout/orders/95305204ET814042L/capture
+2026-08-18 00:36:54.289 +03:00 [INF] Sending HTTP request POST https://api-m.sandbox.paypal.com/v2/checkout/orders/95305204ET814042L/capture
+2026-08-18 00:36:55.706 +03:00 [INF] Received HTTP response headers after 1416.0618ms - 201
+2026-08-18 00:36:55.707 +03:00 [INF] End processing HTTP request after 1418.0424ms - 201
+2026-08-18 00:37:08.832 +03:00 [INF] [Email Task] Sending email to hamed3alii.3@gmail.com
+2026-08-18 00:37:09.135 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-18 00:37:09.135 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-18 00:37:09.513 +03:00 [INF] Received HTTP response headers after 377.3088ms - 201
+2026-08-18 00:37:09.513 +03:00 [INF] End processing HTTP request after 378.2444ms - 201
+2026-08-18 00:37:09.513 +03:00 [INF] [Email Task] Email sent to hamed3alii.3@gmail.com successfully.
+2026-08-18 00:40:20.913 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-18 00:43:44.769 +03:00 [INF] Start processing HTTP request POST https://api-m.sandbox.paypal.com/v1/oauth2/token
+2026-08-18 00:43:44.770 +03:00 [INF] Sending HTTP request POST https://api-m.sandbox.paypal.com/v1/oauth2/token
+2026-08-18 00:43:45.729 +03:00 [INF] Received HTTP response headers after 958.0853ms - 200
+2026-08-18 00:43:45.729 +03:00 [INF] End processing HTTP request after 960.5612ms - 200
+2026-08-18 00:43:46.014 +03:00 [INF] Start processing HTTP request POST https://api-m.sandbox.paypal.com/v2/checkout/orders
+2026-08-18 00:43:46.014 +03:00 [INF] Sending HTTP request POST https://api-m.sandbox.paypal.com/v2/checkout/orders
+2026-08-18 00:43:46.858 +03:00 [INF] Received HTTP response headers after 843.3629ms - 201
+2026-08-18 00:43:46.859 +03:00 [INF] End processing HTTP request after 844.4948ms - 201
+2026-08-18 00:43:48.371 +03:00 [INF] Start processing HTTP request POST https://api-m.sandbox.paypal.com/v1/oauth2/token
+2026-08-18 00:43:48.372 +03:00 [INF] Sending HTTP request POST https://api-m.sandbox.paypal.com/v1/oauth2/token
+2026-08-18 00:43:48.611 +03:00 [INF] Received HTTP response headers after 239.2721ms - 200
+2026-08-18 00:43:48.611 +03:00 [INF] End processing HTTP request after 239.9955ms - 200
+2026-08-18 00:43:48.829 +03:00 [INF] Start processing HTTP request POST https://api-m.sandbox.paypal.com/v2/checkout/orders/8B439568AN496670W/capture
+2026-08-18 00:43:48.829 +03:00 [INF] Sending HTTP request POST https://api-m.sandbox.paypal.com/v2/checkout/orders/8B439568AN496670W/capture
+2026-08-18 00:43:50.242 +03:00 [INF] Received HTTP response headers after 1412.7254ms - 201
+2026-08-18 00:43:50.243 +03:00 [INF] End processing HTTP request after 1414.2526ms - 201
+2026-08-18 00:43:59.429 +03:00 [INF] [Email Task] Sending email to hamed3alii.3@gmail.com
+2026-08-18 00:43:59.714 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-18 00:43:59.716 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-18 00:44:00.143 +03:00 [INF] Received HTTP response headers after 426.8872ms - 201
+2026-08-18 00:44:00.143 +03:00 [INF] End processing HTTP request after 429.8219ms - 201
+2026-08-18 00:44:00.143 +03:00 [INF] [Email Task] Email sent to hamed3alii.3@gmail.com successfully.
