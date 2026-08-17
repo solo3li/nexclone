@@ -192,21 +192,57 @@ namespace NexClone.Backend.Infrastructure.Consumers
 
         protected async Task<(string ApiKey, string ModelName)> GetToolConfigAsync(string toolName)
         {
-            var toolConfig = await _dbContext.ToolConfigurations
-                .Include(t => t.RoutingRules)
-                .FirstOrDefaultAsync(t => t.ToolName == toolName && t.IsActive);
+            var aliases = new System.Collections.Generic.List<string> { toolName };
+            if (toolName.Contains("lip-sync") || toolName.Contains("lipsync"))
+            {
+                aliases.AddRange(new[] { "vidu_advanced_lip_sync", "advanced-lip-sync", "lip-sync", "lipsync", "kling_advanced_lip_sync" });
+            }
+            else if (toolName.Contains("image") && !toolName.Contains("video"))
+            {
+                aliases.AddRange(new[] { "text-to-image", "image" });
+            }
+            else if (toolName.Contains("video"))
+            {
+                aliases.AddRange(new[] { toolName, "text-to-video", "image-to-video", "reference-to-video", "kling_avatar_image2video" });
+            }
 
-            if (toolConfig == null) throw new Exception($"Tool '{toolName}' is not active or not configured.");
+            ToolConfiguration toolConfig = null;
+            foreach (var alias in aliases)
+            {
+                toolConfig = await _dbContext.ToolConfigurations
+                    .Include(t => t.RoutingRules)
+                    .FirstOrDefaultAsync(t => t.ToolName == alias && t.IsActive && t.RoutingRules.Any());
+                if (toolConfig != null) break;
+            }
 
-            var rule = toolConfig.RoutingRules.FirstOrDefault() ?? throw new Exception($"No routing rules configured for '{toolName}'.");
+            if (toolConfig != null)
+            {
+                var rule = toolConfig.RoutingRules.FirstOrDefault();
+                if (rule != null)
+                {
+                    var apiConfig = await _dbContext.ApiConfigurations
+                        .FirstOrDefaultAsync(c => c.ProviderName == rule.ProviderName && c.IsActive);
 
-            var apiConfig = await _dbContext.ApiConfigurations
-                .FirstOrDefaultAsync(c => c.ProviderName == rule.ProviderName && c.IsActive);
+                    if (apiConfig != null && !string.IsNullOrWhiteSpace(apiConfig.ApiKey))
+                    {
+                        return (apiConfig.ApiKey, rule.ModelName ?? toolName);
+                    }
+                }
+            }
 
-            if (apiConfig == null || string.IsNullOrWhiteSpace(apiConfig.ApiKey))
-                throw new Exception($"API configuration for '{rule.ProviderName}' is missing.");
+            // Fallback: Check if CrunAI or any active provider is available in ApiConfigurations
+            var fallbackCrun = await _dbContext.ApiConfigurations
+                .FirstOrDefaultAsync(c => (c.ProviderName == "CrunAI" || c.ProviderName == "Crun") && c.IsActive && !string.IsNullOrWhiteSpace(c.ApiKey));
 
-            return (apiConfig.ApiKey, rule.ModelName ?? toolName);
+            if (fallbackCrun != null)
+            {
+                string fallbackModel = (toolName.Contains("lip-sync") || toolName.Contains("lipsync")) 
+                    ? "shengshu/vidu-lipsync" 
+                    : (toolName.Contains("image") ? "grok" : "default");
+                return (fallbackCrun.ApiKey, fallbackModel);
+            }
+
+            throw new Exception($"API configuration for tool '{toolName}' is missing. Please configure CrunAI API key in admin panel.");
         }
 
         protected async Task NotifyUserSuccess(Guid userId, GenerationHistory history)

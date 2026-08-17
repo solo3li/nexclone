@@ -380,3 +380,105 @@ System.Exception: Crun AI submit failed: {"code":422,"message":"Missing Params o
 2026-08-17 04:16:06.531 +03:00 [INF] Received HTTP response headers after 457.5904ms - 201
 2026-08-17 04:16:06.531 +03:00 [INF] End processing HTTP request after 458.2315ms - 201
 2026-08-17 04:16:06.532 +03:00 [INF] [Email Task] Email sent to hamed3alii.3@gmail.com successfully.
+2026-08-17 04:17:11.258 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-17 04:17:21.872 +03:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 04:17:21.872 +03:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 04:17:22.764 +03:00 [INF] Received HTTP response headers after 891.8136ms - 200
+2026-08-17 04:17:22.765 +03:00 [INF] End processing HTTP request after 892.522ms - 200
+2026-08-17 04:17:33.072 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:17:33.073 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:17:33.291 +03:00 [INF] Received HTTP response headers after 217.9208ms - 200
+2026-08-17 04:17:33.291 +03:00 [INF] End processing HTTP request after 218.7102ms - 200
+2026-08-17 04:17:43.295 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:17:43.297 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:17:43.516 +03:00 [INF] Received HTTP response headers after 218.9735ms - 200
+2026-08-17 04:17:43.516 +03:00 [INF] End processing HTTP request after 221.0368ms - 200
+2026-08-17 04:17:53.518 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:17:53.519 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:17:53.737 +03:00 [INF] Received HTTP response headers after 218.5535ms - 200
+2026-08-17 04:17:53.737 +03:00 [INF] End processing HTTP request after 218.9154ms - 200
+2026-08-17 04:18:03.739 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:18:03.739 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:18:03.959 +03:00 [INF] Received HTTP response headers after 219.9243ms - 200
+2026-08-17 04:18:03.960 +03:00 [INF] End processing HTTP request after 220.5846ms - 200
+2026-08-17 04:18:13.971 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:18:13.971 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:18:14.190 +03:00 [INF] Received HTTP response headers after 219.1686ms - 200
+2026-08-17 04:18:14.190 +03:00 [INF] End processing HTTP request after 219.517ms - 200
+2026-08-17 04:18:24.199 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:18:24.199 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:18:24.418 +03:00 [INF] Received HTTP response headers after 218.7345ms - 200
+2026-08-17 04:18:24.418 +03:00 [INF] End processing HTTP request after 219.1598ms - 200
+2026-08-17 04:18:34.420 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:18:34.421 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:18:34.641 +03:00 [INF] Received HTTP response headers after 220.2229ms - 200
+2026-08-17 04:18:34.641 +03:00 [INF] End processing HTTP request after 220.9505ms - 200
+2026-08-17 04:18:35.154 +03:00 [INF] [Email] Queuing video completion email to hamed3alii.3@gmail.com for task text-to-image Generation
+2026-08-17 04:18:40.158 +03:00 [INF] [Email Task] Sending email to hamed3alii.3@gmail.com
+2026-08-17 04:18:40.466 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 04:18:40.467 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 04:18:40.742 +03:00 [INF] Received HTTP response headers after 274.8682ms - 201
+2026-08-17 04:18:40.742 +03:00 [INF] End processing HTTP request after 275.7404ms - 201
+2026-08-17 04:18:40.742 +03:00 [INF] [Email Task] Email sent to hamed3alii.3@gmail.com successfully.
+2026-08-17 04:19:42.590 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 04:20:28.627 +03:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 04:20:28.628 +03:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 04:20:29.614 +03:00 [INF] Received HTTP response headers after 986.6662ms - 200
+2026-08-17 04:20:29.615 +03:00 [INF] End processing HTTP request after 987.2692ms - 200
+2026-08-17 04:20:39.904 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:20:39.904 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:20:40.123 +03:00 [INF] Received HTTP response headers after 218.9412ms - 200
+2026-08-17 04:20:40.123 +03:00 [INF] End processing HTTP request after 219.5226ms - 200
+2026-08-17 04:20:50.124 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:20:50.124 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:20:50.339 +03:00 [INF] Received HTTP response headers after 214.2141ms - 200
+2026-08-17 04:20:50.339 +03:00 [INF] End processing HTTP request after 214.7683ms - 200
+2026-08-17 04:21:00.348 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:21:00.349 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:21:00.562 +03:00 [INF] Received HTTP response headers after 213.6582ms - 200
+2026-08-17 04:21:00.562 +03:00 [INF] End processing HTTP request after 214.0035ms - 200
+2026-08-17 04:21:10.568 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:21:10.568 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:21:10.782 +03:00 [INF] Received HTTP response headers after 214.5442ms - 200
+2026-08-17 04:21:10.783 +03:00 [INF] End processing HTTP request after 215.0232ms - 200
+2026-08-17 04:21:20.794 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:21:20.794 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:21:21.008 +03:00 [INF] Received HTTP response headers after 213.7601ms - 200
+2026-08-17 04:21:21.008 +03:00 [INF] End processing HTTP request after 214.1066ms - 200
+2026-08-17 04:21:31.010 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:21:31.010 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:21:31.224 +03:00 [INF] Received HTTP response headers after 213.6679ms - 200
+2026-08-17 04:21:31.224 +03:00 [INF] End processing HTTP request after 214.0942ms - 200
+2026-08-17 04:21:41.237 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:21:41.237 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:21:41.450 +03:00 [INF] Received HTTP response headers after 213.2692ms - 200
+2026-08-17 04:21:41.451 +03:00 [INF] End processing HTTP request after 214.0861ms - 200
+2026-08-17 04:21:43.222 +03:00 [INF] [Email] Queuing video completion email to hamed3alii.3@gmail.com for task text-to-image Generation
+2026-08-17 04:21:48.602 +03:00 [INF] [Email Task] Sending email to hamed3alii.3@gmail.com
+2026-08-17 04:21:48.891 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 04:21:48.891 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 04:21:49.201 +03:00 [INF] Received HTTP response headers after 309.9541ms - 201
+2026-08-17 04:21:49.201 +03:00 [INF] End processing HTTP request after 310.6419ms - 201
+2026-08-17 04:21:49.202 +03:00 [INF] [Email Task] Email sent to hamed3alii.3@gmail.com successfully.
+2026-08-17 04:24:27.749 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 04:26:36.862 +03:00 [INF] [LipSync Task 0c7d8fe0-e2b5-45f0-801d-dadffe14cb04] Started consumer.
+2026-08-17 04:26:37.381 +03:00 [ERR] [LipSync Task 0c7d8fe0-e2b5-45f0-801d-dadffe14cb04] Failed
+System.Exception: No routing rules configured for 'advanced-lip-sync'.
+   at NexClone.Backend.Infrastructure.Consumers.BaseAiTaskConsumer.GetToolConfigAsync(String toolName) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\Consumers\BaseAiTaskConsumer.cs:line 201
+   at NexClone.Backend.Infrastructure.Consumers.LipSyncConsumer.Consume(LipSyncMessage message) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\Consumers\LipSyncConsumer.cs:line 50
+2026-08-17 04:31:37.277 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-17 04:31:48.145 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-17 04:31:52.338 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-17 04:31:52.410 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-17 04:31:52.411 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-17 04:31:52.411 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-17 04:31:52.411 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-17 04:31:52.411 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-17 04:31:52.411 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-17 04:31:54.947 +03:00 [INF] Server desktop-rjppsk4:19084:2918ff94 successfully announced in 2525.2364 ms
+2026-08-17 04:31:54.950 +03:00 [INF] Server desktop-rjppsk4:19084:2918ff94 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-17 04:31:54.962 +03:00 [INF] Server desktop-rjppsk4:19084:2918ff94 all the dispatchers started
