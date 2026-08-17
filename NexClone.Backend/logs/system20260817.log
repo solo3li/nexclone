@@ -340,3 +340,24 @@ System.Exception: Crun AI submit failed: {"code":422,"message":"Missing Params o
 2026-08-17 04:12:10.401 +03:00 [INF] Server desktop-rjppsk4:22936:b379d6c7 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-17 04:12:10.412 +03:00 [INF] Server desktop-rjppsk4:22936:b379d6c7 all the dispatchers started
 2026-08-17 04:13:25.326 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 04:14:40.335 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 04:14:47.692 +03:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 04:14:47.695 +03:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 04:14:48.661 +03:00 [INF] Received HTTP response headers after 960.2615ms - 200
+2026-08-17 04:14:48.667 +03:00 [INF] End processing HTTP request after 983.3385ms - 200
+2026-08-17 04:14:59.004 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:14:59.004 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:14:59.214 +03:00 [INF] Received HTTP response headers after 209.7945ms - 200
+2026-08-17 04:14:59.215 +03:00 [INF] End processing HTTP request after 211.9754ms - 200
+2026-08-17 04:15:09.223 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:15:09.223 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:15:09.432 +03:00 [INF] Received HTTP response headers after 208.6562ms - 200
+2026-08-17 04:15:09.433 +03:00 [INF] End processing HTTP request after 209.683ms - 200
+2026-08-17 04:15:19.438 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:15:19.439 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:15:19.647 +03:00 [INF] Received HTTP response headers after 207.9656ms - 200
+2026-08-17 04:15:19.647 +03:00 [INF] End processing HTTP request after 208.9198ms - 200
+2026-08-17 04:15:29.654 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:15:29.655 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 04:15:29.861 +03:00 [INF] Received HTTP response headers after 206.5724ms - 200
+2026-08-17 04:15:29.862 +03:00 [INF] End processing HTTP request after 207.263ms - 200
