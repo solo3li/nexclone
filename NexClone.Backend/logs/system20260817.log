@@ -1628,3 +1628,61 @@ System.Exception: Crun AI Task failed: Upstream internal service error. Please t
 2026-08-17 20:14:23.614 +03:00 [INF] Server desktop-rjppsk4:15108:5c1bf02a all the dispatchers started
 2026-08-17 20:14:37.588 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
 2026-08-17 20:14:47.850 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 20:17:04.701 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 20:18:23.975 +03:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 20:18:23.980 +03:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 20:18:25.353 +03:00 [INF] Received HTTP response headers after 1366.1872ms - 200
+2026-08-17 20:18:25.361 +03:00 [INF] End processing HTTP request after 1398.2237ms - 200
+2026-08-17 20:18:35.693 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 20:18:35.693 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 20:18:35.968 +03:00 [INF] Received HTTP response headers after 275.0514ms - 200
+2026-08-17 20:18:35.969 +03:00 [INF] End processing HTTP request after 277.6035ms - 200
+2026-08-17 20:18:45.984 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 20:18:45.985 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 20:18:46.257 +03:00 [INF] Received HTTP response headers after 271.9142ms - 200
+2026-08-17 20:18:46.257 +03:00 [INF] End processing HTTP request after 273.1912ms - 200
+2026-08-17 20:18:56.268 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 20:18:56.269 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 20:18:56.532 +03:00 [INF] Received HTTP response headers after 263.2071ms - 200
+2026-08-17 20:18:56.533 +03:00 [INF] End processing HTTP request after 264.8456ms - 200
+2026-08-17 20:19:06.541 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 20:19:06.542 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 20:19:06.802 +03:00 [INF] Received HTTP response headers after 259.5546ms - 200
+2026-08-17 20:19:06.802 +03:00 [INF] End processing HTTP request after 260.8271ms - 200
+2026-08-17 20:19:16.805 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 20:19:16.805 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 20:19:17.110 +03:00 [INF] Received HTTP response headers after 304.3305ms - 200
+2026-08-17 20:19:17.110 +03:00 [INF] End processing HTTP request after 305.1861ms - 200
+2026-08-17 20:19:24.550 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-17 20:19:27.112 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 20:19:27.112 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 20:19:27.593 +03:00 [INF] Received HTTP response headers after 481.2221ms - 200
+2026-08-17 20:19:27.594 +03:00 [INF] End processing HTTP request after 482.1521ms - 200
+2026-08-17 20:19:37.603 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 20:19:37.603 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 20:19:38.284 +03:00 [INF] Received HTTP response headers after 680.1394ms - 200
+2026-08-17 20:19:38.284 +03:00 [INF] End processing HTTP request after 681.4623ms - 200
+2026-08-17 20:19:40.220 +03:00 [INF] [Email] Queuing video completion email to hamed3alii.3@gmail.com for task text-to-video Generation
+2026-08-17 20:19:46.658 +03:00 [INF] [Email Task] Sending email to hamed3alii.3@gmail.com
+2026-08-17 20:19:46.947 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 20:19:46.949 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 20:19:47.838 +03:00 [INF] Received HTTP response headers after 888.5623ms - 201
+2026-08-17 20:19:47.838 +03:00 [INF] End processing HTTP request after 891.0658ms - 201
+2026-08-17 20:19:47.839 +03:00 [INF] [Email Task] Email sent to hamed3alii.3@gmail.com successfully.
+2026-08-17 20:22:19.224 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-17 20:22:29.712 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-17 20:22:35.508 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-17 20:22:35.652 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-17 20:22:35.652 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-17 20:22:35.653 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-17 20:22:35.653 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-17 20:22:35.653 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-17 20:22:35.653 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-17 20:22:38.652 +03:00 [INF] Server desktop-rjppsk4:26944:1b488bfd successfully announced in 2973.8394 ms
+2026-08-17 20:22:38.662 +03:00 [INF] Server desktop-rjppsk4:26944:1b488bfd is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-17 20:22:38.693 +03:00 [INF] Server desktop-rjppsk4:26944:1b488bfd all the dispatchers started
+2026-08-17 20:22:49.934 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.

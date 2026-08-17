@@ -405,7 +405,10 @@ namespace NexClone.Backend.Application.Services
                 if (imgSetting != null && !imgSetting.IsActive)
                     return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Text to Image is currently disabled." };
 
-                var pricing = await _context.TextToImageModelPricings.FirstOrDefaultAsync(p => p.IsActive);
+                var allPricings = await _context.TextToImageModelPricings.Where(p => p.IsActive).ToListAsync();
+                var pricing = allPricings.FirstOrDefault(p => NormalizeModelKey(p.ModelName) == normModel || NormalizeModelKey(p.ModelName).Contains(normModel) || normModel.Contains(NormalizeModelKey(p.ModelName)));
+                if (pricing == null) pricing = allPricings.FirstOrDefault();
+
                 if (pricing != null)
                 {
                     totalCost = pricing.BaseCost + (amountForCost * pricing.CostPerImage);

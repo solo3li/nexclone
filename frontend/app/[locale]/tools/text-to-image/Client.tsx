@@ -135,12 +135,62 @@ export default function TextToImagePage() {
   const aspectRef = useRef<HTMLDivElement>(null);
   const resultCanvasRef = useRef<HTMLDivElement>(null);
 
+  // Dynamic model pricing state loaded from backend
+  const [modelOptions, setModelOptions] = useState<ModelOption[]>(MODELS);
+
+  useEffect(() => {
+    let active = true;
+    const loadPricing = async () => {
+      try {
+        const res = await api.get('/api/image/pricing/text-to-image');
+        if (active && res.data?.pricings) {
+          const pricings = res.data.pricings;
+          setModelOptions(prev => prev.map(m => {
+            let found = pricings.find((p: any) => {
+              const normP = (p.modelName || '').toLowerCase().replace(/[-_ .]/g, '');
+              return normP === normM || normP.includes(normM) || normM.includes(normP);
+            });
+            if (!found && pricings.length > 0) found = pricings[0];
+            if (found && found.costPerImage !== undefined) {
+              return {
+                ...m,
+                pricePerImage: Number(found.costPerImage)
+              };
+            }
+            return m;
+          }));
+        }
+      } catch (err) {}
+    };
+    loadPricing();
+    return () => { active = false; };
+  }, []);
+
   // Find active model object
   const currentModel = useMemo(() => {
-    return MODELS.find(m => m.id === selectedModelId) || MODELS[0];
-  }, [selectedModelId]);
+    return modelOptions.find(m => m.id === selectedModelId) || modelOptions[0];
+  }, [modelOptions, selectedModelId]);
 
-  const estimatedCost = currentModel.pricePerImage;
+  // Live estimated cost from backend
+  const [estimatedCost, setEstimatedCost] = useState<number>(4.0);
+  useEffect(() => {
+    let active = true;
+    const fetchCost = async () => {
+      try {
+        const res = await api.get(`/api/image/estimate-tool/text-to-image?model=${currentModel.id}&aspectRatio=${aspectRatio}`);
+        if (active && res.data?.estimatedCost !== undefined) {
+          setEstimatedCost(res.data.estimatedCost);
+        }
+      } catch (err) {
+        if (active && currentModel.pricePerImage) {
+          setEstimatedCost(currentModel.pricePerImage);
+        }
+      }
+    };
+    fetchCost();
+    return () => { active = false; };
+  }, [currentModel, aspectRatio]);
+
   const totalUserCredits = (user?.standardCredits || 0) + (user?.premiumCredits || 0);
   const hasSufficientCredits = totalUserCredits >= estimatedCost;
 
@@ -156,6 +206,14 @@ export default function TextToImagePage() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const handleModelSelect = (modelId: string) => {
+    const model = modelOptions.find(m => m.id === modelId);
+    if (model) {
+      setSelectedModelId(modelId);
+    }
+    setIsModelDropdownOpen(false);
+  };
 
   // Polling for generation status
   useEffect(() => {
@@ -744,13 +802,13 @@ export default function TextToImagePage() {
               {/* Model Dropdown Menu */}
               {isModelDropdownOpen && (
                 <div className="absolute z-50 top-full mt-1.5 w-full bg-[#0d041c] border border-orange-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
-                  {MODELS.map((m) => {
+                  {modelOptions.map((m) => {
                     const isSelected = selectedModelId === m.id;
                     return (
                       <button
                         key={m.id}
                         type="button"
-                        onClick={() => { setSelectedModelId(m.id); setIsModelDropdownOpen(false); }}
+                        onClick={() => handleModelSelect(m.id)}
                         className={`w-full text-start p-2.5 rounded-lg transition-all flex items-center justify-between gap-2 ${
                           isSelected 
                             ? "bg-orange-600/25 text-white border border-orange-500/40" 

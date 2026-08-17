@@ -34,6 +34,38 @@ namespace NexClone.Backend.API.Controllers.AI
             _backgroundJobClient = backgroundJobClient;
         }
 
+        [HttpGet("estimate-tool/{toolType}")]
+        public async Task<IActionResult> EstimateTool(string toolType, [FromQuery] string model = "grok", [FromQuery] string aspectRatio = "16:9", [FromQuery] int? subscriptionId = null)
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+
+            if (toolType != "text-to-image")
+                return BadRequest(new { error = "Invalid tool type." });
+
+            string qualityFormat = $"{model}|{aspectRatio}";
+            decimal usageUnits = 1;
+
+            var policyResult = await _usagePolicy.EstimateCostAsync(userId, toolType, usageUnits, usageUnits, qualityFormat, subscriptionId);
+            if (!policyResult.IsAllowed) return BadRequest(new { error = policyResult.ErrorMessage });
+
+            return Ok(new { estimatedCost = policyResult.TotalCost });
+        }
+
+        [AllowAnonymous]
+        [HttpGet("pricing/{toolType}")]
+        public async Task<IActionResult> GetToolPricing(string toolType)
+        {
+            if (toolType == "text-to-image")
+            {
+                var setting = await _dbContext.TextToImageSettings.FirstOrDefaultAsync();
+                var pricings = await _dbContext.TextToImageModelPricings.Where(p => p.IsActive).ToListAsync();
+                return Ok(new { isActive = setting?.IsActive ?? true, maxPrompt = setting?.MaxPromptLength ?? 5000, pricings });
+            }
+
+            return NotFound();
+        }
+
         [HttpPost("start-tool/{toolType}")]
         public async Task<IActionResult> StartImageTool(
             string toolType,
