@@ -7,6 +7,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using NexClone.Backend.Core.Interfaces;
+using NexClone.Backend.Infrastructure.ExternalServices.Payments;
 
 namespace NexClone.Backend.API.Controllers.Client
 {
@@ -16,15 +17,18 @@ namespace NexClone.Backend.API.Controllers.Client
     public class CheckoutController : ControllerBase
     {
         private readonly IPaymentService _paymentService;
+        private readonly PayPalPaymentService _payPalService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
 
         public CheckoutController(
             IPaymentService paymentService,
+            PayPalPaymentService payPalService,
             UserManager<ApplicationUser> userManager,
             ApplicationDbContext context)
         {
             _paymentService = paymentService;
+            _payPalService = payPalService;
             _userManager = userManager;
             _context = context;
         }
@@ -52,7 +56,8 @@ namespace NexClone.Backend.API.Controllers.Client
                     DisplayName     = ppg.DisplayName ?? ppg.GatewayConfig.ProviderName,
                     Currency        = ppg.Currency,
                     IsDefault       = ppg.IsDefault,
-                    SortOrder       = ppg.SortOrder
+                    SortOrder       = ppg.SortOrder,
+                    ClientId        = ppg.GatewayConfig.ProviderName == "PayPal" ? ppg.GatewayConfig.ClientId : null
                 })
                 .ToListAsync();
 
@@ -65,6 +70,11 @@ namespace NexClone.Backend.API.Controllers.Client
             public int GatewayConfigId { get; set; }
             public string Currency     { get; set; } = "EGP";
             public string Method       { get; set; }
+        }
+
+        public class CapturePayPalRequest
+        {
+            public string OrderId { get; set; }
         }
 
         /// <summary>
@@ -111,9 +121,51 @@ namespace NexClone.Backend.API.Controllers.Client
                 method:         request.Method);
 
             if (result.IsSuccess)
-                return Ok(new { checkoutUrl = result.CheckoutUrl, provider = result.Provider });
+                return Ok(new { checkoutUrl = result.CheckoutUrl, provider = result.Provider, orderId = result.OrderId, clientId = result.ClientId });
 
             return BadRequest(new { error = result.ErrorMessage });
+        }
+
+        /// <summary>
+        /// Creates a PayPal Order for Hosted Card Fields on frontend.
+        /// </summary>
+        [HttpPost("create-paypal-order")]
+        public async Task<IActionResult> CreatePayPalOrder([FromBody] CheckoutRequest request)
+        {
+            if (request == null || request.PlanId <= 0)
+                return BadRequest(new { error = "Invalid plan ID." });
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return NotFound(new { error = "User not found." });
+
+            var paypalConfig = await _context.PaymentGatewayConfigs.FirstOrDefaultAsync(c => c.ProviderName == "PayPal" && c.IsActive);
+            if (paypalConfig == null) return BadRequest(new { error = "PayPal is not configured." });
+
+            var result = await _payPalService.CreateOrderAsync(request.PlanId, paypalConfig.Id, userId, user.Email ?? "user@example.com", "USD");
+            if (!result.IsSuccess) return BadRequest(new { error = result.ErrorMessage });
+
+            return Ok(new { orderId = result.OrderId, clientId = result.ClientId, checkoutUrl = result.CheckoutUrl });
+        }
+
+        /// <summary>
+        /// Captures an authorized PayPal Order submitted via Hosted Card Fields.
+        /// </summary>
+        [HttpPost("capture-paypal-order")]
+        public async Task<IActionResult> CapturePayPalOrder([FromBody] CapturePayPalRequest request)
+        {
+            if (request == null || string.IsNullOrEmpty(request.OrderId))
+                return BadRequest(new { error = "Invalid Order ID." });
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
+            var result = await _payPalService.CaptureOrderAsync(request.OrderId, userId);
+            if (!result.IsSuccess) return BadRequest(new { error = result.ErrorMessage });
+
+            return Ok(new { success = true, orderId = result.OrderId });
         }
     }
 }

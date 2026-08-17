@@ -3,12 +3,16 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System;
+using System.Linq;
+using NexClone.Backend.Application.Services;
+using NexClone.Backend.Infrastructure.ExternalServices.Invoicing;
+using Hangfire;
 
 namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
 {
     /// <summary>
-    /// Handles PayPal Orders API v2 payments.
-    /// Uses Client Credentials flow to get an access token, then creates an order.
+    /// Handles PayPal Orders API v2 payments and Hosted Card Fields.
     /// Config stored in PaymentGatewayConfig with ProviderName = "PayPal":
     ///   ClientId     = PayPal App Client ID
     ///   ClientSecret = PayPal App Client Secret
@@ -18,11 +22,28 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
     {
         private readonly ApplicationDbContext _context;
         private readonly HttpClient _httpClient;
+        private readonly WalletService _walletService;
+        private readonly AffiliateService _affiliateService;
+        private readonly IInvoiceGeneratorService _invoiceService;
+        private readonly IMediaService _mediaService;
+        private readonly IEmailTemplateService _emailTemplateService;
 
-        public PayPalPaymentService(ApplicationDbContext context, HttpClient httpClient)
+        public PayPalPaymentService(
+            ApplicationDbContext context, 
+            HttpClient httpClient,
+            WalletService walletService = null,
+            AffiliateService affiliateService = null,
+            IInvoiceGeneratorService invoiceService = null,
+            IMediaService mediaService = null,
+            IEmailTemplateService emailTemplateService = null)
         {
             _context = context;
             _httpClient = httpClient;
+            _walletService = walletService;
+            _affiliateService = affiliateService;
+            _invoiceService = invoiceService;
+            _mediaService = mediaService;
+            _emailTemplateService = emailTemplateService;
         }
 
         public async Task<PaymentResult> CreateOrderAsync(
@@ -62,10 +83,9 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
             decimal taxAmount = (basePrice + fixedFee) * (taxPercentage / 100m);
             decimal finalTotal = basePrice + fixedFee + taxAmount;
             
-            var amount = finalTotal;
-            var amountStr = amount.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+            var amountStr = finalTotal.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
 
-            // 5. Build return/cancel URLs — these should come from AppSettings ideally
+            // 5. Build return/cancel URLs
             var frontendOrigin = await _context.AppSettings
                 .Where(s => s.Key == "Origin.AllowedOrigins")
                 .Select(s => s.Value)
@@ -82,7 +102,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
                 {
                     new
                     {
-                        reference_id = $"{userId}|{planId}", // Used in webhook to identify user+plan
+                        reference_id = $"{userId}|{planId}",
                         description  = $"Subscription — {plan.Name}",
                         amount       = new
                         {
@@ -99,7 +119,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
                         {
                             payment_method_preference = "UNRESTRICTED",
                             brand_name = "NexMedia AI",
-                            landing_page = "GUEST_CHECKOUT", // Forces guest checkout (credit card)
+                            landing_page = "GUEST_CHECKOUT",
                             user_action = "PAY_NOW",
                             return_url = returnUrl,
                             cancel_url = cancelUrl
@@ -121,7 +141,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
             if (!orderResponse.IsSuccessStatusCode)
                 return new PaymentResult { IsSuccess = false, ErrorMessage = $"PayPal Order Error: {orderContent}" };
 
-            // 7. Extract the approval URL from the response
+            // 7. Extract Order ID & Approval URL
             using var doc  = JsonDocument.Parse(orderContent);
             var root       = doc.RootElement;
             var orderId    = root.TryGetProperty("id", out var idEl) ? idEl.GetString() : null;
@@ -138,20 +158,242 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
                         {
                             approvalUrl = href.GetString() ?? string.Empty;
                             if (relStr == "payer-action") 
-                                break; // Prefer payer-action if both exist
+                                break;
                         }
                     }
                 }
             }
 
-            if (string.IsNullOrEmpty(approvalUrl))
-                return new PaymentResult { IsSuccess = false, ErrorMessage = $"No approval URL returned from PayPal. Raw response: {orderContent}" };
-
             return new PaymentResult
             {
                 IsSuccess   = true,
+                OrderId     = orderId,
+                ClientId    = config.ClientId,
                 CheckoutUrl = approvalUrl,
                 Provider    = "PayPal"
+            };
+        }
+
+        public async Task<PaymentResult> CaptureOrderAsync(string orderId, string userId)
+        {
+            if (string.IsNullOrEmpty(orderId))
+                return new PaymentResult { IsSuccess = false, ErrorMessage = "Invalid Order ID." };
+
+            var config = await _context.PaymentGatewayConfigs
+                .FirstOrDefaultAsync(c => c.ProviderName == "PayPal" && c.IsActive);
+
+            if (config == null || string.IsNullOrEmpty(config.ClientId) || string.IsNullOrEmpty(config.ClientSecret) || string.IsNullOrEmpty(config.ApiBase))
+                return new PaymentResult { IsSuccess = false, ErrorMessage = "PayPal configuration missing." };
+
+            var accessToken = await GetAccessTokenAsync(config.ClientId, config.ClientSecret, config.ApiBase);
+            if (string.IsNullOrEmpty(accessToken))
+                return new PaymentResult { IsSuccess = false, ErrorMessage = "Failed to authenticate with PayPal." };
+
+            // Check if already processed
+            var existingPayment = await _context.Payments.FirstOrDefaultAsync(p => p.PaymentId == orderId && p.Status == "Completed");
+            if (existingPayment != null)
+            {
+                return new PaymentResult { IsSuccess = true, OrderId = orderId, Provider = "PayPal" };
+            }
+
+            // Capture order via PayPal API
+            var captureRequest = new HttpRequestMessage(HttpMethod.Post, $"{config.ApiBase}/v2/checkout/orders/{orderId}/capture");
+            captureRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            captureRequest.Content = new System.Net.Http.StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+
+            var captureResponse = await _httpClient.SendAsync(captureRequest);
+            var captureContent = await captureResponse.Content.ReadAsStringAsync();
+
+            using var doc = JsonDocument.Parse(captureContent);
+            var root = doc.RootElement;
+            var status = root.TryGetProperty("status", out var statusEl) ? statusEl.GetString() : "";
+
+            if (status != "COMPLETED")
+            {
+                return new PaymentResult { IsSuccess = false, ErrorMessage = $"PayPal capture returned status: {status}. Raw: {captureContent}" };
+            }
+
+            // Extract reference_id -> "userId|planId"
+            string referenceId = "";
+            decimal amountUsd = 0;
+
+            if (root.TryGetProperty("purchase_units", out var units) && units.GetArrayLength() > 0)
+            {
+                var unit = units[0];
+                if (unit.TryGetProperty("reference_id", out var refEl))
+                    referenceId = refEl.GetString() ?? "";
+
+                if (unit.TryGetProperty("payments", out var paymentsEl) &&
+                    paymentsEl.TryGetProperty("captures", out var capturesEl) &&
+                    capturesEl.GetArrayLength() > 0)
+                {
+                    var cap = capturesEl[0];
+                    if (cap.TryGetProperty("amount", out var amtEl) && amtEl.TryGetProperty("value", out var valEl))
+                    {
+                        decimal.TryParse(valEl.GetString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out amountUsd);
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(referenceId) || !referenceId.Contains('|'))
+                return new PaymentResult { IsSuccess = false, ErrorMessage = "Missing reference metadata in PayPal order." };
+
+            var parts = referenceId.Split('|', 2);
+            if (!Guid.TryParse(parts[0], out var userGuid) || !int.TryParse(parts[1], out var planId))
+                return new PaymentResult { IsSuccess = false, ErrorMessage = "Malformed reference ID." };
+
+            var user = await _context.Users.FindAsync(userGuid);
+            var plan = await _context.Plans.FindAsync(planId);
+            if (user == null || plan == null)
+                return new PaymentResult { IsSuccess = false, ErrorMessage = "User or Plan not found." };
+
+            // Activate Subscription
+            var existingSub = await _context.Subscriptions
+                .Include(s => s.Plan)
+                .FirstOrDefaultAsync(s => s.UserId == user.Id && s.PlanId == plan.Id && (s.Status == "active" || s.Status == "freeze"));
+
+            Subscription currentSub = null;
+            bool shouldReset = false;
+
+            if (existingSub != null)
+            {
+                if (existingSub.EndDate < DateTime.UtcNow)
+                {
+                    var graceEnds = existingSub.EndDate.AddDays(existingSub.Plan.GracePeriodDays);
+                    if (DateTime.UtcNow > graceEnds) shouldReset = true;
+                }
+                existingSub.EndDate = (existingSub.EndDate > DateTime.UtcNow ? existingSub.EndDate : DateTime.UtcNow).AddDays(plan.DurationDays);
+                existingSub.Status = "active";
+                _context.Update(existingSub);
+                currentSub = existingSub;
+            }
+            else
+            {
+                var latestSub = await _context.Subscriptions
+                    .Include(s => s.Plan)
+                    .Where(s => s.UserId == user.Id && (s.Status == "active" || s.Status == "freeze"))
+                    .OrderByDescending(s => s.EndDate)
+                    .FirstOrDefaultAsync();
+
+                if (latestSub != null && latestSub.EndDate < DateTime.UtcNow)
+                {
+                    var graceEnds = latestSub.EndDate.AddDays(latestSub.Plan.GracePeriodDays);
+                    if (DateTime.UtcNow > graceEnds) shouldReset = true;
+                }
+
+                var activeSubs = await _context.Subscriptions
+                    .Where(s => s.UserId == user.Id && (s.Status == "active" || s.Status == "freeze"))
+                    .ToListAsync();
+                foreach (var s in activeSubs) s.Status = "canceled";
+
+                var newSub = new Subscription
+                {
+                    UserId = user.Id,
+                    PlanId = plan.Id,
+                    StartDate = DateTime.UtcNow,
+                    EndDate = DateTime.UtcNow.AddDays(plan.DurationDays),
+                    Status = "active"
+                };
+                _context.Subscriptions.Add(newSub);
+                currentSub = newSub;
+            }
+
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            if (_walletService != null)
+            {
+                await _walletService.DistributePlanCreditsAsync(user.Id, plan.Id, resetToZero: shouldReset, subscriptionId: currentSub?.Id);
+            }
+
+            var payment = new Payment
+            {
+                UserId = user.Id,
+                PlanId = plan.Id,
+                SubscriptionId = currentSub?.Id,
+                Amount = amountUsd,
+                Currency = "USD",
+                Method = "PayPal_Card",
+                PaymentId = orderId,
+                Status = "Completed",
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.Payments.Add(payment);
+            await _context.SaveChangesAsync();
+
+            // Affiliate Commission
+            if (_affiliateService != null)
+            {
+                try
+                {
+                    bool isRecurring = existingSub != null;
+                    await _affiliateService.CreateCommissionAsync(payment.Id, isRecurring);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Affiliate Error]: {ex.Message}");
+                }
+            }
+
+            // Invoice PDF
+            if (_invoiceService != null && _mediaService != null)
+            {
+                try
+                {
+                    decimal fixedFee = plan.FixedFeeUsd;
+                    decimal taxAmt = (plan.PriceUsd + fixedFee) * (plan.TaxPercentageUsd / 100m);
+                    decimal subTotal = amountUsd - taxAmt - fixedFee;
+
+                    var invoice = new Invoice
+                    {
+                        InvoiceNumber = $"INV-{DateTime.UtcNow.Year}-{Guid.NewGuid().ToString().Substring(0, 6).ToUpper()}",
+                        SubscriptionId = currentSub?.Id ?? 0,
+                        UserId = user.Id,
+                        PaymentGateway = "PayPal",
+                        PaymentMethod = "Card",
+                        Currency = "USD",
+                        SubTotal = subTotal,
+                        TaxAmount = taxAmt,
+                        FixedFeeAmount = fixedFee,
+                        TotalAmount = amountUsd,
+                        TransactionId = orderId,
+                        Subscription = currentSub
+                    };
+                    _context.Invoices.Add(invoice);
+                    await _context.SaveChangesAsync();
+
+                    string verifyUrlBase = Environment.GetEnvironmentVariable("NEXT_PUBLIC_SITE_URL") ?? "https://nexmediaai.com";
+                    byte[] pdfBytes = await _invoiceService.GenerateInvoicePdfAsync(invoice, verifyUrlBase);
+                    using var ms = new System.IO.MemoryStream(pdfBytes);
+                    var minioUrl = await _mediaService.UploadFileAsync(ms, $"invoices/{invoice.InvoiceNumber}.pdf", "application/pdf", "invoices");
+                    invoice.MinioPdfUrl = minioUrl;
+                    _context.Invoices.Update(invoice);
+                    await _context.SaveChangesAsync();
+
+                    if (_emailTemplateService != null && !string.IsNullOrEmpty(user.Email))
+                    {
+                        var htmlBody = _emailTemplateService.GetSubscriptionReceiptEmail(
+                            user.FullName ?? user.Email,
+                            plan.NameAr ?? plan.Name,
+                            currentSub.StartDate,
+                            currentSub.EndDate,
+                            plan.MonthlyCredits,
+                            amountUsd,
+                            minioUrl);
+                        BackgroundJob.Enqueue<NexClone.Backend.Infrastructure.Consumers.EmailConsumer>(c => c.Consume(new NexClone.Backend.Core.Messages.SendEmailMessage { ToEmail = user.Email, ToName = user.FullName ?? "", Subject = "تم تفعيل اشتراكك بنجاح - NexMedia AI", HtmlBody = htmlBody }));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Invoice Error]: {ex.Message}");
+                }
+            }
+
+            return new PaymentResult
+            {
+                IsSuccess = true,
+                OrderId = orderId,
+                Provider = "PayPal"
             };
         }
 

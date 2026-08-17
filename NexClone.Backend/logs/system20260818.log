@@ -22,3 +22,36 @@
 2026-08-18 00:22:50.784 +03:00 [INF] Sending HTTP request POST https://api-m.sandbox.paypal.com/v2/checkout/orders
 2026-08-18 00:22:51.845 +03:00 [INF] Received HTTP response headers after 1060.9088ms - 200
 2026-08-18 00:22:51.845 +03:00 [INF] End processing HTTP request after 1061.6744ms - 200
+2026-08-18 00:23:32.148 +03:00 [INF] Start processing HTTP request POST https://api-m.sandbox.paypal.com/v1/oauth2/token
+2026-08-18 00:23:32.149 +03:00 [INF] Sending HTTP request POST https://api-m.sandbox.paypal.com/v1/oauth2/token
+2026-08-18 00:23:32.804 +03:00 [INF] Received HTTP response headers after 654.2132ms - 200
+2026-08-18 00:23:32.804 +03:00 [INF] End processing HTTP request after 655.9108ms - 200
+2026-08-18 00:23:33.103 +03:00 [INF] Start processing HTTP request POST https://api-m.sandbox.paypal.com/v2/checkout/orders
+2026-08-18 00:23:33.103 +03:00 [INF] Sending HTTP request POST https://api-m.sandbox.paypal.com/v2/checkout/orders
+2026-08-18 00:23:34.127 +03:00 [INF] Received HTTP response headers after 1023.5128ms - 200
+2026-08-18 00:23:34.127 +03:00 [INF] End processing HTTP request after 1024.2624ms - 200
+2026-08-18 00:27:10.480 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-18 00:29:54.331 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-18 00:30:00.997 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-18 00:30:03.277 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-18 00:30:03.405 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-18 00:30:03.405 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-18 00:30:03.406 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-18 00:30:03.406 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-18 00:30:03.406 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-18 00:30:03.407 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-18 00:30:05.709 +03:00 [INF] Server desktop-rjppsk4:13200:657e913c successfully announced in 2277.3996 ms
+2026-08-18 00:30:05.718 +03:00 [INF] Server desktop-rjppsk4:13200:657e913c is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-18 00:30:05.743 +03:00 [INF] Server desktop-rjppsk4:13200:657e913c all the dispatchers started
+2026-08-18 00:30:35.366 +03:00 [INF] Start processing HTTP request POST https://api-m.sandbox.paypal.com/v1/oauth2/token
+2026-08-18 00:30:35.373 +03:00 [INF] Sending HTTP request POST https://api-m.sandbox.paypal.com/v1/oauth2/token
+2026-08-18 00:30:36.537 +03:00 [INF] Received HTTP response headers after 1157.7805ms - 200
+2026-08-18 00:30:36.540 +03:00 [INF] End processing HTTP request after 1184.3979ms - 200
+2026-08-18 00:30:36.848 +03:00 [INF] Start processing HTTP request POST https://api-m.sandbox.paypal.com/v2/checkout/orders
+2026-08-18 00:30:36.848 +03:00 [INF] Sending HTTP request POST https://api-m.sandbox.paypal.com/v2/checkout/orders
+2026-08-18 00:30:37.829 +03:00 [INF] Received HTTP response headers after 980.2212ms - 200
+2026-08-18 00:30:37.829 +03:00 [INF] End processing HTTP request after 981.368ms - 200
