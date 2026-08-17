@@ -406,33 +406,28 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
 
             numEl.innerHTML = ''; expEl.innerHTML = ''; cvvEl.innerHTML = '';
 
-            const numField = cf.NumberField({ placeholder: '1234  5678  9012  3456' });
-            const expField = cf.ExpiryField({ placeholder: 'MM / YY' });
-            const cvvField = cf.CVVField({ placeholder: '•••' });
+            const numField = cf.NumberField({
+              placeholder: '1234  5678  9012  3456',
+              onChange: (evt: any) => setNumberState({ isEmpty: evt.isEmpty, isValid: evt.isValid, isFocused: false }),
+              onFocus: () => setNumberState((s) => ({ ...s, isFocused: true })),
+              onBlur: () => setNumberState((s) => ({ ...s, isFocused: false })),
+            });
+            const expField = cf.ExpiryField({
+              placeholder: 'MM / YY',
+              onChange: (evt: any) => setExpiryState({ isEmpty: evt.isEmpty, isValid: evt.isValid, isFocused: false }),
+              onFocus: () => setExpiryState((s) => ({ ...s, isFocused: true })),
+              onBlur: () => setExpiryState((s) => ({ ...s, isFocused: false })),
+            });
+            const cvvField = cf.CVVField({
+              placeholder: '•••',
+              onChange: (evt: any) => setCvvState({ isEmpty: evt.isEmpty, isValid: evt.isValid, isFocused: false }),
+              onFocus: () => setCvvState((s) => ({ ...s, isFocused: true })),
+              onBlur: () => setCvvState((s) => ({ ...s, isFocused: false })),
+            });
 
             numField.render('#ppf-number');
             expField.render('#ppf-expiry');
             cvvField.render('#ppf-cvv');
-
-            // ── Subscribe to PayPal field events ──
-            // These events give us state (isEmpty, isValid, isFocused) NOT the actual value
-            numField.on('change', (evt: any) => {
-              setNumberState({ isEmpty: evt.isEmpty, isValid: evt.isValid, isFocused: false });
-            });
-            numField.on('focus',  () => setNumberState((s) => ({ ...s, isFocused: true })));
-            numField.on('blur',   () => setNumberState((s) => ({ ...s, isFocused: false })));
-
-            expField.on('change', (evt: any) => {
-              setExpiryState({ isEmpty: evt.isEmpty, isValid: evt.isValid, isFocused: false });
-            });
-            expField.on('focus',  () => setExpiryState((s) => ({ ...s, isFocused: true })));
-            expField.on('blur',   () => setExpiryState((s) => ({ ...s, isFocused: false })));
-
-            cvvField.on('change', (evt: any) => {
-              setCvvState({ isEmpty: evt.isEmpty, isValid: evt.isValid, isFocused: false });
-            });
-            cvvField.on('focus',  () => { setCvvState((s) => ({ ...s, isFocused: true })); });
-            cvvField.on('blur',   () => { setCvvState((s) => ({ ...s, isFocused: false })); });
 
             setIsCardFieldsReady(true);
           } catch (e) { console.warn('[PayPal render]', e); }
