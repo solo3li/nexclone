@@ -24,10 +24,15 @@ import {
   AlertCircle,
   Upload,
   X,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Download,
+  Maximize2,
+  Loader2,
+  Play
 } from "lucide-react";
 import api from "../../../../src/utils/api";
 import { useAppStore } from "../../../../src/store/useAppStore";
+import { signalRNotificationService } from "../../../../lib/signalr-client";
 
 interface ModelOption {
   id: string;
@@ -42,6 +47,16 @@ interface ModelOption {
   isPerSecond?: boolean;
   supportedResolutions: string[];
   prices: { [resolution: string]: number };
+}
+
+interface GeneratedVideoItem {
+  id: string;
+  url: string;
+  prompt: string;
+  model: string;
+  resolution: string;
+  aspectRatio: string;
+  createdAt: string;
 }
 
 const MODELS: ModelOption[] = [
@@ -134,7 +149,7 @@ const SAMPLE_ANIMATION_PROMPTS = {
 export default function ImageToVideoPage() {
   const locale = useLocale();
   const isRtl = locale === 'ar';
-  const { user } = useAppStore();
+  const { user, setUser } = useAppStore();
 
   // Selected Options
   const [selectedModelId, setSelectedModelId] = useState<string>("veo-3.1-fast");
@@ -153,16 +168,30 @@ export default function ImageToVideoPage() {
   const [isResDropdownOpen, setIsResDropdownOpen] = useState(false);
   const [isAspectDropdownOpen, setIsAspectDropdownOpen] = useState(false);
 
-  // Status and Notifications
+  // Generation and Polling State
   const [copied, setCopied] = useState(false);
+  const [copiedResultPrompt, setCopiedResultPrompt] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Generated Outputs
+  const [generatedVideo, setGeneratedVideo] = useState<GeneratedVideoItem | null>(null);
+  const [recentVideos, setRecentVideos] = useState<GeneratedVideoItem[]>([]);
+  const [lightboxVideoUrl, setLightboxVideoUrl] = useState<string | null>(null);
 
   // Refs for dropdown clicks
   const modelRef = useRef<HTMLDivElement>(null);
   const resRef = useRef<HTMLDivElement>(null);
   const aspectRef = useRef<HTMLDivElement>(null);
+  const resultCanvasRef = useRef<HTMLDivElement>(null);
+
+  // Find active model object
+  const currentModel = useMemo(() => {
+    return MODELS.find(m => m.id === selectedModelId) || MODELS[0];
+  }, [selectedModelId]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -179,11 +208,6 @@ export default function ImageToVideoPage() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  // Find active model object
-  const currentModel = useMemo(() => {
-    return MODELS.find(m => m.id === selectedModelId) || MODELS[0];
-  }, [selectedModelId]);
 
   // Adjust resolution if not supported by newly selected model
   const handleModelSelect = (modelId: string) => {
@@ -213,6 +237,73 @@ export default function ImageToVideoPage() {
     return () => { active = false; };
   }, [currentModel, resolution, duration]);
 
+  // Polling for generation status
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    let pollInterval: NodeJS.Timeout;
+
+    if (activeTaskId) {
+      setElapsedSeconds(0);
+      timer = setInterval(() => setElapsedSeconds(prev => prev + 1), 1000);
+
+      const checkTask = async () => {
+        try {
+          const res = await api.get(`/api/video/status/${activeTaskId}`);
+          const data = res.data;
+          if (data && (data.status === "succeeded" || data.status === "completed")) {
+            const finalUrl = data.url || data.fileUrl;
+            if (finalUrl) {
+              const newVidItem: GeneratedVideoItem = {
+                id: data.id || activeTaskId,
+                url: finalUrl,
+                prompt: data.prompt || prompt || (isRtl ? "تحريك صورة" : "Image Animation"),
+                model: currentModel.name,
+                resolution: resolution,
+                aspectRatio: aspectRatio,
+                createdAt: new Date().toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
+              };
+
+              setGeneratedVideo(newVidItem);
+              setRecentVideos(prev => [newVidItem, ...prev.filter(x => x.id !== newVidItem.id)]);
+              setActiveTaskId(null);
+              setIsLoading(false);
+              setSuccessMessage(isRtl ? "🎉 تم تحريك ورندر الفيديو بنجاح!" : "🎉 Image animated successfully!");
+
+              // Refresh user balance
+              api.get("/api/auth/me").then(uRes => {
+                if (uRes.data) setUser(uRes.data);
+              }).catch(() => {});
+
+              // Scroll smoothly to result
+              setTimeout(() => {
+                resultCanvasRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              }, 300);
+            }
+          } else if (data && (data.status === "failed" || data.status === "error")) {
+            setError(data.error || (isRtl ? "فشلت عملية تحريك الصورة" : "Animation generation failed"));
+            setActiveTaskId(null);
+            setIsLoading(false);
+          }
+        } catch (err: any) {
+          console.error("Polling status error:", err);
+        }
+      };
+
+      pollInterval = setInterval(checkTask, 3000);
+
+      // SignalR listener
+      signalRNotificationService.startConnection();
+      signalRNotificationService.onNotification(() => {
+        checkTask();
+      });
+
+      return () => {
+        clearInterval(timer);
+        clearInterval(pollInterval);
+      };
+    }
+  }, [activeTaskId, prompt, currentModel.name, resolution, aspectRatio, isRtl, locale, setUser]);
+
   // Total balance & check sufficiency
   const totalUserCredits = (user?.standardCredits || 0) + (user?.premiumCredits || 0);
   const hasSufficientCredits = totalUserCredits >= estimatedCost;
@@ -223,6 +314,7 @@ export default function ImageToVideoPage() {
       setImageFile(file);
       const url = URL.createObjectURL(file);
       setImagePreview(url);
+      setError(null);
     }
   };
 
@@ -258,6 +350,24 @@ export default function ImageToVideoPage() {
     setPrompt("");
   };
 
+  // Safe Cross-Origin HD Download
+  const handleDownloadVideo = async (url: string, filename?: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = filename || `animated_video_${Date.now()}.mp4`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch {
+      window.open(url, "_blank");
+    }
+  };
+
   // Submission handler
   const handleGenerate = async () => {
     if (!imageFile) {
@@ -271,8 +381,10 @@ export default function ImageToVideoPage() {
 
     try {
       const formData = new FormData();
+      // Append under multiple standard keys to guarantee binding
       formData.append("images", imageFile);
-      if (prompt) formData.append("prompt", prompt);
+      formData.append("image", imageFile);
+      if (prompt.trim()) formData.append("prompt", prompt.trim());
       formData.append("model", currentModel.id);
       formData.append("resolution", resolution);
       formData.append("aspectRatio", aspectRatio);
@@ -283,16 +395,20 @@ export default function ImageToVideoPage() {
         formData.append("duration", "8"); // Veo 8s standard
       }
 
-      const res = await api.post("/api/video/start-tool/image-to-video", formData);
-      setSuccessMessage(
-        isRtl 
-          ? "🎉 تمت إضافة الفيديو إلى طابور المعالجة بنجاح! سيصلك إشعار فوري عند اكتمال التحريك."
-          : "🎉 Animation added to generation queue! You will be notified once rendering completes."
-      );
-      setPrompt("");
+      const res = await api.post("/api/video/start-tool/image-to-video", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+
+      if (res.data?.taskId) {
+        setActiveTaskId(res.data.taskId);
+        setSuccessMessage(
+          isRtl 
+            ? "⚡ جاري تحريك ورندر المشهد عبر محرك الذكاء الاصطناعي..." 
+            : "⚡ Animating video with AI engine..."
+        );
+      }
     } catch (err: any) {
       setError(err.response?.data?.error || (isRtl ? "حدث خطأ أثناء إرسال طلب التوليد" : "Error submitting animation task"));
-    } finally {
       setIsLoading(false);
     }
   };
@@ -319,16 +435,16 @@ export default function ImageToVideoPage() {
                     {isRtl ? "الصورة الأصلية (Source Image)" : "Source Image"}
                   </label>
                   <span className="text-[11px] text-white/40 block">
-                    {isRtl ? "ارفع صورة لتحويلها إلى فيديو متحرك عالي الجودة" : "Upload any image to animate it into a fluid cinematic video"}
+                    {isRtl ? "ارفع صورة واضحة لتحويلها إلى فيديو متحرك" : "Upload an image to bring into life with cinematic motion"}
                   </span>
                 </div>
               </div>
 
-              {imageFile && (
+              {imagePreview && (
                 <button
                   type="button"
                   onClick={removeImage}
-                  className="px-2.5 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-semibold flex items-center gap-1 transition-colors"
+                  className="text-xs px-2.5 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 flex items-center gap-1 transition-all"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>{isRtl ? "حذف الصورة" : "Remove"}</span>
@@ -336,76 +452,78 @@ export default function ImageToVideoPage() {
               )}
             </div>
 
-            <div 
-              onClick={() => !imagePreview && fileInputRef.current?.click()}
-              className={`relative w-full h-56 rounded-xl border transition-all overflow-hidden flex flex-col items-center justify-center cursor-pointer group ${
-                imagePreview 
-                  ? "border-blue-500/40 bg-black/40" 
-                  : "border-white/10 border-dashed bg-[#06010f] hover:border-blue-500/50 hover:bg-white/5"
-              }`}
-            >
-              {imagePreview ? (
-                <>
-                  <img src={imagePreview} alt="Preview" className="w-full h-full object-contain" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between p-3">
-                    <span className="text-xs text-white/80 font-medium truncate">
-                      {imageFile?.name}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); removeImage(); }}
-                      className="p-1.5 rounded-lg bg-red-500 text-white transition-colors"
-                      title={isRtl ? "حذف" : "Remove"}
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <div className="flex flex-col items-center justify-center p-6 text-center space-y-2.5">
-                  <div className="w-12 h-12 rounded-2xl bg-white/5 group-hover:bg-blue-500/15 border border-white/5 group-hover:border-blue-500/30 flex items-center justify-center transition-colors">
-                    <Upload className="w-5 h-5 text-white/40 group-hover:text-blue-400" />
-                  </div>
-                  <div>
-                    <span className="text-sm font-semibold text-white/70 group-hover:text-white block">
-                      {isRtl ? "اضغط لرفع الصورة أو اسحبها إلى هنا" : "Click to upload image or drag & drop"}
-                    </span>
-                    <span className="text-[11px] text-white/30 block mt-1">
-                      {isRtl ? "يدعم صيغ JPG, PNG, WEBP بدقة عالية" : "Supports high-resolution JPG, PNG, WEBP"}
-                    </span>
-                  </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png, image/jpeg, image/webp"
+              onChange={handleImageChange}
+              className="hidden"
+            />
+
+            {!imagePreview ? (
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="border-2 border-dashed border-white/15 hover:border-violet-500/50 bg-[#06010f]/80 hover:bg-[#06010f] rounded-xl p-8 md:p-10 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-3 group"
+              >
+                <div className="w-14 h-14 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Upload className="w-6 h-6 text-violet-400" />
                 </div>
-              )}
-              <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/*" className="hidden" />
-            </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-bold text-white group-hover:text-violet-300 transition-colors">
+                    {isRtl ? "اضغط لرفع الصورة أو اسحبها إلى هنا" : "Click to upload or drag & drop"}
+                  </p>
+                  <p className="text-xs text-white/40 font-mono">
+                    PNG, JPG, WEBP • Max 25MB
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="relative rounded-xl overflow-hidden border border-white/10 bg-black flex items-center justify-center max-h-[360px] group">
+                <img
+                  src={imagePreview}
+                  alt="Source Preview"
+                  className="max-h-[360px] w-full object-contain"
+                />
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-4 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-white text-xs font-bold backdrop-blur-md transition-all flex items-center gap-1.5"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>{isRtl ? "تغيير الصورة" : "Change Image"}</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Prompt Studio Box */}
-          <div className="bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 md:p-6 shadow-xl space-y-4 backdrop-blur-md relative overflow-hidden group focus-within:border-blue-500/50 transition-all">
+          {/* Optional Motion Prompt Box */}
+          <div className="bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 md:p-6 shadow-xl space-y-4 backdrop-blur-md relative overflow-hidden group focus-within:border-violet-500/50 transition-all">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-                  <Wand2 className="w-3.5 h-3.5 text-blue-400" />
+                <div className="w-7 h-7 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
+                  <Wand2 className="w-3.5 h-3.5 text-violet-400" />
                 </div>
                 <div>
                   <label className="text-sm font-bold text-white block">
                     {isRtl ? "وصف التحريك (Motion Prompt) - اختياري" : "Motion Prompt (Optional)"}
                   </label>
                   <span className="text-[11px] text-white/40 block">
-                    {isRtl ? "صف حركة الكاميرا أو العناصر ليتولى الذكاء الاصطناعي تحريكها بدقة" : "Describe camera trajectory, subject action, or atmospheric movement"}
+                    {isRtl ? "صف حركة الكاميرا أو العناصر ليتولى الذكاء الاصطناعي تحريكها بدقة" : "Describe camera motion or actions to guide AI animation"}
                   </span>
                 </div>
               </div>
 
-              {/* Quick Actions */}
+              {/* Quick Actions in Header */}
               <div className="flex items-center gap-1.5">
                 <button
                   type="button"
                   onClick={handleEnhancePrompt}
                   title={isRtl ? "تحسين البرومت تلقائياً" : "Enhance with AI"}
-                  className="px-3 py-1.5 rounded-lg bg-blue-500/15 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95"
+                  className="px-3 py-1.5 rounded-lg bg-violet-500/15 hover:bg-violet-500/30 text-violet-300 border border-violet-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+                  <Sparkles className="w-3.5 h-3.5 text-violet-400" />
                   <span>{isRtl ? "تحسين ذكي ✨" : "Enhance AI ✨"}</span>
                 </button>
 
@@ -441,21 +559,21 @@ export default function ImageToVideoPage() {
                 maxLength={2000}
                 placeholder={
                   isRtl 
-                    ? "اكتب كيف تريد تحريك الصورة... (مثال: لقطة تقريب سينمائية بطيئة، نسيم خفيف يحرك الشعر، إضاءة ناعمة متحركة بدقة 4K)" 
-                    : "Describe how you want to animate the image... (e.g. Smooth cinematic slow zoom-in with gentle hair breeze and subtle volumetric lighting)"
+                    ? "صف كيف تريد تحريك المشهد... (مثال: اقتراب بطيء للكاميرا نحو الشخصية مع هبوب نسيم خفيف يحرك الشعر، إضاءة سينمائية دافئة)" 
+                    : "Describe how to animate the image... (e.g. Slow cinematic zoom in on the subject, hair blowing gently in the wind, soft golden hour rim light)"
                 }
-                className="w-full bg-[#06010f] border border-white/10 rounded-xl p-4 text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 resize-none text-sm md:text-base leading-relaxed transition-all shadow-inner font-sans"
+                className="w-full bg-[#06010f] border border-white/10 rounded-xl p-4 text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/40 resize-none text-sm md:text-base leading-relaxed transition-all shadow-inner font-sans"
               />
               <div className="absolute bottom-3 end-3 text-[11px] text-white/40 font-mono bg-[#06010f]/90 px-2 py-0.5 rounded border border-white/5">
                 {prompt.length} / 2000
               </div>
             </div>
 
-            {/* Inspiration Pills */}
+            {/* Quick Inspiration Pills */}
             <div className="space-y-2 pt-2 border-t border-white/5">
               <div className="flex items-center gap-1.5 text-xs text-white/50 font-medium">
                 <Flame className="w-3.5 h-3.5 text-amber-400" />
-                <span>{isRtl ? "أفكار حركية جاهزة للإلهام:" : "Quick Animation Presets:"}</span>
+                <span>{isRtl ? "أفكار حركية جاهزة للإلهام:" : "Motion Inspiration Presets:"}</span>
               </div>
               <div className="flex flex-wrap gap-2">
                 {(isRtl ? SAMPLE_ANIMATION_PROMPTS.ar : SAMPLE_ANIMATION_PROMPTS.en).map((sample, idx) => (
@@ -463,9 +581,9 @@ export default function ImageToVideoPage() {
                     key={idx}
                     type="button"
                     onClick={() => setPrompt(sample.text)}
-                    className="text-xs bg-white/5 hover:bg-blue-600/20 text-white/70 hover:text-white border border-white/10 hover:border-blue-500/40 rounded-lg px-3 py-1.5 transition-all text-start flex items-center gap-1.5"
+                    className="text-xs bg-white/5 hover:bg-violet-600/20 text-white/70 hover:text-white border border-white/10 hover:border-violet-500/40 rounded-lg px-3 py-1.5 transition-all text-start flex items-center gap-1.5"
                   >
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-violet-400 shrink-0" />
                     <span>{sample.title}</span>
                   </button>
                 ))}
@@ -484,16 +602,6 @@ export default function ImageToVideoPage() {
             </div>
           )}
 
-          {successMessage && (
-            <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-300 text-sm flex items-start gap-3 backdrop-blur-md">
-              <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5 text-emerald-400" />
-              <div className="space-y-0.5">
-                <p className="font-bold">{isRtl ? "تم إرسال الطلب بنجاح" : "Task Submitted Successfully"}</p>
-                <p className="text-xs text-emerald-300/80">{successMessage}</p>
-              </div>
-            </div>
-          )}
-
           {/* Action Bar & Submit CTA */}
           <div className="bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 shadow-xl backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="space-y-1 text-center sm:text-start">
@@ -501,19 +609,16 @@ export default function ImageToVideoPage() {
                 <span>{isRtl ? "الموديل:" : "Model:"}</span>
                 <span className="font-bold text-white">{isRtl ? currentModel.nameAr : currentModel.name}</span>
                 <span>•</span>
-                <span className="text-cyan-300 font-bold">{resolution}</span>
+                <span className="text-violet-300 font-bold">{resolution}</span>
                 <span>•</span>
-                <span className="text-white/80">{aspectRatio}</span>
+                <span className="text-amber-300 font-bold">{aspectRatio}</span>
               </div>
               <div className="flex items-center justify-center sm:justify-start gap-2">
                 <span className="text-xs text-white/50">{isRtl ? "التكلفة:" : "Cost:"}</span>
                 <span className="text-xl font-black text-amber-300 font-mono">{estimatedCost}</span>
-                <span className="text-xs text-amber-300/70 font-semibold">{isRtl ? "نقطة" : "Credits"}</span>
-                {currentModel.discount && currentModel.discount !== "Flexible" && (
-                  <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 rounded">
-                    {currentModel.discount} {isRtl ? "خصم" : "OFF"}
-                  </span>
-                )}
+                <span className="text-xs text-amber-300/70 font-semibold">
+                  {currentModel.isPerSecond ? (isRtl ? `نقطة (${duration} ثواني)` : `Credits (${duration}s)`) : (isRtl ? "نقطة / فيديو" : "Credits / Video")}
+                </span>
               </div>
             </div>
 
@@ -524,13 +629,13 @@ export default function ImageToVideoPage() {
               className={`w-full sm:w-auto px-7 py-3.5 rounded-xl font-extrabold text-sm md:text-base flex items-center justify-center gap-2.5 transition-all shadow-lg ${
                 isLoading || !imageFile || !hasSufficientCredits
                   ? "bg-white/10 text-white/40 cursor-not-allowed border border-white/5"
-                  : "bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 bg-[length:200%_auto] hover:bg-[position:right_center] text-white shadow-blue-900/40 hover:shadow-blue-800/70 active:scale-[0.98]"
+                  : "bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 bg-[length:200%_auto] hover:bg-[position:right_center] text-white shadow-violet-900/40 hover:shadow-violet-800/70 active:scale-[0.98]"
               }`}
             >
               {isLoading ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>{isRtl ? "جاري المعالجة والإرسال..." : "Processing & Queuing..."}</span>
+                  <Loader2 className="w-4 h-4 text-white animate-spin" />
+                  <span>{isRtl ? `جاري المعالجة والتحريك (${elapsedSeconds} ثانية)...` : `Animating Video (${elapsedSeconds}s)...`}</span>
                 </>
               ) : (
                 <>
@@ -540,106 +645,225 @@ export default function ImageToVideoPage() {
               )}
             </button>
           </div>
+
+          {/* ========================================================================= */}
+          {/* 3. Live Studio Result Canvas & Interactive Showcase                       */}
+          {/* ========================================================================= */}
+          <div ref={resultCanvasRef} className="space-y-4 pt-2">
+            {/* When Rendering */}
+            {isLoading && (
+              <div className="bg-[#0b0416]/95 border border-violet-500/30 rounded-2xl p-8 md:p-12 shadow-2xl text-center space-y-5 backdrop-blur-md relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-violet-500/5 via-purple-500/10 to-indigo-500/5 animate-pulse pointer-events-none" />
+                <div className="relative z-10 flex flex-col items-center space-y-4">
+                  <div className="relative">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/30 animate-bounce">
+                      <Film className="w-8 h-8 text-white" />
+                    </div>
+                    <div className="absolute -inset-2 bg-violet-500/20 blur-xl rounded-full animate-ping pointer-events-none" />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <h3 className="text-lg font-extrabold text-white">
+                      {isRtl ? "جاري تحريك ورندر الصورة بالذكاء الاصطناعي..." : "AI Image Animation in Progress..."}
+                    </h3>
+                    <p className="text-xs text-white/50 max-w-md mx-auto">
+                      {isRtl 
+                        ? `يتم الآن معالجة الحركة عبر محرك ${currentModel.nameAr} بدقة ${resolution}`
+                        : `Processing animation with ${currentModel.name} at ${resolution}`}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 bg-black/40 border border-white/10 px-3.5 py-1.5 rounded-full text-xs font-mono text-violet-400">
+                    <Clock className="w-3.5 h-3.5 animate-spin" />
+                    <span>{isRtl ? `الوقت المستغرق: ${elapsedSeconds} ثانية` : `Elapsed: ${elapsedSeconds}s`}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* When Result Ready */}
+            {generatedVideo && !isLoading && (
+              <div className="bg-[#0b0416]/95 border border-violet-500/30 rounded-2xl p-5 md:p-6 shadow-2xl space-y-5 backdrop-blur-md">
+                
+                {/* Result Header Bar */}
+                <div className="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-white/10">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-white">
+                        {isRtl ? "الفيديو النهائي (جاهز للمشاهدة والتحميل)" : "Final Animated Video"}
+                      </h3>
+                      <span className="text-[11px] text-white/40">
+                        {generatedVideo.createdAt} • {generatedVideo.resolution} • {generatedVideo.aspectRatio} • {generatedVideo.model}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Actions Header */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadVideo(generatedVideo.url, `animated_${generatedVideo.id.slice(0, 8)}.mp4`)}
+                      className="px-3.5 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-violet-900/30 transition-all active:scale-95"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>{isRtl ? "تحميل HD" : "Download HD"}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setLightboxVideoUrl(generatedVideo.url)}
+                      className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10 transition-all"
+                      title={isRtl ? "تكبير بملء الشاشة" : "Fullscreen"}
+                    >
+                      <Maximize2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Main Video Player */}
+                <div className="relative rounded-xl overflow-hidden border border-white/10 bg-black flex items-center justify-center">
+                  <video
+                    src={generatedVideo.url}
+                    controls
+                    autoPlay
+                    loop
+                    playsInline
+                    className="max-h-[550px] w-full object-contain rounded-lg"
+                  />
+                </div>
+
+                {/* Video Prompt details & copy */}
+                {generatedVideo.prompt && (
+                  <div className="bg-[#06010f] border border-white/5 rounded-xl p-3.5 space-y-2">
+                    <div className="flex items-center justify-between text-xs text-white/50">
+                      <span className="font-semibold">{isRtl ? "الوصف المستخدم:" : "Prompt Used:"}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(generatedVideo.prompt);
+                          setCopiedResultPrompt(true);
+                          setTimeout(() => setCopiedResultPrompt(false), 2000);
+                        }}
+                        className="flex items-center gap-1 text-violet-400 hover:text-violet-300 transition-colors"
+                      >
+                        {copiedResultPrompt ? <CheckCheck className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>{copiedResultPrompt ? (isRtl ? "تم النسخ!" : "Copied!") : (isRtl ? "نسخ الوصف" : "Copy Prompt")}</span>
+                      </button>
+                    </div>
+                    <p className="text-xs text-white/80 leading-relaxed font-sans" dir="auto">
+                      {generatedVideo.prompt}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Session Gallery (Recent Videos in this session) */}
+            {recentVideos.length > 1 && (
+              <div className="bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 shadow-xl space-y-3 backdrop-blur-md">
+                <h4 className="text-xs font-bold text-white/70 flex items-center gap-2">
+                  <Film className="w-3.5 h-3.5 text-violet-400" />
+                  <span>{isRtl ? "معرض فيديوهات هذه الجلسة" : "Session Generated Videos Gallery"}</span>
+                </h4>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {recentVideos.map((vid) => {
+                    const isSelected = generatedVideo?.id === vid.id;
+                    return (
+                      <button
+                        key={vid.id}
+                        type="button"
+                        onClick={() => setGeneratedVideo(vid)}
+                        className={`relative aspect-video rounded-xl overflow-hidden border transition-all group bg-black ${
+                          isSelected ? "border-violet-500 ring-2 ring-violet-500/50 scale-105" : "border-white/10 hover:border-white/30 opacity-70 hover:opacity-100"
+                        }`}
+                      >
+                        <video src={vid.url} className="w-full h-full object-cover pointer-events-none" />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Play className="w-6 h-6 text-white fill-white" />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
         </div>
 
         {/* ========================================================================= */}
-        {/* 2. Side Settings Panel: Compact Dropdowns & Parameters Controls           */}
+        {/* 2. Side Settings Panel: Dropdowns & Parameters Controls                    */}
         {/* ========================================================================= */}
         <div className="lg:col-span-4 space-y-5">
           <div className="sticky top-20 bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 shadow-xl space-y-4 backdrop-blur-md">
             
             <div className="flex items-center justify-between pb-3 border-b border-white/10">
               <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                <SlidersHorizontal className="w-4 h-4 text-blue-400" />
-                <span>{isRtl ? "إعدادات تحريك الصورة" : "Animation Settings"}</span>
+                <SlidersHorizontal className="w-4 h-4 text-violet-400" />
+                <span>{isRtl ? "إعدادات التحريك" : "Animation Settings"}</span>
               </h2>
               <span className="text-[10px] text-white/40 uppercase tracking-widest font-mono">Options</span>
             </div>
 
-            {/* 1. Model & Tier Dropdown Select */}
+            {/* 1. Model Dropdown Select */}
             <div className="space-y-1.5 relative" ref={modelRef}>
               <label className="text-xs font-bold text-white/80 flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-blue-400" />
-                <span>{isRtl ? "الموديل والمحرك" : "Model & Tier"}</span>
+                <Layers className="w-3.5 h-3.5 text-violet-400" />
+                <span>{isRtl ? "محرك الذكاء الاصطناعي" : "AI Animation Model"}</span>
               </label>
 
               <button
                 type="button"
                 onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
-                className="w-full bg-[#06010f] border border-white/10 hover:border-blue-500/40 rounded-xl p-3 text-start flex items-center justify-between gap-2.5 transition-all group"
+                className="w-full bg-[#06010f] border border-white/10 hover:border-violet-500/40 rounded-xl p-3 text-start flex items-center justify-between gap-2.5 transition-all group"
               >
                 <div className="space-y-0.5 truncate">
                   <div className="flex items-center gap-2 truncate">
                     <span className="font-bold text-xs md:text-sm text-white truncate">
                       {isRtl ? currentModel.nameAr : currentModel.name}
                     </span>
-                    <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-1 py-0.5 rounded shrink-0">
-                      {currentModel.discount}
-                    </span>
+                    {currentModel.discount && (
+                      <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-1 py-0.5 rounded shrink-0">
+                        {currentModel.discount}
+                      </span>
+                    )}
                   </div>
                   <p className="text-[10px] text-white/40 truncate">
                     {isRtl ? currentModel.descAr : currentModel.desc}
                   </p>
                 </div>
-                <ChevronDown className={`w-4 h-4 text-white/50 transition-transform duration-200 shrink-0 ${isModelDropdownOpen ? "rotate-180 text-blue-400" : ""}`} />
+                <ChevronDown className={`w-4 h-4 text-white/50 transition-transform duration-200 shrink-0 ${isModelDropdownOpen ? "rotate-180 text-violet-400" : ""}`} />
               </button>
 
               {/* Model Dropdown Menu */}
               {isModelDropdownOpen && (
-                <div className="absolute z-50 top-full mt-1.5 w-full bg-[#0d041c] border border-blue-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
-                  <div className="px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-blue-400/70 border-b border-white/5">
-                    {isRtl ? "نماذج Google Veo 3.1" : "Google Veo 3.1 Models"}
-                  </div>
-
-                  {MODELS.filter(m => m.family === "veo").map((m) => {
+                <div className="absolute z-50 top-full mt-1.5 w-full bg-[#0d041c] border border-violet-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                  {MODELS.map((m) => {
                     const isSelected = selectedModelId === m.id;
                     return (
                       <button
                         key={m.id}
                         type="button"
                         onClick={() => handleModelSelect(m.id)}
-                        className={`w-full text-start p-2 rounded-lg transition-all flex items-center justify-between gap-2 ${
+                        className={`w-full text-start p-2.5 rounded-lg transition-all flex items-center justify-between gap-2 ${
                           isSelected 
-                            ? "bg-blue-600/25 text-white border border-blue-500/40" 
+                            ? "bg-violet-600/25 text-white border border-violet-500/40" 
                             : "hover:bg-white/5 text-white/70 hover:text-white"
                         }`}
                       >
                         <div className="space-y-0.5">
                           <div className="flex items-center gap-1.5">
                             <span className="font-bold text-xs text-white">{isRtl ? m.nameAr : m.name}</span>
-                            <span className="text-[9px] text-emerald-400 bg-emerald-500/10 px-1 rounded font-mono">{m.discount}</span>
+                            {m.discount && (
+                              <span className="text-[9px] text-emerald-400 bg-emerald-500/10 px-1 rounded">{m.discount}</span>
+                            )}
                           </div>
                           <p className="text-[10px] text-white/40">{isRtl ? m.badgeAr : m.badge}</p>
                         </div>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-blue-400 shrink-0" />}
-                      </button>
-                    );
-                  })}
-
-                  <div className="px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-fuchsia-400/70 border-b border-white/5 pt-2">
-                    {isRtl ? "نماذج xAI Grok" : "xAI Grok Models"}
-                  </div>
-
-                  {MODELS.filter(m => m.family === "grok").map((m) => {
-                    const isSelected = selectedModelId === m.id;
-                    return (
-                      <button
-                        key={m.id}
-                        type="button"
-                        onClick={() => handleModelSelect(m.id)}
-                        className={`w-full text-start p-2 rounded-lg transition-all flex items-center justify-between gap-2 ${
-                          isSelected 
-                            ? "bg-fuchsia-600/25 text-white border border-fuchsia-500/40" 
-                            : "hover:bg-white/5 text-white/70 hover:text-white"
-                        }`}
-                      >
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-xs text-white">{isRtl ? m.nameAr : m.name}</span>
-                          </div>
-                          <p className="text-[10px] text-white/40">{isRtl ? m.badgeAr : m.badge}</p>
-                        </div>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-fuchsia-400 shrink-0" />}
+                        {isSelected && <Check className="w-3.5 h-3.5 text-violet-400 shrink-0" />}
                       </button>
                     );
                   })}
@@ -650,37 +874,31 @@ export default function ImageToVideoPage() {
             {/* 2. Resolution Dropdown Select */}
             <div className="space-y-1.5 relative" ref={resRef}>
               <label className="text-xs font-bold text-white/80 flex items-center gap-1.5">
-                <Monitor className="w-3.5 h-3.5 text-amber-400" />
-                <span>{isRtl ? "دقة الفيديو" : "Resolution"}</span>
+                <Film className="w-3.5 h-3.5 text-indigo-400" />
+                <span>{isRtl ? "دقة الفيديو (Resolution)" : "Resolution"}</span>
               </label>
 
               <button
                 type="button"
                 onClick={() => setIsResDropdownOpen(!isResDropdownOpen)}
-                className="w-full bg-[#06010f] border border-white/10 hover:border-amber-500/40 rounded-xl p-3 text-start flex items-center justify-between gap-2.5 transition-all"
+                className="w-full bg-[#06010f] border border-white/10 hover:border-indigo-500/40 rounded-xl p-3 text-start flex items-center justify-between gap-2.5 transition-all"
               >
                 <div>
                   <span className="font-bold text-xs md:text-sm text-white block">
                     {RESOLUTIONS.find(r => r.id === resolution)?.label || resolution}
                   </span>
                   <span className="text-[10px] text-white/40 block">
-                    {isRtl 
-                      ? RESOLUTIONS.find(r => r.id === resolution)?.descAr 
-                      : RESOLUTIONS.find(r => r.id === resolution)?.desc}
+                    {isRtl ? RESOLUTIONS.find(r => r.id === resolution)?.descAr : RESOLUTIONS.find(r => r.id === resolution)?.desc}
                   </span>
                 </div>
-                <ChevronDown className={`w-4 h-4 text-white/50 transition-transform duration-200 ${isResDropdownOpen ? "rotate-180 text-amber-400" : ""}`} />
+                <ChevronDown className={`w-4 h-4 text-white/50 transition-transform duration-200 ${isResDropdownOpen ? "rotate-180 text-indigo-400" : ""}`} />
               </button>
 
               {/* Resolution Dropdown Menu */}
               {isResDropdownOpen && (
-                <div className="absolute z-40 top-full mt-1.5 w-full bg-[#0d041c] border border-amber-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="absolute z-40 top-full mt-1.5 w-full bg-[#0d041c] border border-indigo-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
                   {RESOLUTIONS.filter(r => currentModel.supportedResolutions.includes(r.id)).map((r) => {
                     const isSelected = resolution === r.id;
-                    const priceTag = currentModel.isPerSecond
-                      ? `${currentModel.prices[r.id]} Cr/s`
-                      : `${currentModel.prices[r.id]} Cr (8s)`;
-
                     return (
                       <button
                         key={r.id}
@@ -688,7 +906,7 @@ export default function ImageToVideoPage() {
                         onClick={() => { setResolution(r.id); setIsResDropdownOpen(false); }}
                         className={`w-full text-start p-2 rounded-lg transition-all flex items-center justify-between gap-2 ${
                           isSelected 
-                            ? "bg-amber-500/20 text-white border border-amber-500/40" 
+                            ? "bg-indigo-600/25 text-white border border-indigo-500/40" 
                             : "hover:bg-white/5 text-white/70 hover:text-white"
                         }`}
                       >
@@ -696,10 +914,7 @@ export default function ImageToVideoPage() {
                           <span className="font-bold text-xs text-white block">{r.label}</span>
                           <span className="text-[10px] text-white/40">{isRtl ? r.descAr : r.desc}</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-mono font-bold text-amber-300">{priceTag}</span>
-                          {isSelected && <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
-                        </div>
+                        {isSelected && <Check className="w-3.5 h-3.5 text-indigo-400 shrink-0" />}
                       </button>
                     );
                   })}
@@ -710,19 +925,19 @@ export default function ImageToVideoPage() {
             {/* 3. Aspect Ratio Dropdown Select */}
             <div className="space-y-1.5 relative" ref={aspectRef}>
               <label className="text-xs font-bold text-white/80 flex items-center gap-1.5">
-                <Film className="w-3.5 h-3.5 text-cyan-400" />
+                <Monitor className="w-3.5 h-3.5 text-amber-400" />
                 <span>{isRtl ? "أبعاد الفيديو (Aspect Ratio)" : "Aspect Ratio"}</span>
               </label>
 
               <button
                 type="button"
                 onClick={() => setIsAspectDropdownOpen(!isAspectDropdownOpen)}
-                className="w-full bg-[#06010f] border border-white/10 hover:border-cyan-500/40 rounded-xl p-3 text-start flex items-center justify-between gap-2.5 transition-all"
+                className="w-full bg-[#06010f] border border-white/10 hover:border-amber-500/40 rounded-xl p-3 text-start flex items-center justify-between gap-2.5 transition-all"
               >
                 <div className="flex items-center gap-2.5">
                   {(() => {
                     const IconComp = ASPECT_RATIOS.find(a => a.id === aspectRatio)?.icon || Monitor;
-                    return <IconComp className="w-4 h-4 text-cyan-400" />;
+                    return <IconComp className="w-4 h-4 text-amber-400" />;
                   })()}
                   <div>
                     <span className="font-bold text-xs md:text-sm text-white block">
@@ -735,12 +950,12 @@ export default function ImageToVideoPage() {
                     </span>
                   </div>
                 </div>
-                <ChevronDown className={`w-4 h-4 text-white/50 transition-transform duration-200 ${isAspectDropdownOpen ? "rotate-180 text-cyan-400" : ""}`} />
+                <ChevronDown className={`w-4 h-4 text-white/50 transition-transform duration-200 ${isAspectDropdownOpen ? "rotate-180 text-amber-400" : ""}`} />
               </button>
 
               {/* Aspect Ratio Dropdown Menu */}
               {isAspectDropdownOpen && (
-                <div className="absolute z-30 top-full mt-1.5 w-full bg-[#0d041c] border border-cyan-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="absolute z-30 top-full mt-1.5 w-full bg-[#0d041c] border border-amber-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
                   {ASPECT_RATIOS.map((a) => {
                     const isSelected = aspectRatio === a.id;
                     const IconComp = a.icon;
@@ -751,18 +966,18 @@ export default function ImageToVideoPage() {
                         onClick={() => { setAspectRatio(a.id); setIsAspectDropdownOpen(false); }}
                         className={`w-full text-start p-2 rounded-lg transition-all flex items-center justify-between gap-2 ${
                           isSelected 
-                            ? "bg-cyan-500/20 text-white border border-cyan-500/40" 
+                            ? "bg-amber-500/20 text-white border border-amber-500/40" 
                             : "hover:bg-white/5 text-white/70 hover:text-white"
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
-                          <IconComp className="w-4 h-4 text-cyan-400" />
+                          <IconComp className="w-4 h-4 text-amber-400" />
                           <div>
                             <span className="font-bold text-xs text-white block">{a.label}</span>
                             <span className="text-[10px] text-white/40">{isRtl ? a.descAr : a.desc}</span>
                           </div>
                         </div>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />}
+                        {isSelected && <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
                       </button>
                     );
                   })}
@@ -770,29 +985,24 @@ export default function ImageToVideoPage() {
               )}
             </div>
 
-            {/* 4. Grok Duration Slider (Shown only when Grok is active) */}
+            {/* 4. Duration Slider for Grok only */}
             {currentModel.isPerSecond && (
               <div className="space-y-2 pt-2 border-t border-white/5">
-                <div className="flex justify-between items-center">
-                  <label className="text-xs font-bold text-white/80 flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-fuchsia-400" />
-                    <span>{isRtl ? "مدة الفيديو" : "Duration"}</span>
-                  </label>
-                  <span className="text-xs font-mono font-extrabold text-fuchsia-300 bg-fuchsia-500/15 border border-fuchsia-500/30 px-2 py-0.5 rounded">
-                    {duration}s
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-bold text-white/80 flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-pink-400" />
+                    <span>{isRtl ? "مدة الفيديو:" : "Duration:"}</span>
                   </span>
+                  <span className="font-bold text-amber-400 font-mono text-sm">{duration} {isRtl ? "ثواني" : "seconds"}</span>
                 </div>
-
-                <input 
-                  type="range" 
-                  min="1" 
-                  max="30" 
-                  step="1" 
-                  value={duration} 
-                  onChange={(e) => setDuration(Number(e.target.value))}
-                  className="w-full h-1.5 bg-white/10 rounded-lg appearance-none cursor-pointer accent-fuchsia-500"
+                <input
+                  type="range"
+                  min="1"
+                  max="30"
+                  value={duration}
+                  onChange={(e) => setDuration(parseInt(e.target.value))}
+                  className="w-full accent-violet-500 cursor-pointer bg-white/10 rounded-lg h-2"
                 />
-
                 <div className="flex justify-between text-[10px] text-white/40 font-mono">
                   <span>1s</span>
                   <span>15s</span>
@@ -805,7 +1015,7 @@ export default function ImageToVideoPage() {
             <div className="pt-2 border-t border-white/5 space-y-2.5">
               <div className="bg-[#06010f] border border-white/5 rounded-xl p-3.5 space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-white/50">{isRtl ? "تكلفة العملية:" : "Operation Cost:"}</span>
+                  <span className="text-white/50">{isRtl ? "تكلفة التوليد:" : "Estimated Cost:"}</span>
                   <span className="font-bold text-amber-300 font-mono">{estimatedCost} Cr</span>
                 </div>
                 <div className="flex justify-between items-center text-xs">
@@ -823,7 +1033,7 @@ export default function ImageToVideoPage() {
               {!hasSufficientCredits && (
                 <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 shrink-0" />
-                  <span>{isRtl ? "رصيدك غير كافٍ. يرجى شحن الرصيد." : "Insufficient credits. Please top up."}</span>
+                  <span>{isRtl ? "رصيدك غير كافٍ لتوليد هذا الفيديو. يرجى شحن الرصيد." : "Insufficient credits. Please top up."}</span>
                 </div>
               )}
             </div>
@@ -832,6 +1042,42 @@ export default function ImageToVideoPage() {
         </div>
 
       </div>
+
+      {/* Lightbox Video Modal */}
+      {lightboxVideoUrl && (
+        <div 
+          onClick={() => setLightboxVideoUrl(null)}
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 animate-in fade-in duration-200"
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxVideoUrl(null)}
+            className="absolute top-5 end-5 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
+          
+          <div className="max-w-5xl max-h-[90vh] w-full relative" onClick={e => e.stopPropagation()}>
+            <video 
+              src={lightboxVideoUrl} 
+              controls 
+              autoPlay 
+              playsInline 
+              className="max-w-full max-h-[85vh] w-full object-contain rounded-2xl shadow-2xl border border-white/10 bg-black"
+            />
+            <div className="mt-3 flex justify-center">
+              <button
+                type="button"
+                onClick={() => handleDownloadVideo(lightboxVideoUrl)}
+                className="px-6 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-sm flex items-center gap-2 shadow-xl shadow-violet-950/50"
+              >
+                <Download className="w-4 h-4" />
+                <span>{isRtl ? "تحميل الفيديو بدقة أصلية" : "Download Original Video"}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

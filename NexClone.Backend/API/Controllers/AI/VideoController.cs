@@ -516,10 +516,16 @@ namespace NexClone.Backend.API.Controllers.AI
             if (toolType == "text-to-video" && string.IsNullOrWhiteSpace(prompt))
                 return BadRequest(new { error = "يرجى كتابة وصف المشهد (Prompt) أولاً." });
 
-            if (toolType == "image-to-video" && (images == null || images.Count == 0))
+            var fileList = images != null ? new List<IFormFile>(images) : new List<IFormFile>();
+            if (fileList.Count == 0 && Request.HasFormContentType && Request.Form.Files.Count > 0)
+            {
+                fileList = Request.Form.Files.ToList();
+            }
+
+            if (toolType == "image-to-video" && fileList.Count == 0)
                 return BadRequest(new { error = "An image is required for this tool." });
 
-            if (toolType == "reference-to-video" && (images == null || images.Count == 0))
+            if (toolType == "reference-to-video" && fileList.Count == 0)
                 return BadRequest(new { error = "At least one reference image is required." });
 
             string qualityFormat = $"{model}|{resolution}";
@@ -558,11 +564,11 @@ namespace NexClone.Backend.API.Controllers.AI
                     AspectRatio = aspectRatio
                 };
 
-                if (images != null && images.Count > 0)
+                if (fileList.Count > 0)
                 {
-                    using (var ms = new MemoryStream()) { await images[0].CopyToAsync(ms); message.Image1Bytes = ms.ToArray(); message.Image1ContentType = images[0].ContentType; }
-                    if (images.Count > 1) { using (var ms = new MemoryStream()) { await images[1].CopyToAsync(ms); message.Image2Bytes = ms.ToArray(); message.Image2ContentType = images[1].ContentType; } }
-                    if (images.Count > 2) { using (var ms = new MemoryStream()) { await images[2].CopyToAsync(ms); message.Image3Bytes = ms.ToArray(); message.Image3ContentType = images[2].ContentType; } }
+                    using (var ms = new MemoryStream()) { await fileList[0].CopyToAsync(ms); message.Image1Bytes = ms.ToArray(); message.Image1ContentType = fileList[0].ContentType; }
+                    if (fileList.Count > 1) { using (var ms = new MemoryStream()) { await fileList[1].CopyToAsync(ms); message.Image2Bytes = ms.ToArray(); message.Image2ContentType = fileList[1].ContentType; } }
+                    if (fileList.Count > 2) { using (var ms = new MemoryStream()) { await fileList[2].CopyToAsync(ms); message.Image3Bytes = ms.ToArray(); message.Image3ContentType = fileList[2].ContentType; } }
                 }
 
                 _backgroundJobClient.Enqueue<NexClone.Backend.Infrastructure.Consumers.VideoToolConsumer>(

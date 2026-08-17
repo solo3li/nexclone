@@ -13,6 +13,7 @@ import {
   Smartphone, 
   Square, 
   Coins, 
+  Clock,
   Check, 
   Layers, 
   Copy, 
@@ -22,10 +23,15 @@ import {
   CheckCircle2,
   AlertCircle,
   Upload,
-  X
+  X,
+  Download,
+  Maximize2,
+  Loader2,
+  Play
 } from "lucide-react";
 import api from "../../../../src/utils/api";
 import { useAppStore } from "../../../../src/store/useAppStore";
+import { signalRNotificationService } from "../../../../lib/signalr-client";
 
 interface ModelOption {
   id: string;
@@ -38,6 +44,16 @@ interface ModelOption {
   discount?: string;
   supportedResolutions: string[];
   prices: { [resolution: string]: number };
+}
+
+interface GeneratedVideoItem {
+  id: string;
+  url: string;
+  prompt: string;
+  model: string;
+  resolution: string;
+  aspectRatio: string;
+  createdAt: string;
 }
 
 const MODELS: ModelOption[] = [
@@ -115,7 +131,7 @@ const FRAME_SLOTS = [
 export default function ReferenceToVideoPage() {
   const locale = useLocale();
   const isRtl = locale === 'ar';
-  const { user } = useAppStore();
+  const { user, setUser } = useAppStore();
 
   // Selected Options (Google Veo 3.1 only)
   const [selectedModelId, setSelectedModelId] = useState<string>("veo-3.1-fast");
@@ -134,14 +150,23 @@ export default function ReferenceToVideoPage() {
 
   // Status and Notifications
   const [copied, setCopied] = useState(false);
+  const [copiedResultPrompt, setCopiedResultPrompt] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Generated Outputs
+  const [generatedVideo, setGeneratedVideo] = useState<GeneratedVideoItem | null>(null);
+  const [recentVideos, setRecentVideos] = useState<GeneratedVideoItem[]>([]);
+  const [lightboxVideoUrl, setLightboxVideoUrl] = useState<string | null>(null);
 
   // Refs for dropdown clicks
   const modelRef = useRef<HTMLDivElement>(null);
   const resRef = useRef<HTMLDivElement>(null);
   const aspectRef = useRef<HTMLDivElement>(null);
+  const resultCanvasRef = useRef<HTMLDivElement>(null);
   const fileInputs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)];
 
   useEffect(() => {
@@ -183,7 +208,6 @@ export default function ReferenceToVideoPage() {
     let active = true;
     const fetchCost = async () => {
       try {
-        // duration is usually fixed at 8s for Veo reference videos
         const res = await api.get(`/api/video/estimate-tool/reference-to-video?model=${currentModel.id}&resolution=${resolution}&duration=8`);
         if (active && res.data?.estimatedCost !== undefined) {
           setEstimatedCost(res.data.estimatedCost);
@@ -193,6 +217,73 @@ export default function ReferenceToVideoPage() {
     fetchCost();
     return () => { active = false; };
   }, [currentModel, resolution]);
+
+  // Polling for generation status
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    let pollInterval: NodeJS.Timeout;
+
+    if (activeTaskId) {
+      setElapsedSeconds(0);
+      timer = setInterval(() => setElapsedSeconds(prev => prev + 1), 1000);
+
+      const checkTask = async () => {
+        try {
+          const res = await api.get(`/api/video/status/${activeTaskId}`);
+          const data = res.data;
+          if (data && (data.status === "succeeded" || data.status === "completed")) {
+            const finalUrl = data.url || data.fileUrl;
+            if (finalUrl) {
+              const newVidItem: GeneratedVideoItem = {
+                id: data.id || activeTaskId,
+                url: finalUrl,
+                prompt: data.prompt || prompt || (isRtl ? "فيديو مرجعي" : "Reference Video"),
+                model: currentModel.name,
+                resolution: resolution,
+                aspectRatio: aspectRatio,
+                createdAt: new Date().toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
+              };
+
+              setGeneratedVideo(newVidItem);
+              setRecentVideos(prev => [newVidItem, ...prev.filter(x => x.id !== newVidItem.id)]);
+              setActiveTaskId(null);
+              setIsLoading(false);
+              setSuccessMessage(isRtl ? "🎉 تم رندر وتوليد الفيديو المرجعي بنجاح!" : "🎉 Reference video generated successfully!");
+
+              // Refresh user balance
+              api.get("/api/auth/me").then(uRes => {
+                if (uRes.data) setUser(uRes.data);
+              }).catch(() => {});
+
+              // Scroll smoothly to result
+              setTimeout(() => {
+                resultCanvasRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              }, 300);
+            }
+          } else if (data && (data.status === "failed" || data.status === "error")) {
+            setError(data.error || (isRtl ? "فشلت عملية توليد الفيديو المرجعي" : "Reference video generation failed"));
+            setActiveTaskId(null);
+            setIsLoading(false);
+          }
+        } catch (err: any) {
+          console.error("Polling status error:", err);
+        }
+      };
+
+      pollInterval = setInterval(checkTask, 3000);
+
+      // SignalR listener
+      signalRNotificationService.startConnection();
+      signalRNotificationService.onNotification(() => {
+        checkTask();
+      });
+
+      return () => {
+        clearInterval(timer);
+        clearInterval(pollInterval);
+      };
+    }
+  }, [activeTaskId, prompt, currentModel.name, resolution, aspectRatio, isRtl, locale, setUser]);
 
   // Total balance & check sufficiency
   const totalUserCredits = (user?.standardCredits || 0) + (user?.premiumCredits || 0);
@@ -204,6 +295,7 @@ export default function ReferenceToVideoPage() {
       setSlotFiles(prev => ({ ...prev, [index]: file }));
       const url = URL.createObjectURL(file);
       setSlotPreviews(prev => ({ ...prev, [index]: url }));
+      setError(null);
     }
   };
 
@@ -241,6 +333,24 @@ export default function ReferenceToVideoPage() {
     setPrompt("");
   };
 
+  // Safe Cross-Origin HD Download
+  const handleDownloadVideo = async (url: string, filename?: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = filename || `reference_video_${Date.now()}.mp4`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch {
+      window.open(url, "_blank");
+    }
+  };
+
   // Submission handler
   const handleGenerate = async () => {
     if (totalUploadedImagesCount === 0) {
@@ -255,30 +365,35 @@ export default function ReferenceToVideoPage() {
     try {
       const formData = new FormData();
       
-      // Append valid slot files in sequence
+      // Append valid slot files in sequence under both keys
       [0, 1, 2].forEach(idx => {
         const file = slotFiles[idx];
         if (file) {
           formData.append("images", file);
+          formData.append("image", file);
         }
       });
 
-      if (prompt) formData.append("prompt", prompt);
+      if (prompt.trim()) formData.append("prompt", prompt.trim());
       formData.append("model", currentModel.id);
       formData.append("resolution", resolution);
       formData.append("aspectRatio", aspectRatio);
       formData.append("duration", "8"); // Veo 8s standard
 
-      const res = await api.post("/api/video/start-tool/reference-to-video", formData);
-      setSuccessMessage(
-        isRtl 
-          ? "🎉 تمت إضافة الفيديو المرجعي إلى طابور المعالجة بنجاح! سيصلك إشعار فوري فور اكتماله."
-          : "🎉 Reference video added to generation queue! You will be notified once rendering completes."
-      );
-      setPrompt("");
+      const res = await api.post("/api/video/start-tool/reference-to-video", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+
+      if (res.data?.taskId) {
+        setActiveTaskId(res.data.taskId);
+        setSuccessMessage(
+          isRtl 
+            ? "⚡ جاري معالجة وتوليد الفيديو المرجعي عبر محرك الذكاء الاصطناعي..." 
+            : "⚡ Generating reference video with AI engine..."
+        );
+      }
     } catch (err: any) {
       setError(err.response?.data?.error || (isRtl ? "حدث خطأ أثناء إرسال طلب التوليد" : "Error submitting reference video task"));
-    } finally {
       setIsLoading(false);
     }
   };
@@ -293,7 +408,7 @@ export default function ReferenceToVideoPage() {
         {/* ========================================================================= */}
         <div className="lg:col-span-8 space-y-5">
           
-          {/* 1.1 Storyboard Reference Frames Grid */}
+          {/* Storyboard Reference Frames Grid */}
           <div className="bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 md:p-6 shadow-xl space-y-4 backdrop-blur-md">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -302,86 +417,86 @@ export default function ReferenceToVideoPage() {
                 </div>
                 <div>
                   <label className="text-sm font-bold text-white block">
-                    {isRtl ? "شريط الإطارات المرجعية (Storyboard Frames)" : "Storyboard Reference Frames"}
+                    {isRtl ? "الستوري بورد المرجعي (Multi-Frame Storyboard)" : "Reference Storyboard Slots"}
                   </label>
                   <span className="text-[11px] text-white/40 block">
-                    {isRtl ? "ارفع حتى 3 صور لتوجيه بداية المشهد، الشخصية، ونهايته مع محرك Google Veo" : "Upload up to 3 frames to guide scene progression and character style via Google Veo"}
+                    {isRtl ? "ارفع حتى 3 صور لتوجيه بداية المشهد ونهايته وأسلوب الشخصية" : "Upload up to 3 frames to interpolate sequence and style"}
                   </span>
                 </div>
               </div>
 
-              <div className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-white/60">
-                {totalUploadedImagesCount} / 3 {isRtl ? "صور" : "Frames"}
-              </div>
+              <span className="text-xs font-mono px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-emerald-400">
+                {totalUploadedImagesCount} / 3 {isRtl ? "صور" : "frames"}
+              </span>
             </div>
 
-            {/* 3 Storyboard Slots */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-1">
+            {/* 3 Storyboard Slots Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
               {FRAME_SLOTS.map((slot) => {
                 const preview = slotPreviews[slot.key];
+                const inputRef = fileInputs[slot.key];
+
                 return (
                   <div key={slot.key} className="space-y-1.5">
-                    <div className="flex items-center justify-between text-[11px] font-bold text-white/70 px-1">
-                      <span>{isRtl ? slot.titleAr : slot.titleEn}</span>
-                      <span className="text-[9px] text-white/30 font-mono">#{slot.key + 1}</span>
-                    </div>
+                    <input
+                      ref={inputRef}
+                      type="file"
+                      accept="image/png, image/jpeg, image/webp"
+                      onChange={(e) => handleSlotImageChange(slot.key, e.target.files?.[0] || null)}
+                      className="hidden"
+                    />
 
-                    <div 
-                      onClick={() => !preview && fileInputs[slot.key].current?.click()}
-                      className={`relative h-44 rounded-xl border transition-all overflow-hidden flex flex-col items-center justify-center cursor-pointer group ${
-                        preview 
-                          ? "border-emerald-500/40 bg-black/40" 
-                          : "border-white/10 border-dashed bg-[#06010f] hover:border-emerald-500/50 hover:bg-white/5"
-                      }`}
-                    >
-                      {preview ? (
-                        <>
-                          <img src={preview} alt={slot.titleEn} className="w-full h-full object-cover" />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between p-2.5">
-                            <span className="text-[10px] text-white/80 font-medium truncate">
-                              {slotFiles[slot.key]?.name}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={(e) => { e.stopPropagation(); handleRemoveSlot(slot.key); }}
-                              className="p-1 rounded-lg bg-red-500/80 hover:bg-red-500 text-white transition-colors"
-                              title={isRtl ? "حذف" : "Remove"}
-                            >
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </>
-                      ) : (
-                        <div className="flex flex-col items-center justify-center p-4 text-center space-y-2">
-                          <div className="w-9 h-9 rounded-xl bg-white/5 group-hover:bg-emerald-500/15 border border-white/5 group-hover:border-emerald-500/30 flex items-center justify-center transition-colors">
-                            <Upload className="w-4 h-4 text-white/40 group-hover:text-emerald-400" />
-                          </div>
-                          <div>
-                            <span className="text-xs font-semibold text-white/60 group-hover:text-white block">
-                              {isRtl ? "اضغط للرفع" : "Click to upload"}
-                            </span>
-                            <span className="text-[10px] text-white/30 block mt-0.5">
-                              {isRtl ? slot.descAr : slot.descEn}
-                            </span>
-                          </div>
-                        </div>
+                    <div className="flex justify-between items-center text-[11px] px-1">
+                      <span className="font-bold text-white/80">{isRtl ? slot.titleAr : slot.titleEn}</span>
+                      {preview && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveSlot(slot.key)}
+                          className="text-red-400 hover:text-red-300 transition-colors"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
                       )}
                     </div>
 
-                    <input 
-                      type="file" 
-                      ref={fileInputs[slot.key]} 
-                      onChange={(e) => handleSlotImageChange(slot.key, e.target.files?.[0] || null)} 
-                      accept="image/*" 
-                      className="hidden" 
-                    />
+                    {!preview ? (
+                      <div
+                        onClick={() => inputRef.current?.click()}
+                        className="border-2 border-dashed border-white/15 hover:border-emerald-500/50 bg-[#06010f]/80 hover:bg-[#06010f] rounded-xl p-4 aspect-[4/3] flex flex-col items-center justify-center gap-2 cursor-pointer transition-all group text-center"
+                      >
+                        <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <Upload className="w-4 h-4 text-emerald-400" />
+                        </div>
+                        <span className="text-[10px] text-white/50 group-hover:text-white transition-colors">
+                          {isRtl ? slot.descAr : slot.descEn}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="relative rounded-xl overflow-hidden border border-white/10 bg-black aspect-[4/3] group">
+                        <img
+                          src={preview}
+                          alt={`Slot ${slot.key}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <button
+                            type="button"
+                            onClick={() => inputRef.current?.click()}
+                            className="px-2.5 py-1 rounded-lg bg-white/20 hover:bg-white/30 text-white text-[10px] font-bold backdrop-blur-md transition-all flex items-center gap-1"
+                          >
+                            <Upload className="w-3 h-3" />
+                            <span>{isRtl ? "تغيير" : "Change"}</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}
             </div>
           </div>
 
-          {/* 1.2 Prompt Studio Box */}
+          {/* Optional Prompt Box */}
           <div className="bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 md:p-6 shadow-xl space-y-4 backdrop-blur-md relative overflow-hidden group focus-within:border-emerald-500/50 transition-all">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -390,15 +505,15 @@ export default function ReferenceToVideoPage() {
                 </div>
                 <div>
                   <label className="text-sm font-bold text-white block">
-                    {isRtl ? "وصف الحركة والتحول (Motion & Transition Prompt)" : "Motion & Transition Prompt"}
+                    {isRtl ? "وصف التحول والقصة (Story & Transition Prompt)" : "Story & Transition Prompt"}
                   </label>
                   <span className="text-[11px] text-white/40 block">
-                    {isRtl ? "صف ما يحدث بين هذه الصور وكيف تتحرك الكاميرا وتتغير العناصر" : "Describe the movement, pacing, and visual transformation between frames"}
+                    {isRtl ? "صف كيف تريد أن تندمج وتتحول اللقطات المرجعية زمنياً" : "Describe the morphing and narrative linking these frames"}
                   </span>
                 </div>
               </div>
 
-              {/* Quick Actions */}
+              {/* Quick Actions in Header */}
               <div className="flex items-center gap-1.5">
                 <button
                   type="button"
@@ -438,12 +553,12 @@ export default function ReferenceToVideoPage() {
               <textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                rows={5}
+                rows={4}
                 maxLength={2000}
                 placeholder={
                   isRtl 
-                    ? "اكتب وصف المشهد والانتقال الحركي بين الصور بالتفصيل... (اختياري، مثلاً: تحول سينمائي تدريجي سلس مع حركة كاميرا مقربة وثبات ملامح الشخصية)" 
-                    : "Describe the transition and camera motion between the reference images... (e.g. Smooth cinematic zoom-in preserving character details with rich lighting)"
+                    ? "صف قصة التحول بين الصور... (مثال: تحول سينمائي سلس من الإطار الأول إلى الأخير مع حركة كاميرا بطيئة وثبات للشخصية)" 
+                    : "Describe the transition story between frames... (e.g. Smooth cinematic morph from start to end with volumetric lighting)"
                 }
                 className="w-full bg-[#06010f] border border-white/10 rounded-xl p-4 text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500/40 resize-none text-sm md:text-base leading-relaxed transition-all shadow-inner font-sans"
               />
@@ -452,11 +567,11 @@ export default function ReferenceToVideoPage() {
               </div>
             </div>
 
-            {/* Inspiration Pills */}
+            {/* Quick Inspiration Pills */}
             <div className="space-y-2 pt-2 border-t border-white/5">
               <div className="flex items-center gap-1.5 text-xs text-white/50 font-medium">
                 <Flame className="w-3.5 h-3.5 text-amber-400" />
-                <span>{isRtl ? "أفكار حركية جاهزة للإلهام:" : "Quick Transition Presets:"}</span>
+                <span>{isRtl ? "أفكار سينمائية للتحول:" : "Cinematic Morph Presets:"}</span>
               </div>
               <div className="flex flex-wrap gap-2">
                 {(isRtl ? SAMPLE_REFERENCE_PROMPTS.ar : SAMPLE_REFERENCE_PROMPTS.en).map((sample, idx) => (
@@ -485,16 +600,6 @@ export default function ReferenceToVideoPage() {
             </div>
           )}
 
-          {successMessage && (
-            <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-300 text-sm flex items-start gap-3 backdrop-blur-md">
-              <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5 text-emerald-400" />
-              <div className="space-y-0.5">
-                <p className="font-bold">{isRtl ? "تم إرسال الطلب بنجاح" : "Task Submitted Successfully"}</p>
-                <p className="text-xs text-emerald-300/80">{successMessage}</p>
-              </div>
-            </div>
-          )}
-
           {/* Action Bar & Submit CTA */}
           <div className="bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 shadow-xl backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="space-y-1 text-center sm:text-start">
@@ -502,21 +607,14 @@ export default function ReferenceToVideoPage() {
                 <span>{isRtl ? "الموديل:" : "Model:"}</span>
                 <span className="font-bold text-white">{isRtl ? currentModel.nameAr : currentModel.name}</span>
                 <span>•</span>
-                <span className="text-cyan-300 font-bold">{resolution}</span>
+                <span className="text-emerald-300 font-bold">{resolution}</span>
                 <span>•</span>
-                <span className="text-white/80">{aspectRatio}</span>
-                <span>•</span>
-                <span className="text-emerald-400 font-mono font-bold">8s</span>
+                <span className="text-amber-300 font-bold">{aspectRatio}</span>
               </div>
               <div className="flex items-center justify-center sm:justify-start gap-2">
                 <span className="text-xs text-white/50">{isRtl ? "التكلفة:" : "Cost:"}</span>
                 <span className="text-xl font-black text-amber-300 font-mono">{estimatedCost}</span>
-                <span className="text-xs text-amber-300/70 font-semibold">{isRtl ? "نقطة" : "Credits"}</span>
-                {currentModel.discount && (
-                  <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 rounded">
-                    {currentModel.discount} {isRtl ? "خصم" : "OFF"}
-                  </span>
-                )}
+                <span className="text-xs text-amber-300/70 font-semibold">{isRtl ? "نقطة / فيديو" : "Credits / Video"}</span>
               </div>
             </div>
 
@@ -527,26 +625,173 @@ export default function ReferenceToVideoPage() {
               className={`w-full sm:w-auto px-7 py-3.5 rounded-xl font-extrabold text-sm md:text-base flex items-center justify-center gap-2.5 transition-all shadow-lg ${
                 isLoading || totalUploadedImagesCount === 0 || !hasSufficientCredits
                   ? "bg-white/10 text-white/40 cursor-not-allowed border border-white/5"
-                  : "bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 bg-[length:200%_auto] hover:bg-[position:right_center] text-white shadow-emerald-900/40 hover:shadow-emerald-800/70 active:scale-[0.98]"
+                  : "bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 bg-[length:200%_auto] hover:bg-[position:right_center] text-white shadow-emerald-900/40 hover:shadow-emerald-800/70 active:scale-[0.98]"
               }`}
             >
               {isLoading ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>{isRtl ? "جاري المعالجة والإرسال..." : "Processing & Queuing..."}</span>
+                  <Loader2 className="w-4 h-4 text-white animate-spin" />
+                  <span>{isRtl ? `جاري المعالجة والرندر (${elapsedSeconds} ثانية)...` : `Rendering Video (${elapsedSeconds}s)...`}</span>
                 </>
               ) : (
                 <>
                   <Zap className="w-4 h-4 text-amber-300" />
-                  <span>{isRtl ? `توليد الفيديو المرجعي (${estimatedCost} نقطة)` : `Generate Reference Video (${estimatedCost} Credits)`}</span>
+                  <span>{isRtl ? `توليد الفيديو (${estimatedCost} نقطة)` : `Generate Video (${estimatedCost} Credits)`}</span>
                 </>
               )}
             </button>
           </div>
+
+          {/* ========================================================================= */}
+          {/* 3. Live Studio Result Canvas & Interactive Showcase                       */}
+          {/* ========================================================================= */}
+          <div ref={resultCanvasRef} className="space-y-4 pt-2">
+            {/* When Rendering */}
+            {isLoading && (
+              <div className="bg-[#0b0416]/95 border border-emerald-500/30 rounded-2xl p-8 md:p-12 shadow-2xl text-center space-y-5 backdrop-blur-md relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-teal-500/10 to-cyan-500/5 animate-pulse pointer-events-none" />
+                <div className="relative z-10 flex flex-col items-center space-y-4">
+                  <div className="relative">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/30 animate-bounce">
+                      <Film className="w-8 h-8 text-white" />
+                    </div>
+                    <div className="absolute -inset-2 bg-emerald-500/20 blur-xl rounded-full animate-ping pointer-events-none" />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <h3 className="text-lg font-extrabold text-white">
+                      {isRtl ? "جاري رندر وتوليد الفيديو المرجعي بالذكاء الاصطناعي..." : "AI Reference Video Rendering..."}
+                    </h3>
+                    <p className="text-xs text-white/50 max-w-md mx-auto">
+                      {isRtl 
+                        ? `يتم الآن دمج الإطارات المرجعية عبر محرك ${currentModel.nameAr} بدقة ${resolution}`
+                        : `Processing reference sequence with ${currentModel.name} at ${resolution}`}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 bg-black/40 border border-white/10 px-3.5 py-1.5 rounded-full text-xs font-mono text-emerald-400">
+                    <Clock className="w-3.5 h-3.5 animate-spin" />
+                    <span>{isRtl ? `الوقت المستغرق: ${elapsedSeconds} ثانية` : `Elapsed: ${elapsedSeconds}s`}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* When Result Ready */}
+            {generatedVideo && !isLoading && (
+              <div className="bg-[#0b0416]/95 border border-emerald-500/30 rounded-2xl p-5 md:p-6 shadow-2xl space-y-5 backdrop-blur-md">
+                
+                {/* Result Header Bar */}
+                <div className="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-white/10">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-white">
+                        {isRtl ? "الفيديو المرجعي النهائي (جاهز للمشاهدة والتحميل)" : "Final Reference Video"}
+                      </h3>
+                      <span className="text-[11px] text-white/40">
+                        {generatedVideo.createdAt} • {generatedVideo.resolution} • {generatedVideo.aspectRatio} • {generatedVideo.model}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Actions Header */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadVideo(generatedVideo.url, `reference_${generatedVideo.id.slice(0, 8)}.mp4`)}
+                      className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-900/30 transition-all active:scale-95"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>{isRtl ? "تحميل HD" : "Download HD"}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setLightboxVideoUrl(generatedVideo.url)}
+                      className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10 transition-all"
+                      title={isRtl ? "تكبير بملء الشاشة" : "Fullscreen"}
+                    >
+                      <Maximize2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Main Video Player */}
+                <div className="relative rounded-xl overflow-hidden border border-white/10 bg-black flex items-center justify-center">
+                  <video
+                    src={generatedVideo.url}
+                    controls
+                    autoPlay
+                    loop
+                    playsInline
+                    className="max-h-[550px] w-full object-contain rounded-lg"
+                  />
+                </div>
+
+                {/* Video Prompt details & copy */}
+                {generatedVideo.prompt && (
+                  <div className="bg-[#06010f] border border-white/5 rounded-xl p-3.5 space-y-2">
+                    <div className="flex items-center justify-between text-xs text-white/50">
+                      <span className="font-semibold">{isRtl ? "الوصف المستخدم:" : "Prompt Used:"}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(generatedVideo.prompt);
+                          setCopiedResultPrompt(true);
+                          setTimeout(() => setCopiedResultPrompt(false), 2000);
+                        }}
+                        className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition-colors"
+                      >
+                        {copiedResultPrompt ? <CheckCheck className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>{copiedResultPrompt ? (isRtl ? "تم النسخ!" : "Copied!") : (isRtl ? "نسخ الوصف" : "Copy Prompt")}</span>
+                      </button>
+                    </div>
+                    <p className="text-xs text-white/80 leading-relaxed font-sans" dir="auto">
+                      {generatedVideo.prompt}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Session Gallery (Recent Videos in this session) */}
+            {recentVideos.length > 1 && (
+              <div className="bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 shadow-xl space-y-3 backdrop-blur-md">
+                <h4 className="text-xs font-bold text-white/70 flex items-center gap-2">
+                  <Film className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>{isRtl ? "معرض فيديوهات هذه الجلسة" : "Session Generated Videos Gallery"}</span>
+                </h4>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {recentVideos.map((vid) => {
+                    const isSelected = generatedVideo?.id === vid.id;
+                    return (
+                      <button
+                        key={vid.id}
+                        type="button"
+                        onClick={() => setGeneratedVideo(vid)}
+                        className={`relative aspect-video rounded-xl overflow-hidden border transition-all group bg-black ${
+                          isSelected ? "border-emerald-500 ring-2 ring-emerald-500/50 scale-105" : "border-white/10 hover:border-white/30 opacity-70 hover:opacity-100"
+                        }`}
+                      >
+                        <video src={vid.url} className="w-full h-full object-cover pointer-events-none" />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Play className="w-6 h-6 text-white fill-white" />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
         </div>
 
         {/* ========================================================================= */}
-        {/* 2. Side Settings Panel: Compact Dropdowns & Parameters Controls           */}
+        {/* 2. Side Settings Panel: Dropdowns & Parameters Controls                    */}
         {/* ========================================================================= */}
         <div className="lg:col-span-4 space-y-5">
           <div className="sticky top-20 bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 shadow-xl space-y-4 backdrop-blur-md">
@@ -554,16 +799,16 @@ export default function ReferenceToVideoPage() {
             <div className="flex items-center justify-between pb-3 border-b border-white/10">
               <h2 className="text-sm font-bold text-white flex items-center gap-2">
                 <SlidersHorizontal className="w-4 h-4 text-emerald-400" />
-                <span>{isRtl ? "إعدادات Google Veo" : "Google Veo Settings"}</span>
+                <span>{isRtl ? "إعدادات الفيديو المرجعي" : "Settings"}</span>
               </h2>
               <span className="text-[10px] text-white/40 uppercase tracking-widest font-mono">Options</span>
             </div>
 
-            {/* 1. Model & Tier Dropdown Select */}
+            {/* 1. Model Dropdown Select */}
             <div className="space-y-1.5 relative" ref={modelRef}>
               <label className="text-xs font-bold text-white/80 flex items-center gap-1.5">
                 <Layers className="w-3.5 h-3.5 text-emerald-400" />
-                <span>{isRtl ? "موديل Google Veo 3.1" : "Google Veo 3.1 Model"}</span>
+                <span>{isRtl ? "محرك الذكاء الاصطناعي" : "AI Model"}</span>
               </label>
 
               <button
@@ -576,9 +821,11 @@ export default function ReferenceToVideoPage() {
                     <span className="font-bold text-xs md:text-sm text-white truncate">
                       {isRtl ? currentModel.nameAr : currentModel.name}
                     </span>
-                    <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-1 py-0.5 rounded shrink-0">
-                      {currentModel.discount}
-                    </span>
+                    {currentModel.discount && (
+                      <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-1 py-0.5 rounded shrink-0">
+                        {currentModel.discount}
+                      </span>
+                    )}
                   </div>
                   <p className="text-[10px] text-white/40 truncate">
                     {isRtl ? currentModel.descAr : currentModel.desc}
@@ -590,10 +837,6 @@ export default function ReferenceToVideoPage() {
               {/* Model Dropdown Menu */}
               {isModelDropdownOpen && (
                 <div className="absolute z-50 top-full mt-1.5 w-full bg-[#0d041c] border border-emerald-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
-                  <div className="px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-emerald-400/70 border-b border-white/5">
-                    {isRtl ? "نماذج Google Veo 3.1 المرجعية" : "Google Veo 3.1 Reference Models"}
-                  </div>
-
                   {MODELS.map((m) => {
                     const isSelected = selectedModelId === m.id;
                     return (
@@ -610,7 +853,9 @@ export default function ReferenceToVideoPage() {
                         <div className="space-y-0.5">
                           <div className="flex items-center gap-1.5">
                             <span className="font-bold text-xs text-white">{isRtl ? m.nameAr : m.name}</span>
-                            <span className="text-[9px] text-emerald-400 bg-emerald-500/10 px-1 rounded font-mono">{m.discount}</span>
+                            {m.discount && (
+                              <span className="text-[9px] text-emerald-400 bg-emerald-500/10 px-1 rounded">{m.discount}</span>
+                            )}
                           </div>
                           <p className="text-[10px] text-white/40">{isRtl ? m.badgeAr : m.badge}</p>
                         </div>
@@ -625,43 +870,39 @@ export default function ReferenceToVideoPage() {
             {/* 2. Resolution Dropdown Select */}
             <div className="space-y-1.5 relative" ref={resRef}>
               <label className="text-xs font-bold text-white/80 flex items-center gap-1.5">
-                <Monitor className="w-3.5 h-3.5 text-amber-400" />
-                <span>{isRtl ? "دقة الفيديو" : "Resolution"}</span>
+                <Film className="w-3.5 h-3.5 text-teal-400" />
+                <span>{isRtl ? "دقة الفيديو (Resolution)" : "Resolution"}</span>
               </label>
 
               <button
                 type="button"
                 onClick={() => setIsResDropdownOpen(!isResDropdownOpen)}
-                className="w-full bg-[#06010f] border border-white/10 hover:border-amber-500/40 rounded-xl p-3 text-start flex items-center justify-between gap-2.5 transition-all"
+                className="w-full bg-[#06010f] border border-white/10 hover:border-teal-500/40 rounded-xl p-3 text-start flex items-center justify-between gap-2.5 transition-all"
               >
                 <div>
                   <span className="font-bold text-xs md:text-sm text-white block">
                     {RESOLUTIONS.find(r => r.id === resolution)?.label || resolution}
                   </span>
                   <span className="text-[10px] text-white/40 block">
-                    {isRtl 
-                      ? RESOLUTIONS.find(r => r.id === resolution)?.descAr 
-                      : RESOLUTIONS.find(r => r.id === resolution)?.desc}
+                    {isRtl ? RESOLUTIONS.find(r => r.id === resolution)?.descAr : RESOLUTIONS.find(r => r.id === resolution)?.desc}
                   </span>
                 </div>
-                <ChevronDown className={`w-4 h-4 text-white/50 transition-transform duration-200 ${isResDropdownOpen ? "rotate-180 text-amber-400" : ""}`} />
+                <ChevronDown className={`w-4 h-4 text-white/50 transition-transform duration-200 ${isResDropdownOpen ? "rotate-180 text-teal-400" : ""}`} />
               </button>
 
               {/* Resolution Dropdown Menu */}
               {isResDropdownOpen && (
-                <div className="absolute z-40 top-full mt-1.5 w-full bg-[#0d041c] border border-amber-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
-                  {RESOLUTIONS.map((r) => {
+                <div className="absolute z-40 top-full mt-1.5 w-full bg-[#0d041c] border border-teal-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                  {RESOLUTIONS.filter(r => currentModel.supportedResolutions.includes(r.id)).map((r) => {
                     const isSelected = resolution === r.id;
-                    const priceTag = `${currentModel.prices[r.id]} Cr (8s)`;
-
                     return (
                       <button
                         key={r.id}
                         type="button"
                         onClick={() => { setResolution(r.id); setIsResDropdownOpen(false); }}
-                        className={`w-full text-start p-2.5 rounded-lg transition-all flex items-center justify-between gap-2 ${
+                        className={`w-full text-start p-2 rounded-lg transition-all flex items-center justify-between gap-2 ${
                           isSelected 
-                            ? "bg-amber-500/20 text-white border border-amber-500/40" 
+                            ? "bg-teal-600/25 text-white border border-teal-500/40" 
                             : "hover:bg-white/5 text-white/70 hover:text-white"
                         }`}
                       >
@@ -669,10 +910,7 @@ export default function ReferenceToVideoPage() {
                           <span className="font-bold text-xs text-white block">{r.label}</span>
                           <span className="text-[10px] text-white/40">{isRtl ? r.descAr : r.desc}</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-mono font-bold text-amber-300">{priceTag}</span>
-                          {isSelected && <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
-                        </div>
+                        {isSelected && <Check className="w-3.5 h-3.5 text-teal-400 shrink-0" />}
                       </button>
                     );
                   })}
@@ -683,19 +921,19 @@ export default function ReferenceToVideoPage() {
             {/* 3. Aspect Ratio Dropdown Select */}
             <div className="space-y-1.5 relative" ref={aspectRef}>
               <label className="text-xs font-bold text-white/80 flex items-center gap-1.5">
-                <Film className="w-3.5 h-3.5 text-cyan-400" />
+                <Monitor className="w-3.5 h-3.5 text-amber-400" />
                 <span>{isRtl ? "أبعاد الفيديو (Aspect Ratio)" : "Aspect Ratio"}</span>
               </label>
 
               <button
                 type="button"
                 onClick={() => setIsAspectDropdownOpen(!isAspectDropdownOpen)}
-                className="w-full bg-[#06010f] border border-white/10 hover:border-cyan-500/40 rounded-xl p-3 text-start flex items-center justify-between gap-2.5 transition-all"
+                className="w-full bg-[#06010f] border border-white/10 hover:border-amber-500/40 rounded-xl p-3 text-start flex items-center justify-between gap-2.5 transition-all"
               >
                 <div className="flex items-center gap-2.5">
                   {(() => {
                     const IconComp = ASPECT_RATIOS.find(a => a.id === aspectRatio)?.icon || Monitor;
-                    return <IconComp className="w-4 h-4 text-cyan-400" />;
+                    return <IconComp className="w-4 h-4 text-amber-400" />;
                   })()}
                   <div>
                     <span className="font-bold text-xs md:text-sm text-white block">
@@ -708,12 +946,12 @@ export default function ReferenceToVideoPage() {
                     </span>
                   </div>
                 </div>
-                <ChevronDown className={`w-4 h-4 text-white/50 transition-transform duration-200 ${isAspectDropdownOpen ? "rotate-180 text-cyan-400" : ""}`} />
+                <ChevronDown className={`w-4 h-4 text-white/50 transition-transform duration-200 ${isAspectDropdownOpen ? "rotate-180 text-amber-400" : ""}`} />
               </button>
 
               {/* Aspect Ratio Dropdown Menu */}
               {isAspectDropdownOpen && (
-                <div className="absolute z-30 top-full mt-1.5 w-full bg-[#0d041c] border border-cyan-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="absolute z-30 top-full mt-1.5 w-full bg-[#0d041c] border border-amber-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
                   {ASPECT_RATIOS.map((a) => {
                     const isSelected = aspectRatio === a.id;
                     const IconComp = a.icon;
@@ -724,18 +962,18 @@ export default function ReferenceToVideoPage() {
                         onClick={() => { setAspectRatio(a.id); setIsAspectDropdownOpen(false); }}
                         className={`w-full text-start p-2 rounded-lg transition-all flex items-center justify-between gap-2 ${
                           isSelected 
-                            ? "bg-cyan-500/20 text-white border border-cyan-500/40" 
+                            ? "bg-amber-500/20 text-white border border-amber-500/40" 
                             : "hover:bg-white/5 text-white/70 hover:text-white"
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
-                          <IconComp className="w-4 h-4 text-cyan-400" />
+                          <IconComp className="w-4 h-4 text-amber-400" />
                           <div>
                             <span className="font-bold text-xs text-white block">{a.label}</span>
                             <span className="text-[10px] text-white/40">{isRtl ? a.descAr : a.desc}</span>
                           </div>
                         </div>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />}
+                        {isSelected && <Check className="w-3.5 h-3.5 text-amber-400 shrink-0" />}
                       </button>
                     );
                   })}
@@ -747,7 +985,7 @@ export default function ReferenceToVideoPage() {
             <div className="pt-2 border-t border-white/5 space-y-2.5">
               <div className="bg-[#06010f] border border-white/5 rounded-xl p-3.5 space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="text-white/50">{isRtl ? "تكلفة العملية (8 ثواني):" : "Cost (8 seconds):"}</span>
+                  <span className="text-white/50">{isRtl ? "تكلفة التوليد:" : "Estimated Cost:"}</span>
                   <span className="font-bold text-amber-300 font-mono">{estimatedCost} Cr</span>
                 </div>
                 <div className="flex justify-between items-center text-xs">
@@ -765,7 +1003,7 @@ export default function ReferenceToVideoPage() {
               {!hasSufficientCredits && (
                 <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 shrink-0" />
-                  <span>{isRtl ? "رصيدك غير كافٍ. يرجى شحن الرصيد." : "Insufficient credits. Please top up."}</span>
+                  <span>{isRtl ? "رصيدك غير كافٍ لتوليد هذا الفيديو. يرجى شحن الرصيد." : "Insufficient credits. Please top up."}</span>
                 </div>
               )}
             </div>
@@ -774,6 +1012,42 @@ export default function ReferenceToVideoPage() {
         </div>
 
       </div>
+
+      {/* Lightbox Video Modal */}
+      {lightboxVideoUrl && (
+        <div 
+          onClick={() => setLightboxVideoUrl(null)}
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 animate-in fade-in duration-200"
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxVideoUrl(null)}
+            className="absolute top-5 end-5 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
+          
+          <div className="max-w-5xl max-h-[90vh] w-full relative" onClick={e => e.stopPropagation()}>
+            <video 
+              src={lightboxVideoUrl} 
+              controls 
+              autoPlay 
+              playsInline 
+              className="max-w-full max-h-[85vh] w-full object-contain rounded-2xl shadow-2xl border border-white/10 bg-black"
+            />
+            <div className="mt-3 flex justify-center">
+              <button
+                type="button"
+                onClick={() => handleDownloadVideo(lightboxVideoUrl)}
+                className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm flex items-center gap-2 shadow-xl shadow-emerald-950/50"
+              >
+                <Download className="w-4 h-4" />
+                <span>{isRtl ? "تحميل الفيديو بدقة أصلية" : "Download Original Video"}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
