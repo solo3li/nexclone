@@ -110,21 +110,6 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
                             value         = amountStr
                         }
                     }
-                },
-                payment_source = new
-                {
-                    paypal = new
-                    {
-                        experience_context = new
-                        {
-                            payment_method_preference = "UNRESTRICTED",
-                            brand_name = "NexMedia AI",
-                            landing_page = "GUEST_CHECKOUT",
-                            user_action = "PAY_NOW",
-                            return_url = returnUrl,
-                            cancel_url = cancelUrl
-                        }
-                    }
                 }
             };
 

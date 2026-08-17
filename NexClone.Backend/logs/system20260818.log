@@ -55,3 +55,44 @@
 2026-08-18 00:30:36.848 +03:00 [INF] Sending HTTP request POST https://api-m.sandbox.paypal.com/v2/checkout/orders
 2026-08-18 00:30:37.829 +03:00 [INF] Received HTTP response headers after 980.2212ms - 200
 2026-08-18 00:30:37.829 +03:00 [INF] End processing HTTP request after 981.368ms - 200
+2026-08-18 00:32:01.314 +03:00 [INF] Start processing HTTP request POST https://api-m.sandbox.paypal.com/v1/oauth2/token
+2026-08-18 00:32:01.315 +03:00 [INF] Sending HTTP request POST https://api-m.sandbox.paypal.com/v1/oauth2/token
+2026-08-18 00:32:01.834 +03:00 [INF] Received HTTP response headers after 519.3077ms - 200
+2026-08-18 00:32:01.835 +03:00 [INF] End processing HTTP request after 521.7889ms - 200
+2026-08-18 00:32:02.139 +03:00 [INF] Start processing HTTP request POST https://api-m.sandbox.paypal.com/v2/checkout/orders
+2026-08-18 00:32:02.139 +03:00 [INF] Sending HTTP request POST https://api-m.sandbox.paypal.com/v2/checkout/orders
+2026-08-18 00:32:02.940 +03:00 [INF] Received HTTP response headers after 800.1606ms - 200
+2026-08-18 00:32:02.941 +03:00 [INF] End processing HTTP request after 802.1841ms - 200
+2026-08-18 00:33:14.286 +03:00 [INF] Start processing HTTP request POST https://api-m.sandbox.paypal.com/v1/oauth2/token
+2026-08-18 00:33:14.287 +03:00 [INF] Sending HTTP request POST https://api-m.sandbox.paypal.com/v1/oauth2/token
+2026-08-18 00:33:15.168 +03:00 [INF] Received HTTP response headers after 880.1151ms - 200
+2026-08-18 00:33:15.168 +03:00 [INF] End processing HTTP request after 882.17ms - 200
+2026-08-18 00:33:15.392 +03:00 [INF] Start processing HTTP request POST https://api-m.sandbox.paypal.com/v2/checkout/orders
+2026-08-18 00:33:15.392 +03:00 [INF] Sending HTTP request POST https://api-m.sandbox.paypal.com/v2/checkout/orders
+2026-08-18 00:33:16.294 +03:00 [INF] Received HTTP response headers after 901.2398ms - 200
+2026-08-18 00:33:16.294 +03:00 [INF] End processing HTTP request after 902.1817ms - 200
+2026-08-18 00:35:06.681 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-18 00:35:15.062 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-18 00:35:17.518 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-18 00:35:17.626 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-18 00:35:17.626 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-18 00:35:17.626 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-18 00:35:17.627 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-18 00:35:17.627 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-18 00:35:17.627 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-18 00:35:20.162 +03:00 [INF] Server desktop-rjppsk4:23296:fa46de77 successfully announced in 2514.8616 ms
+2026-08-18 00:35:20.168 +03:00 [INF] Server desktop-rjppsk4:23296:fa46de77 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-18 00:35:20.192 +03:00 [INF] Server desktop-rjppsk4:23296:fa46de77 all the dispatchers started
+2026-08-18 00:35:20.633 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-18 00:35:25.500 +03:00 [INF] Start processing HTTP request POST https://api-m.sandbox.paypal.com/v1/oauth2/token
+2026-08-18 00:35:25.504 +03:00 [INF] Sending HTTP request POST https://api-m.sandbox.paypal.com/v1/oauth2/token
+2026-08-18 00:35:26.420 +03:00 [INF] Received HTTP response headers after 913.7704ms - 200
+2026-08-18 00:35:26.424 +03:00 [INF] End processing HTTP request after 936.2435ms - 200
+2026-08-18 00:35:26.749 +03:00 [INF] Start processing HTTP request POST https://api-m.sandbox.paypal.com/v2/checkout/orders
+2026-08-18 00:35:26.749 +03:00 [INF] Sending HTTP request POST https://api-m.sandbox.paypal.com/v2/checkout/orders
+2026-08-18 00:35:27.585 +03:00 [INF] Received HTTP response headers after 835.1882ms - 201
+2026-08-18 00:35:27.585 +03:00 [INF] End processing HTTP request after 836.5081ms - 201
