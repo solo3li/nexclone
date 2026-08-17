@@ -11,10 +11,12 @@ namespace NexClone.Backend.API.Controllers.Admin
     public class PaymentsAdminController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly NexClone.Backend.Core.Interfaces.IMediaService _mediaService;
 
-        public PaymentsAdminController(ApplicationDbContext context)
+        public PaymentsAdminController(ApplicationDbContext context, NexClone.Backend.Core.Interfaces.IMediaService mediaService)
         {
             _context = context;
+            _mediaService = mediaService;
         }
 
         public async Task<IActionResult> Index(int pageNumber = 1, string searchString = null)
@@ -69,6 +71,11 @@ namespace NexClone.Backend.API.Controllers.Admin
                     (i.TransactionId != null && i.TransactionId == payment.PaymentId));
 
             ViewBag.Invoice = invoice;
+
+            if (invoice != null && !string.IsNullOrWhiteSpace(invoice.MinioPdfUrl))
+            {
+                ViewBag.PdfUrl = await _mediaService.GetFileUrlAsync(invoice.MinioPdfUrl, "invoices");
+            }
 
             return View(payment);
         }
