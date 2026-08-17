@@ -503,6 +503,19 @@ namespace NexClone.Backend.API.Controllers.AI
             if (toolType != "text-to-video" && toolType != "image-to-video" && toolType != "reference-to-video")
                 return BadRequest(new { error = "Invalid tool type." });
 
+            if (string.IsNullOrWhiteSpace(prompt) && Request.HasFormContentType)
+            {
+                if (Request.Form.TryGetValue("prompt", out var formPrompt)) prompt = formPrompt.ToString();
+                if (Request.Form.TryGetValue("model", out var formModel)) model = formModel.ToString();
+                if (Request.Form.TryGetValue("resolution", out var formRes)) resolution = formRes.ToString();
+                if (Request.Form.TryGetValue("aspectRatio", out var formAspect)) aspectRatio = formAspect.ToString();
+                if (Request.Form.TryGetValue("mode", out var formMode)) mode = formMode.ToString();
+                if (Request.Form.TryGetValue("duration", out var formDur) && int.TryParse(formDur, out var d)) duration = d;
+            }
+
+            if (toolType == "text-to-video" && string.IsNullOrWhiteSpace(prompt))
+                return BadRequest(new { error = "يرجى كتابة وصف المشهد (Prompt) أولاً." });
+
             if (toolType == "image-to-video" && (images == null || images.Count == 0))
                 return BadRequest(new { error = "An image is required for this tool." });
 
