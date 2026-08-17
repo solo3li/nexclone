@@ -40,18 +40,23 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 var (apiKey, defaultModel) = await GetToolConfigAsync("text-to-image");
 
                 var client = _httpClientFactory.CreateClient("AIGateway");
-                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+                if (!client.DefaultRequestHeaders.Contains("x-api-key"))
+                    client.DefaultRequestHeaders.Add("x-api-key", apiKey);
+                if (!client.DefaultRequestHeaders.Contains("Authorization"))
+                    client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
 
-                string endpoint = "https://api.crun.ai/api/v1/client/job/submit";
+                string endpoint = "https://api.crun.ai/api/v1/client/job/CreateTask";
 
-                string crunModel = (message.Model ?? "grok").ToLower();
-                if (crunModel == "grok" || crunModel == "grok-imagine" || crunModel == "grok-image")
+                string crunModel = (message.Model ?? "grok-imagine").ToLower().Trim();
+                if (crunModel == "grok" || crunModel == "grok-imagine" || crunModel == "grok-image" || crunModel == "grok-imagine (t2i)" || crunModel == "t2i")
                     crunModel = "grok-imagine/t2i";
 
                 var payload = new {
                     model = crunModel,
-                    prompt = message.Prompt,
-                    aspect_ratio = message.AspectRatio
+                    input = new {
+                        prompt = message.Prompt,
+                        aspect_ratio = !string.IsNullOrEmpty(message.AspectRatio) ? message.AspectRatio : "1:1"
+                    }
                 };
 
                 var jsonContent = new StringContent(JsonSerializer.Serialize(payload, new JsonSerializerOptions { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull }), Encoding.UTF8, "application/json");
