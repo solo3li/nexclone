@@ -48,6 +48,16 @@ namespace NexClone.Backend.API.Controllers.AI
             if (toolType != "text-to-image")
                 return BadRequest(new { error = "Invalid tool type." });
 
+            if (string.IsNullOrWhiteSpace(prompt) && Request.HasFormContentType)
+            {
+                if (Request.Form.TryGetValue("prompt", out var formPrompt)) prompt = formPrompt.ToString();
+                if (Request.Form.TryGetValue("model", out var formModel)) model = formModel.ToString();
+                if (Request.Form.TryGetValue("aspectRatio", out var formAspect)) aspectRatio = formAspect.ToString();
+            }
+
+            if (string.IsNullOrWhiteSpace(prompt))
+                return BadRequest(new { error = "يرجى كتابة وصف الصورة (Prompt) أولاً." });
+
             string qualityFormat = $"{model}|{aspectRatio}";
             decimal usageUnits = 1;
 

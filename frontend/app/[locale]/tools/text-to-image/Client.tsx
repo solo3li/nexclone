@@ -202,7 +202,9 @@ export default function TextToImagePage() {
       formData.append("model", currentModel.id);
       formData.append("aspectRatio", aspectRatio);
 
-      const res = await api.post("/api/image/start-tool/text-to-image", formData);
+      const res = await api.post("/api/image/start-tool/text-to-image", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
       setSuccessMessage(
         isRtl 
           ? "🎉 تمت إضافة الصورة إلى طابور المعالجة بنجاح! سيتم إشعارك فور اكتمال التوليد."

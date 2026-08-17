@@ -51,10 +51,14 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 if (crunModel == "grok" || crunModel == "grok-imagine" || crunModel == "grok-image" || crunModel == "grok-imagine (t2i)" || crunModel == "t2i")
                     crunModel = "grok-imagine/t2i";
 
+                string promptText = !string.IsNullOrWhiteSpace(message.Prompt) ? message.Prompt : (history.InputText ?? "");
+                if (string.IsNullOrWhiteSpace(promptText))
+                    throw new Exception("Prompt cannot be empty.");
+
                 var payload = new {
                     model = crunModel,
                     input = new {
-                        prompt = message.Prompt,
+                        prompt = promptText,
                         aspect_ratio = !string.IsNullOrEmpty(message.AspectRatio) ? message.AspectRatio : "1:1"
                     }
                 };

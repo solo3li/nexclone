@@ -256,3 +256,28 @@ System.Exception: Crun AI submit failed: {"code":404,"message":"resource not fou
 2026-08-17 03:50:03.107 +03:00 [INF] Server desktop-rjppsk4:26688:da847d5a all the dispatchers started
 2026-08-17 03:50:07.599 +03:00 [INF] Removed 1 outdated record(s) from 'aggregatedcounter' table.
 2026-08-17 03:50:19.600 +03:00 [INF] Removed 1 outdated record(s) from 'job' table.
+2026-08-17 03:51:07.420 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 03:51:14.949 +03:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 03:51:14.950 +03:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 03:51:15.718 +03:00 [INF] Received HTTP response headers after 761.0893ms - 422
+2026-08-17 03:51:15.725 +03:00 [INF] End processing HTTP request after 779.0528ms - 422
+2026-08-17 03:51:15.731 +03:00 [ERR] Error processing image tool task.
+System.Exception: Crun AI submit failed: {"code":422,"message":"Missing Params or Type Error","errors":["Value error, Invalid input for model grok-imagine/t2i: prompt: String should have at least 1 character"]}
+   at NexClone.Backend.Infrastructure.Consumers.ImageToolConsumer.Consume(ImageToolMessage message) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\Consumers\ImageToolConsumer.cs:line 68
+2026-08-17 03:56:06.255 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-17 03:56:13.915 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-17 03:56:18.480 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-17 03:56:18.572 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-17 03:56:18.572 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-17 03:56:18.572 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-17 03:56:18.572 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-17 03:56:18.572 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-17 03:56:18.572 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-17 03:56:23.485 +03:00 [INF] Server desktop-rjppsk4:17540:bb284de5 successfully announced in 4901.3669 ms
+2026-08-17 03:56:23.488 +03:00 [INF] Server desktop-rjppsk4:17540:bb284de5 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-17 03:56:23.500 +03:00 [INF] Server desktop-rjppsk4:17540:bb284de5 all the dispatchers started
+2026-08-17 03:56:24.081 +03:00 [INF] 1 servers were removed due to timeout
