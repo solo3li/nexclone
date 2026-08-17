@@ -237,7 +237,7 @@ namespace NexClone.Backend.Infrastructure.Consumers
             if (fallbackCrun != null)
             {
                 string fallbackModel = (toolName.Contains("lip-sync") || toolName.Contains("lipsync")) 
-                    ? "shengshu/vidu-lipsync" 
+                    ? "vidu/lip-sync" 
                     : (toolName.Contains("image") ? "grok" : "default");
                 return (fallbackCrun.ApiKey, fallbackModel);
             }

@@ -60,7 +60,9 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 string audioKey = await _mediaService.UploadFileAsync(audioStream, $"lipsync/{message.UserId:N}/{DateTime.UtcNow:yyyy-MM}/{Guid.NewGuid()}_{message.AudioFileName}", message.AudioContentType);
                 string audioUrl = await _mediaService.GetFileUrlAsync(audioKey);
 
-                string crunModel = string.IsNullOrEmpty(modelName) || modelName == "default" ? "shengshu/vidu-lipsync" : modelName;
+                string crunModel = string.IsNullOrEmpty(modelName) || modelName == "default" || modelName.Contains("vidu") || modelName.Contains("shengshu")
+                    ? "vidu/lip-sync" 
+                    : modelName;
 
                 var payload = new
                 {
@@ -69,8 +71,6 @@ namespace NexClone.Backend.Infrastructure.Consumers
                     {
                         video_url = videoUrl,
                         audio_url = audioUrl,
-                        speed = 1,
-                        volume = 5,
                         moderation = "enabled"
                     }
                 };

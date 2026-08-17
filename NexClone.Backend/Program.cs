@@ -321,21 +321,32 @@ using (var scope = app.Services.CreateScope())
                     new NexClone.Backend.Core.Entities.ToolRoutingRule
                     {
                         ProviderName = (tool == "kling_avatar_image2video") ? "Picsart" : "CrunAI",
-                        ModelName = (tool == "kling_avatar_image2video") ? "kling-v1" : "shengshu/vidu-lipsync",
+                        ModelName = (tool == "kling_avatar_image2video") ? "kling-v1" : "vidu/lip-sync",
                         QualityLevel = "Standard"
                     }
                 }
             };
             dbContext.ToolConfigurations.Add(config);
         }
-        else if (!existingConfig.RoutingRules.Any())
+        else
         {
-            existingConfig.RoutingRules.Add(new NexClone.Backend.Core.Entities.ToolRoutingRule
+            if (!existingConfig.RoutingRules.Any())
             {
-                ProviderName = (tool == "kling_avatar_image2video") ? "Picsart" : "CrunAI",
-                ModelName = (tool == "kling_avatar_image2video") ? "kling-v1" : "shengshu/vidu-lipsync",
-                QualityLevel = "Standard"
-            });
+                existingConfig.RoutingRules.Add(new NexClone.Backend.Core.Entities.ToolRoutingRule
+                {
+                    ProviderName = (tool == "kling_avatar_image2video") ? "Picsart" : "CrunAI",
+                    ModelName = (tool == "kling_avatar_image2video") ? "kling-v1" : "vidu/lip-sync",
+                    QualityLevel = "Standard"
+                });
+            }
+            else if (tool != "kling_avatar_image2video")
+            {
+                foreach (var rule in existingConfig.RoutingRules)
+                {
+                    rule.ProviderName = "CrunAI";
+                    rule.ModelName = "vidu/lip-sync";
+                }
+            }
         }
     }
     dbContext.SaveChanges();
