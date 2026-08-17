@@ -238,3 +238,21 @@ POSITION: 41
 2026-08-17 03:45:04.564 +03:00 [ERR] Error processing image tool task.
 System.Exception: Crun AI submit failed: {"code":404,"message":"resource not found","path":"/api/v1/client/job/submit"}
    at NexClone.Backend.Infrastructure.Consumers.ImageToolConsumer.Consume(ImageToolMessage message) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\Consumers\ImageToolConsumer.cs:line 63
+2026-08-17 03:49:48.263 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-17 03:49:57.563 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-17 03:49:59.553 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-17 03:49:59.620 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-17 03:49:59.620 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-17 03:49:59.620 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-17 03:49:59.620 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-17 03:49:59.620 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-17 03:49:59.620 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-17 03:50:03.094 +03:00 [INF] Server desktop-rjppsk4:26688:da847d5a successfully announced in 3462.362 ms
+2026-08-17 03:50:03.099 +03:00 [INF] Server desktop-rjppsk4:26688:da847d5a is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-17 03:50:03.107 +03:00 [INF] Server desktop-rjppsk4:26688:da847d5a all the dispatchers started
+2026-08-17 03:50:07.599 +03:00 [INF] Removed 1 outdated record(s) from 'aggregatedcounter' table.
+2026-08-17 03:50:19.600 +03:00 [INF] Removed 1 outdated record(s) from 'job' table.
