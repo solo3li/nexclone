@@ -896,3 +896,44 @@ System.Exception: Crun AI submit failed: {"code":422,"message":"Missing Params o
 2026-08-17 05:53:26.766 +03:00 [INF] Server desktop-rjppsk4:13396:c33068c2 all the dispatchers started
 2026-08-17 05:53:31.499 +03:00 [INF] Removed 1 outdated record(s) from 'aggregatedcounter' table.
 2026-08-17 05:53:40.440 +03:00 [INF] Removed 1 outdated record(s) from 'job' table.
+2026-08-17 05:54:30.869 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 05:55:25.245 +03:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 05:55:25.247 +03:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 05:55:25.652 +03:00 [INF] Received HTTP response headers after 401.8076ms - 422
+2026-08-17 05:55:25.656 +03:00 [INF] End processing HTTP request after 419.756ms - 422
+2026-08-17 05:55:25.658 +03:00 [ERR] Error processing video tool task.
+System.Exception: Crun AI submit failed: {"code":422,"message":"Missing Params or Type Error","errors":["Value error, Invalid input for model grok-imagine/i2v: : Value error, image_urls or task_id must be provided"]}
+   at NexClone.Backend.Infrastructure.Consumers.VideoToolConsumer.Consume(VideoToolMessage message) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\Consumers\VideoToolConsumer.cs:line 204
+2026-08-17 05:58:07.691 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-17 05:58:16.704 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-17 05:58:21.233 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-17 05:58:21.309 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-17 05:58:21.310 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-17 05:58:21.310 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-17 05:58:21.310 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-17 05:58:21.310 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-17 05:58:21.310 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-17 05:58:25.198 +03:00 [INF] Server desktop-rjppsk4:23004:0efc9afc successfully announced in 3876.7429 ms
+2026-08-17 05:58:25.201 +03:00 [INF] Server desktop-rjppsk4:23004:0efc9afc is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-17 05:58:25.214 +03:00 [INF] Server desktop-rjppsk4:23004:0efc9afc all the dispatchers started
+2026-08-17 05:58:25.645 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-17 05:59:42.032 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-17 05:59:51.312 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-17 05:59:56.143 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-17 05:59:56.210 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-17 05:59:56.210 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-17 05:59:56.210 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-17 05:59:56.211 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-17 05:59:56.211 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-17 05:59:56.211 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-17 06:00:00.998 +03:00 [INF] Server desktop-rjppsk4:26416:92c84ac1 successfully announced in 4776.7545 ms
+2026-08-17 06:00:01.001 +03:00 [INF] Server desktop-rjppsk4:26416:92c84ac1 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-17 06:00:01.018 +03:00 [INF] Server desktop-rjppsk4:26416:92c84ac1 all the dispatchers started

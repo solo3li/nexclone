@@ -129,12 +129,13 @@ namespace NexClone.Backend.Infrastructure.Consumers
                         payload = new {
                             model = crunModel,
                             input = new {
-                                image = imageUrl,
-                                image_url = imageUrl,
-                                prompt = promptText,
-                                mode = grokMode,
+                                img_urls = imgUrlsList,
+                                image_urls = imgUrlsList,
+                                duration = message.Duration > 0 ? message.Duration : 6,
                                 resolution = message.Resolution,
-                                duration = message.Duration > 0 ? message.Duration : (int?)null
+                                aspect_ratio = normalizedAspect,
+                                prompt = promptText,
+                                mode = grokMode
                             }
                         };
                     }
