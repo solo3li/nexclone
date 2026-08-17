@@ -97,11 +97,18 @@ namespace NexClone.Backend.API.Controllers.Client
                 .ThenInclude(ap => ap.User)
                 .FirstOrDefaultAsync(r => r.ReferredUserId == id);
 
+            var payments = await _context.Payments
+                .Include(p => p.Plan)
+                .Where(p => p.UserId == id)
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+
             ViewData["Title"] = $"User Details - {user.Email}";
             ViewBag.Plans = new SelectList(await _context.Plans.Where(p => p.PriceUsd > 0 && !p.IsDefaultRegistrationPlan && !p.IsDeleted).ToListAsync(), "Id", "Name");
 
             ViewBag.Devices = devices;
             ViewBag.AffiliateReferral = affiliateReferral;
+            ViewBag.Payments = payments;
             return View(user);
         }
 
@@ -448,8 +455,11 @@ namespace NexClone.Backend.API.Controllers.Client
 
             if (!result.Succeeded)
             {
-                // In a real app we'd show errors, but for simplicity we'll just redirect back.
-                // Could use TempData to show error message
+                TempData["Error"] = string.Join("<br/>", result.Errors.Select(e => e.Description));
+            }
+            else
+            {
+                TempData["Success"] = "Password changed successfully.";
             }
 
             return RedirectToAction(nameof(Details), new { id = userId });

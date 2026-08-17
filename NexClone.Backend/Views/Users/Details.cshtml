@@ -343,6 +343,63 @@
         </div>
     </div>
 
+    <!-- Payments History Section -->
+    <div class="bx--row" style="margin-top: 2rem;">
+        <div class="bx--col">
+            <h3 class="bx--type-productive-heading-04" style="margin-bottom: 1rem;">@Localizer["Payments History"]</h3>
+            <div class="bx--data-table-container">
+                <table class="bx--data-table">
+                    <thead>
+                        <tr>
+                            <th><span class="bx--table-header-label">@Localizer["Transaction ID"]</span></th>
+                            <th><span class="bx--table-header-label">@Localizer["Method"]</span></th>
+                            <th><span class="bx--table-header-label">@Localizer["Amount"]</span></th>
+                            <th><span class="bx--table-header-label">@Localizer["Status"]</span></th>
+                            <th><span class="bx--table-header-label">@Localizer["Plan"]</span></th>
+                            <th><span class="bx--table-header-label">@Localizer["Date"]</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (ViewBag.Payments != null)
+                        {
+                            var paymentsList = (IEnumerable<NexClone.Backend.Core.Entities.Payment>)ViewBag.Payments;
+                            if (paymentsList.Any())
+                            {
+                                foreach (var p in paymentsList)
+                                {
+                                    <tr>
+                                        <td><strong>@p.PaymentId</strong></td>
+                                        <td>@p.Method</td>
+                                        <td>@p.Amount.ToString("0.00") @p.Currency</td>
+                                        <td>
+                                            @if (p.Status == "Completed" || p.Status == "active") { <span class="bx--tag bx--tag--green">@p.Status</span> }
+                                            else if (p.Status == "Pending") { <span class="bx--tag bx--tag--yellow">@p.Status</span> }
+                                            else { <span class="bx--tag bx--tag--red">@p.Status</span> }
+                                        </td>
+                                        <td>@(p.Plan?.Name ?? "-")</td>
+                                        <td>@p.CreatedAt.ToString("MMM dd, yyyy HH:mm")</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="6" style="text-align: center;">@Localizer["No payments found for this user."]</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" style="text-align: center;">@Localizer["No payments found for this user."]</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.edit-sub-btn').forEach(btn => {
