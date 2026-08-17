@@ -268,10 +268,7 @@ function HostedFieldBox({ id, label, isValid, isFocused }: {
           background: '#0a0a10',
           border: isValid
             ? '1px solid rgba(52,211,153,0.4)'
-            : isFocused
-              ? '1px solid rgba(99,102,241,0.6)'
-              : '1px solid rgba(255,255,255,0.08)',
-          boxShadow: isFocused ? '0 0 0 3px rgba(99,102,241,0.12)' : 'none',
+            : '1px solid rgba(255,255,255,0.08)',
         }}
       >
         <div id={id} className="w-full h-full flex items-center" />
@@ -388,14 +385,6 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
               color: '#e2e8f0',
               padding: '0',
               background: 'transparent',
-              outline: 'none',
-              border: 'none',
-              'box-shadow': 'none',
-            },
-            'input:focus': {
-              outline: 'none',
-              border: 'none',
-              'box-shadow': 'none',
             },
             'input::placeholder': { color: '#374151' },
             'input.invalid': { color: '#f87171' },
