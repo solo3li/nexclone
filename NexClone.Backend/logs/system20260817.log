@@ -1686,3 +1686,5 @@ System.Exception: Crun AI Task failed: Upstream internal service error. Please t
 2026-08-17 20:22:38.662 +03:00 [INF] Server desktop-rjppsk4:26944:1b488bfd is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-17 20:22:38.693 +03:00 [INF] Server desktop-rjppsk4:26944:1b488bfd all the dispatchers started
 2026-08-17 20:22:49.934 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 20:27:39.651 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-17 20:28:18.330 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
