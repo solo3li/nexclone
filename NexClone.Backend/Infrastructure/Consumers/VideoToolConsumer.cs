@@ -126,6 +126,15 @@ namespace NexClone.Backend.Infrastructure.Consumers
                             _ => "normal"
                         };
 
+                        string grokAspect = message.AspectRatio switch {
+                            "1:1" => "1:1",
+                            "2:3" => "2:3",
+                            "3:2" => "3:2",
+                            "16:9" => "16:9",
+                            "9:16" => "9:16",
+                            _ => null
+                        };
+
                         payload = new {
                             model = crunModel,
                             input = new {
@@ -133,7 +142,7 @@ namespace NexClone.Backend.Infrastructure.Consumers
                                 image_urls = imgUrlsList,
                                 duration = message.Duration > 0 ? message.Duration : 6,
                                 resolution = message.Resolution,
-                                aspect_ratio = normalizedAspect,
+                                aspect_ratio = grokAspect,
                                 prompt = promptText,
                                 mode = grokMode
                             }

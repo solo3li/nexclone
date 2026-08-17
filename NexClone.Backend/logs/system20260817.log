@@ -937,3 +937,28 @@ System.Exception: Crun AI submit failed: {"code":422,"message":"Missing Params o
 2026-08-17 06:00:00.998 +03:00 [INF] Server desktop-rjppsk4:26416:92c84ac1 successfully announced in 4776.7545 ms
 2026-08-17 06:00:01.001 +03:00 [INF] Server desktop-rjppsk4:26416:92c84ac1 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-17 06:00:01.018 +03:00 [INF] Server desktop-rjppsk4:26416:92c84ac1 all the dispatchers started
+2026-08-17 06:00:37.506 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 06:01:29.397 +03:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 06:01:29.398 +03:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 06:01:30.102 +03:00 [INF] Received HTTP response headers after 698.4069ms - 422
+2026-08-17 06:01:30.106 +03:00 [INF] End processing HTTP request after 712.0595ms - 422
+2026-08-17 06:01:30.108 +03:00 [ERR] Error processing video tool task.
+System.Exception: Crun AI submit failed: {"code":422,"message":"Missing Params or Type Error","errors":["Value error, Invalid input for model grok-imagine/i2v: aspect_ratio: Input should be '1:1', '2:3', '3:2', '16:9', '9:16' or None"]}
+   at NexClone.Backend.Infrastructure.Consumers.VideoToolConsumer.Consume(VideoToolMessage message) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\Consumers\VideoToolConsumer.cs:line 205
+2026-08-17 06:05:02.224 +03:00 [INF] 2 servers were removed due to timeout
+2026-08-17 06:07:05.098 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-17 06:07:14.824 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-17 06:07:16.740 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-17 06:07:16.806 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-17 06:07:16.806 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-17 06:07:16.806 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-17 06:07:16.806 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-17 06:07:16.806 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-17 06:07:16.806 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-17 06:07:20.603 +03:00 [INF] Server desktop-rjppsk4:11940:d2f0c14c successfully announced in 3785.652 ms
+2026-08-17 06:07:20.609 +03:00 [INF] Server desktop-rjppsk4:11940:d2f0c14c is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-17 06:07:20.621 +03:00 [INF] Server desktop-rjppsk4:11940:d2f0c14c all the dispatchers started
