@@ -103,5 +103,32 @@ namespace NexClone.Backend.API.Controllers.AI
                 return StatusCode(500, new { error = "An error occurred: " + ex.Message });
             }
         }
+
+        [HttpGet("status/{taskId}")]
+        public async Task<IActionResult> GetStatus(Guid taskId)
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
+
+            var history = await _dbContext.GenerationHistories
+                .AsNoTracking()
+                .FirstOrDefaultAsync(h => h.Id == taskId && h.UserId == userId);
+
+            if (history == null)
+                return NotFound(new { error = "Task not found" });
+
+            return Ok(new
+            {
+                id = history.Id.ToString(),
+                status = history.Status,
+                url = history.FileUrl,
+                fileUrl = history.FileUrl,
+                error = history.ErrorMessage,
+                title = history.Title,
+                prompt = history.InputText,
+                creditsUsed = history.CreditsUsed,
+                createdAt = history.CreatedAt
+            });
+        }
     }
 }

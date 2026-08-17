@@ -12,7 +12,6 @@ import {
   Monitor, 
   Smartphone, 
   Square, 
-  Coins, 
   Check, 
   Layers, 
   Copy, 
@@ -23,12 +22,17 @@ import {
   AlertCircle,
   EyeOff,
   Palette,
-  Camera,
-  Shapes,
-  Brush
+  Download,
+  Maximize2,
+  X,
+  RefreshCw,
+  Loader2,
+  Share2,
+  Clock
 } from "lucide-react";
 import api from "../../../../src/utils/api";
 import { useAppStore } from "../../../../src/store/useAppStore";
+import { signalRNotificationService } from "../../../../lib/signalr-client";
 
 interface ModelOption {
   id: string;
@@ -39,6 +43,15 @@ interface ModelOption {
   desc: string;
   descAr: string;
   pricePerImage: number;
+}
+
+interface GeneratedImageItem {
+  id: string;
+  url: string;
+  prompt: string;
+  model: string;
+  aspectRatio: string;
+  createdAt: string;
 }
 
 const MODELS: ModelOption[] = [
@@ -89,7 +102,7 @@ const SAMPLE_IMAGE_PROMPTS = {
 export default function TextToImagePage() {
   const locale = useLocale();
   const isRtl = locale === 'ar';
-  const { user } = useAppStore();
+  const { user, setUser } = useAppStore();
 
   // Selected Options
   const [selectedModelId, setSelectedModelId] = useState<string>("grok");
@@ -103,15 +116,24 @@ export default function TextToImagePage() {
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const [isAspectDropdownOpen, setIsAspectDropdownOpen] = useState(false);
 
-  // Status and Notifications
+  // Generation and Polling State
   const [copied, setCopied] = useState(false);
+  const [copiedResultPrompt, setCopiedResultPrompt] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Generated Outputs
+  const [generatedImage, setGeneratedImage] = useState<GeneratedImageItem | null>(null);
+  const [recentImages, setRecentImages] = useState<GeneratedImageItem[]>([]);
+  const [lightboxImageUrl, setLightboxImageUrl] = useState<string | null>(null);
 
   // Refs for dropdown clicks
   const modelRef = useRef<HTMLDivElement>(null);
   const aspectRef = useRef<HTMLDivElement>(null);
+  const resultCanvasRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -125,6 +147,73 @@ export default function TextToImagePage() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Polling for generation status
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    let pollInterval: NodeJS.Timeout;
+
+    if (activeTaskId) {
+      setElapsedSeconds(0);
+      timer = setInterval(() => setElapsedSeconds(prev => prev + 1), 1000);
+
+      const checkTask = async () => {
+        try {
+          const res = await api.get(`/api/image/status/${activeTaskId}`);
+          const data = res.data;
+          if (data && (data.status === "succeeded" || data.status === "completed")) {
+            const finalUrl = data.url || data.fileUrl;
+            if (finalUrl) {
+              const newImgItem: GeneratedImageItem = {
+                id: data.id || activeTaskId,
+                url: finalUrl,
+                prompt: data.prompt || prompt,
+                model: currentModel.id,
+                aspectRatio: aspectRatio,
+                createdAt: new Date().toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' })
+              };
+
+              setGeneratedImage(newImgItem);
+              setRecentImages(prev => [newImgItem, ...prev.filter(x => x.id !== newImgItem.id)]);
+              setActiveTaskId(null);
+              setIsLoading(false);
+              setSuccessMessage(isRtl ? "🎉 تم توليد صورتك بنجاح!" : "🎉 Image rendered successfully!");
+
+              // Refresh user balance
+              api.get("/api/auth/me").then(uRes => {
+                if (uRes.data) setUser(uRes.data);
+              }).catch(() => {});
+
+              // Scroll smoothly to result
+              setTimeout(() => {
+                resultCanvasRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              }, 300);
+            }
+          } else if (data && (data.status === "failed" || data.status === "error")) {
+            setError(data.error || (isRtl ? "فشلت عملية توليد الصورة" : "Image generation failed"));
+            setActiveTaskId(null);
+            setIsLoading(false);
+          }
+        } catch (err: any) {
+          console.error("Polling status error:", err);
+        }
+      };
+
+      pollInterval = setInterval(checkTask, 2500);
+
+      // Also listen on SignalR
+      signalRNotificationService.startConnection();
+      const unsub = signalRNotificationService.onNotification(() => {
+        checkTask();
+      });
+
+      return () => {
+        clearInterval(timer);
+        clearInterval(pollInterval);
+        unsub();
+      };
+    }
+  }, [activeTaskId, prompt, currentModel.id, aspectRatio, isRtl, locale, setUser]);
 
   // Find active model object
   const currentModel = useMemo(() => {
@@ -180,6 +269,24 @@ export default function TextToImagePage() {
     setSelectedStyle(null);
   };
 
+  // Safe Cross-Origin HD Download
+  const handleDownloadImage = async (url: string, filename?: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = filename || `grok_image_${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch {
+      window.open(url, "_blank");
+    }
+  };
+
   // Submission handler
   const handleGenerate = async () => {
     if (!prompt.trim()) {
@@ -205,17 +312,17 @@ export default function TextToImagePage() {
       const res = await api.post("/api/image/start-tool/text-to-image", formData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
-      setSuccessMessage(
-        isRtl 
-          ? "🎉 تمت إضافة الصورة إلى طابور المعالجة بنجاح! سيتم إشعارك فور اكتمال التوليد."
-          : "🎉 Image added to generation queue! You will be notified once rendering completes."
-      );
-      setPrompt("");
-      setNegativePrompt("");
-      setSelectedStyle(null);
+
+      if (res.data?.taskId) {
+        setActiveTaskId(res.data.taskId);
+        setSuccessMessage(
+          isRtl 
+            ? "⚡ جاري معالجة وتوليد الصورة بالذكاء الاصطناعي..." 
+            : "⚡ Generating image with AI engine..."
+        );
+      }
     } catch (err: any) {
       setError(err.response?.data?.error || (isRtl ? "حدث خطأ أثناء إرسال طلب التوليد" : "Error submitting image task"));
-    } finally {
       setIsLoading(false);
     }
   };
@@ -287,7 +394,7 @@ export default function TextToImagePage() {
               <textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                rows={6}
+                rows={5}
                 maxLength={2000}
                 placeholder={
                   isRtl 
@@ -388,16 +495,6 @@ export default function TextToImagePage() {
             </div>
           )}
 
-          {successMessage && (
-            <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-300 text-sm flex items-start gap-3 backdrop-blur-md">
-              <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5 text-emerald-400" />
-              <div className="space-y-0.5">
-                <p className="font-bold">{isRtl ? "تم إرسال الطلب بنجاح" : "Task Submitted Successfully"}</p>
-                <p className="text-xs text-emerald-300/80">{successMessage}</p>
-              </div>
-            </div>
-          )}
-
           {/* Action Bar & Submit CTA */}
           <div className="bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 shadow-xl backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="space-y-1 text-center sm:text-start">
@@ -426,8 +523,8 @@ export default function TextToImagePage() {
             >
               {isLoading ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>{isRtl ? "جاري التوليد والإرسال..." : "Generating Image..."}</span>
+                  <Loader2 className="w-4 h-4 text-white animate-spin" />
+                  <span>{isRtl ? `جاري التوليد (${elapsedSeconds} ثانية)...` : `Rendering (${elapsedSeconds}s)...`}</span>
                 </>
               ) : (
                 <>
@@ -437,6 +534,170 @@ export default function TextToImagePage() {
               )}
             </button>
           </div>
+
+          {/* ========================================================================= */}
+          {/* 3. Live Studio Result Canvas & Interactive Showcase                       */}
+          {/* ========================================================================= */}
+          <div ref={resultCanvasRef} className="space-y-4 pt-2">
+            {/* When Rendering */}
+            {isLoading && (
+              <div className="bg-[#0b0416]/95 border border-orange-500/30 rounded-2xl p-8 md:p-12 shadow-2xl text-center space-y-5 backdrop-blur-md relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 via-amber-500/10 to-orange-500/5 animate-pulse pointer-events-none" />
+                <div className="relative z-10 flex flex-col items-center space-y-4">
+                  <div className="relative">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-lg shadow-orange-500/30 animate-bounce">
+                      <ImageIcon className="w-8 h-8 text-white" />
+                    </div>
+                    <div className="absolute -inset-2 bg-orange-500/20 blur-xl rounded-full animate-ping pointer-events-none" />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <h3 className="text-lg font-extrabold text-white">
+                      {isRtl ? "جاري رسم الصورة بالذكاء الاصطناعي..." : "AI Image Rendering in Progress..."}
+                    </h3>
+                    <p className="text-xs text-white/50 max-w-md mx-auto">
+                      {isRtl 
+                        ? `يتم الآن معالجة مشهدك عبر محرك ${currentModel.nameAr} بدقة عالية وتنسيق ${aspectRatio}`
+                        : `Processing your prompt with ${currentModel.name} at high quality (${aspectRatio})`}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 bg-black/40 border border-white/10 px-3.5 py-1.5 rounded-full text-xs font-mono text-amber-400">
+                    <Clock className="w-3.5 h-3.5 animate-spin" />
+                    <span>{isRtl ? `الوقت المستغرق: ${elapsedSeconds} ثانية` : `Elapsed: ${elapsedSeconds}s`}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* When Result Ready */}
+            {generatedImage && !isLoading && (
+              <div className="bg-[#0b0416]/95 border border-amber-500/30 rounded-2xl p-5 md:p-6 shadow-2xl space-y-5 backdrop-blur-md">
+                
+                {/* Result Header Bar */}
+                <div className="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-white/10">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-white">
+                        {isRtl ? "النتيجة النهائية (جاهزة للتحميل)" : "Final Render Result"}
+                      </h3>
+                      <span className="text-[11px] text-white/40">
+                        {generatedImage.createdAt} • {generatedImage.aspectRatio} • {currentModel.name}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Actions Header */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadImage(generatedImage.url, `grok_${generatedImage.id.slice(0, 8)}.png`)}
+                      className="px-3.5 py-1.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-orange-900/30 transition-all active:scale-95"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>{isRtl ? "تحميل HD" : "Download HD"}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setLightboxImageUrl(generatedImage.url)}
+                      className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border border-white/10 transition-all"
+                      title={isRtl ? "تكبير بملء الشاشة" : "Fullscreen"}
+                    >
+                      <Maximize2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Main Render Image Canvas */}
+                <div className="relative group rounded-xl overflow-hidden border border-white/10 bg-black/60 flex items-center justify-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={generatedImage.url}
+                    alt={generatedImage.prompt}
+                    className="max-h-[600px] w-auto object-contain rounded-lg transition-transform duration-300 group-hover:scale-[1.01]"
+                  />
+
+                  {/* Hover Overlay Actions */}
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-[2px]">
+                    <button
+                      type="button"
+                      onClick={() => setLightboxImageUrl(generatedImage.url)}
+                      className="p-3 rounded-full bg-white/20 hover:bg-white/30 text-white backdrop-blur-md transition-all active:scale-90"
+                      title={isRtl ? "تكبير" : "Zoom"}
+                    >
+                      <Maximize2 className="w-5 h-5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadImage(generatedImage.url, `grok_${generatedImage.id.slice(0, 8)}.png`)}
+                      className="p-3 rounded-full bg-orange-600 hover:bg-orange-500 text-white shadow-lg transition-all active:scale-90"
+                      title={isRtl ? "تحميل" : "Download"}
+                    >
+                      <Download className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Image Prompt details & copy */}
+                <div className="bg-[#06010f] border border-white/5 rounded-xl p-3.5 space-y-2">
+                  <div className="flex items-center justify-between text-xs text-white/50">
+                    <span className="font-semibold">{isRtl ? "الوصف المستخدم:" : "Prompt Used:"}</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(generatedImage.prompt);
+                        setCopiedResultPrompt(true);
+                        setTimeout(() => setCopiedResultPrompt(false), 2000);
+                      }}
+                      className="flex items-center gap-1 text-orange-400 hover:text-orange-300 transition-colors"
+                    >
+                      {copiedResultPrompt ? <CheckCheck className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>{copiedResultPrompt ? (isRtl ? "تم النسخ!" : "Copied!") : (isRtl ? "نسخ الوصف" : "Copy Prompt")}</span>
+                    </button>
+                  </div>
+                  <p className="text-xs text-white/80 leading-relaxed font-sans" dir="auto">
+                    {generatedImage.prompt}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Session Gallery (Recent Images in this session) */}
+            {recentImages.length > 1 && (
+              <div className="bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 shadow-xl space-y-3 backdrop-blur-md">
+                <h4 className="text-xs font-bold text-white/70 flex items-center gap-2">
+                  <ImageIcon className="w-3.5 h-3.5 text-orange-400" />
+                  <span>{isRtl ? "معرض الصور المولدة في هذه الجلسة" : "Session Generated Images Gallery"}</span>
+                </h4>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2.5">
+                  {recentImages.map((img) => {
+                    const isSelected = generatedImage?.id === img.id;
+                    return (
+                      <button
+                        key={img.id}
+                        type="button"
+                        onClick={() => setGeneratedImage(img)}
+                        className={`relative aspect-square rounded-xl overflow-hidden border transition-all group ${
+                          isSelected ? "border-orange-500 ring-2 ring-orange-500/50 scale-105" : "border-white/10 hover:border-white/30 opacity-70 hover:opacity-100"
+                        }`}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={img.url} alt={img.prompt} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Maximize2 className="w-4 h-4 text-white" />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
         </div>
 
         {/* ========================================================================= */}
@@ -606,6 +867,41 @@ export default function TextToImagePage() {
         </div>
 
       </div>
+
+      {/* Lightbox Modal */}
+      {lightboxImageUrl && (
+        <div 
+          onClick={() => setLightboxImageUrl(null)}
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 animate-in fade-in duration-200"
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxImageUrl(null)}
+            className="absolute top-5 end-5 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
+          
+          <div className="max-w-5xl max-h-[90vh] relative" onClick={e => e.stopPropagation()}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img 
+              src={lightboxImageUrl} 
+              alt="Fullscreen Preview" 
+              className="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl border border-white/10"
+            />
+            <div className="mt-3 flex justify-center">
+              <button
+                type="button"
+                onClick={() => handleDownloadImage(lightboxImageUrl)}
+                className="px-6 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-sm flex items-center gap-2 shadow-xl shadow-orange-950/50"
+              >
+                <Download className="w-4 h-4" />
+                <span>{isRtl ? "تحميل الصورة بدقة أصلية" : "Download Original Image"}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

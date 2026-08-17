@@ -37,7 +37,12 @@ function absoluteUrl(path: string) {
   return `${BACKEND}${path}`;
 }
 
-function detectMediaType(url: string): "audio" | "video" | "image" | "none" {
+function detectMediaType(url: string, type?: string): "audio" | "video" | "image" | "none" {
+  if (type) {
+    if (type === "text-to-image" || type === "bg-remover" || type === "image") return "image";
+    if (type === "text-to-video" || type === "image-to-video" || type === "reference-to-video" || type === "lipsync" || type === "lip-sync" || type === "motion-control") return "video";
+    if (type === "text-to-voice" || type === "voice-to-text" || type === "tts" || type === "stt") return "audio";
+  }
   if (!url) return "none";
   const cleanUrl = url.split("?")[0];
   const ext = cleanUrl.split(".").pop()?.toLowerCase() ?? "";
@@ -48,11 +53,18 @@ function detectMediaType(url: string): "audio" | "video" | "image" | "none" {
 }
 
 const TOOL_META: Record<string, { icon: any; label_ar: string; label_en: string; gradient: string }> = {
-  "text-to-voice": { icon: Volume2, label_ar: "نص إلى صوت",      label_en: "Text to Voice",        gradient: "from-violet-600 to-fuchsia-600" },
-  "voice-to-text": { icon: Mic,     label_ar: "صوت إلى نص",      label_en: "Voice to Text",        gradient: "from-fuchsia-600 to-pink-600" },
-  "gpt":           { icon: FileText, label_ar: "توليد نص GPT",    label_en: "GPT Text Generation",  gradient: "from-blue-600 to-cyan-500" },
-  "bg-remover":    { icon: ImageIcon, label_ar: "إزالة خلفية",   label_en: "Background Remover",   gradient: "from-emerald-600 to-teal-500" },
-  "img-to-txt":    { icon: AlignLeft, label_ar: "صورة إلى نص",  label_en: "Image to Text",         gradient: "from-orange-500 to-amber-500" },
+  "text-to-image":      { icon: ImageIcon, label_ar: "نص إلى صورة",       label_en: "Text to Image",        gradient: "from-amber-500 to-orange-500" },
+  "text-to-video":      { icon: Zap,       label_ar: "نص إلى فيديو",       label_en: "Text to Video",        gradient: "from-indigo-600 to-cyan-500" },
+  "image-to-video":     { icon: Zap,       label_ar: "صورة إلى فيديو",     label_en: "Image to Video",       gradient: "from-orange-500 to-amber-500" },
+  "reference-to-video": { icon: Zap,       label_ar: "فيديو مرجعي",        label_en: "Reference to Video",   gradient: "from-purple-600 to-pink-500" },
+  "lipsync":            { icon: Zap,       label_ar: "مزامنة الشفاه",       label_en: "Lip Sync",             gradient: "from-rose-600 to-red-500" },
+  "lip-sync":           { icon: Zap,       label_ar: "مزامنة الشفاه",       label_en: "Lip Sync",             gradient: "from-rose-600 to-red-500" },
+  "motion-control":     { icon: Zap,       label_ar: "التحكم بالحركة",      label_en: "Motion Control",       gradient: "from-emerald-600 to-teal-500" },
+  "text-to-voice":      { icon: Volume2,   label_ar: "نص إلى صوت",         label_en: "Text to Voice",        gradient: "from-violet-600 to-fuchsia-600" },
+  "voice-to-text":      { icon: Mic,       label_ar: "صوت إلى نص",         label_en: "Voice to Text",        gradient: "from-fuchsia-600 to-pink-600" },
+  "gpt":                { icon: FileText,  label_ar: "توليد نص GPT",       label_en: "GPT Text Generation",  gradient: "from-blue-600 to-cyan-500" },
+  "bg-remover":         { icon: ImageIcon, label_ar: "إزالة خلفية",      label_en: "Background Remover",   gradient: "from-emerald-600 to-teal-500" },
+  "img-to-txt":         { icon: AlignLeft, label_ar: "صورة إلى نص",     label_en: "Image to Text",        gradient: "from-orange-500 to-amber-500" },
 };
 
 /* ─── Custom Audio Player ─── */
@@ -203,11 +215,30 @@ export default function HistoryDetailPage() {
     </div>
   );
 
+  const handleDownload = async (url: string, defaultName: string) => {
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = defaultName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch {
+      window.open(url, "_blank");
+    }
+  };
+
   const meta       = TOOL_META[record.type] ?? { icon: Zap, label_ar: record.type, label_en: record.type, gradient: "from-violet-600 to-fuchsia-600" };
   const Icon       = meta.icon;
   const toolLabel  = isRtl ? meta.label_ar : meta.label_en;
-  const mediaType  = detectMediaType(record.fileUrl);
+  const mediaType  = detectMediaType(record.fileUrl, record.type);
   const mediaSrc   = absoluteUrl(record.fileUrl);
+  const isCompleted = record.status === "completed" || record.status === "succeeded";
+  const isFailed = record.status === "failed" || record.status === "error";
 
   return (
     <div className="relative min-h-screen bg-[#0a0015] flex flex-col">
@@ -246,13 +277,17 @@ export default function HistoryDetailPage() {
                   {toolLabel}
                 </span>
                 <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${
-                  record.status === "completed"
+                  isCompleted
                     ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                    : "bg-red-500/10 text-red-400 border-red-500/20"
+                    : isFailed
+                    ? "bg-red-500/10 text-red-400 border-red-500/20"
+                    : "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
                 }`}>
-                  {record.status === "completed"
+                  {isCompleted
                     ? (isRtl ? "✓ مكتمل" : "✓ Completed")
-                    : (isRtl ? "✗ فشل" : "✗ Failed")}
+                    : isFailed
+                    ? (isRtl ? "✗ فشل" : "✗ Failed")
+                    : (isRtl ? "⏳ قيد المعالجة" : "⏳ Processing")}
                 </span>
               </div>
               <h1 className="text-lg font-extrabold text-white leading-snug truncate" title={record.title}>
@@ -349,22 +384,20 @@ export default function HistoryDetailPage() {
                   {isRtl ? "الصورة الناتجة" : "Output Image"}
                 </span>
               </div>
-              <a
-                href={mediaSrc}
-                download
+              <button
+                onClick={() => handleDownload(mediaSrc, `${record.type}_${record.id.slice(0, 8)}.png`)}
                 className="flex items-center gap-1.5 px-2.5 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white/50 hover:text-white text-[11px] transition-all"
               >
                 <Download className="w-3 h-3" />
-                {isRtl ? "تحميل" : "Download"}
-              </a>
+                {isRtl ? "تحميل الصورة" : "Download"}
+              </button>
             </div>
-            <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+            <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden flex items-center justify-center p-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={mediaSrc}
                 alt={record.title}
-                className="w-full max-h-[500px] object-contain"
-                style={{ background: "repeating-conic-gradient(#ffffff10 0% 25%, transparent 0% 50%) 0 0 / 16px 16px" }}
+                className="max-h-[600px] w-auto rounded-xl object-contain shadow-2xl"
               />
             </div>
           </motion.div>
@@ -379,11 +412,20 @@ export default function HistoryDetailPage() {
             className="mb-5"
             dir={isRtl ? "rtl" : "ltr"}
           >
-            <div className="flex items-center gap-2 mb-2 px-1">
-              <Volume2 className="w-4 h-4 text-blue-400" />
-              <span className="text-xs font-semibold text-white/50">
-                {isRtl ? "الفيديو الناتج" : "Output Video"}
-              </span>
+            <div className="flex items-center justify-between mb-2 px-1">
+              <div className="flex items-center gap-2">
+                <Volume2 className="w-4 h-4 text-blue-400" />
+                <span className="text-xs font-semibold text-white/50">
+                  {isRtl ? "الفيديو الناتج" : "Output Video"}
+                </span>
+              </div>
+              <button
+                onClick={() => handleDownload(mediaSrc, `${record.type}_${record.id.slice(0, 8)}.mp4`)}
+                className="flex items-center gap-1.5 px-2.5 py-1 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white/50 hover:text-white text-[11px] transition-all"
+              >
+                <Download className="w-3 h-3" />
+                {isRtl ? "تحميل الفيديو" : "Download"}
+              </button>
             </div>
             <div className="bg-black rounded-2xl overflow-hidden border border-white/10">
               <video

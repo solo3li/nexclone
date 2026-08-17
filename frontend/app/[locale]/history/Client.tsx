@@ -30,30 +30,45 @@ interface GenerationRecord {
 }
 
 const TOOL_ICONS: Record<string, any> = {
+  "text-to-image": Image,
+  "text-to-video": Video,
+  "image-to-video": Video,
+  "reference-to-video": Video,
+  "lipsync": Smile,
+  "lip-sync": Smile,
+  "motion-control": Video,
   "text-to-voice": Volume2,
   "voice-to-text": Mic,
   "gpt": FileText,
   "bg-remover": Image,
-  "image-to-video": Video,
-  "lip-sync": Smile,
 };
 
 const TOOL_COLORS: Record<string, string> = {
+  "text-to-image": "from-amber-500/20 to-orange-500/20 border-amber-500/30 text-amber-400",
+  "text-to-video": "from-indigo-500/20 to-cyan-500/20 border-indigo-500/30 text-cyan-400",
+  "image-to-video": "from-orange-500/20 to-amber-500/20 border-orange-500/30 text-orange-400",
+  "reference-to-video": "from-purple-500/20 to-pink-500/20 border-purple-500/30 text-purple-400",
+  "lipsync": "from-rose-500/20 to-red-500/20 border-rose-500/30 text-rose-400",
+  "lip-sync": "from-rose-500/20 to-red-500/20 border-rose-500/30 text-rose-400",
+  "motion-control": "from-emerald-500/20 to-teal-500/20 border-emerald-500/30 text-emerald-400",
   "text-to-voice": "from-violet-500/20 to-fuchsia-500/20 border-violet-500/30 text-violet-400",
   "voice-to-text": "from-fuchsia-500/20 to-pink-500/20 border-fuchsia-500/30 text-fuchsia-400",
   "gpt": "from-blue-500/20 to-cyan-500/20 border-blue-500/30 text-blue-400",
   "bg-remover": "from-emerald-500/20 to-teal-500/20 border-emerald-500/30 text-emerald-400",
-  "image-to-video": "from-orange-500/20 to-amber-500/20 border-orange-500/30 text-orange-400",
-  "lip-sync": "from-rose-500/20 to-red-500/20 border-rose-500/30 text-rose-400",
 };
 
 const TOOL_LABELS: Record<string, string> = {
+  "text-to-image": "نص إلى صورة",
+  "text-to-video": "نص إلى فيديو",
+  "image-to-video": "صورة إلى فيديو",
+  "reference-to-video": "فيديو مرجعي",
+  "lipsync": "مزامنة الشفاه",
+  "lip-sync": "مزامنة الشفاه",
+  "motion-control": "التحكم بالحركة",
   "text-to-voice": "نص إلى صوت",
   "voice-to-text": "صوت إلى نص",
   "gpt": "GPT",
   "bg-remover": "إزالة خلفية",
-  "image-to-video": "أفاتار إلى فيديو",
-  "lip-sync": "مزامنة الشفاه",
 };
 
 export default function HistoryPage() {
@@ -221,14 +236,14 @@ export default function HistoryPage() {
                       {/* Status + Actions */}
                       <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 mt-4 sm:mt-0 pt-4 sm:pt-0 border-t sm:border-0 border-white/5">
                         <span className={`text-xs font-bold px-4 py-1.5 rounded-full ${
-                          record.status === "completed"
+                          (record.status === "completed" || record.status === "succeeded")
                             ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
-                            : record.status === "failed"
+                            : (record.status === "failed" || record.status === "error")
                             ? "bg-red-500/15 text-red-400 border border-red-500/20"
                             : "bg-yellow-500/15 text-yellow-400 border border-yellow-500/20"
                         }`}>
-                          {record.status === "completed" ? (isRtl ? "مكتمل" : "Done") :
-                           record.status === "failed" ? (isRtl ? "فشل" : "Failed") :
+                          {(record.status === "completed" || record.status === "succeeded") ? (isRtl ? "مكتمل" : "Done") :
+                           (record.status === "failed" || record.status === "error") ? (isRtl ? "فشل" : "Failed") :
                            (
                             <span className="flex items-center gap-1.5">
                                 <Loader2 className="w-3 h-3 animate-spin" />

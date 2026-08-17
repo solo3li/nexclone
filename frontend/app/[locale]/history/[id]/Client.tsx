@@ -74,9 +74,29 @@ export default function HistoryDetailPage() {
       );
     }
 
-    const isVideo = record.type === "image-to-video" || record.type === "lip-sync";
-    const isAudio = record.type === "text-to-voice" || record.type === "voice-to-text";
-    const isImage = record.type === "bg-remover";
+    const isVideo = record.type === "text-to-video" || record.type === "image-to-video" || record.type === "reference-to-video" || record.type === "lip-sync" || record.type === "lipsync" || record.type === "motion-control";
+    const isAudio = record.type === "text-to-voice" || record.type === "voice-to-text" || record.type === "tts" || record.type === "stt";
+    const isImage = record.type === "text-to-image" || record.type === "bg-remover" || record.type === "image";
+
+    const isCompleted = record.status === "completed" || record.status === "succeeded";
+    const isFailed = record.status === "failed" || record.status === "error";
+
+    const handleDownload = async (url: string, defaultName: string) => {
+      try {
+        const res = await fetch(url);
+        const blob = await res.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = defaultName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(blobUrl);
+      } catch {
+        window.open(url, "_blank");
+      }
+    };
 
     return (
       <div className="space-y-8" dir={isRtl ? "rtl" : "ltr"}>
@@ -84,11 +104,16 @@ export default function HistoryDetailPage() {
         <div className="bg-white/5 rounded-3xl p-6 md:p-8 border border-white/10 flex flex-wrap gap-6 items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+              {record.type === "text-to-image" && <Image className="w-6 h-6 text-amber-400" />}
+              {record.type === "text-to-video" && <Video className="w-6 h-6 text-cyan-400" />}
+              {record.type === "reference-to-video" && <Video className="w-6 h-6 text-purple-400" />}
+              {record.type === "motion-control" && <Video className="w-6 h-6 text-emerald-400" />}
               {record.type === "voice-to-text" && <Mic className="w-6 h-6 text-fuchsia-400" />}
               {record.type === "text-to-voice" && <Volume2 className="w-6 h-6 text-violet-400" />}
               {record.type === "gpt" && <FileText className="w-6 h-6 text-emerald-400" />}
               {record.type === "image-to-video" && <Video className="w-6 h-6 text-orange-400" />}
               {record.type === "lip-sync" && <Smile className="w-6 h-6 text-rose-400" />}
+              {record.type === "lipsync" && <Smile className="w-6 h-6 text-rose-400" />}
               {record.title}
             </h2>
             <div className="flex flex-wrap items-center gap-4 mt-4 text-sm text-white/50">
@@ -102,15 +127,15 @@ export default function HistoryDetailPage() {
             </div>
           </div>
           <div className={`px-4 py-2 rounded-full font-bold flex items-center gap-2 ${
-            record.status === "completed" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" :
-            record.status === "failed" ? "bg-red-500/10 text-red-400 border border-red-500/20" :
+            isCompleted ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" :
+            isFailed ? "bg-red-500/10 text-red-400 border border-red-500/20" :
             "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20"
           }`}>
-            {record.status === "completed" && <CheckCircle className="w-4 h-4" />}
-            {record.status === "failed" && <XCircle className="w-4 h-4" />}
+            {isCompleted && <CheckCircle className="w-4 h-4" />}
+            {isFailed && <XCircle className="w-4 h-4" />}
             {isRtl 
-              ? (record.status === "completed" ? "مكتمل" : record.status === "failed" ? "فشل" : "قيد المعالجة")
-              : (record.status === "completed" ? "Completed" : record.status === "failed" ? "Failed" : "Processing")}
+              ? (isCompleted ? "مكتمل" : isFailed ? "فشل" : "قيد المعالجة")
+              : (isCompleted ? "Completed" : isFailed ? "Failed" : "Processing")}
           </div>
         </div>
 
@@ -139,10 +164,18 @@ export default function HistoryDetailPage() {
         {/* Media Player (Video/Audio/Image) */}
         {record.fileUrl && (
           <div className="bg-gradient-to-r from-violet-600/20 to-fuchsia-600/20 rounded-3xl p-6 md:p-8 border border-fuchsia-500/20">
-            <h3 className="text-fuchsia-300 font-medium mb-4 text-sm flex items-center gap-2">
-              <Play className="w-4 h-4" />
-              {isRtl ? "النتيجة النهائية" : "Final Result"}
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-fuchsia-300 font-medium text-sm flex items-center gap-2">
+                <Play className="w-4 h-4" />
+                {isRtl ? "النتيجة النهائية" : "Final Result"}
+              </h3>
+              <button
+                onClick={() => handleDownload(record.fileUrl, `${record.type}_${record.id.slice(0, 8)}.${isImage ? 'png' : isVideo ? 'mp4' : 'mp3'}`)}
+                className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl text-white text-xs font-semibold transition-all"
+              >
+                {isRtl ? "تحميل النتيجة" : "Download Result"}
+              </button>
+            </div>
             
             {isVideo && (
               <video controls className="w-full mt-2 rounded-xl border border-white/10 bg-black/50" src={record.fileUrl}>
@@ -157,7 +190,9 @@ export default function HistoryDetailPage() {
             )}
 
             {isImage && (
-              <img src={record.fileUrl} alt="Result" className="w-full mt-2 rounded-xl border border-white/10" />
+              <div className="rounded-xl overflow-hidden border border-white/10 bg-black/40 flex items-center justify-center p-2">
+                <img src={record.fileUrl} alt="Result" className="max-h-[600px] w-auto rounded-lg object-contain" />
+              </div>
             )}
           </div>
         )}
