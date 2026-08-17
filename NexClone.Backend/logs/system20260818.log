@@ -141,3 +141,25 @@
 2026-08-18 00:44:00.143 +03:00 [INF] Received HTTP response headers after 426.8872ms - 201
 2026-08-18 00:44:00.143 +03:00 [INF] End processing HTTP request after 429.8219ms - 201
 2026-08-18 00:44:00.143 +03:00 [INF] [Email Task] Email sent to hamed3alii.3@gmail.com successfully.
+2026-08-18 01:22:33.138 +03:00 [INF] Start processing HTTP request POST https://api-m.sandbox.paypal.com/v1/oauth2/token
+2026-08-18 01:22:33.141 +03:00 [INF] Sending HTTP request POST https://api-m.sandbox.paypal.com/v1/oauth2/token
+2026-08-18 01:22:33.746 +03:00 [INF] Received HTTP response headers after 603.721ms - 200
+2026-08-18 01:22:33.749 +03:00 [INF] End processing HTTP request after 616.7517ms - 200
+2026-08-18 01:22:33.985 +03:00 [INF] Start processing HTTP request POST https://api-m.sandbox.paypal.com/v2/checkout/orders
+2026-08-18 01:22:33.985 +03:00 [INF] Sending HTTP request POST https://api-m.sandbox.paypal.com/v2/checkout/orders
+2026-08-18 01:22:34.803 +03:00 [INF] Received HTTP response headers after 817.675ms - 201
+2026-08-18 01:22:34.803 +03:00 [INF] End processing HTTP request after 818.4635ms - 201
+2026-08-18 01:22:36.858 +03:00 [INF] Start processing HTTP request POST https://api-m.sandbox.paypal.com/v1/oauth2/token
+2026-08-18 01:22:36.859 +03:00 [INF] Sending HTTP request POST https://api-m.sandbox.paypal.com/v1/oauth2/token
+2026-08-18 01:22:37.111 +03:00 [INF] Received HTTP response headers after 252.5696ms - 200
+2026-08-18 01:22:37.112 +03:00 [INF] End processing HTTP request after 253.6769ms - 200
+2026-08-18 01:22:37.329 +03:00 [INF] Start processing HTTP request POST https://api-m.sandbox.paypal.com/v2/checkout/orders/82004286Y6956460M/capture
+2026-08-18 01:22:37.330 +03:00 [INF] Sending HTTP request POST https://api-m.sandbox.paypal.com/v2/checkout/orders/82004286Y6956460M/capture
+2026-08-18 01:22:39.837 +03:00 [INF] Received HTTP response headers after 2506.8013ms - 201
+2026-08-18 01:22:39.838 +03:00 [INF] End processing HTTP request after 2508.5678ms - 201
+2026-08-18 01:22:50.358 +03:00 [INF] [Email Task] Sending email to hamed3alii.3@gmail.com
+2026-08-18 01:22:50.657 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-18 01:22:50.657 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-18 01:22:50.985 +03:00 [INF] Received HTTP response headers after 327.8958ms - 201
+2026-08-18 01:22:50.985 +03:00 [INF] End processing HTTP request after 328.3012ms - 201
+2026-08-18 01:22:50.985 +03:00 [INF] [Email Task] Email sent to hamed3alii.3@gmail.com successfully.
