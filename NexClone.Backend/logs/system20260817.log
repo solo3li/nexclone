@@ -1932,3 +1932,10 @@ System.Exception: Crun AI Task failed: Upstream internal service error. Please t
 2026-08-17 23:28:58.431 +03:00 [INF] Server desktop-rjppsk4:24720:bafad522 successfully announced in 2087.0152 ms
 2026-08-17 23:28:58.434 +03:00 [INF] Server desktop-rjppsk4:24720:bafad522 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-17 23:28:58.445 +03:00 [INF] Server desktop-rjppsk4:24720:bafad522 all the dispatchers started
+2026-08-17 23:33:58.958 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-17 23:51:06.973 +03:00 [INF] [Email Task] Sending email to test_cf_1786999857886@nexmedia-test.com
+2026-08-17 23:51:07.227 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 23:51:07.238 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 23:51:07.626 +03:00 [INF] Received HTTP response headers after 385.5438ms - 201
+2026-08-17 23:51:07.632 +03:00 [INF] End processing HTTP request after 413.8261ms - 201
+2026-08-17 23:51:07.632 +03:00 [INF] [Email Task] Email sent to test_cf_1786999857886@nexmedia-test.com successfully.
