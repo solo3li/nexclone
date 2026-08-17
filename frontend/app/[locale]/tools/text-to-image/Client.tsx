@@ -135,6 +135,15 @@ export default function TextToImagePage() {
   const aspectRef = useRef<HTMLDivElement>(null);
   const resultCanvasRef = useRef<HTMLDivElement>(null);
 
+  // Find active model object
+  const currentModel = useMemo(() => {
+    return MODELS.find(m => m.id === selectedModelId) || MODELS[0];
+  }, [selectedModelId]);
+
+  const estimatedCost = currentModel.pricePerImage;
+  const totalUserCredits = (user?.standardCredits || 0) + (user?.premiumCredits || 0);
+  const hasSufficientCredits = totalUserCredits >= estimatedCost;
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (modelRef.current && !modelRef.current.contains(event.target as Node)) {
@@ -214,15 +223,6 @@ export default function TextToImagePage() {
       };
     }
   }, [activeTaskId, prompt, currentModel.id, aspectRatio, isRtl, locale, setUser]);
-
-  // Find active model object
-  const currentModel = useMemo(() => {
-    return MODELS.find(m => m.id === selectedModelId) || MODELS[0];
-  }, [selectedModelId]);
-
-  const estimatedCost = currentModel.pricePerImage;
-  const totalUserCredits = (user?.standardCredits || 0) + (user?.premiumCredits || 0);
-  const hasSufficientCredits = totalUserCredits >= estimatedCost;
 
   // Apply Artistic Style Preset to prompt
   const handleApplyStyle = (styleId: string) => {
