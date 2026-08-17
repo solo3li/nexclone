@@ -174,3 +174,67 @@ POSITION: 41
 2026-08-17 01:34:56.963 +03:00 [INF] Server desktop-rjppsk4:20920:5f1973d4 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-17 01:34:56.972 +03:00 [INF] Server desktop-rjppsk4:20920:5f1973d4 all the dispatchers started
 2026-08-17 01:34:57.509 +03:00 [INF] 2 servers were removed due to timeout
+2026-08-17 01:42:52.150 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 01:42:52.473 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 03:22:58.344 +03:00 [INF] [AffiliateCommissionHoldJob] Running daily hold period check...
+2026-08-17 03:22:58.570 +03:00 [INF] [AffiliateCommissionHoldJob] Completed.
+2026-08-17 03:32:08.220 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-17 03:32:20.234 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-17 03:32:24.525 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-17 03:32:24.604 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-17 03:32:24.604 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-17 03:32:24.604 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-17 03:32:24.604 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-17 03:32:24.604 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-17 03:32:24.604 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-17 03:32:28.820 +03:00 [INF] Server desktop-rjppsk4:4532:ab222425 successfully announced in 4203.7577 ms
+2026-08-17 03:32:28.823 +03:00 [INF] Server desktop-rjppsk4:4532:ab222425 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-17 03:32:28.836 +03:00 [INF] Server desktop-rjppsk4:4532:ab222425 all the dispatchers started
+2026-08-17 03:32:38.700 +03:00 [INF] Removed 1 outdated record(s) from 'job' table.
+2026-08-17 03:35:42.193 +03:00 [INF] [Email Task] Sending email to hamed3alii.3@gmail.com
+2026-08-17 03:35:42.570 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 03:35:42.577 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 03:35:42.938 +03:00 [INF] Received HTTP response headers after 354.3372ms - 201
+2026-08-17 03:35:42.948 +03:00 [INF] End processing HTTP request after 393.8363ms - 201
+2026-08-17 03:35:42.948 +03:00 [INF] [Email Task] Email sent to hamed3alii.3@gmail.com successfully.
+2026-08-17 03:36:51.442 +03:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2026-08-17 03:37:29.547 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-17 03:41:07.905 +03:00 [INF] [Email Task] Sending email to hamed3alii.3@gmail.com
+2026-08-17 03:41:08.134 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 03:41:08.135 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 03:41:08.583 +03:00 [INF] Received HTTP response headers after 448.5244ms - 201
+2026-08-17 03:41:08.584 +03:00 [INF] End processing HTTP request after 449.6777ms - 201
+2026-08-17 03:41:08.584 +03:00 [INF] [Email Task] Email sent to hamed3alii.3@gmail.com successfully.
+2026-08-17 03:42:08.393 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 03:43:01.354 +03:00 [INF] [TTS Task 5a321e76-a3c4-4aa8-8232-4e920c72b98c] Started consumer.
+2026-08-17 03:43:02.368 +03:00 [INF] Start processing HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent
+2026-08-17 03:43:02.369 +03:00 [INF] Sending HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent
+2026-08-17 03:43:04.344 +03:00 [INF] Received HTTP response headers after 1974.523ms - 200
+2026-08-17 03:43:04.345 +03:00 [INF] End processing HTTP request after 1976.3476ms - 200
+2026-08-17 03:43:38.980 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 03:43:51.838 +03:00 [INF] [VTT Task fe0e0a90-b87f-4d75-81df-58895d217abb] Started consumer.
+2026-08-17 03:43:53.844 +03:00 [INF] Start processing HTTP request POST https://api.openai.com/v1/audio/transcriptions
+2026-08-17 03:43:53.844 +03:00 [INF] Sending HTTP request POST https://api.openai.com/v1/audio/transcriptions
+2026-08-17 03:43:55.718 +03:00 [INF] Received HTTP response headers after 1873.6445ms - 200
+2026-08-17 03:43:55.719 +03:00 [INF] End processing HTTP request after 1876.1564ms - 200
+2026-08-17 03:44:19.188 +03:00 [INF] [VTT Task 77607baf-df4f-4487-a108-7ea5f49ce957] Started consumer.
+2026-08-17 03:44:21.113 +03:00 [INF] Start processing HTTP request POST https://api.openai.com/v1/audio/transcriptions
+2026-08-17 03:44:21.113 +03:00 [INF] Sending HTTP request POST https://api.openai.com/v1/audio/transcriptions
+2026-08-17 03:44:21.784 +03:00 [INF] Received HTTP response headers after 670.4453ms - 200
+2026-08-17 03:44:21.784 +03:00 [INF] End processing HTTP request after 671.2931ms - 200
+2026-08-17 03:44:21.795 +03:00 [INF] Start processing HTTP request POST https://api.openai.com/v1/chat/completions
+2026-08-17 03:44:21.795 +03:00 [INF] Sending HTTP request POST https://api.openai.com/v1/chat/completions
+2026-08-17 03:44:24.353 +03:00 [INF] Received HTTP response headers after 2557.8363ms - 200
+2026-08-17 03:44:24.353 +03:00 [INF] End processing HTTP request after 2558.5451ms - 200
+2026-08-17 03:44:56.893 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 03:45:03.767 +03:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/submit
+2026-08-17 03:45:03.768 +03:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/submit
+2026-08-17 03:45:04.563 +03:00 [INF] Received HTTP response headers after 795.3555ms - 404
+2026-08-17 03:45:04.563 +03:00 [INF] End processing HTTP request after 796.2435ms - 404
+2026-08-17 03:45:04.564 +03:00 [ERR] Error processing image tool task.
+System.Exception: Crun AI submit failed: {"code":404,"message":"resource not found","path":"/api/v1/client/job/submit"}
+   at NexClone.Backend.Infrastructure.Consumers.ImageToolConsumer.Consume(ImageToolMessage message) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\Consumers\ImageToolConsumer.cs:line 63
