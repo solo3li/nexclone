@@ -408,21 +408,27 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
 
             const numField = cf.NumberField({
               placeholder: '1234  5678  9012  3456',
-              onChange: (evt: any) => setNumberState({ isEmpty: evt.isEmpty, isValid: evt.isValid, isFocused: false }),
-              onFocus: () => setNumberState((s) => ({ ...s, isFocused: true })),
-              onBlur: () => setNumberState((s) => ({ ...s, isFocused: false })),
+              inputEvents: {
+                onChange: (evt: any) => setNumberState({ isEmpty: evt.isEmpty, isValid: evt.isValid, isFocused: false }),
+                onFocus: () => setNumberState((s) => ({ ...s, isFocused: true })),
+                onBlur: () => setNumberState((s) => ({ ...s, isFocused: false })),
+              }
             });
             const expField = cf.ExpiryField({
               placeholder: 'MM / YY',
-              onChange: (evt: any) => setExpiryState({ isEmpty: evt.isEmpty, isValid: evt.isValid, isFocused: false }),
-              onFocus: () => setExpiryState((s) => ({ ...s, isFocused: true })),
-              onBlur: () => setExpiryState((s) => ({ ...s, isFocused: false })),
+              inputEvents: {
+                onChange: (evt: any) => setExpiryState({ isEmpty: evt.isEmpty, isValid: evt.isValid, isFocused: false }),
+                onFocus: () => setExpiryState((s) => ({ ...s, isFocused: true })),
+                onBlur: () => setExpiryState((s) => ({ ...s, isFocused: false })),
+              }
             });
             const cvvField = cf.CVVField({
               placeholder: '•••',
-              onChange: (evt: any) => setCvvState({ isEmpty: evt.isEmpty, isValid: evt.isValid, isFocused: false }),
-              onFocus: () => setCvvState((s) => ({ ...s, isFocused: true })),
-              onBlur: () => setCvvState((s) => ({ ...s, isFocused: false })),
+              inputEvents: {
+                onChange: (evt: any) => setCvvState({ isEmpty: evt.isEmpty, isValid: evt.isValid, isFocused: false }),
+                onFocus: () => setCvvState((s) => ({ ...s, isFocused: true })),
+                onBlur: () => setCvvState((s) => ({ ...s, isFocused: false })),
+              }
             });
 
             numField.render('#ppf-number');
