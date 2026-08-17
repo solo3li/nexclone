@@ -962,3 +962,611 @@ System.Exception: Crun AI submit failed: {"code":422,"message":"Missing Params o
 2026-08-17 06:07:20.603 +03:00 [INF] Server desktop-rjppsk4:11940:d2f0c14c successfully announced in 3785.652 ms
 2026-08-17 06:07:20.609 +03:00 [INF] Server desktop-rjppsk4:11940:d2f0c14c is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-17 06:07:20.621 +03:00 [INF] Server desktop-rjppsk4:11940:d2f0c14c all the dispatchers started
+2026-08-17 06:08:10.093 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 06:09:02.849 +03:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 06:09:02.852 +03:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 06:09:03.511 +03:00 [INF] Received HTTP response headers after 651.0733ms - 200
+2026-08-17 06:09:03.518 +03:00 [INF] End processing HTTP request after 673.6131ms - 200
+2026-08-17 06:09:13.768 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:09:13.769 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:09:13.979 +03:00 [INF] Received HTTP response headers after 210.1049ms - 200
+2026-08-17 06:09:13.979 +03:00 [INF] End processing HTTP request after 211.3343ms - 200
+2026-08-17 06:09:23.980 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:09:23.980 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:09:24.195 +03:00 [INF] Received HTTP response headers after 215.1848ms - 200
+2026-08-17 06:09:24.196 +03:00 [INF] End processing HTTP request after 216.5962ms - 200
+2026-08-17 06:09:34.207 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:09:34.207 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:09:34.417 +03:00 [INF] Received HTTP response headers after 209.3357ms - 200
+2026-08-17 06:09:34.417 +03:00 [INF] End processing HTTP request after 210.5616ms - 200
+2026-08-17 06:09:44.431 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:09:44.432 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:09:44.642 +03:00 [INF] Received HTTP response headers after 209.4994ms - 200
+2026-08-17 06:09:44.642 +03:00 [INF] End processing HTTP request after 210.857ms - 200
+2026-08-17 06:09:54.657 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:09:54.657 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:09:54.866 +03:00 [INF] Received HTTP response headers after 208.896ms - 200
+2026-08-17 06:09:54.866 +03:00 [INF] End processing HTTP request after 209.4096ms - 200
+2026-08-17 06:10:04.878 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:10:04.878 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:10:05.088 +03:00 [INF] Received HTTP response headers after 209.8671ms - 200
+2026-08-17 06:10:05.088 +03:00 [INF] End processing HTTP request after 210.5975ms - 200
+2026-08-17 06:10:05.626 +03:00 [INF] [Email] Queuing video completion email to hamed3alii.3@gmail.com for task image-to-video Generation
+2026-08-17 06:10:10.758 +03:00 [INF] [Email Task] Sending email to hamed3alii.3@gmail.com
+2026-08-17 06:10:11.064 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 06:10:11.064 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 06:10:11.402 +03:00 [INF] Received HTTP response headers after 337.7419ms - 201
+2026-08-17 06:10:11.402 +03:00 [INF] End processing HTTP request after 338.4967ms - 201
+2026-08-17 06:10:11.403 +03:00 [INF] [Email Task] Email sent to hamed3alii.3@gmail.com successfully.
+2026-08-17 06:10:57.015 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 06:11:28.581 +03:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 06:11:28.581 +03:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 06:11:29.391 +03:00 [INF] Received HTTP response headers after 809.7771ms - 200
+2026-08-17 06:11:29.392 +03:00 [INF] End processing HTTP request after 810.6628ms - 200
+2026-08-17 06:11:39.631 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:11:39.631 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:11:39.843 +03:00 [INF] Received HTTP response headers after 211.9093ms - 200
+2026-08-17 06:11:39.844 +03:00 [INF] End processing HTTP request after 212.6479ms - 200
+2026-08-17 06:11:49.853 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:11:49.853 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:11:50.064 +03:00 [INF] Received HTTP response headers after 211.0416ms - 200
+2026-08-17 06:11:50.064 +03:00 [INF] End processing HTTP request after 211.4863ms - 200
+2026-08-17 06:12:00.076 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:12:00.078 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:12:00.289 +03:00 [INF] Received HTTP response headers after 211.5944ms - 200
+2026-08-17 06:12:00.289 +03:00 [INF] End processing HTTP request after 213.068ms - 200
+2026-08-17 06:12:10.297 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:12:10.297 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:12:10.571 +03:00 [INF] Received HTTP response headers after 273.4171ms - 200
+2026-08-17 06:12:10.571 +03:00 [INF] End processing HTTP request after 274.2359ms - 200
+2026-08-17 06:12:11.030 +03:00 [INF] [Email] Queuing video completion email to hamed3alii.3@gmail.com for task text-to-video Generation
+2026-08-17 06:12:15.754 +03:00 [INF] [Email Task] Sending email to hamed3alii.3@gmail.com
+2026-08-17 06:12:15.981 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 06:12:15.982 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 06:12:16.295 +03:00 [INF] Received HTTP response headers after 313.6057ms - 201
+2026-08-17 06:12:16.295 +03:00 [INF] End processing HTTP request after 314.0484ms - 201
+2026-08-17 06:12:16.296 +03:00 [INF] [Email Task] Email sent to hamed3alii.3@gmail.com successfully.
+2026-08-17 06:12:21.309 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-17 06:17:36.242 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 06:17:43.998 +03:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 06:17:43.998 +03:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 06:17:44.982 +03:00 [INF] Received HTTP response headers after 983.9072ms - 200
+2026-08-17 06:17:44.983 +03:00 [INF] End processing HTTP request after 984.6882ms - 200
+2026-08-17 06:17:55.290 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:17:55.290 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:17:55.504 +03:00 [INF] Received HTTP response headers after 213.8401ms - 200
+2026-08-17 06:17:55.504 +03:00 [INF] End processing HTTP request after 214.4907ms - 200
+2026-08-17 06:18:05.516 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:18:05.516 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:18:05.731 +03:00 [INF] Received HTTP response headers after 214.2906ms - 200
+2026-08-17 06:18:05.731 +03:00 [INF] End processing HTTP request after 214.9431ms - 200
+2026-08-17 06:18:15.746 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:18:15.746 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:18:15.959 +03:00 [INF] Received HTTP response headers after 212.9935ms - 200
+2026-08-17 06:18:15.960 +03:00 [INF] End processing HTTP request after 213.8624ms - 200
+2026-08-17 06:18:25.961 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:18:25.961 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:18:26.173 +03:00 [INF] Received HTTP response headers after 212.4039ms - 200
+2026-08-17 06:18:26.173 +03:00 [INF] End processing HTTP request after 212.7636ms - 200
+2026-08-17 06:18:36.177 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:18:36.178 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:18:36.391 +03:00 [INF] Received HTTP response headers after 212.9342ms - 200
+2026-08-17 06:18:36.391 +03:00 [INF] End processing HTTP request after 213.3801ms - 200
+2026-08-17 06:18:46.402 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:18:46.402 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:18:46.614 +03:00 [INF] Received HTTP response headers after 212.2491ms - 200
+2026-08-17 06:18:46.615 +03:00 [INF] End processing HTTP request after 212.6775ms - 200
+2026-08-17 06:18:56.627 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:18:56.627 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:18:56.840 +03:00 [INF] Received HTTP response headers after 212.7995ms - 200
+2026-08-17 06:18:56.840 +03:00 [INF] End processing HTTP request after 213.3537ms - 200
+2026-08-17 06:18:57.431 +03:00 [INF] [Email] Queuing video completion email to hamed3alii.3@gmail.com for task text-to-image Generation
+2026-08-17 06:19:02.500 +03:00 [INF] [Email Task] Sending email to hamed3alii.3@gmail.com
+2026-08-17 06:19:02.794 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 06:19:02.794 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 06:19:03.113 +03:00 [INF] Received HTTP response headers after 318.2887ms - 201
+2026-08-17 06:19:03.113 +03:00 [INF] End processing HTTP request after 318.8513ms - 201
+2026-08-17 06:19:03.113 +03:00 [INF] [Email Task] Email sent to hamed3alii.3@gmail.com successfully.
+2026-08-17 06:20:39.617 +03:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 06:20:39.618 +03:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 06:20:40.476 +03:00 [INF] Received HTTP response headers after 858.4327ms - 200
+2026-08-17 06:20:40.476 +03:00 [INF] End processing HTTP request after 859.1755ms - 200
+2026-08-17 06:20:50.702 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:20:50.703 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:20:50.915 +03:00 [INF] Received HTTP response headers after 212.5034ms - 200
+2026-08-17 06:20:50.915 +03:00 [INF] End processing HTTP request after 212.9057ms - 200
+2026-08-17 06:21:00.921 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:21:00.921 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:21:01.134 +03:00 [INF] Received HTTP response headers after 212.6712ms - 200
+2026-08-17 06:21:01.134 +03:00 [INF] End processing HTTP request after 213.5092ms - 200
+2026-08-17 06:21:11.134 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:21:11.134 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:21:11.346 +03:00 [INF] Received HTTP response headers after 211.4366ms - 200
+2026-08-17 06:21:11.346 +03:00 [INF] End processing HTTP request after 211.7068ms - 200
+2026-08-17 06:21:21.346 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:21:21.347 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:21:21.557 +03:00 [INF] Received HTTP response headers after 210.3836ms - 200
+2026-08-17 06:21:21.557 +03:00 [INF] End processing HTTP request after 210.7913ms - 200
+2026-08-17 06:21:31.558 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:21:31.558 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:21:31.771 +03:00 [INF] Received HTTP response headers after 212.6211ms - 200
+2026-08-17 06:21:31.771 +03:00 [INF] End processing HTTP request after 212.9539ms - 200
+2026-08-17 06:21:41.786 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:21:41.787 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:21:41.998 +03:00 [INF] Received HTTP response headers after 211.3009ms - 200
+2026-08-17 06:21:41.998 +03:00 [INF] End processing HTTP request after 211.8728ms - 200
+2026-08-17 06:21:52.006 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:21:52.006 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:21:52.218 +03:00 [INF] Received HTTP response headers after 210.8797ms - 200
+2026-08-17 06:21:52.218 +03:00 [INF] End processing HTTP request after 212.0204ms - 200
+2026-08-17 06:21:52.812 +03:00 [INF] [Email] Queuing video completion email to hamed3alii.3@gmail.com for task text-to-image Generation
+2026-08-17 06:21:58.227 +03:00 [INF] [Email Task] Sending email to hamed3alii.3@gmail.com
+2026-08-17 06:21:58.444 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 06:21:58.444 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 06:21:58.716 +03:00 [INF] Received HTTP response headers after 272.3251ms - 201
+2026-08-17 06:21:58.716 +03:00 [INF] End processing HTTP request after 272.897ms - 201
+2026-08-17 06:21:58.717 +03:00 [INF] [Email Task] Email sent to hamed3alii.3@gmail.com successfully.
+2026-08-17 06:22:54.170 +03:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 06:22:54.170 +03:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 06:22:54.699 +03:00 [INF] Received HTTP response headers after 528.6742ms - 200
+2026-08-17 06:22:54.699 +03:00 [INF] End processing HTTP request after 529.2297ms - 200
+2026-08-17 06:23:05.000 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:23:05.000 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:23:05.224 +03:00 [INF] Received HTTP response headers after 224.3184ms - 200
+2026-08-17 06:23:05.224 +03:00 [INF] End processing HTTP request after 224.6447ms - 200
+2026-08-17 06:23:15.236 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:23:15.237 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:23:15.447 +03:00 [INF] Received HTTP response headers after 210.7709ms - 200
+2026-08-17 06:23:15.448 +03:00 [INF] End processing HTTP request after 211.1339ms - 200
+2026-08-17 06:23:25.449 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:23:25.449 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:23:25.659 +03:00 [INF] Received HTTP response headers after 210.0547ms - 200
+2026-08-17 06:23:25.659 +03:00 [INF] End processing HTTP request after 210.3957ms - 200
+2026-08-17 06:23:35.664 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:23:35.664 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:23:35.874 +03:00 [INF] Received HTTP response headers after 210.5363ms - 200
+2026-08-17 06:23:35.875 +03:00 [INF] End processing HTTP request after 211.041ms - 200
+2026-08-17 06:23:45.889 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:23:45.889 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:23:46.106 +03:00 [INF] Received HTTP response headers after 216.4799ms - 200
+2026-08-17 06:23:46.106 +03:00 [INF] End processing HTTP request after 216.8171ms - 200
+2026-08-17 06:23:56.115 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:23:56.115 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:23:56.325 +03:00 [INF] Received HTTP response headers after 210.0745ms - 200
+2026-08-17 06:23:56.325 +03:00 [INF] End processing HTTP request after 210.504ms - 200
+2026-08-17 06:24:06.340 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:24:06.340 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:24:06.584 +03:00 [INF] Received HTTP response headers after 244.2484ms - 200
+2026-08-17 06:24:06.584 +03:00 [INF] End processing HTTP request after 244.5662ms - 200
+2026-08-17 06:24:07.102 +03:00 [INF] [Email] Queuing video completion email to hamed3alii.3@gmail.com for task text-to-image Generation
+2026-08-17 06:24:12.714 +03:00 [INF] [Email Task] Sending email to hamed3alii.3@gmail.com
+2026-08-17 06:24:12.932 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 06:24:12.933 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 06:24:13.277 +03:00 [INF] Received HTTP response headers after 344.0197ms - 201
+2026-08-17 06:24:13.277 +03:00 [INF] End processing HTTP request after 344.5329ms - 201
+2026-08-17 06:24:13.277 +03:00 [INF] [Email Task] Email sent to hamed3alii.3@gmail.com successfully.
+2026-08-17 06:25:45.932 +03:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 06:25:45.932 +03:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 06:25:46.509 +03:00 [INF] Received HTTP response headers after 576.962ms - 200
+2026-08-17 06:25:46.509 +03:00 [INF] End processing HTTP request after 577.4621ms - 200
+2026-08-17 06:25:56.805 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:25:56.805 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:25:57.017 +03:00 [INF] Received HTTP response headers after 212.1041ms - 200
+2026-08-17 06:25:57.017 +03:00 [INF] End processing HTTP request after 212.4426ms - 200
+2026-08-17 06:26:07.028 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:26:07.029 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:26:07.240 +03:00 [INF] Received HTTP response headers after 211.049ms - 200
+2026-08-17 06:26:07.240 +03:00 [INF] End processing HTTP request after 211.4788ms - 200
+2026-08-17 06:26:17.244 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:26:17.244 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:26:17.456 +03:00 [INF] Received HTTP response headers after 211.8207ms - 200
+2026-08-17 06:26:17.456 +03:00 [INF] End processing HTTP request after 212.1539ms - 200
+2026-08-17 06:26:27.470 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:26:27.470 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:26:27.681 +03:00 [INF] Received HTTP response headers after 210.8884ms - 200
+2026-08-17 06:26:27.682 +03:00 [INF] End processing HTTP request after 211.324ms - 200
+2026-08-17 06:26:37.694 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:26:37.694 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:26:37.905 +03:00 [INF] Received HTTP response headers after 211.238ms - 200
+2026-08-17 06:26:37.906 +03:00 [INF] End processing HTTP request after 211.7312ms - 200
+2026-08-17 06:26:47.912 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:26:47.912 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:26:48.124 +03:00 [INF] Received HTTP response headers after 211.4928ms - 200
+2026-08-17 06:26:48.124 +03:00 [INF] End processing HTTP request after 211.9275ms - 200
+2026-08-17 06:26:58.127 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:26:58.127 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:26:58.338 +03:00 [INF] Received HTTP response headers after 210.9921ms - 200
+2026-08-17 06:26:58.339 +03:00 [INF] End processing HTTP request after 211.4952ms - 200
+2026-08-17 06:27:08.348 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:27:08.348 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:27:08.559 +03:00 [INF] Received HTTP response headers after 210.95ms - 200
+2026-08-17 06:27:08.559 +03:00 [INF] End processing HTTP request after 211.2656ms - 200
+2026-08-17 06:27:18.575 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:27:18.575 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:27:18.786 +03:00 [INF] Received HTTP response headers after 211.0247ms - 200
+2026-08-17 06:27:18.786 +03:00 [INF] End processing HTTP request after 211.6765ms - 200
+2026-08-17 06:27:28.787 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:27:28.787 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:27:28.998 +03:00 [INF] Received HTTP response headers after 211.0801ms - 200
+2026-08-17 06:27:28.998 +03:00 [INF] End processing HTTP request after 211.4634ms - 200
+2026-08-17 06:27:39.010 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:27:39.010 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:27:39.222 +03:00 [INF] Received HTTP response headers after 211.5689ms - 200
+2026-08-17 06:27:39.222 +03:00 [INF] End processing HTTP request after 211.9235ms - 200
+2026-08-17 06:27:49.223 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:27:49.223 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:27:49.872 +03:00 [INF] Received HTTP response headers after 648.5056ms - 200
+2026-08-17 06:27:49.872 +03:00 [INF] End processing HTTP request after 649.1407ms - 200
+2026-08-17 06:27:59.880 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:27:59.881 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:28:00.094 +03:00 [INF] Received HTTP response headers after 213.5256ms - 200
+2026-08-17 06:28:00.094 +03:00 [INF] End processing HTTP request after 213.9553ms - 200
+2026-08-17 06:28:00.699 +03:00 [INF] [Email] Queuing video completion email to hamed3alii.3@gmail.com for task reference-to-video Generation
+2026-08-17 06:28:06.338 +03:00 [INF] [Email Task] Sending email to hamed3alii.3@gmail.com
+2026-08-17 06:28:06.564 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 06:28:06.564 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 06:28:06.851 +03:00 [INF] Received HTTP response headers after 286.7773ms - 201
+2026-08-17 06:28:06.851 +03:00 [INF] End processing HTTP request after 287.3948ms - 201
+2026-08-17 06:28:06.851 +03:00 [INF] [Email Task] Email sent to hamed3alii.3@gmail.com successfully.
+2026-08-17 06:31:28.049 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 06:32:27.998 +03:00 [INF] [LipSync Task 31397968-1acb-4dc4-a1c3-7769d46e9b5a] Started consumer.
+2026-08-17 06:32:33.120 +03:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 06:32:33.121 +03:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 06:32:36.622 +03:00 [INF] Received HTTP response headers after 3501.4756ms - 200
+2026-08-17 06:32:36.622 +03:00 [INF] End processing HTTP request after 3502.0392ms - 200
+2026-08-17 06:32:46.918 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:32:46.918 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:32:47.127 +03:00 [INF] Received HTTP response headers after 208.2914ms - 200
+2026-08-17 06:32:47.127 +03:00 [INF] End processing HTTP request after 208.6598ms - 200
+2026-08-17 06:32:57.134 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:32:57.134 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 06:32:57.342 +03:00 [INF] Received HTTP response headers after 208.0503ms - 200
+2026-08-17 06:32:57.343 +03:00 [INF] End processing HTTP request after 208.5571ms - 200
+2026-08-17 06:32:57.345 +03:00 [ERR] [LipSync Task 31397968-1acb-4dc4-a1c3-7769d46e9b5a] Failed
+System.Exception: Crun AI Task failed: Upstream internal service error. Please try again later.
+   at NexClone.Backend.Infrastructure.Consumers.BaseAiTaskConsumer.PollCrunApiTask(HttpClient client, String taskId) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\Consumers\BaseAiTaskConsumer.cs:line 181
+   at NexClone.Backend.Infrastructure.Consumers.LipSyncConsumer.Consume(LipSyncMessage message) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\Consumers\LipSyncConsumer.cs:line 99
+2026-08-17 06:55:09.488 +03:00 [ERR] Failed executing DbCommand (1,089,248ms) [Parameters=[@userId='?' (DbType = Guid)], CommandType='"Text"', CommandTimeout='30']
+SELECT g."Id", g."CreatedAt", g."CreditsUsed", g."Duration", g."ErrorMessage", g."FileUrl", g."InputText", g."IsDeletedByUser", g."Lang", g."ResultText", g."Status", g."Title", g."Type", g."UserId", g."Voice"
+FROM "GenerationHistories" AS g
+WHERE g."UserId" = @userId
+ORDER BY g."CreatedAt" DESC
+2026-08-17 06:55:09.557 +03:00 [ERR] An exception occurred while iterating over the results of a query for context type 'NexClone.Backend.Infrastructure.Data.ApplicationDbContext'.
+System.InvalidOperationException: An exception has been raised that is likely due to a transient failure.
+ ---> Npgsql.NpgsqlException (0x80004005): Exception while reading from stream
+ ---> System.IO.IOException: Unable to read data from the transport connection: An existing connection was forcibly closed by the remote host..
+ ---> System.Net.Sockets.SocketException (10054): An existing connection was forcibly closed by the remote host.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.CreateException(SocketError error, Boolean forAsyncThrow)
+   at System.Net.Sockets.NetworkStream.ReadAsync(Memory`1 buffer, CancellationToken cancellationToken)
+   at System.Net.Security.SslStream.EnsureFullTlsFrameAsync[TIOAdapter](CancellationToken cancellationToken, Int32 estimatedSize)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.ThreadPoolBoundHandleOverlapped.CompletionCallback(UInt32 errorCode, UInt32 numBytes, NativeOverlapped* nativeOverlapped)
+   at System.Threading.ThreadPoolTypedWorkItemQueue.System.Threading.IThreadPoolWorkItem.Execute()
+   at System.Threading.ThreadPoolWorkQueue.Dispatch()
+   at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+   at System.Threading.Thread.StartCallback()
+--- End of stack trace from previous location ---
+
+   --- End of inner exception stack trace ---
+   at System.Net.Security.SslStream.EnsureFullTlsFrameAsync[TIOAdapter](CancellationToken cancellationToken, Int32 estimatedSize)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at System.Net.Security.SslStream.ReadAsyncInternal[TIOAdapter](Memory`1 buffer, CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.Internal.NpgsqlReadBuffer.<Ensure>g__EnsureLong|54_0(NpgsqlReadBuffer buffer, Int32 count, Boolean async, Boolean readingNotifications)
+   at Npgsql.Internal.NpgsqlReadBuffer.<Ensure>g__EnsureLong|54_0(NpgsqlReadBuffer buffer, Int32 count, Boolean async, Boolean readingNotifications)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+System.InvalidOperationException: An exception has been raised that is likely due to a transient failure.
+ ---> Npgsql.NpgsqlException (0x80004005): Exception while reading from stream
+ ---> System.IO.IOException: Unable to read data from the transport connection: An existing connection was forcibly closed by the remote host..
+ ---> System.Net.Sockets.SocketException (10054): An existing connection was forcibly closed by the remote host.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.CreateException(SocketError error, Boolean forAsyncThrow)
+   at System.Net.Sockets.NetworkStream.ReadAsync(Memory`1 buffer, CancellationToken cancellationToken)
+   at System.Net.Security.SslStream.EnsureFullTlsFrameAsync[TIOAdapter](CancellationToken cancellationToken, Int32 estimatedSize)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.ThreadPoolBoundHandleOverlapped.CompletionCallback(UInt32 errorCode, UInt32 numBytes, NativeOverlapped* nativeOverlapped)
+   at System.Threading.ThreadPoolTypedWorkItemQueue.System.Threading.IThreadPoolWorkItem.Execute()
+   at System.Threading.ThreadPoolWorkQueue.Dispatch()
+   at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+   at System.Threading.Thread.StartCallback()
+--- End of stack trace from previous location ---
+
+   --- End of inner exception stack trace ---
+   at System.Net.Security.SslStream.EnsureFullTlsFrameAsync[TIOAdapter](CancellationToken cancellationToken, Int32 estimatedSize)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at System.Net.Security.SslStream.ReadAsyncInternal[TIOAdapter](Memory`1 buffer, CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.Internal.NpgsqlReadBuffer.<Ensure>g__EnsureLong|54_0(NpgsqlReadBuffer buffer, Int32 count, Boolean async, Boolean readingNotifications)
+   at Npgsql.Internal.NpgsqlReadBuffer.<Ensure>g__EnsureLong|54_0(NpgsqlReadBuffer buffer, Int32 count, Boolean async, Boolean readingNotifications)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+2026-08-17 06:55:09.810 +03:00 [ERR] An unhandled exception has occurred while executing the request.
+System.InvalidOperationException: An exception has been raised that is likely due to a transient failure.
+ ---> Npgsql.NpgsqlException (0x80004005): Exception while reading from stream
+ ---> System.IO.IOException: Unable to read data from the transport connection: An existing connection was forcibly closed by the remote host..
+ ---> System.Net.Sockets.SocketException (10054): An existing connection was forcibly closed by the remote host.
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.CreateException(SocketError error, Boolean forAsyncThrow)
+   at System.Net.Sockets.NetworkStream.ReadAsync(Memory`1 buffer, CancellationToken cancellationToken)
+   at System.Net.Security.SslStream.EnsureFullTlsFrameAsync[TIOAdapter](CancellationToken cancellationToken, Int32 estimatedSize)
+   at System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+   at System.Threading.ThreadPoolBoundHandleOverlapped.CompletionCallback(UInt32 errorCode, UInt32 numBytes, NativeOverlapped* nativeOverlapped)
+   at System.Threading.ThreadPoolTypedWorkItemQueue.System.Threading.IThreadPoolWorkItem.Execute()
+   at System.Threading.ThreadPoolWorkQueue.Dispatch()
+   at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+   at System.Threading.Thread.StartCallback()
+--- End of stack trace from previous location ---
+
+   --- End of inner exception stack trace ---
+   at System.Net.Security.SslStream.EnsureFullTlsFrameAsync[TIOAdapter](CancellationToken cancellationToken, Int32 estimatedSize)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at System.Net.Security.SslStream.ReadAsyncInternal[TIOAdapter](Memory`1 buffer, CancellationToken cancellationToken)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.Internal.NpgsqlReadBuffer.<Ensure>g__EnsureLong|54_0(NpgsqlReadBuffer buffer, Int32 count, Boolean async, Boolean readingNotifications)
+   at Npgsql.Internal.NpgsqlReadBuffer.<Ensure>g__EnsureLong|54_0(NpgsqlReadBuffer buffer, Int32 count, Boolean async, Boolean readingNotifications)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at NexClone.Backend.API.Controllers.Client.HistoryController.GetHistory() in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\API\Controllers\Client\HistoryController.cs:line 33
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Localization.RequestLocalizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+2026-08-17 06:55:11.791 +03:00 [ERR] An error occurred using the connection to database 'railway' on server 'tcp://tramway.proxy.rlwy.net:37832'.
+2026-08-17 06:55:11.804 +03:00 [ERR] An exception occurred while iterating over the results of a query for context type 'NexClone.Backend.Infrastructure.Data.ApplicationDbContext'.
+System.InvalidOperationException: An exception has been raised that is likely due to a transient failure.
+ ---> Npgsql.NpgsqlException (0x80004005): No such host is known.
+ ---> System.Net.Sockets.SocketException (11001): No such host is known.
+   at System.Net.NameResolutionPal.ProcessResult(SocketError errorCode, GetAddrInfoExContext* context)
+   at System.Net.NameResolutionPal.GetAddressInfoExCallback(Int32 error, Int32 bytes, NativeOverlapped* overlapped)
+--- End of stack trace from previous location ---
+   at Npgsql.Internal.NpgsqlConnector.ConnectAsync(NpgsqlTimeout timeout, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.ConnectAsync(NpgsqlTimeout timeout, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternalAsync(Boolean errorsExpected, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternalAsync(Boolean errorsExpected, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenAsync(CancellationToken cancellationToken, Boolean errorsExpected)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+System.InvalidOperationException: An exception has been raised that is likely due to a transient failure.
+ ---> Npgsql.NpgsqlException (0x80004005): No such host is known.
+ ---> System.Net.Sockets.SocketException (11001): No such host is known.
+   at System.Net.NameResolutionPal.ProcessResult(SocketError errorCode, GetAddrInfoExContext* context)
+   at System.Net.NameResolutionPal.GetAddressInfoExCallback(Int32 error, Int32 bytes, NativeOverlapped* overlapped)
+--- End of stack trace from previous location ---
+   at Npgsql.Internal.NpgsqlConnector.ConnectAsync(NpgsqlTimeout timeout, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.ConnectAsync(NpgsqlTimeout timeout, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternalAsync(Boolean errorsExpected, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternalAsync(Boolean errorsExpected, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenAsync(CancellationToken cancellationToken, Boolean errorsExpected)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+2026-08-17 06:55:11.822 +03:00 [ERR] An unhandled exception has occurred while executing the request.
+System.InvalidOperationException: An exception has been raised that is likely due to a transient failure.
+ ---> Npgsql.NpgsqlException (0x80004005): No such host is known.
+ ---> System.Net.Sockets.SocketException (11001): No such host is known.
+   at System.Net.NameResolutionPal.ProcessResult(SocketError errorCode, GetAddrInfoExContext* context)
+   at System.Net.NameResolutionPal.GetAddressInfoExCallback(Int32 error, Int32 bytes, NativeOverlapped* overlapped)
+--- End of stack trace from previous location ---
+   at Npgsql.Internal.NpgsqlConnector.ConnectAsync(NpgsqlTimeout timeout, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.ConnectAsync(NpgsqlTimeout timeout, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternalAsync(Boolean errorsExpected, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternalAsync(Boolean errorsExpected, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenAsync(CancellationToken cancellationToken, Boolean errorsExpected)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
+   at NexClone.Backend.API.Controllers.Client.HistoryController.GetHistory() in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\API\Controllers\Client\HistoryController.cs:line 33
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Localization.RequestLocalizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+2026-08-17 06:55:12.606 +03:00 [WRN] Server desktop-rjppsk4:11940:d2f0c14c encountered an exception while sending heartbeat
+Npgsql.NpgsqlException (0x80004005): No such host is known.
+ ---> System.Net.Sockets.SocketException (0x00002AF9): No such host is known.
+   at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.Heartbeat(String serverId)
+   at Hangfire.Server.ServerHeartbeatProcess.Execute(BackgroundProcessContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\ServerHeartbeatProcess.cs:line 50
+2026-08-17 12:07:49.292 +03:00 [ERR] Execution DelayedJobScheduler is in the Failed state now due to an exception, execution will be retried in no more than 00:00:09
+Npgsql.NpgsqlException (0x80004005): No such host is known.
+ ---> System.Net.Sockets.SocketException (0x00002AF9): No such host is known.
+   at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlConnection.AcquireLock(String resource, TimeSpan timeout)
+   at Hangfire.Server.DelayedJobScheduler.UseConnectionDistributedLock[T](JobStorage storage, Func`2 action) in C:\projects\hangfire-525\src\Hangfire.Core\Server\DelayedJobScheduler.cs:line 407
+   at Hangfire.Server.DelayedJobScheduler.Execute(BackgroundProcessContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\DelayedJobScheduler.cs:line 148
+   at Hangfire.Server.BackgroundProcessDispatcherBuilder.ExecuteProcess(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessDispatcherBuilder.cs:line 82
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-17 18:24:16.594 +03:00 [ERR] Execution Worker is in the Failed state now due to an exception, execution will be retried in no more than 00:00:04
+Npgsql.NpgsqlException (0x80004005): No such host is known.
+ ---> System.Net.Sockets.SocketException (0x00002AF9): No such host is known.
+   at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlJobQueue.<>c__DisplayClass13_0.<Dequeue_Transaction>b__0()
+   at Hangfire.PostgreSql.Utils.Utils.TryExecute[T](Func`1 func, T& result, Func`2 swallowException, Nullable`1 tryCount)
+   at Hangfire.PostgreSql.PostgreSqlJobQueue.Dequeue_Transaction(String[] queues, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlJobQueue.Dequeue(String[] queues, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlConnection.FetchNextJob(String[] queues, CancellationToken cancellationToken)
+   at Hangfire.Server.Worker.Execute(BackgroundProcessContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\Worker.cs:line 107
+   at Hangfire.Server.BackgroundProcessDispatcherBuilder.ExecuteProcess(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessDispatcherBuilder.cs:line 82
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-17 18:24:36.546 +03:00 [INF] Server desktop-rjppsk4:11940:d2f0c14c is now able to continue sending heartbeats
+2026-08-17 18:24:49.960 +03:00 [INF] Execution DelayedJobScheduler recovered from the Failed state after 06:17:04.8974178 and is in the Running state now
+2026-08-17 18:24:54.577 +03:00 [INF] [LipSync Task d1ee4ca8-d94e-496a-ac79-ee5f6af2a676] Started consumer.
+2026-08-17 18:25:00.132 +03:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 18:25:00.133 +03:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 18:25:03.240 +03:00 [INF] Received HTTP response headers after 3107.8327ms - 200
+2026-08-17 18:25:03.241 +03:00 [INF] End processing HTTP request after 3109.1961ms - 200
+2026-08-17 18:25:13.462 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 18:25:13.462 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 18:25:13.699 +03:00 [INF] Received HTTP response headers after 236.7694ms - 200
+2026-08-17 18:25:13.699 +03:00 [INF] End processing HTTP request after 237.4084ms - 200
+2026-08-17 18:25:23.714 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 18:25:23.714 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 18:25:23.993 +03:00 [INF] Received HTTP response headers after 279.0917ms - 200
+2026-08-17 18:25:23.993 +03:00 [INF] End processing HTTP request after 279.9816ms - 200
+2026-08-17 18:25:23.994 +03:00 [ERR] [LipSync Task d1ee4ca8-d94e-496a-ac79-ee5f6af2a676] Failed
+System.Exception: Crun AI Task failed: Upstream internal service error. Please try again later.
+   at NexClone.Backend.Infrastructure.Consumers.BaseAiTaskConsumer.PollCrunApiTask(HttpClient client, String taskId) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\Consumers\BaseAiTaskConsumer.cs:line 181
+   at NexClone.Backend.Infrastructure.Consumers.LipSyncConsumer.Consume(LipSyncMessage message) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\Consumers\LipSyncConsumer.cs:line 99
+2026-08-17 18:25:30.087 +03:00 [INF] Execution Worker recovered from the Failed state after 00:01:13.2293285 and is in the Running state now
+2026-08-17 18:37:22.455 +03:00 [INF] [LipSync Task 4222fdb8-5069-4e4c-90f1-68c9addb8f1b] Started consumer.
+2026-08-17 18:37:27.836 +03:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 18:37:27.836 +03:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 18:37:31.430 +03:00 [INF] Received HTTP response headers after 3593.2325ms - 200
+2026-08-17 18:37:31.430 +03:00 [INF] End processing HTTP request after 3593.9909ms - 200
+2026-08-17 18:37:41.769 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 18:37:41.769 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 18:37:42.066 +03:00 [INF] Received HTTP response headers after 297.1966ms - 200
+2026-08-17 18:37:42.067 +03:00 [INF] End processing HTTP request after 298.0361ms - 200
+2026-08-17 18:37:52.073 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 18:37:52.073 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 18:37:52.341 +03:00 [INF] Received HTTP response headers after 267.6817ms - 200
+2026-08-17 18:37:52.341 +03:00 [INF] End processing HTTP request after 268.3772ms - 200
+2026-08-17 18:37:52.342 +03:00 [ERR] [LipSync Task 4222fdb8-5069-4e4c-90f1-68c9addb8f1b] Failed
+System.Exception: Crun AI Task failed: Upstream internal service error. Please try again later.
+   at NexClone.Backend.Infrastructure.Consumers.BaseAiTaskConsumer.PollCrunApiTask(HttpClient client, String taskId) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\Consumers\BaseAiTaskConsumer.cs:line 181
+   at NexClone.Backend.Infrastructure.Consumers.LipSyncConsumer.Consume(LipSyncMessage message) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\Consumers\LipSyncConsumer.cs:line 99
+2026-08-17 19:30:31.454 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-17 19:32:20.402 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-17 19:32:30.767 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-17 19:32:33.945 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-17 19:32:34.139 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-17 19:32:34.140 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-17 19:32:34.141 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-17 19:32:34.142 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-17 19:32:34.142 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-17 19:32:34.143 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-17 19:32:37.056 +03:00 [INF] Server desktop-rjppsk4:14460:9c77c7bb successfully announced in 2888.7723 ms
+2026-08-17 19:32:37.062 +03:00 [INF] Server desktop-rjppsk4:14460:9c77c7bb is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-17 19:32:37.130 +03:00 [INF] Server desktop-rjppsk4:14460:9c77c7bb all the dispatchers started
+2026-08-17 19:32:37.579 +03:00 [INF] 1 servers were removed due to timeout

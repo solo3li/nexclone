@@ -71,6 +71,8 @@ namespace NexClone.Backend.Infrastructure.Consumers
                     {
                         video_url = videoUrl,
                         audio_url = audioUrl,
+                        speed = 1.0,
+                        volume = 5,
                         moderation = "enabled"
                     }
                 };
