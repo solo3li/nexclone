@@ -37,7 +37,7 @@ export default function BlogIndex() {
                   
                   {/* Decorative Header */}
                   <div className="w-full h-40 bg-gradient-to-br from-violet-900/40 to-fuchsia-900/40 flex items-center justify-center relative overflow-hidden">
-                     <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
+                      <div className="absolute inset-0 bg-[radial-gradient(#ffffff0a_1px,transparent_1px)] [background-size:16px_16px] opacity-40"></div>
                      <span className="text-violet-400/50 text-5xl font-black italic mix-blend-overlay">AI</span>
                   </div>
                   
