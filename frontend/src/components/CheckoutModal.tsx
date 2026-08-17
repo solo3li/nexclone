@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { X, UploadCloud, Loader2, CreditCard, ShieldCheck, Lock, RotateCcw } from 'lucide-react';
+import { X, UploadCloud, Loader2, ShieldCheck, Lock, RotateCcw, CheckCircle2 } from 'lucide-react';
 import { Plan } from '@/store/usePlansStore';
 import { useLocale } from 'next-intl';
 import api from '@/utils/api';
@@ -30,92 +30,208 @@ interface CheckoutModalProps {
   onClose: () => void;
 }
 
+interface FieldState {
+  isEmpty: boolean;
+  isValid: boolean;
+  isFocused: boolean;
+}
+
 declare global {
   interface Window { paypal?: any; }
 }
 
-// ─── Animated Card Preview ────────────────────────────────────────────────────
+// ─── Mastercard-style Card Preview ──────────────────────────────────────────
 
-function CardPreview({ name, isFlipped, onFlip }: {
+function CardPreview({
+  name, isFlipped, onFlip,
+  numberState, expiryState, cvvState,
+}: {
   name: string;
   isFlipped: boolean;
   onFlip: () => void;
+  numberState: FieldState;
+  expiryState: FieldState;
+  cvvState: FieldState;
 }) {
+  const numberDisplay = numberState.isValid
+    ? '•••• •••• •••• ●●●●'
+    : numberState.isFocused
+      ? '•••• •••• •••• ▌'
+      : '•••• •••• •••• ••••';
+
+  const expiryDisplay = expiryState.isValid
+    ? '██ / ██'
+    : expiryState.isFocused
+      ? '▌▌ / ▌▌'
+      : 'MM / YY';
+
   return (
-    <div className="relative select-none" style={{ perspective: '1000px' }}>
-      {/* Card flip container */}
+    <div className="relative select-none" style={{ perspective: '1200px' }}>
       <div
         className="relative w-full transition-transform duration-700"
         style={{
-          height: '160px',
+          height: '175px',
           transformStyle: 'preserve-3d',
           transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
         }}
       >
-        {/* ── Front ── */}
+        {/* ══ FRONT ══ */}
         <div
-          className="absolute inset-0 rounded-2xl p-5 flex flex-col justify-between overflow-hidden"
+          className="absolute inset-0 rounded-2xl overflow-hidden p-5 flex flex-col justify-between"
           style={{
             backfaceVisibility: 'hidden',
-            background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 45%, #4c1d95 100%)',
-            boxShadow: '0 16px 40px rgba(99,102,241,0.4), 0 0 0 1px rgba(255,255,255,0.08)',
+            background: 'linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%)',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.07)',
           }}
         >
-          {/* Shine */}
-          <div className="absolute inset-0 rounded-2xl" style={{
-            background: 'radial-gradient(ellipse at 15% 15%, rgba(255,255,255,0.18) 0%, transparent 65%)',
+          {/* Noise texture overlay */}
+          <div className="absolute inset-0 rounded-2xl opacity-[0.03]" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
           }} />
-          {/* Circles */}
-          <div className="absolute -right-6 -top-6 w-32 h-32 rounded-full" style={{ background: 'rgba(139,92,246,0.15)' }} />
-          <div className="absolute -right-2 top-10 w-24 h-24 rounded-full" style={{ background: 'rgba(99,102,241,0.12)' }} />
 
-          <div className="relative flex justify-between items-start">
-            {/* Chip */}
-            <div className="w-9 h-6 rounded" style={{
-              background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
-              boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.15)',
-            }} />
-            {/* Card type icon */}
-            <CreditCard className="w-6 h-6 text-white/30" />
+          {/* Glossy highlight */}
+          <div className="absolute inset-0 rounded-2xl" style={{
+            background: 'linear-gradient(145deg, rgba(255,255,255,0.07) 0%, transparent 50%)',
+          }} />
+
+          {/* Glow from MC circles */}
+          <div className="absolute top-3 right-3 w-20 h-20 rounded-full blur-2xl opacity-20" style={{ background: '#eb001b' }} />
+          <div className="absolute top-3 right-10 w-20 h-20 rounded-full blur-2xl opacity-20" style={{ background: '#f79e1b' }} />
+
+          {/* ── Row 1: Chip + MC Logo ── */}
+          <div className="relative flex items-center justify-between">
+            {/* EMV Chip */}
+            <div className="relative">
+              <div
+                className="w-10 h-7 rounded-md"
+                style={{
+                  background: 'linear-gradient(145deg, #d4a843 0%, #c8961e 40%, #e8c060 60%, #c8961e 100%)',
+                  boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.4)',
+                }}
+              />
+              {/* Chip lines */}
+              <div className="absolute inset-0 flex flex-col justify-center items-center gap-px opacity-40">
+                <div className="w-5 h-px bg-amber-900 rounded" />
+                <div className="w-5 h-px bg-amber-900 rounded" />
+                <div className="w-5 h-px bg-amber-900 rounded" />
+              </div>
+              {/* Chip center contact */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-4 rounded-sm" style={{ background: 'rgba(0,0,0,0.25)' }} />
+            </div>
+
+            {/* Mastercard Logo */}
+            <div className="relative flex items-center">
+              <div
+                className="w-9 h-9 rounded-full"
+                style={{
+                  background: '#eb001b',
+                  boxShadow: '0 2px 8px rgba(235,0,27,0.4)',
+                }}
+              />
+              <div
+                className="w-9 h-9 rounded-full -ml-4"
+                style={{
+                  background: '#f79e1b',
+                  mixBlendMode: 'screen',
+                  boxShadow: '0 2px 8px rgba(247,158,27,0.4)',
+                }}
+              />
+              {/* Mastercard text */}
+              <span
+                className="absolute left-1/2 -translate-x-1/2 text-white font-extrabold"
+                style={{ fontSize: '7px', letterSpacing: '0.03em', top: '50%', transform: 'translate(-50%,-50%)', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
+              >
+                mastercard
+              </span>
+            </div>
           </div>
 
-          <div className="relative space-y-2">
-            <div className="text-white/70 text-base font-mono tracking-[0.22em]">
-              •••• •••• •••• ••••
+          {/* ── Row 2: Card Number ── */}
+          <div className="relative">
+            <div
+              className="font-mono tracking-[0.2em] transition-all duration-300"
+              style={{
+                fontSize: '15px',
+                color: numberState.isValid ? '#a5b4fc' : numberState.isFocused ? '#fff' : 'rgba(255,255,255,0.5)',
+                textShadow: numberState.isFocused ? '0 0 20px rgba(165,180,252,0.5)' : 'none',
+              }}
+            >
+              {numberDisplay}
             </div>
-            <div className="flex justify-between items-end">
-              <div>
-                <div className="text-white/35 text-[9px] uppercase tracking-widest mb-0.5">Card Holder</div>
-                <div className="text-white text-xs font-semibold uppercase tracking-wide truncate max-w-[110px]">
-                  {name || 'YOUR NAME'}
-                </div>
+            {numberState.isValid && (
+              <CheckCircle2 className="absolute -right-1 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-emerald-400" />
+            )}
+          </div>
+
+          {/* ── Row 3: Expiry + Name ── */}
+          <div className="relative flex justify-between items-end">
+            <div>
+              <div className="text-white/30 text-[8px] uppercase tracking-widest mb-0.5">Expires</div>
+              <div
+                className="font-mono text-xs transition-all duration-300"
+                style={{
+                  color: expiryState.isValid ? '#a5b4fc' : expiryState.isFocused ? '#fff' : 'rgba(255,255,255,0.45)',
+                }}
+              >
+                {expiryDisplay}
+                {expiryState.isValid && <CheckCircle2 className="inline ml-1 w-3 h-3 text-emerald-400" />}
               </div>
-              <div className="text-right">
-                <div className="text-white/35 text-[9px] uppercase tracking-widest mb-0.5">Expires</div>
-                <div className="text-white text-xs font-mono">MM / YY</div>
+            </div>
+            <div className="text-right">
+              <div className="text-white/30 text-[8px] uppercase tracking-widest mb-0.5">Card Holder</div>
+              <div
+                className="text-xs font-semibold uppercase tracking-wide transition-all duration-200 max-w-[120px] truncate"
+                style={{ color: name ? '#fff' : 'rgba(255,255,255,0.3)' }}
+              >
+                {name || 'YOUR NAME'}
               </div>
             </div>
           </div>
         </div>
 
-        {/* ── Back ── */}
+        {/* ══ BACK ══ */}
         <div
           className="absolute inset-0 rounded-2xl overflow-hidden"
           style={{
             backfaceVisibility: 'hidden',
             transform: 'rotateY(180deg)',
-            background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 45%, #4c1d95 100%)',
-            boxShadow: '0 16px 40px rgba(99,102,241,0.4), 0 0 0 1px rgba(255,255,255,0.08)',
+            background: 'linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%)',
+            boxShadow: '0 20px 50px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.07)',
           }}
         >
           {/* Magnetic strip */}
-          <div className="w-full h-8 absolute top-6" style={{ background: 'rgba(0,0,0,0.75)' }} />
-          <div className="absolute bottom-6 left-0 right-0 px-4 flex items-center gap-2">
-            <div className="flex-1 h-8 rounded" style={{ background: 'rgba(255,255,255,0.85)' }} />
-            <div className="text-right">
-              <div className="text-white/40 text-[9px] mb-0.5">CVV</div>
-              <div className="text-white text-xs font-mono font-bold">•••</div>
+          <div className="absolute top-7 left-0 right-0 h-10" style={{ background: 'linear-gradient(180deg, #1a1a1a, #111, #1a1a1a)' }} />
+
+          {/* Signature + CVV area */}
+          <div className="absolute bottom-7 left-4 right-4 flex items-center gap-3">
+            {/* Signature strip */}
+            <div
+              className="flex-1 h-9 rounded-md flex items-center px-2"
+              style={{
+                background: 'repeating-linear-gradient(45deg, #e8e8e8 0px, #e8e8e8 2px, #d0d0d0 2px, #d0d0d0 4px)',
+              }}
+            >
+              <span className="text-[10px] italic text-gray-500 font-serif opacity-60">Authorized Signature</span>
             </div>
+            {/* CVV box */}
+            <div
+              className="w-12 h-9 rounded-md flex flex-col items-center justify-center"
+              style={{ background: '#fff', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.15)' }}
+            >
+              <span className="text-[7px] text-gray-500 font-semibold">CVV</span>
+              <span
+                className="font-mono text-sm font-bold transition-all duration-300"
+                style={{ color: cvvState.isValid ? '#4f46e5' : '#374151' }}
+              >
+                {cvvState.isValid ? '●●●' : '•••'}
+              </span>
+            </div>
+          </div>
+
+          {/* MC logo small on back */}
+          <div className="absolute top-2 right-4 flex items-center">
+            <div className="w-5 h-5 rounded-full" style={{ background: '#eb001b', opacity: 0.7 }} />
+            <div className="w-5 h-5 rounded-full -ml-2" style={{ background: '#f79e1b', opacity: 0.7 }} />
           </div>
         </div>
       </div>
@@ -124,57 +240,74 @@ function CardPreview({ name, isFlipped, onFlip }: {
       <button
         type="button"
         onClick={onFlip}
-        className="mt-2 w-full flex items-center justify-center gap-1.5 text-[11px] text-indigo-400 hover:text-indigo-300 transition"
+        className="mt-2 w-full flex items-center justify-center gap-1.5 text-[11px] text-indigo-400/70 hover:text-indigo-300 transition py-0.5"
       >
         <RotateCcw className="w-3 h-3" />
-        {isFlipped ? 'عرض الوجه الأمامي' : 'عرض خانة CVV'}
+        {isFlipped ? 'الوجه الأمامي' : 'عرض CVV'}
       </button>
     </div>
   );
 }
 
-// ─── Hosted Field Box (no event handlers to avoid iframe focus loss) ──────────
+// ─── Hosted Field Box ─────────────────────────────────────────────────────────
 
-function HostedFieldBox({ id, label }: { id: string; label: string }) {
+function HostedFieldBox({ id, label, isValid, isFocused }: {
+  id: string;
+  label: string;
+  isValid?: boolean;
+  isFocused?: boolean;
+}) {
   return (
     <div>
       <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">
         {label}
       </label>
       <div
-        id={id}
-        className="w-full h-11 rounded-xl px-3 flex items-center"
+        className="relative w-full h-11 rounded-xl px-3 flex items-center transition-all duration-200"
         style={{
-          background: '#0d0d12',
-          border: '1px solid rgba(99,102,241,0.25)',
-          boxShadow: '0 0 0 0 transparent',
-          transition: 'box-shadow 0.2s',
+          background: '#0a0a10',
+          border: isValid
+            ? '1px solid rgba(52,211,153,0.4)'
+            : isFocused
+              ? '1px solid rgba(99,102,241,0.6)'
+              : '1px solid rgba(255,255,255,0.08)',
+          boxShadow: isFocused ? '0 0 0 3px rgba(99,102,241,0.12)' : 'none',
         }}
-      />
+      >
+        <div id={id} className="w-full h-full flex items-center" />
+        {isValid && (
+          <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-400 pointer-events-none" />
+        )}
+      </div>
     </div>
   );
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
+const DEFAULT_FIELD: FieldState = { isEmpty: true, isValid: false, isFocused: false };
+
 export default function CheckoutModal({ plan, currency, onClose }: CheckoutModalProps) {
   const locale = useLocale();
-  const isRtl = locale === 'ar';
+  const isRtl  = locale === 'ar';
 
-  const [activeTab, setActiveTab]             = useState<'card' | 'wallet' | 'manual'>('card');
-  const [gateways, setGateways]               = useState<GatewayOption[]>([]);
+  const [activeTab, setActiveTab]         = useState<'card' | 'wallet' | 'manual'>('card');
+  const [gateways, setGateways]           = useState<GatewayOption[]>([]);
   const [selectedGateway, setSelectedGateway] = useState<GatewayOption | null>(null);
   const [paymentMethods, setPaymentMethods]   = useState<PaymentMethod[]>([]);
-  const [file, setFile]                       = useState<File | null>(null);
-  const [isSubmitting, setIsSubmitting]       = useState(false);
+  const [file, setFile]                   = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting]   = useState(false);
   const [isLoadingGateways, setIsLoadingGateways] = useState(false);
-  const [error, setError]                     = useState('');
+  const [error, setError]                 = useState('');
 
-  // Card UI state (no iframes involved)
-  const [cardholderName, setCardholderName]   = useState('');
-  const [isCardFlipped, setIsCardFlipped]     = useState(false);
+  // Card UI
+  const [cardholderName, setCardholderName] = useState('');
+  const [isCardFlipped, setIsCardFlipped]   = useState(false);
+  const [numberState, setNumberState]       = useState<FieldState>(DEFAULT_FIELD);
+  const [expiryState, setExpiryState]       = useState<FieldState>(DEFAULT_FIELD);
+  const [cvvState, setCvvState]             = useState<FieldState>(DEFAULT_FIELD);
 
-  // PayPal SDK
+  // PayPal
   const [isCardFieldsReady, setIsCardFieldsReady] = useState(false);
   const cardFieldsInstanceRef = useRef<any>(null);
 
@@ -193,37 +326,32 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
 
   useEffect(() => { fetchGateways(); }, [fetchGateways]);
 
-  // ─── Manual methods ────────────────────────────────────────────────────────
+  // ─── Manual ────────────────────────────────────────────────────────────────
   useEffect(() => {
     if (activeTab === 'manual' && paymentMethods.length === 0) {
-      api.get<PaymentMethod[]>('/api/ManualPayments/methods')
-        .then((res) => setPaymentMethods(res.data))
-        .catch(() => {});
+      api.get<PaymentMethod[]>('/api/ManualPayments/methods').then((r) => setPaymentMethods(r.data)).catch(() => {});
     }
   }, [activeTab, paymentMethods.length]);
 
   // ─── Public settings ───────────────────────────────────────────────────────
   const [paymentStatuses, setPaymentStatuses] = useState<any>(null);
-  const [socialLinks, setSocialLinks]         = useState<{ [key: string]: string }>({});
+  const [socialLinks, setSocialLinks]         = useState<{ [k: string]: string }>({});
 
   useEffect(() => {
     api.get('/api/settings/public').then((r) => setPaymentStatuses(r.data.paymentStatuses)).catch(() => {});
     api.get('/api/platform/social-links').then((r) => setSocialLinks(r.data)).catch(() => {});
   }, []);
 
-  // ─── PayPal SDK – load ONCE, no state triggers inside ────────────────────
+  // ─── PayPal SDK ─────────────────────────────────────────────────────────────
   useEffect(() => {
     if (currency !== 'USD' || !selectedGateway || selectedGateway.providerName !== 'PayPal') return;
 
     const clientId = selectedGateway.clientId ||
       'ARjmGWCzZOQte5ev7zNvng8eTjtoHSdkWelVbPmI_fHqu3dXua5gtiM-udVH1AD0RP_5FhSUCfV-I7sO';
-    const scriptId = 'paypal-sdk-script';
 
     const initFields = () => {
       if (!window.paypal?.CardFields) { setIsCardFieldsReady(false); return; }
-
-      // Build instance once
-      if (cardFieldsInstanceRef.current) return; // already initialized
+      if (cardFieldsInstanceRef.current) return; // guard — only init once
 
       try {
         const cf = window.paypal.CardFields({
@@ -253,7 +381,6 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
             setError(e?.message || (isRtl ? 'خطأ في معالجة البطاقة' : 'Card error'));
             setIsSubmitting(false);
           },
-          // Minimal style – no background so it inherits the container
           style: {
             input: {
               'font-size': '14px',
@@ -268,35 +395,59 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
         });
 
         cardFieldsInstanceRef.current = cf;
-
         if (!cf.isEligible()) { setIsCardFieldsReady(false); return; }
 
-        // Render into our divs (plain divs, no React events on them)
         setTimeout(() => {
           try {
-            const num = document.getElementById('ppf-number');
-            const exp = document.getElementById('ppf-expiry');
-            const cvv = document.getElementById('ppf-cvv');
-            if (num && exp && cvv) {
-              num.innerHTML = ''; exp.innerHTML = ''; cvv.innerHTML = '';
-              cf.NumberField({ placeholder: '1234  5678  9012  3456' }).render('#ppf-number');
-              cf.ExpiryField({ placeholder: 'MM / YY' }).render('#ppf-expiry');
-              cf.CVVField({ placeholder: '•••' }).render('#ppf-cvv');
-              setIsCardFieldsReady(true);
-            }
-          } catch (err) { console.warn('[PayPal render]', err); }
+            const numEl = document.getElementById('ppf-number');
+            const expEl = document.getElementById('ppf-expiry');
+            const cvvEl = document.getElementById('ppf-cvv');
+            if (!numEl || !expEl || !cvvEl) return;
+
+            numEl.innerHTML = ''; expEl.innerHTML = ''; cvvEl.innerHTML = '';
+
+            const numField = cf.NumberField({ placeholder: '1234  5678  9012  3456' });
+            const expField = cf.ExpiryField({ placeholder: 'MM / YY' });
+            const cvvField = cf.CVVField({ placeholder: '•••' });
+
+            numField.render('#ppf-number');
+            expField.render('#ppf-expiry');
+            cvvField.render('#ppf-cvv');
+
+            // ── Subscribe to PayPal field events ──
+            // These events give us state (isEmpty, isValid, isFocused) NOT the actual value
+            numField.on('change', (evt: any) => {
+              setNumberState({ isEmpty: evt.isEmpty, isValid: evt.isValid, isFocused: false });
+            });
+            numField.on('focus',  () => setNumberState((s) => ({ ...s, isFocused: true })));
+            numField.on('blur',   () => setNumberState((s) => ({ ...s, isFocused: false })));
+
+            expField.on('change', (evt: any) => {
+              setExpiryState({ isEmpty: evt.isEmpty, isValid: evt.isValid, isFocused: false });
+            });
+            expField.on('focus',  () => setExpiryState((s) => ({ ...s, isFocused: true })));
+            expField.on('blur',   () => setExpiryState((s) => ({ ...s, isFocused: false })));
+
+            cvvField.on('change', (evt: any) => {
+              setCvvState({ isEmpty: evt.isEmpty, isValid: evt.isValid, isFocused: false });
+            });
+            cvvField.on('focus',  () => { setCvvState((s) => ({ ...s, isFocused: true })); });
+            cvvField.on('blur',   () => { setCvvState((s) => ({ ...s, isFocused: false })); });
+
+            setIsCardFieldsReady(true);
+          } catch (e) { console.warn('[PayPal render]', e); }
         }, 400);
-      } catch (err) {
-        console.error('[PayPal init]', err);
+      } catch (e) {
+        console.error('[PayPal init]', e);
         setIsCardFieldsReady(false);
       }
     };
 
+    const scriptId = 'paypal-sdk-script';
     const existing = document.getElementById(scriptId);
     if (!existing) {
       const s = document.createElement('script');
-      s.id = scriptId;
-      // Only card-fields component – no buttons
+      s.id  = scriptId;
       s.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&components=card-fields&currency=USD&intent=capture`;
       s.async = true;
       s.onload = initFields;
@@ -304,25 +455,21 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
     } else {
       initFields();
     }
-
-    // Cleanup – do NOT destroy on re-render to avoid focus loss
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedGateway?.gatewayConfigId]);
 
   if (!plan) return null;
 
-  const price         = currency === 'USD' ? plan.priceUsd : plan.priceEgp;
+  const price          = currency === 'USD' ? plan.priceUsd : plan.priceEgp;
   const currencySymbol = currency === 'USD' ? '$' : 'EGP ';
-  const isUsdPayPal   = currency === 'USD' && selectedGateway?.providerName === 'PayPal';
+  const isUsdPayPal    = currency === 'USD' && selectedGateway?.providerName === 'PayPal';
 
-  // ─── Submit handlers ───────────────────────────────────────────────────────
+  // ─── Handlers ──────────────────────────────────────────────────────────────
   const handleCardPay = async () => {
     if (!cardFieldsInstanceRef.current) return;
     setIsSubmitting(true); setError('');
     try {
-      await cardFieldsInstanceRef.current.submit({
-        cardholderName: cardholderName.trim() || 'Cardholder',
-      });
+      await cardFieldsInstanceRef.current.submit({ cardholderName: cardholderName.trim() || 'Cardholder' });
     } catch (e: any) {
       setError(e?.message || (isRtl ? 'خطأ في الدفع' : 'Payment error'));
       setIsSubmitting(false);
@@ -334,10 +481,8 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
     setIsSubmitting(true); setError('');
     try {
       const res = await api.post('/api/checkout/pay', {
-        planId: plan.id,
-        gatewayConfigId: selectedGateway.gatewayConfigId,
-        currency,
-        method: activeTab === 'wallet' ? 'wallet' : 'card',
+        planId: plan.id, gatewayConfigId: selectedGateway.gatewayConfigId,
+        currency, method: activeTab === 'wallet' ? 'wallet' : 'card',
       });
       if (res.data?.checkoutUrl) window.location.href = res.data.checkoutUrl;
       else throw new Error('No URL');
@@ -369,12 +514,10 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
     if (s?.comingSoon) return 'coming_soon';
     return 'active';
   };
-
   const tabStatus = (tab: string) => {
     if (tab === 'card') {
       const a = gwStatus('paypal'); const b = gwStatus('paymob');
-      if (a === 'active' || b === 'active') return 'active';
-      return a;
+      return (a === 'active' || b === 'active') ? 'active' : a;
     }
     if (tab === 'wallet') return gwStatus('paymob');
     if (tab === 'manual') return gwStatus('manual');
@@ -382,15 +525,15 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
   };
 
   const Badge = ({ s }: { s: string }) => {
-    if (s === 'maintenance') return <span className="text-[9px] font-bold px-1 py-px rounded bg-orange-500/20 text-orange-400">{isRtl ? 'صيانة' : 'Maint'}</span>;
-    if (s === 'coming_soon') return <span className="text-[9px] font-bold px-1 py-px rounded bg-cyan-500/20 text-cyan-400">{isRtl ? 'قريباً' : 'Soon'}</span>;
-    if (s === 'suspended')   return <span className="text-[9px] font-bold px-1 py-px rounded bg-red-500/20 text-red-400">{isRtl ? 'موقوف' : 'Off'}</span>;
+    if (s === 'maintenance') return <span className="text-[8px] font-bold px-1 py-px rounded bg-orange-500/20 text-orange-400">{isRtl ? 'صيانة' : 'Maint'}</span>;
+    if (s === 'coming_soon') return <span className="text-[8px] font-bold px-1 py-px rounded bg-cyan-500/20 text-cyan-400">{isRtl ? 'قريباً' : 'Soon'}</span>;
+    if (s === 'suspended')   return <span className="text-[8px] font-bold px-1 py-px rounded bg-red-500/20 text-red-400">{isRtl ? 'موقوف' : 'Off'}</span>;
     return null;
   };
 
   const FallbackMsg = ({ s }: { s: string }) => {
     if (s === 'active') return null;
-    const msgs: Record<string,string> = {
+    const msgs: Record<string, string> = {
       maintenance: isRtl ? 'البوابة تحت الصيانة.' : 'Gateway under maintenance.',
       coming_soon: isRtl ? 'ستتوفر قريباً.' : 'Coming soon.',
       suspended:   isRtl ? 'البوابة موقوفة.' : 'Gateway suspended.',
@@ -409,29 +552,24 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/80 backdrop-blur-sm"
-      dir={isRtl ? 'rtl' : 'ltr'}
-    >
-      {/* Glow */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/80 backdrop-blur-sm" dir={isRtl ? 'rtl' : 'ltr'}>
+      {/* ambient glow */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-[500px] h-[500px] rounded-full opacity-[0.07] blur-3xl"
-          style={{ background: 'radial-gradient(circle, #6366f1, transparent)' }} />
+        <div className="w-[500px] h-[500px] rounded-full opacity-[0.06] blur-3xl" style={{ background: 'radial-gradient(circle,#6366f1,transparent)' }} />
       </div>
 
       <div
         className="relative w-full rounded-3xl overflow-hidden"
         style={{
-          maxWidth: '680px',
+          maxWidth: '700px',
           maxHeight: '95vh',
           overflowY: 'auto',
-          background: 'linear-gradient(170deg, #13131a 0%, #0f0f14 100%)',
+          background: 'linear-gradient(170deg,#13131a 0%,#0f0f14 100%)',
           boxShadow: '0 40px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.06)',
         }}
       >
         {/* Close */}
-        <button onClick={onClose}
-          className="absolute top-4 right-4 z-10 p-1.5 rounded-full text-slate-500 hover:text-white hover:bg-white/5 transition">
+        <button onClick={onClose} className="absolute top-4 right-4 z-10 p-1.5 rounded-full text-slate-500 hover:text-white hover:bg-white/5 transition">
           <X className="w-5 h-5" />
         </button>
 
@@ -452,22 +590,19 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
             </p>
           </div>
 
-          {/* ── Tabs ── */}
-          <div className="flex gap-2 mb-5 p-1 rounded-xl"
-            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+          {/* Tabs */}
+          <div className="flex gap-2 mb-5 p-1 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
             {(['card', ...(currency === 'EGP' ? ['wallet'] : []), 'manual']).map((tab) => {
               const t = tab as 'card' | 'wallet' | 'manual';
               const st = tabStatus(t);
               const active = activeTab === t;
-              const labels: Record<string,string> = {
+              const labels: Record<string, string> = {
                 card:   isRtl ? '💳 بطاقة' : '💳 Card',
                 wallet: isRtl ? '📱 محافظ' : '📱 Wallets',
                 manual: isRtl ? '🏦 تحويل' : '🏦 Transfer',
               };
               return (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(t)}
+                <button key={tab} onClick={() => setActiveTab(t)}
                   className="flex-1 py-2 rounded-lg text-xs font-semibold transition-all duration-200 flex flex-col items-center gap-0.5"
                   style={{
                     background: active ? 'linear-gradient(135deg,#4f46e5,#7c3aed)' : 'transparent',
@@ -475,42 +610,42 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
                     boxShadow:  active ? '0 4px 14px rgba(99,102,241,0.4)' : 'none',
                   }}
                 >
-                  <span>{labels[tab]}</span>
+                  <span>{labels[t]}</span>
                   <Badge s={st} />
                 </button>
               );
             })}
           </div>
 
-          {/* ──────────────────────── CARD TAB ──────────────────────── */}
+          {/* ── CARD TAB ── */}
           {activeTab === 'card' && (
             <div>
               {isLoadingGateways ? (
                 <div className="flex flex-col items-center py-14 gap-3">
                   <div className="w-8 h-8 rounded-full border-2 border-indigo-500/30 border-t-indigo-500 animate-spin" />
-                  <span className="text-slate-500 text-xs">{isRtl ? 'جاري تجهيز بوابة الدفع...' : 'Initializing gateway...'}</span>
+                  <span className="text-slate-500 text-xs">{isRtl ? 'جاري تجهيز البوابة...' : 'Initializing gateway...'}</span>
                 </div>
               ) : gateways.length === 0 ? (
                 <div className="bg-white/3 border border-white/8 rounded-2xl p-6 text-center text-slate-500 text-sm">
-                  {isRtl ? 'لا توجد بوابات دفع متاحة لهذه الباقة.' : 'No payment gateways available.'}
+                  {isRtl ? 'لا توجد بوابات دفع متاحة.' : 'No payment gateways available.'}
                 </div>
               ) : isUsdPayPal ? (
-                /* ── USD: Side-by-side layout ── */
+                /* ── USD PayPal — two columns ── */
                 <div className="space-y-4">
-                  {/* Two-column grid */}
                   <div className="grid gap-5" style={{ gridTemplateColumns: '1fr 1fr' }}>
-                    {/* LEFT — Card preview */}
-                    <div className="flex flex-col gap-0">
-                      <CardPreview
-                        name={cardholderName}
-                        isFlipped={isCardFlipped}
-                        onFlip={() => setIsCardFlipped((v) => !v)}
-                      />
-                    </div>
+                    {/* Card Preview */}
+                    <CardPreview
+                      name={cardholderName}
+                      isFlipped={isCardFlipped}
+                      onFlip={() => setIsCardFlipped((v) => !v)}
+                      numberState={numberState}
+                      expiryState={expiryState}
+                      cvvState={cvvState}
+                    />
 
-                    {/* RIGHT — Hosted fields (plain divs, no React event handlers) */}
+                    {/* Fields — no React events on PayPal iframes */}
                     <div className="flex flex-col gap-3">
-                      {/* Cardholder name — normal React input, safe */}
+                      {/* Cardholder name */}
                       <div>
                         <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">
                           {isRtl ? 'الاسم على البطاقة' : 'Cardholder Name'}
@@ -519,22 +654,35 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
                           type="text"
                           value={cardholderName}
                           onChange={(e) => setCardholderName(e.target.value)}
-                          placeholder={isRtl ? 'مثال: Ahmed Mohamed' : 'e.g. John Doe'}
-                          className="w-full h-11 px-3 rounded-xl text-sm text-white placeholder-slate-600 outline-none transition"
+                          placeholder="e.g. John Doe"
+                          className="w-full h-11 px-3 rounded-xl text-sm text-white placeholder-slate-600 outline-none transition-all"
                           style={{
-                            background: '#0d0d12',
-                            border: '1px solid rgba(99,102,241,0.25)',
+                            background: '#0a0a10',
+                            border: cardholderName ? '1px solid rgba(52,211,153,0.4)' : '1px solid rgba(255,255,255,0.08)',
                           }}
                         />
                       </div>
 
-                      {/* PayPal hosted field: number */}
-                      <HostedFieldBox id="ppf-number" label={isRtl ? 'رقم البطاقة' : 'Card Number'} />
+                      <HostedFieldBox
+                        id="ppf-number"
+                        label={isRtl ? 'رقم البطاقة' : 'Card Number'}
+                        isValid={numberState.isValid}
+                        isFocused={numberState.isFocused}
+                      />
 
-                      {/* Expiry + CVV side by side */}
                       <div className="grid grid-cols-2 gap-2">
-                        <HostedFieldBox id="ppf-expiry" label={isRtl ? 'الانتهاء' : 'Expiry'} />
-                        <HostedFieldBox id="ppf-cvv" label="CVV" />
+                        <HostedFieldBox
+                          id="ppf-expiry"
+                          label={isRtl ? 'الانتهاء' : 'Expiry'}
+                          isValid={expiryState.isValid}
+                          isFocused={expiryState.isFocused}
+                        />
+                        <HostedFieldBox
+                          id="ppf-cvv"
+                          label="CVV"
+                          isValid={cvvState.isValid}
+                          isFocused={cvvState.isFocused}
+                        />
                       </div>
                     </div>
                   </div>
@@ -546,19 +694,18 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
                     </div>
                   )}
 
-                  {/* Pay button — full width below the two columns */}
+                  {/* Pay button */}
                   <button
                     onClick={handleCardPay}
                     disabled={isSubmitting || !isCardFieldsReady}
                     className="relative w-full py-4 rounded-2xl font-bold text-white text-base overflow-hidden transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{
                       background: 'linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%)',
-                      boxShadow:  isSubmitting ? 'none' : '0 8px 28px rgba(99,102,241,0.5)',
+                      boxShadow: isSubmitting ? 'none' : '0 8px 28px rgba(99,102,241,0.5)',
                     }}
                   >
                     {!isSubmitting && isCardFieldsReady && (
-                      <span className="absolute inset-0 rounded-2xl animate-pulse opacity-20"
-                        style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)' }} />
+                      <span className="absolute inset-0 rounded-2xl animate-pulse opacity-15" style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)' }} />
                     )}
                     <span className="relative flex items-center justify-center gap-2">
                       {isSubmitting
@@ -572,7 +719,7 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
                   <div className="flex items-center justify-center gap-3">
                     <Lock className="w-3 h-3 text-slate-700" />
                     <span className="text-slate-600 text-[11px]">{isRtl ? 'مدعوم بـ' : 'Secured by'}</span>
-                    <div className="flex items-center gap-2 opacity-35">
+                    <div className="flex items-center gap-2 opacity-30">
                       <span className="text-[11px] font-black text-slate-400 italic">VISA</span>
                       <div className="flex -space-x-1.5">
                         <div className="w-4 h-4 rounded-full bg-red-500" />
@@ -584,7 +731,7 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
                   </div>
                 </div>
               ) : (
-                /* ── EGP: Standard redirect ── */
+                /* ── EGP Redirect ── */
                 <div className="space-y-4">
                   {gateways.length > 1 && (
                     <div className="grid gap-2">
@@ -592,9 +739,9 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
                         <button key={g.gatewayConfigId} onClick={() => setSelectedGateway(g)}
                           className="flex items-center gap-3 p-3 rounded-xl border text-sm font-medium transition-all"
                           style={{
-                            background:   selectedGateway?.gatewayConfigId === g.gatewayConfigId ? 'rgba(99,102,241,0.1)' : 'transparent',
-                            borderColor:  selectedGateway?.gatewayConfigId === g.gatewayConfigId ? '#6366f1' : 'rgba(255,255,255,0.08)',
-                            color:        selectedGateway?.gatewayConfigId === g.gatewayConfigId ? '#fff' : '#64748b',
+                            background:  selectedGateway?.gatewayConfigId === g.gatewayConfigId ? 'rgba(99,102,241,0.1)' : 'transparent',
+                            borderColor: selectedGateway?.gatewayConfigId === g.gatewayConfigId ? '#6366f1' : 'rgba(255,255,255,0.08)',
+                            color:       selectedGateway?.gatewayConfigId === g.gatewayConfigId ? '#fff' : '#64748b',
                           }}
                         >
                           <span className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${selectedGateway?.gatewayConfigId === g.gatewayConfigId ? 'border-indigo-500 bg-indigo-500' : 'border-slate-600'}`} />
@@ -604,8 +751,7 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
                       ))}
                     </div>
                   )}
-                  <div className="rounded-2xl p-4"
-                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                  <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
                     <div className="flex justify-between text-sm mb-1">
                       <span className="text-slate-500">{isRtl ? 'البوابة' : 'Gateway'}</span>
                       <span className="text-white font-medium">{selectedGateway?.displayName ?? '—'}</span>
@@ -633,8 +779,7 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
           {/* ── WALLET TAB ── */}
           {activeTab === 'wallet' && currency === 'EGP' && (
             <div className="space-y-4">
-              <div className="rounded-2xl p-4"
-                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+              <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
                 <div className="flex justify-between items-center">
                   <span className="text-slate-500 text-sm">{isRtl ? 'الإجمالي' : 'Total'}</span>
                   <span className="text-2xl font-bold text-white">{currencySymbol}{price}</span>
@@ -642,8 +787,7 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
               </div>
               {error && <p className="text-red-400 text-sm">{error}</p>}
               <FallbackMsg s={tabStatus('wallet')} />
-              <button onClick={handleRedirectPay}
-                disabled={isSubmitting || !selectedGateway}
+              <button onClick={handleRedirectPay} disabled={isSubmitting || !selectedGateway}
                 className="w-full py-4 rounded-2xl font-bold text-white text-base transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                 style={{ background: 'linear-gradient(135deg,#059669,#10b981)', boxShadow: '0 8px 28px rgba(16,185,129,0.4)' }}
               >
@@ -656,8 +800,7 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
           {/* ── MANUAL TAB ── */}
           {activeTab === 'manual' && (
             <div className="space-y-4">
-              <div className="rounded-2xl p-4 text-sm text-slate-400"
-                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+              <div className="rounded-2xl p-4 text-sm text-slate-400" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
                 <p className="font-semibold text-white mb-3">{isRtl ? 'تفاصيل التحويل:' : 'Transfer Details:'}</p>
                 {paymentMethods.length > 0 ? (
                   <ul className="space-y-2">
@@ -669,17 +812,13 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-slate-500 flex items-center gap-2">
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    {isRtl ? 'جاري التحميل...' : 'Loading...'}
-                  </p>
+                  <p className="text-slate-500 flex items-center gap-2"><Loader2 className="w-3.5 h-3.5 animate-spin" />{isRtl ? 'جاري...' : 'Loading...'}</p>
                 )}
                 <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center">
                   <span className="text-slate-500">{isRtl ? 'المبلغ' : 'Amount'}</span>
                   <span className="text-xl font-bold text-white">{currencySymbol}{price}</span>
                 </div>
               </div>
-
               <div>
                 <label className="block text-[10px] font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
                   {isRtl ? 'إرفاق إيصال التحويل' : 'Upload Transfer Receipt'}
@@ -687,24 +826,19 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
                 <label
                   className="flex flex-col items-center justify-center w-full h-28 rounded-2xl cursor-pointer transition-all"
                   style={{
-                    background:  file ? 'rgba(99,102,241,0.07)' : 'rgba(255,255,255,0.02)',
-                    border:      `2px dashed ${file ? 'rgba(99,102,241,0.45)' : 'rgba(255,255,255,0.08)'}`,
+                    background: file ? 'rgba(99,102,241,0.07)' : 'rgba(255,255,255,0.02)',
+                    border: `2px dashed ${file ? 'rgba(99,102,241,0.45)' : 'rgba(255,255,255,0.08)'}`,
                   }}
                 >
                   <UploadCloud className={`w-7 h-7 mb-2 ${file ? 'text-indigo-400' : 'text-slate-600'}`} />
                   <p className="text-xs text-slate-500">
-                    {file
-                      ? <span className="text-indigo-400 font-semibold">{file.name}</span>
-                      : (isRtl ? 'اضغط لرفع الصورة' : 'Click to upload')}
+                    {file ? <span className="text-indigo-400 font-semibold">{file.name}</span> : (isRtl ? 'اضغط لرفع الصورة' : 'Click to upload')}
                   </p>
-                  <input type="file" className="hidden" accept="image/*"
-                    onChange={(e) => e.target.files?.[0] && setFile(e.target.files[0])} />
+                  <input type="file" className="hidden" accept="image/*" onChange={(e) => e.target.files?.[0] && setFile(e.target.files[0])} />
                 </label>
               </div>
-
               {error && <p className="text-red-400 text-sm">{error}</p>}
               <FallbackMsg s={tabStatus('manual')} />
-
               <button onClick={handleManualPay}
                 disabled={isSubmitting || !file || tabStatus('manual') !== 'active'}
                 className="w-full py-4 rounded-2xl font-bold text-white text-base transition-all disabled:opacity-50 flex items-center justify-center gap-2"
