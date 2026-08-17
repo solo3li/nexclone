@@ -212,14 +212,13 @@ export default function TextToImagePage() {
 
       // Also listen on SignalR
       signalRNotificationService.startConnection();
-      const unsub = signalRNotificationService.onNotification(() => {
+      signalRNotificationService.onNotification(() => {
         checkTask();
       });
 
       return () => {
         clearInterval(timer);
         clearInterval(pollInterval);
-        unsub();
       };
     }
   }, [activeTaskId, prompt, currentModel.id, aspectRatio, isRtl, locale, setUser]);
