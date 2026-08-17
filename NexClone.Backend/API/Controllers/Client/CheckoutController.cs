@@ -34,6 +34,7 @@ namespace NexClone.Backend.API.Controllers.Client
         /// The frontend uses this to show the user their payment options.
         /// </summary>
         [HttpGet("gateways/{planId}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetGatewaysForPlan(int planId)
         {
             var plan = await _context.Plans.FindAsync(planId);
