@@ -56,15 +56,37 @@ namespace NexClone.Backend.Infrastructure.Consumers
                         _ => "16:9"
                     };
 
-                    payload = new {
-                        model = crunModel,
-                        input = new {
-                            prompt = message.Prompt,
-                            resolution = message.Resolution,
-                            aspect_ratio = normalizedAspect,
-                            duration = message.Duration > 0 ? message.Duration : (int?)null
-                        }
-                    };
+                    if (crunModel.Contains("grok"))
+                    {
+                        string grokMode = (message.Mode?.ToLower()) switch {
+                            "fun" => "fun",
+                            "spicy" => "spicy",
+                            _ => "normal"
+                        };
+
+                        payload = new {
+                            model = crunModel,
+                            input = new {
+                                prompt = message.Prompt,
+                                resolution = message.Resolution,
+                                aspect_ratio = normalizedAspect,
+                                mode = grokMode,
+                                duration = message.Duration > 0 ? message.Duration : (int?)null
+                            }
+                        };
+                    }
+                    else
+                    {
+                        payload = new {
+                            model = crunModel,
+                            input = new {
+                                prompt = message.Prompt,
+                                resolution = message.Resolution,
+                                aspect_ratio = normalizedAspect,
+                                duration = message.Duration > 0 ? message.Duration : (int?)null
+                            }
+                        };
+                    }
                 }
                 else if (message.ToolType == "image-to-video")
                 {
@@ -98,13 +120,19 @@ namespace NexClone.Backend.Infrastructure.Consumers
 
                     if (crunModel.Contains("grok"))
                     {
+                        string grokMode = (message.Mode?.ToLower()) switch {
+                            "fun" => "fun",
+                            "spicy" => "spicy",
+                            _ => "normal"
+                        };
+
                         payload = new {
                             model = crunModel,
                             input = new {
                                 image = imageUrl,
                                 image_url = imageUrl,
                                 prompt = promptText,
-                                mode = message.Mode,
+                                mode = grokMode,
                                 resolution = message.Resolution,
                                 duration = message.Duration > 0 ? message.Duration : (int?)null
                             }

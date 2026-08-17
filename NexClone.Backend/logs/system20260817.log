@@ -831,3 +831,68 @@ System.Exception: Crun AI submit failed: {"code":422,"message":"Missing Params o
 2026-08-17 05:42:56.794 +03:00 [INF] Server desktop-rjppsk4:15908:fd7e553b is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-17 05:42:56.805 +03:00 [INF] Server desktop-rjppsk4:15908:fd7e553b all the dispatchers started
 2026-08-17 05:43:32.439 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 05:44:53.618 +03:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 05:44:53.621 +03:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 05:44:54.184 +03:00 [INF] Received HTTP response headers after 556.7228ms - 200
+2026-08-17 05:44:54.190 +03:00 [INF] End processing HTTP request after 581.8043ms - 200
+2026-08-17 05:45:04.510 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 05:45:04.510 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 05:45:04.731 +03:00 [INF] Received HTTP response headers after 221.2122ms - 200
+2026-08-17 05:45:04.732 +03:00 [INF] End processing HTTP request after 223.3964ms - 200
+2026-08-17 05:45:14.744 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 05:45:14.744 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 05:45:14.962 +03:00 [INF] Received HTTP response headers after 218.0556ms - 200
+2026-08-17 05:45:14.963 +03:00 [INF] End processing HTTP request after 218.9168ms - 200
+2026-08-17 05:45:24.973 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 05:45:24.973 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 05:45:25.302 +03:00 [INF] Received HTTP response headers after 328.8673ms - 200
+2026-08-17 05:45:25.303 +03:00 [INF] End processing HTTP request after 329.5078ms - 200
+2026-08-17 05:45:35.317 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 05:45:35.318 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 05:45:35.541 +03:00 [INF] Received HTTP response headers after 223.8041ms - 200
+2026-08-17 05:45:35.542 +03:00 [INF] End processing HTTP request after 224.5509ms - 200
+2026-08-17 05:45:45.548 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 05:45:45.549 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 05:45:45.767 +03:00 [INF] Received HTTP response headers after 218.2501ms - 200
+2026-08-17 05:45:45.767 +03:00 [INF] End processing HTTP request after 219.1761ms - 200
+2026-08-17 05:45:55.775 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 05:45:55.775 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 05:45:55.994 +03:00 [INF] Received HTTP response headers after 219.0319ms - 200
+2026-08-17 05:45:55.994 +03:00 [INF] End processing HTTP request after 219.6609ms - 200
+2026-08-17 05:46:06.000 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 05:46:06.000 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 05:46:06.221 +03:00 [INF] Received HTTP response headers after 220.2456ms - 200
+2026-08-17 05:46:06.221 +03:00 [INF] End processing HTTP request after 221.2256ms - 200
+2026-08-17 05:46:06.756 +03:00 [INF] [Email] Queuing video completion email to hamed3alii.3@gmail.com for task image-to-video Generation
+2026-08-17 05:46:11.985 +03:00 [INF] [Email Task] Sending email to hamed3alii.3@gmail.com
+2026-08-17 05:46:12.299 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 05:46:12.299 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 05:46:12.631 +03:00 [INF] Received HTTP response headers after 331.7296ms - 201
+2026-08-17 05:46:12.631 +03:00 [INF] End processing HTTP request after 332.1756ms - 201
+2026-08-17 05:46:12.631 +03:00 [INF] [Email Task] Email sent to hamed3alii.3@gmail.com successfully.
+2026-08-17 05:47:36.137 +03:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 05:47:36.138 +03:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 05:47:36.794 +03:00 [INF] Received HTTP response headers after 655.8971ms - 422
+2026-08-17 05:47:36.794 +03:00 [INF] End processing HTTP request after 656.711ms - 422
+2026-08-17 05:47:36.794 +03:00 [ERR] Error processing video tool task.
+System.Exception: Crun AI submit failed: {"code":422,"message":"Missing Params or Type Error","errors":["Value error, Invalid input for model grok-imagine/i2v: mode: Input should be 'fun', 'normal' or 'spicy'"]}
+   at NexClone.Backend.Infrastructure.Consumers.VideoToolConsumer.Consume(VideoToolMessage message) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\Consumers\VideoToolConsumer.cs:line 176
+2026-08-17 05:47:57.307 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-17 05:53:12.993 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-17 05:53:21.917 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-17 05:53:25.107 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-17 05:53:25.189 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-17 05:53:25.189 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-17 05:53:25.190 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-17 05:53:25.190 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-17 05:53:25.190 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-17 05:53:25.190 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-17 05:53:26.750 +03:00 [INF] Server desktop-rjppsk4:13396:c33068c2 successfully announced in 1548.362 ms
+2026-08-17 05:53:26.753 +03:00 [INF] Server desktop-rjppsk4:13396:c33068c2 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-17 05:53:26.766 +03:00 [INF] Server desktop-rjppsk4:13396:c33068c2 all the dispatchers started
+2026-08-17 05:53:31.499 +03:00 [INF] Removed 1 outdated record(s) from 'aggregatedcounter' table.
+2026-08-17 05:53:40.440 +03:00 [INF] Removed 1 outdated record(s) from 'job' table.

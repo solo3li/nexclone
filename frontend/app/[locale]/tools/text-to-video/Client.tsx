@@ -154,6 +154,7 @@ export default function TextToVideoPage() {
   const [resolution, setResolution] = useState<string>("1080p");
   const [aspectRatio, setAspectRatio] = useState<string>("16:9");
   const [duration, setDuration] = useState<number>(6); // For Grok (1-30s)
+  const [mode, setMode] = useState<string>("normal"); // For Grok (normal, fun, spicy)
   const [prompt, setPrompt] = useState<string>("");
 
   // Dropdown UI Open States
@@ -365,6 +366,7 @@ export default function TextToVideoPage() {
 
       if (currentModel.family === "grok") {
         formData.append("duration", duration.toString());
+        formData.append("mode", mode);
       } else {
         formData.append("duration", "8"); // Veo 8s standard
       }
@@ -884,26 +886,55 @@ export default function TextToVideoPage() {
 
             {/* 4. Duration Slider for Grok only */}
             {currentModel.isPerSecond && (
-              <div className="space-y-2 pt-2 border-t border-white/5">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="font-bold text-white/80 flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-pink-400" />
-                    <span>{isRtl ? "مدة الفيديو:" : "Duration:"}</span>
+              <div className="space-y-3 pt-2 border-t border-white/5">
+                <div className="space-y-1.5">
+                  <span className="font-bold text-white/80 text-xs flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    <span>{isRtl ? "نمط المشهد (Creative Mode):" : "Creative Mode:"}</span>
                   </span>
-                  <span className="font-bold text-amber-400 font-mono text-sm">{duration} {isRtl ? "ثواني" : "seconds"}</span>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {[
+                      { id: "normal", labelAr: "واقعي", labelEn: "Normal" },
+                      { id: "fun", labelAr: "مرح", labelEn: "Fun" },
+                      { id: "spicy", labelAr: "سينمائي", labelEn: "Spicy" }
+                    ].map((m) => (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => setMode(m.id)}
+                        className={`py-1.5 px-2 rounded-lg text-xs font-bold transition-all ${
+                          mode === m.id
+                            ? "bg-violet-600 text-white shadow-md shadow-violet-900/40"
+                            : "bg-white/5 hover:bg-white/10 text-white/60 hover:text-white"
+                        }`}
+                      >
+                        {isRtl ? m.labelAr : m.labelEn}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <input
-                  type="range"
-                  min="1"
-                  max="30"
-                  value={duration}
-                  onChange={(e) => setDuration(parseInt(e.target.value))}
-                  className="w-full accent-violet-500 cursor-pointer bg-white/10 rounded-lg h-2"
-                />
-                <div className="flex justify-between text-[10px] text-white/40 font-mono">
-                  <span>1s</span>
-                  <span>15s</span>
-                  <span>30s</span>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="font-bold text-white/80 flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-pink-400" />
+                      <span>{isRtl ? "مدة الفيديو:" : "Duration:"}</span>
+                    </span>
+                    <span className="font-bold text-amber-400 font-mono text-sm">{duration} {isRtl ? "ثواني" : "seconds"}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="1"
+                    max="30"
+                    value={duration}
+                    onChange={(e) => setDuration(parseInt(e.target.value))}
+                    className="w-full accent-violet-500 cursor-pointer bg-white/10 rounded-lg h-2"
+                  />
+                  <div className="flex justify-between text-[10px] text-white/40 font-mono">
+                    <span>1s</span>
+                    <span>15s</span>
+                    <span>30s</span>
+                  </div>
                 </div>
               </div>
             )}
