@@ -275,7 +275,9 @@ using (var scope = app.Services.CreateScope())
         var requiredOrigins = new[]
         {
             "http://localhost:3000", "http://localhost:3001",
-            "http://167.71.66.188:3000", "http://178.62.192.74:3000"
+            "http://167.71.66.188:3000", "http://178.62.192.74:3000",
+            "https://recently-gnome-growth-accomplished.trycloudflare.com",
+            "https://nascar-introduces-polo-appreciation.trycloudflare.com"
         };
         var currentList = existingOrigins.Value.Split(',').Select(o => o.Trim()).ToList();
         bool changed = false;

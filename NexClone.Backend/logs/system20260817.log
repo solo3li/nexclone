@@ -1790,3 +1790,145 @@ System.Exception: Crun AI Task failed: Upstream internal service error. Please t
 2026-08-17 22:11:09.821 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
 2026-08-17 22:11:10.054 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
 2026-08-17 22:11:14.377 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 22:14:01.936 +03:00 [INF] [Email Task] Sending email to admin_6327a92b@nexmediaai.com
+2026-08-17 22:14:02.166 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:14:02.166 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:14:02.894 +03:00 [INF] Received HTTP response headers after 727.8791ms - 201
+2026-08-17 22:14:02.895 +03:00 [INF] End processing HTTP request after 728.4049ms - 201
+2026-08-17 22:14:02.895 +03:00 [INF] [Email Task] Email sent to admin_6327a92b@nexmediaai.com successfully.
+2026-08-17 22:15:11.634 +03:00 [INF] [Email Task] Sending email to superadmin_84066bdb@nexmediaai.com
+2026-08-17 22:15:11.922 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:15:11.922 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:15:12.054 +03:00 [INF] Received HTTP response headers after 131.7013ms - 201
+2026-08-17 22:15:12.055 +03:00 [INF] End processing HTTP request after 132.5427ms - 201
+2026-08-17 22:15:12.055 +03:00 [INF] [Email Task] Email sent to superadmin_84066bdb@nexmediaai.com successfully.
+2026-08-17 22:15:38.701 +03:00 [INF] [Email Task] Sending email to manageduser_6e8c363c@nexmediaai.com
+2026-08-17 22:15:39.326 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:15:39.326 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:15:39.817 +03:00 [INF] Received HTTP response headers after 491.672ms - 201
+2026-08-17 22:15:39.818 +03:00 [INF] End processing HTTP request after 492.1949ms - 201
+2026-08-17 22:15:39.818 +03:00 [INF] [Email Task] Email sent to manageduser_6e8c363c@nexmediaai.com successfully.
+2026-08-17 22:16:16.719 +03:00 [INF] [Email Task] Sending email to superadmin_160aa12b@nexmediaai.com
+2026-08-17 22:16:17.075 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:16:17.075 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:16:17.514 +03:00 [INF] Received HTTP response headers after 438.8278ms - 201
+2026-08-17 22:16:17.514 +03:00 [INF] End processing HTTP request after 439.1054ms - 201
+2026-08-17 22:16:17.514 +03:00 [INF] [Email Task] Email sent to superadmin_160aa12b@nexmediaai.com successfully.
+2026-08-17 22:16:39.875 +03:00 [INF] [Email Task] Sending email to manageduser_4a894a9c@nexmediaai.com
+2026-08-17 22:16:40.174 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:16:40.175 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:16:40.298 +03:00 [INF] Received HTTP response headers after 123.6246ms - 201
+2026-08-17 22:16:40.298 +03:00 [INF] End processing HTTP request after 124.0743ms - 201
+2026-08-17 22:16:40.299 +03:00 [INF] [Email Task] Email sent to manageduser_4a894a9c@nexmediaai.com successfully.
+2026-08-17 22:17:02.149 +03:00 [INF] [Email Task] Sending email to manageduser_4a894a9c@nexmediaai.com
+2026-08-17 22:17:02.436 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:17:02.436 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:17:02.630 +03:00 [INF] Received HTTP response headers after 193.5315ms - 201
+2026-08-17 22:17:02.630 +03:00 [INF] End processing HTTP request after 193.8786ms - 201
+2026-08-17 22:17:02.630 +03:00 [INF] [Email Task] Email sent to manageduser_4a894a9c@nexmediaai.com successfully.
+2026-08-17 22:17:39.933 +03:00 [INF] [Email Task] Sending email to superadmin_13fa89d0@nexmediaai.com
+2026-08-17 22:17:40.240 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:17:40.240 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:17:40.375 +03:00 [INF] Received HTTP response headers after 134.3615ms - 201
+2026-08-17 22:17:40.375 +03:00 [INF] End processing HTTP request after 134.8828ms - 201
+2026-08-17 22:17:40.375 +03:00 [INF] [Email Task] Email sent to superadmin_13fa89d0@nexmediaai.com successfully.
+2026-08-17 22:18:08.140 +03:00 [INF] [Email Task] Sending email to manageduser_e133b4da@nexmediaai.com
+2026-08-17 22:18:08.467 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:18:08.467 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:18:08.897 +03:00 [INF] Received HTTP response headers after 429.9085ms - 201
+2026-08-17 22:18:08.897 +03:00 [INF] End processing HTTP request after 430.3186ms - 201
+2026-08-17 22:18:08.897 +03:00 [INF] [Email Task] Email sent to manageduser_e133b4da@nexmediaai.com successfully.
+2026-08-17 22:18:31.682 +03:00 [INF] [Email Task] Sending email to manageduser_e133b4da@nexmediaai.com
+2026-08-17 22:18:32.146 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:18:32.146 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:18:32.475 +03:00 [INF] Received HTTP response headers after 329.1424ms - 201
+2026-08-17 22:18:32.475 +03:00 [INF] End processing HTTP request after 329.3727ms - 201
+2026-08-17 22:18:32.475 +03:00 [INF] [Email Task] Email sent to manageduser_e133b4da@nexmediaai.com successfully.
+2026-08-17 22:19:11.094 +03:00 [INF] [Email Task] Sending email to superadmin_c27f4185@nexmediaai.com
+2026-08-17 22:19:11.431 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:19:11.431 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:19:11.683 +03:00 [INF] Received HTTP response headers after 252.1686ms - 201
+2026-08-17 22:19:11.684 +03:00 [INF] End processing HTTP request after 252.4647ms - 201
+2026-08-17 22:19:11.684 +03:00 [INF] [Email Task] Email sent to superadmin_c27f4185@nexmediaai.com successfully.
+2026-08-17 22:19:38.817 +03:00 [INF] [Email Task] Sending email to manageduser_3ca8f0a9@nexmediaai.com
+2026-08-17 22:19:39.503 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:19:39.504 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:19:40.091 +03:00 [INF] Received HTTP response headers after 587.4659ms - 201
+2026-08-17 22:19:40.092 +03:00 [INF] End processing HTTP request after 588.7391ms - 201
+2026-08-17 22:19:40.092 +03:00 [INF] [Email Task] Email sent to manageduser_3ca8f0a9@nexmediaai.com successfully.
+2026-08-17 22:19:58.424 +03:00 [INF] [Email Task] Sending email to manageduser_3ca8f0a9@nexmediaai.com
+2026-08-17 22:19:58.842 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:19:58.843 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:19:59.198 +03:00 [INF] Received HTTP response headers after 355.8312ms - 201
+2026-08-17 22:19:59.199 +03:00 [INF] End processing HTTP request after 356.2177ms - 201
+2026-08-17 22:19:59.199 +03:00 [INF] [Email Task] Email sent to manageduser_3ca8f0a9@nexmediaai.com successfully.
+2026-08-17 22:20:33.789 +03:00 [INF] [Email Task] Sending email to superadmin_cc521b64@nexmediaai.com
+2026-08-17 22:20:34.088 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:20:34.088 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:20:34.432 +03:00 [INF] Received HTTP response headers after 344.0091ms - 201
+2026-08-17 22:20:34.432 +03:00 [INF] End processing HTTP request after 344.2955ms - 201
+2026-08-17 22:20:34.432 +03:00 [INF] [Email Task] Email sent to superadmin_cc521b64@nexmediaai.com successfully.
+2026-08-17 22:21:01.600 +03:00 [INF] [Email Task] Sending email to manageduser_42ac3a97@nexmediaai.com
+2026-08-17 22:21:01.818 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:21:01.819 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:21:01.960 +03:00 [INF] Received HTTP response headers after 141.3055ms - 201
+2026-08-17 22:21:01.960 +03:00 [INF] End processing HTTP request after 141.8332ms - 201
+2026-08-17 22:21:01.960 +03:00 [INF] [Email Task] Email sent to manageduser_42ac3a97@nexmediaai.com successfully.
+2026-08-17 22:21:25.253 +03:00 [INF] [Email Task] Sending email to manageduser_42ac3a97@nexmediaai.com
+2026-08-17 22:21:26.054 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:21:26.054 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:21:28.176 +03:00 [INF] Received HTTP response headers after 2122.3452ms - 201
+2026-08-17 22:21:28.176 +03:00 [INF] End processing HTTP request after 2122.8115ms - 201
+2026-08-17 22:21:28.177 +03:00 [INF] [Email Task] Email sent to manageduser_42ac3a97@nexmediaai.com successfully.
+2026-08-17 22:23:22.198 +03:00 [INF] [Email Task] Sending email to superadmin_8bcaa118@nexmediaai.com
+2026-08-17 22:23:22.902 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:23:22.902 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:23:23.735 +03:00 [INF] Received HTTP response headers after 832.924ms - 201
+2026-08-17 22:23:23.735 +03:00 [INF] End processing HTTP request after 833.3476ms - 201
+2026-08-17 22:23:23.735 +03:00 [INF] [Email Task] Email sent to superadmin_8bcaa118@nexmediaai.com successfully.
+2026-08-17 22:23:42.440 +03:00 [INF] [Email Task] Sending email to manageduser_271c6d8f@nexmediaai.com
+2026-08-17 22:23:42.664 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:23:42.664 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:23:42.802 +03:00 [INF] Received HTTP response headers after 138.2643ms - 201
+2026-08-17 22:23:42.802 +03:00 [INF] End processing HTTP request after 138.6202ms - 201
+2026-08-17 22:23:42.802 +03:00 [INF] [Email Task] Email sent to manageduser_271c6d8f@nexmediaai.com successfully.
+2026-08-17 22:23:57.683 +03:00 [INF] [Email Task] Sending email to manageduser_271c6d8f@nexmediaai.com
+2026-08-17 22:23:58.477 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:23:58.477 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 22:23:59.130 +03:00 [INF] Received HTTP response headers after 652.253ms - 201
+2026-08-17 22:23:59.130 +03:00 [INF] End processing HTTP request after 652.7533ms - 201
+2026-08-17 22:23:59.130 +03:00 [INF] [Email Task] Email sent to manageduser_271c6d8f@nexmediaai.com successfully.
+2026-08-17 23:26:56.835 +03:00 [INF] [Email Task] Sending email to superadmin_1cd18535@nexmediaai.com
+2026-08-17 23:26:57.427 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 23:26:57.428 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 23:26:59.589 +03:00 [INF] Received HTTP response headers after 2161.0095ms - 201
+2026-08-17 23:26:59.590 +03:00 [INF] End processing HTTP request after 2167.0618ms - 201
+2026-08-17 23:26:59.590 +03:00 [INF] [Email Task] Email sent to superadmin_1cd18535@nexmediaai.com successfully.
+2026-08-17 23:27:24.747 +03:00 [INF] [Email Task] Sending email to manageduser_a0b310b4@nexmediaai.com
+2026-08-17 23:27:24.966 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 23:27:24.966 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 23:27:25.201 +03:00 [INF] Received HTTP response headers after 235.0508ms - 201
+2026-08-17 23:27:25.201 +03:00 [INF] End processing HTTP request after 235.4539ms - 201
+2026-08-17 23:27:25.205 +03:00 [INF] [Email Task] Email sent to manageduser_a0b310b4@nexmediaai.com successfully.
+2026-08-17 23:27:39.040 +03:00 [INF] [Email Task] Sending email to manageduser_a0b310b4@nexmediaai.com
+2026-08-17 23:27:39.268 +03:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 23:27:39.269 +03:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-17 23:27:39.481 +03:00 [INF] Received HTTP response headers after 212.1809ms - 201
+2026-08-17 23:27:39.482 +03:00 [INF] End processing HTTP request after 212.5863ms - 201
+2026-08-17 23:27:39.482 +03:00 [INF] [Email Task] Email sent to manageduser_a0b310b4@nexmediaai.com successfully.
+2026-08-17 23:28:41.161 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-17 23:28:50.668 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-17 23:28:56.221 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-17 23:28:56.325 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-17 23:28:56.326 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-17 23:28:56.326 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-17 23:28:56.326 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-17 23:28:56.326 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-17 23:28:56.326 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-17 23:28:58.431 +03:00 [INF] Server desktop-rjppsk4:24720:bafad522 successfully announced in 2087.0152 ms
+2026-08-17 23:28:58.434 +03:00 [INF] Server desktop-rjppsk4:24720:bafad522 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-17 23:28:58.445 +03:00 [INF] Server desktop-rjppsk4:24720:bafad522 all the dispatchers started
