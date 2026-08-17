@@ -200,26 +200,32 @@ builder.Services.AddScoped<NexClone.Backend.Infrastructure.Consumers.VideoToolCo
 builder.Services.AddScoped<NexClone.Backend.Infrastructure.Consumers.ImageToolConsumer>();
 
 
-// Add Rate Limiting
+// Add Rate Limiting (Partitioned per Client IP)
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-    // General API policy: 100 requests/minute
-    options.AddFixedWindowLimiter("ApiPolicy", opt =>
-    {
-        opt.PermitLimit = 100;
-        opt.Window = TimeSpan.FromMinutes(1);
-        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-        opt.QueueLimit = 0;
-    });
-    // Strict auth policy: 10 requests/minute to prevent brute force on login/register/forgot-password
-    options.AddFixedWindowLimiter("AuthPolicy", opt =>
-    {
-        opt.PermitLimit = 10;
-        opt.Window = TimeSpan.FromMinutes(1);
-        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-        opt.QueueLimit = 0;
-    });
+    
+    // General API policy: 100 requests/minute per IP
+    options.AddPolicy("ApiPolicy", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 100,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            }));
+
+    // Strict auth policy: 30 requests/minute per IP to prevent brute force
+    options.AddPolicy("AuthPolicy", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 30,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            }));
 });
 
 // Add OpenAPI (net10.0)
