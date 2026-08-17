@@ -73,12 +73,14 @@ namespace NexClone.Backend.Infrastructure.Consumers
                     if (message.Image1Bytes != null)
                     {
                         using var ms = new System.IO.MemoryStream(message.Image1Bytes);
-                        imageUrl = await _mediaService.UploadFileAsync(ms, $"image2video_{Guid.NewGuid()}.jpg", message.Image1ContentType);
+                        string key = await _mediaService.UploadFileAsync(ms, $"image2video_{Guid.NewGuid()}.jpg", message.Image1ContentType);
+                        imageUrl = await _mediaService.GetFileUrlAsync(key);
                     }
                     if (message.Image2Bytes != null)
                     {
                         using var ms = new System.IO.MemoryStream(message.Image2Bytes);
-                        endFrameUrl = await _mediaService.UploadFileAsync(ms, $"image2video_end_{Guid.NewGuid()}.jpg", message.Image2ContentType);
+                        string key = await _mediaService.UploadFileAsync(ms, $"image2video_end_{Guid.NewGuid()}.jpg", message.Image2ContentType);
+                        endFrameUrl = await _mediaService.GetFileUrlAsync(key);
                     }
 
                     var imgUrlsList = new System.Collections.Generic.List<string> { imageUrl };
@@ -125,9 +127,24 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 else if (message.ToolType == "reference-to-video")
                 {
                     var images = new System.Collections.Generic.List<string>();
-                    if (message.Image1Bytes != null) { using var ms = new System.IO.MemoryStream(message.Image1Bytes); images.Add(await _mediaService.UploadFileAsync(ms, $"ref_{Guid.NewGuid()}.jpg", message.Image1ContentType)); }
-                    if (message.Image2Bytes != null) { using var ms = new System.IO.MemoryStream(message.Image2Bytes); images.Add(await _mediaService.UploadFileAsync(ms, $"ref_{Guid.NewGuid()}.jpg", message.Image2ContentType)); }
-                    if (message.Image3Bytes != null) { using var ms = new System.IO.MemoryStream(message.Image3Bytes); images.Add(await _mediaService.UploadFileAsync(ms, $"ref_{Guid.NewGuid()}.jpg", message.Image3ContentType)); }
+                    if (message.Image1Bytes != null) 
+                    { 
+                        using var ms = new System.IO.MemoryStream(message.Image1Bytes); 
+                        string key = await _mediaService.UploadFileAsync(ms, $"ref_{Guid.NewGuid()}.jpg", message.Image1ContentType); 
+                        images.Add(await _mediaService.GetFileUrlAsync(key)); 
+                    }
+                    if (message.Image2Bytes != null) 
+                    { 
+                        using var ms = new System.IO.MemoryStream(message.Image2Bytes); 
+                        string key = await _mediaService.UploadFileAsync(ms, $"ref_{Guid.NewGuid()}.jpg", message.Image2ContentType); 
+                        images.Add(await _mediaService.GetFileUrlAsync(key)); 
+                    }
+                    if (message.Image3Bytes != null) 
+                    { 
+                        using var ms = new System.IO.MemoryStream(message.Image3Bytes); 
+                        string key = await _mediaService.UploadFileAsync(ms, $"ref_{Guid.NewGuid()}.jpg", message.Image3ContentType); 
+                        images.Add(await _mediaService.GetFileUrlAsync(key)); 
+                    }
                     
                     string normalizedAspect = message.AspectRatio switch {
                         "9:16" => "9:16",
