@@ -191,6 +191,16 @@ namespace NexClone.Backend.Application.Services
             return policy;
         }
 
+        public static string NormalizeModelKey(string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return string.Empty;
+            return name.ToLowerInvariant()
+                .Replace("-", "")
+                .Replace("_", "")
+                .Replace(" ", "")
+                .Replace(".", "");
+        }
+
         private decimal GetLegacyCostPerUnit(string toolId)
         {
             return 1m;
@@ -263,6 +273,7 @@ namespace NexClone.Backend.Application.Services
             var parts = quality.Split('|');
             var modelName = parts[0];
             var resolution = parts.Length > 1 ? parts[1] : "default";
+            var normModel = NormalizeModelKey(modelName);
 
             bool allowStandard = toolConfig?.AllowStandardCredits ?? true;
             bool allowPremium = toolConfig?.AllowPremiumCredits ?? false;
@@ -274,8 +285,9 @@ namespace NexClone.Backend.Application.Services
                 if (avatarSetting != null && !avatarSetting.IsActive)
                     return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Avatar to Video is currently disabled." };
 
-                var pricing = await _context.AvatarToVideoModelPricings.FirstOrDefaultAsync(p => p.IsActive && (p.ModelName.ToLower() == modelName.ToLower() || p.ModelName.ToLower().Contains("avatar")));
-                if (pricing == null) pricing = await _context.AvatarToVideoModelPricings.FirstOrDefaultAsync(p => p.IsActive);
+                var allPricings = await _context.AvatarToVideoModelPricings.Where(p => p.IsActive).ToListAsync();
+                var pricing = allPricings.FirstOrDefault(p => NormalizeModelKey(p.ModelName) == normModel || NormalizeModelKey(p.ModelName).Contains(normModel) || normModel.Contains(NormalizeModelKey(p.ModelName)));
+                if (pricing == null) pricing = allPricings.FirstOrDefault();
 
                 if (pricing != null)
                 {
@@ -291,8 +303,9 @@ namespace NexClone.Backend.Application.Services
                 if (t2vSetting != null && !t2vSetting.IsActive)
                     return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Text to Video is currently disabled." };
 
-                var pricing = await _context.TextToVideoModelPricings.FirstOrDefaultAsync(p => p.IsActive && (p.ModelName.ToLower() == modelName.ToLower() || modelName.ToLower().Contains(p.ModelName.ToLower())));
-                if (pricing == null) pricing = await _context.TextToVideoModelPricings.FirstOrDefaultAsync(p => p.IsActive);
+                var allPricings = await _context.TextToVideoModelPricings.Where(p => p.IsActive).ToListAsync();
+                var pricing = allPricings.FirstOrDefault(p => NormalizeModelKey(p.ModelName) == normModel || NormalizeModelKey(p.ModelName).Contains(normModel) || normModel.Contains(NormalizeModelKey(p.ModelName)));
+                if (pricing == null) pricing = allPricings.FirstOrDefault();
 
                 if (pricing != null)
                 {
@@ -330,8 +343,9 @@ namespace NexClone.Backend.Application.Services
                 if (i2vSetting != null && !i2vSetting.IsActive)
                     return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Image to Video is currently disabled." };
 
-                var pricing = await _context.ImageToVideoModelPricings.FirstOrDefaultAsync(p => p.IsActive && (p.ModelName.ToLower() == modelName.ToLower() || modelName.ToLower().Contains(p.ModelName.ToLower())));
-                if (pricing == null) pricing = await _context.ImageToVideoModelPricings.FirstOrDefaultAsync(p => p.IsActive);
+                var allPricings = await _context.ImageToVideoModelPricings.Where(p => p.IsActive).ToListAsync();
+                var pricing = allPricings.FirstOrDefault(p => NormalizeModelKey(p.ModelName) == normModel || NormalizeModelKey(p.ModelName).Contains(normModel) || normModel.Contains(NormalizeModelKey(p.ModelName)));
+                if (pricing == null) pricing = allPricings.FirstOrDefault();
 
                 if (pricing != null)
                 {
@@ -369,7 +383,10 @@ namespace NexClone.Backend.Application.Services
                 if (lipSetting != null && !lipSetting.IsActive)
                     return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Lip-Sync is currently disabled." };
 
-                var pricing = await _context.LipSyncModelPricings.FirstOrDefaultAsync(p => p.IsActive);
+                var allPricings = await _context.LipSyncModelPricings.Where(p => p.IsActive).ToListAsync();
+                var pricing = allPricings.FirstOrDefault(p => NormalizeModelKey(p.ModelName) == normModel || NormalizeModelKey(p.ModelName).Contains(normModel) || normModel.Contains(NormalizeModelKey(p.ModelName)));
+                if (pricing == null) pricing = allPricings.FirstOrDefault();
+
                 if (pricing != null)
                 {
                     double dur = (double)amountForCost;

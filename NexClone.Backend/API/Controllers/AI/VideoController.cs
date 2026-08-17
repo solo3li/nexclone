@@ -369,12 +369,44 @@ namespace NexClone.Backend.API.Controllers.AI
                 return BadRequest(new { error = "Invalid tool type." });
 
             string qualityFormat = $"{model}|{resolution}";
-            decimal usageUnits = model == "grok" && duration > 0 ? duration : 1;
+            decimal usageUnits = (model.ToLower().Contains("grok") && duration > 0) ? duration : 1;
 
             var policyResult = await _usagePolicy.EstimateCostAsync(userId, toolType, usageUnits, usageUnits, qualityFormat, subscriptionId);
             if (!policyResult.IsAllowed) return BadRequest(new { error = policyResult.ErrorMessage });
 
             return Ok(new { estimatedCost = policyResult.TotalCost });
+        }
+
+        [AllowAnonymous]
+        [HttpGet("pricing/{toolType}")]
+        public async Task<IActionResult> GetToolPricing(string toolType)
+        {
+            if (toolType == "text-to-video")
+            {
+                var setting = await _dbContext.TextToVideoSettings.FirstOrDefaultAsync();
+                var pricings = await _dbContext.TextToVideoModelPricings.Where(p => p.IsActive).ToListAsync();
+                return Ok(new { isActive = setting?.IsActive ?? true, maxPrompt = setting?.MaxPromptLength ?? 5000, pricings });
+            }
+            else if (toolType == "image-to-video" || toolType == "reference-to-video")
+            {
+                var setting = await _dbContext.ImageToVideoSettings.FirstOrDefaultAsync();
+                var pricings = await _dbContext.ImageToVideoModelPricings.Where(p => p.IsActive).ToListAsync();
+                return Ok(new { isActive = setting?.IsActive ?? true, maxPrompt = setting?.MaxPromptLength ?? 5000, pricings });
+            }
+            else if (toolType == "advanced-lip-sync" || toolType == "lipsync")
+            {
+                var setting = await _dbContext.LipSyncSettings.FirstOrDefaultAsync();
+                var pricings = await _dbContext.LipSyncModelPricings.Where(p => p.IsActive).ToListAsync();
+                return Ok(new { isActive = setting?.IsActive ?? true, pricings });
+            }
+            else if (toolType == "motion-control")
+            {
+                var setting = await _dbContext.MotionControlSettings.FirstOrDefaultAsync();
+                var pricings = await _dbContext.MotionControlModelPricings.Where(p => p.IsActive).ToListAsync();
+                return Ok(new { isActive = setting?.IsActive ?? true, pricings });
+            }
+
+            return NotFound();
         }
 
         [HttpPost("start-motion-control")]
@@ -529,7 +561,7 @@ namespace NexClone.Backend.API.Controllers.AI
                 return BadRequest(new { error = "At least one reference image is required." });
 
             string qualityFormat = $"{model}|{resolution}";
-            decimal usageUnits = model == "grok" && duration > 0 ? duration : 1;
+            decimal usageUnits = (model.ToLower().Contains("grok") && duration > 0) ? duration : 1;
 
             var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, toolType, usageUnits, usageUnits, qualityFormat, subscriptionId);
             if (!policyResult.IsAllowed)

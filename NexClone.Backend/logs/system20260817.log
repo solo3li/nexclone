@@ -1570,3 +1570,61 @@ System.Exception: Crun AI Task failed: Upstream internal service error. Please t
 2026-08-17 19:32:37.062 +03:00 [INF] Server desktop-rjppsk4:14460:9c77c7bb is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-17 19:32:37.130 +03:00 [INF] Server desktop-rjppsk4:14460:9c77c7bb all the dispatchers started
 2026-08-17 19:32:37.579 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-17 19:34:29.055 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 19:34:47.889 +03:00 [INF] [LipSync Task 0fa43758-56b0-4021-94a1-5f4de4a568e4] Started consumer.
+2026-08-17 19:34:54.684 +03:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 19:34:54.689 +03:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 19:34:57.978 +03:00 [INF] Received HTTP response headers after 3282.2642ms - 200
+2026-08-17 19:34:57.989 +03:00 [INF] End processing HTTP request after 3313.0618ms - 200
+2026-08-17 19:35:08.344 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 19:35:08.345 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 19:35:08.618 +03:00 [INF] Received HTTP response headers after 272.6815ms - 200
+2026-08-17 19:35:08.618 +03:00 [INF] End processing HTTP request after 275.1639ms - 200
+2026-08-17 19:35:18.635 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 19:35:18.635 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 19:35:18.856 +03:00 [INF] Received HTTP response headers after 220.6117ms - 200
+2026-08-17 19:35:18.857 +03:00 [INF] End processing HTTP request after 222.6229ms - 200
+2026-08-17 19:35:28.863 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 19:35:28.863 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 19:35:29.084 +03:00 [INF] Received HTTP response headers after 220.9833ms - 200
+2026-08-17 19:35:29.085 +03:00 [INF] End processing HTTP request after 222.4349ms - 200
+2026-08-17 19:35:29.087 +03:00 [ERR] [LipSync Task 0fa43758-56b0-4021-94a1-5f4de4a568e4] Failed
+System.Exception: Crun AI Task failed: Upstream internal service error. Please try again later.
+   at NexClone.Backend.Infrastructure.Consumers.BaseAiTaskConsumer.PollCrunApiTask(HttpClient client, String taskId) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\Consumers\BaseAiTaskConsumer.cs:line 181
+   at NexClone.Backend.Infrastructure.Consumers.LipSyncConsumer.Consume(LipSyncMessage message) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\Consumers\LipSyncConsumer.cs:line 101
+2026-08-17 19:37:35.260 +03:00 [INF] [LipSync Task 037ca7c2-9807-43ad-8094-24b93ef35421] Started consumer.
+2026-08-17 19:37:40.574 +03:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 19:37:40.575 +03:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-17 19:37:43.757 +03:00 [INF] Received HTTP response headers after 3182.1042ms - 200
+2026-08-17 19:37:43.758 +03:00 [INF] End processing HTTP request after 3183.1989ms - 200
+2026-08-17 19:37:54.068 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 19:37:54.069 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 19:37:54.280 +03:00 [INF] Received HTTP response headers after 211.2274ms - 200
+2026-08-17 19:37:54.281 +03:00 [INF] End processing HTTP request after 212.3196ms - 200
+2026-08-17 19:38:04.289 +03:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 19:38:04.289 +03:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-17 19:38:04.503 +03:00 [INF] Received HTTP response headers after 213.8464ms - 200
+2026-08-17 19:38:04.503 +03:00 [INF] End processing HTTP request after 214.8991ms - 200
+2026-08-17 19:38:04.504 +03:00 [ERR] [LipSync Task 037ca7c2-9807-43ad-8094-24b93ef35421] Failed
+System.Exception: Crun AI Task failed: Upstream internal service error. Please try again later.
+   at NexClone.Backend.Infrastructure.Consumers.BaseAiTaskConsumer.PollCrunApiTask(HttpClient client, String taskId) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\Consumers\BaseAiTaskConsumer.cs:line 181
+   at NexClone.Backend.Infrastructure.Consumers.LipSyncConsumer.Consume(LipSyncMessage message) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\Consumers\LipSyncConsumer.cs:line 101
+2026-08-17 19:38:35.538 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 20:14:06.973 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-17 20:14:16.648 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-17 20:14:21.734 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-17 20:14:21.896 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-17 20:14:21.896 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-17 20:14:21.897 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-17 20:14:21.898 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-17 20:14:21.898 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-17 20:14:21.898 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-17 20:14:23.539 +03:00 [INF] Server desktop-rjppsk4:15108:5c1bf02a successfully announced in 1613.0499 ms
+2026-08-17 20:14:23.545 +03:00 [INF] Server desktop-rjppsk4:15108:5c1bf02a is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-17 20:14:23.614 +03:00 [INF] Server desktop-rjppsk4:15108:5c1bf02a all the dispatchers started
+2026-08-17 20:14:37.588 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-17 20:14:47.850 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.

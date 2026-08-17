@@ -165,9 +165,43 @@ export default function ReferenceToVideoPage() {
   // Refs for dropdown clicks
   const modelRef = useRef<HTMLDivElement>(null);
   const resRef = useRef<HTMLDivElement>(null);
-  const aspectRef = useRef<HTMLDivElement>(null);
   const resultCanvasRef = useRef<HTMLDivElement>(null);
   const fileInputs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)];
+
+  // Dynamic model pricing state loaded from backend
+  const [modelOptions, setModelOptions] = useState<ModelOption[]>(MODELS);
+
+  useEffect(() => {
+    let active = true;
+    const loadPricing = async () => {
+      try {
+        const res = await api.get('/api/video/pricing/reference-to-video');
+        if (active && res.data?.pricings) {
+          const pricings = res.data.pricings;
+          setModelOptions(prev => prev.map(m => {
+            const normM = m.id.toLowerCase().replace(/[-_ .]/g, '');
+            const found = pricings.find((p: any) => {
+              const normP = (p.modelName || '').toLowerCase().replace(/[-_ .]/g, '');
+              return normP === normM || normP.includes(normM) || normM.includes(normP);
+            });
+            if (found) {
+              return {
+                ...m,
+                prices: {
+                  "720p": found.fixedCost_720p ?? m.prices["720p"],
+                  "1080p": found.fixedCost_1080p ?? m.prices["1080p"],
+                  "4k": found.fixedCost_4k ?? m.prices["4k"],
+                }
+              };
+            }
+            return m;
+          }));
+        }
+      } catch (err) {}
+    };
+    loadPricing();
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -187,12 +221,12 @@ export default function ReferenceToVideoPage() {
 
   // Find active model object
   const currentModel = useMemo(() => {
-    return MODELS.find(m => m.id === selectedModelId) || MODELS[0];
-  }, [selectedModelId]);
+    return modelOptions.find(m => m.id === selectedModelId) || modelOptions[0];
+  }, [modelOptions, selectedModelId]);
 
   // Adjust resolution if not supported by newly selected model
   const handleModelSelect = (modelId: string) => {
-    const model = MODELS.find(m => m.id === modelId);
+    const model = modelOptions.find(m => m.id === modelId);
     if (model) {
       setSelectedModelId(modelId);
       if (!model.supportedResolutions.includes(resolution)) {
@@ -837,7 +871,7 @@ export default function ReferenceToVideoPage() {
               {/* Model Dropdown Menu */}
               {isModelDropdownOpen && (
                 <div className="absolute z-50 top-full mt-1.5 w-full bg-[#0d041c] border border-emerald-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
-                  {MODELS.map((m) => {
+                  {modelOptions.map((m) => {
                     const isSelected = selectedModelId === m.id;
                     return (
                       <button
