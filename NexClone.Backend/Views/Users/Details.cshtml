@@ -368,7 +368,7 @@
                                 foreach (var p in paymentsList)
                                 {
                                     <tr>
-                                        <td><strong>@p.PaymentId</strong></td>
+                                        <td><strong><a href="@Url.Action("Details", "PaymentsAdmin", new { id = p.Id })" style="color: #0f62fe;">@p.PaymentId</a></strong></td>
                                         <td>@p.Method</td>
                                         <td>@p.Amount.ToString("0.00") @p.Currency</td>
                                         <td>

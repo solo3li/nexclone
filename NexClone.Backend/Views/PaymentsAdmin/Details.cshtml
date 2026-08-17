@@ -1,0 +1,106 @@
+@model NexClone.Backend.Core.Entities.Payment
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
+
+@{
+    ViewData["Title"] = "Payment Details";
+    var invoice = ViewBag.Invoice as NexClone.Backend.Core.Entities.Invoice;
+}
+
+<div class="bx--grid bx--grid--full-width">
+    <div class="bx--row" style="margin-bottom: 2rem;">
+        <div class="bx--col" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1 class="bx--type-productive-heading-05">@Localizer["Payment Details"]</h1>
+                <p style="margin-top: 0.5rem; color: #525252;">Transaction ID: @Model.PaymentId</p>
+            </div>
+            <a href="@Url.Action("Index")" class="bx--btn bx--btn--secondary">@Localizer["Back to Payments"]</a>
+        </div>
+    </div>
+
+    <div class="bx--row">
+        <!-- Payment Info Card -->
+        <div class="bx--col-lg-6" style="margin-bottom: 2rem;">
+            <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; height: 100%;">
+                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">@Localizer["Transaction Information"]</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div><strong>@Localizer["Status"]:</strong> 
+                        @if (Model.Status == "Completed" || Model.Status == "active" || Model.Status == "paid") { <span class="bx--tag bx--tag--green">@Model.Status</span> }
+                        else if (Model.Status == "Pending") { <span class="bx--tag bx--tag--yellow">@Model.Status</span> }
+                        else { <span class="bx--tag bx--tag--red">@Model.Status</span> }
+                    </div>
+                    <div><strong>@Localizer["Amount"]:</strong> <span style="font-size: 1.25rem; font-weight: bold; color: #0f62fe;">@Model.Amount.ToString("0.00") @Model.Currency</span></div>
+                    <div><strong>@Localizer["Gateway/Method"]:</strong> @Model.Method</div>
+                    <div><strong>@Localizer["Date"]:</strong> @Model.CreatedAt.ToString("MMM dd, yyyy HH:mm")</div>
+                    
+                    @if (Model.SubscriptionId.HasValue)
+                    {
+                        <div><strong>@Localizer["Subscription ID"]:</strong> #@Model.SubscriptionId</div>
+                    }
+                    @if (Model.Plan != null)
+                    {
+                        <div><strong>@Localizer["Purchased Plan"]:</strong> @Model.Plan.Name</div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- User Info Card -->
+        <div class="bx--col-lg-6" style="margin-bottom: 2rem;">
+            <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; height: 100%;">
+                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">@Localizer["Customer Information"]</h3>
+                
+                @if (Model.User != null)
+                {
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div><strong>@Localizer["Name"]:</strong> @(string.IsNullOrEmpty(Model.User.FullName) ? "N/A" : Model.User.FullName)</div>
+                        <div><strong>@Localizer["Email"]:</strong> <a href="@Url.Action("Details", "Users", new { id = Model.UserId })" style="color: #0f62fe;">@Model.User.Email</a></div>
+                        <div><strong>@Localizer["Phone"]:</strong> @(string.IsNullOrEmpty(Model.User.PhoneNumber) ? "N/A" : Model.User.PhoneNumber)</div>
+                        <div><strong>@Localizer["Country"]:</strong> @(string.IsNullOrEmpty(Model.User.Country) ? "N/A" : Model.User.Country)</div>
+                    </div>
+                    <div style="margin-top: 1.5rem;">
+                        <a href="@Url.Action("Details", "Users", new { id = Model.UserId })" class="bx--btn bx--btn--sm bx--btn--primary">@Localizer["View User Profile"]</a>
+                    </div>
+                }
+                else
+                {
+                    <p>@Localizer["User data is not available."]</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoice / PDF View -->
+    <div class="bx--row">
+        <div class="bx--col">
+            <div style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem;">
+                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">@Localizer["Invoice Document (PDF)"]</h3>
+                <p style="margin-bottom: 1.5rem; color: #525252;">@Localizer["The official invoice document includes the QR code, seal, and detailed tax breakdown."]</p>
+                
+                @if (invoice != null && !string.IsNullOrEmpty(invoice.MinioPdfUrl))
+                {
+                    <div style="width: 100%; height: 800px; border: 1px solid #c6c6c6; border-radius: 4px; overflow: hidden; background: #f4f4f4; position: relative;">
+                        <iframe src="@invoice.MinioPdfUrl" width="100%" height="100%" style="border: none;"></iframe>
+                    </div>
+                    <div style="margin-top: 1rem; display: flex; gap: 1rem;">
+                        <a href="@invoice.MinioPdfUrl" target="_blank" class="bx--btn bx--btn--primary">
+                            <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" style="margin-right: 0.5rem;"><path d="M13 14H3c-.6 0-1-.4-1-1V3c0-.6.4-1 1-1h5v2H4v8h8V7h2v6c0 .6-.4 1-1 1z"></path><path d="M10 2v2h2.6L7.3 9.3l1.4 1.4 5.3-5.3V8h2V2z"></path></svg>
+                            @Localizer["Open PDF in New Tab"]
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="bx--inline-notification bx--inline-notification--warning" role="alert" style="width: 100%; max-width: none;">
+                        <div class="bx--inline-notification__details">
+                            <div class="bx--inline-notification__text-wrapper">
+                                <p class="bx--inline-notification__title">@Localizer["No Invoice Document Found"]</p>
+                                <p class="bx--inline-notification__subtitle">@Localizer["The PDF invoice for this transaction has not been generated or the URL is missing."]</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

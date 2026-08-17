@@ -1,0 +1,116 @@
+@model IEnumerable<NexClone.Backend.Core.Entities.Payment>
+@inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
+
+@{
+    ViewData["Title"] = "Payments History";
+}
+
+<div class="bx--grid bx--grid--full-width">
+    <div class="bx--row" style="margin-bottom: 2rem;">
+        <div class="bx--col">
+            <h1 class="bx--type-productive-heading-05">@Localizer["Payments History"]</h1>
+            <p style="margin-top: 0.5rem; color: #525252;">View and manage all system payments and transactions.</p>
+        </div>
+    </div>
+
+    <!-- Search/Filter Row -->
+    <div class="bx--row" style="margin-bottom: 2rem;">
+        <div class="bx--col">
+            <form method="get" action="@Url.Action("Index")" style="display: flex; gap: 1rem; align-items: flex-end;">
+                <div class="bx--form-item" style="flex: 1; max-width: 400px;">
+                    <label for="search" class="bx--label">@Localizer["Search by Transaction ID or Email"]</label>
+                    <div class="bx--search bx--search--sm" role="search">
+                        <div class="bx--search-magnifier" style="display: flex; align-items: center; justify-content: center;">
+                            <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M15,14.3L10.7,10c1.9-2.3,1.6-5.8-0.7-7.7S4.2,0.7,2.3,3S0.7,8.8,3,10.7c2,1.7,5,1.7,7,0l4.3,4.3L15,14.3z M2,6.5 C2,4,4,2,6.5,2S11,4,11,6.5S9,11,6.5,11S2,9,2,6.5z"></path></svg>
+                        </div>
+                        <input type="text" class="bx--search-input" id="search" name="searchString" value="@ViewBag.CurrentSearch" placeholder="@Localizer["Search..."]">
+                    </div>
+                </div>
+                <button type="submit" class="bx--btn bx--btn--primary bx--btn--sm">@Localizer["Search"]</button>
+                @if (!string.IsNullOrEmpty(ViewBag.CurrentSearch as string))
+                {
+                    <a href="@Url.Action("Index")" class="bx--btn bx--btn--ghost bx--btn--sm">@Localizer["Clear"]</a>
+                }
+            </form>
+        </div>
+    </div>
+
+    <div class="bx--row">
+        <div class="bx--col">
+            <div class="bx--data-table-container">
+                <table class="bx--data-table">
+                    <thead>
+                        <tr>
+                            <th><span class="bx--table-header-label">@Localizer["Transaction ID"]</span></th>
+                            <th><span class="bx--table-header-label">@Localizer["User"]</span></th>
+                            <th><span class="bx--table-header-label">@Localizer["Method"]</span></th>
+                            <th><span class="bx--table-header-label">@Localizer["Amount"]</span></th>
+                            <th><span class="bx--table-header-label">@Localizer["Status"]</span></th>
+                            <th><span class="bx--table-header-label">@Localizer["Date"]</span></th>
+                            <th><span class="bx--table-header-label">@Localizer["Actions"]</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var p in Model)
+                            {
+                                <tr>
+                                    <td><strong>@p.PaymentId</strong></td>
+                                    <td>
+                                        @if(p.User != null) {
+                                            <a href="@Url.Action("Details", "Users", new { id = p.UserId })" style="color: #0f62fe;">@p.User.Email</a>
+                                        } else {
+                                            <span style="color:#a8a8a8;">Unknown User</span>
+                                        }
+                                    </td>
+                                    <td>@p.Method</td>
+                                    <td>@p.Amount.ToString("0.00") @p.Currency</td>
+                                    <td>
+                                        @if (p.Status == "Completed" || p.Status == "active" || p.Status == "paid") { <span class="bx--tag bx--tag--green">@p.Status</span> }
+                                        else if (p.Status == "Pending") { <span class="bx--tag bx--tag--yellow">@p.Status</span> }
+                                        else { <span class="bx--tag bx--tag--red">@p.Status</span> }
+                                    </td>
+                                    <td>@p.CreatedAt.ToString("MMM dd, yyyy HH:mm")</td>
+                                    <td>
+                                        <a href="@Url.Action("Details", new { id = p.Id })" class="bx--btn bx--btn--sm bx--btn--primary">@Localizer["View Details"]</a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 2rem;">@Localizer["No payments found."]</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            @if (ViewBag.TotalPages > 1)
+            {
+                <div class="bx--pagination" style="margin-top: 1rem;">
+                    <div class="bx--pagination__left">
+                        <span class="bx--pagination__text">Page @ViewBag.PageNumber of @ViewBag.TotalPages</span>
+                    </div>
+                    <div class="bx--pagination__right">
+                        @if (ViewBag.PageNumber > 1)
+                        {
+                            <a href="@Url.Action("Index", new { pageNumber = ViewBag.PageNumber - 1, searchString = ViewBag.CurrentSearch })" class="bx--pagination__button bx--pagination__button--backward">
+                                <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="24" height="24" viewBox="0 0 32 32" aria-hidden="true"><path d="M20 24L10 16 20 8z"></path></svg>
+                            </a>
+                        }
+                        @if (ViewBag.PageNumber < ViewBag.TotalPages)
+                        {
+                            <a href="@Url.Action("Index", new { pageNumber = ViewBag.PageNumber + 1, searchString = ViewBag.CurrentSearch })" class="bx--pagination__button bx--pagination__button--forward">
+                                <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="24" height="24" viewBox="0 0 32 32" aria-hidden="true"><path d="M12 8L22 16 12 24z"></path></svg>
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

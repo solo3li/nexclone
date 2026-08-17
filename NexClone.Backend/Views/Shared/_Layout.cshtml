@@ -545,6 +545,14 @@
                     </a>
                 </li>
                 }
+                @if (isSuperAdmin || visibleSections.Contains("/PaymentsAdmin")) {
+                    <li class="sidebar-menu-item">
+                    <a href="/PaymentsAdmin">
+                        <i class='bx bx-history'></i>
+                        @Localizer["Payments History"]
+                    </a>
+                </li>
+                }
                 @if (isSuperAdmin || visibleSections.Contains("/ManualPaymentMethodsAdmin")) {
                     <li class="sidebar-menu-item">
                     <a href="/ManualPaymentMethodsAdmin">
