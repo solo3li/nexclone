@@ -221,3 +221,6 @@
     Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
     Shutdown timeout: 00:00:15
     Schedule polling interval: 00:00:15
+2026-08-18 02:01:45.742 +03:00 [INF] Server desktop-rjppsk4:25168:8be6e4b1 successfully announced in 2123.522 ms
+2026-08-18 02:01:45.747 +03:00 [INF] Server desktop-rjppsk4:25168:8be6e4b1 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-18 02:01:45.770 +03:00 [INF] Server desktop-rjppsk4:25168:8be6e4b1 all the dispatchers started
