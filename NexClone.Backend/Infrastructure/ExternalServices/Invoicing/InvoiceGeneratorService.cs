@@ -52,7 +52,12 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Invoicing
                     }
                 });
 
-                row.ConstantItem(100).Height(50).Placeholder(); // Placeholder for Logo
+                // Replaced placeholder with Company Info
+                row.ConstantItem(150).AlignRight().Column(c =>
+                {
+                    c.Item().Text("NexMedia AI").FontSize(18).SemiBold().FontColor(Colors.Blue.Darken2);
+                    c.Item().Text("support@nexmediaai.com").FontSize(10);
+                });
             });
         }
 
@@ -60,7 +65,33 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Invoicing
         {
             container.PaddingVertical(1, Unit.Centimetre).Column(column =>
             {
-                column.Spacing(5);
+                column.Spacing(20);
+
+                // Billed To Section
+                column.Item().Row(row =>
+                {
+                    row.RelativeItem().Column(c =>
+                    {
+                        c.Item().Text("Billed To:").SemiBold().FontSize(12).FontColor(Colors.Grey.Darken2);
+                        if (invoice.User != null)
+                        {
+                            c.Item().Text(invoice.User.FullName ?? invoice.User.Email).SemiBold();
+                            c.Item().Text(invoice.User.Email);
+                            if (!string.IsNullOrEmpty(invoice.User.PhoneNumber))
+                            {
+                                c.Item().Text($"Phone: {invoice.User.PhoneNumber}");
+                            }
+                            if (!string.IsNullOrEmpty(invoice.User.Country))
+                            {
+                                c.Item().Text($"Country: {invoice.User.Country}");
+                            }
+                        }
+                        else
+                        {
+                            c.Item().Text("Customer details not available");
+                        }
+                    });
+                });
 
                 // Table
                 column.Item().Table(table =>
