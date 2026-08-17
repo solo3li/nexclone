@@ -50,12 +50,18 @@ namespace NexClone.Backend.Infrastructure.Consumers
 
                 if (message.ToolType == "text-to-video")
                 {
+                    string normalizedAspect = message.AspectRatio switch {
+                        "9:16" => "9:16",
+                        "16:9" => "16:9",
+                        _ => "16:9"
+                    };
+
                     payload = new {
                         model = crunModel,
                         input = new {
                             prompt = message.Prompt,
                             resolution = message.Resolution,
-                            aspect_ratio = !string.IsNullOrEmpty(message.AspectRatio) ? message.AspectRatio : "16:9",
+                            aspect_ratio = normalizedAspect,
                             duration = message.Duration > 0 ? message.Duration : (int?)null
                         }
                     };
@@ -74,18 +80,47 @@ namespace NexClone.Backend.Infrastructure.Consumers
                         using var ms = new System.IO.MemoryStream(message.Image2Bytes);
                         endFrameUrl = await _mediaService.UploadFileAsync(ms, $"image2video_end_{Guid.NewGuid()}.jpg", message.Image2ContentType);
                     }
-                    payload = new {
-                        model = crunModel,
-                        input = new {
-                            image = imageUrl,
-                            end_image = endFrameUrl,
-                            prompt = message.Prompt,
-                            mode = message.Mode,
-                            resolution = message.Resolution,
-                            aspect_ratio = !string.IsNullOrEmpty(message.AspectRatio) ? message.AspectRatio : "16:9",
-                            duration = message.Duration > 0 ? message.Duration : (int?)null
-                        }
+
+                    var imgUrlsList = new System.Collections.Generic.List<string> { imageUrl };
+                    if (!string.IsNullOrEmpty(endFrameUrl)) imgUrlsList.Add(endFrameUrl);
+
+                    string normalizedAspect = message.AspectRatio switch {
+                        "9:16" => "9:16",
+                        "16:9" => "16:9",
+                        "Auto" => "Auto",
+                        "auto" => "Auto",
+                        _ => "Auto"
                     };
+
+                    string promptText = !string.IsNullOrWhiteSpace(message.Prompt) ? message.Prompt : "Cinematic fluid camera motion, photorealistic animation";
+
+                    if (crunModel.Contains("grok"))
+                    {
+                        payload = new {
+                            model = crunModel,
+                            input = new {
+                                image = imageUrl,
+                                image_url = imageUrl,
+                                prompt = promptText,
+                                mode = message.Mode,
+                                resolution = message.Resolution,
+                                duration = message.Duration > 0 ? message.Duration : (int?)null
+                            }
+                        };
+                    }
+                    else
+                    {
+                        payload = new {
+                            model = crunModel,
+                            input = new {
+                                img_urls = imgUrlsList,
+                                prompt = promptText,
+                                resolution = message.Resolution,
+                                aspect_ratio = normalizedAspect,
+                                duration = message.Duration > 0 ? message.Duration : (int?)null
+                            }
+                        };
+                    }
                 }
                 else if (message.ToolType == "reference-to-video")
                 {
@@ -94,13 +129,23 @@ namespace NexClone.Backend.Infrastructure.Consumers
                     if (message.Image2Bytes != null) { using var ms = new System.IO.MemoryStream(message.Image2Bytes); images.Add(await _mediaService.UploadFileAsync(ms, $"ref_{Guid.NewGuid()}.jpg", message.Image2ContentType)); }
                     if (message.Image3Bytes != null) { using var ms = new System.IO.MemoryStream(message.Image3Bytes); images.Add(await _mediaService.UploadFileAsync(ms, $"ref_{Guid.NewGuid()}.jpg", message.Image3ContentType)); }
                     
+                    string normalizedAspect = message.AspectRatio switch {
+                        "9:16" => "9:16",
+                        "16:9" => "16:9",
+                        "Auto" => "Auto",
+                        "auto" => "Auto",
+                        _ => "Auto"
+                    };
+
+                    string promptText = !string.IsNullOrWhiteSpace(message.Prompt) ? message.Prompt : "Cinematic smooth transition and character continuity";
+
                     payload = new {
                         model = crunModel,
                         input = new {
-                            image_urls = images,
-                            prompt = message.Prompt,
+                            img_urls = images,
+                            prompt = promptText,
                             resolution = message.Resolution,
-                            aspect_ratio = !string.IsNullOrEmpty(message.AspectRatio) ? message.AspectRatio : "16:9"
+                            aspect_ratio = normalizedAspect
                         }
                     };
                 }
