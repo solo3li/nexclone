@@ -60,57 +60,129 @@
         </div>
     </div>
 
-    @* Webhook URLs Reference Card *@
+    @* Webhook & Callback URLs Reference Card *@
+    @inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+    @{
+        var baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
+        var frontendUrl = Configuration["AppSettings:DefaultFrontendUrl"] ?? "http://localhost:3000";
+        var paymobWebhook = $"{baseUrl}/api/webhooks/paymob";
+        var paypalWebhook = $"{baseUrl}/api/webhooks/paypal";
+        var successReturnUrl = $"{frontendUrl}/profile/invoices";
+        var cancelReturnUrl = $"{frontendUrl}/pricing";
+    }
 
-    <div class="bx--row" style="margin-top: 2rem;">
+    <div class="bx--row" style="margin-top: 2.5rem;">
         <div class="bx--col">
-            <div style="background: #f4f4f4; border: 1px solid #e0e0e0; border-left: 4px solid #0f62fe; padding: 1.5rem; border-radius: 4px;">
-                <h4 style="margin: 0 0 1rem 0; font-size: 1rem; font-weight: 600; color: #161616;">
-                    🔗 Webhook URLs — Add these in your payment provider dashboard
-                </h4>
-                <p style="margin: 0 0 1rem 0; font-size: 0.875rem; color: #525252;">
-                    These URLs must be configured in your payment provider's dashboard to receive payment notifications.
-                </p>
-
-                @{
-                    var baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
-                    var paymobWebhook = $"{baseUrl}/api/webhooks/paymob";
-                    var paypalWebhook = $"{baseUrl}/api/webhooks/paypal";
-                }
-
-                <div style="margin-bottom: 1rem;">
-                    <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #393939; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                        Paymob — Transaction Callback URL
-                    </label>
+            <div style="background: #ffffff; border: 1px solid #e0e0e0; border-top: 4px solid #0f62fe; padding: 2rem; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.75rem;">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <input id="paymob-webhook-url"
-                               type="text"
-                               readonly
-                               value="@paymobWebhook"
-                               style="flex: 1; padding: 0.5rem 0.75rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.875rem; background: #ffffff; border: 1px solid #e0e0e0; border-radius: 4px; color: #161616; cursor: text;" />
-                        <button type="button"
-                                onclick="copyToClipboard('paymob-webhook-url', this)"
-                                style="padding: 0.5rem 1rem; background: #0f62fe; color: #ffffff; border: none; border-radius: 4px; font-size: 0.875rem; cursor: pointer; white-space: nowrap; transition: background 0.2s;">
-                            Copy
-                        </button>
+                        <span style="font-size: 1.25rem;">🔗</span>
+                        <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">@Localizer["Payment Gateways Integration URLs"]</h3>
                     </div>
+                    <span class="bx--tag bx--tag--blue">Webhook &amp; Callbacks</span>
                 </div>
 
-                <div>
-                    <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #393939; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                        PayPal — Webhook URL
-                    </label>
-                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <input id="paypal-webhook-url"
-                               type="text"
-                               readonly
-                               value="@paypalWebhook"
-                               style="flex: 1; padding: 0.5rem 0.75rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.875rem; background: #ffffff; border: 1px solid #e0e0e0; border-radius: 4px; color: #161616; cursor: text;" />
-                        <button type="button"
-                                onclick="copyToClipboard('paypal-webhook-url', this)"
-                                style="padding: 0.5rem 1rem; background: #0f62fe; color: #ffffff; border: none; border-radius: 4px; font-size: 0.875rem; cursor: pointer; white-space: nowrap; transition: background 0.2s;">
-                            Copy
-                        </button>
+                <p style="margin: 0 0 1.5rem 0; font-size: 0.875rem; color: #525252;">
+                    @Localizer["Copy and paste these exact URLs into your PayPal Developer Dashboard and Paymob Portal to ensure instant payment capture and invoice generation."]
+                </p>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <!-- PAYPAL CONFIGURATION CARD -->
+                    <div style="background: #f4f4f4; padding: 1.5rem; border: 1px solid #e0e0e0; border-left: 4px solid #003087; border-radius: 4px;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                            <strong style="font-size: 1.05rem; color: #003087;">🅿️ PayPal Developer Dashboard</strong>
+                        </div>
+                        
+                        <!-- Webhook URL -->
+                        <div style="margin-bottom: 1.25rem;">
+                            <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #393939; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                                Webhook URL (Server-to-Server)
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                                <input id="paypal-webhook-url" type="text" readonly value="@paypalWebhook"
+                                       style="flex: 1; padding: 0.5rem 0.75rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.825rem; background: #ffffff; border: 1px solid #e0e0e0; border-radius: 4px; color: #161616; cursor: text;" />
+                                <button type="button" onclick="copyToClipboard('paypal-webhook-url', this)"
+                                        style="padding: 0.5rem 0.875rem; background: #003087; color: #ffffff; border: none; border-radius: 4px; font-size: 0.825rem; cursor: pointer; white-space: nowrap; transition: background 0.2s;">
+                                    Copy
+                                </button>
+                            </div>
+                            <div class="bx--form__helper-text" style="font-size: 0.75rem; color: #6f6f6f;">
+                                Events: <code style="background: #e0e0e0; padding: 1px 4px; border-radius: 2px;">CHECKOUT.ORDER.APPROVED</code>, <code style="background: #e0e0e0; padding: 1px 4px; border-radius: 2px;">PAYMENT.CAPTURE.COMPLETED</code>
+                            </div>
+                        </div>
+
+                        <!-- Return URL -->
+                        <div style="margin-bottom: 1.25rem;">
+                            <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #393939; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                                Return / Success URL (Client)
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input id="paypal-return-url" type="text" readonly value="@successReturnUrl"
+                                       style="flex: 1; padding: 0.5rem 0.75rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.825rem; background: #ffffff; border: 1px solid #e0e0e0; border-radius: 4px; color: #161616; cursor: text;" />
+                                <button type="button" onclick="copyToClipboard('paypal-return-url', this)"
+                                        style="padding: 0.5rem 0.875rem; background: #003087; color: #ffffff; border: none; border-radius: 4px; font-size: 0.825rem; cursor: pointer; white-space: nowrap; transition: background 0.2s;">
+                                    Copy
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Cancel URL -->
+                        <div>
+                            <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #393939; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                                Cancel URL (Client)
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <input id="paypal-cancel-url" type="text" readonly value="@cancelReturnUrl"
+                                       style="flex: 1; padding: 0.5rem 0.75rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.825rem; background: #ffffff; border: 1px solid #e0e0e0; border-radius: 4px; color: #161616; cursor: text;" />
+                                <button type="button" onclick="copyToClipboard('paypal-cancel-url', this)"
+                                        style="padding: 0.5rem 0.875rem; background: #003087; color: #ffffff; border: none; border-radius: 4px; font-size: 0.825rem; cursor: pointer; white-space: nowrap; transition: background 0.2s;">
+                                    Copy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PAYMOB CONFIGURATION CARD -->
+                    <div style="background: #f4f4f4; padding: 1.5rem; border: 1px solid #e0e0e0; border-left: 4px solid #0f62fe; border-radius: 4px;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                            <strong style="font-size: 1.05rem; color: #0f62fe;">💳 Paymob Dashboard</strong>
+                        </div>
+
+                        <!-- Transaction Processed Callback -->
+                        <div style="margin-bottom: 1.25rem;">
+                            <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #393939; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                                Transaction Processed Callback (Server Webhook)
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                                <input id="paymob-processed-url" type="text" readonly value="@paymobWebhook"
+                                       style="flex: 1; padding: 0.5rem 0.75rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.825rem; background: #ffffff; border: 1px solid #e0e0e0; border-radius: 4px; color: #161616; cursor: text;" />
+                                <button type="button" onclick="copyToClipboard('paymob-processed-url', this)"
+                                        style="padding: 0.5rem 0.875rem; background: #0f62fe; color: #ffffff; border: none; border-radius: 4px; font-size: 0.825rem; cursor: pointer; white-space: nowrap; transition: background 0.2s;">
+                                    Copy
+                                </button>
+                            </div>
+                            <div class="bx--form__helper-text" style="font-size: 0.75rem; color: #6f6f6f;">
+                                Add in: Payment Integrations &gt; Actions &gt; Edit &gt; Transaction Processed Callback.
+                            </div>
+                        </div>
+
+                        <!-- Transaction Response Callback -->
+                        <div>
+                            <label style="display: block; font-size: 0.75rem; font-weight: 600; color: #393939; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                                Transaction Response Callback (Client Redirection)
+                            </label>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                                <input id="paymob-response-url" type="text" readonly value="@successReturnUrl"
+                                       style="flex: 1; padding: 0.5rem 0.75rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.825rem; background: #ffffff; border: 1px solid #e0e0e0; border-radius: 4px; color: #161616; cursor: text;" />
+                                <button type="button" onclick="copyToClipboard('paymob-response-url', this)"
+                                        style="padding: 0.5rem 0.875rem; background: #0f62fe; color: #ffffff; border: none; border-radius: 4px; font-size: 0.825rem; cursor: pointer; white-space: nowrap; transition: background 0.2s;">
+                                    Copy
+                                </button>
+                            </div>
+                            <div class="bx--form__helper-text" style="font-size: 0.75rem; color: #6f6f6f;">
+                                Add in: Payment Integrations &gt; Actions &gt; Edit &gt; Transaction Response Callback.
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -127,7 +199,7 @@
             btn.style.background = '#24a148';
             setTimeout(() => {
                 btn.textContent = original;
-                btn.style.background = '#0f62fe';
+                btn.style.background = '';
             }, 2000);
         }).catch(() => {
             input.select();
