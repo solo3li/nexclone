@@ -15,12 +15,16 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
         private readonly IConfiguration _configuration;
         private readonly PayPalPaymentService _payPal;
 
-        public PaymobPaymentService(ApplicationDbContext context, HttpClient httpClient, IConfiguration configuration)
+        public PaymobPaymentService(
+            ApplicationDbContext context,
+            HttpClient httpClient,
+            IConfiguration configuration,
+            PayPalPaymentService payPalPaymentService)
         {
             _context = context;
             _httpClient = httpClient;
             _configuration = configuration;
-            _payPal = new PayPalPaymentService(context, httpClient);
+            _payPal = payPalPaymentService;
         }
 
         /// <inheritdoc/>

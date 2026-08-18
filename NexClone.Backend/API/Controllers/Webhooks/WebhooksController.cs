@@ -82,25 +82,44 @@ namespace NexClone.Backend.API.Controllers.Webhooks
 
 
                     // 3. Extract User ID and Plan Identifier
+                    // Priority chain: extras → order.data → billing_data (Paymob Intention API)
                     string userId = "";
                     string planIdentifier = "";
 
-                    if (obj.TryGetProperty("payment_key_claims", out var claims) && 
-                        claims.TryGetProperty("billing_data", out var billing))
+                    // 3a. Primary: obj.extras (set via Intention API extras field)
+                    if (obj.TryGetProperty("extras", out var extras))
                     {
-                        userId = billing.TryGetProperty("first_name", out var fn) ? fn.GetString() ?? "" : "";
-                        planIdentifier = billing.TryGetProperty("last_name", out var ln) ? ln.GetString() ?? "" : "";
+                        if (extras.TryGetProperty("user_id", out var extUserId))
+                            userId = extUserId.GetString() ?? "";
+                        if (extras.TryGetProperty("plan_id", out var extPlanId))
+                            planIdentifier = extPlanId.GetString() ?? "";
                     }
 
-                    // Fallback to order extra if available
-                    if (string.IsNullOrEmpty(userId) && obj.TryGetProperty("order", out var orderObj) && orderObj.TryGetProperty("data", out var orderData))
+                    // 3b. Fallback: obj.order.data (older Paymob flow)
+                    if ((string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(planIdentifier))
+                        && obj.TryGetProperty("order", out var orderObj)
+                        && orderObj.TryGetProperty("data", out var orderData))
                     {
-                        if (orderData.TryGetProperty("user_id", out var uid)) userId = uid.GetString() ?? "";
-                        if (orderData.TryGetProperty("plan_id", out var pid)) planIdentifier = pid.GetString() ?? "";
+                        if (string.IsNullOrEmpty(userId) && orderData.TryGetProperty("user_id", out var uid))
+                            userId = uid.GetString() ?? "";
+                        if (string.IsNullOrEmpty(planIdentifier) && orderData.TryGetProperty("plan_id", out var pid))
+                            planIdentifier = pid.GetString() ?? "";
+                    }
+
+                    // 3c. Last resort: billing_data.first_name / last_name (legacy hack)
+                    if ((string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(planIdentifier))
+                        && obj.TryGetProperty("payment_key_claims", out var claims)
+                        && claims.TryGetProperty("billing_data", out var billing))
+                    {
+                        if (string.IsNullOrEmpty(userId))
+                            userId = billing.TryGetProperty("first_name", out var fn) ? fn.GetString() ?? "" : "";
+                        if (string.IsNullOrEmpty(planIdentifier))
+                            planIdentifier = billing.TryGetProperty("last_name", out var ln) ? ln.GetString() ?? "" : "";
                     }
 
                     if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(planIdentifier))
                     {
+                        Console.WriteLine($"[PaymobWebhook] Could not extract user/plan. Payload snippet: {obj.ToString().Substring(0, Math.Min(500, obj.ToString().Length))}");
                         return BadRequest("Missing user or plan data.");
                     }
 
@@ -129,6 +148,19 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                     if (plan == null)
                     {
                         return NotFound("Plan not found.");
+                    }
+
+                    // 4b. Idempotency: check if this Paymob transaction was already processed
+                    int incomingTxId = obj.TryGetProperty("id", out var txIdProp) ? txIdProp.GetInt32() : 0;
+                    if (incomingTxId > 0)
+                    {
+                        var alreadyProcessed = await _context.Payments
+                            .AnyAsync(p => p.PaymentId == incomingTxId.ToString() && p.Status == "Completed");
+                        if (alreadyProcessed)
+                        {
+                            Console.WriteLine($"[PaymobWebhook] Transaction {incomingTxId} already processed — ignoring duplicate.");
+                            return Ok(new { message = "Already processed." });
+                        }
                     }
 
                     // 5. Activate or Extend Subscription
@@ -197,7 +229,7 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                     
                     await _walletService.DistributePlanCreditsAsync(user.Id, plan.Id, resetToZero: shouldReset, subscriptionId: currentSub?.Id);
 
-                    int orderId = obj.TryGetProperty("id", out var idProp) ? idProp.GetInt32() : 0;
+                    // Use incomingTxId already parsed during idempotency check
                     int amountCents = obj.TryGetProperty("amount_cents", out var amountProp) ? amountProp.GetInt32() : 0;
                     decimal amountEgp = amountCents / 100m;
 
@@ -209,7 +241,7 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                         Amount = amountEgp,
                         Currency = "EGP",
                         Method = "Paymob",
-                        PaymentId = orderId.ToString(),
+                        PaymentId = incomingTxId.ToString(),
                         Status = "Completed",
                         CreatedAt = DateTime.UtcNow
                     };
@@ -248,7 +280,7 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                         TaxAmount = taxAmt,
                         FixedFeeAmount = fixedFee,
                         TotalAmount = amountEgp,
-                        TransactionId = orderId.ToString(),
+                        TransactionId = incomingTxId.ToString(),
                         Subscription = currentSub
                     };
                     
@@ -454,6 +486,36 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                         System.Globalization.CultureInfo.InvariantCulture, out amountUsd);
                 }
 
+                // 6b. Idempotency: check if already processed via CaptureOrderAsync or previous webhook
+                // Extract the PayPal order ID from the resource
+                string paypalOrderId = string.Empty;
+                if (payload.TryGetProperty("resource", out var resForId))
+                {
+                    // For PAYMENT.CAPTURE.COMPLETED, resource.id is the capture ID
+                    // The supplementary_data.related_ids.order_id is the order ID
+                    if (resForId.TryGetProperty("supplementary_data", out var suppD)
+                        && suppD.TryGetProperty("related_ids", out var relIds)
+                        && relIds.TryGetProperty("order_id", out var orderIdEl))
+                    {
+                        paypalOrderId = orderIdEl.GetString() ?? string.Empty;
+                    }
+                    if (string.IsNullOrEmpty(paypalOrderId) && resForId.TryGetProperty("id", out var captureIdEl))
+                    {
+                        paypalOrderId = captureIdEl.GetString() ?? string.Empty;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(paypalOrderId))
+                {
+                    var alreadyDone = await _context.Payments
+                        .AnyAsync(p => p.PaymentId == paypalOrderId && p.Status == "Completed");
+                    if (alreadyDone)
+                    {
+                        Console.WriteLine($"[PayPalWebhook] Order {paypalOrderId} already processed — ignoring duplicate.");
+                        return Ok(new { message = "Already processed." });
+                    }
+                }
+
                 // 7. Activate / extend subscription (same logic as Paymob webhook)
                 var existingSub = await _context.Subscriptions
                     .Include(s => s.Plan)
@@ -499,7 +561,7 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                 await _context.SaveChangesAsync();
                 await _walletService.DistributePlanCreditsAsync(user.Id, plan.Id, resetToZero: shouldReset, subscriptionId: currentSub?.Id);
 
-                // 8. Record payment
+                // 8. Record payment — use paypalOrderId for idempotency key (not transmissionId which changes per webhook delivery)
                 _context.Payments.Add(new Payment
                 {
                     UserId         = user.Id,
@@ -508,7 +570,7 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                     Amount         = amountUsd,
                     Currency       = "USD",
                     Method         = "PayPal",
-                    PaymentId      = transmissionId,
+                    PaymentId      = !string.IsNullOrEmpty(paypalOrderId) ? paypalOrderId : transmissionId,
                     Status         = "Completed",
                     CreatedAt      = DateTime.UtcNow
                 });

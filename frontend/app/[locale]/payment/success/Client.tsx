@@ -23,17 +23,33 @@ function SuccessContent() {
   const isManual = method === 'manual';
 
   useEffect(() => {
-    const txId = searchParams.get('id');
-    const success = searchParams.get('success');
+    const txId      = searchParams.get('id');         // Paymob transaction id
+    const success   = searchParams.get('success');    // Paymob success flag
+    const provider  = searchParams.get('provider');   // 'PayPal' | 'Paymob'
+    const token     = searchParams.get('token');      // PayPal redirect token
 
     const refreshSession = async () => {
       try {
+        // --- Paymob: verify session via transaction ID ---
         if (txId && success === 'true') {
           await api.post('/api/checkout/verify-paymob-session', {
             transactionId: txId,
             success: true
           }).catch(() => {});
         }
+
+        // --- PayPal redirect flow: capture the order ---
+        // When PayPal redirects back it includes ?token=ORDER_ID in the URL
+        if (provider === 'PayPal' && token) {
+          try {
+            await api.post('/api/checkout/capture-paypal-order', { orderId: token });
+          } catch (captureErr: any) {
+            // If already captured (409 / "Already processed") that's fine
+            console.warn('[PaymentSuccess] PayPal capture:', captureErr?.response?.data?.error || captureErr?.message);
+          }
+        }
+
+        // Always refresh the user session so UI reflects the new plan
         const res = await api.get('/api/auth/me');
         if (res.data) {
           useAppStore.getState().setUser(res.data);

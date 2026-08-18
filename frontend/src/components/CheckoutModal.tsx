@@ -3,7 +3,9 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { X, UploadCloud, Loader2, ShieldCheck, Lock, RotateCcw, CheckCircle2 } from 'lucide-react';
 import { Plan } from '@/store/usePlansStore';
 import { useLocale } from 'next-intl';
+import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
+import { useAppStore } from '@/store/useAppStore';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -287,6 +289,16 @@ const DEFAULT_FIELD: FieldState = { isEmpty: true, isValid: false, isFocused: fa
 export default function CheckoutModal({ plan, currency, onClose }: CheckoutModalProps) {
   const locale = useLocale();
   const isRtl  = locale === 'ar';
+  const router = useRouter();
+  const { user, isAuthenticated } = useAppStore();
+
+  // Auth guard — redirect to login if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated || !user) {
+      onClose();
+      router.push(`/${locale}/login?redirect=/pricing`);
+    }
+  }, [isAuthenticated, user, locale, onClose, router]);
 
   const [activeTab, setActiveTab]         = useState<'card' | 'wallet' | 'manual'>('card');
   const [gateways, setGateways]           = useState<GatewayOption[]>([]);
