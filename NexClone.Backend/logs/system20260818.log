@@ -420,3 +420,4 @@ Npgsql.NpgsqlException (0x80004005): No such host is known.
 2026-08-18 06:04:23.988 +03:00 [INF] Server desktop-rjppsk4:16444:2f39b8be all the dispatchers started
 2026-08-18 06:04:27.597 +03:00 [INF] Removed 1 outdated record(s) from 'aggregatedcounter' table.
 2026-08-18 06:04:33.302 +03:00 [INF] Removed 5 outdated record(s) from 'job' table.
+2026-08-18 06:09:24.408 +03:00 [INF] 1 servers were removed due to timeout
