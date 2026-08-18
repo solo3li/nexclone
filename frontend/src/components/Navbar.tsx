@@ -1,7 +1,24 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Zap, Menu, X, Globe, ChevronDown, Mic, FileAudio, Video, Smile } from "lucide-react";
+import { 
+  Zap, 
+  Menu, 
+  X, 
+  Globe, 
+  ChevronDown, 
+  Mic, 
+  FileAudio, 
+  Video, 
+  Smile, 
+  Film, 
+  Layers, 
+  Image as ImageIcon, 
+  Volume2,
+  Sparkles,
+  ArrowRight,
+  ArrowLeft
+} from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link, usePathname, useRouter } from "../i18n/routing";
 import { useAppStore } from "../store/useAppStore";
@@ -38,6 +55,7 @@ export default function Navbar() {
   const t = useTranslations('Navbar');
   const locale = useLocale();
   const router = useRouter();
+  const ArrowIcon = locale === 'ar' ? ArrowLeft : ArrowRight;
 
   const { isAuthenticated, user, setUser, logout, setInitializing } = useAppStore();
 
@@ -60,31 +78,31 @@ export default function Navbar() {
 
   const tools = [
     {
-      id: "text-to-voice",
-      href: "/tools/text-to-voice",
-      icon: Mic,
-      labelEn: "Text to Voice",
-      labelAr: "تحويل النص لصوت",
-      color: "text-fuchsia-400",
-      bg: "bg-fuchsia-500/10",
-    },
-    {
-      id: "voice-to-text",
-      href: "/tools/voice-to-text",
-      icon: FileAudio,
-      labelEn: "Voice to Text",
-      labelAr: "تحويل الصوت لنص",
-      color: "text-emerald-400",
-      bg: "bg-emerald-500/10",
+      id: "text-to-video",
+      href: "/tools/text-to-video",
+      icon: Film,
+      labelEn: "Text to Video",
+      labelAr: "تحويل النص لفيديو",
+      color: "text-violet-400",
+      bg: "bg-violet-500/10",
     },
     {
       id: "image-to-video",
       href: "/tools/image-to-video",
       icon: Video,
-      labelEn: "Avatar to Video",
-      labelAr: "افتار الى فيديو",
+      labelEn: "Image to Video",
+      labelAr: "تحويل الصورة لفيديو",
       color: "text-blue-400",
       bg: "bg-blue-500/10",
+    },
+    {
+      id: "reference-to-video",
+      href: "/tools/reference-to-video",
+      icon: Layers,
+      labelEn: "Reference to Video",
+      labelAr: "صور مرجعية لفيديو",
+      color: "text-indigo-400",
+      bg: "bg-indigo-500/10",
     },
     {
       id: "advanced-lip-sync",
@@ -103,17 +121,47 @@ export default function Navbar() {
       labelAr: "نسخ الحركة",
       color: "text-cyan-400",
       bg: "bg-cyan-500/10",
+    },
+    {
+      id: "text-to-image",
+      href: "/tools/text-to-image",
+      icon: ImageIcon,
+      labelEn: "Text to Image",
+      labelAr: "تحويل النص لصورة",
+      color: "text-amber-400",
+      bg: "bg-amber-500/10",
+    },
+    {
+      id: "text-to-voice",
+      href: "/tools/text-to-voice",
+      icon: Volume2,
+      labelEn: "Text to Voice",
+      labelAr: "تحويل النص لصوت",
+      color: "text-emerald-400",
+      bg: "bg-emerald-500/10",
+    },
+    {
+      id: "voice-to-text",
+      href: "/tools/voice-to-text",
+      icon: FileAudio,
+      labelEn: "Voice to Text",
+      labelAr: "تحويل الصوت لنص",
+      color: "text-teal-400",
+      bg: "bg-teal-500/10",
     }
   ];
 
   const getToolStatus = (id: string) => {
     if (!toolConfigs) return 'active';
     const routeMapping: Record<string, string[]> = {
-      "image-to-video": ["kling_avatar_image2video"],
+      "text-to-video": ["kling_text2video", "vidu_text2video"],
+      "image-to-video": ["kling_avatar_image2video", "vidu_image2video"],
+      "reference-to-video": ["kling_reference2video"],
       "advanced-lip-sync": ["kling_advanced_lip_sync", "vidu_advanced_lip_sync"],
+      "motion-control": ["motion-control"],
+      "text-to-image": ["flux_text2image", "text-to-image"],
       "text-to-voice": ["text-to-voice"],
-      "voice-to-text": ["voice-to-text"],
-      "motion-control": ["motion-control"]
+      "voice-to-text": ["voice-to-text"]
     };
     let mappedKeys = routeMapping[id];
     if (!mappedKeys) {
@@ -174,33 +222,62 @@ export default function Navbar() {
             </Link>
             
             <div className="relative group">
-              <button className="flex items-center gap-1 text-white/70 hover:text-white text-sm font-medium transition-colors duration-200">
+              <button className="flex items-center gap-1 text-white/70 hover:text-white text-sm font-medium transition-colors duration-200 py-2">
                 {t('tools')}
                 <ChevronDown className="w-4 h-4 opacity-70 group-hover:opacity-100 transition-transform group-hover:rotate-180" />
               </button>
-              <div className="absolute top-full mt-4 w-64 rounded-2xl bg-[#0a0015]/95 backdrop-blur-xl border border-white/10 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 flex flex-col overflow-hidden pt-2 pb-2" style={{ [locale === 'ar' ? 'right' : 'left']: '-1rem' }}>
-                {tools.map(tool => {
-                  const status = getToolStatus(tool.id);
-                  const Icon = tool.icon;
-                  return (
-                    <Link key={tool.id} href={tool.href} className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors group/item">
-                      <div className={`w-8 h-8 rounded-lg ${tool.bg} flex items-center justify-center shrink-0`}>
-                        <Icon className={`w-4 h-4 ${tool.color}`} />
-                      </div>
-                      <span className="text-sm font-medium text-white/90 flex-1">{locale === 'ar' ? tool.labelAr : tool.labelEn}</span>
-                      {status === 'maintenance' && (
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 whitespace-nowrap ml-auto">
-                          {locale === 'ar' ? 'صيانة' : 'Maint.'}
-                        </span>
-                      )}
-                      {status === 'coming_soon' && (
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 whitespace-nowrap ml-auto">
-                          {locale === 'ar' ? 'قريباً' : 'Soon'}
-                        </span>
-                      )}
-                    </Link>
-                  );
-                })}
+              
+              {/* Dropdown 2-Column Mega Menu */}
+              <div 
+                className="absolute top-full mt-2 w-[480px] rounded-2xl bg-[#0a0015]/95 backdrop-blur-2xl border border-white/10 shadow-2xl shadow-purple-950/50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 flex flex-col overflow-hidden p-2 z-50" 
+                style={{ [locale === 'ar' ? 'right' : 'left']: '-2rem' }}
+              >
+                <div className="grid grid-cols-2 gap-1.5 p-1">
+                  {tools.map(tool => {
+                    const status = getToolStatus(tool.id);
+                    const Icon = tool.icon;
+                    return (
+                      <Link 
+                        key={tool.id} 
+                        href={tool.href} 
+                        className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-all group/item border border-transparent hover:border-white/5"
+                      >
+                        <div className={`w-8 h-8 rounded-lg ${tool.bg} flex items-center justify-center shrink-0 group-hover/item:scale-105 transition-transform`}>
+                          <Icon className={`w-4 h-4 ${tool.color}`} />
+                        </div>
+                        <div className="flex flex-col min-w-0 flex-1">
+                          <span className="text-xs font-semibold text-white/90 truncate group-hover/item:text-white">
+                            {locale === 'ar' ? tool.labelAr : tool.labelEn}
+                          </span>
+                        </div>
+                        {status === 'maintenance' && (
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 whitespace-nowrap">
+                            {locale === 'ar' ? 'صيانة' : 'Maint.'}
+                          </span>
+                        )}
+                        {status === 'coming_soon' && (
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 whitespace-nowrap">
+                            {locale === 'ar' ? 'قريباً' : 'Soon'}
+                          </span>
+                        )}
+                      </Link>
+                    );
+                  })}
+                </div>
+
+                {/* Bottom View All Tools Link */}
+                <div className="mt-1 pt-2 border-t border-white/5 px-2 pb-1">
+                  <Link 
+                    href="/tools" 
+                    className="flex items-center justify-between px-3 py-2 rounded-xl bg-violet-600/10 hover:bg-violet-600/20 text-violet-300 hover:text-violet-200 text-xs font-semibold transition-colors"
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>{locale === 'ar' ? 'استعراض كل الأدوات في الاستوديو' : 'View All Tools Studio'}</span>
+                    </span>
+                    <ArrowIcon className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
               </div>
             </div>
 
