@@ -99,7 +99,75 @@
     </form>
 
 
-    <!-- 2. SECURITY & AUTHENTICATION -->
+    <!-- 2. PAYMENT METHODS MAINTENANCE -->
+    <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #f1c21b; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        @Html.AntiForgeryToken()
+
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 1.25rem;">💳</span>
+                <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">@Localizer["Payment Methods Maintenance"]</h3>
+            </div>
+            <span class="bx--tag bx--tag--yellow">Payments</span>
+        </div>
+
+        <p style="color: #525252; margin-bottom: 1.5rem; font-size: 0.875rem;">
+            @Localizer["Disable or set specific payment methods under maintenance. Users will see status badges or maintenance warnings during checkout."]
+        </p>
+
+        @{
+            var paymentMethods = new[] { 
+                new { Id = "Paymob", Name = "Paymob" },
+                new { Id = "PayPal", Name = "PayPal" },
+                new { Id = "Manual", Name = "Manual Transfer" }
+            };
+        }
+
+        @foreach (var pm in paymentMethods)
+        {
+            bool isSuspended = GetVal($"Payment.{pm.Id}.Suspended") == "true";
+            bool isMaintenance = GetVal($"Payment.{pm.Id}.Maintenance") == "true";
+            bool isComingSoon = GetVal($"Payment.{pm.Id}.ComingSoon") == "true";
+
+            <div style="display: flex; align-items: center; gap: 2rem; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid #f4f4f4;">
+                <div style="min-width: 160px; font-weight: 600;">@Localizer[pm.Name]</div>
+                
+                <div class="bx--form-item bx--checkbox-wrapper" style="margin: 0;">
+                    <input type="hidden" name="settings[Payment.@(pm.Id).Suspended]" value="false" id="hidden_Payment_@(pm.Id)_Suspended" />
+                    <input id="Payment_@(pm.Id)_Suspended" class="bx--checkbox" type="checkbox" name="settings[Payment.@(pm.Id).Suspended]" value="true" @(isSuspended ? "checked" : "") onchange="document.getElementById('hidden_Payment_@(pm.Id)_Suspended').disabled = this.checked;">
+                    <label for="Payment_@(pm.Id)_Suspended" class="bx--checkbox-label" title="Suspended">
+                        <span class="bx--checkbox-label-text" style="color: #8a3ffc; font-weight: 500;">Suspended</span>
+                    </label>
+                    <script>document.getElementById('hidden_Payment_@(pm.Id)_Suspended').disabled = document.getElementById('Payment_@(pm.Id)_Suspended').checked;</script>
+                </div>
+
+                <div class="bx--form-item bx--checkbox-wrapper" style="margin: 0;">
+                    <input type="hidden" name="settings[Payment.@(pm.Id).Maintenance]" value="false" id="hidden_Payment_@(pm.Id)_Maintenance" />
+                    <input id="Payment_@(pm.Id)_Maintenance" class="bx--checkbox" type="checkbox" name="settings[Payment.@(pm.Id).Maintenance]" value="true" @(isMaintenance ? "checked" : "") onchange="document.getElementById('hidden_Payment_@(pm.Id)_Maintenance').disabled = this.checked;">
+                    <label for="Payment_@(pm.Id)_Maintenance" class="bx--checkbox-label" title="Maintenance Mode">
+                        <span class="bx--checkbox-label-text" style="color: #da1e28; font-weight: 500;">Maintenance</span>
+                    </label>
+                    <script>document.getElementById('hidden_Payment_@(pm.Id)_Maintenance').disabled = document.getElementById('Payment_@(pm.Id)_Maintenance').checked;</script>
+                </div>
+
+                <div class="bx--form-item bx--checkbox-wrapper" style="margin: 0;">
+                    <input type="hidden" name="settings[Payment.@(pm.Id).ComingSoon]" value="false" id="hidden_Payment_@(pm.Id)_ComingSoon" />
+                    <input id="Payment_@(pm.Id)_ComingSoon" class="bx--checkbox" type="checkbox" name="settings[Payment.@(pm.Id).ComingSoon]" value="true" @(isComingSoon ? "checked" : "") onchange="document.getElementById('hidden_Payment_@(pm.Id)_ComingSoon').disabled = this.checked;">
+                    <label for="Payment_@(pm.Id)_ComingSoon" class="bx--checkbox-label" title="Coming Soon Mode">
+                        <span class="bx--checkbox-label-text" style="color: #0f62fe; font-weight: 500;">Coming Soon</span>
+                    </label>
+                    <script>document.getElementById('hidden_Payment_@(pm.Id)_ComingSoon').disabled = document.getElementById('Payment_@(pm.Id)_ComingSoon').checked;</script>
+                </div>
+            </div>
+        }
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Payment Settings"]</button>
+        </div>
+    </form>
+
+
+    <!-- 3. SECURITY & AUTHENTICATION -->
     <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #da1e28; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
         @Html.AntiForgeryToken()
 
