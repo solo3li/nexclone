@@ -14,3 +14,4 @@
 2026-08-18 06:16:21.729 +03:00 [INF] Server desktop-rjppsk4:15436:68be8e08 successfully announced in 1617.6618 ms
 2026-08-18 06:16:21.732 +03:00 [INF] Server desktop-rjppsk4:15436:68be8e08 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-18 06:16:21.743 +03:00 [INF] Server desktop-rjppsk4:15436:68be8e08 all the dispatchers started
+2026-08-18 06:16:29.675 +03:00 [INF] Removed 4 outdated record(s) from 'job' table.
