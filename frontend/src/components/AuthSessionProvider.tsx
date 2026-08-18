@@ -25,6 +25,7 @@ export function AuthSessionProvider({ children }: { children: React.ReactNode })
       } finally {
         if (isMounted) {
           useAppStore.getState().setInitializing(false);
+          useAuthStore.getState().setInitializing(false);
         }
       }
     };

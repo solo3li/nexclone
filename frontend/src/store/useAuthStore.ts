@@ -37,6 +37,7 @@ interface AuthState {
   resetPassword: (data: any) => Promise<any>;
   checkCooldown: (email: string) => Promise<any>;
   addPhone: (data: any) => Promise<any>;
+  setInitializing: (isInit: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -50,6 +51,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     isAuthenticated: !!user, 
     hasPhoneNumber: user?.hasPhoneNumber ?? false 
   }),
+
+  setInitializing: (isInit) => set({ isInitializing: isInit }),
 
   login: async (credentials) => {
     const res = await api.post(API_ENDPOINTS.LOGIN, credentials);
