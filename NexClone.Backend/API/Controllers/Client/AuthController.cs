@@ -288,10 +288,53 @@ namespace NexClone.Backend.API.Controllers.Client
                 Console.WriteLine($"[LOGIN FAILED] User not found: {request.Email}");
                 return Unauthorized(new { Message = "كلمة المرور أو البريد الإلكتروني غير صحيح." });
             }
-            if (!await _userManager.CheckPasswordAsync(user, request.Password)) {
-                Console.WriteLine($"[LOGIN FAILED] Wrong password for: {request.Email}");
-                return Unauthorized(new { Message = "كلمة المرور أو البريد الإلكتروني غير صحيح." });
+            // 1. Check if account is already locked out
+            if (await _userManager.IsLockedOutAsync(user))
+            {
+                var lockoutEnd = user.LockoutEnd ?? DateTimeOffset.UtcNow.AddMinutes(15);
+                var remainingSeconds = (int)Math.Max(1, (lockoutEnd - DateTimeOffset.UtcNow).TotalSeconds);
+                Console.WriteLine($"[LOGIN LOCKED] User {request.Email} is locked out for {remainingSeconds}s");
+                return Unauthorized(new 
+                { 
+                    Message = "تم قفل الحساب مؤقتاً بسبب تكرار المحاولات الخاطئة.",
+                    IsLockedOut = true,
+                    RemainingSeconds = remainingSeconds
+                });
             }
+
+            // 2. Validate Password
+            if (!await _userManager.CheckPasswordAsync(user, request.Password)) 
+            {
+                await _userManager.AccessFailedAsync(user);
+                
+                // Check if this attempt triggered a lockout
+                if (await _userManager.IsLockedOutAsync(user))
+                {
+                    var lockoutEnd = user.LockoutEnd ?? DateTimeOffset.UtcNow.AddMinutes(15);
+                    var remainingSeconds = (int)Math.Max(1, (lockoutEnd - DateTimeOffset.UtcNow).TotalSeconds);
+                    Console.WriteLine($"[LOGIN JUST LOCKED] User {request.Email} just reached max attempts. Locked for {remainingSeconds}s");
+                    return Unauthorized(new 
+                    { 
+                        Message = "تم قفل الحساب مؤقتاً بسبب استنفاد محاولات الدخول الخاطئة.",
+                        IsLockedOut = true,
+                        RemainingSeconds = remainingSeconds
+                    });
+                }
+
+                var failedCount = await _userManager.GetAccessFailedCountAsync(user);
+                var remainingAttempts = Math.Max(0, 20 - failedCount);
+                Console.WriteLine($"[LOGIN FAILED] Wrong password for: {request.Email}. Failed count: {failedCount}/20");
+                return Unauthorized(new 
+                { 
+                    Message = remainingAttempts <= 3 && remainingAttempts > 0
+                        ? $"كلمة المرور غير صحيحة. متبقي لديك {remainingAttempts} محاولات قبل قفل الحساب."
+                        : "كلمة المرور أو البريد الإلكتروني غير صحيح.",
+                    RemainingAttempts = remainingAttempts
+                });
+            }
+
+            // 3. Reset failed attempts on successful password verification
+            await _userManager.ResetAccessFailedCountAsync(user);
 
             if (!user.IsVerified) {
                 Console.WriteLine($"[LOGIN FAILED] Unverified user: {request.Email}");

@@ -108,8 +108,58 @@
                     </div>
 
                     <div>
-                        <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Change Password"]</button>
+                        <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Change Password & Unlock"]</button>
                     </div>
+                </form>
+            </div>
+
+            <!-- Account Security & Lockout Section -->
+            <div style="background: #f4f4f4; padding: 2rem; border: 1px solid #e0e0e0; margin-top: 2rem;">
+                <h3 class="bx--type-productive-heading-03" style="margin-bottom: 1.5rem; margin-top: 0;">@Localizer["Account Security & Lockout"]</h3>
+                
+                @{
+                    bool isLocked = ViewBag.IsLockedOut == true;
+                    int failedAttempts = ViewBag.AccessFailedCount ?? 0;
+                    DateTimeOffset? lockoutEnd = ViewBag.LockoutEnd as DateTimeOffset?;
+                }
+
+                <div style="margin-bottom: 1rem;">
+                    @if (isLocked)
+                    {
+                        <div class="bx--inline-notification bx--inline-notification--error" role="alert" style="width: 100%; margin-bottom: 1rem;">
+                            <div class="bx--inline-notification__details">
+                                <div class="bx--inline-notification__text-wrapper">
+                                    <p class="bx--inline-notification__title">@Localizer["Account Locked"]</p>
+                                    <p class="bx--inline-notification__subtitle">
+                                        @Localizer["This account is temporarily locked due to excessive failed attempts."]
+                                        @if (lockoutEnd.HasValue)
+                                        {
+                                            <br/><span>@Localizer["Locked until"]: @lockoutEnd.Value.ToLocalTime().ToString("MMM dd, yyyy HH:mm:ss")</span>
+                                        }
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="bx--inline-notification bx--inline-notification--success" role="alert" style="width: 100%; margin-bottom: 1rem;">
+                            <div class="bx--inline-notification__details">
+                                <div class="bx--inline-notification__text-wrapper">
+                                    <p class="bx--inline-notification__title">@Localizer["Account Status: Active & Normal"]</p>
+                                    <p class="bx--inline-notification__subtitle">@Localizer["Failed Login Attempts"]: @failedAttempts / 20</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <form asp-action="UnlockUser" method="post">
+                    <input type="hidden" name="userId" value="@Model.Id" />
+                    <button type="submit" class="bx--btn bx--btn--tertiary" style="width: 100%; justify-content: center;">
+                        <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="16" height="16" viewBox="0 0 32 32" aria-hidden="true" style="margin-right: 0.5rem;"><path d="M26 14h-2v-4a8 8 0 0 0-16 0v4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2V16a2 2 0 0 0-2-2zM10 10a6 6 0 0 1 12 0v4H10zm16 18H6V16h20z"></path></svg>
+                        @Localizer["Unlock Account & Reset Attempts"]
+                    </button>
                 </form>
             </div>
         </div>

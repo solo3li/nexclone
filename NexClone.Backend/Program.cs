@@ -75,9 +75,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options => {
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireUppercase = false;
     options.Password.RequiredLength = 6;
-    // Brute Force Protection: lock account after 5 failed attempts for 15 minutes
+    // Brute Force Protection: lock account after 20 failed attempts for 15 minutes
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
-    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.MaxFailedAccessAttempts = 20;
     options.Lockout.AllowedForNewUsers = true;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()

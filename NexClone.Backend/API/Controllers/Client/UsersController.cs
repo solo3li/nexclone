@@ -109,6 +109,9 @@ namespace NexClone.Backend.API.Controllers.Client
             ViewBag.Devices = devices;
             ViewBag.AffiliateReferral = affiliateReferral;
             ViewBag.Payments = payments;
+            ViewBag.IsLockedOut = user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTimeOffset.UtcNow;
+            ViewBag.LockoutEnd = user.LockoutEnd;
+            ViewBag.AccessFailedCount = user.AccessFailedCount;
             return View(user);
         }
 
@@ -450,18 +453,55 @@ namespace NexClone.Backend.API.Controllers.Client
             var user = await userManager.FindByIdAsync(userId.ToString());
             if (user == null) return NotFound();
 
-            var token = await userManager.GeneratePasswordResetTokenAsync(user);
-            var result = await userManager.ResetPasswordAsync(user, token, newPassword);
-
-            if (!result.Succeeded)
+            if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 6)
             {
-                TempData["Error"] = string.Join("<br/>", result.Errors.Select(e => e.Description));
-            }
-            else
-            {
-                TempData["Success"] = "Password changed successfully.";
+                TempData["Error"] = "Password must be at least 6 characters long.";
+                return RedirectToAction(nameof(Details), new { id = userId });
             }
 
+            // Remove existing password if any
+            if (await userManager.HasPasswordAsync(user))
+            {
+                var removeResult = await userManager.RemovePasswordAsync(user);
+                if (!removeResult.Succeeded)
+                {
+                    TempData["Error"] = string.Join("<br/>", removeResult.Errors.Select(e => e.Description));
+                    return RedirectToAction(nameof(Details), new { id = userId });
+                }
+            }
+
+            // Add new password
+            var addResult = await userManager.AddPasswordAsync(user, newPassword);
+            if (!addResult.Succeeded)
+            {
+                TempData["Error"] = string.Join("<br/>", addResult.Errors.Select(e => e.Description));
+                return RedirectToAction(nameof(Details), new { id = userId });
+            }
+
+            // Unlock user, reset failed attempts, update security stamp & ensure verified
+            await userManager.SetLockoutEndDateAsync(user, null);
+            await userManager.ResetAccessFailedCountAsync(user);
+            await userManager.UpdateSecurityStampAsync(user);
+            
+            user.IsVerified = true;
+            await userManager.UpdateAsync(user);
+
+            TempData["Success"] = "Password changed and account unlocked successfully.";
+            return RedirectToAction(nameof(Details), new { id = userId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UnlockUser(Guid userId, [FromServices] Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> userManager)
+        {
+            var user = await userManager.FindByIdAsync(userId.ToString());
+            if (user == null) return NotFound();
+
+            await userManager.SetLockoutEndDateAsync(user, null);
+            await userManager.ResetAccessFailedCountAsync(user);
+            await userManager.UpdateSecurityStampAsync(user);
+
+            TempData["Success"] = "User account has been unlocked and failed login attempts reset to 0.";
             return RedirectToAction(nameof(Details), new { id = userId });
         }
         [HttpGet]

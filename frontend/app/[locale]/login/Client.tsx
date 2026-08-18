@@ -4,8 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
 import { Link, useRouter } from "../../../src/i18n/routing";
 import Navbar from "../../../src/components/Navbar";
-import { Mail, Lock, ArrowRight, ArrowLeft, CheckCircle, XCircle, Eye, EyeOff } from "lucide-react";
-import { useState, useCallback } from "react";
+import { Mail, Lock, ArrowRight, ArrowLeft, CheckCircle, XCircle, Eye, EyeOff, ShieldAlert, Timer } from "lucide-react";
+import { useState, useCallback, useEffect } from "react";
 
 import { useAuthStore } from "../../../src/store/useAuthStore";
 import { GoogleLoginButton } from "../../../components/GoogleLoginButton";
@@ -42,6 +42,31 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [lockoutSeconds, setLockoutSeconds] = useState<number | null>(null);
+
+  // Countdown timer for lockout
+  useEffect(() => {
+    if (lockoutSeconds === null || lockoutSeconds <= 0) return;
+
+    const timer = setInterval(() => {
+      setLockoutSeconds((prev) => {
+        if (prev === null || prev <= 1) {
+          clearInterval(timer);
+          setError("");
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [lockoutSeconds]);
+
+  const formatTimer = (totalSec: number) => {
+    const mins = Math.floor(totalSec / 60);
+    const secs = totalSec % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
 
   const [touched, setTouched] = useState({ email: false, password: false });
   const [fieldErrors, setFieldErrors] = useState({ email: null as string | null, password: null as string | null });
@@ -136,6 +161,12 @@ export default function LoginPage() {
         router.push(`/verify-email?email=${encodeURIComponent(email)}`);
         return;
       }
+      if (err.response?.data?.IsLockedOut) {
+        const secs = err.response.data.RemainingSeconds || 900;
+        setLockoutSeconds(secs);
+        setError(err.response.data.Message || (isRtl ? "تم قفل الحساب مؤقتاً بسبب تكرار المحاولات الخاطئة." : "Account temporarily locked."));
+        return;
+      }
       setError(err.response?.data?.Message || (isRtl ? "فشل تسجيل الدخول، يرجى المحاولة مرة أخرى" : "Login failed, please try again"));
     } finally {
       setLoading(false);
@@ -160,7 +191,32 @@ export default function LoginPage() {
 
           <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
             <AnimatePresence>
-              {error && (
+              {lockoutSeconds !== null && lockoutSeconds > 0 && (
+                <motion.div
+                  key="lockout-alert"
+                  variants={errorVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="p-4 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-amber-200 text-sm overflow-hidden flex flex-col gap-2 items-center text-center shadow-lg shadow-amber-500/5"
+                >
+                  <div className="flex items-center gap-2 font-semibold text-amber-300">
+                    <ShieldAlert className="w-5 h-5 text-amber-400 animate-pulse" />
+                    <span>{isRtl ? "الحساب مقفل مؤقتاً" : "Account Temporarily Locked"}</span>
+                  </div>
+                  <p className="text-xs text-amber-200/80">
+                    {isRtl
+                      ? "تم استنفاد عدد المحاولات الخاطئة. يرجى الانتظار حتى انتهاء الوقت للمحاولة مرة أخرى:"
+                      : "Too many failed login attempts. Please wait until the timer expires:"}
+                  </p>
+                  <div className="flex items-center gap-2 px-4 py-2 bg-amber-500/20 border border-amber-500/30 rounded-xl font-mono text-xl font-bold text-amber-300 tracking-wider">
+                    <Timer className="w-5 h-5 animate-spin text-amber-400" style={{ animationDuration: '4s' }} />
+                    <span>{formatTimer(lockoutSeconds)}</span>
+                  </div>
+                </motion.div>
+              )}
+
+              {error && (!lockoutSeconds || lockoutSeconds <= 0) && (
                 <motion.div
                   key="login-error"
                   variants={errorVariants}
@@ -255,9 +311,9 @@ export default function LoginPage() {
             {/* Submit Button */}
             <motion.button
               type="submit"
-              disabled={loading}
-              whileHover={!loading ? { scale: 1.01, y: -1 } : {}}
-              whileTap={!loading ? { scale: 0.99 } : {}}
+              disabled={loading || (lockoutSeconds !== null && lockoutSeconds > 0)}
+              whileHover={!loading && (!lockoutSeconds || lockoutSeconds <= 0) ? { scale: 1.01, y: -1 } : {}}
+              whileTap={!loading && (!lockoutSeconds || lockoutSeconds <= 0) ? { scale: 0.99 } : {}}
               className="group relative w-full flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-white font-bold text-lg overflow-hidden shadow-[0_0_20px_rgba(139,92,246,0.2)] hover:shadow-[0_0_30px_rgba(139,92,246,0.4)] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-fuchsia-600" />
@@ -272,11 +328,16 @@ export default function LoginPage() {
                     />
                     {isRtl ? "جاري الدخول..." : "Signing in..."}
                   </span>
+                ) : lockoutSeconds !== null && lockoutSeconds > 0 ? (
+                  <span className="flex items-center gap-2 font-mono">
+                    <Timer className="w-5 h-5" />
+                    {isRtl ? `انتظر (${formatTimer(lockoutSeconds)})` : `Wait (${formatTimer(lockoutSeconds)})`}
+                  </span>
                 ) : (
                   t("submitLogin")
                 )}
               </span>
-              {!loading && (
+              {!loading && (!lockoutSeconds || lockoutSeconds <= 0) && (
                 <ArrowIcon
                   className={`w-5 h-5 relative transition-transform duration-300 ${isRtl ? "group-hover:-translate-x-1" : "group-hover:translate-x-1"}`}
                 />
