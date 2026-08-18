@@ -21,42 +21,47 @@ namespace NexClone.Backend.API.Controllers.Admin
             _emailService = emailService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index(string? tab)
         {
-            ViewData["Title"] = "Mailing & Emails";
-            return View();
-        }
+            ViewData["Title"] = "Mailing & Emails Dashboard";
+            ViewBag.ActiveTab = tab ?? "send-mail";
 
-        [HttpGet]
-        public async Task<IActionResult> Settings()
-        {
-            ViewData["Title"] = "Mailing Settings";
+            // 1. Load Brevo Config
             var config = await _context.ApiConfigurations.FirstOrDefaultAsync(c => c.ProviderName == "Brevo");
-            
-            var model = new MailingSettingsViewModel();
+            var settingsModel = new MailingSettingsViewModel();
             if (config != null)
             {
-                model.ApiKey = config.ApiKey;
+                settingsModel.ApiKey = config.ApiKey;
                 if (!string.IsNullOrWhiteSpace(config.AdditionalSettings))
                 {
                     try
                     {
                         var settings = JsonSerializer.Deserialize<JsonElement>(config.AdditionalSettings);
-                        if (settings.TryGetProperty("SenderEmail", out var emailProp)) model.SenderEmail = emailProp.GetString();
-                        if (settings.TryGetProperty("SenderName", out var nameProp)) model.SenderName = nameProp.GetString();
+                        if (settings.TryGetProperty("SenderEmail", out var emailProp)) settingsModel.SenderEmail = emailProp.GetString();
+                        if (settings.TryGetProperty("SenderName", out var nameProp)) settingsModel.SenderName = nameProp.GetString();
                     }
                     catch (JsonException) { }
                 }
             }
+            ViewBag.SettingsModel = settingsModel;
 
-            return View(model);
+            // 2. Load Email Templates
+            var templates = await _context.EmailTemplates.OrderByDescending(t => t.UpdatedAt).ToListAsync();
+            ViewBag.Templates = templates;
+
+            // 3. Send Mail model
+            var sendMailModel = new SendMailViewModel();
+            return View(sendMailModel);
         }
+
+        [HttpGet]
+        public IActionResult Settings() => RedirectToAction(nameof(Index), new { tab = "settings" });
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Settings(MailingSettingsViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid) return RedirectToAction(nameof(Index), new { tab = "settings" });
 
             var config = await _context.ApiConfigurations.FirstOrDefaultAsync(c => c.ProviderName == "Brevo");
             if (config == null)
@@ -82,16 +87,11 @@ namespace NexClone.Backend.API.Controllers.Admin
             await _context.SaveChangesAsync();
             
             TempData["SuccessMessage"] = HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource>>()["Mailing settings saved successfully."].Value;
-            return RedirectToAction(nameof(Settings));
+            return RedirectToAction(nameof(Index), new { tab = "settings" });
         }
 
         [HttpGet]
-        public async Task<IActionResult> Templates()
-        {
-            ViewData["Title"] = "Email Templates";
-            var templates = await _context.EmailTemplates.OrderByDescending(t => t.UpdatedAt).ToListAsync();
-            return View(templates);
-        }
+        public IActionResult Templates() => RedirectToAction(nameof(Index), new { tab = "templates" });
 
         [HttpGet]
         public IActionResult CreateTemplate()
@@ -111,7 +111,7 @@ namespace NexClone.Backend.API.Controllers.Admin
                 template.UpdatedAt = DateTime.UtcNow;
                 _context.EmailTemplates.Add(template);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Templates));
+                return RedirectToAction(nameof(Index), new { tab = "templates" });
             }
             return View(template);
         }
@@ -146,7 +146,7 @@ namespace NexClone.Backend.API.Controllers.Admin
                     if (!_context.EmailTemplates.Any(e => e.Id == id)) return NotFound();
                     else throw;
                 }
-                return RedirectToAction(nameof(Templates));
+                return RedirectToAction(nameof(Index), new { tab = "templates" });
             }
             return View(template);
         }
@@ -160,26 +160,21 @@ namespace NexClone.Backend.API.Controllers.Admin
                 _context.EmailTemplates.Remove(template);
                 await _context.SaveChangesAsync();
             }
-            return RedirectToAction(nameof(Templates));
+            return RedirectToAction(nameof(Index), new { tab = "templates" });
         }
 
         [HttpGet]
-        public async Task<IActionResult> SendMail()
-        {
-            ViewData["Title"] = "Send Broadcast / Email";
-            ViewBag.Templates = await _context.EmailTemplates.OrderBy(t => t.Name).ToListAsync();
-            return View();
-        }
+        public IActionResult SendMail() => RedirectToAction(nameof(Index), new { tab = "send-mail" });
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SendMail(SendMailViewModel model)
         {
             ViewBag.Templates = await _context.EmailTemplates.OrderBy(t => t.Name).ToListAsync();
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid) return RedirectToAction(nameof(Index), new { tab = "send-mail" });
 
-            string subject = model.Subject;
-            string htmlBody = model.HtmlBody;
+            string subject = model.Subject ?? string.Empty;
+            string htmlBody = model.HtmlBody ?? string.Empty;
 
             if (model.TemplateId.HasValue)
             {
@@ -193,18 +188,15 @@ namespace NexClone.Backend.API.Controllers.Admin
 
             if (string.IsNullOrWhiteSpace(subject) || string.IsNullOrWhiteSpace(htmlBody))
             {
-                ModelState.AddModelError(string.Empty, "Subject and Body are required.");
-                return View(model);
+                TempData["ErrorMessage"] = "Subject and Body are required.";
+                return RedirectToAction(nameof(Index), new { tab = "send-mail" });
             }
 
             if (string.IsNullOrWhiteSpace(model.TargetUserEmail))
             {
                 // Send to ALL users
-                // In a production environment, this should be an async background job.
-                // We will fire and forget a task for demonstration/simplicity without blocking the thread for too long.
                 var users = await _context.Users.Select(u => new { u.Email, u.FullName }).ToListAsync();
                 
-                // Fire and forget
                 _ = Task.Run(async () =>
                 {
                     foreach (var u in users)
@@ -235,7 +227,7 @@ namespace NexClone.Backend.API.Controllers.Admin
                 }
             }
 
-            return RedirectToAction(nameof(SendMail));
+            return RedirectToAction(nameof(Index), new { tab = "send-mail" });
         }
     }
 
