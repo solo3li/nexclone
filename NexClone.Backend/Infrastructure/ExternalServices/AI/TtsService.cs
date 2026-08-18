@@ -35,17 +35,53 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                 .FirstOrDefaultAsync(p => p.QualityLevel.ToLower() == quality.ToLower() && p.IsActive);
 
             string modelName = pricing?.ModelName ?? (
-                quality.Equals("High", StringComparison.OrdinalIgnoreCase) ? "gemini-3.1-flash-tts-preview" :
-                quality.Equals("Medium", StringComparison.OrdinalIgnoreCase) ? "gemini-2.5-pro-preview-tts" :
+                quality.Equals("High", StringComparison.OrdinalIgnoreCase) ? "gemini-2.5-flash-preview-tts" :
+                quality.Equals("Medium", StringComparison.OrdinalIgnoreCase) ? "gemini-2.5-flash-preview-tts" :
                 "gemini-2.5-flash-preview-tts"
             );
 
-            var apiConfig = await _dbContext.ApiConfigurations.FirstOrDefaultAsync(c => c.ProviderName == "Gemini" && c.IsActive);
-            if (apiConfig == null || string.IsNullOrWhiteSpace(apiConfig.ApiKey))
-                throw new Exception("No active configuration or API Key found for provider 'Gemini'.");
+            var isArabic = string.Equals(language, "arabic", StringComparison.OrdinalIgnoreCase);
+            var darijatConfig = await _dbContext.ApiConfigurations.FirstOrDefaultAsync(c => c.ProviderName == "Darijat" && c.IsActive);
+            var geminiConfig = await _dbContext.ApiConfigurations.FirstOrDefaultAsync(c => c.ProviderName == "Gemini" && c.IsActive);
+            var openAiConfig = await _dbContext.ApiConfigurations.FirstOrDefaultAsync(c => c.ProviderName == "OpenAI" && c.IsActive);
 
-            var result = await GenerateGeminiAudioAsync(text, voiceName, styleInstruction, apiConfig, modelName);
-            return (result.Item1, result.Item2, result.Item3, "Gemini", modelName);
+            // 1. If Arabic and Darijat configured, try Darijat
+            if (isArabic && darijatConfig != null && !string.IsNullOrWhiteSpace(darijatConfig.ApiKey))
+            {
+                try
+                {
+                    var (dStream, dType, dExt) = await GenerateDarijatAudioAsync(text, voiceName, styleInstruction, darijatConfig);
+                    return (dStream, dType, dExt, "Darijat", "darijat-voice");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[TTS] Darijat generation error: {ex.Message}. Falling back to Gemini...");
+                }
+            }
+
+            // 2. Gemini
+            if (geminiConfig != null && !string.IsNullOrWhiteSpace(geminiConfig.ApiKey))
+            {
+                try
+                {
+                    var (gStream, gType, gExt) = await GenerateGeminiAudioAsync(text, voiceName, styleInstruction, geminiConfig, modelName);
+                    return (gStream, gType, gExt, "Gemini", modelName);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[TTS] Gemini generation error: {ex.Message}. Falling back to OpenAI if available...");
+                    if (openAiConfig == null) throw;
+                }
+            }
+
+            // 3. OpenAI Fallback
+            if (openAiConfig != null && !string.IsNullOrWhiteSpace(openAiConfig.ApiKey))
+            {
+                var (oStream, oType, oExt) = await GenerateOpenAiAudioAsync(text, voiceName, openAiConfig, null);
+                return (oStream, oType, oExt, "OpenAI", "tts-1");
+            }
+
+            throw new Exception("No active TTS provider configured or all providers failed.");
         }
 
         private async Task<(Stream, string, string)> GenerateOpenAiAudioAsync(string text, string voiceName, ApiConfiguration config, string customModelName = null)
@@ -135,12 +171,17 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
 
         private async Task<(Stream, string, string)> GenerateGeminiAudioAsync(string text, string voiceName, string styleInstruction, ApiConfiguration config, string customModelName = null)
         {
-            // Resolve Gemini voice from Darijat mapping
-            string geminiVoice = "Zephyr";
-            var voiceModel = await _dbContext.Voices.FirstOrDefaultAsync(v => v.VoiceName == voiceName);
-            if (voiceModel != null && !string.IsNullOrEmpty(voiceModel.GeminiVoice))
+            var validGeminiVoices = new[] { "Puck", "Charon", "Kore", "Fenrir", "Aoede" };
+            string geminiVoice = "Puck";
+
+            var voiceModel = await _dbContext.Voices.FirstOrDefaultAsync(v => v.VoiceName == voiceName || v.Name == voiceName);
+            if (voiceModel != null && !string.IsNullOrEmpty(voiceModel.GeminiVoice) && validGeminiVoices.Contains(voiceModel.GeminiVoice))
             {
                 geminiVoice = voiceModel.GeminiVoice;
+            }
+            else if (voiceModel != null && voiceModel.Gender?.ToLower() == "female")
+            {
+                geminiVoice = "Aoede";
             }
 
             var prompt = string.IsNullOrWhiteSpace(styleInstruction) ? 
@@ -151,59 +192,61 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
             client.Timeout = TimeSpan.FromSeconds(300);
             client.DefaultRequestHeaders.Add("x-goog-api-key", config.ApiKey);
 
-            var modelNamesStr = string.IsNullOrWhiteSpace(customModelName) ? "gemini-2.5-flash-preview-tts" : customModelName; 
-            if (string.IsNullOrWhiteSpace(customModelName) && !string.IsNullOrEmpty(config.AdditionalSettings))
+            // Construct list of model candidates to try with graceful fallbacks
+            var modelNames = new List<string>();
+            if (!string.IsNullOrWhiteSpace(customModelName))
             {
-                try
+                var parts = customModelName.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(m => m.Trim());
+                foreach (var p in parts)
                 {
-                    using var doc = JsonDocument.Parse(config.AdditionalSettings);
-                    if (doc.RootElement.TryGetProperty("gemini_model", out var mElement))
-                        modelNamesStr = mElement.GetString() ?? modelNamesStr;
+                    if (!modelNames.Contains(p)) modelNames.Add(p);
                 }
-                catch { }
             }
+            
+            if (!modelNames.Contains("gemini-2.5-flash-preview-tts")) modelNames.Add("gemini-2.5-flash-preview-tts");
+            if (!modelNames.Contains("gemini-2.0-flash")) modelNames.Add("gemini-2.0-flash");
+            if (!modelNames.Contains("gemini-2.5-flash")) modelNames.Add("gemini-2.5-flash");
 
-            var modelNames = modelNamesStr.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(m => m.Trim()).ToArray();
             Exception lastException = null;
 
             foreach (var modelName in modelNames)
             {
-                var url = $"https://generativelanguage.googleapis.com/v1beta/models/{modelName}:generateContent";
-                
-                var payload = new
-                {
-                    contents = new[]
-                    {
-                        new { parts = new[] { new { text = prompt } } }
-                    },
-                    generationConfig = new
-                    {
-                        responseModalities = new[] { "AUDIO" },
-                        speechConfig = new
-                        {
-                            voiceConfig = new
-                            {
-                                prebuiltVoiceConfig = new { voiceName = geminiVoice }
-                            }
-                        }
-                    }
-                };
-
-                var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-                var response = await client.PostAsync(url, content);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    var error = await response.Content.ReadAsStringAsync();
-                    lastException = new Exception($"Gemini API Error ({modelName}): {error}");
-                    continue; // Try next fallback model
-                }
-
-                var jsonResponse = await response.Content.ReadAsStringAsync();
-                using var jsonDoc = JsonDocument.Parse(jsonResponse);
-                
                 try
                 {
+                    var url = $"https://generativelanguage.googleapis.com/v1beta/models/{modelName}:generateContent";
+                    
+                    var payload = new
+                    {
+                        contents = new[]
+                        {
+                            new { parts = new[] { new { text = prompt } } }
+                        },
+                        generationConfig = new
+                        {
+                            responseModalities = new[] { "AUDIO" },
+                            speechConfig = new
+                            {
+                                voiceConfig = new
+                                {
+                                    prebuiltVoiceConfig = new { voiceName = geminiVoice }
+                                }
+                            }
+                        }
+                    };
+
+                    var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+                    var response = await client.PostAsync(url, content);
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        var error = await response.Content.ReadAsStringAsync();
+                        lastException = new Exception($"Gemini API Error ({modelName}): {error}");
+                        continue;
+                    }
+
+                    var jsonResponse = await response.Content.ReadAsStringAsync();
+                    using var jsonDoc = JsonDocument.Parse(jsonResponse);
+                    
                     var candidates = jsonDoc.RootElement.GetProperty("candidates");
                     if (candidates.GetArrayLength() > 0)
                     {
@@ -212,12 +255,14 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                         {
                             if (finishReason.GetString() == "OTHER" && !candidate.TryGetProperty("content", out _))
                             {
-                                throw new Exception("Gemini TTS refused to generate audio for this text. This might be due to an unsupported language or a safety block.");
+                                throw new Exception($"Gemini model '{modelName}' finished with OTHER (no audio produced).");
                             }
                         }
 
-                        var inlineData = candidate
-                            .GetProperty("content")
+                        if (!candidate.TryGetProperty("content", out var contentElem))
+                            throw new Exception("Candidate missing content property.");
+
+                        var inlineData = contentElem
                             .GetProperty("parts")[0]
                             .GetProperty("inlineData");
                         
@@ -226,7 +271,6 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                             throw new Exception("Gemini API returned empty audio data.");
 
                         var audioBytes = Convert.FromBase64String(base64Audio);
-                        
                         var mimeType = inlineData.GetProperty("mimeType").GetString() ?? "";
                         
                         if (mimeType.ToLowerInvariant().Contains("audio/l16") || mimeType.ToLowerInvariant().Contains("pcm"))
@@ -254,9 +298,9 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[Gemini TTS Raw Response]: {jsonResponse}");
-                    lastException = new Exception($"Error parsing Gemini response from model {modelName}: {ex.Message}");
-                    continue; // Try next fallback model on parse error
+                    Console.WriteLine($"[Gemini TTS Error on {modelName}]: {ex.Message}");
+                    lastException = ex;
+                    continue; // Try next fallback model
                 }
             }
 

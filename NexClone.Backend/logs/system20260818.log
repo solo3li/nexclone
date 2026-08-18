@@ -149,3 +149,14 @@ System.Threading.Tasks.TaskCanceledException: A task was canceled.
 2026-08-18 21:18:56.265 +03:00 [INF] Server desktop-rjppsk4:17164:2b354100 successfully announced in 2216.4124 ms
 2026-08-18 21:18:56.275 +03:00 [INF] Server desktop-rjppsk4:17164:2b354100 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-18 21:18:56.299 +03:00 [INF] Server desktop-rjppsk4:17164:2b354100 all the dispatchers started
+2026-08-18 21:20:10.152 +03:00 [INF] [TTS Task d6fbbb6c-e43a-4481-9edf-7b6cfb3c01ba] Started consumer.
+2026-08-18 21:20:11.251 +03:00 [INF] Start processing HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-preview-tts:generateContent
+2026-08-18 21:20:11.254 +03:00 [INF] Sending HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-preview-tts:generateContent
+2026-08-18 21:20:13.664 +03:00 [INF] Received HTTP response headers after 2403.5674ms - 200
+2026-08-18 21:20:13.673 +03:00 [INF] End processing HTTP request after 2431.7289ms - 200
+2026-08-18 21:20:13.684 +03:00 [ERR] [TextToVoice Task d6fbbb6c-e43a-4481-9edf-7b6cfb3c01ba] Failed
+System.Exception: Error parsing Gemini response from model gemini-2.5-pro-preview-tts: Gemini TTS refused to generate audio for this text. This might be due to an unsupported language or a safety block.
+   at NexClone.Backend.Infrastructure.ExternalServices.AI.TtsService.GenerateGeminiAudioAsync(String text, String voiceName, String styleInstruction, ApiConfiguration config, String customModelName) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\ExternalServices\AI\TtsService.cs:line 263
+   at NexClone.Backend.Infrastructure.ExternalServices.AI.TtsService.GenerateAudioAsync(String text, String language, String voiceName, String styleInstruction, String quality) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\ExternalServices\AI\TtsService.cs:line 47
+   at NexClone.Backend.Infrastructure.Consumers.TtsConsumer.Consume(TextToVoiceMessage message) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\Consumers\TtsConsumer.cs:line 44
+2026-08-18 21:23:57.138 +03:00 [INF] 1 servers were removed due to timeout
