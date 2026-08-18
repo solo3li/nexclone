@@ -165,6 +165,7 @@ export default function ReferenceToVideoPage() {
   // Refs for dropdown clicks
   const modelRef = useRef<HTMLDivElement>(null);
   const resRef = useRef<HTMLDivElement>(null);
+  const aspectRef = useRef<HTMLDivElement>(null);
   const resultCanvasRef = useRef<HTMLDivElement>(null);
   const fileInputs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)];
 
@@ -180,10 +181,16 @@ export default function ReferenceToVideoPage() {
           const pricings = res.data.pricings;
           setModelOptions(prev => prev.map(m => {
             const normM = m.id.toLowerCase().replace(/[-_ .]/g, '');
-            const found = pricings.find((p: any) => {
+            let found = pricings.find((p: any) => {
               const normP = (p.modelName || '').toLowerCase().replace(/[-_ .]/g, '');
-              return normP === normM || normP.includes(normM) || normM.includes(normP);
+              return normP === normM;
             });
+            if (!found) {
+              found = pricings.find((p: any) => {
+                const normP = (p.modelName || '').toLowerCase().replace(/[-_ .]/g, '');
+                return normP.includes(normM) || normM.includes(normP);
+              });
+            }
             if (found) {
               return {
                 ...m,

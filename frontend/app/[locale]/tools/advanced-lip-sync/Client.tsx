@@ -103,6 +103,7 @@ function AdvancedLipSyncPage() {
 
   // Cost Estimation
   const [estimatedCost, setEstimatedCost] = useState<number>(user?.activePlan?.lipSyncCostPerGeneration || 1);
+  const [isPerSecond, setIsPerSecond] = useState<boolean>(false);
   const [isEstimating, setIsEstimating] = useState(false);
 
   // Audio Playback
@@ -143,24 +144,30 @@ function AdvancedLipSyncPage() {
 
   // Dynamic cost calculation based on audio / video duration
   useEffect(() => {
-    const effectiveDuration = audioDuration ?? videoDuration;
-    if (effectiveDuration == null || !isAuthenticated || !user) {
-      setEstimatedCost(user?.activePlan?.lipSyncCostPerGeneration || 1);
+    if (!isAuthenticated || !user) {
+      setEstimatedCost(1);
       return;
     }
+    const effectiveDuration = audioDuration ?? videoDuration ?? 5; // Default to 5 seconds (1 block)
     setIsEstimating(true);
     const params = new URLSearchParams();
     params.append('durationSeconds', effectiveDuration.toFixed(2));
     api.get(`/api/video/estimate-lipsync?${params.toString()}`)
       .then(res => {
-        if (res.data && (res.data.estimatedCost !== undefined || res.data.totalCost !== undefined)) {
-          setEstimatedCost(res.data.estimatedCost || res.data.totalCost || 1);
+        if (res.data) {
+          if (res.data.estimatedCost !== undefined || res.data.totalCost !== undefined) {
+            setEstimatedCost(res.data.estimatedCost ?? res.data.totalCost);
+          }
+          if (res.data.isPerSecond !== undefined) {
+            setIsPerSecond(res.data.isPerSecond);
+          }
         }
       })
       .catch(() => {
-        // Fallback: 1 credit per 5s block
+        // Fallback
         const blocks = Math.max(1, Math.ceil(effectiveDuration / 5));
         setEstimatedCost(blocks);
+        setIsPerSecond(false);
       })
       .finally(() => setIsEstimating(false));
   }, [isAuthenticated, user, videoDuration, audioDuration]);
@@ -675,7 +682,9 @@ function AdvancedLipSyncPage() {
                 <span className="text-xs text-amber-300/70 font-semibold">{isRtl ? "نقطة" : "Credits"}</span>
                 {(audioDuration || videoDuration) && (
                   <span className="text-[10px] text-white/40 font-mono">
-                    ({Math.ceil((audioDuration ?? videoDuration ?? 5) / 5)} {isRtl ? "وحدات × 5ث" : "blocks × 5s"})
+                    {isPerSecond 
+                      ? `(${Math.ceil(audioDuration ?? videoDuration ?? 1)} ${isRtl ? "ثانية" : "seconds"})`
+                      : `(${Math.ceil((audioDuration ?? videoDuration ?? 5) / 5)} ${isRtl ? "وحدات × 5ث" : "blocks × 5s"})`}
                   </span>
                 )}
               </div>

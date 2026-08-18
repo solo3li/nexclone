@@ -699,9 +699,20 @@
                 <span style="background: #0f62fe; color: white; font-weight: bold; font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; letter-spacing: 0.5px;">CRUN AI</span>
                 <h3 class="bx--type-productive-heading-03" style="margin: 0; color: #161616;">Vidu AI Lip Sync (Shengshu)</h3>
             </div>
-            <span style="background: #e8f8f0; color: #198038; font-weight: 600; font-size: 0.8rem; padding: 4px 12px; border-radius: 4px; border: 1px solid #a7f0ba;">
-                ● @Localizer["Tiered Billing (Per 5-Second Interval)"]
-            </span>
+            <div class="bx--form-item" style="margin: 0;">
+                <select name="LipSyncBillingType" class="bx--select-input" style="padding: 4px 12px; border-radius: 4px; border: 1px solid #a7f0ba; font-weight: 600; font-size: 0.8rem; background: #e8f8f0; color: #198038;">
+                    @if (lipPricing.BillingType == "PerSecond")
+                    {
+                        <option value="Per5Seconds">@Localizer["Tiered Billing (Per 5-Second Interval)"]</option>
+                        <option value="PerSecond" selected>@Localizer["Per Second Billing"]</option>
+                    }
+                    else
+                    {
+                        <option value="Per5Seconds" selected>@Localizer["Tiered Billing (Per 5-Second Interval)"]</option>
+                        <option value="PerSecond">@Localizer["Per Second Billing"]</option>
+                    }
+                </select>
+            </div>
         </div>
 
         <div style="background: #fbfbfb; border: 1px solid #e8e8e8; border-radius: 6px; padding: 1.5rem; margin-bottom: 1.5rem;">
@@ -711,13 +722,13 @@
                     <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #525252;">Syncs lip movements in the video to an uploaded audio track or recorded voice note.</p>
                 </div>
                 <span style="background: #edf5ff; color: #0043ce; font-weight: 600; font-size: 0.85rem; padding: 6px 14px; border-radius: 4px; border: 1px solid #d0e2ff;">
-                    @(lipPricing.BaseCost > 0 ? (lipPricing.BaseCost / 5.0m).ToString("0.0") : "2.4") Credits / sec
+                    @(lipPricing.BillingType == "PerSecond" ? lipPricing.CostPerSecond.ToString("0.0") : (lipPricing.BaseCost > 0 ? (lipPricing.BaseCost / 5.0m).ToString("0.0") : "2.4")) Credits / sec
                 </span>
             </div>
 
             <div class="bx--form-item" style="max-width: 320px;">
-                <label class="bx--label" style="font-weight: 600; font-size: 0.95rem;">@Localizer["Cost per 5 Seconds (Credits)"]</label>
-                <input type="number" step="0.1" min="0" name="ModelCosts[vidu-lipsync-audio]" class="bx--text-input" value="@(lipPricing.BaseCost > 0 ? lipPricing.BaseCost : 12.0m)" style="font-size: 1.15rem; font-weight: bold;" />
+                <label class="bx--label" style="font-weight: 600; font-size: 0.95rem;">@Localizer["Base Cost (Per Block / Per Second)"]</label>
+                <input type="number" step="0.1" min="0" name="ModelCosts[vidu-lipsync-std]" class="bx--text-input" value="@(lipPricing.BillingType == "PerSecond" ? lipPricing.CostPerSecond : (lipPricing.BaseCost > 0 ? lipPricing.BaseCost : 12.0m))" style="font-size: 1.15rem; font-weight: bold;" />
                 <div class="bx--form__helper-text">Cost charged for each 5-second block of video duration (Default: 12 Credits).</div>
             </div>
         </div>

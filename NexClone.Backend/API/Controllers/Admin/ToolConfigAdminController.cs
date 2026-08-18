@@ -198,12 +198,12 @@ namespace NexClone.Backend.API.Controllers.Admin
                 }
                 ViewBag.LipSyncSetting = lipSetting;
 
-                var lipPricing = await _context.LipSyncModelPricings.FirstOrDefaultAsync(p => p.ModelName == "vidu-lipsync-audio" || p.ModelName == "audio" || p.ModelName == "vidu_advanced_lip_sync" || p.ModelName == "vidu-lipsync-std");
+                var lipPricing = await _context.LipSyncModelPricings.FirstOrDefaultAsync(p => p.ModelName == "vidu-lipsync-std" || p.ModelName == "vidu-lipsync-audio" || p.ModelName == "audio" || p.ModelName == "vidu_advanced_lip_sync");
                 if (lipPricing == null)
                 {
                     lipPricing = new Core.Entities.LipSyncModelPricing
                     {
-                        ModelName = "vidu-lipsync-audio",
+                        ModelName = "vidu-lipsync-std",
                         ProviderName = "CrunAI",
                         BillingType = "Per5Seconds",
                         BaseCost = 12.0m,
@@ -216,7 +216,7 @@ namespace NexClone.Backend.API.Controllers.Admin
                 }
                 else
                 {
-                    lipPricing.ModelName = "vidu-lipsync-audio";
+                    lipPricing.ModelName = "vidu-lipsync-std";
                     if (lipPricing.BaseCost <= 0) lipPricing.BaseCost = 12.0m;
                     lipPricing.CostPerSecond = Math.Round(lipPricing.BaseCost / 5.0m, 2);
                     lipPricing.BillingType = "Per5Seconds";
@@ -624,15 +624,27 @@ namespace NexClone.Backend.API.Controllers.Admin
                     string defaultWallet = config.AllowPremiumCredits && !config.AllowStandardCredits ? "Premium" : (config.AllowStandardCredits && !config.AllowPremiumCredits ? "Standard" : "Both");
 
                     // Audio LipSync
-                    var audioPricing = await _context.LipSyncModelPricings.FirstOrDefaultAsync(p => p.ModelName == "vidu-lipsync-audio" || p.ModelName == "audio" || p.ModelName == "vidu_advanced_lip_sync" || p.ModelName == "vidu-lipsync-std");
-                    if (audioPricing == null) { audioPricing = new Core.Entities.LipSyncModelPricing { ModelName = "vidu-lipsync-audio", ProviderName = "CrunAI", BillingType = "Per5Seconds" }; _context.LipSyncModelPricings.Add(audioPricing); }
-                    audioPricing.ModelName = "vidu-lipsync-audio";
+                    var audioPricing = await _context.LipSyncModelPricings.FirstOrDefaultAsync(p => p.ModelName == "vidu-lipsync-std" || p.ModelName == "vidu-lipsync-audio" || p.ModelName == "audio" || p.ModelName == "vidu_advanced_lip_sync");
+                    if (audioPricing == null) { audioPricing = new Core.Entities.LipSyncModelPricing { ModelName = "vidu-lipsync-std", ProviderName = "CrunAI", BillingType = "Per5Seconds" }; _context.LipSyncModelPricings.Add(audioPricing); }
+                    audioPricing.ModelName = "vidu-lipsync-std";
                     audioPricing.IsActive = config.IsActive;
                     audioPricing.AllowedWallet = defaultWallet;
-                    if (ModelCosts.ContainsKey("vidu-lipsync-audio"))
+                    
+                    if (Request.Form.ContainsKey("LipSyncBillingType"))
                     {
-                        audioPricing.BaseCost = ModelCosts["vidu-lipsync-audio"];
-                        audioPricing.CostPerSecond = Math.Round(audioPricing.BaseCost / 5.0m, 2);
+                        audioPricing.BillingType = Request.Form["LipSyncBillingType"];
+                    }
+
+                    if (ModelCosts.ContainsKey("vidu-lipsync-std"))
+                    {
+                        audioPricing.BaseCost = ModelCosts["vidu-lipsync-std"];
+                        // If it's PerSecond, the BaseCost IS the CostPerSecond.
+                        if (audioPricing.BillingType == "PerSecond") {
+                            audioPricing.CostPerSecond = audioPricing.BaseCost;
+                            audioPricing.BaseCost = 0; // Clear base cost so it doesn't fall back to block pricing
+                        } else {
+                            audioPricing.CostPerSecond = Math.Round(audioPricing.BaseCost / 5.0m, 2);
+                        }
                     }
                 }
                 else if (config.ToolName == "text-to-image")

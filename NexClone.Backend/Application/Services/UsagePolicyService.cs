@@ -304,7 +304,8 @@ namespace NexClone.Backend.Application.Services
                     return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Text to Video is currently disabled." };
 
                 var allPricings = await _context.TextToVideoModelPricings.Where(p => p.IsActive).ToListAsync();
-                var pricing = allPricings.FirstOrDefault(p => NormalizeModelKey(p.ModelName) == normModel || NormalizeModelKey(p.ModelName).Contains(normModel) || normModel.Contains(NormalizeModelKey(p.ModelName)));
+                var pricing = allPricings.FirstOrDefault(p => NormalizeModelKey(p.ModelName) == normModel);
+                if (pricing == null) pricing = allPricings.FirstOrDefault(p => NormalizeModelKey(p.ModelName).Contains(normModel) || normModel.Contains(NormalizeModelKey(p.ModelName)));
                 if (pricing == null) pricing = allPricings.FirstOrDefault();
 
                 if (pricing != null)
@@ -344,7 +345,8 @@ namespace NexClone.Backend.Application.Services
                     return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Image to Video is currently disabled." };
 
                 var allPricings = await _context.ImageToVideoModelPricings.Where(p => p.IsActive).ToListAsync();
-                var pricing = allPricings.FirstOrDefault(p => NormalizeModelKey(p.ModelName) == normModel || NormalizeModelKey(p.ModelName).Contains(normModel) || normModel.Contains(NormalizeModelKey(p.ModelName)));
+                var pricing = allPricings.FirstOrDefault(p => NormalizeModelKey(p.ModelName) == normModel);
+                if (pricing == null) pricing = allPricings.FirstOrDefault(p => NormalizeModelKey(p.ModelName).Contains(normModel) || normModel.Contains(NormalizeModelKey(p.ModelName)));
                 if (pricing == null) pricing = allPricings.FirstOrDefault();
 
                 if (pricing != null)
@@ -390,10 +392,19 @@ namespace NexClone.Backend.Application.Services
                 if (pricing != null)
                 {
                     double dur = (double)amountForCost;
-                    if (dur <= 0) dur = 5.0;
-                    int blocks = (int)Math.Ceiling(dur / 5.0);
-                    decimal costPerBlock = pricing.BaseCost > 0 ? pricing.BaseCost : (pricing.CostPerSecond * 5.0m > 0 ? pricing.CostPerSecond * 5.0m : 12.0m);
-                    totalCost = blocks * costPerBlock;
+                    if (pricing.BillingType != null && pricing.BillingType.Equals("PerSecond", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (dur <= 0) dur = 1.0;
+                        totalCost = (decimal)Math.Ceiling(dur) * pricing.CostPerSecond;
+                    }
+                    else
+                    {
+                        if (dur <= 0) dur = 5.0;
+                        int blocks = (int)Math.Ceiling(dur / 5.0);
+                        decimal costPerBlock = pricing.BaseCost > 0 ? pricing.BaseCost : (pricing.CostPerSecond * 5.0m > 0 ? pricing.CostPerSecond * 5.0m : 12.0m);
+                        totalCost = blocks * costPerBlock;
+                    }
+
                     allowStandard = pricing.AllowedWallet.Equals("Standard", StringComparison.OrdinalIgnoreCase) || pricing.AllowedWallet.Equals("Both", StringComparison.OrdinalIgnoreCase);
                     allowPremium = pricing.AllowedWallet.Equals("Premium", StringComparison.OrdinalIgnoreCase) || pricing.AllowedWallet.Equals("Both", StringComparison.OrdinalIgnoreCase);
                 }

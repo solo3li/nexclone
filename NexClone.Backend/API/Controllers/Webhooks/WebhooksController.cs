@@ -69,7 +69,15 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                 {
                     bool hmacValid = VerifyPaymobHmac(objForHmac, hmac, paymobConfig.HmacSecret!);
                     if (!hmacValid)
+                    {
+                        Console.WriteLine($"[PaymobWebhook] HMAC validation failed! Received HMAC: {hmac}. Payload: {payload.GetRawText()}");
                         return Unauthorized("Invalid HMAC signature.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("[PaymobWebhook] 'obj' property not found in payload.");
+                    return BadRequest("Invalid payload: missing 'obj'.");
                 }
 
                 if (payload.TryGetProperty("obj", out var obj))

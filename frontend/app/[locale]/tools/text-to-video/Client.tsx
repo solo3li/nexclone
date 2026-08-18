@@ -194,10 +194,16 @@ export default function TextToVideoPage() {
           const pricings = res.data.pricings;
           setModelOptions(prev => prev.map(m => {
             const normM = m.id.toLowerCase().replace(/[-_ .]/g, '');
-            const found = pricings.find((p: any) => {
+            let found = pricings.find((p: any) => {
               const normP = (p.modelName || '').toLowerCase().replace(/[-_ .]/g, '');
-              return normP === normM || normP.includes(normM) || normM.includes(normP);
+              return normP === normM;
             });
+            if (!found) {
+              found = pricings.find((p: any) => {
+                const normP = (p.modelName || '').toLowerCase().replace(/[-_ .]/g, '');
+                return normP.includes(normM) || normM.includes(normP);
+              });
+            }
             if (found) {
               if (found.billingType === 'PerSecond') {
                 return {
@@ -970,14 +976,14 @@ export default function TextToVideoPage() {
                   </div>
                   <input
                     type="range"
-                    min="1"
+                    min="6"
                     max="30"
                     value={duration}
                     onChange={(e) => setDuration(parseInt(e.target.value))}
                     className="w-full accent-violet-500 cursor-pointer bg-white/10 rounded-lg h-2"
                   />
                   <div className="flex justify-between text-[10px] text-white/40 font-mono">
-                    <span>1s</span>
+                    <span>6s</span>
                     <span>15s</span>
                     <span>30s</span>
                   </div>

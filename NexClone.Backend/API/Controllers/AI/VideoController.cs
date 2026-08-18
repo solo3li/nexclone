@@ -71,11 +71,14 @@ namespace NexClone.Backend.API.Controllers.AI
             var policyResult = await _usagePolicy.EstimateCostAsync(userId, "advanced-lip-sync", usageUnits, usageUnits, "vidu-lipsync-std", subscriptionId);
             if (!policyResult.IsAllowed) return BadRequest(new { error = policyResult.ErrorMessage });
 
+            var pricing = await _dbContext.LipSyncModelPricings.FirstOrDefaultAsync(p => p.IsActive);
+            bool isPerSecond = pricing != null && pricing.BillingType != null && pricing.BillingType.Equals("PerSecond", StringComparison.OrdinalIgnoreCase);
+
             return Ok(new { 
                 estimatedCost = policyResult.TotalCost, 
-
                 durationSeconds = durationSeconds,
-                blocks = durationSeconds.HasValue ? (int)Math.Ceiling(durationSeconds.Value / 5.0) : (int?)null
+                blocks = durationSeconds.HasValue ? (int)Math.Ceiling(durationSeconds.Value / 5.0) : (int?)null,
+                isPerSecond = isPerSecond
             });
         }
 
