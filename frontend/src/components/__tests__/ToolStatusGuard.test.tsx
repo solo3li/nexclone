@@ -4,6 +4,8 @@ import ToolStatusGuard from '../ToolStatusGuard';
 import { NextIntlClientProvider } from 'next-intl';
 import api from '../../utils/api';
 
+import { useAppStore } from '../../store/useAppStore';
+
 vi.mock('../../utils/api', () => ({
   default: {
     get: vi.fn(),
@@ -17,6 +19,7 @@ vi.mock('../../i18n/routing', () => ({
 describe('ToolStatusGuard', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    useAppStore.setState({ toolConfigs: null });
   });
 
   const renderWithIntl = (ui: React.ReactElement, locale = 'en') => {

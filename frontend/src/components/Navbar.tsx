@@ -24,6 +24,7 @@ import { Link, usePathname, useRouter } from "../i18n/routing";
 import { useAppStore } from "../store/useAppStore";
 import { useAuthStore } from "../store/useAuthStore";
 import api from "../utils/api";
+import { resolveToolStatus } from "../utils/toolStatus";
 import { FreezeWarningBanner } from "./FreezeWarningBanner";
 
 function LanguageSwitcher() {
@@ -48,33 +49,28 @@ function LanguageSwitcher() {
 }
 
 export default function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [toolConfigs, setToolConfigs] = useState<any>(null);
-  
-  const t = useTranslations('Navbar');
+  const t = useTranslations("Navbar");
   const locale = useLocale();
   const router = useRouter();
   const ArrowIcon = locale === 'ar' ? ArrowLeft : ArrowRight;
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-  const { isAuthenticated, user, setUser, logout, setInitializing } = useAppStore();
+  const { user, setUser, logout, toolConfigs, fetchToolConfigs } = useAppStore();
+  const { isAuthenticated, isInitializing } = useAuthStore();
+  const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      useAuthStore.getState().fetchMe().then((data) => {
-        setUser(data);
-      }).catch(() => {
-        setInitializing(false);
-      });
-    } else {
+    if (!isInitializing) {
       setInitializing(false);
     }
     
     // Fetch tool configs for badges
-    api.get('/api/platform/tools-config')
-      .then(res => setToolConfigs(res.data))
-      .catch(err => console.error("Failed to fetch tool configs:", err));
-  }, [isAuthenticated, setUser]);
+    if (!toolConfigs) {
+      fetchToolConfigs();
+    }
+  }, [isAuthenticated, setUser, toolConfigs, fetchToolConfigs]);
 
   const tools = [
     {
@@ -152,30 +148,7 @@ export default function Navbar() {
   ];
 
   const getToolStatus = (id: string) => {
-    if (!toolConfigs) return 'active';
-    const routeMapping: Record<string, string[]> = {
-      "text-to-video": ["kling_text2video", "vidu_text2video"],
-      "image-to-video": ["kling_avatar_image2video", "vidu_image2video"],
-      "reference-to-video": ["kling_reference2video"],
-      "advanced-lip-sync": ["kling_advanced_lip_sync", "vidu_advanced_lip_sync"],
-      "motion-control": ["motion-control"],
-      "text-to-image": ["flux_text2image", "text-to-image"],
-      "text-to-voice": ["text-to-voice"],
-      "voice-to-text": ["voice-to-text"]
-    };
-    let mappedKeys = routeMapping[id];
-    if (!mappedKeys) {
-      const fuzzyKey = Object.keys(toolConfigs).find(k => k.includes(id.replace(/-/g, '_')));
-      if (fuzzyKey) mappedKeys = [fuzzyKey];
-    }
-    if (mappedKeys && mappedKeys.length > 0) {
-      const relevantConfigs = mappedKeys.map(k => toolConfigs[k]).filter(Boolean);
-      if (relevantConfigs.length > 0) {
-        if (relevantConfigs.some(c => c.isMaintenanceMode)) return 'maintenance';
-        if (relevantConfigs.some(c => c.isComingSoon)) return 'coming_soon';
-      }
-    }
-    return 'active';
+    return resolveToolStatus(id, toolConfigs).status;
   };
 
   useEffect(() => {

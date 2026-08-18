@@ -30,6 +30,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAppStore } from "../store/useAppStore";
 import api from "../utils/api";
 import { signalRNotificationService } from "../../lib/signalr-client";
+import { resolveToolStatus } from "../utils/toolStatus";
 
 export default function ToolsSidebar() {
   const locale = useLocale();
@@ -42,14 +43,15 @@ export default function ToolsSidebar() {
     setUser, 
     logout, 
     isSidebarCollapsed, 
-    toggleSidebarCollapse 
+    toggleSidebarCollapse,
+    toolConfigs,
+    fetchToolConfigs
   } = useAppStore();
 
   const [isOpen, setIsOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
   const [walletsExpanded, setWalletsExpanded] = useState(false);
-  const [toolConfigs, setToolConfigs] = useState<any>(null);
   const [activeTasksCount, setActiveTasksCount] = useState<number>(0);
 
   const notifRef = useRef<HTMLDivElement>(null);
@@ -217,15 +219,14 @@ export default function ToolsSidebar() {
   };
 
   useEffect(() => {
-    // Fetch tool configs for dynamic statuses
-    api.get('/api/platform/tools-config')
-      .then(res => setToolConfigs(res.data))
-      .catch(err => console.error("Failed to fetch tool configs:", err));
+    if (!toolConfigs) {
+      fetchToolConfigs();
+    }
 
     checkActiveTasks();
     const interval = setInterval(checkActiveTasks, 10000);
     return () => clearInterval(interval);
-  }, [user]);
+  }, [user, toolConfigs, fetchToolConfigs]);
 
   const [notifications, setNotifications] = useState<Array<{ id: number, title: string, message: string, type: string, url: string, time: Date }>>([]);
 
@@ -591,33 +592,7 @@ export default function ToolsSidebar() {
                       {category.tools.map((tool) => {
                         const isActive = pathname.includes(tool.id);
                         const Icon = tool.icon;
-
-                        // Status resolution
-                        let status = 'active';
-                        if (toolConfigs) {
-                          const routeMapping: Record<string, string[]> = {
-                            "image-to-video": ["image-to-video"],
-                            "text-to-video": ["text-to-video"],
-                            "reference-to-video": ["reference-to-video"],
-                            "text-to-image": ["text-to-image"],
-                            "advanced-lip-sync": ["kling_advanced_lip_sync", "vidu_advanced_lip_sync"],
-                            "text-to-voice": ["text-to-voice"],
-                            "voice-to-text": ["voice-to-text"],
-                            "motion-control": ["motion-control"]
-                          };
-                          let mappedKeys = routeMapping[tool.id];
-                          if (!mappedKeys) {
-                            const fuzzyKey = Object.keys(toolConfigs).find(k => k.includes(tool.id.replace(/-/g, '_')));
-                            if (fuzzyKey) mappedKeys = [fuzzyKey];
-                          }
-                          if (mappedKeys && mappedKeys.length > 0) {
-                            const relevantConfigs = mappedKeys.map(k => toolConfigs[k]).filter(Boolean);
-                            if (relevantConfigs.length > 0) {
-                              if (relevantConfigs.some(c => c.isMaintenanceMode)) status = 'maintenance';
-                              else if (relevantConfigs.some(c => c.isComingSoon)) status = 'coming_soon';
-                            }
-                          }
-                        }
+                        const status = resolveToolStatus(tool.id, toolConfigs).status;
 
                         return (
                           <Link

@@ -43,7 +43,9 @@ export interface AppState {
   isAuthenticated: boolean;
   hasPhoneNumber: boolean;
   isInitializing: boolean;
-  isSidebarCollapsed: boolean;
+  toolConfigs: Record<string, any> | null;
+  setToolConfigs: (configs: Record<string, any>) => void;
+  fetchToolConfigs: () => Promise<Record<string, any>>;
   setSidebarCollapsed: (collapsed: boolean) => void;
   toggleSidebarCollapse: () => void;
   setUser: (user: any | null) => void;
@@ -52,12 +54,25 @@ export interface AppState {
   logout: () => void;
 }
 
-export const useAppStore = create<AppState>((set) => ({
+export const useAppStore = create<AppState>((set, get) => ({
   user: null,
   isAuthenticated: false,
   hasPhoneNumber: false,
   isInitializing: true,
   isSidebarCollapsed: false,
+  toolConfigs: null,
+  setToolConfigs: (configs) => set({ toolConfigs: configs }),
+  fetchToolConfigs: async () => {
+    try {
+      const { default: api } = await import('../utils/api');
+      const res = await api.get('/api/platform/tools-config');
+      set({ toolConfigs: res.data });
+      return res.data;
+    } catch (err) {
+      console.error('[Store] Failed to fetch tool configs:', err);
+      return get().toolConfigs || {};
+    }
+  },
   setSidebarCollapsed: (collapsed) => set({ isSidebarCollapsed: collapsed }),
   toggleSidebarCollapse: () => set((state) => ({ isSidebarCollapsed: !state.isSidebarCollapsed })),
   setUser: (user) => set({ user, isAuthenticated: !!user, hasPhoneNumber: user?.hasPhoneNumber ?? false, isInitializing: false }),

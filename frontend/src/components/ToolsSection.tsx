@@ -1,4 +1,5 @@
 "use client";
+import { useEffect } from "react";
 import { motion, useMotionValue, useSpring, useTransform, useMotionTemplate } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import Image from "next/image";
@@ -19,6 +20,8 @@ import {
 import { AnimatedText, AnimatedReveal } from "./AnimatedText";
 import { useTranslations, useLocale } from "next-intl";
 import { Link, useRouter } from "../i18n/routing";
+import { useAppStore } from "../store/useAppStore";
+import { resolveToolStatus } from "../utils/toolStatus";
 
 type Tool = {
   icon: any;
@@ -39,8 +42,30 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
   const t = useTranslations("Tools");
   const locale = useLocale();
   const router = useRouter();
+  const isRtl = locale === 'ar';
   const Icon = tool.icon;
-  const ArrowIcon = locale === 'ar' ? ArrowLeft : ArrowRight;
+  const ArrowIcon = isRtl ? ArrowLeft : ArrowRight;
+
+  const { toolConfigs } = useAppStore();
+  const statusInfo = resolveToolStatus(tool.href || '', toolConfigs);
+
+  const displayBadge = statusInfo.isMaintenanceMode 
+    ? (isRtl ? 'تحت التحديث' : 'Maintenance')
+    : statusInfo.isComingSoon 
+      ? (isRtl ? 'قريباً' : 'Coming Soon')
+      : tool.badge;
+
+  const displayBadgeColor = statusInfo.isMaintenanceMode
+    ? "bg-orange-500/20 text-orange-300 border-orange-500/30"
+    : statusInfo.isComingSoon
+      ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/30"
+      : tool.badgeColor;
+
+  const ctaText = statusInfo.isMaintenanceMode
+    ? (isRtl ? 'تحت التحديث' : 'Maintenance')
+    : statusInfo.isComingSoon
+      ? (isRtl ? 'قريباً' : 'Coming Soon')
+      : t('useTool');
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -130,11 +155,11 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
               className={`absolute -inset-1 rounded-xl bg-gradient-to-br ${tool.iconBg} opacity-0 group-hover:opacity-40 blur-md transition-all duration-300 animate-pulse`}
             />
           </div>
-          {tool.badge && (
+          {displayBadge && (
             <span
-              className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${tool.badgeColor}`}
+              className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${displayBadgeColor}`}
             >
-              {tool.badge}
+              {displayBadge}
             </span>
           )}
         </div>
@@ -161,7 +186,7 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
 
         {/* CTA */}
         <div className="flex items-center gap-1.5 text-violet-400 text-xs font-medium group-hover:gap-2.5 transition-all duration-300 relative inline-flex mt-auto">
-          <span>{t('useTool')}</span>
+          <span>{ctaText}</span>
           <ArrowIcon className={`w-3.5 h-3.5 transition-transform duration-300 ${locale === 'ar' ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
           <div className="absolute -bottom-1 left-0 right-0 h-px bg-violet-400/0 group-hover:bg-violet-400/50 transition-colors duration-300" />
         </div>
@@ -174,6 +199,14 @@ export default function ToolsSection() {
   const t = useTranslations("Tools");
   const locale = useLocale();
   const isRtl = locale === 'ar';
+
+  const { toolConfigs, fetchToolConfigs } = useAppStore();
+
+  useEffect(() => {
+    if (!toolConfigs) {
+      fetchToolConfigs();
+    }
+  }, [toolConfigs, fetchToolConfigs]);
 
   const tools: Tool[] = [
     {

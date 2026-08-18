@@ -155,22 +155,59 @@ namespace NexClone.Backend.API.Controllers.Client
             }
 
             var activeToolConfig = await _context.ToolConfigurations
-                .FirstOrDefaultAsync(c => c.ToolName == "text-to-voice" && c.IsActive);
+                .FirstOrDefaultAsync(c => c.ToolName == "text-to-voice");
 
             bool isMaintenanceMode = activeToolConfig?.IsMaintenanceMode ?? false;
+            bool isComingSoon = activeToolConfig?.IsComingSoon ?? false;
+            bool isActive = activeToolConfig?.IsActive ?? true;
 
-            return Ok(new { maxChars = maxChars, customInstructionsEnabled = customInstructionsEnabled, isMaintenanceMode = isMaintenanceMode, allowedVoices = allowedVoices });
+            var dbPricings = await _context.TextToVoiceModelPricings
+                .Where(p => p.IsActive)
+                .Select(p => new {
+                    qualityLevel = p.QualityLevel,
+                    modelName = p.ModelName,
+                    costPerChar = p.CostPerChar,
+                    allowedWallet = p.AllowedWallet
+                })
+                .ToListAsync();
+
+            object qualitiesToReturn;
+            if (dbPricings.Any())
+            {
+                qualitiesToReturn = dbPricings;
+            }
+            else
+            {
+                qualitiesToReturn = new[]
+                {
+                    new { qualityLevel = "Standard", modelName = "gemini-2.5-flash-preview-tts", costPerChar = 0.001m, allowedWallet = "Standard" },
+                    new { qualityLevel = "Medium", modelName = "gemini-2.5-pro-preview-tts", costPerChar = 0.005m, allowedWallet = "Both" },
+                    new { qualityLevel = "High", modelName = "gemini-3.1-flash-tts-preview", costPerChar = 0.010m, allowedWallet = "Premium" }
+                };
+            }
+
+            return Ok(new { 
+                maxChars = maxChars, 
+                customInstructionsEnabled = customInstructionsEnabled, 
+                isMaintenanceMode = isMaintenanceMode, 
+                isComingSoon = isComingSoon, 
+                isActive = isActive, 
+                allowedVoices = allowedVoices,
+                qualities = qualitiesToReturn
+            });
         }
 
         [HttpGet("vtt-config")]
         public async Task<IActionResult> GetVttConfig()
         {
             var activeToolConfig = await _context.ToolConfigurations
-                .FirstOrDefaultAsync(c => c.ToolName == "voice-to-text" && c.IsActive);
+                .FirstOrDefaultAsync(c => c.ToolName == "voice-to-text");
 
             bool isMaintenanceMode = activeToolConfig?.IsMaintenanceMode ?? false;
+            bool isComingSoon = activeToolConfig?.IsComingSoon ?? false;
+            bool isActive = activeToolConfig?.IsActive ?? true;
 
-            return Ok(new { isMaintenanceMode = isMaintenanceMode });
+            return Ok(new { isMaintenanceMode = isMaintenanceMode, isComingSoon = isComingSoon, isActive = isActive });
         }
 
         [HttpGet("payment-methods")]

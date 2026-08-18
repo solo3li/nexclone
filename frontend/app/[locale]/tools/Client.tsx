@@ -4,7 +4,7 @@ import { useLocale } from "next-intl";
 import { Link } from "../../../src/i18n/routing";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Film, 
   Video, 
@@ -18,12 +18,22 @@ import {
   ArrowRight,
   Layers as StudioIcon
 } from "lucide-react";
+import { useAppStore } from "../../../src/store/useAppStore";
+import { resolveToolStatus } from "../../../src/utils/toolStatus";
 
 export default function ToolsPage() {
   const locale = useLocale();
   const isRtl = locale === 'ar';
   const ArrowIcon = isRtl ? ArrowLeft : ArrowRight;
   const [activeCategory, setActiveCategory] = useState<string>("all");
+
+  const { toolConfigs, fetchToolConfigs } = useAppStore();
+
+  useEffect(() => {
+    if (!toolConfigs) {
+      fetchToolConfigs();
+    }
+  }, [toolConfigs, fetchToolConfigs]);
 
   const categories = [
     { id: "all", labelEn: "All Tools", labelAr: "جميع الأدوات" },
@@ -225,6 +235,28 @@ export default function ToolsPage() {
           <AnimatePresence>
             {filteredTools.map((tool, index) => {
               const Icon = tool.icon;
+              const statusInfo = resolveToolStatus(tool.id, toolConfigs);
+              const isMaintenance = statusInfo.isMaintenanceMode;
+              const isComingSoon = statusInfo.isComingSoon;
+
+              const displayBadge = isMaintenance
+                ? (isRtl ? 'تحت التحديث' : 'Maintenance')
+                : isComingSoon
+                  ? (isRtl ? 'قريباً' : 'Coming Soon')
+                  : (isRtl ? tool.badgeAr : tool.badgeEn);
+
+              const displayBadgeColor = isMaintenance
+                ? "bg-orange-500/20 text-orange-300 border-orange-500/30"
+                : isComingSoon
+                  ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/30"
+                  : tool.badgeColor;
+
+              const actionText = isMaintenance
+                ? (isRtl ? 'تحت التحديث' : 'Under Maintenance')
+                : isComingSoon
+                  ? (isRtl ? 'قريباً جداً' : 'Coming Soon')
+                  : (isRtl ? 'بدء الاستخدام' : 'Launch Tool');
+
               return (
                 <motion.div
                   layout
@@ -253,8 +285,8 @@ export default function ToolsPage() {
                       
                       {/* Top Badge */}
                       <div className="absolute top-3 right-3 z-10">
-                        <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border backdrop-blur-md ${tool.badgeColor}`}>
-                          {isRtl ? tool.badgeAr : tool.badgeEn}
+                        <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border backdrop-blur-md ${displayBadgeColor}`}>
+                          {displayBadge}
                         </span>
                       </div>
                     </div>
@@ -275,8 +307,8 @@ export default function ToolsPage() {
                       </p>
 
                       {/* Action Button */}
-                      <div className="flex items-center justify-between text-xs font-semibold text-violet-400 group-hover:text-violet-300 mt-auto pt-3 border-t border-white/5">
-                        <span>{isRtl ? 'بدء الاستخدام' : 'Launch Tool'}</span>
+                      <div className={`flex items-center justify-between text-xs font-semibold ${isMaintenance ? 'text-orange-400' : isComingSoon ? 'text-cyan-400' : 'text-violet-400 group-hover:text-violet-300'} mt-auto pt-3 border-t border-white/5`}>
+                        <span>{actionText}</span>
                         <ArrowIcon className="w-4 h-4 transform transition-transform group-hover:translate-x-1" />
                       </div>
                     </div>

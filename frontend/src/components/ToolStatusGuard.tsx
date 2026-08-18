@@ -4,20 +4,21 @@ import { useEffect, useState } from "react";
 import { usePathname } from "../i18n/routing";
 import { useLocale } from "next-intl";
 import { Loader2, Settings, Clock, Sparkles } from "lucide-react";
-import api from "../utils/api";
-
-type ToolConfig = {
-  isActive: boolean;
-  isMaintenanceMode: boolean;
-  isComingSoon: boolean;
-};
+import { useAppStore } from "../store/useAppStore";
+import { resolveToolStatus, ToolStatusInfo } from "../utils/toolStatus";
 
 export default function ToolStatusGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const locale = useLocale();
   const isRtl = locale === 'ar';
   
-  const [config, setConfig] = useState<ToolConfig | null>(null);
+  const { toolConfigs, fetchToolConfigs } = useAppStore();
+  const [statusInfo, setStatusInfo] = useState<ToolStatusInfo>({
+    status: 'active',
+    isMaintenanceMode: false,
+    isComingSoon: false,
+    isActive: true
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -26,7 +27,7 @@ export default function ToolStatusGuard({ children }: { children: React.ReactNod
     // Safety timeout to avoid getting stuck on loader
     const timeoutId = setTimeout(() => {
       if (isMounted) setIsLoading(false);
-    }, 2500);
+    }, 1500);
 
     // Extract tool name from pathname. e.g. /tools/image-to-video -> image-to-video
     const segments = pathname.split('/').filter(Boolean);
@@ -38,50 +39,16 @@ export default function ToolStatusGuard({ children }: { children: React.ReactNod
       return;
     }
 
-    const fetchConfig = async () => {
+    const checkStatus = async () => {
       try {
-        const res = await api.get('/api/platform/tools-config');
+        let configs = toolConfigs;
+        if (!configs) {
+          configs = await fetchToolConfigs();
+        }
         if (!isMounted) return;
-        const allConfigs = res.data;
         
-        // Map frontend route names to database tool names
-        const routeMapping: Record<string, string[]> = {
-          "text-to-video": ["text-to-video"],
-          "image-to-video": ["image-to-video"],
-          "reference-to-video": ["reference-to-video"],
-          "text-to-image": ["text-to-image"],
-          "advanced-lip-sync": ["advanced-lip-sync", "kling_advanced_lip_sync", "vidu_advanced_lip_sync"],
-          "text-to-voice": ["text-to-voice"],
-          "voice-to-text": ["voice-to-text"],
-          "motion-control": ["motion-control"]
-        };
-
-        let mappedKeys = routeMapping[currentTool];
-        
-        if (!mappedKeys) {
-          const fuzzyKey = Object.keys(allConfigs).find(k => k.includes(currentTool.replace(/-/g, '_')) || k.includes(currentTool));
-          if (fuzzyKey) mappedKeys = [fuzzyKey];
-        }
-
-        if (mappedKeys && mappedKeys.length > 0) {
-          const relevantConfigs = mappedKeys.map(k => allConfigs[k]).filter(Boolean);
-          
-          if (relevantConfigs.length > 0) {
-            // Priority: Maintenance > Coming Soon > Active
-            const maintenanceConfig = relevantConfigs.find(c => c.isMaintenanceMode);
-            const comingSoonConfig = relevantConfigs.find(c => c.isComingSoon);
-            
-            if (maintenanceConfig) {
-              setConfig(maintenanceConfig);
-            } else if (comingSoonConfig) {
-              setConfig(comingSoonConfig);
-            } else {
-              setConfig(relevantConfigs[0]);
-            }
-          }
-        } else if (allConfigs[currentTool]) {
-          setConfig(allConfigs[currentTool]);
-        }
+        const resolved = resolveToolStatus(currentTool, configs);
+        setStatusInfo(resolved);
       } catch (err) {
         console.error("Failed to fetch tool config:", err);
       } finally {
@@ -89,13 +56,13 @@ export default function ToolStatusGuard({ children }: { children: React.ReactNod
       }
     };
 
-    fetchConfig();
+    checkStatus();
 
     return () => {
       isMounted = false;
       clearTimeout(timeoutId);
     };
-  }, [pathname]);
+  }, [pathname, toolConfigs, fetchToolConfigs]);
 
   if (isLoading) {
     return (
@@ -105,7 +72,7 @@ export default function ToolStatusGuard({ children }: { children: React.ReactNod
     );
   }
 
-  if (config?.isMaintenanceMode) {
+  if (statusInfo.isMaintenanceMode) {
     return (
       <div className="min-h-screen bg-[#0a0015] flex items-center justify-center p-6 relative overflow-hidden w-full" dir={isRtl ? 'rtl' : 'ltr'}>
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-fuchsia-600/10 rounded-full blur-[120px] pointer-events-none" />
@@ -132,7 +99,7 @@ export default function ToolStatusGuard({ children }: { children: React.ReactNod
     );
   }
 
-  if (config?.isComingSoon) {
+  if (statusInfo.isComingSoon) {
     return (
       <div className="min-h-screen bg-[#0a0015] flex items-center justify-center p-6 relative overflow-hidden w-full" dir={isRtl ? 'rtl' : 'ltr'}>
         <div className="absolute top-1/3 right-1/3 w-96 h-96 bg-cyan-600/10 rounded-full blur-[120px] pointer-events-none" />

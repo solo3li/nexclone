@@ -48,6 +48,11 @@ function TextToVoicePage() {
   const [selectedVoice, setSelectedVoice] = useState<string>("");
   const [voiceFilter, setVoiceFilter] = useState("all"); // "all" | "male" | "female"
   const [selectedQuality, setSelectedQuality] = useState<string>("Standard");
+  const [availableQualities, setAvailableQualities] = useState<Array<{ qualityLevel: string, costPerChar: number }>>([
+    { qualityLevel: 'Standard', costPerChar: 0.001 },
+    { qualityLevel: 'Medium', costPerChar: 0.005 },
+    { qualityLevel: 'High', costPerChar: 0.010 }
+  ]);
   
   const [dialects, setDialects] = useState<OptionProfile[]>([]);
   const [emotions, setEmotions] = useState<OptionProfile[]>([]);
@@ -108,6 +113,9 @@ function TextToVoicePage() {
         setCustomInstructionsEnabled(configRes.data.customInstructionsEnabled || false);
         setIsMaintenanceMode(configRes.data.isMaintenanceMode || false);
         setAllowedVoices(configRes.data.allowedVoices || null);
+        if (configRes.data.qualities && Array.isArray(configRes.data.qualities)) {
+          setAvailableQualities(configRes.data.qualities);
+        }
       } catch (error) {
         console.error("Failed to load options:", error);
       }
@@ -118,10 +126,12 @@ function TextToVoicePage() {
   }, []);
 
   useEffect(() => {
-    setEstimatedCost(Math.max((text.length * (selectedQuality === 'High' ? (user?.activePlan?.ttsCostPerCharHigh ?? 0.01) : (user?.activePlan?.ttsCostPerChar ?? 0.001))), 0.0001));
+    const currentTier = availableQualities.find(q => q.qualityLevel.toLowerCase() === selectedQuality.toLowerCase());
+    const costPerChar = currentTier?.costPerChar ?? (selectedQuality === 'High' ? 0.010 : selectedQuality === 'Medium' ? 0.005 : 0.001);
+    setEstimatedCost(Math.max(text.length * costPerChar, 0.0001));
     setChargedWallet(null);
     setChargedWalletIcon(null);
-  }, [text]);
+  }, [text, selectedQuality, availableQualities]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -596,17 +606,17 @@ function TextToVoicePage() {
                   </div>
                   
                   <div className="flex bg-white/5 p-1 rounded-full border border-white/5 gap-1">
-                    {['Standard', 'High'].map((q) => (
+                    {['Standard', 'Medium', 'High'].map((q) => (
                       <button
                         key={q}
                         onClick={() => setSelectedQuality(q)}
                         className={`flex-1 py-1.5 rounded-full text-[10px] font-medium transition-all ${
                           selectedQuality === q
-                            ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white'
+                            ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-md shadow-violet-600/30 font-bold'
                             : 'text-white/50 hover:text-white'
                         }`}
                       >
-                        {isRtl ? (q === 'Standard' ? 'عادية' : 'عالية') : q}
+                        {isRtl ? (q === 'Standard' ? 'عادية' : q === 'Medium' ? 'متوسطة' : 'فائقة') : q}
                       </button>
                     ))}
                   </div>
