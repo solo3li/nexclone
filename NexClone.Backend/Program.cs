@@ -277,6 +277,8 @@ using (var scope = app.Services.CreateScope())
         {
             "http://localhost:3000", "http://localhost:3001",
             "http://167.71.66.188:3000", "http://178.62.192.74:3000",
+            "https://yes-ralph-foster-coalition.trycloudflare.com",
+            "https://inkjet-joining-falls-endorsement.trycloudflare.com",
             "https://recently-gnome-growth-accomplished.trycloudflare.com",
             "https://nascar-introduces-polo-appreciation.trycloudflare.com"
         };
@@ -441,6 +443,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
+
+app.MapControllers();
 
 app.MapControllerRoute(
     name: "areas",

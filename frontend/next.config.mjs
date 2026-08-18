@@ -9,7 +9,8 @@ const nextConfig = {
     'localhost',
     '127.0.0.1',
     '*.trycloudflare.com',
-    'redhead-emerald-boys-started.trycloudflare.com',
+    'yes-ralph-foster-coalition.trycloudflare.com',
+    'inkjet-joining-falls-endorsement.trycloudflare.com',
   ],
   typescript: {
     ignoreBuildErrors: true,
