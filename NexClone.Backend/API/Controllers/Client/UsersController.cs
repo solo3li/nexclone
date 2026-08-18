@@ -478,12 +478,10 @@ namespace NexClone.Backend.API.Controllers.Client
                 return RedirectToAction(nameof(Details), new { id = userId });
             }
 
-            // Unlock user, reset failed attempts, update security stamp & ensure verified
+            // Unlock user, reset failed attempts & update security stamp
             await userManager.SetLockoutEndDateAsync(user, null);
             await userManager.ResetAccessFailedCountAsync(user);
             await userManager.UpdateSecurityStampAsync(user);
-            
-            user.IsVerified = true;
             await userManager.UpdateAsync(user);
 
             TempData["Success"] = "Password changed and account unlocked successfully.";

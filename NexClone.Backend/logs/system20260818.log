@@ -383,3 +383,4 @@ Npgsql.NpgsqlException (0x80004005): No such host is known.
 2026-08-18 05:38:38.137 +03:00 [INF] End processing HTTP request after 424.3911ms - 201
 2026-08-18 05:38:38.163 +03:00 [INF] [Email Task] Email sent to mhmodreda63@gmail.com successfully.
 2026-08-18 05:38:41.040 +03:00 [INF] Removed 32 outdated record(s) from 'job' table.
+2026-08-18 05:43:32.841 +03:00 [INF] 1 servers were removed due to timeout
