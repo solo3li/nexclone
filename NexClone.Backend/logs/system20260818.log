@@ -279,3 +279,24 @@ System.Exception: Error parsing Gemini response from model gemini-2.5-pro-previe
 2026-08-18 22:34:09.506 +03:00 [INF] Received HTTP response headers after 1732.7726ms - 201
 2026-08-18 22:34:09.515 +03:00 [INF] End processing HTTP request after 1762.5667ms - 201
 2026-08-18 22:34:20.077 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-18 22:49:02.165 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-18 22:49:12.322 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-18 22:49:14.924 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-18 22:49:15.073 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-18 22:49:15.073 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-18 22:49:15.074 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-18 22:49:15.074 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-18 22:49:15.075 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-18 22:49:15.075 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-18 22:49:19.271 +03:00 [INF] Server desktop-rjppsk4:20392:0b427a47 successfully announced in 4173.6257 ms
+2026-08-18 22:49:19.280 +03:00 [INF] Server desktop-rjppsk4:20392:0b427a47 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-18 22:49:19.299 +03:00 [INF] Server desktop-rjppsk4:20392:0b427a47 all the dispatchers started
+2026-08-18 22:51:07.234 +03:00 [INF] Start processing HTTP request POST https://accept.paymob.com/v1/intention/
+2026-08-18 22:51:07.238 +03:00 [INF] Sending HTTP request POST https://accept.paymob.com/v1/intention/
+2026-08-18 22:51:08.408 +03:00 [INF] Received HTTP response headers after 1162.3342ms - 201
+2026-08-18 22:51:08.416 +03:00 [INF] End processing HTTP request after 1188.014ms - 201
+2026-08-18 22:54:20.046 +03:00 [INF] 1 servers were removed due to timeout
