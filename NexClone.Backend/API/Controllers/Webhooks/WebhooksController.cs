@@ -365,11 +365,17 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                     {
                         var parts = field.Split('.', 2);
                         if (obj.TryGetProperty(parts[0], out var nested) && nested.TryGetProperty(parts[1], out var nestedVal))
-                            value = nestedVal.ToString();
+                        {
+                            if (nestedVal.ValueKind == JsonValueKind.True) value = "true";
+                            else if (nestedVal.ValueKind == JsonValueKind.False) value = "false";
+                            else value = nestedVal.ToString();
+                        }
                     }
                     else if (obj.TryGetProperty(field, out var val))
                     {
-                        value = val.ToString();
+                        if (val.ValueKind == JsonValueKind.True) value = "true";
+                        else if (val.ValueKind == JsonValueKind.False) value = "false";
+                        else value = val.ToString();
                     }
                     concatenated.Append(value);
                 }
