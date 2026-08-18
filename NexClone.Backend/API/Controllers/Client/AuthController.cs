@@ -359,13 +359,13 @@ namespace NexClone.Backend.API.Controllers.Client
 
             var token = GenerateJwtToken(user);
             
-            var isHttps = Request.IsHttps || Request.Headers["X-Forwarded-Proto"] == "https";
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = isHttps,
-                SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
-                Expires = DateTime.UtcNow.AddDays(15)
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddDays(15),
+                IsEssential = true
             };
             Response.Cookies.Append("jwt", token, cookieOptions);
 
@@ -531,13 +531,13 @@ namespace NexClone.Backend.API.Controllers.Client
 
             var token = GenerateJwtToken(user);
             
-            var isHttps = Request.IsHttps || Request.Headers["X-Forwarded-Proto"] == "https";
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = isHttps,
-                SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax,
-                Expires = DateTime.UtcNow.AddDays(15)
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddDays(15),
+                IsEssential = true
             };
             Response.Cookies.Append("jwt", token, cookieOptions);
 
@@ -675,12 +675,11 @@ namespace NexClone.Backend.API.Controllers.Client
         [HttpPost("logout")]
         public IActionResult Logout()
         {
-            var isHttps = Request.IsHttps || Request.Headers["X-Forwarded-Proto"] == "https";
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = isHttps,
-                SameSite = isHttps ? SameSiteMode.None : SameSiteMode.Lax
+                Secure = true,
+                SameSite = SameSiteMode.None
             };
             Response.Cookies.Delete("jwt", cookieOptions);
             return Ok(new { Message = "Logged out" });

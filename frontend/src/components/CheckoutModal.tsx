@@ -485,6 +485,10 @@ export default function CheckoutModal({ plan, currency, onClose }: CheckoutModal
       if (res.data?.checkoutUrl) window.location.href = res.data.checkoutUrl;
       else throw new Error('No URL');
     } catch (e: any) {
+      if (e.response?.status === 401) {
+        window.location.href = `/${locale}/login?redirect=/pricing`;
+        return;
+      }
       setError(e.response?.data?.error || (isRtl ? 'حدث خطأ' : 'Error'));
       setIsSubmitting(false);
     }

@@ -75,6 +75,7 @@ async function getPublicSettings() {
 }
 
 import { GoogleAuthProviderWrapper } from "../../components/GoogleAuthProviderWrapper";
+import { AuthSessionProvider } from "../../src/components/AuthSessionProvider";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -117,13 +118,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M3QMV7SP" height="0" width="0" style={{ display: 'none', visibility: 'hidden' }}></iframe>
         </noscript>
         <NextIntlClientProvider messages={messages}>
-          <GoogleAuthProviderWrapper clientId={googleClientId}>
-            {isMaintenanceMode ? (
-              <MaintenanceScreen endDate={maintenanceEndDate} />
-            ) : (
-              children
-            )}
-          </GoogleAuthProviderWrapper>
+          <AuthSessionProvider>
+            <GoogleAuthProviderWrapper clientId={googleClientId}>
+              {isMaintenanceMode ? (
+                <MaintenanceScreen endDate={maintenanceEndDate} />
+              ) : (
+                children
+              )}
+            </GoogleAuthProviderWrapper>
+          </AuthSessionProvider>
         </NextIntlClientProvider>
         {/* Unregister Service Worker and Clear Cache */}
         <script

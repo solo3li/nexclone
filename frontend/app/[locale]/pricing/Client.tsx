@@ -9,17 +9,30 @@ import Footer from "../../../src/components/Footer";
 import MobileBottomNav from "../../../src/components/MobileBottomNav";
 import CursorGlow from "../../../src/components/CursorGlow";
 import { useLocale } from 'next-intl';
+import { useRouter } from '@/i18n/routing';
+import { useAppStore } from '@/store/useAppStore';
 import CheckoutModal from '@/components/CheckoutModal';
 import { Plan } from '@/store/usePlansStore';
 
 export default function PricingPage() {
   const { plans, isLoading, error, fetchPlans } = usePlansStore();
+  const { user, isAuthenticated } = useAppStore();
+  const router = useRouter();
   const [currency, setCurrency] = useState<'USD' | 'EGP'>('USD');
   const [checkoutCurrency, setCheckoutCurrency] = useState<'USD' | 'EGP'>('USD');
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<number>(30);
   const locale = useLocale();
   const isRtl = locale === 'ar';
+
+  const handleSelectPlan = (plan: Plan, curr: 'USD' | 'EGP') => {
+    if (!isAuthenticated && !user) {
+      router.push(`/login?redirect=/pricing&planId=${plan.id}`);
+      return;
+    }
+    setCheckoutCurrency(curr);
+    setSelectedPlan(plan);
+  };
 
   const availableDurations = useMemo(() => {
     return Array.from(new Set(plans.map(p => p.durationDays))).sort((a, b) => a - b);
@@ -200,10 +213,7 @@ export default function PricingPage() {
 
                     {plan.priceUsd === 0 ? (
                       <button 
-                        onClick={() => {
-                          setCheckoutCurrency('USD');
-                          setSelectedPlan(plan);
-                        }}
+                        onClick={() => handleSelectPlan(plan, 'USD')}
                         className={`w-full py-4 mt-8 rounded-xl font-semibold transition-all duration-300 ${isPopular ? 'bg-white text-black hover:bg-gray-100 hover:shadow-lg hover:shadow-white/20' : 'bg-white/10 text-white hover:bg-white/20'}`}
                       >
                         {isRtl ? 'ابدأ مجاناً' : 'Get Started for Free'}
@@ -211,10 +221,7 @@ export default function PricingPage() {
                     ) : (
                       <div className="flex gap-3 mt-8">
                         <button
-                          onClick={() => {
-                            setCheckoutCurrency('EGP');
-                            setSelectedPlan(plan);
-                          }}
+                          onClick={() => handleSelectPlan(plan, 'EGP')}
                           className={`flex-1 py-3.5 px-2 rounded-xl font-bold transition-all duration-300 text-sm flex items-center justify-center gap-2 ${
                             isPopular 
                               ? 'bg-white text-purple-900 hover:bg-gray-50 hover:shadow-xl hover:-translate-y-0.5' 
@@ -225,10 +232,7 @@ export default function PricingPage() {
                           <span>{isRtl ? 'دفع بالجنيه' : 'Pay in EGP'}</span>
                         </button>
                         <button
-                          onClick={() => {
-                            setCheckoutCurrency('USD');
-                            setSelectedPlan(plan);
-                          }}
+                          onClick={() => handleSelectPlan(plan, 'USD')}
                           className={`flex-1 py-3.5 px-2 rounded-xl font-bold transition-all duration-300 text-sm flex items-center justify-center gap-2 ${
                             isPopular 
                               ? 'bg-black/20 text-white border border-white/30 hover:bg-black/30 hover:border-white/50 backdrop-blur-md hover:-translate-y-0.5' 
