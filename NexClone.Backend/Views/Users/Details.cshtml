@@ -417,10 +417,13 @@
                             {
                                 foreach (var p in paymentsList)
                                 {
-                                    <tr>
-                                        <td><strong><a href="@Url.Action("Details", "PaymentsAdmin", new { id = p.Id })" style="color: #0f62fe;">@p.PaymentId</a></strong></td>
+                                    <tr style="cursor: pointer; transition: background 0.15s ease;"
+                                        onmouseover="this.style.backgroundColor='#edf5ff';" 
+                                        onmouseout="this.style.backgroundColor='';"
+                                        onclick="if (!event.target.closest('a')) window.location='@Url.Action("Details", "PaymentsAdmin", new { id = p.Id })';">
+                                        <td><strong><a href="@Url.Action("Details", "PaymentsAdmin", new { id = p.Id })" style="color: #0f62fe; text-decoration: none; font-family: 'IBM Plex Mono', monospace;">@p.PaymentId</a></strong></td>
                                         <td>@p.Method</td>
-                                        <td>@p.Amount.ToString("0.00") @p.Currency</td>
+                                        <td><strong>@p.Amount.ToString("0.00") @p.Currency</strong></td>
                                         <td>
                                             @if (p.Status == "Completed" || p.Status == "active") { <span class="bx--tag bx--tag--green">@p.Status</span> }
                                             else if (p.Status == "Pending") { <span class="bx--tag bx--tag--yellow">@p.Status</span> }
