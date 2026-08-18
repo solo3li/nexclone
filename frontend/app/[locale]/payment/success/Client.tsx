@@ -23,20 +23,13 @@ function SuccessContent() {
   const isManual = method === 'manual';
 
   useEffect(() => {
-    const txId      = searchParams.get('id');         // Paymob transaction id
-    const success   = searchParams.get('success');    // Paymob success flag
     const provider  = searchParams.get('provider');   // 'PayPal' | 'Paymob'
-    const token     = searchParams.get('token');      // PayPal redirect token
+    const token     = searchParams.get('token');      // PayPal redirect token (orderId)
 
     const refreshSession = async () => {
       try {
-        // --- Paymob: verify session via transaction ID ---
-        if (txId && success === 'true') {
-          await api.post('/api/checkout/verify-paymob-session', {
-            transactionId: txId,
-            success: true
-          }).catch(() => {});
-        }
+        // --- Paymob: txId is available for reference but activation is handled by webhook ---
+        // No client-side verify needed; the Paymob webhook activates the subscription server-side.
 
         // --- PayPal redirect flow: capture the order ---
         // When PayPal redirects back it includes ?token=ORDER_ID in the URL
