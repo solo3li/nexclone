@@ -61,6 +61,25 @@ namespace NexClone.Backend.API.Controllers.Client
                 })
                 .ToListAsync();
 
+            if (!gateways.Any())
+            {
+                var globalGateways = await _context.PaymentGatewayConfigs
+                    .Where(c => c.IsActive)
+                    .Select(c => new
+                    {
+                        GatewayConfigId = c.Id,
+                        ProviderName    = c.ProviderName,
+                        DisplayName     = c.ProviderName,
+                        Currency        = c.ProviderName == "PayPal" ? "USD" : "EGP",
+                        IsDefault       = true,
+                        SortOrder       = 0,
+                        ClientId        = c.ProviderName == "PayPal" ? c.ClientId : null
+                    })
+                    .ToListAsync();
+
+                return Ok(globalGateways);
+            }
+
             return Ok(gateways);
         }
 
@@ -96,7 +115,7 @@ namespace NexClone.Backend.API.Controllers.Client
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) return NotFound(new { error = "User not found." });
 
-            // Validate that this gateway is actually linked to this plan and currency
+            // Validate that this gateway is actually linked to this plan and currency, or active globally
             var gatewayLink = await _context.PlanPaymentGateways
                 .Include(ppg => ppg.GatewayConfig)
                 .FirstOrDefaultAsync(ppg =>
@@ -107,7 +126,12 @@ namespace NexClone.Backend.API.Controllers.Client
                     ppg.GatewayConfig.IsActive);
 
             if (gatewayLink == null)
-                return BadRequest(new { error = "The selected payment gateway is not available for this plan and currency." });
+            {
+                var globalGateway = await _context.PaymentGatewayConfigs
+                    .FirstOrDefaultAsync(g => g.Id == request.GatewayConfigId && g.IsActive);
+                if (globalGateway == null)
+                    return BadRequest(new { error = "The selected payment gateway is not available for this plan and currency." });
+            }
 
             // Dispatch to the payment service — routing is handled internally per currency
             var result = await _paymentService.InitiatePaymentAsync(
