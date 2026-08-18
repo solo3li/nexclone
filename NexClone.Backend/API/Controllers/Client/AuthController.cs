@@ -362,8 +362,8 @@ namespace NexClone.Backend.API.Controllers.Client
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None,
+                Secure = false,
+                SameSite = SameSiteMode.Lax,
                 Expires = DateTime.UtcNow.AddDays(15),
                 IsEssential = true
             };
@@ -534,8 +534,8 @@ namespace NexClone.Backend.API.Controllers.Client
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None,
+                Secure = false,
+                SameSite = SameSiteMode.Lax,
                 Expires = DateTime.UtcNow.AddDays(15),
                 IsEssential = true
             };
@@ -678,8 +678,8 @@ namespace NexClone.Backend.API.Controllers.Client
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None
+                Secure = false,
+                SameSite = SameSiteMode.Lax
             };
             Response.Cookies.Delete("jwt", cookieOptions);
             return Ok(new { Message = "Logged out" });

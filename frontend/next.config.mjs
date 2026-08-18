@@ -9,8 +9,8 @@ const nextConfig = {
     'localhost',
     '127.0.0.1',
     '*.trycloudflare.com',
-    'matter-intelligent-spelling-include.trycloudflare.com',
-    'remix-eventually-literally-evanescence.trycloudflare.com',
+    'optimize-brief-configuring-promo.trycloudflare.com',
+    'playstation-malpractice-physical-development.trycloudflare.com',
   ],
   typescript: {
     ignoreBuildErrors: true,

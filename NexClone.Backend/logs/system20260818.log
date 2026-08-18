@@ -447,3 +447,4 @@ System.Threading.Tasks.TaskCanceledException: A task was canceled.
 System.Threading.Tasks.TaskCanceledException: A task was canceled.
    at NexClone.Backend.Application.BackgroundJobs.SubscriptionStatusService.ExecuteAsync(CancellationToken stoppingToken) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Application\BackgroundJobs\SubscriptionStatusService.cs:line 39
    at Microsoft.Extensions.Hosting.Internal.Host.TryExecuteBackgroundServiceAsync(BackgroundService backgroundService)
+2026-08-18 23:39:50.070 +03:00 [INF] 2 servers were removed due to timeout

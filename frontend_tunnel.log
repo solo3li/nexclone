@@ -1,43 +1,43 @@
-{"level":"info","time":"2026-08-18T20:32:26Z","message":"Thank you for trying Cloudflare Tunnel. Doing so, without a Cloudflare account, is a quick way to experiment and try it out. However, be aware that these account-less Tunnels have no uptime guarantee, are subject to the Cloudflare Online Services Terms of Use (https://www.cloudflare.com/website-terms/), and Cloudflare reserves the right to investigate your use of Tunnels for violations of such terms. If you intend to use Tunnels in production you should use a pre-created named tunnel by following: https://developers.cloudflare.com/cloudflare-one/connections/connect-apps"}
-{"level":"info","time":"2026-08-18T20:32:26Z","message":"Requesting new quick Tunnel on trycloudflare.com..."}
-{"level":"info","time":"2026-08-18T20:32:34Z","message":"+--------------------------------------------------------------------------------------------+"}
-{"level":"info","time":"2026-08-18T20:32:34Z","message":"|  Your quick Tunnel has been created! Visit it at (it may take some time to be reachable):  |"}
-{"level":"info","time":"2026-08-18T20:32:34Z","message":"|  https://matter-intelligent-spelling-include.trycloudflare.com                             |"}
-{"level":"info","time":"2026-08-18T20:32:34Z","message":"+--------------------------------------------------------------------------------------------+"}
-{"level":"info","time":"2026-08-18T20:32:34Z","message":"Cannot determine default configuration path. No file [config.yml config.yaml] in [~/.cloudflared ~/.cloudflare-warp ~/cloudflare-warp]"}
-{"level":"info","time":"2026-08-18T20:32:34Z","message":"Version 2026.8.1 (Checksum 8f1d6f87b8756dbf37064b16e2c8251b69d816305e4f4373e1b80efb28d13b83)"}
-{"level":"info","time":"2026-08-18T20:32:34Z","message":"GOOS: windows, GOVersion: go1.26.4, GoArch: amd64"}
-{"level":"info","time":"2026-08-18T20:32:34Z","message":"Settings: map[ha-connections:1 logfile:C:\\Users\\solo\\Desktop\\nexcole\\nexclone\\frontend_tunnel.log protocol:quic url:http://127.0.0.1:3000]"}
-{"level":"info","time":"2026-08-18T20:32:34Z","message":"cloudflared will not automatically update on Windows systems."}
-{"level":"info","time":"2026-08-18T20:32:34Z","message":"Generated Connector ID: 728cbbe8-8a27-421a-9dce-48bef9db77e0"}
-{"level":"info","time":"2026-08-18T20:32:34Z","message":"Initial protocol quic"}
-{"level":"info","time":"2026-08-18T20:32:34Z","message":"ICMP proxy will use 192.168.1.4 as source for IPv4"}
-{"level":"info","time":"2026-08-18T20:32:35Z","message":"ICMP proxy will use fe80::5c71:71d:b3ac:9155 in zone Wi-Fi as source for IPv6"}
-{"level":"info","time":"2026-08-18T20:32:35Z","message":"cloudflared does not support loading the system root certificate pool on Windows. Please use --origin-ca-pool <PATH> to specify the path to the certificate pool"}
-{"level":"info","time":"2026-08-18T20:32:35Z","message":"ICMP proxy will use 192.168.1.4 as source for IPv4"}
-{"level":"info","event":0,"ip":"198.41.192.67","connIndex":0,"time":"2026-08-18T20:32:35Z","message":"Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256]"}
-{"level":"info","time":"2026-08-18T20:32:35Z","message":"ICMP proxy will use fe80::5c71:71d:b3ac:9155 in zone Wi-Fi as source for IPv6"}
-{"level":"info","time":"2026-08-18T20:32:35Z","message":"Starting metrics server on 127.0.0.1:20242/metrics"}
-{"level":"info","time":"2026-08-18T20:32:36Z","message":"+-------------------------------------------------------------------------------------+"}
-{"level":"info","time":"2026-08-18T20:32:36Z","message":"|                               CONNECTIVITY PRE-CHECKS                               |"}
-{"level":"info","time":"2026-08-18T20:32:36Z","message":"+-------------------------------------------------------------------------------------+"}
-{"level":"info","time":"2026-08-18T20:32:36Z","message":"|  COMPONENT         TARGET                     STATUS  DETAILS                       |"}
-{"level":"info","time":"2026-08-18T20:32:36Z","message":"|  DNS Resolution    region1.v2.argotunnel.com  PASS    DNS Resolved successfully     |"}
-{"level":"info","time":"2026-08-18T20:32:36Z","message":"|  DNS Resolution    region2.v2.argotunnel.com  PASS    DNS Resolved successfully     |"}
-{"level":"info","time":"2026-08-18T20:32:36Z","message":"|  UDP Connectivity  region1.v2.argotunnel.com  PASS    QUIC connection successful    |"}
-{"level":"info","time":"2026-08-18T20:32:36Z","message":"|  UDP Connectivity  region2.v2.argotunnel.com  PASS    QUIC connection successful    |"}
-{"level":"info","time":"2026-08-18T20:32:36Z","message":"|  TCP Connectivity  region1.v2.argotunnel.com  PASS    HTTP/2 connection successful  |"}
-{"level":"info","time":"2026-08-18T20:32:36Z","message":"|  TCP Connectivity  region2.v2.argotunnel.com  PASS    HTTP/2 connection successful  |"}
-{"level":"info","time":"2026-08-18T20:32:36Z","message":"|  Cloudflare API    api.cloudflare.com:443     PASS    API is reachable              |"}
-{"level":"info","time":"2026-08-18T20:32:36Z","message":"|                                                                                     |"}
-{"level":"info","time":"2026-08-18T20:32:36Z","message":"|  SUMMARY: Environment is healthy. cloudflared will use 'quic' as primary protocol.  |"}
-{"level":"info","time":"2026-08-18T20:32:36Z","message":"+-------------------------------------------------------------------------------------+"}
-{"level":"info","run_id":"c6dc7f8c-9a90-4173-aeb5-c625be6a9753","component":"DNS Resolution","target":"region1.v2.argotunnel.com","status":"pass","details":"DNS Resolved successfully","time":"2026-08-18T20:32:36Z","message":"precheck"}
-{"level":"info","run_id":"c6dc7f8c-9a90-4173-aeb5-c625be6a9753","component":"DNS Resolution","target":"region2.v2.argotunnel.com","status":"pass","details":"DNS Resolved successfully","time":"2026-08-18T20:32:36Z","message":"precheck"}
-{"level":"info","run_id":"c6dc7f8c-9a90-4173-aeb5-c625be6a9753","component":"UDP Connectivity","target":"region1.v2.argotunnel.com","status":"pass","details":"QUIC connection successful","time":"2026-08-18T20:32:36Z","message":"precheck"}
-{"level":"info","run_id":"c6dc7f8c-9a90-4173-aeb5-c625be6a9753","component":"UDP Connectivity","target":"region2.v2.argotunnel.com","status":"pass","details":"QUIC connection successful","time":"2026-08-18T20:32:36Z","message":"precheck"}
-{"level":"info","run_id":"c6dc7f8c-9a90-4173-aeb5-c625be6a9753","component":"TCP Connectivity","target":"region1.v2.argotunnel.com","status":"pass","details":"HTTP/2 connection successful","time":"2026-08-18T20:32:36Z","message":"precheck"}
-{"level":"info","run_id":"c6dc7f8c-9a90-4173-aeb5-c625be6a9753","component":"TCP Connectivity","target":"region2.v2.argotunnel.com","status":"pass","details":"HTTP/2 connection successful","time":"2026-08-18T20:32:36Z","message":"precheck"}
-{"level":"info","run_id":"c6dc7f8c-9a90-4173-aeb5-c625be6a9753","component":"Cloudflare API","target":"api.cloudflare.com:443","status":"pass","details":"API is reachable","time":"2026-08-18T20:32:36Z","message":"precheck"}
-{"level":"info","run_id":"c6dc7f8c-9a90-4173-aeb5-c625be6a9753","hard_fail":false,"suggested_protocol":"quic","time":"2026-08-18T20:32:36Z","message":"precheck complete"}
-{"level":"info","event":0,"connection":"56940cd3-8836-4d4d-9bcc-9616e3a1fd6a","connIndex":0,"location":"mrs05","ip":"198.41.192.67","protocol":"quic","time":"2026-08-18T20:32:36Z","message":"Registered tunnel connection"}
+{"level":"info","time":"2026-08-18T22:05:57Z","message":"Thank you for trying Cloudflare Tunnel. Doing so, without a Cloudflare account, is a quick way to experiment and try it out. However, be aware that these account-less Tunnels have no uptime guarantee, are subject to the Cloudflare Online Services Terms of Use (https://www.cloudflare.com/website-terms/), and Cloudflare reserves the right to investigate your use of Tunnels for violations of such terms. If you intend to use Tunnels in production you should use a pre-created named tunnel by following: https://developers.cloudflare.com/cloudflare-one/connections/connect-apps"}
+{"level":"info","time":"2026-08-18T22:05:57Z","message":"Requesting new quick Tunnel on trycloudflare.com..."}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"+--------------------------------------------------------------------------------------------+"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"|  Your quick Tunnel has been created! Visit it at (it may take some time to be reachable):  |"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"|  https://optimize-brief-configuring-promo.trycloudflare.com                                |"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"+--------------------------------------------------------------------------------------------+"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"Cannot determine default configuration path. No file [config.yml config.yaml] in [~/.cloudflared ~/.cloudflare-warp ~/cloudflare-warp]"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"Version 2026.8.1 (Checksum 8f1d6f87b8756dbf37064b16e2c8251b69d816305e4f4373e1b80efb28d13b83)"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"GOOS: windows, GOVersion: go1.26.4, GoArch: amd64"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"Settings: map[ha-connections:1 logfile:C:\\Users\\solo\\Desktop\\nexcole\\nexclone\\frontend_tunnel.log protocol:quic url:http://127.0.0.1:3000]"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"cloudflared will not automatically update on Windows systems."}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"Generated Connector ID: 29569f2c-cf5b-4641-9a00-6076b2cfabb1"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"Initial protocol quic"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"ICMP proxy will use 192.168.1.4 as source for IPv4"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"ICMP proxy will use fe80::5c71:71d:b3ac:9155 in zone Wi-Fi as source for IPv6"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"cloudflared does not support loading the system root certificate pool on Windows. Please use --origin-ca-pool <PATH> to specify the path to the certificate pool"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"ICMP proxy will use 192.168.1.4 as source for IPv4"}
+{"level":"info","event":0,"ip":"198.41.192.227","connIndex":0,"time":"2026-08-18T22:06:06Z","message":"Tunnel connection curve preferences: [X25519MLKEM768 CurveID(65074) CurveP256]"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"ICMP proxy will use fe80::5c71:71d:b3ac:9155 in zone Wi-Fi as source for IPv6"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"Starting metrics server on 127.0.0.1:20242/metrics"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"+-------------------------------------------------------------------------------------+"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"|                               CONNECTIVITY PRE-CHECKS                               |"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"+-------------------------------------------------------------------------------------+"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"|  COMPONENT         TARGET                     STATUS  DETAILS                       |"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"|  DNS Resolution    region1.v2.argotunnel.com  PASS    DNS Resolved successfully     |"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"|  DNS Resolution    region2.v2.argotunnel.com  PASS    DNS Resolved successfully     |"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"|  UDP Connectivity  region1.v2.argotunnel.com  PASS    QUIC connection successful    |"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"|  UDP Connectivity  region2.v2.argotunnel.com  PASS    QUIC connection successful    |"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"|  TCP Connectivity  region1.v2.argotunnel.com  PASS    HTTP/2 connection successful  |"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"|  TCP Connectivity  region2.v2.argotunnel.com  PASS    HTTP/2 connection successful  |"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"|  Cloudflare API    api.cloudflare.com:443     PASS    API is reachable              |"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"|                                                                                     |"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"|  SUMMARY: Environment is healthy. cloudflared will use 'quic' as primary protocol.  |"}
+{"level":"info","time":"2026-08-18T22:06:06Z","message":"+-------------------------------------------------------------------------------------+"}
+{"level":"info","run_id":"af93fb97-f490-4eeb-8359-3dfac1852071","component":"DNS Resolution","target":"region1.v2.argotunnel.com","status":"pass","details":"DNS Resolved successfully","time":"2026-08-18T22:06:06Z","message":"precheck"}
+{"level":"info","run_id":"af93fb97-f490-4eeb-8359-3dfac1852071","component":"DNS Resolution","target":"region2.v2.argotunnel.com","status":"pass","details":"DNS Resolved successfully","time":"2026-08-18T22:06:06Z","message":"precheck"}
+{"level":"info","run_id":"af93fb97-f490-4eeb-8359-3dfac1852071","component":"UDP Connectivity","target":"region1.v2.argotunnel.com","status":"pass","details":"QUIC connection successful","time":"2026-08-18T22:06:06Z","message":"precheck"}
+{"level":"info","run_id":"af93fb97-f490-4eeb-8359-3dfac1852071","component":"UDP Connectivity","target":"region2.v2.argotunnel.com","status":"pass","details":"QUIC connection successful","time":"2026-08-18T22:06:06Z","message":"precheck"}
+{"level":"info","run_id":"af93fb97-f490-4eeb-8359-3dfac1852071","component":"TCP Connectivity","target":"region1.v2.argotunnel.com","status":"pass","details":"HTTP/2 connection successful","time":"2026-08-18T22:06:06Z","message":"precheck"}
+{"level":"info","run_id":"af93fb97-f490-4eeb-8359-3dfac1852071","component":"TCP Connectivity","target":"region2.v2.argotunnel.com","status":"pass","details":"HTTP/2 connection successful","time":"2026-08-18T22:06:06Z","message":"precheck"}
+{"level":"info","run_id":"af93fb97-f490-4eeb-8359-3dfac1852071","component":"Cloudflare API","target":"api.cloudflare.com:443","status":"pass","details":"API is reachable","time":"2026-08-18T22:06:06Z","message":"precheck"}
+{"level":"info","run_id":"af93fb97-f490-4eeb-8359-3dfac1852071","hard_fail":false,"suggested_protocol":"quic","time":"2026-08-18T22:06:06Z","message":"precheck complete"}
+{"level":"info","event":0,"connection":"b5fa6228-be41-410f-98a3-6e93700c08ec","connIndex":0,"location":"mrs04","ip":"198.41.192.227","protocol":"quic","time":"2026-08-18T22:06:07Z","message":"Registered tunnel connection"}
