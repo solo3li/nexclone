@@ -1,11 +1,14 @@
 "use client";
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, CheckCircle, Clock } from 'lucide-react';
 import { useLocale } from 'next-intl';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import api from '../../../../src/utils/api';
+import { useAppStore } from '../../../../src/store/useAppStore';
+import { useAuthStore } from '../../../../src/store/useAuthStore';
 import Navbar from "../../../../src/components/Navbar";
 import Footer from "../../../../src/components/Footer";
 import MobileBottomNav from "../../../../src/components/MobileBottomNav";
@@ -18,6 +21,31 @@ function SuccessContent() {
   const method = searchParams.get('method');
   
   const isManual = method === 'manual';
+
+  useEffect(() => {
+    const txId = searchParams.get('id');
+    const success = searchParams.get('success');
+
+    const refreshSession = async () => {
+      try {
+        if (txId && success === 'true') {
+          await api.post('/api/checkout/verify-paymob-session', {
+            transactionId: txId,
+            success: true
+          }).catch(() => {});
+        }
+        const res = await api.get('/api/auth/me');
+        if (res.data) {
+          useAppStore.getState().setUser(res.data);
+          useAuthStore.getState().setUser(res.data);
+        }
+      } catch (err) {
+        console.warn('[PaymentSuccess] session refresh error:', err);
+      }
+    };
+
+    refreshSession();
+  }, [searchParams]);
 
   // Theme based on payment method
   const theme = isManual ? {

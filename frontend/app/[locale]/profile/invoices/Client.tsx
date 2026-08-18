@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useAuthStore } from '../../../../src/store/useAuthStore';
+import { useAppStore } from '../../../../src/store/useAppStore';
 import { useHistoryStore } from '../../../../src/store/useHistoryStore';
 import { Download, FileText, ArrowLeft, ArrowRight, Crown, Activity, Lock } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
@@ -11,7 +11,7 @@ import { motion } from 'framer-motion';
 export default function MyInvoicesPage() {
   const { locale } = useParams();
   const router = useRouter();
-  const { user, isAuthenticated, isInitializing } = useAuthStore();
+  const { user, isAuthenticated, isInitializing } = useAppStore();
   const { fetchHistory, fetchInvoices, invoices, isLoading } = useHistoryStore();
   const [historyCount, setHistoryCount] = useState(0);
 

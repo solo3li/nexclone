@@ -1,5 +1,6 @@
 using System;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
@@ -11,12 +12,14 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
     {
         private readonly ApplicationDbContext _context;
         private readonly HttpClient _httpClient;
+        private readonly IConfiguration _configuration;
         private readonly PayPalPaymentService _payPal;
 
-        public PaymobPaymentService(ApplicationDbContext context, HttpClient httpClient)
+        public PaymobPaymentService(ApplicationDbContext context, HttpClient httpClient, IConfiguration configuration)
         {
             _context = context;
             _httpClient = httpClient;
+            _configuration = configuration;
             _payPal = new PayPalPaymentService(context, httpClient);
         }
 
@@ -97,6 +100,9 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
                     paymentMethodsList.Add(walletIntegrationId);
             }
 
+            string frontendUrl = _configuration["AppSettings:DefaultFrontendUrl"] ?? "https://yes-ralph-foster-coalition.trycloudflare.com";
+            string redirectionUrl = $"{frontendUrl.TrimEnd('/')}/ar/payment/success?method=paymob";
+
             var payload = new
             {
                 amount = amountCents,
@@ -116,7 +122,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
                 {
                     apartment = "NA",
                     first_name = (userId.Length > 50) ? userId.Substring(0, 50) : userId,
-                    last_name = (plan.Name.Length > 50) ? plan.Name.Substring(0, 50) : plan.Name,
+                    last_name = plan.Id.ToString(),
                     street = "NA",
                     building = "NA",
                     phone_number = string.IsNullOrEmpty(phoneNumber)
@@ -128,6 +134,14 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
                     state = "NA",
                     city = "NA"
                 },
+                extras = new
+                {
+                    user_id = userId,
+                    plan_id = plan.Id.ToString(),
+                    plan_name = plan.Name
+                },
+                special_reference = $"SUB_{userId}_{plan.Id}_{DateTime.UtcNow.Ticks}",
+                redirection_url = redirectionUrl,
                 expiration = 3600
             };
 

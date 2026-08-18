@@ -81,18 +81,25 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                     }
 
 
-                    // 3. Extract User ID and Plan Name
+                    // 3. Extract User ID and Plan Identifier
                     string userId = "";
-                    string planName = "";
+                    string planIdentifier = "";
 
                     if (obj.TryGetProperty("payment_key_claims", out var claims) && 
                         claims.TryGetProperty("billing_data", out var billing))
                     {
                         userId = billing.TryGetProperty("first_name", out var fn) ? fn.GetString() ?? "" : "";
-                        planName = billing.TryGetProperty("last_name", out var ln) ? ln.GetString() ?? "" : "";
+                        planIdentifier = billing.TryGetProperty("last_name", out var ln) ? ln.GetString() ?? "" : "";
                     }
 
-                    if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(planName))
+                    // Fallback to order extra if available
+                    if (string.IsNullOrEmpty(userId) && obj.TryGetProperty("order", out var orderObj) && orderObj.TryGetProperty("data", out var orderData))
+                    {
+                        if (orderData.TryGetProperty("user_id", out var uid)) userId = uid.GetString() ?? "";
+                        if (orderData.TryGetProperty("plan_id", out var pid)) planIdentifier = pid.GetString() ?? "";
+                    }
+
+                    if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(planIdentifier))
                     {
                         return BadRequest("Missing user or plan data.");
                     }
@@ -104,11 +111,24 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                     }
 
                     var user = await _context.Users.FindAsync(userGuid);
-                    var plan = await _context.Plans.FirstOrDefaultAsync(p => p.Name == planName);
-
-                    if (user == null || plan == null)
+                    if (user == null)
                     {
-                        return NotFound("User or Plan not found.");
+                        return NotFound("User not found.");
+                    }
+
+                    Plan plan = null;
+                    if (int.TryParse(planIdentifier, out int parsedPlanId))
+                    {
+                        plan = await _context.Plans.FindAsync(parsedPlanId);
+                    }
+                    if (plan == null)
+                    {
+                        plan = await _context.Plans.FirstOrDefaultAsync(p => p.Name == planIdentifier || p.NameAr == planIdentifier);
+                    }
+
+                    if (plan == null)
+                    {
+                        return NotFound("Plan not found.");
                     }
 
                     // 5. Activate or Extend Subscription
