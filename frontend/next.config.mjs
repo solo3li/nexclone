@@ -9,8 +9,8 @@ const nextConfig = {
     'localhost',
     '127.0.0.1',
     '*.trycloudflare.com',
-    'yes-ralph-foster-coalition.trycloudflare.com',
-    'inkjet-joining-falls-endorsement.trycloudflare.com',
+    'matter-intelligent-spelling-include.trycloudflare.com',
+    'remix-eventually-literally-evanescence.trycloudflare.com',
   ],
   typescript: {
     ignoreBuildErrors: true,
