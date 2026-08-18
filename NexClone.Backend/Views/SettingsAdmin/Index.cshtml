@@ -1,314 +1,285 @@
 @model IEnumerable<NexClone.Backend.Core.Entities.AppSetting>
 @inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 
-<div class="bx--grid" style="padding-left: 0; max-width: 800px; margin-left: 0;">
+@{
+    ViewData["Title"] = "Global Settings";
+
+    string GetVal(string key, string defaultVal = "") => 
+        Model.FirstOrDefault(s => s.Key == key)?.Value ?? defaultVal;
+}
+
+<div class="bx--grid" style="padding-left: 0; max-width: 900px; margin-left: 0;">
     <div class="bx--row" style="margin-bottom: 2rem;">
-        <h2 style="margin: 0; font-weight: 400; font-size: 1.5rem;">@ViewData["Title"]</h2>
-        <p style="color: #525252; margin-top: 0.5rem;">@Localizer["Manage site configurations, maintenance modes, and storage independently."]</p>
+        <div class="bx--col">
+            <h2 style="margin: 0; font-weight: 400; font-size: 1.75rem;">@Localizer["Global System Settings"]</h2>
+            <p style="color: #525252; margin-top: 0.5rem; font-size: 0.95rem;">
+                @Localizer["Manage system-wide configuration, security policies, maintenance mode, and background processing."]
+            </p>
+        </div>
     </div>
 
-    <!-- SITE SETTINGS FORM -->
-    <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #0f62fe;">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="bx--inline-notification bx--inline-notification--success" role="alert" style="width: 100%; margin-bottom: 1.5rem;">
+            <div class="bx--inline-notification__details">
+                <div class="bx--inline-notification__text-wrapper">
+                    <p class="bx--inline-notification__title">@Localizer["Success"]</p>
+                    <p class="bx--inline-notification__subtitle">@TempData["SuccessMessage"]</p>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- 1. GENERAL & SITE MAINTENANCE -->
+    <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #0f62fe; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
         @Html.AntiForgeryToken()
 
-        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">@Localizer["Site Settings"]</h3>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 1.25rem;">🌐</span>
+                <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">@Localizer["Site & Maintenance Settings"]</h3>
+            </div>
+            <span class="bx--tag bx--tag--blue">General</span>
+        </div>
         
+        <!-- Global Maintenance Mode -->
+        @{
+            bool isMaintenanceMode = GetVal("Site.MaintenanceMode") == "true";
+        }
         <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom: 1.5rem;">
-            @{
-                var maintenanceModeStr = Model.FirstOrDefault(s => s.Key == "Site.MaintenanceMode")?.Value ?? "false";
-                bool isMaintenanceMode = bool.TryParse(maintenanceModeStr, out var m) && m;
-            }
             <input type="hidden" name="settings[Site.MaintenanceMode]" value="false" id="hidden_Site_MaintenanceMode" />
             <input id="Site_MaintenanceMode" class="bx--checkbox" type="checkbox" value="true" name="settings[Site.MaintenanceMode]" @(isMaintenanceMode ? "checked" : "") onchange="document.getElementById('hidden_Site_MaintenanceMode').disabled = this.checked;">
             <label for="Site_MaintenanceMode" class="bx--checkbox-label" title="Enable Global Maintenance Mode">
-                <span class="bx--checkbox-label-text">@Localizer["Enable Global Maintenance Mode (Will show maintenance screen to all users)"]</span>
+                <span class="bx--checkbox-label-text" style="font-weight: 500;">@Localizer["Enable Global Maintenance Mode (Shows maintenance screen to all users)"]</span>
             </label>
             <script>document.getElementById('hidden_Site_MaintenanceMode').disabled = document.getElementById('Site_MaintenanceMode').checked;</script>
         </div>
 
-        <div class="bx--form-item" style="margin-bottom: 1rem;">
-            <label for="Site_MaintenanceEndDate" class="bx--label">@Localizer["Maintenance End Date (Optional)"]</label>
-            <input id="Site_MaintenanceEndDate" type="datetime-local" class="bx--text-input" name="settings[Site.MaintenanceEndDate]" value="@Model.FirstOrDefault(s => s.Key == "Site.MaintenanceEndDate")?.Value" placeholder="YYYY-MM-DDTHH:MM">
+        <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+            <label for="Site_MaintenanceEndDate" class="bx--label">@Localizer["Maintenance End Date (Optional countdown)"]</label>
+            <input id="Site_MaintenanceEndDate" type="datetime-local" class="bx--text-input" name="settings[Site.MaintenanceEndDate]" value="@GetVal("Site.MaintenanceEndDate")">
             <div class="bx--form__helper-text">@Localizer["Leave blank for indefinite maintenance."]</div>
         </div>
 
-        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
+        <!-- CORS Origins -->
+        <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+            <label for="Origin_AllowedOrigins" class="bx--label">@Localizer["Allowed Origins (CORS)"]</label>
+            <input id="Origin_AllowedOrigins" type="text" class="bx--text-input" name="settings[Origin.AllowedOrigins]" value="@GetVal("Origin.AllowedOrigins")" placeholder="http://localhost:3000,https://nexmediaai.com">
+            <div class="bx--form__helper-text">@Localizer["Comma-separated list of allowed frontend URLs (e.g. http://localhost:3000,https://nexmediaai.com)"]</div>
+        </div>
+
+        <!-- Social Media Links -->
+        <h4 style="font-size: 0.95rem; font-weight: 600; color: #525252; margin-top: 1.5rem; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px;">@Localizer["Social Media Links (Footer)"]</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div class="bx--form-item">
+                <label for="Social_Facebook" class="bx--label">Facebook</label>
+                <input id="Social_Facebook" type="url" class="bx--text-input" name="settings[Social.Facebook]" value="@GetVal("Social.Facebook")" placeholder="https://facebook.com/yourpage">
+            </div>
+            <div class="bx--form-item">
+                <label for="Social_Twitter" class="bx--label">Twitter / X</label>
+                <input id="Social_Twitter" type="url" class="bx--text-input" name="settings[Social.Twitter]" value="@GetVal("Social.Twitter")" placeholder="https://x.com/yourhandle">
+            </div>
+            <div class="bx--form-item">
+                <label for="Social_Instagram" class="bx--label">Instagram</label>
+                <input id="Social_Instagram" type="url" class="bx--text-input" name="settings[Social.Instagram]" value="@GetVal("Social.Instagram")" placeholder="https://instagram.com/yourprofile">
+            </div>
+            <div class="bx--form-item">
+                <label for="Social_LinkedIn" class="bx--label">LinkedIn</label>
+                <input id="Social_LinkedIn" type="url" class="bx--text-input" name="settings[Social.LinkedIn]" value="@GetVal("Social.LinkedIn")" placeholder="https://linkedin.com/company/yourcompany">
+            </div>
+            <div class="bx--form-item" style="grid-column: span 2;">
+                <label for="Social_YouTube" class="bx--label">YouTube</label>
+                <input id="Social_YouTube" type="url" class="bx--text-input" name="settings[Social.YouTube]" value="@GetVal("Social.YouTube")" placeholder="https://youtube.com/@@yourchannel">
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
             <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Site Settings"]</button>
         </div>
     </form>
 
-    <!-- TOOLS MAINTENANCE FORM -->
-    <form action="@Url.Action("SaveToolsMaintenance", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #da1e28;">
+
+    <!-- 2. SECURITY & AUTHENTICATION -->
+    <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #da1e28; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
         @Html.AntiForgeryToken()
 
-        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">@Localizer["Tools Maintenance"]</h3>
-        <p style="color: #525252; margin-bottom: 1rem; font-size: 0.875rem;">@Localizer["Enable maintenance mode for specific tools. This will show a maintenance screen to users attempting to access them."]</p>
-
-        @if (ViewBag.ToolConfigurations != null)
-        {
-            var tools = (IEnumerable<NexClone.Backend.Core.Entities.ToolConfiguration>)ViewBag.ToolConfigurations;
-            foreach (var tool in tools)
-            {
-                <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #f4f4f4;">
-                    <div style="display: flex; align-items: center; gap: 2rem; margin-bottom: 1rem;">
-                        <div style="min-width: 200px; font-weight: 500;">@tool.ToolName</div>
-                        
-                        <div class="bx--form-item bx--checkbox-wrapper" style="margin: 0;">
-                            <input id="toolMaintenance_@(tool.Id)" class="bx--checkbox" type="checkbox" name="toolMaintenance_@(tool.Id)" value="true" @(tool.IsMaintenanceMode ? "checked" : "")>
-                            <label for="toolMaintenance_@(tool.Id)" class="bx--checkbox-label" title="Maintenance Mode">
-                                <span class="bx--checkbox-label-text" style="color: #da1e28;">Maintenance</span>
-                            </label>
-                        </div>
-
-                        <div class="bx--form-item bx--checkbox-wrapper" style="margin: 0;">
-                            <input id="toolComingSoon_@(tool.Id)" class="bx--checkbox" type="checkbox" name="toolComingSoon_@(tool.Id)" value="true" @(tool.IsComingSoon ? "checked" : "")>
-                            <label for="toolComingSoon_@(tool.Id)" class="bx--checkbox-label" title="Coming Soon Mode">
-                                <span class="bx--checkbox-label-text" style="color: #0f62fe;">Coming Soon</span>
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div class="bx--form-item">
-                        <label for="toolSettings_@(tool.Id)" class="bx--label">@Localizer["Additional Settings (JSON - Pricing, Configs)"]</label>
-                        <textarea id="toolSettings_@(tool.Id)" class="bx--text-input" name="toolSettings_@(tool.Id)" rows="3" placeholder="{ ... }" style="font-family: monospace; resize: vertical;">@tool.AdditionalSettings</textarea>
-                    </div>
-                </div>
-            }
-        }
-
-        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
-            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Tools Maintenance"]</button>
-        </div>
-    </form>
-
-    <!-- PAYMENT METHODS MAINTENANCE FORM -->
-    <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #f1c21b;">
-        @Html.AntiForgeryToken()
-
-        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">@Localizer["Payment Methods Maintenance"]</h3>
-        <p style="color: #525252; margin-bottom: 1rem; font-size: 0.875rem;">@Localizer["Disable specific payment methods during maintenance. Users will see \"Under Maintenance\" in the checkout page."]</p>
-
-        @{
-            var paymentMethods = new[] { 
-                new { Id = "Paymob", Name = "Paymob" },
-                new { Id = "PayPal", Name = "PayPal" },
-                new { Id = "Manual", Name = "Manual Transfer" }
-            };
-        }
-
-        @foreach (var pm in paymentMethods)
-        {
-            bool isSuspended = (Model.FirstOrDefault(s => s.Key == $"Payment.{pm.Id}.Suspended")?.Value == "true");
-            bool isMaintenance = (Model.FirstOrDefault(s => s.Key == $"Payment.{pm.Id}.Maintenance")?.Value == "true");
-            bool isComingSoon = (Model.FirstOrDefault(s => s.Key == $"Payment.{pm.Id}.ComingSoon")?.Value == "true");
-
-            <div style="display: flex; align-items: center; gap: 2rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #f4f4f4;">
-                <div style="min-width: 150px; font-weight: 500;">@Localizer[pm.Name]</div>
-                
-                <div class="bx--form-item bx--checkbox-wrapper" style="margin: 0;">
-                    <input type="hidden" name="settings[Payment.@(pm.Id).Suspended]" value="false" id="hidden_Payment_@(pm.Id)_Suspended" />
-                    <input id="Payment_@(pm.Id)_Suspended" class="bx--checkbox" type="checkbox" name="settings[Payment.@(pm.Id).Suspended]" value="true" @(isSuspended ? "checked" : "") onchange="document.getElementById('hidden_Payment_@(pm.Id)_Suspended').disabled = this.checked;">
-                    <label for="Payment_@(pm.Id)_Suspended" class="bx--checkbox-label" title="Suspended">
-                        <span class="bx--checkbox-label-text" style="color: #8a3ffc;">Suspended</span>
-                    </label>
-                    <script>document.getElementById('hidden_Payment_@(pm.Id)_Suspended').disabled = document.getElementById('Payment_@(pm.Id)_Suspended').checked;</script>
-                </div>
-
-                <div class="bx--form-item bx--checkbox-wrapper" style="margin: 0;">
-                    <input type="hidden" name="settings[Payment.@(pm.Id).Maintenance]" value="false" id="hidden_Payment_@(pm.Id)_Maintenance" />
-                    <input id="Payment_@(pm.Id)_Maintenance" class="bx--checkbox" type="checkbox" name="settings[Payment.@(pm.Id).Maintenance]" value="true" @(isMaintenance ? "checked" : "") onchange="document.getElementById('hidden_Payment_@(pm.Id)_Maintenance').disabled = this.checked;">
-                    <label for="Payment_@(pm.Id)_Maintenance" class="bx--checkbox-label" title="Maintenance Mode">
-                        <span class="bx--checkbox-label-text" style="color: #da1e28;">Maintenance</span>
-                    </label>
-                    <script>document.getElementById('hidden_Payment_@(pm.Id)_Maintenance').disabled = document.getElementById('Payment_@(pm.Id)_Maintenance').checked;</script>
-                </div>
-
-                <div class="bx--form-item bx--checkbox-wrapper" style="margin: 0;">
-                    <input type="hidden" name="settings[Payment.@(pm.Id).ComingSoon]" value="false" id="hidden_Payment_@(pm.Id)_ComingSoon" />
-                    <input id="Payment_@(pm.Id)_ComingSoon" class="bx--checkbox" type="checkbox" name="settings[Payment.@(pm.Id).ComingSoon]" value="true" @(isComingSoon ? "checked" : "") onchange="document.getElementById('hidden_Payment_@(pm.Id)_ComingSoon').disabled = this.checked;">
-                    <label for="Payment_@(pm.Id)_ComingSoon" class="bx--checkbox-label" title="Coming Soon Mode">
-                        <span class="bx--checkbox-label-text" style="color: #0f62fe;">Coming Soon</span>
-                    </label>
-                    <script>document.getElementById('hidden_Payment_@(pm.Id)_ComingSoon').disabled = document.getElementById('Payment_@(pm.Id)_ComingSoon').checked;</script>
-                </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 1.25rem;">🔒</span>
+                <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">@Localizer["Security, Lockout & Google OAuth"]</h3>
             </div>
-        }
-
-        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
-            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Payment Settings"]</button>
-        </div>
-    </form>
-
-    <!-- CORS SETTINGS FORM -->
-    <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #24a148;">
-        @Html.AntiForgeryToken()
-
-        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">@Localizer["Origin (CORS) Settings"]</h3>
-        
-        <div class="bx--form-item" style="margin-bottom: 1rem;">
-            <label for="Origin_AllowedOrigins" class="bx--label">@Localizer["Allowed Origins"]</label>
-            <input id="Origin_AllowedOrigins" type="text" class="bx--text-input" name="settings[Origin.AllowedOrigins]" value="@Model.FirstOrDefault(s => s.Key == "Origin.AllowedOrigins")?.Value" placeholder="http://localhost:3000,https://nexclone.com">
-            <div class="bx--form__helper-text">@Localizer["Comma-separated list of allowed origins. Use * to allow all (not recommended)."]</div>
+            <span class="bx--tag bx--tag--red">Security</span>
         </div>
 
-        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
-            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Origin Settings"]</button>
-        </div>
-    </form>
+        <p style="color: #525252; margin-bottom: 1.5rem; font-size: 0.875rem;">
+            @Localizer["Configure brute-force protection, account lockout thresholds, and third-party authentication."]
+        </p>
 
-
-    <!-- RABBITMQ QUEUE SETTINGS FORM -->
-    <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #8a3ffc;">
-        @Html.AntiForgeryToken()
-
-        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">@Localizer["Background Queues (RabbitMQ) Settings"]</h3>
-        <p style="color: #525252; margin-bottom: 1rem; font-size: 0.875rem;">@Localizer["Control whether AI operations are sent to RabbitMQ background queues."]</p>
-
-        @{
-            var rabbitMqEnabledStr = Model.FirstOrDefault(s => s.Key == "Site.RabbitMqEnabled")?.Value ?? "true";
-            bool isRabbitMqEnabled = bool.TryParse(rabbitMqEnabledStr, out var rmq) ? rmq : true;
-        }
-
-        <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom: 1rem;">
-            <input type="hidden" name="settings[Site.RabbitMqEnabled]" value="false" id="hidden_Site_RabbitMqEnabled" />
-            <input id="Site_RabbitMqEnabled" class="bx--checkbox" type="checkbox" name="settings[Site.RabbitMqEnabled]" value="true" @(isRabbitMqEnabled ? "checked" : "") onchange="document.getElementById('hidden_Site_RabbitMqEnabled').disabled = this.checked;">
-            <label for="Site_RabbitMqEnabled" class="bx--checkbox-label">
-                <span class="bx--checkbox-label-text">@Localizer["Enable RabbitMQ Queues (If disabled, requests will be rejected with an error instead of queuing)"]</span>
-            </label>
-            <script>document.getElementById('hidden_Site_RabbitMqEnabled').disabled = document.getElementById('Site_RabbitMqEnabled').checked;</script>
-        </div>
-
-        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
-            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Queue Settings"]</button>
-        </div>
-    </form>
-
-    <!-- CONCURRENCY LIMITS SETTINGS FORM -->
-    <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #ff832b;">
-        @Html.AntiForgeryToken()
-
-        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">@Localizer["Concurrent Requests Limits (Queues)"]</h3>
-        <p style="color: #525252; margin-bottom: 1rem; font-size: 0.875rem;">@Localizer["Configure how many requests can be processed at the same time for each tool. Requires queue to be enabled."]</p>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1rem;">
+        <!-- Lockout Thresholds -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
             <div class="bx--form-item">
-                <label for="Concurrency_tts" class="bx--label">@Localizer["Text-to-Voice (TTS)"]</label>
-                <input id="Concurrency_tts" type="number" class="bx--text-input" name="settings[Concurrency_tts]" value="@(Model.FirstOrDefault(s => s.Key == "Concurrency_tts")?.Value ?? "10")" placeholder="10" min="1">
+                <label for="Security_MaxLoginAttempts" class="bx--label">@Localizer["Max Failed Login Attempts"]</label>
+                <input id="Security_MaxLoginAttempts" type="number" min="1" max="100" class="bx--text-input" name="settings[Security.MaxLoginAttempts]" value="@GetVal("Security.MaxLoginAttempts", "20")">
+                <div class="bx--form__helper-text">@Localizer["Number of incorrect attempts before account is locked (e.g. 20)."]</div>
             </div>
 
             <div class="bx--form-item">
-                <label for="Concurrency_vtt" class="bx--label">@Localizer["Voice-to-Text (STT)"]</label>
-                <input id="Concurrency_vtt" type="number" class="bx--text-input" name="settings[Concurrency_vtt]" value="@(Model.FirstOrDefault(s => s.Key == "Concurrency_vtt")?.Value ?? "10")" placeholder="10" min="1">
-            </div>
-
-            <div class="bx--form-item">
-                <label for="Concurrency_avatar2video" class="bx--label">@Localizer["Avatar Image-to-Video"]</label>
-                <input id="Concurrency_avatar2video" type="number" class="bx--text-input" name="settings[Concurrency_avatar2video]" value="@(Model.FirstOrDefault(s => s.Key == "Concurrency_avatar2video")?.Value ?? "10")" placeholder="10" min="1">
-            </div>
-
-            <div class="bx--form-item">
-                <label for="Concurrency_lipsync" class="bx--label">@Localizer["Advanced Lip-Sync"]</label>
-                <input id="Concurrency_lipsync" type="number" class="bx--text-input" name="settings[Concurrency_lipsync]" value="@(Model.FirstOrDefault(s => s.Key == "Concurrency_lipsync")?.Value ?? "10")" placeholder="10" min="1">
-            </div>
-
-            <div class="bx--form-item" style="margin-bottom: 1rem; flex: 1; min-width: 250px;">
-                <label for="Concurrency_motion_control" class="bx--label">@Localizer["Motion Transfer"]</label>
-                <input id="Concurrency_motion_control" type="number" class="bx--text-input" name="settings[Concurrency_motion_control]" value="@(Model.FirstOrDefault(s => s.Key == "Concurrency_motion_control")?.Value ?? "10")" placeholder="10" min="1">
-            </div>
-
-            <div class="bx--form-item">
-                <label for="Concurrency_email" class="bx--label">@Localizer["System Emails"]</label>
-                <input id="Concurrency_email" type="number" class="bx--text-input" name="settings[Concurrency_email]" value="@(Model.FirstOrDefault(s => s.Key == "Concurrency_email")?.Value ?? "10")" placeholder="10" min="1">
+                <label for="Security_LockoutMinutes" class="bx--label">@Localizer["Lockout Duration (Minutes)"]</label>
+                <input id="Security_LockoutMinutes" type="number" min="1" max="1440" class="bx--text-input" name="settings[Security.LockoutMinutes]" value="@GetVal("Security.LockoutMinutes", "15")">
+                <div class="bx--form__helper-text">@Localizer["Time duration in minutes the user must wait before trying again (e.g. 15)."]</div>
             </div>
         </div>
 
-        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
-            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Concurrency Limits"]</button>
-        </div>
-    </form>
-
-    <!-- GOOGLE OAUTH SETTINGS FORM -->
-    <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #ea4335;">
-        @Html.AntiForgeryToken()
-
-        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">@Localizer["Google OAuth Settings"]</h3>
-        <p style="color: #525252; margin-bottom: 1rem; font-size: 0.875rem;">@Localizer["Configure Google Login for your users."]</p>
-        
+        <!-- Google OAuth -->
+        <h4 style="font-size: 0.95rem; font-weight: 600; color: #525252; margin-top: 1.5rem; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px;">@Localizer["Google OAuth Authentication"]</h4>
         <div class="bx--form-item" style="margin-bottom: 1rem;">
             <label for="OAuth_GoogleClientId" class="bx--label">@Localizer["Google Client ID"]</label>
-            <input id="OAuth_GoogleClientId" type="text" class="bx--text-input" name="settings[OAuth.GoogleClientId]" value="@Model.FirstOrDefault(s => s.Key == "OAuth.GoogleClientId")?.Value" placeholder="xxxx-xxxx.apps.googleusercontent.com">
-            <div class="bx--form__helper-text">Found in Google Cloud Console > APIs & Services > Credentials</div>
+            <input id="OAuth_GoogleClientId" type="text" class="bx--text-input" name="settings[OAuth.GoogleClientId]" value="@GetVal("OAuth.GoogleClientId")" placeholder="xxxx-xxxx.apps.googleusercontent.com">
+            <div class="bx--form__helper-text">Found in Google Cloud Console &gt; APIs &amp; Services &gt; Credentials</div>
         </div>
 
         <div class="bx--form-item" style="margin-bottom: 1rem;">
             <label for="OAuth_GoogleClientSecret" class="bx--label">@Localizer["Google Client Secret"]</label>
-            <input id="OAuth_GoogleClientSecret" type="text" class="bx--text-input" name="settings[OAuth.GoogleClientSecret]" value="@Model.FirstOrDefault(s => s.Key == "OAuth.GoogleClientSecret")?.Value" placeholder="GOCSPX-xxxxxxxxxxxxxxxxxxxxxxxx">
-            <div class="bx--form__helper-text">Keep this secret. Found in Google Cloud Console next to your Client ID.</div>
+            <input id="OAuth_GoogleClientSecret" type="text" class="bx--text-input" name="settings[OAuth.GoogleClientSecret]" value="@GetVal("OAuth.GoogleClientSecret")" placeholder="GOCSPX-xxxxxxxxxxxxxxxxxxxxxxxx">
+            <div class="bx--form__helper-text">Keep this confidential. Found in Google Cloud Console next to your Client ID.</div>
         </div>
 
-        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
-            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Google OAuth Settings"]</button>
+        <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Security Settings"]</button>
         </div>
     </form>
 
-    <!-- FREE PLAN SETTINGS FORM -->
-    <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #0043ce;">
+
+    <!-- 3. COMPANY & INVOICING INFORMATION -->
+    <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #1192e8; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
         @Html.AntiForgeryToken()
 
-        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">@Localizer["Free Plan Limits (Device Fingerprint)"]</h3>
-        <p style="color: #525252; margin-bottom: 1rem; font-size: 0.875rem;">@Localizer["Restrict the free plan to a specific number of claims per device to prevent abuse."]</p>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 1.25rem;">📄</span>
+                <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">@Localizer["Company & Invoicing Details"]</h3>
+            </div>
+            <span class="bx--tag bx--tag--teal">Invoices</span>
+        </div>
+
+        <p style="color: #525252; margin-bottom: 1.5rem; font-size: 0.875rem;">
+            @Localizer["These details will appear on official PDF invoices, receipts, and customer billing documents."]
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1rem;">
+            <div class="bx--form-item">
+                <label for="Company_Name" class="bx--label">@Localizer["Company Official Name"]</label>
+                <input id="Company_Name" type="text" class="bx--text-input" name="settings[Company.Name]" value="@GetVal("Company.Name", "NexMedia AI")" placeholder="NexMedia AI">
+            </div>
+
+            <div class="bx--form-item">
+                <label for="Company_SupportEmail" class="bx--label">@Localizer["Support & Billing Email"]</label>
+                <input id="Company_SupportEmail" type="email" class="bx--text-input" name="settings[Company.SupportEmail]" value="@GetVal("Company.SupportEmail", "support@nexmediaai.com")" placeholder="support@nexmediaai.com">
+            </div>
+
+            <div class="bx--form-item" style="grid-column: span 2;">
+                <label for="Company_Address" class="bx--label">@Localizer["Business Address"]</label>
+                <input id="Company_Address" type="text" class="bx--text-input" name="settings[Company.Address]" value="@GetVal("Company.Address", "Cairo, Egypt")" placeholder="City, Country">
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Company Details"]</button>
+        </div>
+    </form>
+
+
+    <!-- 4. HANGFIRE PROCESSING LIMITS -->
+    <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #8a3ffc; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        @Html.AntiForgeryToken()
+
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 1.25rem;">⚙️</span>
+                <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">@Localizer["Hangfire Worker Concurrency Limits"]</h3>
+            </div>
+            <span class="bx--tag bx--tag--purple">Hangfire</span>
+        </div>
+
+        <p style="color: #525252; margin-bottom: 1.5rem; font-size: 0.875rem;">
+            @Localizer["Configure maximum concurrent execution limits for each background AI consumer."]
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1rem;">
+            <div class="bx--form-item">
+                <label for="Concurrency_tts" class="bx--label">@Localizer["Text-to-Voice (TTS) Limit"]</label>
+                <input id="Concurrency_tts" type="number" class="bx--text-input" name="settings[Concurrency_tts]" value="@GetVal("Concurrency_tts", "10")" min="1">
+            </div>
+
+            <div class="bx--form-item">
+                <label for="Concurrency_vtt" class="bx--label">@Localizer["Voice-to-Text (STT) Limit"]</label>
+                <input id="Concurrency_vtt" type="number" class="bx--text-input" name="settings[Concurrency_vtt]" value="@GetVal("Concurrency_vtt", "10")" min="1">
+            </div>
+
+            <div class="bx--form-item">
+                <label for="Concurrency_avatar2video" class="bx--label">@Localizer["Avatar Image-to-Video Limit"]</label>
+                <input id="Concurrency_avatar2video" type="number" class="bx--text-input" name="settings[Concurrency_avatar2video]" value="@GetVal("Concurrency_avatar2video", "10")" min="1">
+            </div>
+
+            <div class="bx--form-item">
+                <label for="Concurrency_lipsync" class="bx--label">@Localizer["Advanced Lip-Sync Limit"]</label>
+                <input id="Concurrency_lipsync" type="number" class="bx--text-input" name="settings[Concurrency_lipsync]" value="@GetVal("Concurrency_lipsync", "10")" min="1">
+            </div>
+
+            <div class="bx--form-item">
+                <label for="Concurrency_motion_control" class="bx--label">@Localizer["Motion Transfer Limit"]</label>
+                <input id="Concurrency_motion_control" type="number" class="bx--text-input" name="settings[Concurrency_motion_control]" value="@GetVal("Concurrency_motion_control", "10")" min="1">
+            </div>
+
+            <div class="bx--form-item">
+                <label for="Concurrency_email" class="bx--label">@Localizer["System Email Queue Limit"]</label>
+                <input id="Concurrency_email" type="number" class="bx--text-input" name="settings[Concurrency_email]" value="@GetVal("Concurrency_email", "10")" min="1">
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Concurrency Limits"]</button>
+        </div>
+    </form>
+
+
+    <!-- 5. FREE PLAN LIMITS & ABUSE PREVENTION -->
+    <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #0043ce; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        @Html.AntiForgeryToken()
+
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 1.25rem;">🛡️</span>
+                <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">@Localizer["Free Trial & Abuse Prevention"]</h3>
+            </div>
+            <span class="bx--tag bx--tag--cyan">Trial Guard</span>
+        </div>
+
+        <p style="color: #525252; margin-bottom: 1.5rem; font-size: 0.875rem;">
+            @Localizer["Restrict free plan claims per device fingerprint to prevent multiple account abuses."]
+        </p>
         
         @{
-            bool fingerprintCheck = (Model.FirstOrDefault(s => s.Key == "FreePlan.FingerprintCheck")?.Value == "true");
+            bool fingerprintCheck = GetVal("FreePlan.FingerprintCheck") == "true";
         }
         
-        <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom: 1rem;">
+        <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom: 1.5rem;">
             <input type="hidden" name="settings[FreePlan.FingerprintCheck]" value="false" id="hidden_FreePlan_FingerprintCheck" />
             <input id="FreePlan_FingerprintCheck" class="bx--checkbox" type="checkbox" name="settings[FreePlan.FingerprintCheck]" value="true" @(fingerprintCheck ? "checked" : "") onchange="document.getElementById('hidden_FreePlan_FingerprintCheck').disabled = this.checked;">
             <label for="FreePlan_FingerprintCheck" class="bx--checkbox-label">
-                <span class="bx--checkbox-label-text">@Localizer["Enable Fingerprint Limit for Free Plans"]</span>
+                <span class="bx--checkbox-label-text" style="font-weight: 500;">@Localizer["Enable Device Fingerprint Verification for Free Plans"]</span>
             </label>
             <script>document.getElementById('hidden_FreePlan_FingerprintCheck').disabled = document.getElementById('FreePlan_FingerprintCheck').checked;</script>
         </div>
 
         <div class="bx--form-item" style="margin-bottom: 1rem;">
-            <label for="FreePlan_MaxUsesPerDevice" class="bx--label">@Localizer["Max Uses Per Device"]</label>
-            <input id="FreePlan_MaxUsesPerDevice" type="number" class="bx--text-input" name="settings[FreePlan.MaxUsesPerDevice]" value="@Model.FirstOrDefault(s => s.Key == "FreePlan.MaxUsesPerDevice")?.Value" placeholder="1" min="1">
-            <div class="bx--form__helper-text">@Localizer["Number of accounts per device that can claim the free plan (e.g. 1)."]</div>
+            <label for="FreePlan_MaxUsesPerDevice" class="bx--label">@Localizer["Max Free Claims Per Device"]</label>
+            <input id="FreePlan_MaxUsesPerDevice" type="number" class="bx--text-input" name="settings[FreePlan.MaxUsesPerDevice]" value="@GetVal("FreePlan.MaxUsesPerDevice", "1")" min="1" style="max-width: 250px;">
+            <div class="bx--form__helper-text">@Localizer["Maximum number of accounts per physical device that can claim a free trial (default: 1)."]</div>
         </div>
 
-        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
-            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Free Plan Settings"]</button>
-        </div>
-    </form>
-
-    <!-- AFFILIATE SETTINGS FORM -->
-    <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #8a3ffc;">
-        @Html.AntiForgeryToken()
-
-        <h3 style="margin-bottom: 1rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.5rem;">@Localizer["Affiliate & Referral Settings"]</h3>
-        <p style="color: #525252; margin-bottom: 1rem; font-size: 0.875rem;">@Localizer["Configure rewards for the referral and cash affiliate program."]</p>
-        
-        <div class="bx--form-item" style="margin-bottom: 1rem;">
-            <label for="Affiliate_CreditRewardReferrer" class="bx--label">@Localizer["Credit Reward (Referrer)"]</label>
-            <input id="Affiliate_CreditRewardReferrer" type="number" class="bx--text-input" name="settings[Affiliate.CreditRewardReferrer]" value="@Model.FirstOrDefault(s => s.Key == "Affiliate.CreditRewardReferrer")?.Value" placeholder="50">
-            <div class="bx--form__helper-text">@Localizer["Amount of credits to give the person who shared their link."]</div>
-        </div>
-
-        <div class="bx--form-item" style="margin-bottom: 1rem;">
-            <label for="Affiliate_CreditRewardReferred" class="bx--label">@Localizer["Credit Reward (Referred User)"]</label>
-            <input id="Affiliate_CreditRewardReferred" type="number" class="bx--text-input" name="settings[Affiliate.CreditRewardReferred]" value="@Model.FirstOrDefault(s => s.Key == "Affiliate.CreditRewardReferred")?.Value" placeholder="50">
-            <div class="bx--form__helper-text">@Localizer["Amount of credits to give the new user who signed up using a link."]</div>
-        </div>
-
-        <div class="bx--form-item" style="margin-bottom: 1rem;">
-            <label for="Affiliate_CashCommissionPercentage" class="bx--label">@Localizer["Cash Affiliate Commission (%)"]</label>
-            <input id="Affiliate_CashCommissionPercentage" type="number" step="0.1" class="bx--text-input" name="settings[Affiliate.CashCommissionPercentage]" value="@Model.FirstOrDefault(s => s.Key == "Affiliate.CashCommissionPercentage")?.Value" placeholder="20">
-            <div class="bx--form__helper-text">@Localizer["Percentage of cash commission given to Cash Affiliates upon payments."]</div>
-        </div>
-
-        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
-            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Affiliate Settings"]</button>
+        <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Trial Settings"]</button>
         </div>
     </form>
 </div>

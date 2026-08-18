@@ -321,9 +321,12 @@ namespace NexClone.Backend.API.Controllers.Client
                     });
                 }
 
+                var maxAttemptsSetting = await _context.AppSettings.Where(s => s.Key == "Security.MaxLoginAttempts").Select(s => s.Value).FirstOrDefaultAsync();
+                int maxAttempts = int.TryParse(maxAttemptsSetting, out var ma) ? ma : 20;
+
                 var failedCount = await _userManager.GetAccessFailedCountAsync(user);
-                var remainingAttempts = Math.Max(0, 20 - failedCount);
-                Console.WriteLine($"[LOGIN FAILED] Wrong password for: {request.Email}. Failed count: {failedCount}/20");
+                var remainingAttempts = Math.Max(0, maxAttempts - failedCount);
+                Console.WriteLine($"[LOGIN FAILED] Wrong password for: {request.Email}. Failed count: {failedCount}/{maxAttempts}");
                 return Unauthorized(new 
                 { 
                     Message = remainingAttempts <= 3 && remainingAttempts > 0

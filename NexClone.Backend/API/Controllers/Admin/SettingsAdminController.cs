@@ -23,36 +23,56 @@ namespace NexClone.Backend.API.Controllers.Admin
             ViewData["Title"] = "Global Settings";
             var settings = await _context.AppSettings.ToListAsync();
             
-            var predefinedSocialKeys = new[] { "Social.Facebook", "Social.Twitter", "Social.LinkedIn", "Social.Instagram", "Social.YouTube", "Social.Email" };
-            foreach (var key in predefinedSocialKeys)
+            var defaultKeys = new Dictionary<string, (string DefaultValue, string Description)>
             {
-                if (!settings.Any(s => s.Key == key))
+                { "Site.MaintenanceMode", ("false", "Global maintenance mode toggle") },
+                { "Site.MaintenanceEndDate", ("", "Expected maintenance end date/time") },
+                { "Origin.AllowedOrigins", ("http://localhost:3000,https://nexmediaai.com", "Comma-separated allowed CORS origins") },
+                { "Security.MaxLoginAttempts", ("20", "Max failed login attempts before lockout") },
+                { "Security.LockoutMinutes", ("15", "Lockout duration in minutes") },
+                { "OAuth.GoogleClientId", ("", "Google OAuth Client ID") },
+                { "OAuth.GoogleClientSecret", ("", "Google OAuth Client Secret") },
+                { "Company.Name", ("NexMedia AI", "Official company name for invoices") },
+                { "Company.SupportEmail", ("support@nexmediaai.com", "Support email for invoices and footer") },
+                { "Company.Address", ("Cairo, Egypt", "Business address for invoices") },
+                { "Social.Facebook", ("", "Facebook page URL") },
+                { "Social.Twitter", ("", "Twitter/X profile URL") },
+                { "Social.LinkedIn", ("", "LinkedIn company page URL") },
+                { "Social.Instagram", ("", "Instagram profile URL") },
+                { "Social.YouTube", ("", "YouTube channel URL") },
+                { "Concurrency_tts", ("10", "TTS concurrent processing limit") },
+                { "Concurrency_vtt", ("10", "STT concurrent processing limit") },
+                { "Concurrency_avatar2video", ("10", "Avatar image-to-video concurrent processing limit") },
+                { "Concurrency_lipsync", ("10", "LipSync concurrent processing limit") },
+                { "Concurrency_motion_control", ("10", "Motion transfer concurrent processing limit") },
+                { "Concurrency_email", ("10", "System emails concurrent processing limit") },
+                { "FreePlan.FingerprintCheck", ("true", "Enable fingerprint check for free trial") },
+                { "FreePlan.MaxUsesPerDevice", ("1", "Max free trial claims per device") }
+            };
+
+            bool changesMade = false;
+            foreach (var kvp in defaultKeys)
+            {
+                if (!settings.Any(s => s.Key == kvp.Key))
                 {
-                    var newSetting = new AppSetting { Key = key, Value = "", Description = "Social Link", UpdatedAt = System.DateTime.UtcNow };
+                    var newSetting = new AppSetting 
+                    { 
+                        Key = kvp.Key, 
+                        Value = kvp.Value.DefaultValue, 
+                        Description = kvp.Value.Description, 
+                        UpdatedAt = System.DateTime.UtcNow 
+                    };
                     _context.AppSettings.Add(newSetting);
                     settings.Add(newSetting);
-                }
-            }
-            
-            var toolConfigs = await _context.ToolConfigurations.ToListAsync();
-            var defaultTools = new[] { "text-to-voice", "voice-to-text", "image-to-video", "advanced-lip-sync", "motion-control" };
-            bool changesMade = false;
-            foreach (var defaultTool in defaultTools)
-            {
-                if (!toolConfigs.Any(t => t.ToolName == defaultTool))
-                {
-                    var newConfig = new ToolConfiguration { ToolName = defaultTool, IsActive = true, IsMaintenanceMode = false };
-                    _context.ToolConfigurations.Add(newConfig);
-                    toolConfigs.Add(newConfig);
                     changesMade = true;
                 }
             }
+
             if (changesMade)
             {
                 await _context.SaveChangesAsync();
             }
 
-            ViewBag.ToolConfigurations = toolConfigs;
             return View(settings);
         }
 
@@ -95,6 +115,7 @@ namespace NexClone.Backend.API.Controllers.Admin
             }
 
             await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Settings saved successfully.";
             return RedirectToAction(nameof(Index));
         }
 
