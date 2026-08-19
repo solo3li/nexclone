@@ -75,3 +75,32 @@
 2026-08-19 01:43:48.864 +03:00 [INF] 1 servers were removed due to timeout
 2026-08-19 01:44:05.362 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
 2026-08-19 01:56:56.413 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-19 02:29:56.764 +03:00 [INF] Start installing Hangfire SQL objects...
+2026-08-19 02:30:02.817 +03:00 [INF] Hangfire SQL objects installed.
+2026-08-19 02:30:05.067 +03:00 [INF] SubscriptionStatusService is starting.
+2026-08-19 02:30:05.146 +03:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-19 02:30:05.147 +03:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-19 02:30:05.147 +03:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-19 02:30:05.147 +03:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-19 02:30:05.147 +03:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-19 02:30:05.147 +03:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-19 02:30:07.266 +03:00 [INF] Server desktop-rjppsk4:24748:5c9c31ca successfully announced in 2105.0269 ms
+2026-08-19 02:30:07.271 +03:00 [INF] Server desktop-rjppsk4:24748:5c9c31ca is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-19 02:30:07.284 +03:00 [INF] Server desktop-rjppsk4:24748:5c9c31ca all the dispatchers started
+2026-08-19 02:30:11.097 +03:00 [INF] Removed 1 outdated record(s) from 'aggregatedcounter' table.
+2026-08-19 02:30:16.785 +03:00 [INF] Removed 2 outdated record(s) from 'job' table.
+2026-08-19 02:31:58.928 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-19 02:35:07.802 +03:00 [INF] 1 servers were removed due to timeout
+2026-08-19 02:39:40.254 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-19 02:42:14.833 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-19 02:42:27.173 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-19 02:42:43.002 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-19 02:43:22.914 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-19 02:45:03.061 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-19 02:45:09.793 +03:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-19 03:00:21.871 +03:00 [INF] [AffiliateCommissionHoldJob] Running daily hold period check...
+2026-08-19 03:00:22.108 +03:00 [INF] [AffiliateCommissionHoldJob] Completed.

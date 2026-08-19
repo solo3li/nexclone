@@ -59,6 +59,65 @@ export default function ToolsSidebar() {
 
   const toolCategories = [
     {
+      id: "audio",
+      labelEn: "Audio Studio",
+      labelAr: "استوديو الصوت",
+      icon: FileAudio,
+      accent: "emerald",
+      accentBg: "bg-emerald-500/10",
+      accentText: "text-emerald-400",
+      accentBorder: "border-emerald-500/30",
+      accentGlow: "shadow-[0_0_15px_rgba(16,185,129,0.3)]",
+      tools: [
+        {
+          id: "text-to-voice",
+          href: "/tools/text-to-voice",
+          icon: Mic,
+          labelEn: "Text to Voice",
+          labelAr: "تحويل النص لصوت",
+          color: "text-emerald-400",
+          activeBg: "bg-gradient-to-r from-emerald-600/30 to-teal-600/10",
+          activeBorder: "border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.25)]",
+          dotColor: "bg-emerald-400"
+        },
+        {
+          id: "voice-to-text",
+          href: "/tools/voice-to-text",
+          icon: FileAudio,
+          labelEn: "Voice to Text",
+          labelAr: "تحويل الصوت لنص",
+          color: "text-teal-400",
+          activeBg: "bg-gradient-to-r from-teal-600/30 to-emerald-600/10",
+          activeBorder: "border-teal-500/50 shadow-[0_0_15px_rgba(20,184,166,0.25)]",
+          dotColor: "bg-teal-400"
+        }
+      ]
+    },
+    {
+      id: "image",
+      labelEn: "Image Studio",
+      labelAr: "استوديو الصور",
+      icon: ImageIcon,
+      accent: "amber",
+      accentBg: "bg-amber-500/10",
+      accentText: "text-amber-400",
+      accentBorder: "border-amber-500/30",
+      accentGlow: "shadow-[0_0_15px_rgba(245,158,11,0.3)]",
+      tools: [
+        {
+          id: "text-to-image",
+          href: "/tools/text-to-image",
+          icon: ImageIcon,
+          labelEn: "Text to Image",
+          labelAr: "تحويل النص لصورة",
+          color: "text-amber-400",
+          activeBg: "bg-gradient-to-r from-amber-600/30 to-orange-600/10",
+          activeBorder: "border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.25)]",
+          dotColor: "bg-amber-400"
+        }
+      ]
+    },
+    {
       id: "video",
       labelEn: "Video Studio",
       labelAr: "استوديو الفيديو",
@@ -123,65 +182,6 @@ export default function ToolsSidebar() {
           activeBg: "bg-gradient-to-r from-cyan-600/30 to-blue-600/10",
           activeBorder: "border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.25)]",
           dotColor: "bg-cyan-400"
-        }
-      ]
-    },
-    {
-      id: "image",
-      labelEn: "Image Studio",
-      labelAr: "استوديو الصور",
-      icon: ImageIcon,
-      accent: "amber",
-      accentBg: "bg-amber-500/10",
-      accentText: "text-amber-400",
-      accentBorder: "border-amber-500/30",
-      accentGlow: "shadow-[0_0_15px_rgba(245,158,11,0.3)]",
-      tools: [
-        {
-          id: "text-to-image",
-          href: "/tools/text-to-image",
-          icon: ImageIcon,
-          labelEn: "Text to Image",
-          labelAr: "تحويل النص لصورة",
-          color: "text-amber-400",
-          activeBg: "bg-gradient-to-r from-amber-600/30 to-orange-600/10",
-          activeBorder: "border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.25)]",
-          dotColor: "bg-amber-400"
-        }
-      ]
-    },
-    {
-      id: "audio",
-      labelEn: "Audio Studio",
-      labelAr: "استوديو الصوت",
-      icon: FileAudio,
-      accent: "emerald",
-      accentBg: "bg-emerald-500/10",
-      accentText: "text-emerald-400",
-      accentBorder: "border-emerald-500/30",
-      accentGlow: "shadow-[0_0_15px_rgba(16,185,129,0.3)]",
-      tools: [
-        {
-          id: "text-to-voice",
-          href: "/tools/text-to-voice",
-          icon: Mic,
-          labelEn: "Text to Voice",
-          labelAr: "تحويل النص لصوت",
-          color: "text-emerald-400",
-          activeBg: "bg-gradient-to-r from-emerald-600/30 to-teal-600/10",
-          activeBorder: "border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.25)]",
-          dotColor: "bg-emerald-400"
-        },
-        {
-          id: "voice-to-text",
-          href: "/tools/voice-to-text",
-          icon: FileAudio,
-          labelEn: "Voice to Text",
-          labelAr: "تحويل الصوت لنص",
-          color: "text-teal-400",
-          activeBg: "bg-gradient-to-r from-teal-600/30 to-emerald-600/10",
-          activeBorder: "border-teal-500/50 shadow-[0_0_15px_rgba(20,184,166,0.25)]",
-          dotColor: "bg-teal-400"
         }
       ]
     }
@@ -403,106 +403,27 @@ export default function ToolsSidebar() {
         </div>
 
         {/* ========================================================================= */}
-        {/* 2. Glassmorphic User & Wallet Card (Collapsible)                          */}
+        {/* 2. Compact User Row at Top                                                */}
         {/* ========================================================================= */}
         {user && (
           <div className="px-3 py-3 border-b border-white/5" dir={isRtl ? 'rtl' : 'ltr'}>
             {!isSidebarCollapsed || isOpen ? (
-              <div className="space-y-2.5">
-                {/* User Row */}
-                <div className="flex items-center justify-between">
-                  <Link href="/profile" className="flex items-center gap-2 group truncate">
-                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-md shadow-violet-900/30 shrink-0">
-                      <span className="text-white text-[11px] font-black">
-                        {user.fullName?.charAt(0)?.toUpperCase() || 'U'}
-                      </span>
-                    </div>
-                    <span className="text-white/80 group-hover:text-white text-xs font-semibold truncate transition-colors">
-                      {user.fullName || user.email}
+              <div className="flex items-center justify-between">
+                <Link href="/profile" className="flex items-center gap-2 group truncate">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-md shadow-violet-900/30 shrink-0">
+                    <span className="text-white text-[11px] font-black">
+                      {user.fullName?.charAt(0)?.toUpperCase() || 'U'}
                     </span>
-                  </Link>
-                  <Link
-                    href="/pricing"
-                    className="text-[10px] bg-gradient-to-r from-violet-600/30 to-fuchsia-600/30 hover:from-violet-600/50 hover:to-fuchsia-600/50 text-violet-200 border border-violet-500/30 px-2 py-0.5 rounded-md font-bold flex items-center gap-1 transition-all"
-                  >
-                    <Sparkles className="w-2.5 h-2.5 text-violet-300" />
-                    <span>{isRtl ? "ترقية" : "Upgrade"}</span>
-                  </Link>
-                </div>
-
-                {/* Glassmorphic Wallet Card */}
-                <div className="relative" ref={walletRef}>
-                  <div
-                    onClick={() => setWalletsExpanded(!walletsExpanded)}
-                    className="p-2.5 rounded-xl bg-gradient-to-b from-white/[0.07] to-white/[0.02] border border-white/10 hover:border-violet-500/40 shadow-inner cursor-pointer transition-all group"
-                  >
-                    <div className="flex items-center justify-between mb-1.5">
-                      <div className="flex items-center gap-1.5">
-                        <Wallet className="w-3.5 h-3.5 text-violet-400" />
-                        <span className="text-xs font-bold text-white/90">
-                          {isRtl ? "رصيد المحفظة" : "Credits Wallet"}
-                        </span>
-                      </div>
-                      <Link
-                        href="/pricing"
-                        onClick={(e) => e.stopPropagation()}
-                        className="text-[10px] text-amber-300 hover:text-amber-200 flex items-center gap-0.5 font-bold"
-                      >
-                        <Plus className="w-2.5 h-2.5" />
-                        <span>{isRtl ? "شحن" : "Top Up"}</span>
-                      </Link>
-                    </div>
-
-                    <div className="flex items-baseline justify-between">
-                      <span className="text-lg font-black text-amber-300 font-mono">
-                        {totalCredits.toLocaleString()}
-                      </span>
-                      <span className="text-[10px] text-white/40 font-mono uppercase">Credits</span>
-                    </div>
-
-                    {/* Progress Ratio Bar */}
-                    <div className="w-full h-1.5 bg-black/40 rounded-full overflow-hidden mt-1.5 flex">
-                      <div 
-                        className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500" 
-                        style={{ width: `${Math.min(100, (user.standardCredits / Math.max(1, totalCredits)) * 100)}%` }} 
-                      />
-                      <div 
-                        className="h-full bg-gradient-to-r from-amber-400 to-orange-400" 
-                        style={{ width: `${Math.min(100, (user.premiumCredits / Math.max(1, totalCredits)) * 100)}%` }} 
-                      />
-                    </div>
                   </div>
-
-                  {/* Expanded Wallet Breakdown */}
-                  <AnimatePresence>
-                    {walletsExpanded && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 5 }}
-                        className="mt-1.5 p-2 bg-[#0c0218] border border-white/10 rounded-xl space-y-1.5 text-xs shadow-xl"
-                      >
-                        <div className="flex justify-between items-center px-1 text-white/60">
-                          <span>{isRtl ? "رصيد قياسي:" : "Standard Credits:"}</span>
-                          <span className="font-bold text-violet-300 font-mono">{Number(user.standardCredits || 0).toFixed(1)}</span>
-                        </div>
-                        <div className="flex justify-between items-center px-1 text-white/60">
-                          <span>{isRtl ? "رصيد مميز:" : "Premium Credits:"}</span>
-                          <span className="font-bold text-amber-300 font-mono">{Number(user.premiumCredits || 0).toFixed(1)}</span>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
+                  <span className="text-white/80 group-hover:text-white text-xs font-semibold truncate transition-colors">
+                    {user.fullName || user.email}
+                  </span>
+                </Link>
               </div>
             ) : (
-              /* Compact Avatar & Wallet Icon in Collapsed Rail */
               <div className="flex flex-col items-center gap-2">
                 <Link href="/profile" title={user.fullName || user.email} className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-md">
                   <span className="text-white text-xs font-black">{user.fullName?.charAt(0)?.toUpperCase() || 'U'}</span>
-                </Link>
-                <Link href="/pricing" title={`${totalCredits} Credits`} className="w-8 h-8 rounded-xl bg-white/5 hover:bg-violet-500/20 border border-white/10 flex items-center justify-center text-amber-300">
-                  <Wallet className="w-4 h-4" />
                 </Link>
               </div>
             )}
@@ -510,50 +431,7 @@ export default function ToolsSidebar() {
         )}
 
         {/* ========================================================================= */}
-        {/* 3. Live Queue & History Hub Shortcut                                      */}
-        {/* ========================================================================= */}
-        <div className="px-3 pt-3" dir={isRtl ? 'rtl' : 'ltr'}>
-          <Link
-            href="/history"
-            onClick={() => setIsOpen(false)}
-            className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all group relative overflow-hidden ${
-              pathname.includes('/history')
-                ? "bg-gradient-to-r from-violet-600/30 to-fuchsia-600/15 border-violet-500/40 text-white shadow-[0_0_15px_rgba(139,92,246,0.2)]"
-                : "bg-white/[0.03] hover:bg-white/[0.07] border-white/10 hover:border-white/20 text-white/70 hover:text-white"
-            } ${isSidebarCollapsed && !isOpen ? 'justify-center !px-0' : ''}`}
-            title={isRtl ? "سجل العمليات والمشاريع" : "History & Projects"}
-          >
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-              pathname.includes('/history') ? 'bg-violet-500/20 text-violet-300' : 'bg-white/5 text-white/60 group-hover:text-white'
-            }`}>
-              <History className="w-4 h-4" />
-            </div>
-
-            {(!isSidebarCollapsed || isOpen) && (
-              <div className="flex-1 truncate">
-                <span className="text-xs font-bold block leading-tight">
-                  {isRtl ? "سجل المشاريع والعمليات" : "History & Projects"}
-                </span>
-                <span className="text-[10px] text-white/40 block">
-                  {isRtl ? "متابعة وتحميل نتائج التوليد" : "Track and download results"}
-                </span>
-              </div>
-            )}
-
-            {/* Live Queue Pulse Badge */}
-            {activeTasksCount > 0 ? (
-              <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-md bg-violet-500/20 text-violet-300 border border-violet-500/40 flex items-center gap-1 shrink-0 ${
-                isSidebarCollapsed && !isOpen ? 'absolute top-1 right-1' : ''
-              }`}>
-                <Loader2 className="w-2.5 h-2.5 animate-spin text-violet-400" />
-                {(!isSidebarCollapsed || isOpen) && <span>{activeTasksCount} {isRtl ? "قيد الرندر" : "Active"}</span>}
-              </span>
-            ) : null}
-          </Link>
-        </div>
-
-        {/* ========================================================================= */}
-        {/* 4. Categorized Studio Tools Navigation with Vibrant Accents & Glow        */}
+        {/* 3. Categorized Studio Tools Navigation                                    */}
         {/* ========================================================================= */}
         <div className="p-3 flex-1 overflow-y-auto space-y-4 custom-scrollbar">
           {toolCategories.map((category) => {
@@ -653,9 +531,119 @@ export default function ToolsSidebar() {
         </div>
 
         {/* ========================================================================= */}
-        {/* Bottom Footer: Logout & Home                                              */}
+        {/* 4. Bottom Section: Wallet, History & Logout                               */}
         {/* ========================================================================= */}
-        <div className="p-3 border-t border-white/5 flex flex-col gap-1.5" dir={isRtl ? 'rtl' : 'ltr'}>
+        <div className="p-3 border-t border-white/5 flex flex-col gap-3" dir={isRtl ? 'rtl' : 'ltr'}>
+          
+          {user && (!isSidebarCollapsed || isOpen) && (
+            <div className="relative" ref={walletRef}>
+              <div
+                onClick={() => setWalletsExpanded(!walletsExpanded)}
+                className="p-2.5 rounded-xl bg-gradient-to-b from-white/[0.07] to-white/[0.02] border border-white/10 hover:border-violet-500/40 shadow-inner cursor-pointer transition-all group"
+              >
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <Wallet className="w-3.5 h-3.5 text-violet-400" />
+                    <span className="text-xs font-bold text-white/90">
+                      {isRtl ? "رصيد المحفظة" : "Credits Wallet"}
+                    </span>
+                  </div>
+                  <Link
+                    href="/pricing"
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-[10px] bg-gradient-to-r from-violet-600/30 to-fuchsia-600/30 hover:from-violet-600/50 hover:to-fuchsia-600/50 text-violet-200 border border-violet-500/30 px-2 py-0.5 rounded-md font-bold flex items-center gap-1 transition-all"
+                  >
+                    <Sparkles className="w-2.5 h-2.5 text-violet-300" />
+                    <span>{isRtl ? "ترقية" : "Upgrade"}</span>
+                  </Link>
+                </div>
+
+                <div className="flex items-baseline justify-between">
+                  <span className="text-lg font-black text-amber-300 font-mono">
+                    {totalCredits.toLocaleString()}
+                  </span>
+                  <span className="text-[10px] text-white/40 font-mono uppercase">Credits</span>
+                </div>
+
+                {/* Progress Ratio Bar */}
+                <div className="w-full h-1.5 bg-black/40 rounded-full overflow-hidden mt-1.5 flex">
+                  <div 
+                    className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500" 
+                    style={{ width: `${Math.min(100, (user.standardCredits / Math.max(1, totalCredits)) * 100)}%` }} 
+                  />
+                  <div 
+                    className="h-full bg-gradient-to-r from-amber-400 to-orange-400" 
+                    style={{ width: `${Math.min(100, (user.premiumCredits / Math.max(1, totalCredits)) * 100)}%` }} 
+                  />
+                </div>
+              </div>
+
+              {/* Expanded Wallet Breakdown */}
+              <AnimatePresence>
+                {walletsExpanded && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 5 }}
+                    className="absolute bottom-full left-0 right-0 mb-1.5 p-2 bg-[#0c0218] border border-white/10 rounded-xl space-y-1.5 text-xs shadow-xl z-10"
+                  >
+                    <div className="flex justify-between items-center px-1 text-white/60">
+                      <span>{isRtl ? "رصيد قياسي:" : "Standard Credits:"}</span>
+                      <span className="font-bold text-violet-300 font-mono">{Number(user.standardCredits || 0).toFixed(1)}</span>
+                    </div>
+                    <div className="flex justify-between items-center px-1 text-white/60">
+                      <span>{isRtl ? "رصيد مميز:" : "Premium Credits:"}</span>
+                      <span className="font-bold text-amber-300 font-mono">{Number(user.premiumCredits || 0).toFixed(1)}</span>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+
+          {user && (isSidebarCollapsed && !isOpen) && (
+            <Link href="/pricing" title={`${totalCredits} Credits`} className="w-full h-10 rounded-xl bg-white/5 hover:bg-violet-500/20 border border-white/10 flex items-center justify-center text-amber-300">
+              <Wallet className="w-4 h-4" />
+            </Link>
+          )}
+
+          <Link
+            href="/history"
+            onClick={() => setIsOpen(false)}
+            className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all group relative overflow-hidden ${
+              pathname.includes('/history')
+                ? "bg-gradient-to-r from-violet-600/30 to-fuchsia-600/15 border-violet-500/40 text-white shadow-[0_0_15px_rgba(139,92,246,0.2)]"
+                : "bg-white/[0.03] hover:bg-white/[0.07] border-white/10 hover:border-white/20 text-white/70 hover:text-white"
+            } ${isSidebarCollapsed && !isOpen ? 'justify-center !px-0' : ''}`}
+            title={isRtl ? "سجل العمليات والمشاريع" : "History & Projects"}
+          >
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+              pathname.includes('/history') ? 'bg-violet-500/20 text-violet-300' : 'bg-white/5 text-white/60 group-hover:text-white'
+            }`}>
+              <History className="w-4 h-4" />
+            </div>
+
+            {(!isSidebarCollapsed || isOpen) && (
+              <div className="flex-1 truncate">
+                <span className="text-xs font-bold block leading-tight">
+                  {isRtl ? "سجل المشاريع والعمليات" : "History & Projects"}
+                </span>
+                <span className="text-[10px] text-white/40 block">
+                  {isRtl ? "متابعة وتحميل نتائج التوليد" : "Track and download results"}
+                </span>
+              </div>
+            )}
+
+            {activeTasksCount > 0 ? (
+              <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-md bg-violet-500/20 text-violet-300 border border-violet-500/40 flex items-center gap-1 shrink-0 ${
+                isSidebarCollapsed && !isOpen ? 'absolute top-1 right-1' : ''
+              }`}>
+                <Loader2 className="w-2.5 h-2.5 animate-spin text-violet-400" />
+                {(!isSidebarCollapsed || isOpen) && <span>{activeTasksCount} {isRtl ? "قيد الرندر" : "Active"}</span>}
+              </span>
+            ) : null}
+          </Link>
+
           <button
             onClick={handleLogout}
             className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-white/40 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all group ${
@@ -673,6 +661,7 @@ export default function ToolsSidebar() {
         </div>
 
       </div>
+
     </>
   );
 }
