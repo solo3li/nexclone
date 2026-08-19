@@ -25,7 +25,7 @@ namespace NexClone.Backend.API.Controllers.Client
                 .FirstOrDefaultAsync(s => s.Key == "Site.MaintenanceEndDate");
                 
             var googleClientIdStr = await _context.AppSettings
-                .FirstOrDefaultAsync(s => s.Key == "Auth.Google.ClientId");
+                .FirstOrDefaultAsync(s => s.Key == "OAuth.GoogleClientId");
 
             bool isMaintenanceMode = bool.TryParse(isMaintenanceModeStr?.Value, out var m) && m;
             
