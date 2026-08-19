@@ -314,21 +314,36 @@ export default function ToolsSidebar() {
         `}
       >
         {/* ========================================================================= */}
-        {/* Top Header: Logo Brand + Quick Collapse Toggle + Notifications             */}
+        {/* 1. Top Header: Icons Bar (Profile, Home, History)                         */}
         {/* ========================================================================= */}
         <div className="flex items-center justify-between px-3.5 py-4 border-b border-white/5" dir={isRtl ? 'rtl' : 'ltr'}>
-          <Link href="/" className="flex items-center gap-2.5 group overflow-hidden">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-600 via-indigo-600 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-violet-900/40 shrink-0 group-hover:scale-105 transition-transform">
-              <span className="text-white font-black text-sm">N</span>
-            </div>
-            {(!isSidebarCollapsed || isOpen) && (
-              <span className="font-bold text-white/95 text-sm tracking-tight group-hover:text-white transition-colors truncate">
-                NexMedia
-              </span>
+          <div className="flex items-center gap-1.5">
+            {user && (
+              <Link href="/profile" className="flex items-center group shrink-0" title={user.fullName || user.email}>
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-md shadow-violet-900/30 group-hover:scale-105 transition-transform">
+                  <span className="text-white text-xs font-black">
+                    {user.fullName?.charAt(0)?.toUpperCase() || 'U'}
+                  </span>
+                </div>
+              </Link>
             )}
-          </Link>
+            
+            {(!isSidebarCollapsed || isOpen) && (
+              <>
+                <Link href="/" className="w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all group shrink-0" title={isRtl ? "الرئيسية" : "Home"}>
+                  <Home className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                </Link>
+                <Link href="/history" className="relative w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/60 hover:text-white transition-all group shrink-0" title={isRtl ? "سجل العمليات" : "History"}>
+                  <History className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  {activeTasksCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.8)] border-2 border-[#070110]" />
+                  )}
+                </Link>
+              </>
+            )}
+          </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0">
             {/* Desktop Collapse / Expand Button */}
             <button
               onClick={toggleSidebarCollapse}
@@ -403,27 +418,62 @@ export default function ToolsSidebar() {
         </div>
 
         {/* ========================================================================= */}
-        {/* 2. Compact User Row at Top                                                */}
+        {/* 2. Compact Wallet Card                                                    */}
         {/* ========================================================================= */}
         {user && (
           <div className="px-3 py-3 border-b border-white/5" dir={isRtl ? 'rtl' : 'ltr'}>
             {!isSidebarCollapsed || isOpen ? (
-              <div className="flex items-center justify-between">
-                <Link href="/profile" className="flex items-center gap-2 group truncate">
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-md shadow-violet-900/30 shrink-0">
-                    <span className="text-white text-[11px] font-black">
-                      {user.fullName?.charAt(0)?.toUpperCase() || 'U'}
-                    </span>
+              <div className="relative" ref={walletRef}>
+                <div
+                  onClick={() => setWalletsExpanded(!walletsExpanded)}
+                  className="p-2 rounded-xl bg-gradient-to-b from-white/[0.07] to-white/[0.02] border border-white/10 hover:border-violet-500/40 shadow-inner cursor-pointer transition-all group flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+                      <Wallet className="w-4 h-4 text-amber-400" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[9px] text-white/40 uppercase tracking-wider leading-none mb-1">{isRtl ? "الرصيد" : "Credits"}</span>
+                      <span className="text-sm font-black text-amber-300 font-mono leading-none">
+                        {totalCredits.toLocaleString()}
+                      </span>
+                    </div>
                   </div>
-                  <span className="text-white/80 group-hover:text-white text-xs font-semibold truncate transition-colors">
-                    {user.fullName || user.email}
-                  </span>
-                </Link>
+                  <Link
+                    href="/pricing"
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-[10px] bg-gradient-to-r from-violet-600/30 to-fuchsia-600/30 hover:from-violet-600/50 hover:to-fuchsia-600/50 text-violet-200 border border-violet-500/30 px-2 py-1.5 rounded-md font-bold flex items-center gap-1 transition-all"
+                  >
+                    <Sparkles className="w-2.5 h-2.5 text-violet-300" />
+                    <span>{isRtl ? "ترقية" : "Upgrade"}</span>
+                  </Link>
+                </div>
+
+                {/* Expanded Wallet Breakdown */}
+                <AnimatePresence>
+                  {walletsExpanded && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      className="absolute top-full left-0 right-0 mt-1.5 p-2 bg-[#0c0218] border border-white/10 rounded-xl space-y-1.5 text-xs shadow-xl z-10"
+                    >
+                      <div className="flex justify-between items-center px-1 text-white/60">
+                        <span>{isRtl ? "رصيد قياسي:" : "Standard Credits:"}</span>
+                        <span className="font-bold text-violet-300 font-mono">{Number(user.standardCredits || 0).toFixed(1)}</span>
+                      </div>
+                      <div className="flex justify-between items-center px-1 text-white/60">
+                        <span>{isRtl ? "رصيد مميز:" : "Premium Credits:"}</span>
+                        <span className="font-bold text-amber-300 font-mono">{Number(user.premiumCredits || 0).toFixed(1)}</span>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-2">
-                <Link href="/profile" title={user.fullName || user.email} className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-md">
-                  <span className="text-white text-xs font-black">{user.fullName?.charAt(0)?.toUpperCase() || 'U'}</span>
+                <Link href="/pricing" title={`${totalCredits} Credits`} className="w-8 h-8 rounded-xl bg-white/5 hover:bg-violet-500/20 border border-white/10 flex items-center justify-center text-amber-300">
+                  <Wallet className="w-4 h-4" />
                 </Link>
               </div>
             )}
@@ -531,119 +581,9 @@ export default function ToolsSidebar() {
         </div>
 
         {/* ========================================================================= */}
-        {/* 4. Bottom Section: Wallet, History & Logout                               */}
+        {/* 4. Bottom Footer: Logout                                                  */}
         {/* ========================================================================= */}
-        <div className="p-3 border-t border-white/5 flex flex-col gap-3" dir={isRtl ? 'rtl' : 'ltr'}>
-          
-          {user && (!isSidebarCollapsed || isOpen) && (
-            <div className="relative" ref={walletRef}>
-              <div
-                onClick={() => setWalletsExpanded(!walletsExpanded)}
-                className="p-2.5 rounded-xl bg-gradient-to-b from-white/[0.07] to-white/[0.02] border border-white/10 hover:border-violet-500/40 shadow-inner cursor-pointer transition-all group"
-              >
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-1.5">
-                    <Wallet className="w-3.5 h-3.5 text-violet-400" />
-                    <span className="text-xs font-bold text-white/90">
-                      {isRtl ? "رصيد المحفظة" : "Credits Wallet"}
-                    </span>
-                  </div>
-                  <Link
-                    href="/pricing"
-                    onClick={(e) => e.stopPropagation()}
-                    className="text-[10px] bg-gradient-to-r from-violet-600/30 to-fuchsia-600/30 hover:from-violet-600/50 hover:to-fuchsia-600/50 text-violet-200 border border-violet-500/30 px-2 py-0.5 rounded-md font-bold flex items-center gap-1 transition-all"
-                  >
-                    <Sparkles className="w-2.5 h-2.5 text-violet-300" />
-                    <span>{isRtl ? "ترقية" : "Upgrade"}</span>
-                  </Link>
-                </div>
-
-                <div className="flex items-baseline justify-between">
-                  <span className="text-lg font-black text-amber-300 font-mono">
-                    {totalCredits.toLocaleString()}
-                  </span>
-                  <span className="text-[10px] text-white/40 font-mono uppercase">Credits</span>
-                </div>
-
-                {/* Progress Ratio Bar */}
-                <div className="w-full h-1.5 bg-black/40 rounded-full overflow-hidden mt-1.5 flex">
-                  <div 
-                    className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500" 
-                    style={{ width: `${Math.min(100, (user.standardCredits / Math.max(1, totalCredits)) * 100)}%` }} 
-                  />
-                  <div 
-                    className="h-full bg-gradient-to-r from-amber-400 to-orange-400" 
-                    style={{ width: `${Math.min(100, (user.premiumCredits / Math.max(1, totalCredits)) * 100)}%` }} 
-                  />
-                </div>
-              </div>
-
-              {/* Expanded Wallet Breakdown */}
-              <AnimatePresence>
-                {walletsExpanded && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 5 }}
-                    className="absolute bottom-full left-0 right-0 mb-1.5 p-2 bg-[#0c0218] border border-white/10 rounded-xl space-y-1.5 text-xs shadow-xl z-10"
-                  >
-                    <div className="flex justify-between items-center px-1 text-white/60">
-                      <span>{isRtl ? "رصيد قياسي:" : "Standard Credits:"}</span>
-                      <span className="font-bold text-violet-300 font-mono">{Number(user.standardCredits || 0).toFixed(1)}</span>
-                    </div>
-                    <div className="flex justify-between items-center px-1 text-white/60">
-                      <span>{isRtl ? "رصيد مميز:" : "Premium Credits:"}</span>
-                      <span className="font-bold text-amber-300 font-mono">{Number(user.premiumCredits || 0).toFixed(1)}</span>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          )}
-
-          {user && (isSidebarCollapsed && !isOpen) && (
-            <Link href="/pricing" title={`${totalCredits} Credits`} className="w-full h-10 rounded-xl bg-white/5 hover:bg-violet-500/20 border border-white/10 flex items-center justify-center text-amber-300">
-              <Wallet className="w-4 h-4" />
-            </Link>
-          )}
-
-          <Link
-            href="/history"
-            onClick={() => setIsOpen(false)}
-            className={`flex items-center gap-3 p-2.5 rounded-xl border transition-all group relative overflow-hidden ${
-              pathname.includes('/history')
-                ? "bg-gradient-to-r from-violet-600/30 to-fuchsia-600/15 border-violet-500/40 text-white shadow-[0_0_15px_rgba(139,92,246,0.2)]"
-                : "bg-white/[0.03] hover:bg-white/[0.07] border-white/10 hover:border-white/20 text-white/70 hover:text-white"
-            } ${isSidebarCollapsed && !isOpen ? 'justify-center !px-0' : ''}`}
-            title={isRtl ? "سجل العمليات والمشاريع" : "History & Projects"}
-          >
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-              pathname.includes('/history') ? 'bg-violet-500/20 text-violet-300' : 'bg-white/5 text-white/60 group-hover:text-white'
-            }`}>
-              <History className="w-4 h-4" />
-            </div>
-
-            {(!isSidebarCollapsed || isOpen) && (
-              <div className="flex-1 truncate">
-                <span className="text-xs font-bold block leading-tight">
-                  {isRtl ? "سجل المشاريع والعمليات" : "History & Projects"}
-                </span>
-                <span className="text-[10px] text-white/40 block">
-                  {isRtl ? "متابعة وتحميل نتائج التوليد" : "Track and download results"}
-                </span>
-              </div>
-            )}
-
-            {activeTasksCount > 0 ? (
-              <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-md bg-violet-500/20 text-violet-300 border border-violet-500/40 flex items-center gap-1 shrink-0 ${
-                isSidebarCollapsed && !isOpen ? 'absolute top-1 right-1' : ''
-              }`}>
-                <Loader2 className="w-2.5 h-2.5 animate-spin text-violet-400" />
-                {(!isSidebarCollapsed || isOpen) && <span>{activeTasksCount} {isRtl ? "قيد الرندر" : "Active"}</span>}
-              </span>
-            ) : null}
-          </Link>
-
+        <div className="p-3 border-t border-white/5 flex flex-col gap-1.5" dir={isRtl ? 'rtl' : 'ltr'}>
           <button
             onClick={handleLogout}
             className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-white/40 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all group ${
