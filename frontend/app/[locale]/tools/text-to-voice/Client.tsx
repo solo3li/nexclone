@@ -50,10 +50,8 @@ function TextToVoicePage() {
   const [selectedQuality, setSelectedQuality] = useState<string>("High");
   const [availableQualities, setAvailableQualities] = useState<Array<{ qualityLevel: string, costPerChar: number }>>([
     { qualityLevel: 'Standard', costPerChar: 0.001 },
-    { qualityLevel: 'Medium', costPerChar: 0.005 },
     { qualityLevel: 'High', costPerChar: 0.010 }
   ]);
-  
   const [dialects, setDialects] = useState<OptionProfile[]>([]);
   const [emotions, setEmotions] = useState<OptionProfile[]>([]);
   const [styles, setStyles] = useState<OptionProfile[]>([]);
@@ -713,6 +711,26 @@ function TextToVoicePage() {
                         </div>
                       )})
                     )}
+                  </div>
+                </div>
+
+                {/* Quality Selection */}
+                <div className="flex flex-col gap-1.5 mt-4">
+                  <label className="text-[11px] font-semibold text-white/60 px-2">{isRtl ? 'جودة الصوت' : 'Audio Quality'}</label>
+                  <div className="flex bg-[#0a0015]/60 p-1 rounded-xl border border-white/5">
+                    {availableQualities.map((q) => (
+                      <button
+                        key={q.qualityLevel}
+                        onClick={() => setSelectedQuality(q.qualityLevel)}
+                        className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-all ${
+                          selectedQuality === q.qualityLevel 
+                            ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg' 
+                            : 'text-white/50 hover:text-white/80'
+                        }`}
+                      >
+                        {q.qualityLevel === 'Standard' ? (isRtl ? 'عادية' : 'Standard') : (isRtl ? 'عالية' : 'High')}
+                      </button>
+                    ))}
                   </div>
                 </div>
 

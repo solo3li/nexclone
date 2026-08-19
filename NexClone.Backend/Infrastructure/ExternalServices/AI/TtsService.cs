@@ -30,9 +30,9 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
             if (string.IsNullOrWhiteSpace(text))
                 throw new ArgumentException("Text cannot be empty.");
 
-            // --- Quota-based Fallback Routing ---
+            // --- Quota-based Fallback Routing (Only for High Quality) ---
             var ttsSettings = await _dbContext.TextToVoiceSettings.FirstOrDefaultAsync();
-            if (ttsSettings != null && ttsSettings.FallbackThresholdLimit.HasValue && ttsSettings.FallbackThresholdLimit.Value > 0)
+            if (quality.Equals("High", StringComparison.OrdinalIgnoreCase) && ttsSettings != null && ttsSettings.FallbackThresholdLimit.HasValue && ttsSettings.FallbackThresholdLimit.Value > 0)
             {
                 var now = DateTime.UtcNow;
                 
@@ -57,16 +57,10 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                 }
                 else
                 {
-                    // Threshold not exceeded, force High quality (Primary) and increment counter
-                    quality = "High";
+                    // Threshold not exceeded, keep High quality (Primary) and increment counter
                     ttsSettings.CurrentPrimaryRequestCount++;
                 }
                 await _dbContext.SaveChangesAsync();
-            }
-            else
-            {
-                // If no fallback is configured, just force High since we merged them in the UI
-                quality = "High";
             }
             // -------------------------------------
 
