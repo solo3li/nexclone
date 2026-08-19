@@ -57,7 +57,7 @@ export default function Navbar() {
   const [toolsOpen, setToolsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  const { user, setUser, logout, toolConfigs, fetchToolConfigs } = useAppStore();
+  const { user, setUser, logout, setLogoutModalOpen, toolConfigs, fetchToolConfigs } = useAppStore();
   const { isAuthenticated, isInitializing } = useAuthStore();
   const [initializing, setInitializing] = useState(true);
 
@@ -298,12 +298,7 @@ export default function Navbar() {
                   <span className="relative">{locale === 'ar' ? 'حسابي' : 'Profile'}</span>
                 </Link>
                 <button
-                  onClick={() => {
-                    api.post('/api/auth/logout').finally(() => {
-                      logout();
-                      router.push('/');
-                    });
-                  }}
+                  onClick={() => setLogoutModalOpen(true)}
                   className="text-white/60 hover:text-white/90 text-sm font-medium transition-colors cursor-pointer"
                 >
                   {locale === 'ar' ? 'خروج' : 'Logout'}
@@ -400,11 +395,8 @@ export default function Navbar() {
                   </Link>
                   <button
                     onClick={() => {
-                      api.post('/api/auth/logout').finally(() => {
-                        logout();
-                        setMenuOpen(false);
-                        router.push('/');
-                      });
+                      setLogoutModalOpen(true);
+                      setMenuOpen(false);
                     }}
                     className="mt-2 w-full text-center py-3 rounded-xl bg-white/5 border border-white/10 text-white font-semibold"
                   >

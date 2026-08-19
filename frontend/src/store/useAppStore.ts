@@ -53,6 +53,8 @@ export interface AppState {
   setInitializing: (isInit: boolean) => void;
   logout: () => void;
   logoutAll: () => Promise<void>;
+  isLogoutModalOpen: boolean;
+  setLogoutModalOpen: (isOpen: boolean) => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -61,6 +63,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   hasPhoneNumber: false,
   isInitializing: true,
   isSidebarCollapsed: false,
+  isLogoutModalOpen: false,
   toolConfigs: null,
   setToolConfigs: (configs) => set({ toolConfigs: configs }),
   fetchToolConfigs: async () => {
@@ -94,5 +97,6 @@ export const useAppStore = create<AppState>((set, get) => ({
     } finally {
       get().logout();
     }
-  }
+  },
+  setLogoutModalOpen: (isOpen) => set({ isLogoutModalOpen: isOpen })
 }));

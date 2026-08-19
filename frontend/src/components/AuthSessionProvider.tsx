@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import api from "../utils/api";
 import { useAppStore } from "../store/useAppStore";
 import { useAuthStore } from "../store/useAuthStore";
+import LogoutModal from "./modals/LogoutModal";
 
 export function AuthSessionProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -32,10 +33,23 @@ export function AuthSessionProvider({ children }: { children: React.ReactNode })
 
     initAuthSession();
 
+    const handleUnauthorized = () => {
+      useAppStore.getState().logout();
+      useAuthStore.getState().setUser(null);
+    };
+
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
+
     return () => {
       isMounted = false;
+      window.removeEventListener('auth:unauthorized', handleUnauthorized);
     };
   }, []);
 
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <LogoutModal />
+    </>
+  );
 }

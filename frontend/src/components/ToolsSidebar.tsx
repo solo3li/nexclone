@@ -42,6 +42,7 @@ export default function ToolsSidebar() {
     user, 
     setUser, 
     logout, 
+    setLogoutModalOpen,
     isSidebarCollapsed, 
     toggleSidebarCollapse,
     toolConfigs,
@@ -197,12 +198,8 @@ export default function ToolsSidebar() {
     setExpandedCategories(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const handleLogout = async () => {
-    try {
-      await api.post('/api/auth/logout');
-    } catch { }
-    logout();
-    router.push('/login');
+  const handleLogout = () => {
+    setLogoutModalOpen(true);
   };
 
   // Fetch active history tasks for live queue counter
