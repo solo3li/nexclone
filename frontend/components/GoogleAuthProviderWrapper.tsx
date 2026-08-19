@@ -1,6 +1,9 @@
 "use client";
 
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import React, { createContext } from 'react';
+
+export const GoogleAuthContext = createContext<string | null>(null);
 
 export function GoogleAuthProviderWrapper({
   children,
@@ -9,15 +12,15 @@ export function GoogleAuthProviderWrapper({
   children: React.ReactNode;
   clientId: string | null;
 }) {
-  // If no Google Client ID is configured, render children without the provider
-  // This avoids "missing-client-id" console errors
-  if (!clientId) {
-    return <>{children}</>;
-  }
-
   return (
-    <GoogleOAuthProvider clientId={clientId}>
-      {children}
-    </GoogleOAuthProvider>
+    <GoogleAuthContext.Provider value={clientId}>
+      {clientId ? (
+        <GoogleOAuthProvider clientId={clientId}>
+          {children}
+        </GoogleOAuthProvider>
+      ) : (
+        <>{children}</>
+      )}
+    </GoogleAuthContext.Provider>
   );
 }
