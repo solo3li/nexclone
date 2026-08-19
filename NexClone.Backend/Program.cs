@@ -233,6 +233,8 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 
+builder.Services.AddHealthChecks();
+
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
@@ -277,10 +279,8 @@ using (var scope = app.Services.CreateScope())
         {
             "http://localhost:3000", "http://localhost:3001",
             "http://167.71.66.188:3000", "http://178.62.192.74:3000",
-            "https://yes-ralph-foster-coalition.trycloudflare.com",
-            "https://inkjet-joining-falls-endorsement.trycloudflare.com",
-            "https://recently-gnome-growth-accomplished.trycloudflare.com",
-            "https://nascar-introduces-polo-appreciation.trycloudflare.com"
+            "https://nexclone-dev.169.58.204.169.nip.io",
+            "https://api-nexclone-dev.169.58.204.169.nip.io"
         };
         var currentList = existingOrigins.Value.Split(',').Select(o => o.Trim()).ToList();
         bool changed = false;
@@ -455,6 +455,7 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+app.MapHealthChecks("/health");
 app.MapHub<NexClone.Backend.Hubs.TicketHub>("/hubs/ticket");
 app.MapHub<NexClone.Backend.Hubs.NotificationHub>("/hubs/notification");
 

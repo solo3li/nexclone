@@ -43,8 +43,8 @@ ingress:
   tls: true
   certIssuer: letsencrypt-prod
   hosts:
-    frontend: nexclone-dev.167.71.66.188.nip.io
-    backend:  api-nexclone-dev.167.71.66.188.nip.io
+    frontend: nexclone-dev.169.58.204.169.nip.io
+    backend:  api-nexclone-dev.169.58.204.169.nip.io
 
 # ── Secret name (will be created from .dev.env) ───────────────
 envSecretName: nexclone-dev-env
@@ -97,7 +97,7 @@ redis:
 
 # ── RabbitMQ — use official rabbitmq:3-management-alpine ─────────────────────
 rabbitmq:
-  enabled: true
+  enabled: false
   image:
     registry: docker.io
     repository: library/rabbitmq

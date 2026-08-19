@@ -14,7 +14,7 @@ metadata:
     {{- end }}
     traefik.ingress.kubernetes.io/router.entrypoints: websecure,web
     # Force HTTPS redirect
-    traefik.ingress.kubernetes.io/router.middlewares: default-redirect-https@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: nexclone-dev-redirect-https@kubernetescrd
 spec:
   ingressClassName: {{ .Values.ingress.ingressClass }}
   {{- if .Values.ingress.tls }}

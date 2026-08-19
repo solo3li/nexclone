@@ -100,7 +100,7 @@ redis:
 
 # ── Sub-chart: RabbitMQ ────────────────────────────────────────
 rabbitmq:
-  enabled: true
+  enabled: false
   auth:
     username: devuser
     password: devrabbit123!

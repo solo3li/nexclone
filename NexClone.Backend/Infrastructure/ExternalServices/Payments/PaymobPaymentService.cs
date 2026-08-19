@@ -104,7 +104,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
                     paymentMethodsList.Add(walletIntegrationId);
             }
 
-            string frontendUrl = _configuration["AppSettings:DefaultFrontendUrl"] ?? "https://yes-ralph-foster-coalition.trycloudflare.com";
+            string frontendUrl = _configuration["AppSettings:DefaultFrontendUrl"] ?? "https://nexclone-dev.169.58.204.169.nip.io";
             string redirectionUrl = $"{frontendUrl.TrimEnd('/')}/ar/payment/success?method=paymob";
 
             var payload = new

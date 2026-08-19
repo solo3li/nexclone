@@ -11,6 +11,8 @@ const nextConfig = {
     '*.trycloudflare.com',
     'optimize-brief-configuring-promo.trycloudflare.com',
     'playstation-malpractice-physical-development.trycloudflare.com',
+    '*.nip.io',
+    'nexclone-dev.169.58.204.169.nip.io',
   ],
   typescript: {
     ignoreBuildErrors: true,
@@ -43,11 +45,11 @@ const nextConfig = {
       beforeFiles: [
         {
           source: '/api/:path*',
-          destination: 'http://127.0.0.1:8080/api/:path*',
+          destination: 'http://nexclone-backend:8080/api/:path*',
         },
         {
           source: '/nexmedia/:path*',
-          destination: 'http://minio:9001/nexmedia/:path*',
+          destination: 'http://nexclone-dev-minio:9000/nexmedia/:path*',
         },
       ],
     };
