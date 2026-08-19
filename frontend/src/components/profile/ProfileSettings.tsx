@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { User as UserIcon, Lock, Upload, Save, Loader2, CheckCircle2, AlertCircle, Image as ImageIcon, LogOut } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useAppStore } from "../../../store/useAppStore";
+import { useAppStore } from "../../store/useAppStore";
 
 interface Props {
   user: any;
