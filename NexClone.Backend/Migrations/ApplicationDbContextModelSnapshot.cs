@@ -1241,6 +1241,9 @@ namespace NexClone.Backend.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<decimal>("CostPerGeneration")
+                        .HasColumnType("numeric");
+
                     b.Property<decimal>("CostPerSecond")
                         .HasColumnType("numeric");
 
@@ -1438,23 +1441,8 @@ namespace NexClone.Backend.Migrations
                     b.Property<string>("AllowedVoices")
                         .HasColumnType("text");
 
-                    b.Property<decimal>("AvatarVideoCostPerGeneration")
-                        .HasColumnType("numeric");
-
                     b.Property<bool>("AvatarVideoEnabled")
                         .HasColumnType("boolean");
-
-                    b.Property<int>("AvatarVideoMaxAudioFileSizeMb")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("AvatarVideoMaxCharsPerRequest")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("AvatarVideoMaxFileSizeMb")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("AvatarVideoProCost")
-                        .HasColumnType("numeric");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -1497,44 +1485,14 @@ namespace NexClone.Backend.Migrations
                     b.Property<bool>("IsFreeTrial")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("LipSyncChargePerSecond")
-                        .HasColumnType("boolean");
-
-                    b.Property<decimal>("LipSyncCostPerGeneration")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("LipSyncCostPerSecond")
-                        .HasColumnType("numeric");
-
                     b.Property<bool>("LipSyncEnabled")
                         .HasColumnType("boolean");
-
-                    b.Property<int>("LipSyncMaxAudioFileSizeMb")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("LipSyncMaxDurationSeconds")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("LipSyncMaxVideoFileSizeMb")
-                        .HasColumnType("integer");
 
                     b.Property<decimal>("MonthlyCredits")
                         .HasColumnType("numeric");
 
-                    b.Property<decimal>("MotionControlCostPerGeneration")
-                        .HasColumnType("numeric");
-
                     b.Property<bool>("MotionControlEnabled")
                         .HasColumnType("boolean");
-
-                    b.Property<int>("MotionControlMaxImageFileSizeMb")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("MotionControlMaxVideoFileSizeMb")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("MotionControlProCost")
-                        .HasColumnType("numeric");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -1561,14 +1519,8 @@ namespace NexClone.Backend.Migrations
                     b.Property<decimal>("StandardCredits")
                         .HasColumnType("numeric");
 
-                    b.Property<decimal>("SttCostPerMinute")
-                        .HasColumnType("numeric");
-
                     b.Property<bool>("SttEnabled")
                         .HasColumnType("boolean");
-
-                    b.Property<int>("SttMaxFileSizeMb")
-                        .HasColumnType("integer");
 
                     b.Property<decimal>("TaxPercentageEgp")
                         .HasColumnType("numeric");
@@ -1582,23 +1534,8 @@ namespace NexClone.Backend.Migrations
                     b.Property<bool>("TextToVideoEnabled")
                         .HasColumnType("boolean");
 
-                    b.Property<int>("TtsCharactersBlock")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("TtsCostPerChar")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("TtsCostPerCharHigh")
-                        .HasColumnType("numeric");
-
-                    b.Property<bool>("TtsCustomInstructionsEnabled")
-                        .HasColumnType("boolean");
-
                     b.Property<bool>("TtsEnabled")
                         .HasColumnType("boolean");
-
-                    b.Property<int>("TtsMaxCharsPerRequest")
-                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -1976,6 +1913,87 @@ namespace NexClone.Backend.Migrations
                     b.ToTable("TextToVideoSettings");
                 });
 
+            modelBuilder.Entity("NexClone.Backend.Core.Entities.TextToVoiceModelPricing", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AllowedWallet")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<decimal>("BaseCost")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("BillingType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<decimal>("CostPerChar")
+                        .HasColumnType("numeric");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ModelName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ProviderName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("QualityLevel")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TextToVoiceModelPricings");
+                });
+
+            modelBuilder.Entity("NexClone.Backend.Core.Entities.TextToVoiceSetting", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CurrentPrimaryRequestCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("FallbackResetDurationHours")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("FallbackThresholdLimit")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("LastResetDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("MaxConcurrentOperations")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MaxTextLength")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TextToVoiceSettings");
+                });
+
             modelBuilder.Entity("NexClone.Backend.Core.Entities.TicketMessage", b =>
                 {
                     b.Property<int>("Id")
@@ -2174,6 +2192,76 @@ namespace NexClone.Backend.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Voices");
+                });
+
+            modelBuilder.Entity("NexClone.Backend.Core.Entities.VoiceToTextModelPricing", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AllowedWallet")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<decimal>("BaseCost")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("BillingType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<decimal>("CostPerMinute")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("CostPerSecond")
+                        .HasColumnType("numeric");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ModelName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ProviderName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VoiceToTextModelPricings");
+                });
+
+            modelBuilder.Entity("NexClone.Backend.Core.Entities.VoiceToTextSetting", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("MaxAudioDurationMinutes")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("MaxAudioFileSizeMb")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("MaxConcurrentOperations")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VoiceToTextSettings");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>

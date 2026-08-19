@@ -769,6 +769,17 @@ namespace NexClone.Backend.API.Controllers.Admin
                     ttsSetting.MaxConcurrentOperations = MaxConcurrentOperations ?? 10;
                     if (int.TryParse(Request.Form["MaxTextLength"].ToString(), out int maxLen) && maxLen > 0)
                         ttsSetting.MaxTextLength = maxLen;
+                    
+                    if (int.TryParse(Request.Form["FallbackThresholdLimit"].ToString(), out int fallbackLimit) && fallbackLimit > 0)
+                        ttsSetting.FallbackThresholdLimit = fallbackLimit;
+                    else
+                        ttsSetting.FallbackThresholdLimit = null;
+
+                    if (int.TryParse(Request.Form["FallbackResetDurationHours"].ToString(), out int resetDuration) && resetDuration > 0)
+                        ttsSetting.FallbackResetDurationHours = resetDuration;
+                    else
+                        ttsSetting.FallbackResetDurationHours = null;
+
                     ttsSetting.UpdatedAt = DateTime.UtcNow;
 
                     string defaultWallet = config.AllowPremiumCredits && !config.AllowStandardCredits ? "Premium" : (config.AllowStandardCredits && !config.AllowPremiumCredits ? "Standard" : "Both");

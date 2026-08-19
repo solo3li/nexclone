@@ -92,6 +92,13 @@ namespace NexClone.Backend.Core.Entities
         public bool IsActive { get; set; } = true;
         public int MaxTextLength { get; set; } = 5000;
         public int MaxConcurrentOperations { get; set; } = 10;
+
+        // Quota-based Fallback Routing Settings
+        public int? FallbackThresholdLimit { get; set; }
+        public int? FallbackResetDurationHours { get; set; }
+        public int CurrentPrimaryRequestCount { get; set; } = 0;
+        public DateTime? LastResetDate { get; set; }
+
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }
 

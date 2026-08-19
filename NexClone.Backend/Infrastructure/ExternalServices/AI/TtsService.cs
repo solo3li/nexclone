@@ -30,6 +30,46 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
             if (string.IsNullOrWhiteSpace(text))
                 throw new ArgumentException("Text cannot be empty.");
 
+            // --- Quota-based Fallback Routing ---
+            var ttsSettings = await _dbContext.TextToVoiceSettings.FirstOrDefaultAsync();
+            if (ttsSettings != null && ttsSettings.FallbackThresholdLimit.HasValue && ttsSettings.FallbackThresholdLimit.Value > 0)
+            {
+                var now = DateTime.UtcNow;
+                
+                // Reset counter if duration has passed
+                if (ttsSettings.FallbackResetDurationHours.HasValue && ttsSettings.LastResetDate.HasValue)
+                {
+                    if ((now - ttsSettings.LastResetDate.Value).TotalHours >= ttsSettings.FallbackResetDurationHours.Value)
+                    {
+                        ttsSettings.CurrentPrimaryRequestCount = 0;
+                        ttsSettings.LastResetDate = now;
+                    }
+                }
+                else if (!ttsSettings.LastResetDate.HasValue)
+                {
+                    ttsSettings.LastResetDate = now;
+                }
+
+                if (ttsSettings.CurrentPrimaryRequestCount >= ttsSettings.FallbackThresholdLimit.Value)
+                {
+                    // Threshold exceeded, force Medium quality (Fallback)
+                    quality = "Medium";
+                }
+                else
+                {
+                    // Threshold not exceeded, force High quality (Primary) and increment counter
+                    quality = "High";
+                    ttsSettings.CurrentPrimaryRequestCount++;
+                }
+                await _dbContext.SaveChangesAsync();
+            }
+            else
+            {
+                // If no fallback is configured, just force High since we merged them in the UI
+                quality = "High";
+            }
+            // -------------------------------------
+
             // Resolve model based on quality from dedicated pricing table
             var pricing = await _dbContext.TextToVoiceModelPricings
                 .FirstOrDefaultAsync(p => p.QualityLevel.ToLower() == quality.ToLower() && p.IsActive);

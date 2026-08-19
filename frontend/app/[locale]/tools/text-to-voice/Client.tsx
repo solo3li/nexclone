@@ -47,7 +47,7 @@ function TextToVoicePage() {
   const [voices, setVoices] = useState<VoiceProfile[]>([]);
   const [selectedVoice, setSelectedVoice] = useState<string>("");
   const [voiceFilter, setVoiceFilter] = useState("all"); // "all" | "male" | "female"
-  const [selectedQuality, setSelectedQuality] = useState<string>("Standard");
+  const [selectedQuality, setSelectedQuality] = useState<string>("High");
   const [availableQualities, setAvailableQualities] = useState<Array<{ qualityLevel: string, costPerChar: number }>>([
     { qualityLevel: 'Standard', costPerChar: 0.001 },
     { qualityLevel: 'Medium', costPerChar: 0.005 },
@@ -596,31 +596,6 @@ function TextToVoicePage() {
                   </div>
                 </div>
 
-                {/* Quality Mode */}
-                <div className="bg-[#0a0015]/60 border border-white/5 rounded-xl p-2">
-                  <div className="flex items-center gap-2 mb-2 px-1">
-                    <div className="w-5 h-5 bg-violet-600/20 rounded flex items-center justify-center">
-                      <Zap className="w-3 h-3 text-violet-400" />
-                    </div>
-                    <span className="text-white/80 text-xs font-semibold">{isRtl ? 'جودة الصوت' : 'Audio Quality'}</span>
-                  </div>
-                  
-                  <div className="flex bg-white/5 p-1 rounded-full border border-white/5 gap-1">
-                    {['Standard', 'Medium', 'High'].map((q) => (
-                      <button
-                        key={q}
-                        onClick={() => setSelectedQuality(q)}
-                        className={`flex-1 py-1.5 rounded-full text-[10px] font-medium transition-all ${
-                          selectedQuality === q
-                            ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-md shadow-violet-600/30 font-bold'
-                            : 'text-white/50 hover:text-white'
-                        }`}
-                      >
-                        {isRtl ? (q === 'Standard' ? 'عادية' : q === 'Medium' ? 'متوسطة' : 'فائقة') : q}
-                      </button>
-                    ))}
-                  </div>
-                </div>
 
                 {/* Free Account Notice - Only in Arabic Mode and if on Free/No plan */}
                 {languageMode === 'arabic' && (!user?.activePlan || user.activePlan.name?.toLowerCase() === 'free') && (
