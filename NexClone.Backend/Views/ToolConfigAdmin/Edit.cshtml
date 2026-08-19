@@ -893,27 +893,6 @@
                 </div>
             </div>
 
-            <!-- 2. Medium: Gemini 2.5 Pro -->
-            <div style="background: #fbfbfb; border: 1px solid #e8e8e8; border-radius: 6px; padding: 1.5rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <div>
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span style="background: #edf5ff; color: #0043ce; font-weight: 700; font-size: 0.8rem; padding: 3px 8px; border-radius: 4px;">MEDIUM QUALITY</span>
-                            <span style="font-weight: 700; font-size: 1.1rem; color: #161616;">Gemini 2.5 Pro TTS</span>
-                        </div>
-                        <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: #525252;">Advanced high-fidelity voice synthesis for long-form reading, audiobooks, and complex narration.</p>
-                    </div>
-                    <span style="background: #eef3fe; color: #0f62fe; font-weight: 600; font-size: 0.85rem; padding: 6px 14px; border-radius: 4px; border: 1px solid #c9deff;">
-                        @((medPrice * 1000m).ToString("0.00")) Credits / 1,000 chars
-                    </span>
-                </div>
-                <div class="bx--form-item" style="max-width: 320px;">
-                    <label class="bx--label" style="font-weight: 600; font-size: 0.95rem;">@Localizer["Cost Per Character (Credits)"]</label>
-                    <input type="number" step="0.0001" min="0" name="ModelCosts[Medium]" class="bx--text-input" value="@medPrice" style="font-size: 1.15rem; font-weight: bold;" />
-                    <div class="bx--form__helper-text">Model: gemini-2.5-pro-preview-tts (Default: 0.005 Credits/char = 5.0 Credits/1k).</div>
-                </div>
-            </div>
-
             <!-- 3. High: Gemini 3.1 Flash -->
             <div style="background: #fbfbfb; border: 1px solid #e8e8e8; border-radius: 6px; padding: 1.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
