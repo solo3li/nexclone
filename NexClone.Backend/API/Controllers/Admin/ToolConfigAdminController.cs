@@ -272,7 +272,6 @@ namespace NexClone.Backend.API.Controllers.Admin
                     ttsPricings = new List<Core.Entities.TextToVoiceModelPricing>
                     {
                         new Core.Entities.TextToVoiceModelPricing { QualityLevel = "Standard", ModelName = "gemini-2.5-flash-preview-tts", ProviderName = "Gemini", CostPerChar = 0.001m, AllowedWallet = "Standard", IsActive = true },
-                        new Core.Entities.TextToVoiceModelPricing { QualityLevel = "Medium", ModelName = "gemini-2.5-pro-preview-tts", ProviderName = "Gemini", CostPerChar = 0.005m, AllowedWallet = "Standard", IsActive = true },
                         new Core.Entities.TextToVoiceModelPricing { QualityLevel = "High", ModelName = "gemini-3.1-flash-tts-preview", ProviderName = "Gemini", CostPerChar = 0.010m, AllowedWallet = "Standard", IsActive = true }
                     };
                     _context.TextToVoiceModelPricings.AddRange(ttsPricings);
@@ -799,18 +798,6 @@ namespace NexClone.Backend.API.Controllers.Admin
                     if (ModelCosts.ContainsKey("Standard")) stdPricing.CostPerChar = ModelCosts["Standard"];
                     else if (ModelCosts.ContainsKey("gemini-2.5-flash-preview-tts")) stdPricing.CostPerChar = ModelCosts["gemini-2.5-flash-preview-tts"];
 
-                    var medPricing = ttsPricings.FirstOrDefault(p => p.QualityLevel == "Medium");
-                    if (medPricing == null)
-                    {
-                        medPricing = new Core.Entities.TextToVoiceModelPricing { QualityLevel = "Medium", ModelName = "gemini-2.5-pro-preview-tts", ProviderName = "Gemini", CostPerChar = 0.005m };
-                        _context.TextToVoiceModelPricings.Add(medPricing);
-                    }
-                    medPricing.ModelName = "gemini-2.5-pro-preview-tts";
-                    medPricing.ProviderName = "Gemini";
-                    medPricing.IsActive = config.IsActive;
-                    medPricing.AllowedWallet = defaultWallet;
-                    if (ModelCosts.ContainsKey("Medium")) medPricing.CostPerChar = ModelCosts["Medium"];
-                    else if (ModelCosts.ContainsKey("gemini-2.5-pro-preview-tts")) medPricing.CostPerChar = ModelCosts["gemini-2.5-pro-preview-tts"];
 
                     var highPricing = ttsPricings.FirstOrDefault(p => p.QualityLevel == "High");
                     if (highPricing == null)

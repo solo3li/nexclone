@@ -30,6 +30,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
             if (string.IsNullOrWhiteSpace(text))
                 throw new ArgumentException("Text cannot be empty.");
 
+            bool useFallbackModel = false;
             // --- Quota-based Fallback Routing (Only for High Quality) ---
             var ttsSettings = await _dbContext.TextToVoiceSettings.FirstOrDefaultAsync();
             if (quality.Equals("High", StringComparison.OrdinalIgnoreCase) && ttsSettings != null && ttsSettings.FallbackThresholdLimit.HasValue && ttsSettings.FallbackThresholdLimit.Value > 0)
@@ -52,8 +53,8 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
 
                 if (ttsSettings.CurrentPrimaryRequestCount >= ttsSettings.FallbackThresholdLimit.Value)
                 {
-                    // Threshold exceeded, force Medium quality (Fallback)
-                    quality = "Medium";
+                    // Threshold exceeded, force fallback model
+                    useFallbackModel = true;
                 }
                 else
                 {
@@ -69,10 +70,14 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                 .FirstOrDefaultAsync(p => p.QualityLevel.ToLower() == quality.ToLower() && p.IsActive);
 
             string modelName = pricing?.ModelName ?? (
-                quality.Equals("High", StringComparison.OrdinalIgnoreCase) ? "gemini-2.5-flash-preview-tts" :
-                quality.Equals("Medium", StringComparison.OrdinalIgnoreCase) ? "gemini-2.5-flash-preview-tts" :
+                quality.Equals("High", StringComparison.OrdinalIgnoreCase) ? "gemini-3.1-flash-tts-preview" :
                 "gemini-2.5-flash-preview-tts"
             );
+
+            if (useFallbackModel)
+            {
+                modelName = "gemini-2.5-pro-preview-tts";
+            }
 
             var isArabic = string.Equals(language, "arabic", StringComparison.OrdinalIgnoreCase);
             var darijatConfig = await _dbContext.ApiConfigurations.FirstOrDefaultAsync(c => c.ProviderName == "Darijat" && c.IsActive);
