@@ -2,8 +2,9 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
-import { User as UserIcon, Lock, Upload, Save, Loader2, CheckCircle2, AlertCircle, Image as ImageIcon } from "lucide-react";
+import { User as UserIcon, Lock, Upload, Save, Loader2, CheckCircle2, AlertCircle, Image as ImageIcon, LogOut } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useAppStore } from "../../../store/useAppStore";
 
 interface Props {
   user: any;
@@ -14,6 +15,7 @@ interface Props {
 
 export default function ProfileSettings({ user, isRtl, updateProfile, changePassword }: Props) {
   const t = useTranslations("Profile");
+  const { logoutAll } = useAppStore();
 
   // Settings State
   const [fullName, setFullName] = useState(user?.fullName || "");
@@ -231,6 +233,35 @@ export default function ProfileSettings({ user, isRtl, updateProfile, changePass
               {isRtl ? "تحديث كلمة المرور" : "Update Password"}
             </button>
           </div>
+        </div>
+      </motion.div>
+
+      {/* Session Management */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+        className="bg-white/5 backdrop-blur-xl border border-rose-500/20 rounded-3xl p-6 md:p-8"
+      >
+        <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+          <LogOut className="w-6 h-6 text-rose-400" />
+          {isRtl ? "إدارة الجلسات" : "Session Management"}
+        </h2>
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex-1">
+             <p className="text-white/70 text-sm">
+               {isRtl ? "في حالة فقدان هاتفك المحمول أو الشك في وجود نشاط غير مصرح به، يمكنك تسجيل الخروج من جميع الأجهزة المتصلة بحسابك فوراً." : "If you lost your phone or suspect unauthorized access, you can immediately log out from all connected devices."}
+             </p>
+          </div>
+          <button
+             onClick={() => {
+                if (confirm(isRtl ? "هل أنت متأكد من رغبتك في تسجيل الخروج من جميع الأجهزة؟" : "Are you sure you want to log out from all devices?")) {
+                  logoutAll();
+                }
+             }}
+             className="px-6 py-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 font-bold rounded-xl hover:bg-rose-500/20 transition-colors flex items-center gap-2 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-rose-500/30"
+          >
+             <LogOut className="w-5 h-5" />
+             {isRtl ? "الخروج من جميع الأجهزة" : "Logout from all devices"}
+          </button>
         </div>
       </motion.div>
     </div>

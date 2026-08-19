@@ -52,6 +52,7 @@ export interface AppState {
   updateUser: (data: any) => void;
   setInitializing: (isInit: boolean) => void;
   logout: () => void;
+  logoutAll: () => Promise<void>;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -83,5 +84,15 @@ export const useAppStore = create<AppState>((set, get) => ({
       localStorage.removeItem('accessToken');
     }
     set({ user: null, isAuthenticated: false, hasPhoneNumber: false, isInitializing: false });
+  },
+  logoutAll: async () => {
+    try {
+      const { default: api } = await import('../utils/api');
+      await api.post('/api/auth/logout-all');
+    } catch (err) {
+      console.error('[Store] Logout all failed:', err);
+    } finally {
+      get().logout();
+    }
   }
 }));

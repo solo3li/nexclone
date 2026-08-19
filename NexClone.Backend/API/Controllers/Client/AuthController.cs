@@ -359,7 +359,22 @@ namespace NexClone.Backend.API.Controllers.Client
 
             var token = GenerateJwtToken(user);
             
+            // X-Forwarded-For was fetched earlier in Login as ipAddress. We can use it.
+            // But just in case, we do it safely:
+            var ipAddrForRefresh = Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+            var refreshToken = GenerateRefreshToken(user.Id, ipAddrForRefresh);
+            _context.RefreshTokens.Add(refreshToken);
+            await _context.SaveChangesAsync();
+            
             var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddMinutes(15),
+                IsEssential = true
+            };
+            var refreshOptions = new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
@@ -368,6 +383,7 @@ namespace NexClone.Backend.API.Controllers.Client
                 IsEssential = true
             };
             Response.Cookies.Append("jwt", token, cookieOptions);
+            Response.Cookies.Append("refreshToken", refreshToken.Token, refreshOptions);
 
             return Ok(new AuthResponse
             {
@@ -531,7 +547,22 @@ namespace NexClone.Backend.API.Controllers.Client
 
             var token = GenerateJwtToken(user);
             
+            // X-Forwarded-For was fetched earlier in Login as ipAddress. We can use it.
+            // But just in case, we do it safely:
+            var ipAddrForRefresh = Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+            var refreshToken = GenerateRefreshToken(user.Id, ipAddrForRefresh);
+            _context.RefreshTokens.Add(refreshToken);
+            await _context.SaveChangesAsync();
+            
             var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddMinutes(15),
+                IsEssential = true
+            };
+            var refreshOptions = new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
@@ -540,6 +571,7 @@ namespace NexClone.Backend.API.Controllers.Client
                 IsEssential = true
             };
             Response.Cookies.Append("jwt", token, cookieOptions);
+            Response.Cookies.Append("refreshToken", refreshToken.Token, refreshOptions);
 
             return Ok(new AuthResponse
             {
@@ -660,30 +692,113 @@ namespace NexClone.Backend.API.Controllers.Client
                 issuer: issuer,
                 audience: audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddDays(15),
+                expires: DateTime.UtcNow.AddMinutes(15),
                 signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        [HttpPost("refresh-token")]
-        public IActionResult RefreshTokenEndpoint()
+
+        private RefreshToken GenerateRefreshToken(Guid userId, string ipAddress)
         {
-            return BadRequest(new { Message = "Refresh tokens are no longer used. Please use the 15-day JWT." });
+            var randomBytes = new byte[64];
+            using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomBytes);
+            }
+            return new RefreshToken
+            {
+                UserId = userId,
+                Token = Convert.ToBase64String(randomBytes),
+                ExpiresAt = DateTime.UtcNow.AddDays(15),
+                CreatedByIp = ipAddress
+            };
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshTokenEndpoint()
+        {
+            var refreshTokenCookie = Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(refreshTokenCookie))
+                return Unauthorized(new { Message = "لا يوجد توكن تحديث صالح." });
+
+            var existingToken = await _context.RefreshTokens
+                .Include(r => r.User)
+                .FirstOrDefaultAsync(r => r.Token == refreshTokenCookie);
+
+            if (existingToken == null || !existingToken.IsActive)
+                return Unauthorized(new { Message = "توكن التحديث غير صالح أو منتهي." });
+
+            // Revoke old token
+            existingToken.IsRevoked = true;
+            existingToken.RevokedAt = DateTime.UtcNow;
+            existingToken.RevokedByIp = Request.Headers["X-Forwarded-For"].FirstOrDefault() ?? HttpContext.Connection.RemoteIpAddress?.ToString();
+
+            // Generate new tokens
+            var newJwt = GenerateJwtToken(existingToken.User);
+            var newRefreshToken = GenerateRefreshToken(existingToken.UserId, existingToken.RevokedByIp ?? "Unknown");
+            existingToken.ReplacedByToken = newRefreshToken.Token;
+
+            _context.RefreshTokens.Add(newRefreshToken);
+            await _context.SaveChangesAsync();
+
+            var jwtOptions = new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.None, Expires = DateTime.UtcNow.AddMinutes(15), IsEssential = true };
+            var refreshOptions = new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.None, Expires = DateTime.UtcNow.AddDays(15), IsEssential = true };
+
+            Response.Cookies.Append("jwt", newJwt, jwtOptions);
+            Response.Cookies.Append("refreshToken", newRefreshToken.Token, refreshOptions);
+
+            return Ok(new AuthResponse { Token = newJwt, Email = existingToken.User.Email!, IsVerified = existingToken.User.IsVerified });
         }
 
         [HttpPost("logout")]
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
-            var cookieOptions = new CookieOptions
+            var refreshTokenCookie = Request.Cookies["refreshToken"];
+            if (!string.IsNullOrEmpty(refreshTokenCookie))
             {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.None
-            };
+                var existingToken = await _context.RefreshTokens.FirstOrDefaultAsync(r => r.Token == refreshTokenCookie);
+                if (existingToken != null)
+                {
+                    existingToken.IsRevoked = true;
+                    existingToken.RevokedAt = DateTime.UtcNow;
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            var cookieOptions = new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.None };
             Response.Cookies.Delete("jwt", cookieOptions);
-            return Ok(new { Message = "Logged out" });
+            Response.Cookies.Delete("refreshToken", cookieOptions);
+            return Ok(new { Message = "تم تسجيل الخروج بنجاح" });
         }
+
+        [Authorize]
+        [HttpPost("logout-all")]
+        public async Task<IActionResult> LogoutAll()
+        {
+            var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value 
+                         ?? User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value;
+                         
+            if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var parsedUserId))
+                return Unauthorized();
+
+            var activeTokens = await _context.RefreshTokens
+                .Where(r => r.UserId == parsedUserId && !r.IsRevoked && r.ExpiresAt > DateTime.UtcNow)
+                .ToListAsync();
+
+            foreach (var t in activeTokens)
+            {
+                t.IsRevoked = true;
+                t.RevokedAt = DateTime.UtcNow;
+            }
+            await _context.SaveChangesAsync();
+
+            var cookieOptions = new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.None };
+            Response.Cookies.Delete("jwt", cookieOptions);
+            Response.Cookies.Delete("refreshToken", cookieOptions);
+            return Ok(new { Message = "تم تسجيل الخروج من جميع الأجهزة بنجاح" });
+        }
+
 
         [HttpPost("add-phone")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
