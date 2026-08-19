@@ -65,8 +65,8 @@ if ! $NO_BUILD; then
 
   info "🔨 Building frontend image (nexclone-frontend:latest)..."
   docker build \
-    --build-arg NEXT_PUBLIC_API_URL=https://api-nexclone-dev.167.71.66.188.nip.io \
-    --build-arg NEXT_PUBLIC_SITE_URL=https://nexclone-dev.167.71.66.188.nip.io \
+    --build-arg NEXT_PUBLIC_API_URL=https://api-nexclone-dev.169.58.204.169.nip.io \
+    --build-arg NEXT_PUBLIC_SITE_URL=https://nexclone-dev.169.58.204.169.nip.io \
     -t nexclone-frontend:latest ./frontend
 
   # Import images into k3s containerd (required for imagePullPolicy: Never)
@@ -94,8 +94,8 @@ helm upgrade --install "$RELEASE" "$CHART_DIR" \
 info ""
 info "✅ Deploy complete!"
 info ""
-info "  Frontend: https://nexclone-dev.167.71.66.188.nip.io"
-info "  Backend:  https://api-nexclone-dev.167.71.66.188.nip.io"
+info "  Frontend: https://nexclone-dev.169.58.204.169.nip.io"
+info "  Backend:  https://api-nexclone-dev.169.58.204.169.nip.io"
 info ""
 info "  Check pods:  kubectl get pods -n $NAMESPACE"
 info "  Logs:        kubectl logs -n $NAMESPACE deploy/nexclone-backend -f"
