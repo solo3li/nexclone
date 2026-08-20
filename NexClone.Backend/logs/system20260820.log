@@ -506,3 +506,35 @@ DETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error
 2026-08-20 13:54:00.847 +02:00 [INF] Server vmi3518782:249785:8bb8fba1 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-20 13:54:01.095 +02:00 [INF] Server vmi3518782:249785:8bb8fba1 all the dispatchers started
 2026-08-20 14:05:40.093 +02:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2026-08-20 14:16:19.627 +02:00 [INF] Server vmi3518782:249785:8bb8fba1 caught stopping signal...
+2026-08-20 14:16:19.637 +02:00 [INF] Server vmi3518782:249785:8bb8fba1 All dispatchers stopped
+2026-08-20 14:16:19.796 +02:00 [INF] Server vmi3518782:249785:8bb8fba1 successfully reported itself as stopped in 154.2747 ms
+2026-08-20 14:16:19.797 +02:00 [INF] Server vmi3518782:249785:8bb8fba1 has been stopped in total 163.3242 ms
+2026-08-20 14:17:02.554 +02:00 [INF] Start installing Hangfire SQL objects...
+2026-08-20 14:17:09.338 +02:00 [INF] Hangfire SQL objects installed.
+2026-08-20 14:17:11.771 +02:00 [INF] Media Cleanup Background Service started.
+2026-08-20 14:17:11.774 +02:00 [INF] SubscriptionStatusService is starting.
+2026-08-20 14:17:11.786 +02:00 [INF] Searching for processed media older than 08/06/2026 12:17:11...
+2026-08-20 14:17:11.841 +02:00 [WRN] The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased.
+2026-08-20 14:17:12.102 +02:00 [INF] Successfully cleaned up 0 media files in total.
+2026-08-20 14:17:12.176 +02:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-20 14:17:12.177 +02:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-20 14:17:12.178 +02:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-20 14:17:12.178 +02:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-20 14:17:12.184 +02:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-20 14:17:12.185 +02:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 20
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-20 14:17:12.408 +02:00 [INF] Server vmi3518782:254626:09c259ff successfully announced in 175.7443 ms
+2026-08-20 14:17:12.416 +02:00 [INF] Server vmi3518782:254626:09c259ff is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-20 14:17:12.824 +02:00 [INF] Server vmi3518782:254626:09c259ff all the dispatchers started
+2026-08-20 14:17:54.293 +02:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2026-08-20 14:18:14.599 +02:00 [INF] Admin-assigned FIRST_PURCHASE commission 150.03 EGP (rate 10%) for affiliate 14 on payment 332
+2026-08-20 14:18:20.441 +02:00 [INF] [Email Task] Sending email to bd333079@gmail.com
+2026-08-20 14:18:20.678 +02:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-20 14:18:20.680 +02:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-20 14:18:20.785 +02:00 [INF] Received HTTP response headers after 99.854ms - 201
+2026-08-20 14:18:20.787 +02:00 [INF] End processing HTTP request after 114.7175ms - 201
+2026-08-20 14:18:20.789 +02:00 [INF] [Email Task] Email sent to bd333079@gmail.com successfully.
