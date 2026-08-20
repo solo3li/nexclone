@@ -485,3 +485,23 @@ DETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error
 2026-08-20 13:51:29.987 +02:00 [INF] Server vmi3518782:204716:02624bd1 All dispatchers stopped
 2026-08-20 13:51:30.156 +02:00 [INF] Server vmi3518782:204716:02624bd1 successfully reported itself as stopped in 163.4076 ms
 2026-08-20 13:51:30.156 +02:00 [INF] Server vmi3518782:204716:02624bd1 has been stopped in total 178.5048 ms
+2026-08-20 13:53:54.631 +02:00 [INF] Start installing Hangfire SQL objects...
+2026-08-20 13:53:57.964 +02:00 [INF] Hangfire SQL objects installed.
+2026-08-20 13:53:59.346 +02:00 [INF] SubscriptionStatusService is starting.
+2026-08-20 13:53:59.347 +02:00 [INF] Media Cleanup Background Service started.
+2026-08-20 13:53:59.354 +02:00 [INF] Searching for processed media older than 08/06/2026 11:53:59...
+2026-08-20 13:53:59.373 +02:00 [WRN] The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased.
+2026-08-20 13:53:59.494 +02:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-20 13:53:59.495 +02:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-20 13:53:59.496 +02:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-20 13:53:59.497 +02:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-20 13:53:59.497 +02:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-20 13:53:59.497 +02:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 20
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-20 13:54:00.664 +02:00 [INF] Successfully cleaned up 0 media files in total.
+2026-08-20 13:54:00.773 +02:00 [INF] Server vmi3518782:249785:8bb8fba1 successfully announced in 1214.2644 ms
+2026-08-20 13:54:00.847 +02:00 [INF] Server vmi3518782:249785:8bb8fba1 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-20 13:54:01.095 +02:00 [INF] Server vmi3518782:249785:8bb8fba1 all the dispatchers started
