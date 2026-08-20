@@ -23,6 +23,8 @@ namespace NexClone.Backend.Application.Services
         public decimal MinPayoutEgp { get; set; }
         public int MaxRecurringMonths { get; set; }
         public int MaxInactivityDays { get; set; }
+        public bool PreventFingerprintFraud { get; set; }
+        public bool PreventIpFraud { get; set; }
     }
 
     public class AffiliateCurrencyBalance
@@ -60,6 +62,8 @@ namespace NexClone.Backend.Application.Services
         private const string KEY_MIN_EGP = "Affiliate.MinPayoutEgp";
         private const string KEY_MAX_MONTHS = "Affiliate.MaxRecurringMonths";
         private const string KEY_MAX_INACTIVITY = "Affiliate.MaxInactivityDays";
+        private const string KEY_PREVENT_FINGERPRINT = "Affiliate.PreventFingerprintFraud";
+        private const string KEY_PREVENT_IP = "Affiliate.PreventIpFraud";
 
         public AffiliateService(ApplicationDbContext db, ILogger<AffiliateService> logger)
         {
@@ -75,7 +79,7 @@ namespace NexClone.Backend.Application.Services
             {
                 KEY_ENABLED, KEY_HOLD, KEY_ATTRIBUTION,
                 KEY_RECURRING, KEY_STOP_ON_CANCEL, KEY_MIN_USD, KEY_MIN_EGP,
-                KEY_MAX_MONTHS, KEY_MAX_INACTIVITY
+                KEY_MAX_MONTHS, KEY_MAX_INACTIVITY, KEY_PREVENT_FINGERPRINT, KEY_PREVENT_IP
             };
             var settings = await _db.AppSettings
                 .Where(s => keys.Contains(s.Key))
@@ -92,6 +96,8 @@ namespace NexClone.Backend.Application.Services
                 MinPayoutEgp        = GetDecimal(settings, KEY_MIN_EGP, 500),
                 MaxRecurringMonths  = GetInt(settings, KEY_MAX_MONTHS, 0),
                 MaxInactivityDays   = GetInt(settings, KEY_MAX_INACTIVITY, 0),
+                PreventFingerprintFraud = GetBool(settings, KEY_PREVENT_FINGERPRINT, false),
+                PreventIpFraud      = GetBool(settings, KEY_PREVENT_IP, false),
             };
         }
 
@@ -106,6 +112,8 @@ namespace NexClone.Backend.Application.Services
             await UpsertSettingAsync(KEY_MIN_EGP, dto.MinPayoutEgp.ToString("F2", System.Globalization.CultureInfo.InvariantCulture), "Minimum payout amount in EGP");
             await UpsertSettingAsync(KEY_MAX_MONTHS, dto.MaxRecurringMonths.ToString(), "Max months for recurring commissions (0 for unlimited)");
             await UpsertSettingAsync(KEY_MAX_INACTIVITY, dto.MaxInactivityDays.ToString(), "Max days of inactivity before referral link drops (0 for unlimited)");
+            await UpsertSettingAsync(KEY_PREVENT_FINGERPRINT, dto.PreventFingerprintFraud.ToString().ToLower(), "Prevent self-referral if device fingerprint matches affiliate");
+            await UpsertSettingAsync(KEY_PREVENT_IP, dto.PreventIpFraud.ToString().ToLower(), "Prevent self-referral if IP address matches affiliate");
             await _db.SaveChangesAsync();
         }
 
@@ -203,7 +211,7 @@ namespace NexClone.Backend.Application.Services
             return sessionToken;
         }
 
-        public async Task LinkReferralToUserAsync(string sessionToken, Guid newUserId)
+        public async Task LinkReferralToUserAsync(string sessionToken, Guid newUserId, string ipAddress, string fingerprint)
         {
             if (string.IsNullOrWhiteSpace(sessionToken)) return;
 
@@ -211,6 +219,7 @@ namespace NexClone.Backend.Application.Services
             if (await _db.AffiliateReferrals.AnyAsync(r => r.ReferredUserId == newUserId)) return;
 
             var referral = await _db.AffiliateReferrals
+                .Include(r => r.AffiliateProfile)
                 .FirstOrDefaultAsync(r => r.SessionToken == sessionToken && r.ReferredUserId == null);
 
             if (referral == null) return;
@@ -219,6 +228,26 @@ namespace NexClone.Backend.Application.Services
             {
                 _logger.LogInformation("Referral session {Token} expired. Attribution period ended.", sessionToken);
                 return;
+            }
+
+            var settings = await GetSettingsAsync();
+
+            if (settings.PreventIpFraud && !string.IsNullOrWhiteSpace(ipAddress) && ipAddress != "Unknown")
+            {
+                if (await _db.DeviceFingerprints.AnyAsync(df => df.UserId == referral.AffiliateProfile.UserId && df.IpAddress == ipAddress))
+                {
+                    _logger.LogWarning("Fraud prevented: Shared IP {IP} between Affiliate {AffId} and new user {NewId}", ipAddress, referral.AffiliateProfile.UserId, newUserId);
+                    return;
+                }
+            }
+
+            if (settings.PreventFingerprintFraud && !string.IsNullOrWhiteSpace(fingerprint))
+            {
+                if (await _db.DeviceFingerprints.AnyAsync(df => df.UserId == referral.AffiliateProfile.UserId && df.FingerprintHash == fingerprint))
+                {
+                    _logger.LogWarning("Fraud prevented: Shared Fingerprint {FP} between Affiliate {AffId} and new user {NewId}", fingerprint, referral.AffiliateProfile.UserId, newUserId);
+                    return;
+                }
             }
 
             referral.ReferredUserId = newUserId;
@@ -231,7 +260,7 @@ namespace NexClone.Backend.Application.Services
         /// Called during registration when a user manually enters a referral code.
         /// Creates a new referral record instantly and links it.
         /// </summary>
-        public async Task LinkManualReferralAsync(string referralCode, Guid newUserId)
+        public async Task LinkManualReferralAsync(string referralCode, Guid newUserId, string ipAddress, string fingerprint)
         {
             if (string.IsNullOrWhiteSpace(referralCode)) return;
             referralCode = referralCode.ToUpper();
@@ -244,8 +273,28 @@ namespace NexClone.Backend.Application.Services
 
             if (profile == null) return;
 
-            // Prevent referring yourself
+            // Prevent referring yourself (same account)
             if (profile.UserId == newUserId) return;
+
+            var settings = await GetSettingsAsync();
+
+            if (settings.PreventIpFraud && !string.IsNullOrWhiteSpace(ipAddress) && ipAddress != "Unknown")
+            {
+                if (await _db.DeviceFingerprints.AnyAsync(df => df.UserId == profile.UserId && df.IpAddress == ipAddress))
+                {
+                    _logger.LogWarning("Fraud prevented (Manual): Shared IP {IP} between Affiliate {AffId} and new user {NewId}", ipAddress, profile.UserId, newUserId);
+                    return;
+                }
+            }
+
+            if (settings.PreventFingerprintFraud && !string.IsNullOrWhiteSpace(fingerprint))
+            {
+                if (await _db.DeviceFingerprints.AnyAsync(df => df.UserId == profile.UserId && df.FingerprintHash == fingerprint))
+                {
+                    _logger.LogWarning("Fraud prevented (Manual): Shared Fingerprint {FP} between Affiliate {AffId} and new user {NewId}", fingerprint, profile.UserId, newUserId);
+                    return;
+                }
+            }
 
             var referral = new AffiliateReferral
             {

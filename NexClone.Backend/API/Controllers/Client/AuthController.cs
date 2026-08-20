@@ -146,12 +146,12 @@ namespace NexClone.Backend.API.Controllers.Client
                 if (!string.IsNullOrEmpty(refCodePayload))
                 {
                     // Manual code entered by user
-                    await affiliateService.LinkManualReferralAsync(refCodePayload, user.Id);
+                    await affiliateService.LinkManualReferralAsync(refCodePayload, user.Id, ipAddress, fingerprint);
                 }
                 else if (!string.IsNullOrEmpty(affCookie))
                 {
                     // No manual code, but they arrived via link previously
-                    await affiliateService.LinkReferralToUserAsync(affCookie, user.Id);
+                    await affiliateService.LinkReferralToUserAsync(affCookie, user.Id, ipAddress, fingerprint);
                 }
             }
 
@@ -187,21 +187,7 @@ namespace NexClone.Backend.API.Controllers.Client
 
             await _context.SaveChangesAsync();
 
-            // Link affiliate referral session (from ?ref= cookie) if present
-            try
-            {
-                var affiliateSession = Request.Cookies["aff_session"];
-                if (!string.IsNullOrEmpty(affiliateSession))
-                {
-                    var affSvc = HttpContext.RequestServices.GetService<NexClone.Backend.Application.Services.AffiliateService>();
-                    if (affSvc != null)
-                        await affSvc.LinkReferralToUserAsync(affiliateSession, user.Id);
-                }
-            }
-            catch (Exception affEx)
-            {
-                Console.WriteLine($"[Affiliate] Failed to link referral on register: {affEx.Message}");
-            }
+
 
             var verificationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var origin = Request.Headers["Origin"].FirstOrDefault() ?? _configuration["AppSettings:DefaultFrontendUrl"] ?? "http://localhost:3000";
@@ -460,12 +446,12 @@ namespace NexClone.Backend.API.Controllers.Client
                     if (!string.IsNullOrEmpty(refCodePayload))
                     {
                         // Manual code entered by user or passed directly
-                        await affiliateService.LinkManualReferralAsync(refCodePayload, user.Id);
+                        await affiliateService.LinkManualReferralAsync(refCodePayload, user.Id, ipAddress, fingerprint);
                     }
                     else if (!string.IsNullOrEmpty(affCookie))
                     {
                         // No manual code, but they arrived via link previously
-                        await affiliateService.LinkReferralToUserAsync(affCookie, user.Id);
+                        await affiliateService.LinkReferralToUserAsync(affCookie, user.Id, ipAddress, fingerprint);
                     }
                 }
             }
