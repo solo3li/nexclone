@@ -83,7 +83,7 @@ namespace NexClone.Backend.Application.Services
 
             return new AffiliateSettingsDto
             {
-                IsEnabled           = GetBool(settings, KEY_ENABLED, false),
+                IsEnabled           = GetBool(settings, KEY_ENABLED, true),
                 HoldPeriodDays      = GetInt(settings, KEY_HOLD, 14),
                 AttributionPeriodDays = GetInt(settings, KEY_ATTRIBUTION, 30),
                 RecurringEnabled    = GetBool(settings, KEY_RECURRING, true),

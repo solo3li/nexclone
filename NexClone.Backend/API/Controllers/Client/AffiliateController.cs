@@ -156,7 +156,7 @@ namespace NexClone.Backend.API.Controllers.Client
             var profile = await _db.AffiliateProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
             if (profile == null) return Ok(new object[] { });
 
-            var referrals = await _db.AffiliateReferrals
+            var referralsData = await _db.AffiliateReferrals
                 .Where(r => r.AffiliateProfileId == profile.Id && r.ReferredUserId.HasValue)
                 .Include(r => r.ReferredUser)
                 .OrderByDescending(r => r.ClickedAt)
@@ -165,16 +165,24 @@ namespace NexClone.Backend.API.Controllers.Client
                 .Select(r => new
                 {
                     referralId = r.Id,
-                    referredUser = r.ReferredUser != null ? new { name = r.ReferredUser.FullName, email = MaskEmail(r.ReferredUser.Email) } : null,
+                    referredUser = r.ReferredUser,
                     clickedAt = r.ClickedAt,
                     hasConverted = r.HasConverted,
-                    // Get their active subscription
                     activeSubscription = _db.Subscriptions
                         .Where(s => s.UserId == r.ReferredUserId && s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow)
                         .Select(s => new { planName = s.Plan.Name, status = s.Status })
                         .FirstOrDefault()
                 })
                 .ToListAsync();
+
+            var referrals = referralsData.Select(r => new
+            {
+                referralId = r.referralId,
+                referredUser = r.referredUser != null ? new { name = r.referredUser.FullName, email = MaskEmail(r.referredUser.Email) } : null,
+                clickedAt = r.clickedAt,
+                hasConverted = r.hasConverted,
+                activeSubscription = r.activeSubscription
+            }).ToList();
 
             return Ok(referrals);
         }
@@ -192,7 +200,7 @@ namespace NexClone.Backend.API.Controllers.Client
             var profile = await _db.AffiliateProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
             if (profile == null) return Ok(new object[] { });
 
-            var commissions = await _db.AffiliateCommissions
+            var commissionsData = await _db.AffiliateCommissions
                 .Where(c => c.AffiliateProfileId == profile.Id)
                 .Include(c => c.Customer)
                 .Include(c => c.Plan)
@@ -201,19 +209,36 @@ namespace NexClone.Backend.API.Controllers.Client
                 .Take(pageSize)
                 .Select(c => new
                 {
-                    id = c.Id,
-                    type = c.Type,
-                    amount = c.Amount,
-                    currency = c.Currency,
-                    rate = c.Rate,
-                    status = c.Status,
-                    createdAt = c.CreatedAt,
-                    availableAt = c.AvailableAt,
-                    paidAt = c.PaidAt,
-                    plan = new { name = c.Plan.Name, nameAr = c.Plan.NameAr },
-                    customerName = c.Customer.FullName ?? MaskEmail(c.Customer.Email)
+                    c.Id,
+                    c.Type,
+                    c.Amount,
+                    c.Currency,
+                    c.Rate,
+                    c.Status,
+                    c.CreatedAt,
+                    c.AvailableAt,
+                    c.PaidAt,
+                    PlanName = c.Plan.Name,
+                    PlanNameAr = c.Plan.NameAr,
+                    CustomerName = c.Customer.FullName,
+                    CustomerEmail = c.Customer.Email
                 })
                 .ToListAsync();
+
+            var commissions = commissionsData.Select(c => new
+            {
+                id = c.Id,
+                type = c.Type,
+                amount = c.Amount,
+                currency = c.Currency,
+                rate = c.Rate,
+                status = c.Status,
+                createdAt = c.CreatedAt,
+                availableAt = c.AvailableAt,
+                paidAt = c.PaidAt,
+                plan = new { name = c.PlanName, nameAr = c.PlanNameAr },
+                customerName = c.CustomerName ?? MaskEmail(c.CustomerEmail)
+            }).ToList();
 
             return Ok(commissions);
         }
