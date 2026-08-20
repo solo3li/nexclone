@@ -132,12 +132,10 @@ namespace NexClone.Backend.Application.Services
                 return (false, "User is already an affiliate.", profile);
 
             var code = await GenerateUniqueCodeAsync();
-            var count = await _db.AffiliateProfiles.CountAsync() + 1;
-
             profile = new AffiliateProfile
             {
                 UserId = userId,
-                AffiliateDisplayId = $"AF-{count:D5}",
+                AffiliateDisplayId = "PENDING", // Will be updated after inserting
                 ReferralCode = code,
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true,
@@ -149,6 +147,10 @@ namespace NexClone.Backend.Application.Services
             };
 
             _db.AffiliateProfiles.Add(profile);
+            await _db.SaveChangesAsync();
+            
+            // Assign display ID safely using the generated primary key
+            profile.AffiliateDisplayId = $"AF-{profile.Id:D5}";
             await _db.SaveChangesAsync();
 
             _logger.LogInformation("Onboarded AffiliateProfile {Id} for user {UserId}", profile.Id, userId);
@@ -226,6 +228,9 @@ namespace NexClone.Backend.Application.Services
         {
             if (string.IsNullOrWhiteSpace(referralCode)) return;
             referralCode = referralCode.ToUpper();
+            
+            // Prevent linking if user is already referred
+            if (await _db.AffiliateReferrals.AnyAsync(r => r.ReferredUserId == newUserId)) return;
 
             var profile = await _db.AffiliateProfiles
                 .FirstOrDefaultAsync(p => p.ReferralCode == referralCode && p.IsActive);
@@ -264,6 +269,12 @@ namespace NexClone.Backend.Application.Services
         {
             var settings = await GetSettingsAsync();
             if (!settings.IsEnabled) return;
+
+            // Prevent duplicate commissions
+            var isAlreadyCommissioned = await _db.AffiliateCommissions
+                .AnyAsync(c => c.PaymentId == paymentId && 
+                               c.Type != CommissionType.Reversal);
+            if (isAlreadyCommissioned) return;
 
             // Check if user was referred by an affiliate
             var referral = await _db.AffiliateReferrals
@@ -360,6 +371,12 @@ namespace NexClone.Backend.Application.Services
             if (!settings.IsEnabled) return;
 
             if (isRecurring && !settings.RecurringEnabled) return;
+
+            // Prevent duplicate commissions
+            var expectedType = isRecurring ? CommissionType.Recurring : CommissionType.FirstPurchase;
+            var isAlreadyCommissioned = await _db.AffiliateCommissions
+                .AnyAsync(c => c.PaymentId == paymentId && c.Type == expectedType);
+            if (isAlreadyCommissioned) return;
 
             var payment = await _db.Payments
                 .Include(p => p.User)
@@ -563,32 +580,37 @@ namespace NexClone.Backend.Application.Services
         /// </summary>
         public async Task<List<AffiliateCurrencyBalance>> GetBalancesAsync(int affiliateProfileId)
         {
-            var commissions = await _db.AffiliateCommissions
+            // Database-level grouping and summing for performance
+            var commissionTotals = await _db.AffiliateCommissions
                 .Where(c => c.AffiliateProfileId == affiliateProfileId)
+                .GroupBy(c => new { c.Currency, c.Status })
+                .Select(g => new { g.Key.Currency, g.Key.Status, Total = g.Sum(c => c.Amount) })
                 .ToListAsync();
 
-            var payouts = await _db.AffiliatePayouts
+            var payoutTotals = await _db.AffiliatePayouts
                 .Where(p => p.AffiliateProfileId == affiliateProfileId && 
                             p.Status != PayoutStatus.Rejected && 
                             p.Status != PayoutStatus.Failed)
+                .GroupBy(p => p.Currency)
+                .Select(g => new { Currency = g.Key, Total = g.Sum(p => p.Amount) })
                 .ToListAsync();
 
-            var currencies = commissions.Select(c => c.Currency).Distinct().ToList();
-
+            var currencies = commissionTotals.Select(c => c.Currency).Distinct().ToList();
             var result = new List<AffiliateCurrencyBalance>();
+
             foreach (var currency in currencies)
             {
-                decimal available = commissions
+                decimal available = commissionTotals
                     .Where(c => c.Currency == currency && c.Status == CommissionStatus.Available)
-                    .Sum(c => c.Amount);
+                    .Sum(c => c.Total);
 
-                decimal paid = payouts
+                decimal paid = payoutTotals
                     .Where(p => p.Currency == currency)
-                    .Sum(p => p.Amount);
+                    .Sum(p => p.Total);
 
-                decimal pending = commissions
+                decimal pending = commissionTotals
                     .Where(c => c.Currency == currency && c.Status == CommissionStatus.Pending)
-                    .Sum(c => c.Amount);
+                    .Sum(c => c.Total);
 
                 result.Add(new AffiliateCurrencyBalance
                 {
@@ -613,28 +635,39 @@ namespace NexClone.Backend.Application.Services
             if (amount < minimum)
                 return (false, $"Minimum payout is {minimum} {currency}.");
 
-            // Available balance check
-            var balances = await GetBalancesAsync(affiliateProfileId);
-            var balance = balances.FirstOrDefault(b => b.Currency == currency);
-            if (balance == null || balance.Available < amount)
-                return (false, "Insufficient available balance.");
-
-            var payout = new AffiliatePayout
+            // Use Serializable transaction to prevent Double Spend via race condition
+            using var transaction = await _db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+            try
             {
-                AffiliateProfileId = affiliateProfileId,
-                Amount = amount,
-                Currency = currency,
-                PayoutMethod = method,
-                PayoutAccount = account,
-                AffiliateMessage = message,
-                Status = PayoutStatus.Pending,
-                RequestedAt = DateTime.UtcNow
-            };
+                // Available balance check
+                var balances = await GetBalancesAsync(affiliateProfileId);
+                var balance = balances.FirstOrDefault(b => b.Currency == currency);
+                if (balance == null || balance.Available < amount)
+                    return (false, "Insufficient available balance.");
 
-            _db.AffiliatePayouts.Add(payout);
-            await _db.SaveChangesAsync();
+                var payout = new AffiliatePayout
+                {
+                    AffiliateProfileId = affiliateProfileId,
+                    Amount = amount,
+                    Currency = currency,
+                    PayoutMethod = method,
+                    PayoutAccount = account,
+                    AffiliateMessage = message,
+                    Status = PayoutStatus.Pending,
+                    RequestedAt = DateTime.UtcNow
+                };
 
-            return (true, string.Empty);
+                _db.AffiliatePayouts.Add(payout);
+                await _db.SaveChangesAsync();
+                
+                await transaction.CommitAsync();
+                return (true, string.Empty);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Transaction failed during payout request for profile {ProfileId}", affiliateProfileId);
+                return (false, "A concurrency error occurred, please try again.");
+            }
         }
 
         // ─── Admin Stats ──────────────────────────────────────────────────────
@@ -647,11 +680,6 @@ namespace NexClone.Backend.Application.Services
 
             if (profile == null) return new AffiliateStatsDto();
 
-            var referredUserIds = profile.Referrals
-                .Where(r => r.ReferredUserId.HasValue)
-                .Select(r => r.ReferredUserId!.Value)
-                .ToList();
-
             var paidCustomers = await _db.AffiliateCommissions
                 .Where(c => c.AffiliateProfileId == affiliateProfileId &&
                             c.Type == CommissionType.FirstPurchase)
@@ -660,7 +688,9 @@ namespace NexClone.Backend.Application.Services
                 .CountAsync();
 
             var activeSubscriptions = await _db.Subscriptions
-                .Where(s => referredUserIds.Contains(s.UserId) && s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow)
+                .Where(s => _db.AffiliateReferrals.Any(r => r.AffiliateProfileId == affiliateProfileId && r.ReferredUserId == s.UserId)
+                            && s.Status.ToLower() == "active" 
+                            && s.EndDate > DateTime.UtcNow)
                 .CountAsync();
 
             var balances = await GetBalancesAsync(affiliateProfileId);
