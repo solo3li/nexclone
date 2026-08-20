@@ -18,7 +18,7 @@ function GoogleLoginInner({ refCode }: { refCode?: string }) {
               token: credentialResponse.credential,
               refCode: refCode
             });
-            router.push('/');
+            window.location.href = '/';
           } catch (error) {
             console.error("Login failed", error);
             alert("Google login failed. Please try again.");

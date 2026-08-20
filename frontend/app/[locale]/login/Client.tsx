@@ -155,7 +155,7 @@ export default function LoginPage() {
       }
 
       await login({ email, password, deviceFingerprint: visitorId });
-      router.push("/");
+      window.location.href = "/";
     } catch (err: any) {
       if (err.response?.data?.RequiresVerification) {
         router.push(`/verify-email?email=${encodeURIComponent(email)}`);
