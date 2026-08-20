@@ -8,6 +8,8 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
+using NexClone.Backend.Core.Interfaces;
 
 namespace NexClone.Backend.API.Controllers.Admin
 {
@@ -16,11 +18,13 @@ namespace NexClone.Backend.API.Controllers.Admin
     {
         private readonly ApplicationDbContext _db;
         private readonly AffiliateService _affiliateService;
+        private readonly IMediaService _mediaService;
 
-        public AffiliateAdminController(ApplicationDbContext db, AffiliateService affiliateService)
+        public AffiliateAdminController(ApplicationDbContext db, AffiliateService affiliateService, IMediaService mediaService)
         {
             _db = db;
             _affiliateService = affiliateService;
+            _mediaService = mediaService;
         }
 
         // ─── Overview ────────────────────────────────────────────────────────
@@ -214,7 +218,7 @@ namespace NexClone.Backend.API.Controllers.Admin
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdatePayoutStatus(int id, string newStatus, string? rejectionReason = null)
+        public async Task<IActionResult> UpdatePayoutStatus(int id, string newStatus, string? rejectionReason = null, IFormFile? receipt = null)
         {
             var payout = await _db.AffiliatePayouts.FindAsync(id);
             if (payout == null) return NotFound();
@@ -222,7 +226,7 @@ namespace NexClone.Backend.API.Controllers.Admin
             var validTransitions = new Dictionary<string, string[]>
             {
                 [PayoutStatus.Pending]    = new[] { PayoutStatus.Approved, PayoutStatus.Rejected },
-                [PayoutStatus.Approved]   = new[] { PayoutStatus.Processing, PayoutStatus.Rejected },
+                [PayoutStatus.Approved]   = new[] { PayoutStatus.Processing, PayoutStatus.Paid, PayoutStatus.Rejected },
                 [PayoutStatus.Processing] = new[] { PayoutStatus.Paid, PayoutStatus.Failed },
             };
 
@@ -236,7 +240,21 @@ namespace NexClone.Backend.API.Controllers.Admin
             payout.ProcessedAt = DateTime.UtcNow;
 
             if (newStatus == PayoutStatus.Rejected)
+            {
                 payout.RejectionReason = rejectionReason;
+            }
+            else if (newStatus == PayoutStatus.Paid && receipt != null && receipt.Length > 0)
+            {
+                using var ms = new System.IO.MemoryStream();
+                await receipt.CopyToAsync(ms);
+                ms.Position = 0;
+                
+                var ext = System.IO.Path.GetExtension(receipt.FileName) ?? ".png";
+                var filename = $"receipt_{payout.Id}_{Guid.NewGuid():N}{ext}";
+                
+                var url = await _mediaService.UploadFileAsync(ms, filename, receipt.ContentType, "payout-receipts");
+                payout.TransferReceiptUrl = url;
+            }
 
             await _db.SaveChangesAsync();
 

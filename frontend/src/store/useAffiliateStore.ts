@@ -58,6 +58,7 @@ export interface AffiliatePayout {
   payoutAccount: string;
   status: string;
   rejectionReason: string | null;
+  transferReceiptUrl: string | null;
   requestedAt: string;
   processedAt: string | null;
 }

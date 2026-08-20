@@ -83,10 +83,14 @@
                         {
                             <div style="font-size:0.7rem; color:#c62828; margin-top:2px;">@payout.RejectionReason</div>
                         }
+                        @if (!string.IsNullOrEmpty(payout.TransferReceiptUrl))
+                        {
+                            <div style="margin-top:4px;"><a href="@payout.TransferReceiptUrl" target="_blank" style="font-size:0.75rem; color:#0f62fe; text-decoration:underline;">View Receipt</a></div>
+                        }
                     </td>
                     <td style="padding:0.6rem 0.75rem; text-align:center; font-size:0.8rem;">@payout.RequestedAt.ToString("yyyy-MM-dd")</td>
                     <td style="padding:0.6rem 0.75rem; text-align:center;">
-                        <form method="post" action="@Url.Action("UpdatePayoutStatus")" style="display:inline;">
+                        <form method="post" action="@Url.Action("UpdatePayoutStatus")" enctype="multipart/form-data" style="display:inline; display:flex; flex-direction:column; gap:0.5rem; align-items:center;">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="id" value="@payout.Id" />
 
@@ -102,8 +106,13 @@
                             }
                             else if (payout.Status == "PROCESSING")
                             {
-                                <button name="newStatus" value="PAID" class="bx--btn bx--btn--sm" style="background:#155724; color:#fff; border:none; padding:4px 10px; cursor:pointer;">Mark Paid</button>
-                                <button name="newStatus" value="FAILED" class="bx--btn bx--btn--sm" style="background:#721c24; color:#fff; border:none; padding:4px 10px; cursor:pointer; margin-left:4px;">Mark Failed</button>
+                                <div style="display:flex; flex-direction:column; gap:4px; align-items:center;">
+                                    <input type="file" name="receipt" accept="image/*" style="font-size:0.75rem; width:150px;" required />
+                                    <div style="display:flex; gap:4px;">
+                                        <button name="newStatus" value="PAID" class="bx--btn bx--btn--sm" style="background:#155724; color:#fff; border:none; padding:4px 10px; cursor:pointer;">Mark Paid</button>
+                                        <button name="newStatus" value="FAILED" class="bx--btn bx--btn--sm" formnovalidate style="background:#721c24; color:#fff; border:none; padding:4px 10px; cursor:pointer;">Mark Failed</button>
+                                    </div>
+                                </div>
                             }
                             else
                             {

@@ -36,6 +36,21 @@ namespace NexClone.Backend.API.Controllers.Client
             return id;
         }
 
+        private string MaskEmail(string? email)
+        {
+            if (string.IsNullOrWhiteSpace(email)) return string.Empty;
+            var parts = email.Split('@');
+            if (parts.Length != 2) return email;
+            
+            var name = parts[0];
+            var domain = parts[1];
+            
+            if (name.Length <= 2)
+                return $"{name[0]}***@{domain}";
+                
+            return $"{name[0]}***{name[^1]}@{domain}";
+        }
+
         // ─────────────────────────────────────────────
         //  GET /api/affiliate/profile
         // ─────────────────────────────────────────────
@@ -150,7 +165,7 @@ namespace NexClone.Backend.API.Controllers.Client
                 .Select(r => new
                 {
                     referralId = r.Id,
-                    referredUser = r.ReferredUser != null ? new { name = r.ReferredUser.FullName, email = r.ReferredUser.Email } : null,
+                    referredUser = r.ReferredUser != null ? new { name = r.ReferredUser.FullName, email = MaskEmail(r.ReferredUser.Email) } : null,
                     clickedAt = r.ClickedAt,
                     hasConverted = r.HasConverted,
                     // Get their active subscription
@@ -196,7 +211,7 @@ namespace NexClone.Backend.API.Controllers.Client
                     availableAt = c.AvailableAt,
                     paidAt = c.PaidAt,
                     plan = new { name = c.Plan.Name, nameAr = c.Plan.NameAr },
-                    customerName = c.Customer.FullName ?? c.Customer.Email
+                    customerName = c.Customer.FullName ?? MaskEmail(c.Customer.Email)
                 })
                 .ToListAsync();
 
@@ -271,6 +286,7 @@ namespace NexClone.Backend.API.Controllers.Client
                     payoutAccount = p.PayoutAccount,
                     status = p.Status,
                     rejectionReason = p.RejectionReason,
+                    transferReceiptUrl = p.TransferReceiptUrl,
                     requestedAt = p.RequestedAt,
                     processedAt = p.ProcessedAt
                 })

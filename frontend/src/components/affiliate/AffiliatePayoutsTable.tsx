@@ -57,6 +57,13 @@ export default function AffiliatePayoutsTable({ payouts, isRtl }: Props) {
                           {p.rejectionReason}
                         </div>
                       )}
+                      {p.transferReceiptUrl && (
+                        <div className="mt-2">
+                          <a href={p.transferReceiptUrl} target="_blank" rel="noreferrer" className="text-xs text-blue-400 hover:underline">
+                            {isRtl ? 'عرض الإيصال' : 'View Receipt'}
+                          </a>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 );

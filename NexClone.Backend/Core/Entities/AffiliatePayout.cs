@@ -33,6 +33,10 @@ namespace NexClone.Backend.Core.Entities
         [MaxLength(300)]
         public string PayoutAccount { get; set; } = string.Empty;
 
+        /// <summary>Optional message from the affiliate</summary>
+        [MaxLength(500)]
+        public string? AffiliateMessage { get; set; }
+
         /// <summary>PENDING | APPROVED | PROCESSING | PAID | REJECTED | FAILED</summary>
         [Required]
         [MaxLength(20)]
@@ -43,6 +47,9 @@ namespace NexClone.Backend.Core.Entities
 
         public DateTime RequestedAt { get; set; } = DateTime.UtcNow;
         public DateTime? ProcessedAt { get; set; }
+        
+        [MaxLength(1000)]
+        public string? TransferReceiptUrl { get; set; }
 
         // Navigation
         [ForeignKey(nameof(AffiliateProfileId))]

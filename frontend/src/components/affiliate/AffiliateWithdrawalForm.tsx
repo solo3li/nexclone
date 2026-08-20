@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAffiliateStore, AffiliateCurrencyBalance } from '@/store/useAffiliateStore';
 
 interface Props {
@@ -15,6 +15,17 @@ export default function AffiliateWithdrawalForm({ balances, isRtl }: Props) {
 
   const [amount, setAmount] = useState('');
   const [currency, setCurrency] = useState(availableBalances[0]?.currency || 'USD');
+  const [payoutMethod, setPayoutMethod] = useState('');
+  const [payoutAccount, setPayoutAccount] = useState('');
+
+  useEffect(() => {
+    if (currency === 'EGP') {
+      setPayoutMethod('InstaPay');
+    } else {
+      setPayoutMethod('USDT (TRC20)');
+    }
+    setPayoutAccount('');
+  }, [currency]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +41,11 @@ export default function AffiliateWithdrawalForm({ balances, isRtl }: Props) {
       return;
     }
 
+    if (!payoutMethod || !payoutAccount) {
+      setError(isRtl ? 'يرجى إدخال تفاصيل الدفع' : 'Please enter payment details');
+      return;
+    }
+
     const currentBalance = availableBalances.find(b => b.currency === currency)?.available || 0;
     if (Number(amount) > currentBalance) {
       setError(isRtl ? 'المبلغ المطلوب يتجاوز الرصيد المتاح' : 'Requested amount exceeds available balance');
@@ -39,7 +55,9 @@ export default function AffiliateWithdrawalForm({ balances, isRtl }: Props) {
     setLoading(true);
     const res = await requestPayout({
       amount: Number(amount),
-      currency
+      currency,
+      payoutMethod,
+      payoutAccount
     });
     setLoading(false);
 
@@ -118,6 +136,49 @@ export default function AffiliateWithdrawalForm({ balances, isRtl }: Props) {
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0.00"
               className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet-500 transition-colors"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-white/60">
+              {isRtl ? 'وسيلة الدفع' : 'Payout Method'}
+            </label>
+            <select
+              value={payoutMethod}
+              onChange={(e) => {
+                  setPayoutMethod(e.target.value);
+                  setPayoutAccount('');
+              }}
+              className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet-500 transition-colors"
+            >
+              {currency === 'EGP' ? (
+                <>
+                  <option value="InstaPay">InstaPay (إنستاباي)</option>
+                  <option value="Vodafone Cash">Vodafone Cash (فودافون كاش)</option>
+                  <option value="Bank Transfer">Bank Transfer (تحويل بنكي)</option>
+                </>
+              ) : (
+                <>
+                  <option value="USDT (TRC20)">USDT (TRC20)</option>
+                  <option value="PayPal">PayPal (باي بال)</option>
+                </>
+              )}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-white/60">
+              {isRtl ? 'تفاصيل الحساب (عنوان المحفظة / رقم الموبايل)' : 'Account Details (Wallet Address / Number)'}
+            </label>
+            <input
+              type="text"
+              value={payoutAccount}
+              onChange={(e) => setPayoutAccount(e.target.value)}
+              placeholder={payoutMethod === 'USDT (TRC20)' ? 'TXXXXXXXXXXXXXXXXXXXX' : payoutMethod.includes('InstaPay') ? 'username@instapay' : '...'}
+              className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet-500 transition-colors"
+              required
             />
           </div>
         </div>
