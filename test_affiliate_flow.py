@@ -3,7 +3,7 @@ import uuid
 import time
 import json
 
-BASE_URL = "http://localhost:8080"
+BASE_URL = "https://api-nexclone-dev.169.58.204.169.nip.io"
 
 def run_test():
     print("🚀 Starting Affiliate System End-to-End Test...")
