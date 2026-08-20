@@ -400,3 +400,84 @@ DETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error
 2026-08-20 09:01:57.473 +02:00 [INF] 1 servers were removed due to timeout
 2026-08-20 09:01:57.520 +02:00 [INF] Server vmi3518782:191634:9bae4fb4 all the dispatchers started
 2026-08-20 09:06:57.492 +02:00 [INF] 2 servers were removed due to timeout
+2026-08-20 10:26:31.432 +02:00 [INF] Start installing Hangfire SQL objects...
+2026-08-20 10:26:35.002 +02:00 [INF] Hangfire SQL objects installed.
+2026-08-20 10:26:36.615 +02:00 [INF] SubscriptionStatusService is starting.
+2026-08-20 10:26:36.615 +02:00 [INF] Media Cleanup Background Service started.
+2026-08-20 10:26:36.623 +02:00 [INF] Searching for processed media older than 08/06/2026 08:26:36...
+2026-08-20 10:26:36.739 +02:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-20 10:26:36.739 +02:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-20 10:26:36.740 +02:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-20 10:26:36.740 +02:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-20 10:26:36.741 +02:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-20 10:26:36.741 +02:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 20
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-20 10:26:36.832 +02:00 [INF] No old media found to clean up.
+2026-08-20 10:26:37.911 +02:00 [INF] Server vmi3518782:204716:02624bd1 successfully announced in 1150.8704 ms
+2026-08-20 10:26:37.924 +02:00 [INF] Server vmi3518782:204716:02624bd1 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-20 10:26:37.992 +02:00 [INF] Server vmi3518782:204716:02624bd1 all the dispatchers started
+2026-08-20 10:32:59.000 +02:00 [INF] [Email Task] Sending email to m83448421@gmail.com
+2026-08-20 10:32:59.212 +02:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-20 10:32:59.216 +02:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-20 10:32:59.369 +02:00 [INF] Received HTTP response headers after 148.6196ms - 201
+2026-08-20 10:32:59.374 +02:00 [INF] End processing HTTP request after 172.7547ms - 201
+2026-08-20 10:32:59.378 +02:00 [INF] [Email Task] Email sent to m83448421@gmail.com successfully.
+2026-08-20 10:34:34.580 +02:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-20 10:35:23.467 +02:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-20 10:35:33.153 +02:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-20 10:36:33.803 +02:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-20 10:36:51.341 +02:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-20 10:37:30.700 +02:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-20 10:42:20.350 +02:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2026-08-20 10:43:12.035 +02:00 [INF] Onboarded AffiliateProfile 14 for user "01a01bdd-5555-7df5-bbb8-0490f7bf0c72"
+2026-08-20 10:43:39.999 +02:00 [INF] [Affiliate] TrackClickAsync failed: System is disabled.
+2026-08-20 10:43:40.291 +02:00 [INF] [Affiliate] TrackClickAsync failed: System is disabled.
+2026-08-20 10:44:14.945 +02:00 [INF] [Affiliate] TrackClickAsync failed: System is disabled.
+2026-08-20 10:44:15.449 +02:00 [INF] [Affiliate] TrackClickAsync failed: System is disabled.
+2026-08-20 10:44:18.045 +02:00 [INF] [Affiliate] TrackClickAsync failed: System is disabled.
+2026-08-20 10:44:19.358 +02:00 [INF] [Affiliate] TrackClickAsync failed: System is disabled.
+2026-08-20 10:46:30.282 +02:00 [INF] Manually linked user "01a01e59-b0cf-71ed-b8a7-c91398fb19bd" to profile 14 via code RUGXKKCP
+2026-08-20 10:46:33.582 +02:00 [INF] [Email Task] Sending email to bd333079@gmail.com
+2026-08-20 10:46:33.738 +02:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-20 10:46:33.738 +02:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-20 10:46:33.828 +02:00 [INF] Received HTTP response headers after 89.8201ms - 201
+2026-08-20 10:46:33.829 +02:00 [INF] End processing HTTP request after 91.2492ms - 201
+2026-08-20 10:46:33.829 +02:00 [INF] [Email Task] Email sent to bd333079@gmail.com successfully.
+2026-08-20 10:49:02.511 +02:00 [INF] Onboarded AffiliateProfile 15 for user "01a01e59-b0cf-71ed-b8a7-c91398fb19bd"
+2026-08-20 10:56:21.185 +02:00 [INF] [Email Task] Sending email to bd333079@gmail.com
+2026-08-20 10:56:21.404 +02:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-20 10:56:21.404 +02:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-20 10:56:21.507 +02:00 [INF] Received HTTP response headers after 102.5893ms - 201
+2026-08-20 10:56:21.508 +02:00 [INF] End processing HTTP request after 103.8429ms - 201
+2026-08-20 10:56:21.508 +02:00 [INF] [Email Task] Email sent to bd333079@gmail.com successfully.
+2026-08-20 10:56:42.454 +02:00 [INF] [Email Task] Sending email to bd333079@gmail.com
+2026-08-20 10:56:42.614 +02:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-20 10:56:42.615 +02:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-20 10:56:42.682 +02:00 [INF] Received HTTP response headers after 66.7197ms - 201
+2026-08-20 10:56:42.682 +02:00 [INF] End processing HTTP request after 68.7089ms - 201
+2026-08-20 10:56:42.683 +02:00 [INF] [Email Task] Email sent to bd333079@gmail.com successfully.
+2026-08-20 11:00:17.466 +02:00 [INF] [Email Task] Sending email to bd333079@gmail.com
+2026-08-20 11:00:17.620 +02:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-20 11:00:17.620 +02:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-20 11:00:17.781 +02:00 [INF] Received HTTP response headers after 160.6678ms - 201
+2026-08-20 11:00:17.782 +02:00 [INF] End processing HTTP request after 161.6223ms - 201
+2026-08-20 11:00:17.800 +02:00 [INF] [Email Task] Email sent to bd333079@gmail.com successfully.
+2026-08-20 11:05:20.042 +02:00 [INF] [Affiliate] TrackClickAsync failed: System is disabled.
+2026-08-20 11:05:20.309 +02:00 [INF] [Affiliate] TrackClickAsync failed: System is disabled.
+2026-08-20 11:06:07.886 +02:00 [INF] Manually linked user "01a01e6b-a91f-760a-bd70-1b777206339d" to profile 14 via code RUGXKKCP
+2026-08-20 11:06:11.251 +02:00 [INF] [Email Task] Sending email to bd333079@gmail.com
+2026-08-20 11:06:11.418 +02:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-20 11:06:11.418 +02:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-20 11:06:11.546 +02:00 [INF] Received HTTP response headers after 128.0779ms - 201
+2026-08-20 11:06:11.547 +02:00 [INF] End processing HTTP request after 130.8433ms - 201
+2026-08-20 11:06:11.547 +02:00 [INF] [Email Task] Email sent to bd333079@gmail.com successfully.
+2026-08-20 11:07:42.965 +02:00 [INF] [Affiliate] TrackClickAsync failed: System is disabled.
+2026-08-20 11:10:26.141 +02:00 [INF] [Email Task] Sending email to bd333079@gmail.com
+2026-08-20 11:10:26.298 +02:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-20 11:10:26.299 +02:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-20 11:10:26.396 +02:00 [INF] Received HTTP response headers after 95.9946ms - 201
+2026-08-20 11:10:26.396 +02:00 [INF] End processing HTTP request after 98.0234ms - 201
+2026-08-20 11:10:26.397 +02:00 [INF] [Email Task] Email sent to bd333079@gmail.com successfully.
