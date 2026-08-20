@@ -133,3 +133,10 @@
 2026-08-20 07:39:19.384 +02:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
 2026-08-20 07:39:52.735 +02:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
 2026-08-20 07:40:10.674 +02:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-20 08:27:48.422 +02:00 [INF] Manually linked user "01a01dda-b829-7d02-9c7a-2d180196010c" to profile 13 via code ZK2POHM5
+2026-08-20 08:27:48.744 +02:00 [INF] [Email Task] Sending email to fps60y@gmail.com
+2026-08-20 08:27:48.793 +02:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-20 08:27:48.798 +02:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-20 08:27:48.893 +02:00 [INF] Received HTTP response headers after 90.6759ms - 201
+2026-08-20 08:27:48.899 +02:00 [INF] End processing HTTP request after 111.2955ms - 201
+2026-08-20 08:27:48.900 +02:00 [INF] [Email Task] Email sent to fps60y@gmail.com successfully.
