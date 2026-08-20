@@ -52,56 +52,62 @@ namespace NexClone.Backend.Application.BackgroundJobs
 
             _logger.LogInformation($"Searching for processed media older than {expiryDate}...");
 
-            // Find all generation histories older than 14 days that have a FileUrl and are not yet marked as expired.
-            // We use Status != "expired" as an indicator that it hasn't been cleaned up yet.
-            var oldRecords = await dbContext.GenerationHistories
-                .Where(h => h.CreatedAt < expiryDate 
-                            && h.Status != "expired" 
-                            && !string.IsNullOrEmpty(h.FileUrl))
-                .ToListAsync(stoppingToken);
+            int totalDeleted = 0;
+            bool hasMoreRecords = true;
+            int batchSize = 100;
 
-            if (oldRecords.Count == 0)
+            while (hasMoreRecords && !stoppingToken.IsCancellationRequested)
             {
-                _logger.LogInformation("No old media found to clean up.");
-                return;
+                // Fetch in batches of 100 to prevent Out of Memory (OOM) errors and infinite loops
+                var oldRecords = await dbContext.GenerationHistories
+                    .Where(h => h.CreatedAt < expiryDate 
+                                && h.Status != "expired" 
+                                && h.FileUrl != null && h.FileUrl != "")
+                    .Take(batchSize)
+                    .ToListAsync(stoppingToken);
+
+                if (oldRecords.Count == 0)
+                {
+                    hasMoreRecords = false;
+                    break;
+                }
+
+                foreach (var record in oldRecords)
+                {
+                    try
+                    {
+                        // 1. Delete physical file from MinIO
+                        if (!string.IsNullOrWhiteSpace(record.FileUrl))
+                        {
+                            await mediaService.DeleteFileAsync(record.FileUrl);
+                        }
+
+                        // 2. Also try to delete input files if any URL is found in InputText (some tools store it here)
+                        if (!string.IsNullOrWhiteSpace(record.InputText) && 
+                            (record.InputText.StartsWith("http://") || record.InputText.StartsWith("https://")))
+                        {
+                            await mediaService.DeleteFileAsync(record.InputText);
+                        }
+
+                        // 3. Update database record
+                        record.FileUrl = ""; // Clear URL
+                        record.Status = "expired";
+                        
+                        totalDeleted++;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"Failed to clean up media for history ID {record.Id}");
+                        // Mark as expired anyway to prevent infinite loop on corrupted files
+                        record.Status = "expired"; 
+                    }
+                }
+
+                // Save changes incrementally after each batch to prevent data loss on crash
+                await dbContext.SaveChangesAsync(stoppingToken);
             }
 
-            _logger.LogInformation($"Found {oldRecords.Count} records to clean up.");
-
-            int deletedCount = 0;
-
-            foreach (var record in oldRecords)
-            {
-                try
-                {
-                    // 1. Delete physical file from MinIO
-                    if (!string.IsNullOrWhiteSpace(record.FileUrl))
-                    {
-                        await mediaService.DeleteFileAsync(record.FileUrl);
-                    }
-
-                    // 2. Also try to delete input files if any URL is found in InputText (some tools store it here)
-                    if (!string.IsNullOrWhiteSpace(record.InputText) && 
-                        (record.InputText.StartsWith("http://") || record.InputText.StartsWith("https://")))
-                    {
-                        await mediaService.DeleteFileAsync(record.InputText);
-                    }
-
-                    // 3. Update database record
-                    record.FileUrl = ""; // Clear URL
-                    record.Status = "expired";
-                    
-                    deletedCount++;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, $"Failed to clean up media for history ID {record.Id}");
-                }
-            }
-
-            await dbContext.SaveChangesAsync(stoppingToken);
-
-            _logger.LogInformation($"Successfully cleaned up {deletedCount} media files.");
+            _logger.LogInformation($"Successfully cleaned up {totalDeleted} media files in total.");
         }
     }
 }
