@@ -399,3 +399,4 @@ DETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error
 2026-08-20 09:01:57.466 +02:00 [INF] Server vmi3518782:191634:9bae4fb4 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-20 09:01:57.473 +02:00 [INF] 1 servers were removed due to timeout
 2026-08-20 09:01:57.520 +02:00 [INF] Server vmi3518782:191634:9bae4fb4 all the dispatchers started
+2026-08-20 09:06:57.492 +02:00 [INF] 2 servers were removed due to timeout
