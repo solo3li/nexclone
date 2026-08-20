@@ -248,54 +248,15 @@
                         </div>
                     </div>
 
-                    <!-- Custom Dates (Optional) -->
-                    <div style="background: #e0e8f5; border: 1px solid #c5d4eb; border-radius: 4px; padding: 1rem; margin-bottom: 1.5rem;">
-                        <p style="margin: 0 0 0.75rem 0; font-size: 0.875rem; font-weight: 600; color: #0043ce;">
-                            @Localizer["Custom Dates (Optional)"]
-                        </p>
-                        <p style="margin: 0 0 1rem 0; font-size: 0.8rem; color: #00539a;">
-                            @Localizer["Leave blank to use the current date and the plan's default duration."]
-                        </p>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                            <div class="bx--form-item">
-                                <label for="startDate" class="bx--label">@Localizer["Start Date"]</label>
-                                <div class="bx--text-input__field-wrapper">
-                                    <input id="startDate" type="datetime-local" class="bx--text-input" name="startDate">
-                                </div>
-                            </div>
-                            <div class="bx--form-item">
-                                <label for="endDate" class="bx--label">@Localizer["End Date"]</label>
-                                <div class="bx--text-input__field-wrapper">
-                                    <input id="endDate" type="datetime-local" class="bx--text-input" name="endDate">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Affiliate Commission Override -->
-                    <div style="background: #e8f5e9; border: 1px solid #a5d6a7; border-radius: 4px; padding: 1rem; margin-bottom: 1.5rem;">
-                        <p style="margin: 0 0 0.75rem 0; font-size: 0.875rem; font-weight: 600; color: #1b5e20;">
-                            @Localizer["Affiliate Commission Override (Optional)"]
-                        </p>
-                        <p style="margin: 0 0 1rem 0; font-size: 0.8rem; color: #388e3c;">
-                            @Localizer["Leave blank to use the plan's default commission rates. Set 0 to disable commission for this assignment."]
-                        </p>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                            <div class="bx--form-item">
-                                <label for="affiliateFirstCommissionPercent" class="bx--label">@Localizer["First Purchase Commission (%)"]</label>
-                                <div class="bx--text-input__field-wrapper">
-                                    <input id="affiliateFirstCommissionPercent" type="number" class="bx--text-input"
-                                           name="affiliateFirstCommissionPercent" min="0" max="100" step="0.01"
-                                           placeholder="e.g. 20 (plan default used if blank)">
-                                </div>
-                            </div>
-                            <div class="bx--form-item">
-                                <label for="affiliateRecurringCommissionPercent" class="bx--label">@Localizer["Recurring Commission (%)"]</label>
-                                <div class="bx--text-input__field-wrapper">
-                                    <input id="affiliateRecurringCommissionPercent" type="number" class="bx--text-input"
-                                           name="affiliateRecurringCommissionPercent" min="0" max="100" step="0.01"
-                                           placeholder="e.g. 10 (plan default used if blank)">
-                                </div>
-                            </div>
+                    <!-- Currency Selection -->
+                    <div class="bx--form-item" style="margin-bottom: 1.5rem;">
+                        <label for="currency" class="bx--label">@Localizer["Payment Currency (Affects Affiliate Commission)"]</label>
+                        <div class="bx--select">
+                            <select id="currency" name="currency" class="bx--select-input" required>
+                                <option value="USD" selected>USD ($)</option>
+                                <option value="EGP">EGP (جنيه)</option>
+                            </select>
+                            <svg focusable="false" preserveAspectRatio="xMidYMid meet" style="will-change: transform;" xmlns="http://www.w3.org/2000/svg" class="bx--select__arrow" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 11L3 6 3.7 5.3 8 9.6 12.3 5.3 13 6z"></path></svg>
                         </div>
                     </div>
 

@@ -197,11 +197,7 @@ namespace NexClone.Backend.API.Controllers.Client
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AssignPlan(Guid userId, int planId,
-            decimal? affiliateFirstCommissionPercent,
-            decimal? affiliateRecurringCommissionPercent,
-            DateTime? startDate,
-            DateTime? endDate,
+        public async Task<IActionResult> AssignPlan(Guid userId, int planId, string currency,
             [FromServices] NexClone.Backend.Infrastructure.ExternalServices.Invoicing.IInvoiceGeneratorService invoiceService,
             [FromServices] NexClone.Backend.Core.Interfaces.IMediaService mediaService)
         {
@@ -228,8 +224,8 @@ namespace NexClone.Backend.API.Controllers.Client
                     }
                 }
 
-                existingSub.StartDate = startDate.HasValue ? DateTime.SpecifyKind(startDate.Value, DateTimeKind.Utc) : existingSub.StartDate;
-                existingSub.EndDate = endDate.HasValue ? DateTime.SpecifyKind(endDate.Value, DateTimeKind.Utc) : (existingSub.EndDate > DateTime.UtcNow ? existingSub.EndDate : DateTime.UtcNow).AddDays(plan.DurationDays);
+                existingSub.StartDate = existingSub.StartDate;
+                existingSub.EndDate = (existingSub.EndDate > DateTime.UtcNow ? existingSub.EndDate : DateTime.UtcNow).AddDays(plan.DurationDays);
                 existingSub.Status = "active";
                 newSub = existingSub;
             }
@@ -256,8 +252,8 @@ namespace NexClone.Backend.API.Controllers.Client
                     UserId = userId,
                     PlanId = planId,
                     Status = "active",
-                    StartDate = startDate.HasValue ? DateTime.SpecifyKind(startDate.Value, DateTimeKind.Utc) : DateTime.UtcNow,
-                    EndDate = endDate.HasValue ? DateTime.SpecifyKind(endDate.Value, DateTimeKind.Utc) : (startDate.HasValue ? DateTime.SpecifyKind(startDate.Value, DateTimeKind.Utc) : DateTime.UtcNow).AddDays(plan.DurationDays),
+                    StartDate = DateTime.UtcNow,
+                    EndDate = DateTime.UtcNow.AddDays(plan.DurationDays),
                     CreatedAt = DateTime.UtcNow
                 };
                 _context.Subscriptions.Add(newSub);
@@ -267,13 +263,15 @@ namespace NexClone.Backend.API.Controllers.Client
             await _walletService.DistributePlanCreditsAsync(user.Id, plan.Id, resetToZero: shouldReset, subscriptionId: newSub.Id);
 
             // Record Payment for Admin assignment
+            string resolvedCurrency = !string.IsNullOrWhiteSpace(currency) ? currency.ToUpper() : "EGP";
+            decimal paymentAmount = resolvedCurrency == "USD" ? plan.PriceUsd : plan.PriceEgp;
             var payment = new Payment
             {
                 UserId = user.Id,
                 PlanId = plan.Id,
                 SubscriptionId = newSub.Id,
-                Amount = plan.PriceEgp, // Or USD depending on standard, using EGP for invoice fallback
-                Currency = "EGP",
+                Amount = paymentAmount,
+                Currency = resolvedCurrency,
                 Method = "Manual/Admin",
                 PaymentId = "ADMIN-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
                 Status = "Completed",
@@ -282,39 +280,15 @@ namespace NexClone.Backend.API.Controllers.Client
             _context.Payments.Add(payment);
             await _context.SaveChangesAsync();
 
-
-            // Affiliate Commission Override — store overrides keyed by PaymentId so AffiliateService can pick them up
-            if (affiliateFirstCommissionPercent.HasValue || affiliateRecurringCommissionPercent.HasValue)
+            // Trigger with plan defaults
+            try
             {
-                try
-                {
-                    decimal? firstPct = affiliateFirstCommissionPercent.HasValue
-                        ? Math.Max(0, Math.Min(100, affiliateFirstCommissionPercent.Value))
-                        : (decimal?)null;
-                    decimal? recurringPct = affiliateRecurringCommissionPercent.HasValue
-                        ? Math.Max(0, Math.Min(100, affiliateRecurringCommissionPercent.Value))
-                        : (decimal?)null;
-
-                    var affiliateService = HttpContext.RequestServices.GetRequiredService<NexClone.Backend.Application.Services.AffiliateService>();
-                    await affiliateService.ProcessPaymentCommissionAsync(user.Id, payment.Id, payment.Amount, payment.Currency, plan.Id, newSub.Id, firstPct, recurringPct);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[Affiliate] Commission override failed: {ex.Message}");
-                }
+                var affiliateService = HttpContext.RequestServices.GetRequiredService<NexClone.Backend.Application.Services.AffiliateService>();
+                await affiliateService.ProcessPaymentCommissionAsync(user.Id, payment.Id, payment.Amount, payment.Currency, plan.Id, newSub.Id);
             }
-            else
+            catch (Exception ex)
             {
-                // No override — trigger with plan defaults
-                try
-                {
-                    var affiliateService = HttpContext.RequestServices.GetRequiredService<NexClone.Backend.Application.Services.AffiliateService>();
-                    await affiliateService.ProcessPaymentCommissionAsync(user.Id, payment.Id, payment.Amount, payment.Currency, plan.Id, newSub.Id);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[Affiliate] Commission for manual plan assignment failed: {ex.Message}");
-                }
+                Console.WriteLine($"[Affiliate] Commission for manual plan assignment failed: {ex.Message}");
             }
 
 
