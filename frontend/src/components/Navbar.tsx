@@ -40,10 +40,10 @@ function LanguageSwitcher() {
   return (
     <button 
       onClick={toggleLanguage}
-      className="flex items-center gap-1.5 text-white/80 hover:text-white transition-colors px-2"
+      className="flex items-center gap-1 text-white/80 hover:text-white transition-colors px-1 sm:px-2"
     >
       <Globe className="w-4 h-4" />
-      <span className="text-sm font-medium uppercase mt-0.5">{locale === 'ar' ? 'EN' : 'عربي'}</span>
+      <span className="text-xs sm:text-sm font-medium uppercase mt-0.5">{locale === 'ar' ? 'EN' : 'عربي'}</span>
     </button>
   );
 }
@@ -327,10 +327,20 @@ export default function Navbar() {
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center gap-4">
+          <div className="md:hidden flex items-center gap-2 sm:gap-4">
+            {isAuthenticated && user && (
+              <Link href="/profile" className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-white/5 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer" title={locale === 'ar' ? 'الرصيد' : 'Credits'}>
+                <Zap className="w-3.5 h-3.5 text-fuchsia-400" />
+                <div className="flex items-center gap-1 text-xs font-bold">
+                  <span className="text-emerald-400">{Number(user.standardCredits || 0).toFixed(0)}</span>
+                  <span className="text-white/20">|</span>
+                  <span className="text-amber-400">{Number(user.premiumCredits || 0).toFixed(0)}</span>
+                </div>
+              </Link>
+            )}
             <LanguageSwitcher />
             <button
-              className="text-white/80 hover:text-white transition-colors"
+              className="text-white/80 hover:text-white transition-colors p-1"
               onClick={() => setMenuOpen(!menuOpen)}
             >
               {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
