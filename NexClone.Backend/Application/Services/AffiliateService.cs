@@ -256,9 +256,13 @@ namespace NexClone.Backend.Application.Services
                 ReferredUserId = newUserId
             };
 
-            profile.TotalClicks++; // Count as a click/interaction
             _db.AffiliateReferrals.Add(referral);
             await _db.SaveChangesAsync();
+            
+            // Atomic update to prevent lost updates
+            await _db.AffiliateProfiles
+                .Where(p => p.Id == profile.Id)
+                .ExecuteUpdateAsync(s => s.SetProperty(p => p.TotalClicks, p => p.TotalClicks + 1));
 
             _logger.LogInformation("Manually linked user {UserId} to profile {ProfileId} via code {Code}", newUserId, profile.Id, referralCode);
         }
