@@ -46,12 +46,15 @@ namespace NexClone.Backend.API.Controllers.Webhooks
         {
             try
             {
+                Console.WriteLine($"[PaymobWebhook] Webhook hit! Payload: {payload.GetRawText()}");
+                
                 // 1. Fetch active Paymob Config
                 var paymobConfig = await _context.PaymentGatewayConfigs
                     .FirstOrDefaultAsync(c => c.ProviderName == "Paymob" && c.IsActive);
 
                 if (paymobConfig == null)
                 {
+                    Console.WriteLine("[PaymobWebhook] Paymob configuration not found or inactive.");
                     return BadRequest("Paymob configuration not found or inactive.");
                 }
 
@@ -59,11 +62,15 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                 bool hmacConfigured = !string.IsNullOrEmpty(paymobConfig.HmacSecret);
                 if (!hmacConfigured)
                 {
+                    Console.WriteLine("[PaymobWebhook] Paymob HMAC secret is not configured.");
                     return BadRequest("Paymob HMAC secret is not configured.");
                 }
 
                 if (string.IsNullOrEmpty(hmac))
+                {
+                    Console.WriteLine("[PaymobWebhook] Missing HMAC signature in query.");
                     return Unauthorized("Missing HMAC signature.");
+                }
 
                 if (payload.TryGetProperty("obj", out var objForHmac))
                 {
@@ -85,6 +92,7 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                     bool success = obj.TryGetProperty("success", out var successProp) && successProp.GetBoolean();
                     if (!success)
                     {
+                        Console.WriteLine("[PaymobWebhook] Payment was marked as failed in the payload. Ignoring.");
                         return Ok(new { message = "Payment failed, ignored." });
                     }
 
@@ -134,12 +142,14 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                     // 4. Find User and Plan — Guid.TryParse prevents crash on malformed input
                     if (!Guid.TryParse(userId, out var userGuid))
                     {
+                        Console.WriteLine($"[PaymobWebhook] Invalid user ID format: {userId}");
                         return BadRequest("Invalid user ID format.");
                     }
 
                     var user = await _context.Users.FindAsync(userGuid);
                     if (user == null)
                     {
+                        Console.WriteLine($"[PaymobWebhook] User not found: {userId}");
                         return NotFound("User not found.");
                     }
 
@@ -155,6 +165,7 @@ namespace NexClone.Backend.API.Controllers.Webhooks
 
                     if (plan == null)
                     {
+                        Console.WriteLine($"[PaymobWebhook] Plan not found: {planIdentifier}");
                         return NotFound("Plan not found.");
                     }
 
@@ -338,10 +349,12 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                     return Ok(new { success = true, message = "Subscription activated successfully." });
                 }
 
+                Console.WriteLine("[PaymobWebhook] Invalid payload structure.");
                 return BadRequest("Invalid payload structure.");
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"[PaymobWebhook] Exception occurred: {ex}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
