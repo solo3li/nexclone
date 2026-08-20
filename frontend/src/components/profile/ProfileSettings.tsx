@@ -60,8 +60,8 @@ export default function ProfileSettings({ user, isRtl, updateProfile, changePass
       const res = await updateProfile(formData);
       
       if (res) {
-         setFullName(res.fullName);
-         setImagePreview(res.imageUrl);
+         setFullName(res.fullName || "");
+         setImagePreview(res.imageUrl || null);
       }
       setProfileMessage({ type: 'success', text: isRtl ? "تم التحديث بنجاح" : "Profile updated successfully." });
     } catch (err) {
@@ -169,7 +169,7 @@ export default function ProfileSettings({ user, isRtl, updateProfile, changePass
           <div className="pt-4 flex justify-end">
             <button
               onClick={handleUpdateProfile}
-              disabled={savingProfile || (!fullName.trim() && !profileImage)}
+              disabled={savingProfile || (!fullName?.trim() && !profileImage)}
               className="px-6 py-3 bg-white text-[#0a0015] font-bold rounded-xl hover:bg-white/90 transition-colors flex items-center gap-2 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#0a0015]"
             >
               {savingProfile ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
