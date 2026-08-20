@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NexClone.Backend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3c417a7f111defa843ae9c316a6817fcf1ad26d6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+396019a331191e144b8fcf5e417764eb7cbff38b")]
 [assembly: System.Reflection.AssemblyProductAttribute("NexClone.Backend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NexClone.Backend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

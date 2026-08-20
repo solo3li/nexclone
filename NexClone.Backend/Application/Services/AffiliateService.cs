@@ -192,9 +192,13 @@ namespace NexClone.Backend.Application.Services
                 AttributionExpiresAt = DateTime.UtcNow.AddDays(settings.AttributionPeriodDays)
             };
 
-            profile.TotalClicks++;
             _db.AffiliateReferrals.Add(referral);
             await _db.SaveChangesAsync();
+            
+            // Atomic update to prevent lost updates on concurrent clicks
+            await _db.AffiliateProfiles
+                .Where(p => p.Id == profile.Id)
+                .ExecuteUpdateAsync(s => s.SetProperty(p => p.TotalClicks, p => p.TotalClicks + 1));
 
             return sessionToken;
         }
@@ -202,6 +206,9 @@ namespace NexClone.Backend.Application.Services
         public async Task LinkReferralToUserAsync(string sessionToken, Guid newUserId)
         {
             if (string.IsNullOrWhiteSpace(sessionToken)) return;
+
+            // Prevent linking if user is already referred elsewhere
+            if (await _db.AffiliateReferrals.AnyAsync(r => r.ReferredUserId == newUserId)) return;
 
             var referral = await _db.AffiliateReferrals
                 .FirstOrDefaultAsync(r => r.SessionToken == sessionToken && r.ReferredUserId == null);
@@ -510,17 +517,15 @@ namespace NexClone.Backend.Application.Services
         public async Task ProcessPendingCommissionsAsync()
         {
             var now = DateTime.UtcNow;
-            var pending = await _db.AffiliateCommissions
+            
+            // ExecuteUpdateAsync performs a direct SQL UPDATE without loading entities into memory
+            int updatedCount = await _db.AffiliateCommissions
                 .Where(c => c.Status == CommissionStatus.Pending && c.AvailableAt <= now)
-                .ToListAsync();
+                .ExecuteUpdateAsync(s => s.SetProperty(c => c.Status, CommissionStatus.Available));
 
-            foreach (var commission in pending)
-                commission.Status = CommissionStatus.Available;
-
-            if (pending.Count > 0)
+            if (updatedCount > 0)
             {
-                await _db.SaveChangesAsync();
-                _logger.LogInformation("Processed {Count} pending commissions to AVAILABLE", pending.Count);
+                _logger.LogInformation("Processed {Count} pending commissions to AVAILABLE", updatedCount);
             }
         }
 
