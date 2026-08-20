@@ -23,11 +23,13 @@ namespace NexClone.Backend.API.Controllers.Client
     {
         private readonly AffiliateService _affiliateService;
         private readonly ApplicationDbContext _db;
+        private readonly NexClone.Backend.Core.Interfaces.IMediaService _mediaService;
 
-        public AffiliateController(AffiliateService affiliateService, ApplicationDbContext db)
+        public AffiliateController(AffiliateService affiliateService, ApplicationDbContext db, NexClone.Backend.Core.Interfaces.IMediaService mediaService)
         {
             _affiliateService = affiliateService;
             _db = db;
+            _mediaService = mediaService;
         }
 
         private Guid GetCurrentUserId()
@@ -304,7 +306,18 @@ namespace NexClone.Backend.API.Controllers.Client
             var payouts = await _db.AffiliatePayouts
                 .Where(p => p.AffiliateProfileId == profile.Id)
                 .OrderByDescending(p => p.RequestedAt)
-                .Select(p => new
+                .ToListAsync();
+
+            var result = new System.Collections.Generic.List<object>();
+            foreach (var p in payouts)
+            {
+                string receiptUrl = null;
+                if (!string.IsNullOrEmpty(p.TransferReceiptUrl))
+                {
+                    receiptUrl = await _mediaService.GetFileUrlAsync(p.TransferReceiptUrl);
+                }
+
+                result.Add(new
                 {
                     id = p.Id,
                     amount = p.Amount,
@@ -313,14 +326,14 @@ namespace NexClone.Backend.API.Controllers.Client
                     payoutAccount = p.PayoutAccount,
                     status = p.Status,
                     rejectionReason = p.RejectionReason,
-                    transferReceiptUrl = p.TransferReceiptUrl,
+                    transferReceiptUrl = receiptUrl,
                     affiliateMessage = p.AffiliateMessage,
                     requestedAt = p.RequestedAt,
                     processedAt = p.ProcessedAt
-                })
-                .ToListAsync();
+                });
+            }
 
-            return Ok(payouts);
+            return Ok(result);
         }
     }
 }
