@@ -352,7 +352,7 @@ function AdvancedLipSyncPage() {
         {/* ========================================================================= */}
         {/* 1. Main Center Area: Dual Media Studio (Video & Audio File Only)          */}
         {/* ========================================================================= */}
-        <div className="lg:col-span-8 space-y-5">
+        <div className="order-2 lg:order-1 lg:col-span-8 space-y-5">
           
           {/* Dual Media Pairing Studio */}
           <div className="bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 md:p-6 shadow-xl space-y-4 backdrop-blur-md">
@@ -719,7 +719,7 @@ function AdvancedLipSyncPage() {
         {/* ========================================================================= */}
         {/* 2. Side Settings Panel: Compact Dropdowns & Parameters Controls           */}
         {/* ========================================================================= */}
-        <div className="lg:col-span-4 space-y-5">
+        <div className="order-1 lg:order-2 lg:col-span-4 space-y-5">
           <div className="sticky top-20 bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 shadow-xl space-y-4 backdrop-blur-md">
             
             <div className="flex items-center justify-between pb-3 border-b border-white/10">

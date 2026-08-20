@@ -354,19 +354,6 @@ export default function TextToVideoPage() {
   const totalUserCredits = (user?.standardCredits || 0) + (user?.premiumCredits || 0);
   const hasSufficientCredits = totalUserCredits >= estimatedCost;
 
-  // AI Prompt Enhancer Action
-  const handleEnhancePrompt = () => {
-    if (!prompt.trim()) {
-      setPrompt(isRtl ? SAMPLE_PROMPTS.ar[0].text : SAMPLE_PROMPTS.en[0].text);
-      return;
-    }
-    const cinematicAddon = isRtl 
-      ? "، إضاءة سينمائية احترافية، لقطة كاميرا ديناميكية سلسة، دقة واقعية فائقة 4K مع ألوان غنية وتفاصيل مذهلة."
-      : ", highly detailed, 8k resolution, cinematic lighting, photorealistic, dynamic camera movement, octane render, masterpiece.";
-    if (!prompt.includes("cinematic") && !prompt.includes("سينمائي")) {
-      setPrompt(prev => prev.trim() + cinematicAddon);
-    }
-  };
 
   const handleCopyPrompt = () => {
     if (prompt.trim()) {
@@ -449,7 +436,7 @@ export default function TextToVideoPage() {
         {/* ========================================================================= */}
         {/* 1. Main Center/Right Area: Prompt Studio & Action Bar                      */}
         {/* ========================================================================= */}
-        <div className="lg:col-span-8 space-y-5">
+        <div className="order-2 lg:order-1 lg:col-span-8 space-y-5">
           
           {/* Main Prompt Box */}
           <div className="bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 md:p-6 shadow-xl space-y-4 backdrop-blur-md relative overflow-hidden group focus-within:border-violet-500/50 transition-all">
@@ -470,15 +457,6 @@ export default function TextToVideoPage() {
 
               {/* Quick Actions in Header */}
               <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={handleEnhancePrompt}
-                  title={isRtl ? "تحسين البرومت تلقائياً" : "Enhance with AI"}
-                  className="px-3 py-1.5 rounded-lg bg-violet-500/15 hover:bg-violet-500/30 text-violet-300 border border-violet-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-violet-400" />
-                  <span>{isRtl ? "تحسين ذكي ✨" : "Enhance AI ✨"}</span>
-                </button>
 
                 {prompt && (
                   <>
@@ -522,26 +500,6 @@ export default function TextToVideoPage() {
               </div>
             </div>
 
-            {/* Quick Inspiration Pills */}
-            <div className="space-y-2 pt-2 border-t border-white/5">
-              <div className="flex items-center gap-1.5 text-xs text-white/50 font-medium">
-                <Flame className="w-3.5 h-3.5 text-amber-400" />
-                <span>{isRtl ? "أفكار جاهزة سريعة للإلهام:" : "Quick Inspiration Presets:"}</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {(isRtl ? SAMPLE_PROMPTS.ar : SAMPLE_PROMPTS.en).map((sample, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => setPrompt(sample.text)}
-                    className="text-xs bg-white/5 hover:bg-violet-600/20 text-white/70 hover:text-white border border-white/10 hover:border-violet-500/40 rounded-lg px-3 py-1.5 transition-all text-start flex items-center gap-1.5"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-violet-400 shrink-0" />
-                    <span>{sample.title}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* Notifications: Error / Success */}
@@ -748,7 +706,7 @@ export default function TextToVideoPage() {
         {/* ========================================================================= */}
         {/* 2. Side Settings Panel: Dropdowns & Parameters Controls                    */}
         {/* ========================================================================= */}
-        <div className="lg:col-span-4 space-y-5">
+        <div className="order-1 lg:order-2 lg:col-span-4 space-y-5">
           <div className="sticky top-20 bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 shadow-xl space-y-4 backdrop-blur-md">
             
             <div className="flex items-center justify-between pb-3 border-b border-white/10">

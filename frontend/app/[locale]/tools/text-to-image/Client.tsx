@@ -300,19 +300,6 @@ export default function TextToImagePage() {
     }
   };
 
-  // AI Prompt Enhancer Action
-  const handleEnhancePrompt = () => {
-    if (!prompt.trim()) {
-      setPrompt(isRtl ? SAMPLE_IMAGE_PROMPTS.ar[0].text : SAMPLE_IMAGE_PROMPTS.en[0].text);
-      return;
-    }
-    const addon = isRtl 
-      ? "، تفاصيل واقعية فائقة 8K، إضاءة سينمائية محيطية دافئة، ألوان غنية متناسقة وجودة إخراج فنية متقنة."
-      : ", 8k resolution, cinematic lighting, photorealistic, intricate textures, masterpiece, high dynamic range, octane render.";
-    if (!prompt.includes("8k") && !prompt.includes("واقعية")) {
-      setPrompt(prev => prev.trim() + addon);
-    }
-  };
 
   const handleCopyPrompt = () => {
     if (prompt.trim()) {
@@ -393,7 +380,7 @@ export default function TextToImagePage() {
         {/* ========================================================================= */}
         {/* 1. Main Center/Right Area: Studio Prompt Canvas & Styles                  */}
         {/* ========================================================================= */}
-        <div className="lg:col-span-8 space-y-5">
+        <div className="order-2 lg:order-1 lg:col-span-8 space-y-5">
           
           {/* Main Prompt Box */}
           <div className="bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 md:p-6 shadow-xl space-y-4 backdrop-blur-md relative overflow-hidden group focus-within:border-orange-500/50 transition-all">
@@ -414,15 +401,6 @@ export default function TextToImagePage() {
 
               {/* Quick Actions */}
               <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={handleEnhancePrompt}
-                  title={isRtl ? "تحسين البرومت تلقائياً" : "Enhance with AI"}
-                  className="px-3 py-1.5 rounded-lg bg-orange-500/15 hover:bg-orange-500/30 text-orange-300 border border-orange-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-orange-400" />
-                  <span>{isRtl ? "تحسين ذكي ✨" : "Enhance AI ✨"}</span>
-                </button>
 
                 {prompt && (
                   <>
@@ -466,54 +444,6 @@ export default function TextToImagePage() {
               </div>
             </div>
 
-            {/* Artistic Styles Bar */}
-            <div className="space-y-2 pt-2 border-t border-white/5">
-              <div className="flex items-center gap-1.5 text-xs text-white/50 font-medium">
-                <Palette className="w-3.5 h-3.5 text-orange-400" />
-                <span>{isRtl ? "الأنماط الفنية السريعة:" : "Artistic Styles:"}</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {STYLE_PRESETS.map((style) => {
-                  const isSelected = selectedStyle === style.id;
-                  return (
-                    <button
-                      key={style.id}
-                      type="button"
-                      onClick={() => handleApplyStyle(style.id)}
-                      className={`text-xs px-3 py-1.5 rounded-lg border transition-all flex items-center gap-1.5 ${
-                        isSelected 
-                          ? "bg-orange-500/25 border-orange-500/50 text-white font-bold shadow-sm" 
-                          : "bg-white/5 hover:bg-white/10 text-white/70 hover:text-white border-white/10 hover:border-orange-500/30"
-                      }`}
-                    >
-                      <span>{isRtl ? style.labelAr : style.labelEn}</span>
-                      {isSelected && <Check className="w-3 h-3 text-orange-400" />}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Inspiration Pills */}
-            <div className="space-y-2 pt-2 border-t border-white/5">
-              <div className="flex items-center gap-1.5 text-xs text-white/50 font-medium">
-                <Flame className="w-3.5 h-3.5 text-amber-400" />
-                <span>{isRtl ? "أفكار جاهزة سريعة للإلهام:" : "Quick Inspiration Presets:"}</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {(isRtl ? SAMPLE_IMAGE_PROMPTS.ar : SAMPLE_IMAGE_PROMPTS.en).map((sample, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => setPrompt(sample.text)}
-                    className="text-xs bg-white/5 hover:bg-orange-600/20 text-white/70 hover:text-white border border-white/10 hover:border-orange-500/40 rounded-lg px-3 py-1.5 transition-all text-start flex items-center gap-1.5"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-orange-400 shrink-0" />
-                    <span>{sample.title}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
 
             {/* Negative Prompt Accordion (Optional) */}
             <div className="pt-2 border-t border-white/5">
@@ -761,7 +691,7 @@ export default function TextToImagePage() {
         {/* ========================================================================= */}
         {/* 2. Side Settings Panel: Compact Dropdowns & Parameters Controls           */}
         {/* ========================================================================= */}
-        <div className="lg:col-span-4 space-y-5">
+        <div className="order-1 lg:order-2 lg:col-span-4 space-y-5">
           <div className="sticky top-20 bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 shadow-xl space-y-4 backdrop-blur-md">
             
             <div className="flex items-center justify-between pb-3 border-b border-white/10">

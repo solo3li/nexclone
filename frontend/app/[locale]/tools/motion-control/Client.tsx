@@ -214,19 +214,6 @@ function MotionControlPage() {
   const totalUserCredits = (user?.standardCredits || 0) + (user?.premiumCredits || 0);
   const hasSufficientCredits = totalUserCredits >= estimatedCost;
 
-  // AI Prompt Enhancer Action
-  const handleEnhancePrompt = () => {
-    if (!prompt.trim()) {
-      setPrompt(isRtl ? SAMPLE_MOTION_PROMPTS.ar[0].text : SAMPLE_MOTION_PROMPTS.en[0].text);
-      return;
-    }
-    const addon = isRtl 
-      ? "، حركة فيزيائية انسيابية، ثبات تام لهوية الشخصية، إضاءة سينمائية محيطية متجانسة بدقة 1080p."
-      : ", fluid natural physics, perfect character identity preservation, volumetric studio lighting, 1080p photorealism.";
-    if (!prompt.includes("cinematic") && !prompt.includes("انسيابية")) {
-      setPrompt(prev => prev.trim() + addon);
-    }
-  };
 
   const handleCopyPrompt = () => {
     if (prompt.trim()) {
@@ -311,7 +298,7 @@ function MotionControlPage() {
         {/* ========================================================================= */}
         {/* 1. Main Center/Right Area: Dual Media Pairing & Prompt Studio             */}
         {/* ========================================================================= */}
-        <div className="lg:col-span-8 space-y-5">
+        <div className="order-2 lg:order-1 lg:col-span-8 space-y-5">
           
           {/* Dual Uploading Pairing Grid */}
           <div className="bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 md:p-6 shadow-xl space-y-4 backdrop-blur-md">
@@ -500,15 +487,6 @@ function MotionControlPage() {
 
               {/* Quick Actions */}
               <div className="flex items-center gap-1.5">
-                <button
-                  type="button"
-                  onClick={handleEnhancePrompt}
-                  title={isRtl ? "تحسين البرومت تلقائياً" : "Enhance with AI"}
-                  className="px-3 py-1.5 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>{isRtl ? "تحسين ذكي ✨" : "Enhance AI ✨"}</span>
-                </button>
 
                 {prompt && (
                   <>
@@ -552,26 +530,6 @@ function MotionControlPage() {
               </div>
             </div>
 
-            {/* Inspiration Pills */}
-            <div className="space-y-2 pt-2 border-t border-white/5">
-              <div className="flex items-center gap-1.5 text-xs text-white/50 font-medium">
-                <Flame className="w-3.5 h-3.5 text-amber-400" />
-                <span>{isRtl ? "أفكار حركية جاهزة للإلهام:" : "Quick Motion Presets:"}</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {(isRtl ? SAMPLE_MOTION_PROMPTS.ar : SAMPLE_MOTION_PROMPTS.en).map((sample, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => setPrompt(sample.text)}
-                    className="text-xs bg-white/5 hover:bg-cyan-600/20 text-white/70 hover:text-white border border-white/10 hover:border-cyan-500/40 rounded-lg px-3 py-1.5 transition-all text-start flex items-center gap-1.5"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
-                    <span>{sample.title}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
 
           {/* Processing State Banner */}
@@ -681,7 +639,7 @@ function MotionControlPage() {
         {/* ========================================================================= */}
         {/* 2. Side Settings Panel: Compact Dropdowns & Parameters Controls           */}
         {/* ========================================================================= */}
-        <div className="lg:col-span-4 space-y-5">
+        <div className="order-1 lg:order-2 lg:col-span-4 space-y-5">
           <div className="sticky top-20 bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 shadow-xl space-y-4 backdrop-blur-md">
             
             <div className="flex items-center justify-between pb-3 border-b border-white/10">
