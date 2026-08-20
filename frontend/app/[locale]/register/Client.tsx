@@ -5,7 +5,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { Link } from "../../../src/i18n/routing";
 import Navbar from "../../../src/components/Navbar";
 import { Mail, Lock, User, ArrowRight, ArrowLeft, CheckCircle, XCircle, Eye, EyeOff } from "lucide-react";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useAuthStore } from "../../../src/store/useAuthStore";
 import { useRouter } from "../../../src/i18n/routing";
 import { GoogleLoginButton } from "../../../components/GoogleLoginButton";
@@ -65,17 +65,34 @@ export default function RegisterPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  // Read affiliate session from either URL or cookie
-  const refCode = searchParams.get("ref") || getCookie("aff_session") || undefined;
+  // Read affiliate session from URL initially for SSR
+  const urlRef = searchParams.get("ref");
   
   const { register } = useAuthStore();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const initialRefCode = searchParams.get("ref") || getCookie("aff_ref_code") || "";
-  const [manualRefCode, setManualRefCode] = useState(initialRefCode);
-  const isRefCodeLocked = Boolean(initialRefCode);
+  const [manualRefCode, setManualRefCode] = useState(urlRef || "");
+  const [isRefCodeLocked, setIsRefCodeLocked] = useState(Boolean(urlRef));
+  const [refCode, setRefCode] = useState<string | undefined>(urlRef || undefined);
+
+  useEffect(() => {
+    // Check cookies on client side to prevent hydration mismatches
+    if (!urlRef) {
+      const cookieRef = getCookie("aff_ref_code");
+      if (cookieRef) {
+        setManualRefCode(cookieRef);
+        setIsRefCodeLocked(true);
+      }
+      
+      const sessionRef = getCookie("aff_session");
+      if (sessionRef) {
+        setRefCode(sessionRef);
+      }
+    }
+  }, [urlRef]);
+
   const [showPassword, setShowPassword] = useState(false);
   const [acceptedPolicy, setAcceptedPolicy] = useState(false);
   const [error, setError] = useState("");
