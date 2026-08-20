@@ -102,8 +102,8 @@ namespace NexClone.Backend.Application.Services
             await UpsertSettingAsync(KEY_ATTRIBUTION, dto.AttributionPeriodDays.ToString(), "Days referral attribution remains valid after click");
             await UpsertSettingAsync(KEY_RECURRING, dto.RecurringEnabled.ToString().ToLower(), "Enable recurring commissions on subscription renewals");
             await UpsertSettingAsync(KEY_STOP_ON_CANCEL, dto.StopOnCancellation.ToString().ToLower(), "Stop recurring commissions when subscription is cancelled");
-            await UpsertSettingAsync(KEY_MIN_USD, dto.MinPayoutUsd.ToString("F2"), "Minimum payout amount in USD");
-            await UpsertSettingAsync(KEY_MIN_EGP, dto.MinPayoutEgp.ToString("F2"), "Minimum payout amount in EGP");
+            await UpsertSettingAsync(KEY_MIN_USD, dto.MinPayoutUsd.ToString("F2", System.Globalization.CultureInfo.InvariantCulture), "Minimum payout amount in USD");
+            await UpsertSettingAsync(KEY_MIN_EGP, dto.MinPayoutEgp.ToString("F2", System.Globalization.CultureInfo.InvariantCulture), "Minimum payout amount in EGP");
             await UpsertSettingAsync(KEY_MAX_MONTHS, dto.MaxRecurringMonths.ToString(), "Max months for recurring commissions (0 for unlimited)");
             await UpsertSettingAsync(KEY_MAX_INACTIVITY, dto.MaxInactivityDays.ToString(), "Max days of inactivity before referral link drops (0 for unlimited)");
             await _db.SaveChangesAsync();
@@ -722,6 +722,6 @@ namespace NexClone.Backend.Application.Services
             => d.TryGetValue(key, out var v) && int.TryParse(v, out var n) ? n : def;
 
         private static decimal GetDecimal(Dictionary<string, string> d, string key, decimal def)
-            => d.TryGetValue(key, out var v) && decimal.TryParse(v, out var n) ? n : def;
+            => d.TryGetValue(key, out var v) && decimal.TryParse(v, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var n) ? n : def;
     }
 }
