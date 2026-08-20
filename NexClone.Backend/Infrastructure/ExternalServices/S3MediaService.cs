@@ -231,5 +231,45 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
             
             return url;
         }
+
+        public async Task DeleteFileAsync(string objectName, string bucketName = null)
+        {
+            if (string.IsNullOrWhiteSpace(objectName)) return;
+
+            // Handle URL inputs, extract just the object name if it's a full URL
+            if (objectName.StartsWith("http://") || objectName.StartsWith("https://"))
+            {
+                try
+                {
+                    var uri = new Uri(objectName);
+                    // Usually path is /bucket-name/object-name OR just /object-name if bucket is in host
+                    // A simple fallback is to just take the last segment if it's a flat structure
+                    var segments = uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+                    if (segments.Length > 0)
+                    {
+                        objectName = segments.Last();
+                    }
+                }
+                catch
+                {
+                    return; // Ignore parse errors
+                }
+            }
+
+            await EnsureClientInitializedAsync();
+            
+            try
+            {
+                var removeObjectArgs = new RemoveObjectArgs()
+                    .WithBucket(string.IsNullOrWhiteSpace(bucketName) ? _defaultBucket : bucketName)
+                    .WithObject(objectName);
+                
+                await _minioClient.RemoveObjectAsync(removeObjectArgs).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[S3MediaService] Error deleting file {objectName}: {ex.Message}");
+            }
+        }
     }
 }

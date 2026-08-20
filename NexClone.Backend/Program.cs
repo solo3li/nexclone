@@ -173,6 +173,7 @@ builder.Services.AddScoped<NexClone.Backend.Application.BackgroundJobs.Affiliate
 
 // Register Background Services
 builder.Services.AddHostedService<NexClone.Backend.Application.BackgroundJobs.SubscriptionStatusService>();
+builder.Services.AddHostedService<NexClone.Backend.Application.BackgroundJobs.MediaCleanupService>();
 
 // Register Dynamic Concurrency Manager
 builder.Services.AddSingleton<NexClone.Backend.Core.Interfaces.IDynamicConcurrencyManager, NexClone.Backend.Application.Services.DynamicConcurrencyManager>();

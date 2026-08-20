@@ -80,6 +80,7 @@ export default function HistoryDetailPage() {
 
     const isCompleted = record.status === "completed" || record.status === "succeeded";
     const isFailed = record.status === "failed" || record.status === "error";
+    const isExpired = record.status === "expired";
 
     const handleDownload = async (url: string, defaultName: string) => {
       try {
@@ -129,15 +130,27 @@ export default function HistoryDetailPage() {
           <div className={`px-4 py-2 rounded-full font-bold flex items-center gap-2 ${
             isCompleted ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" :
             isFailed ? "bg-red-500/10 text-red-400 border border-red-500/20" :
+            isExpired ? "bg-gray-500/10 text-gray-400 border border-gray-500/20" :
             "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20"
           }`}>
             {isCompleted && <CheckCircle className="w-4 h-4" />}
             {isFailed && <XCircle className="w-4 h-4" />}
+            {isExpired && <AlertCircle className="w-4 h-4" />}
             {isRtl 
-              ? (isCompleted ? "مكتمل" : isFailed ? "فشل" : "قيد المعالجة")
-              : (isCompleted ? "Completed" : isFailed ? "Failed" : "Processing")}
+              ? (isCompleted ? "مكتمل" : isFailed ? "فشل" : isExpired ? "منتهي الصلاحية" : "قيد المعالجة")
+              : (isCompleted ? "Completed" : isFailed ? "Failed" : isExpired ? "Expired" : "Processing")}
           </div>
         </div>
+
+        {/* Expired Message */}
+        {isExpired && (
+          <div className="bg-gray-500/10 rounded-3xl p-6 md:p-8 border border-gray-500/20 text-center">
+             <h3 className="text-gray-400 font-medium flex items-center justify-center gap-2">
+                <AlertCircle className="w-5 h-5" />
+                {isRtl ? "تم حذف الملف (مر أكثر من 14 يوماً) لتوفير مساحة التخزين" : "File expired and removed after 14 days to save storage"}
+             </h3>
+          </div>
+        )}
 
         {/* Input Text (If Text-to-Voice or GPT or Image-to-Video Prompt) */}
         {record.inputText && (

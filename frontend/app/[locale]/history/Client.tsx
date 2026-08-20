@@ -240,10 +240,13 @@ export default function HistoryPage() {
                             ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
                             : (record.status === "failed" || record.status === "error")
                             ? "bg-red-500/15 text-red-400 border border-red-500/20"
+                            : record.status === "expired"
+                            ? "bg-gray-500/15 text-gray-400 border border-gray-500/20"
                             : "bg-yellow-500/15 text-yellow-400 border border-yellow-500/20"
                         }`}>
                           {(record.status === "completed" || record.status === "succeeded") ? (isRtl ? "مكتمل" : "Done") :
                            (record.status === "failed" || record.status === "error") ? (isRtl ? "فشل" : "Failed") :
+                           record.status === "expired" ? (isRtl ? "منتهي الصلاحية" : "Expired") :
                            (
                             <span className="flex items-center gap-1.5">
                                 <Loader2 className="w-3 h-3 animate-spin" />
