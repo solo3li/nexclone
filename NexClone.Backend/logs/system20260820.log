@@ -568,3 +568,31 @@ DETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error
 2026-08-20 14:52:38.274 +02:00 [INF] Server vmi3518782:263311:6adde31e successfully announced in 1082.7831 ms
 2026-08-20 14:52:38.279 +02:00 [INF] Server vmi3518782:263311:6adde31e is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-20 14:52:38.309 +02:00 [INF] Server vmi3518782:263311:6adde31e all the dispatchers started
+2026-08-20 14:54:20.431 +02:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-20 14:54:29.683 +02:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-20 14:54:57.925 +02:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2026-08-20 14:55:18.159 +02:00 [INF] [Email Task] Sending email to m83448421@gmail.com
+2026-08-20 14:55:18.369 +02:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-20 14:55:18.372 +02:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-20 14:55:18.557 +02:00 [INF] Received HTTP response headers after 176.3576ms - 201
+2026-08-20 14:55:18.598 +02:00 [INF] End processing HTTP request after 235.084ms - 201
+2026-08-20 14:55:18.601 +02:00 [INF] [Email Task] Email sent to m83448421@gmail.com successfully.
+2026-08-20 14:56:15.067 +02:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-20 14:56:38.962 +02:00 [INF] [VTT Task 1d9b3b92-e40b-4a05-b808-5d986fbfd185] Started consumer.
+2026-08-20 14:56:39.604 +02:00 [INF] [VTT Task c4831db3-e038-48a8-99cc-d20030c0b30e] Started consumer.
+2026-08-20 14:56:40.526 +02:00 [INF] Start processing HTTP request POST https://api.openai.com/v1/audio/transcriptions
+2026-08-20 14:56:40.526 +02:00 [INF] Sending HTTP request POST https://api.openai.com/v1/audio/transcriptions
+2026-08-20 14:56:40.852 +02:00 [INF] Start processing HTTP request POST https://api.openai.com/v1/audio/transcriptions
+2026-08-20 14:56:40.852 +02:00 [INF] Sending HTTP request POST https://api.openai.com/v1/audio/transcriptions
+2026-08-20 14:56:42.070 +02:00 [INF] Received HTTP response headers after 1543.0568ms - 400
+2026-08-20 14:56:42.070 +02:00 [INF] End processing HTTP request after 1544.6629ms - 400
+2026-08-20 14:56:42.071 +02:00 [INF] Start processing HTTP request POST https://api.openai.com/v1/audio/transcriptions
+2026-08-20 14:56:42.072 +02:00 [INF] Sending HTTP request POST https://api.openai.com/v1/audio/transcriptions
+2026-08-20 14:56:42.318 +02:00 [INF] Received HTTP response headers after 1464.9756ms - 400
+2026-08-20 14:56:42.318 +02:00 [INF] End processing HTTP request after 1487.5354ms - 400
+2026-08-20 14:56:42.320 +02:00 [INF] Start processing HTTP request POST https://api.openai.com/v1/audio/transcriptions
+2026-08-20 14:56:42.320 +02:00 [INF] Sending HTTP request POST https://api.openai.com/v1/audio/transcriptions
+2026-08-20 14:56:43.399 +02:00 [INF] Received HTTP response headers after 1326.8256ms - 200
+2026-08-20 14:56:43.399 +02:00 [INF] End processing HTTP request after 1328.0423ms - 200
+2026-08-20 14:56:43.763 +02:00 [INF] Received HTTP response headers after 1442.6845ms - 200
+2026-08-20 14:56:43.763 +02:00 [INF] End processing HTTP request after 1443.587ms - 200
