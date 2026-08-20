@@ -69,12 +69,12 @@ export default function AffiliatePage() {
           {isRtl ? 'يرجى تسجيل الدخول للوصول إلى لوحة الإحالة.' : 'Please log in to access your affiliate dashboard.'}
         </div>
       ) : needsOnboarding ? (
-        <div className="relative z-10 pt-28 pb-24 px-4">
+        <div className="relative z-10 pt-36 md:pt-40 pb-24 px-4">
           <AffiliateOnboardingForm />
         </div>
       ) : (
 
-      <div className="max-w-6xl mx-auto relative z-10 pt-28 pb-24 px-4">
+      <div className="max-w-6xl mx-auto relative z-10 pt-36 md:pt-40 pb-24 px-4">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
