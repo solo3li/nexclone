@@ -604,7 +604,7 @@ namespace NexClone.Backend.Application.Services
         // ─── Payout ───────────────────────────────────────────────────────────
 
         public async Task<(bool Success, string Error)> RequestPayoutAsync(
-            int affiliateProfileId, decimal amount, string currency, string method, string account)
+            int affiliateProfileId, decimal amount, string currency, string method, string account, string? message = null)
         {
             var settings = await GetSettingsAsync();
 
@@ -626,6 +626,7 @@ namespace NexClone.Backend.Application.Services
                 Currency = currency,
                 PayoutMethod = method,
                 PayoutAccount = account,
+                AffiliateMessage = message,
                 Status = PayoutStatus.Pending,
                 RequestedAt = DateTime.UtcNow
             };

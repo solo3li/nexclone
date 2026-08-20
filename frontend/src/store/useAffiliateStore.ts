@@ -68,6 +68,7 @@ export interface PayoutRequest {
   currency: string;
   payoutMethod: string;
   payoutAccount: string;
+  message?: string;
 }
 
 // ─── Store ────────────────────────────────────────────────────────────────────

@@ -17,6 +17,7 @@ export default function AffiliateWithdrawalForm({ balances, isRtl }: Props) {
   const [currency, setCurrency] = useState(availableBalances[0]?.currency || 'USD');
   const [payoutMethod, setPayoutMethod] = useState('');
   const [payoutAccount, setPayoutAccount] = useState('');
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     if (currency === 'EGP') {
@@ -57,7 +58,8 @@ export default function AffiliateWithdrawalForm({ balances, isRtl }: Props) {
       amount: Number(amount),
       currency,
       payoutMethod,
-      payoutAccount
+      payoutAccount,
+      message: message.trim() || undefined
     });
     setLoading(false);
 
@@ -181,6 +183,18 @@ export default function AffiliateWithdrawalForm({ balances, isRtl }: Props) {
               required
             />
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-white/60">
+            {isRtl ? 'ملاحظة للإدارة (اختياري)' : 'Message to Admin (Optional)'}
+          </label>
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder={isRtl ? 'أي ملاحظات إضافية حول التحويل...' : 'Any additional notes about the transfer...'}
+            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-violet-500 transition-colors resize-none h-24"
+          />
         </div>
 
         <button

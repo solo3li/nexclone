@@ -228,6 +228,7 @@ namespace NexClone.Backend.API.Controllers.Client
             public string Currency { get; set; } = string.Empty;
             public string PayoutMethod { get; set; } = string.Empty;
             public string PayoutAccount { get; set; } = string.Empty;
+            public string? Message { get; set; }
         }
 
         [HttpPost("payouts")]
@@ -253,7 +254,8 @@ namespace NexClone.Backend.API.Controllers.Client
                 request.Amount,
                 request.Currency.ToUpperInvariant(),
                 method,
-                account);
+                account,
+                request.Message);
 
             if (!success)
                 return BadRequest(new { error });
@@ -287,6 +289,7 @@ namespace NexClone.Backend.API.Controllers.Client
                     status = p.Status,
                     rejectionReason = p.RejectionReason,
                     transferReceiptUrl = p.TransferReceiptUrl,
+                    affiliateMessage = p.AffiliateMessage,
                     requestedAt = p.RequestedAt,
                     processedAt = p.ProcessedAt
                 })
