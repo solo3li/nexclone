@@ -22,7 +22,11 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
 
   useEffect(() => {
     if (isAuthenticated && id) {
-      fetchTicket();
+      if (!isNaN(Number(id))) {
+        fetchTicket();
+      } else {
+        setLoading(false);
+      }
     }
   }, [isAuthenticated, id]);
 
@@ -74,8 +78,8 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
     try {
       const data = await fetchTicketDetails(id);
       setTicket(data);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.warn("Failed to fetch ticket:", err?.message);
     } finally {
       setLoading(false);
     }

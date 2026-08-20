@@ -28,7 +28,7 @@ export default function TicketsList() {
     try {
       const res = await createTicket({ subject, message });
       setShowCreate(false);
-      router.push(`/profile/tickets/${res.id}` as any);
+      router.push(`/profile/tickets/${res.id || res.Id}` as any);
     } catch (err) {
       console.error(err);
     } finally {
