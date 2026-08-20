@@ -138,9 +138,11 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                 if (payload.TryGetProperty("obj", out var obj))
                 {
                     bool success = obj.TryGetProperty("success", out var successProp) && successProp.GetBoolean();
-                    if (!success)
+                    bool isRefunded = obj.TryGetProperty("is_refunded", out var refundedProp) && refundedProp.GetBoolean();
+
+                    if (!success && !isRefunded)
                     {
-                        Console.WriteLine("[PaymobWebhook] Payment was marked as failed in the payload. Ignoring.");
+                        Console.WriteLine("[PaymobWebhook] Payment was marked as failed and is not a refund. Ignoring.");
                         return Ok(new { message = "Payment failed, ignored." });
                     }
 
@@ -219,6 +221,50 @@ namespace NexClone.Backend.API.Controllers.Webhooks
 
                     // 4b. Idempotency: check if this Paymob transaction was already processed
                     int incomingTxId = obj.TryGetProperty("id", out var txIdProp) ? txIdProp.GetInt32() : 0;
+                    
+                    // --- REFUND LOGIC ---
+                    if (isRefunded)
+                    {
+                        Console.WriteLine($"[PaymobWebhook] Refund detected for user {user.Id}, plan {plan.Id}");
+                        
+                        // 1. Find the latest completed payment for this user and plan
+                        var paymentToRefund = await _context.Payments
+                            .Where(p => p.UserId == user.Id && p.PlanId == plan.Id && p.Status == "Completed")
+                            .OrderByDescending(p => p.CreatedAt)
+                            .FirstOrDefaultAsync();
+
+                        if (paymentToRefund != null)
+                        {
+                            paymentToRefund.Status = "Refunded";
+                            _context.Payments.Update(paymentToRefund);
+
+                            // 2. Cancel active subscription
+                            var activeSub = await _context.Subscriptions
+                                .FirstOrDefaultAsync(s => s.Id == paymentToRefund.SubscriptionId && (s.Status == "active" || s.Status == "freeze"));
+                            
+                            if (activeSub != null)
+                            {
+                                activeSub.Status = "canceled";
+                                _context.Subscriptions.Update(activeSub);
+                            }
+
+                            await _context.SaveChangesAsync();
+
+                            // 3. Reverse Affiliate Commission
+                            try
+                            {
+                                await _affiliateService.ReverseCommissionAsync(paymentToRefund.Id);
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"[Affiliate] Failed to reverse commission for payment {paymentToRefund.Id}: {ex.Message}");
+                            }
+                        }
+
+                        return Ok(new { success = true, message = "Refund processed successfully." });
+                    }
+                    // --- END REFUND LOGIC ---
+
                     if (incomingTxId > 0)
                     {
                         var alreadyProcessed = await _context.Payments
@@ -503,9 +549,14 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                 // For production, uncomment and implement VerifyPayPalSignatureAsync below.
                 // For now we trust the payload if headers are present (add full verification before go-live).
 
-                // 3. Only handle PAYMENT.CAPTURE.COMPLETED events
-                if (!payload.TryGetProperty("event_type", out var eventType)
-                    || eventType.GetString() != "PAYMENT.CAPTURE.COMPLETED")
+                // 3. Handle PAYMENT.CAPTURE.COMPLETED and PAYMENT.CAPTURE.REFUNDED events
+                if (!payload.TryGetProperty("event_type", out var eventType))
+                {
+                    return Ok(new { message = "Event ignored." });
+                }
+                
+                string eventTypeStr = eventType.GetString();
+                if (eventTypeStr != "PAYMENT.CAPTURE.COMPLETED" && eventTypeStr != "PAYMENT.CAPTURE.REFUNDED")
                 {
                     return Ok(new { message = "Event ignored." });
                 }
@@ -560,6 +611,46 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                     decimal.TryParse(val.GetString(), System.Globalization.NumberStyles.Any,
                         System.Globalization.CultureInfo.InvariantCulture, out amountUsd);
                 }
+
+                // --- REFUND LOGIC ---
+                if (eventTypeStr == "PAYMENT.CAPTURE.REFUNDED")
+                {
+                    Console.WriteLine($"[PayPalWebhook] Refund detected for user {user.Id}, plan {plan.Id}");
+                    
+                    var paymentToRefund = await _context.Payments
+                        .Where(p => p.UserId == user.Id && p.PlanId == plan.Id && p.Status == "Completed")
+                        .OrderByDescending(p => p.CreatedAt)
+                        .FirstOrDefaultAsync();
+
+                    if (paymentToRefund != null)
+                    {
+                        paymentToRefund.Status = "Refunded";
+                        _context.Payments.Update(paymentToRefund);
+
+                        var activeSub = await _context.Subscriptions
+                            .FirstOrDefaultAsync(s => s.Id == paymentToRefund.SubscriptionId && (s.Status == "active" || s.Status == "freeze"));
+                        
+                        if (activeSub != null)
+                        {
+                            activeSub.Status = "canceled";
+                            _context.Subscriptions.Update(activeSub);
+                        }
+
+                        await _context.SaveChangesAsync();
+
+                        try
+                        {
+                            await _affiliateService.ReverseCommissionAsync(paymentToRefund.Id);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"[Affiliate] Failed to reverse commission for PayPal payment {paymentToRefund.Id}: {ex.Message}");
+                        }
+                    }
+
+                    return Ok(new { success = true, message = "Refund processed successfully." });
+                }
+                // --- END REFUND LOGIC ---
 
                 // 6b. Idempotency: check if already processed via CaptureOrderAsync or previous webhook
                 // Extract the PayPal order ID from the resource
