@@ -141,7 +141,7 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
   }
 
   return (
-    <div className="bg-white/5 border border-white/10 p-6 md:p-8 rounded-3xl flex flex-col h-[calc(100vh-200px)] min-h-[500px] w-full">
+    <div className="bg-white/5 border border-white/10 p-3 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl flex flex-col h-[calc(100vh-200px)] min-h-[500px] w-full">
       <div className="flex justify-between items-center mb-6 pb-6 border-b border-white/10">
         <div>
           <div className="flex items-center gap-3 mb-2">
@@ -173,7 +173,7 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
             className={`flex flex-col ${msg.isAdminMessage ? "items-start" : "items-end"}`}
           >
             <div
-              className={`max-w-[80%] rounded-2xl p-4 ${
+              className={`max-w-[90%] sm:max-w-[80%] rounded-2xl p-3 sm:p-4 ${
                 msg.isAdminMessage ? "bg-white/10 rounded-tl-none" : "bg-violet-600 rounded-tr-none"
               }`}
             >
@@ -241,7 +241,7 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
               </button>
             </div>
           )}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <label className="cursor-pointer p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors text-white/60 hover:text-white">
               <input
                 type="file"
@@ -264,7 +264,7 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
             <button
               type="submit"
               disabled={(!message.trim() && !attachment) || sending}
-              className="px-6 py-2 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white rounded-xl transition-colors text-sm font-semibold"
+              className="px-4 sm:px-6 py-2 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white rounded-xl transition-colors text-sm font-semibold"
             >
               {sending ? "..." : "Send"}
             </button>

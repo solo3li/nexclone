@@ -47,8 +47,8 @@ export default function TicketsList() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="bg-white/5 border border-white/10 p-8 rounded-3xl">
-      <div className="flex justify-between items-center mb-8">
+    <div className="bg-white/5 border border-white/10 p-4 sm:p-8 rounded-2xl sm:rounded-3xl">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-6 sm:mb-8">
         <h2 className="text-2xl font-bold text-white">Support Tickets</h2>
         <button 
           onClick={() => setShowCreate(!showCreate)}
@@ -92,7 +92,7 @@ export default function TicketsList() {
         <div className="space-y-4">
           {tickets.map(ticket => (
             <Link href={`/profile/tickets/${ticket.id}` as any} key={ticket.id} className="block group">
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-violet-500/50 transition-colors flex justify-between items-center">
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-4 sm:p-6 hover:border-violet-500/50 transition-colors flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
                 <div>
                   <h3 className="text-lg font-bold text-white mb-2 group-hover:text-violet-400 transition-colors">
                     {ticket.subject}
@@ -101,7 +101,7 @@ export default function TicketsList() {
                     Last updated: {new Date(ticket.updatedAt).toLocaleDateString()} at {new Date(ticket.updatedAt).toLocaleTimeString()}
                   </div>
                 </div>
-                <div className="flex flex-col items-end gap-2">
+                <div className="flex sm:flex-col items-center sm:items-end gap-3 sm:gap-2 w-full sm:w-auto justify-between sm:justify-start border-t sm:border-t-0 border-white/5 pt-3 sm:pt-0">
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                     ticket.status === 'Open' ? 'bg-red-500/20 text-red-400' :
                     ticket.status === 'InProgress' ? 'bg-yellow-500/20 text-yellow-400' :
