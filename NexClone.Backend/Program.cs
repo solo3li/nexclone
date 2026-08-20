@@ -280,8 +280,8 @@ using (var scope = app.Services.CreateScope())
         {
             "http://localhost:3000", "http://localhost:3001",
             "http://167.71.66.188:3000", "http://178.62.192.74:3000",
-            "https://nexclone-dev.169.58.204.169.nip.io",
-            "https://api-nexclone-dev.169.58.204.169.nip.io"
+            "https://dev.169.58.204.169.nip.io",
+            "https://api.169.58.204.169.nip.io"
         };
         var currentList = existingOrigins.Value.Split(',').Select(o => o.Trim()).ToList();
         bool changed = false;
