@@ -1,46 +1,11 @@
 services:
-  # Next.js Frontend
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        MINIO_PUBLIC_ENDPOINT: 188.166.65.112:9000
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
-    container_name: nexclone-frontend
-    ports:
-      - "3000:3000"
-    env_file:
-      - .dev.env
-    networks:
-      - nexclone_network
-    depends_on:
-      - backend
-
-  # ASP.NET Core API & Admin
-  backend:
-    build:
-      context: ./NexClone.Backend
-      dockerfile: Dockerfile
-    container_name: nexclone-backend
-    ports:
-      - "8080:8080"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8080
-    env_file:
-      - .dev.env
-    networks:
-      - nexclone_network
-    depends_on:
-      - postgres
-      - minio
-
   postgres:
     image: postgres:15
     container_name: nexclone-postgres
-    env_file:
-      - .dev.env
+    environment:
+      - POSTGRES_DB=nexclone_dev
+      - POSTGRES_USER=nexclone
+      - POSTGRES_PASSWORD=devpassword123!
     ports:
       - "5432:5432"
     networks:
@@ -54,14 +19,47 @@ services:
     ports:
       - "9001:9001"
       - "9002:9002"
-    env_file:
-      - .dev.env
+    environment:
+      - MINIO_ROOT_USER=devminioadmin
+      - MINIO_ROOT_PASSWORD=devminiosecret123!
     command: server /data --address ":9001" --console-address ":9002"
     networks:
       - nexclone_network
     volumes:
       - miniodata:/data
 
+  redis:
+    image: redis:7
+    container_name: nexclone-redis
+    command: redis-server --requirepass "devredis123!"
+    ports:
+      - "6379:6379"
+    networks:
+      - nexclone_network
+    volumes:
+      - redisdata:/data
+
+  traefik:
+    image: traefik:v2.10
+    container_name: nexclone-traefik
+    command:
+      - "--providers.file.directory=/etc/traefik/dynamic"
+      - "--providers.file.watch=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=admin@nexclone.local"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - nexclone_network
+    volumes:
+      - ./traefik-dynamic.yml:/etc/traefik/dynamic/traefik-dynamic.yml:ro
+      - traefik-certs:/letsencrypt
 
 networks:
   nexclone_network:
@@ -70,3 +68,5 @@ networks:
 volumes:
   pgdata:
   miniodata:
+  redisdata:
+  traefik-certs:

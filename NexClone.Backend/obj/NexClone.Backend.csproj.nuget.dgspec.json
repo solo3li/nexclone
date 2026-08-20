@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/src/NexClone.Backend.csproj": {}
+    "/root/nexmedia/nexclone/NexClone.Backend/NexClone.Backend.csproj": {}
   },
   "projects": {
-    "/src/NexClone.Backend.csproj": {
+    "/root/nexmedia/nexclone/NexClone.Backend/NexClone.Backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/src/NexClone.Backend.csproj",
+        "projectUniqueName": "/root/nexmedia/nexclone/NexClone.Backend/NexClone.Backend.csproj",
         "projectName": "NexClone.Backend",
-        "projectPath": "/src/NexClone.Backend.csproj",
+        "projectPath": "/root/nexmedia/nexclone/NexClone.Backend/NexClone.Backend.csproj",
         "packagesPath": "/root/.nuget/packages/",
-        "outputPath": "/src/obj/",
+        "outputPath": "/root/nexmedia/nexclone/NexClone.Backend/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/root/.nuget/NuGet/NuGet.Config"
@@ -20,11 +20,11 @@
           "net10.0"
         ],
         "sources": {
+          "/usr/lib/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net10.0": {
-            "framework": "net10.0",
             "targetAlias": "net10.0",
             "projectReferences": {}
           }
@@ -39,11 +39,10 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.400"
+        "SdkAnalysisLevel": "10.0.100"
       },
       "frameworks": {
         "net10.0": {
-          "framework": "net10.0",
           "targetAlias": "net10.0",
           "dependencies": {
             "Google.Apis.Auth": {
@@ -136,7 +135,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/10.0.400/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/10.0.111/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

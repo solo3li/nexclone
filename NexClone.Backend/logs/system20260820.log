@@ -1,0 +1,28 @@
+2026-08-20 06:37:49.260 +02:00 [INF] Start installing Hangfire SQL objects...
+2026-08-20 06:37:52.571 +02:00 [INF] Hangfire SQL objects installed.
+2026-08-20 06:37:53.973 +02:00 [INF] SubscriptionStatusService is starting.
+2026-08-20 06:37:53.973 +02:00 [INF] Media Cleanup Background Service started.
+2026-08-20 06:37:53.983 +02:00 [INF] Searching for processed media older than 08/06/2026 04:37:53...
+2026-08-20 06:37:54.128 +02:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-20 06:37:54.129 +02:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-20 06:37:54.129 +02:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-20 06:37:54.130 +02:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-20 06:37:54.130 +02:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-20 06:37:54.130 +02:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 20
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-20 06:37:54.758 +02:00 [INF] Found 116 records to clean up.
+2026-08-20 06:37:55.399 +02:00 [INF] Server vmi3518782:161734:98c63637 successfully announced in 1249.0049 ms
+2026-08-20 06:37:55.404 +02:00 [INF] Server vmi3518782:161734:98c63637 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-20 06:37:55.433 +02:00 [INF] Server vmi3518782:161734:98c63637 all the dispatchers started
+2026-08-20 06:37:56.337 +02:00 [INF] Removed 1 outdated record(s) from 'aggregatedcounter' table.
+2026-08-20 06:37:59.844 +02:00 [INF] Removed 1 outdated record(s) from 'job' table.
+2026-08-20 06:38:02.332 +02:00 [INF] [AffiliateCommissionHoldJob] Running daily hold period check...
+2026-08-20 06:38:02.792 +02:00 [INF] [AffiliateCommissionHoldJob] Completed.
+2026-08-20 06:38:14.692 +02:00 [INF] Successfully cleaned up 116 media files.
+2026-08-20 06:38:49.030 +02:00 [INF] Server vmi3518782:161734:98c63637 caught stopping signal...
+2026-08-20 06:38:49.218 +02:00 [INF] Server vmi3518782:161734:98c63637 All dispatchers stopped
+2026-08-20 06:38:49.378 +02:00 [INF] Server vmi3518782:161734:98c63637 successfully reported itself as stopped in 156.5399 ms
+2026-08-20 06:38:49.378 +02:00 [INF] Server vmi3518782:161734:98c63637 has been stopped in total 336.2911 ms

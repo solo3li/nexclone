@@ -1,16 +1,13 @@
-name: Build and Push Docker Images
+name: Production Pipeline
 
 on:
   push:
     branches:
       - production
-      - main
-      - master
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -30,7 +27,7 @@ jobs:
           context: ./NexClone.Backend
           file: ./NexClone.Backend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/nexclone-backend:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/nexclone-backend:production
           cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-backend:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-backend:buildcache,mode=max
 
@@ -40,8 +37,34 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/nexclone-frontend:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/nexclone-frontend:production
           cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-frontend:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-frontend:buildcache,mode=max
           build-args: |
-            NEXT_PUBLIC_API_URL=https://nexclone-backend-production.up.railway.app
+            NEXT_PUBLIC_API_URL=https://api.nexclone.169.58.204.169.nip.io
+
+  deploy-to-helm:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+      
+      - name: Deploy to VPS with Helm
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+            cd /root/nexmedia/nexclone/nexclone-chart
+            helm upgrade --install nexclone-production . \
+              --namespace nexclone-production --create-namespace \
+              --set backend.image.tag=production \
+              --set frontend.image.tag=production \
+              --set ingress.hosts.frontend=nexclone.169.58.204.169.nip.io \
+              --set ingress.hosts.backend=api.nexclone.169.58.204.169.nip.io \
+              --set postgresql.enabled=true \
+              --set redis.enabled=true \
+              --set minio.enabled=true
