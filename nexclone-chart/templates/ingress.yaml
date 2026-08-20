@@ -1,20 +1,15 @@
-{{/* ============================================================
-  ingress.yaml — Traefik Ingress for frontend + backend
-  ============================================================ */}}
 {{- if .Values.ingress.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: nexclone-ingress
-  namespace: {{ .Values.namespace }}
+  name: nexclone-ingress-{{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
   annotations:
     {{- if .Values.ingress.tls }}
     cert-manager.io/cluster-issuer: {{ .Values.ingress.certIssuer | quote }}
     traefik.ingress.kubernetes.io/router.tls: "true"
     {{- end }}
     traefik.ingress.kubernetes.io/router.entrypoints: websecure,web
-    # Force HTTPS redirect
-    traefik.ingress.kubernetes.io/router.middlewares: nexclone-dev-redirect-https@kubernetescrd
 spec:
   ingressClassName: {{ .Values.ingress.ingressClass }}
   {{- if .Values.ingress.tls }}
@@ -22,7 +17,7 @@ spec:
     - hosts:
         - {{ .Values.ingress.hosts.backend }}
         - {{ .Values.ingress.hosts.frontend }}
-      secretName: nexclone-dev-tls
+      secretName: nexclone-tls-{{ .Release.Name }}
   {{- end }}
   rules:
     # ── Backend API ────────────────────────────────────────────

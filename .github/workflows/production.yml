@@ -47,20 +47,29 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the repo
-        uses: actions/checkout@v4
-      
       - name: Deploy to VPS with Helm
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          ENV_FILE_CONTENT: ${{ secrets.PRODUCTION_ENV }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          envs: ENV_FILE_CONTENT
           script: |
             export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
             cd /root/nexmedia/nexclone/nexclone-chart
+            
+            # Ensure namespace exists
+            kubectl create namespace nexclone-production --dry-run=client -o yaml | kubectl apply -f -
+            
+            # Apply environment secrets securely
+            echo "$ENV_FILE_CONTENT" > .prod.env
+            kubectl create secret generic nexclone-env --from-env-file=.prod.env -n nexclone-production --dry-run=client -o yaml | kubectl apply -f -
+            rm -f .prod.env
+            
             helm upgrade --install nexclone-production . \
-              --namespace nexclone-production --create-namespace \
+              --namespace nexclone-production \
               --set backend.image.tag=production \
               --set frontend.image.tag=production \
               --set ingress.hosts.frontend=nexclone.169.58.204.169.nip.io \
