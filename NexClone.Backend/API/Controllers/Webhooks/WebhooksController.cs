@@ -41,6 +41,54 @@ namespace NexClone.Backend.API.Controllers.Webhooks
             _affiliateService = affiliateService;
         }
 
+        [HttpPost("mock-payment")]
+        public async Task<IActionResult> MockPaymentWebhook([FromQuery] string email, [FromQuery] int planId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            if (user == null) return BadRequest("Invalid user");
+
+            var plan = await _context.Plans.FindAsync(planId);
+            if (plan == null) 
+            {
+                plan = new Plan { Id = planId, Name = "Mock Plan", PriceUsd = 10 };
+                _context.Plans.Add(plan);
+                await _context.SaveChangesAsync();
+            }
+
+            // 1. Create Subscription
+            var sub = new Subscription
+            {
+                UserId = user.Id,
+                PlanId = plan.Id,
+                Status = "active",
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddDays(30),
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.Subscriptions.Add(sub);
+            await _context.SaveChangesAsync();
+
+            // 2. Create Payment
+            var payment = new Payment
+            {
+                UserId = user.Id,
+                PlanId = plan.Id,
+                SubscriptionId = sub.Id,
+                Amount = 10,
+                Currency = "USD",
+                Status = "Completed",
+                PaymentId = Guid.NewGuid().ToString(),
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.Payments.Add(payment);
+            await _context.SaveChangesAsync();
+
+            // 3. Trigger Affiliate Commission
+            await _affiliateService.CreateCommissionAsync(payment.Id, isRecurring: false);
+
+            return Ok(new { message = "Mock payment created successfully" });
+        }
+
         [HttpPost("paymob")]
         public async Task<IActionResult> PaymobWebhook([FromBody] JsonElement payload, [FromQuery] string hmac)
         {
