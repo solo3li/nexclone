@@ -321,3 +321,22 @@ DETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error
 2026-08-20 08:38:14.974 +02:00 [INF] Received HTTP response headers after 93.0565ms - 201
 2026-08-20 08:38:14.974 +02:00 [INF] End processing HTTP request after 95.1227ms - 201
 2026-08-20 08:38:14.975 +02:00 [INF] [Email Task] Email sent to fps60y@gmail.com successfully.
+2026-08-20 08:45:12.942 +02:00 [INF] Start installing Hangfire SQL objects...
+2026-08-20 08:45:13.065 +02:00 [INF] Hangfire SQL objects installed.
+2026-08-20 08:45:13.373 +02:00 [INF] Media Cleanup Background Service started.
+2026-08-20 08:45:13.373 +02:00 [INF] SubscriptionStatusService is starting.
+2026-08-20 08:45:13.381 +02:00 [INF] Searching for processed media older than 08/06/2026 06:45:13...
+2026-08-20 08:45:13.448 +02:00 [INF] No old media found to clean up.
+2026-08-20 08:45:13.532 +02:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: 127.0.0.1, DB: nexclone_dev, Schema: hangfire'
+2026-08-20 08:45:13.533 +02:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-20 08:45:13.533 +02:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-20 08:45:13.534 +02:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-20 08:45:13.534 +02:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-20 08:45:13.534 +02:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 20
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-20 08:45:13.601 +02:00 [INF] Server vmi3518782:188116:192cf311 successfully announced in 33.073 ms
+2026-08-20 08:45:13.606 +02:00 [INF] Server vmi3518782:188116:192cf311 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-20 08:45:13.785 +02:00 [INF] Server vmi3518782:188116:192cf311 all the dispatchers started

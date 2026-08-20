@@ -195,6 +195,21 @@ namespace NexClone.Backend.API.Controllers.Admin
             return View(profile);
         }
 
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateCommissionStatus(int commissionId, string newStatus)
+        {
+            var commission = await _db.AffiliateCommissions.FindAsync(commissionId);
+            if (commission == null) return NotFound();
+
+            commission.Status = newStatus.ToUpperInvariant();
+            await _db.SaveChangesAsync();
+
+            TempData["Success"] = $"Commission #{commissionId} status updated to {newStatus}.";
+            return RedirectToAction(nameof(Details), new { id = commission.AffiliateProfileId });
+        }
+
         // ─── Payout Requests ─────────────────────────────────────────────────
 
         public async Task<IActionResult> PayoutRequests([FromQuery] string? status = null, [FromQuery] string? currency = null)
