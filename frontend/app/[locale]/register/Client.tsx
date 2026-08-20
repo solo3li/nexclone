@@ -73,7 +73,9 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [manualRefCode, setManualRefCode] = useState(searchParams.get("ref") || getCookie("aff_ref_code") || "");
+  const initialRefCode = searchParams.get("ref") || getCookie("aff_ref_code") || "";
+  const [manualRefCode, setManualRefCode] = useState(initialRefCode);
+  const isRefCodeLocked = Boolean(initialRefCode);
   const [showPassword, setShowPassword] = useState(false);
   const [acceptedPolicy, setAcceptedPolicy] = useState(false);
   const [error, setError] = useState("");
@@ -425,7 +427,12 @@ export default function RegisterPage() {
                       placeholder={isRtl ? "كود الإحالة (اختياري)" : "Referral Code (Optional)"}
                       value={manualRefCode}
                       onChange={(e) => setManualRefCode(e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-10 py-3 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 transition-all duration-300 uppercase font-mono"
+                      readOnly={isRefCodeLocked}
+                      className={`w-full border rounded-xl px-10 py-3 text-white placeholder-white/30 transition-all duration-300 uppercase font-mono ${
+                        isRefCodeLocked 
+                          ? 'bg-white/5 border-white/10 opacity-70 cursor-not-allowed text-white/60 focus:outline-none' 
+                          : 'bg-white/5 border-white/10 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50'
+                      }`}
                     />
                   </div>
 
