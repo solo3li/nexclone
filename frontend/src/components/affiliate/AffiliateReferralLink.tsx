@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Copy, Check, Link } from 'lucide-react';
 import { AffiliateProfile } from '@/store/useAffiliateStore';
 
@@ -11,14 +11,16 @@ interface Props {
 
 export default function AffiliateReferralLink({ profile, isRtl }: Props) {
   const [copied, setCopied] = useState(false);
+  const [dynamicLink, setDynamicLink] = useState(profile.referralLink);
 
-  // Dynamically construct the link in the browser, fallback to profile.referralLink during SSR
-  const dynamicReferralLink = typeof window !== 'undefined' 
-    ? `${window.location.origin}/register?ref=${profile.referralCode}`
-    : profile.referralLink;
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setDynamicLink(`${window.location.origin}/register?ref=${profile.referralCode}`);
+    }
+  }, [profile.referralCode]);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(dynamicReferralLink).then(() => {
+    navigator.clipboard.writeText(dynamicLink).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
@@ -52,7 +54,7 @@ export default function AffiliateReferralLink({ profile, isRtl }: Props) {
 
         <div className="flex gap-3 items-center">
           <div className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 font-mono text-sm text-violet-300 overflow-hidden text-ellipsis whitespace-nowrap">
-            {dynamicReferralLink}
+            {dynamicLink}
           </div>
           <button
             onClick={handleCopy}
