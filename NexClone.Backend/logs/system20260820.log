@@ -596,3 +596,50 @@ DETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error
 2026-08-20 14:56:43.399 +02:00 [INF] End processing HTTP request after 1328.0423ms - 200
 2026-08-20 14:56:43.763 +02:00 [INF] Received HTTP response headers after 1442.6845ms - 200
 2026-08-20 14:56:43.763 +02:00 [INF] End processing HTTP request after 1443.587ms - 200
+2026-08-20 15:05:07.506 +02:00 [INF] [Email Task] Sending email to m83448421@gmail.com
+2026-08-20 15:05:07.665 +02:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-20 15:05:07.666 +02:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-20 15:05:07.781 +02:00 [INF] Received HTTP response headers after 114.9641ms - 201
+2026-08-20 15:05:07.781 +02:00 [INF] End processing HTTP request after 116.1593ms - 201
+2026-08-20 15:05:07.782 +02:00 [INF] [Email Task] Email sent to m83448421@gmail.com successfully.
+2026-08-20 15:15:33.658 +02:00 [INF] [Email Task] Sending email to bd333079@gmail.com
+2026-08-20 15:15:33.827 +02:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-20 15:15:33.827 +02:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-20 15:15:34.006 +02:00 [INF] Received HTTP response headers after 178.5915ms - 201
+2026-08-20 15:15:34.006 +02:00 [INF] End processing HTTP request after 179.6136ms - 201
+2026-08-20 15:15:34.006 +02:00 [INF] [Email Task] Email sent to bd333079@gmail.com successfully.
+2026-08-20 15:24:17.592 +02:00 [INF] Server vmi3518782:263311:6adde31e caught stopping signal...
+2026-08-20 15:24:17.599 +02:00 [INF] Server vmi3518782:263311:6adde31e All dispatchers stopped
+2026-08-20 15:24:17.765 +02:00 [INF] Server vmi3518782:263311:6adde31e successfully reported itself as stopped in 155.364 ms
+2026-08-20 15:24:17.766 +02:00 [INF] Server vmi3518782:263311:6adde31e has been stopped in total 170.921 ms
+2026-08-20 15:25:10.980 +02:00 [INF] Start installing Hangfire SQL objects...
+2026-08-20 15:25:14.528 +02:00 [INF] Hangfire SQL objects installed.
+2026-08-20 15:25:16.125 +02:00 [INF] Media Cleanup Background Service started.
+2026-08-20 15:25:16.125 +02:00 [INF] SubscriptionStatusService is starting.
+2026-08-20 15:25:16.135 +02:00 [INF] Searching for processed media older than 08/06/2026 13:25:16...
+2026-08-20 15:25:16.155 +02:00 [WRN] The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased.
+2026-08-20 15:25:16.547 +02:00 [INF] Successfully cleaned up 0 media files in total.
+2026-08-20 15:25:16.645 +02:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-20 15:25:16.645 +02:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-20 15:25:16.646 +02:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-20 15:25:16.646 +02:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-20 15:25:16.647 +02:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-20 15:25:16.647 +02:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 20
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-20 15:25:16.843 +02:00 [INF] Server vmi3518782:272313:80985678 successfully announced in 173.2742 ms
+2026-08-20 15:25:16.853 +02:00 [INF] Server vmi3518782:272313:80985678 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-20 15:25:16.988 +02:00 [INF] Server vmi3518782:272313:80985678 all the dispatchers started
+2026-08-20 15:25:44.987 +02:00 [WRN] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2026-08-20 15:26:09.143 +02:00 [INF] [DEBUG] ProcessPaymentCommissionAsync started for Payment 336, UserId "01a01e6b-a91f-760a-bd70-1b777206339d", Amount 1500.3 EGP
+2026-08-20 15:26:09.668 +02:00 [INF] [DEBUG] Referral HasConverted is true, so isRecurring = true.
+2026-08-20 15:26:09.669 +02:00 [INF] [DEBUG] Using percentage rate 10. Calculated amount: 150.03
+2026-08-20 15:26:09.906 +02:00 [INF] Admin-assigned RECURRING commission 150.03 EGP (rate 10%) for affiliate 14 on payment 336
+2026-08-20 15:26:15.689 +02:00 [INF] [Email Task] Sending email to bd333079@gmail.com
+2026-08-20 15:26:15.901 +02:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-20 15:26:15.904 +02:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-20 15:26:16.099 +02:00 [INF] Received HTTP response headers after 189.0262ms - 201
+2026-08-20 15:26:16.101 +02:00 [INF] End processing HTTP request after 205.3982ms - 201
+2026-08-20 15:26:16.103 +02:00 [INF] [Email Task] Email sent to bd333079@gmail.com successfully.

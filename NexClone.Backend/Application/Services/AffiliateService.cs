@@ -327,27 +327,51 @@ namespace NexClone.Backend.Application.Services
             Guid userId, int paymentId, decimal amount, string currency, int planId, int subscriptionId,
             decimal? firstCommissionOverride = null, decimal? recurringCommissionOverride = null)
         {
+            _logger.LogInformation("[DEBUG] ProcessPaymentCommissionAsync started for Payment {PaymentId}, UserId {UserId}, Amount {Amount} {Currency}", paymentId, userId, amount, currency);
+
             var settings = await GetSettingsAsync();
-            if (!settings.IsEnabled) return;
+            if (!settings.IsEnabled) 
+            {
+                _logger.LogWarning("[DEBUG] Affiliate system is disabled.");
+                return;
+            }
 
             // Prevent duplicate commissions
             var isAlreadyCommissioned = await _db.AffiliateCommissions
                 .AnyAsync(c => c.PaymentId == paymentId && 
                                c.Type != CommissionType.Reversal);
-            if (isAlreadyCommissioned) return;
+            if (isAlreadyCommissioned) 
+            {
+                _logger.LogWarning("[DEBUG] Commission already exists for Payment {PaymentId}.", paymentId);
+                return;
+            }
 
             // Check if user was referred by an affiliate
             var referral = await _db.AffiliateReferrals
                 .Include(r => r.AffiliateProfile)
                 .FirstOrDefaultAsync(r => r.ReferredUserId == userId && r.AffiliateProfile.IsActive);
 
-            if (referral == null) return; // Not a referred user — skip
+            if (referral == null) 
+            {
+                _logger.LogWarning("[DEBUG] No active referral found for UserId {UserId}.", userId);
+                return; // Not a referred user — skip
+            }
 
             var plan = await _db.Plans.FindAsync(planId);
-            if (plan == null) return;
+            if (plan == null) 
+            {
+                _logger.LogWarning("[DEBUG] Plan {PlanId} not found.", planId);
+                return;
+            }
 
             bool isRecurring = referral.HasConverted;
-            if (isRecurring && !settings.RecurringEnabled) return;
+            _logger.LogInformation("[DEBUG] Referral HasConverted is {HasConverted}, so isRecurring = {isRecurring}.", referral.HasConverted, isRecurring);
+
+            if (isRecurring && !settings.RecurringEnabled) 
+            {
+                _logger.LogWarning("[DEBUG] Recurring commissions are disabled in settings.");
+                return;
+            }
 
             decimal commissionAmount = 0;
             decimal rate = 0;
@@ -358,15 +382,18 @@ namespace NexClone.Backend.Application.Services
                 {
                     rate = recurringCommissionOverride.Value;
                     commissionAmount = Math.Round(amount * rate / 100m, 2);
+                    _logger.LogInformation("[DEBUG] Using override rate {Rate}. Calculated amount: {Amount}", rate, commissionAmount);
                 }
                 else if (plan.AffiliateRecurringCommissionType == "Fixed")
                 {
                     commissionAmount = currency.ToUpper() == "USD" ? plan.AffiliateRecurringCommissionValueUsd : plan.AffiliateRecurringCommissionValueEgp;
+                    _logger.LogInformation("[DEBUG] Using fixed commission. Calculated amount: {Amount}", commissionAmount);
                 }
                 else
                 {
                     rate = currency.ToUpper() == "USD" ? plan.AffiliateRecurringCommissionValueUsd : plan.AffiliateRecurringCommissionValueEgp;
                     commissionAmount = Math.Round(amount * rate / 100m, 2);
+                    _logger.LogInformation("[DEBUG] Using percentage rate {Rate}. Calculated amount: {Amount}", rate, commissionAmount);
                 }
             }
             else
@@ -387,9 +414,21 @@ namespace NexClone.Backend.Application.Services
                 }
             }
 
-            if (isRecurring && recurringCommissionOverride < 0) return;
-            if (!isRecurring && firstCommissionOverride < 0) return;
-            if (commissionAmount <= 0) return;
+            if (isRecurring && recurringCommissionOverride < 0) 
+            {
+                _logger.LogWarning("[DEBUG] Recurring commission override is less than 0.");
+                return;
+            }
+            if (!isRecurring && firstCommissionOverride < 0) 
+            {
+                _logger.LogWarning("[DEBUG] First commission override is less than 0.");
+                return;
+            }
+            if (commissionAmount <= 0) 
+            {
+                _logger.LogWarning("[DEBUG] Commission amount is <= 0 ({Amount}). Returning.", commissionAmount);
+                return;
+            }
 
             var commission = new AffiliateCommission
             {
