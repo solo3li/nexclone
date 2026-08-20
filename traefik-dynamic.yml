@@ -3,6 +3,7 @@ http:
     frontend-router:
       rule: "Host(`dev.169.58.204.169.nip.io`)"
       entryPoints:
+        - web
         - websecure
       tls:
         certResolver: myresolver
@@ -10,6 +11,7 @@ http:
     backend-router:
       rule: "Host(`api.169.58.204.169.nip.io`)"
       entryPoints:
+        - web
         - websecure
       tls:
         certResolver: myresolver
