@@ -34,7 +34,7 @@ export default function LogoutModal() {
       setIsLoggingOut(false);
       setLogoutModalOpen(false);
       logout();
-      router.push(`/${locale}`);
+      window.location.href = `/${locale}`;
     }
   };
 
@@ -47,7 +47,7 @@ export default function LogoutModal() {
     } finally {
       setIsLoggingOutAll(false);
       setLogoutModalOpen(false);
-      router.push(`/${locale}`);
+      window.location.href = `/${locale}`;
     }
   };
 
