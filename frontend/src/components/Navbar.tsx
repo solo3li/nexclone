@@ -364,29 +364,47 @@ export default function Navbar() {
                 {t('home')}
               </Link>
               <div className="flex flex-col py-2 border-b border-white/5">
-                <span className="text-white/50 text-xs font-bold uppercase mb-3 px-1">{t('tools')}</span>
-                {tools.map(tool => {
-                  const status = getToolStatus(tool.id);
-                  const Icon = tool.icon;
-                  return (
-                    <Link key={tool.id} href={tool.href} onClick={() => setMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-2 text-white/80 hover:text-white transition-colors rounded-xl hover:bg-white/5 group/item">
-                      <div className={`w-8 h-8 rounded-lg ${tool.bg} flex items-center justify-center shrink-0`}>
-                        <Icon className={`w-4 h-4 ${tool.color}`} />
-                      </div>
-                      <span className="text-sm font-medium flex-1">{locale === 'ar' ? tool.labelAr : tool.labelEn}</span>
-                      {status === 'maintenance' && (
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 whitespace-nowrap">
-                          {locale === 'ar' ? 'صيانة' : 'Maint.'}
-                        </span>
-                      )}
-                      {status === 'coming_soon' && (
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 whitespace-nowrap">
-                          {locale === 'ar' ? 'قريباً' : 'Soon'}
-                        </span>
-                      )}
-                    </Link>
-                  );
-                })}
+                <button 
+                  onClick={() => setToolsOpen(!toolsOpen)} 
+                  className="flex items-center justify-between px-1 mb-2 text-white/50 hover:text-white/80 transition-colors w-full"
+                >
+                  <span className="text-xs font-bold uppercase">{t('tools')}</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${toolsOpen ? "rotate-180" : ""}`} />
+                </button>
+                <AnimatePresence>
+                  {toolsOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="flex flex-col overflow-hidden"
+                    >
+                      {tools.map(tool => {
+                        const status = getToolStatus(tool.id);
+                        const Icon = tool.icon;
+                        return (
+                          <Link key={tool.id} href={tool.href} onClick={() => setMenuOpen(false)} className="flex items-center gap-3 py-2.5 px-2 text-white/80 hover:text-white transition-colors rounded-xl hover:bg-white/5 group/item">
+                            <div className={`w-8 h-8 rounded-lg ${tool.bg} flex items-center justify-center shrink-0`}>
+                              <Icon className={`w-4 h-4 ${tool.color}`} />
+                            </div>
+                            <span className="text-sm font-medium flex-1">{locale === 'ar' ? tool.labelAr : tool.labelEn}</span>
+                            {status === 'maintenance' && (
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30 whitespace-nowrap">
+                                {locale === 'ar' ? 'صيانة' : 'Maint.'}
+                              </span>
+                            )}
+                            {status === 'coming_soon' && (
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 whitespace-nowrap">
+                                {locale === 'ar' ? 'قريباً' : 'Soon'}
+                              </span>
+                            )}
+                          </Link>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
               <Link href="/pricing" onClick={() => setMenuOpen(false)} className="text-white/80 hover:text-white text-base font-medium py-2 border-b border-white/5 transition-colors">
                 {t('pricing')}
