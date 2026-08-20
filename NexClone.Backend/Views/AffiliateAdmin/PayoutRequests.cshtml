@@ -85,7 +85,7 @@
                         }
                         @if (!string.IsNullOrEmpty(payout.TransferReceiptUrl))
                         {
-                            <div style="margin-top:4px;"><a href="@payout.TransferReceiptUrl" target="_blank" style="font-size:0.75rem; color:#0f62fe; text-decoration:underline;">View Receipt</a></div>
+                            <div style="margin-top:4px;"><a href="@Url.Action("ViewReceipt", "AffiliateAdmin", new { id = payout.Id })" target="_blank" style="font-size:0.75rem; color:#0f62fe; text-decoration:underline;">View Receipt</a></div>
                         }
                     </td>
                     <td style="padding:0.6rem 0.75rem; text-align:center; font-size:0.8rem;">@payout.RequestedAt.ToString("yyyy-MM-dd")</td>

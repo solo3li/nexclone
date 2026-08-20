@@ -360,3 +360,22 @@ DETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error
 2026-08-20 08:53:59.878 +02:00 [INF] Server vmi3518782:189715:6b9ed0da successfully announced in 39.3406 ms
 2026-08-20 08:53:59.885 +02:00 [INF] Server vmi3518782:189715:6b9ed0da is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-20 08:53:59.987 +02:00 [INF] Server vmi3518782:189715:6b9ed0da all the dispatchers started
+2026-08-20 08:57:58.058 +02:00 [INF] Start installing Hangfire SQL objects...
+2026-08-20 08:57:58.132 +02:00 [INF] Hangfire SQL objects installed.
+2026-08-20 08:57:58.420 +02:00 [INF] SubscriptionStatusService is starting.
+2026-08-20 08:57:58.423 +02:00 [INF] Media Cleanup Background Service started.
+2026-08-20 08:57:58.444 +02:00 [INF] Searching for processed media older than 08/06/2026 06:57:58...
+2026-08-20 08:57:58.576 +02:00 [INF] No old media found to clean up.
+2026-08-20 08:57:58.757 +02:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: 127.0.0.1, DB: nexclone_dev, Schema: hangfire'
+2026-08-20 08:57:58.759 +02:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-20 08:57:58.761 +02:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-20 08:57:58.762 +02:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-20 08:57:58.763 +02:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-20 08:57:58.763 +02:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 20
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-20 08:57:58.803 +02:00 [INF] Server vmi3518782:190629:0e57f2b0 successfully announced in 16.2549 ms
+2026-08-20 08:57:58.809 +02:00 [INF] Server vmi3518782:190629:0e57f2b0 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-20 08:57:58.929 +02:00 [INF] Server vmi3518782:190629:0e57f2b0 all the dispatchers started

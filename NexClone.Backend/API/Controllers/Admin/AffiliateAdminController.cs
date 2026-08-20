@@ -231,6 +231,17 @@ namespace NexClone.Backend.API.Controllers.Admin
             return View(payouts);
         }
 
+        
+        [HttpGet]
+        public async Task<IActionResult> ViewReceipt(int id)
+        {
+            var payout = await _db.AffiliatePayouts.FindAsync(id);
+            if (payout == null || string.IsNullOrEmpty(payout.TransferReceiptUrl)) return NotFound();
+            
+            var url = await _mediaService.GetFileUrlAsync(payout.TransferReceiptUrl);
+            return Redirect(url);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdatePayoutStatus(int id, string newStatus, string? rejectionReason = null, IFormFile? receipt = null)
