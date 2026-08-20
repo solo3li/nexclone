@@ -481,3 +481,7 @@ DETAIL: Detail redacted as it may contain sensitive data. Specify 'Include Error
 2026-08-20 11:10:26.396 +02:00 [INF] Received HTTP response headers after 95.9946ms - 201
 2026-08-20 11:10:26.396 +02:00 [INF] End processing HTTP request after 98.0234ms - 201
 2026-08-20 11:10:26.397 +02:00 [INF] [Email Task] Email sent to bd333079@gmail.com successfully.
+2026-08-20 13:51:29.974 +02:00 [INF] Server vmi3518782:204716:02624bd1 caught stopping signal...
+2026-08-20 13:51:29.987 +02:00 [INF] Server vmi3518782:204716:02624bd1 All dispatchers stopped
+2026-08-20 13:51:30.156 +02:00 [INF] Server vmi3518782:204716:02624bd1 successfully reported itself as stopped in 163.4076 ms
+2026-08-20 13:51:30.156 +02:00 [INF] Server vmi3518782:204716:02624bd1 has been stopped in total 178.5048 ms

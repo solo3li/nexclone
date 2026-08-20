@@ -17,16 +17,10 @@
         @Html.AntiForgeryToken()
 
         <!-- Enable / Disable -->
-        <div class="bx--form-item" style="margin-bottom:1.5rem;">
-            <div class="bx--toggle">
-                <input id="IsEnabled" type="checkbox" name="IsEnabled" value="true"
-                       class="bx--toggle__input" @(Model.IsEnabled ? "checked" : "") />
-                <label class="bx--toggle__label" for="IsEnabled">
-                    <span class="bx--toggle__text--left">Off</span>
-                    <span class="bx--toggle__appearance"></span>
-                    <span class="bx--toggle__text--right">Affiliate System Enabled</span>
-                </label>
-            </div>
+        <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom:1.5rem;">
+            <input id="IsEnabled" type="checkbox" name="IsEnabled" value="true"
+                   class="bx--checkbox" @(Model.IsEnabled ? "checked" : "") />
+            <label class="bx--checkbox-label" for="IsEnabled">Affiliate System Enabled</label>
         </div>
 
         <!-- Hold Period -->
@@ -50,29 +44,32 @@
         </div>
 
         <!-- Recurring Commission -->
-        <div class="bx--form-item" style="margin-bottom:1.5rem;">
-            <div class="bx--toggle">
-                <input id="RecurringEnabled" type="checkbox" name="RecurringEnabled" value="true"
-                       class="bx--toggle__input" @(Model.RecurringEnabled ? "checked" : "") />
-                <label class="bx--toggle__label" for="RecurringEnabled">
-                    <span class="bx--toggle__text--left">Off</span>
-                    <span class="bx--toggle__appearance"></span>
-                    <span class="bx--toggle__text--right">Recurring Commission Enabled</span>
-                </label>
-            </div>
+        <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom:1.5rem;">
+            <input id="RecurringEnabled" type="checkbox" name="RecurringEnabled" value="true"
+                   class="bx--checkbox" @(Model.RecurringEnabled ? "checked" : "") />
+            <label class="bx--checkbox-label" for="RecurringEnabled">Recurring Commission Enabled</label>
         </div>
 
         <!-- Stop on Cancellation -->
-        <div class="bx--form-item" style="margin-bottom:1.5rem;">
-            <div class="bx--toggle">
-                <input id="StopOnCancellation" type="checkbox" name="StopOnCancellation" value="true"
-                       class="bx--toggle__input" @(Model.StopOnCancellation ? "checked" : "") />
-                <label class="bx--toggle__label" for="StopOnCancellation">
-                    <span class="bx--toggle__text--left">Off</span>
-                    <span class="bx--toggle__appearance"></span>
-                    <span class="bx--toggle__text--right">Stop Recurring Commission After Subscription Cancellation</span>
-                </label>
-            </div>
+        <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom:1.5rem;">
+            <input id="StopOnCancellation" type="checkbox" name="StopOnCancellation" value="true"
+                   class="bx--checkbox" @(Model.StopOnCancellation ? "checked" : "") />
+            <label class="bx--checkbox-label" for="StopOnCancellation">Stop Recurring Commission After Subscription Cancellation</label>
+        </div>
+
+        <!-- Fraud Prevention -->
+        <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom:1.5rem;">
+            <input id="PreventFingerprintFraud" type="checkbox" name="PreventFingerprintFraud" value="true"
+                   class="bx--checkbox" @(Model.PreventFingerprintFraud ? "checked" : "") />
+            <label class="bx--checkbox-label" for="PreventFingerprintFraud">Prevent Self-Referral (Device Fingerprint)</label>
+            <p class="bx--form__helper-text" style="margin-top:0.5rem; color:#d12727;">Recommended. Blocks referrals if the new user has the exact same device fingerprint as the affiliate.</p>
+        </div>
+
+        <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom:1.5rem;">
+            <input id="PreventIpFraud" type="checkbox" name="PreventIpFraud" value="true"
+                   class="bx--checkbox" @(Model.PreventIpFraud ? "checked" : "") />
+            <label class="bx--checkbox-label" for="PreventIpFraud">Prevent Self-Referral (IP Address)</label>
+            <p class="bx--form__helper-text" style="margin-top:0.5rem;">Blocks referrals if the new user shares the same IP address as the affiliate. (May block users in the same household/office).</p>
         </div>
 
         <!-- Limits -->
