@@ -462,8 +462,8 @@ namespace NexClone.Backend.Application.Services
                 {
                     double val = (double)amountForCost;
                     if (val <= 0) val = 1.0;
-                    // If val > 30, it was passed in seconds (e.g. 120s -> 2 min), otherwise directly in minutes
-                    double minutes = val > 30 ? (val / 60.0) : val;
+                    // Always round up to the nearest minute as requested
+                    double minutes = val > 30 ? Math.Ceiling(val / 60.0) : Math.Ceiling(val);
                     totalCost = pricing.BaseCost + ((decimal)minutes * pricing.CostPerMinute);
                     if (totalCost < 0.1m) totalCost = 0.1m;
                     allowStandard = pricing.AllowedWallet.Equals("Standard", StringComparison.OrdinalIgnoreCase) || pricing.AllowedWallet.Equals("Both", StringComparison.OrdinalIgnoreCase);
