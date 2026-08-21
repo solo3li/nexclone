@@ -153,6 +153,7 @@ builder.Services.AddSingleton<NexClone.Backend.Core.Interfaces.ITtsCatalogServic
 
 // Register Media Service
 builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IMediaService, NexClone.Backend.Infrastructure.ExternalServices.S3MediaService>();
+builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.ISubscriptionPermissionService, NexClone.Backend.Application.Services.SubscriptionPermissionService>();
 
 // Register Email Service
 builder.Services.AddScoped<NexClone.Backend.Infrastructure.ExternalServices.BrevoEmailService>();

@@ -59,15 +59,11 @@ namespace NexClone.Backend.API.Controllers.AI
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
-            var activeSubscription = await _dbContext.Subscriptions
-                .Include(s => s.Plan)
-                .Where(s => s.UserId == userId && s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow)
-                .FirstOrDefaultAsync();
-
-            if (activeSubscription != null && !string.IsNullOrEmpty(activeSubscription.Plan.AllowedVoices))
+            var permService = HttpContext.RequestServices.GetService(typeof(NexClone.Backend.Core.Interfaces.ISubscriptionPermissionService)) as NexClone.Backend.Core.Interfaces.ISubscriptionPermissionService;
+            var perms = await permService.GetEffectivePermissionsAsync(userId);
+            if (perms.HasActiveSubscription && perms.AllowedVoices != null && perms.AllowedVoices.Any())
             {
-                var allowedVoices = activeSubscription.Plan.AllowedVoices.Split(',').Select(v => v.Trim()).ToList();
-                if (!string.IsNullOrEmpty(request.VoiceName) && !allowedVoices.Contains(request.VoiceName))
+                if (!string.IsNullOrEmpty(request.VoiceName) && !perms.AllowedVoices.Contains(request.VoiceName))
                 {
                     return BadRequest(new { error = $"The voice '{request.VoiceName}' is not allowed on your current plan." });
                 }

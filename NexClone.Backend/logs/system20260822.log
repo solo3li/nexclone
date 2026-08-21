@@ -1,0 +1,3 @@
+2026-08-22 00:23:59.611 +02:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-22 00:41:32.510 +02:00 [INF] Removed 2 outdated record(s) from 'aggregatedcounter' table.
+2026-08-22 00:41:36.284 +02:00 [INF] Removed 11 outdated record(s) from 'job' table.

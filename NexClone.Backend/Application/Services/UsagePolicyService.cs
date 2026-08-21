@@ -53,28 +53,38 @@ namespace NexClone.Backend.Application.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly IHubContext<NotificationHub> _hubContext;
+        private readonly NexClone.Backend.Core.Interfaces.ISubscriptionPermissionService _permissionService;
 
-        public UsagePolicyService(ApplicationDbContext context, IHubContext<NotificationHub> hubContext)
+        public UsagePolicyService(ApplicationDbContext context, IHubContext<NotificationHub> hubContext, NexClone.Backend.Core.Interfaces.ISubscriptionPermissionService permissionService)
         {
             _context = context;
             _hubContext = hubContext;
+            _permissionService = permissionService;
         }
 
         public async Task<ToolPolicy> GetToolPolicyForUserAsync(Guid userId, string toolId, string quality = "Standard")
         {
-            var user = await _context.Users
-                .Include(u => u.Subscriptions)
-                    .ThenInclude(s => s.Plan)
-                .FirstOrDefaultAsync(u => u.Id == userId);
+            // Use centralized permission service to support stacked subscriptions
+            var perms = await _permissionService.GetEffectivePermissionsAsync(userId);
+            if (!perms.HasActiveSubscription) return new ToolPolicy { Enabled = true };
 
-            if (user == null) return new ToolPolicy { Enabled = true };
+            return GetToolPolicyFromPermissions(perms, toolId);
+        }
 
-            var activeSubscription = user.Subscriptions
-                .FirstOrDefault(s => s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow);
-
-            if (activeSubscription == null) return new ToolPolicy { Enabled = true };
-
-            return GetToolPolicy(activeSubscription.Plan, toolId, quality);
+        private ToolPolicy GetToolPolicyFromPermissions(NexClone.Backend.Core.Interfaces.PlanPermissions perms, string toolId)
+        {
+            var policy = new ToolPolicy();
+            if (toolId == "text-to-voice") policy.Enabled = perms.TtsEnabled;
+            else if (toolId == "voice-to-text") policy.Enabled = perms.SttEnabled;
+            else if (toolId == "kling_avatar_image2video" || toolId == "avatar-to-video") policy.Enabled = perms.AvatarVideoEnabled;
+            else if (toolId == "advanced-lip-sync" || toolId == "lipsync") policy.Enabled = perms.LipSyncEnabled;
+            else if (toolId == "kling_motion_control" || toolId == "motion-control") policy.Enabled = perms.MotionControlEnabled;
+            else if (toolId == "text-to-video") policy.Enabled = perms.TextToVideoEnabled;
+            else if (toolId == "image-to-video") policy.Enabled = perms.ImageToVideoEnabled;
+            else if (toolId == "image-to-image" || toolId == "reference-to-video") policy.Enabled = perms.ReferenceToVideoEnabled;
+            else if (toolId == "text-to-image") policy.Enabled = perms.TextToImageEnabled;
+            else policy.Enabled = true; // Unknown tools are allowed by default
+            return policy;
         }
 
         public async Task<PolicyValidationResult> ValidateAndChargeAsync(Guid userId, string toolId, decimal usageAmountForLimits, decimal? usageAmountForCost = null, string quality = "Standard", int? subscriptionId = null)
@@ -231,19 +241,18 @@ namespace NexClone.Backend.Application.Services
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Your account is currently in the freeze period. Please renew your subscription to continue using the services." };
             }
 
-            var activeSubscription = user.Subscriptions
-                .Where(s => s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow)
-                .OrderByDescending(s => s.Plan.IsDefaultRegistrationPlan || s.Plan.IsFreeTrial)
-                .ThenBy(s => s.EndDate)
-                .FirstOrDefault();
+            // Use centralized permission service to correctly resolve permissions across stacked subscriptions.
+            // A user is only frozen on the Free plan if ALL their active subscriptions are Free/Trial.
+            // If at least one Paid subscription is active, they are unlocked.
+            var perms = await _permissionService.GetEffectivePermissionsAsync(userId);
 
-            if (activeSubscription != null && (activeSubscription.Plan.PriceUsd == 0 || activeSubscription.Plan.IsFreeTrial || activeSubscription.Plan.Name.ToLower().Contains("free")))
+            if (perms.HasActiveSubscription && perms.IsFrozenDueToFreePlanOnly)
             {
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Your credits are frozen while on the Free plan. Please upgrade your plan to continue using the services." };
             }
 
-            var toolPolicy = activeSubscription != null ? GetToolPolicy(activeSubscription.Plan, toolId, quality) : new ToolPolicy { Enabled = true };
-            if (activeSubscription == null) toolPolicy.Enabled = true;
+            var toolPolicy = perms.HasActiveSubscription ? GetToolPolicyFromPermissions(perms, toolId) : new ToolPolicy { Enabled = true };
+
 
             if (!toolPolicy.Enabled)
             {

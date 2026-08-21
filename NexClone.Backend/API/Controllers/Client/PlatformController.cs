@@ -136,18 +136,11 @@ namespace NexClone.Backend.API.Controllers.Client
                 var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 if (Guid.TryParse(userIdStr, out var userId))
                 {
-                    var activeSubscription = await _context.Subscriptions
-                        .Include(s => s.Plan)
-                        .Where(s => s.UserId == userId && s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow)
-                        .OrderByDescending(s => s.EndDate)
-                        .FirstOrDefaultAsync();
-
-                    if (activeSubscription?.Plan != null)
+                    var permService = HttpContext.RequestServices.GetService(typeof(NexClone.Backend.Core.Interfaces.ISubscriptionPermissionService)) as NexClone.Backend.Core.Interfaces.ISubscriptionPermissionService;
+                    var perms = await permService.GetEffectivePermissionsAsync(userId);
+                    if (perms.HasActiveSubscription)
                     {
-                        if (!string.IsNullOrEmpty(activeSubscription.Plan.AllowedVoices))
-                        {
-                            allowedVoices = activeSubscription.Plan.AllowedVoices.Split(',').Select(v => v.Trim()).ToList();
-                        }
+                        allowedVoices = perms.AllowedVoices;
                     }
                 }
             }
