@@ -250,7 +250,7 @@
                 <div style="max-height: 220px; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 4px; padding: 1rem; background: #fff; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
                     @if (ViewBag.AllVoices != null)
                     {
-                        foreach (var voice in ViewBag.AllVoices as List<NexClone.Backend.Core.Entities.Voice>)
+                        foreach (var voice in ViewBag.AllVoices as List<NexClone.Backend.Core.Catalogs.VoiceCatalogItem>)
                         {
                             bool isChecked = Model?.AllowedVoices != null && Model.AllowedVoices.Split(',').Contains(voice.VoiceName);
                             <div class="bx--checkbox-wrapper">
