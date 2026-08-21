@@ -5,13 +5,15 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   allowedDevOrigins: [
-    '178.62.192.74', 
+    '178.62.192.74',
     'localhost',
     '127.0.0.1',
     '*.trycloudflare.com',
     '*.nip.io',
     'dev.169.58.204.169.nip.io',
     'api.169.58.204.169.nip.io',
+    'staging.169.58.204.169.nip.io',
+    'api.staging.169.58.204.169.nip.io'
   ],
   typescript: {
     ignoreBuildErrors: true,
