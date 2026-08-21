@@ -354,3 +354,23 @@ System.Threading.Tasks.TaskCanceledException: A task was canceled.
 System.Threading.Tasks.TaskCanceledException: A task was canceled.
    at NexClone.Backend.Application.BackgroundJobs.MediaCleanupService.ExecuteAsync(CancellationToken stoppingToken) in /root/nexmedia/nexclone/NexClone.Backend/Application/BackgroundJobs/MediaCleanupService.cs:line 41
    at Microsoft.Extensions.Hosting.Internal.Host.TryExecuteBackgroundServiceAsync(BackgroundService backgroundService)
+2026-08-21 23:41:16.244 +02:00 [INF] Start installing Hangfire SQL objects...
+2026-08-21 23:41:19.745 +02:00 [INF] Hangfire SQL objects installed.
+2026-08-21 23:41:21.279 +02:00 [INF] SubscriptionStatusService is starting.
+2026-08-21 23:41:21.280 +02:00 [INF] Media Cleanup Background Service started.
+2026-08-21 23:41:21.292 +02:00 [INF] Searching for processed media older than 08/07/2026 21:41:21...
+2026-08-21 23:41:21.314 +02:00 [WRN] The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased.
+2026-08-21 23:41:21.421 +02:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-21 23:41:21.422 +02:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-21 23:41:21.423 +02:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-21 23:41:21.423 +02:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-21 23:41:21.423 +02:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-21 23:41:21.423 +02:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 20
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-21 23:41:21.505 +02:00 [INF] Successfully cleaned up 0 media files in total.
+2026-08-21 23:41:22.627 +02:00 [INF] Server vmi3518782:519778:c35147da successfully announced in 1185.3947 ms
+2026-08-21 23:41:22.634 +02:00 [INF] Server vmi3518782:519778:c35147da is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-21 23:41:22.659 +02:00 [INF] Server vmi3518782:519778:c35147da all the dispatchers started
