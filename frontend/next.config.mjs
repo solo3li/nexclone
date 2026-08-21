@@ -12,8 +12,7 @@ const nextConfig = {
     '*.nip.io',
     'dev.169.58.204.169.nip.io',
     'api.169.58.204.169.nip.io',
-    'staging.169.58.204.169.nip.io',
-    'api.staging.169.58.204.169.nip.io'
+    'https://staging.69.58.204.169.nip.io/'
   ],
   typescript: {
     ignoreBuildErrors: true,
