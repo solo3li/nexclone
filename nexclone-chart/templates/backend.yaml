@@ -5,7 +5,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nexclone-backend
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: nexclone-backend
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
@@ -87,7 +87,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: nexclone-backend
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: nexclone-backend
 spec:
