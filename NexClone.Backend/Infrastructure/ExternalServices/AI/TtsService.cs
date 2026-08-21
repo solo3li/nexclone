@@ -13,11 +13,13 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly NexClone.Backend.Core.Interfaces.ITtsCatalogService _ttsCatalog;
 
-        public TtsService(ApplicationDbContext dbContext, IHttpClientFactory httpClientFactory)
+        public TtsService(ApplicationDbContext dbContext, IHttpClientFactory httpClientFactory, NexClone.Backend.Core.Interfaces.ITtsCatalogService ttsCatalog)
         {
             _dbContext = dbContext;
             _httpClientFactory = httpClientFactory;
+            _ttsCatalog = ttsCatalog;
         }
 
         public async Task<(Stream AudioStream, string ContentType, string FileExtension, string ProviderName, string ModelName)> GenerateAudioAsync(
@@ -210,17 +212,16 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
 
         private async Task<(Stream, string, string)> GenerateGeminiAudioAsync(string text, string voiceName, string styleInstruction, ApiConfiguration config, string customModelName = null)
         {
-            var validGeminiVoices = new[] { "Puck", "Charon", "Kore", "Fenrir", "Aoede" };
-            string geminiVoice = "Puck";
+            string geminiVoice = "Puck"; // default
 
-            var voiceModel = await _dbContext.Voices.FirstOrDefaultAsync(v => v.VoiceName == voiceName || v.Name == voiceName);
-            if (voiceModel != null && !string.IsNullOrEmpty(voiceModel.GeminiVoice) && validGeminiVoices.Contains(voiceModel.GeminiVoice))
+            var voiceModel = _ttsCatalog.GetVoiceByName(voiceName);
+            if (voiceModel != null && !string.IsNullOrEmpty(voiceModel.GeminiVoice))
             {
                 geminiVoice = voiceModel.GeminiVoice;
             }
             else if (voiceModel != null && voiceModel.Gender?.ToLower() == "female")
             {
-                geminiVoice = "Aoede";
+                geminiVoice = "Aoede"; // fallback for female if no specific GeminiVoice
             }
 
             var prompt = string.IsNullOrWhiteSpace(styleInstruction) ? 

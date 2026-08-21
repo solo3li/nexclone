@@ -6,7 +6,7 @@
     "Gender": "female",
     "Accent": "متعددة اللهجات",
     "DemoAudio": "voice_demos/صبرينه.mp3",
-    "GeminiVoice": "Kore",
+    "GeminiVoice": "Leda",
     "IsActive": true,
     "IsPremium": true,
     "Order": 9
@@ -18,7 +18,7 @@
     "Gender": "male",
     "Accent": "متعدد اللهجات",
     "DemoAudio": "voice_demos/طلال.mp3",
-    "GeminiVoice": "Puck",
+    "GeminiVoice": "Algenib",
     "IsActive": true,
     "IsPremium": true,
     "Order": 7
@@ -30,7 +30,7 @@
     "Gender": "female",
     "Accent": "متعددة اللهجات",
     "DemoAudio": "voice_demos/صفاء.mp3",
-    "GeminiVoice": "Kore",
+    "GeminiVoice": "Aoede",
     "IsActive": true,
     "IsPremium": true,
     "Order": 10
@@ -42,7 +42,7 @@
     "Gender": "female",
     "Accent": "متعددة اللهجات",
     "DemoAudio": "voice_demos/هديل.mp3",
-    "GeminiVoice": "Aoede",
+    "GeminiVoice": "Callirrhoe",
     "IsActive": true,
     "IsPremium": false,
     "Order": 11
@@ -54,7 +54,7 @@
     "Gender": "female",
     "Accent": "متعددة اللهجات",
     "DemoAudio": "voice_demos/سلوي.mp3",
-    "GeminiVoice": "Kore",
+    "GeminiVoice": "Zephyr",
     "IsActive": true,
     "IsPremium": true,
     "Order": 35
@@ -66,7 +66,7 @@
     "Gender": "female",
     "Accent": "متعددة اللهجات",
     "DemoAudio": "voice_demos/هند.mp3",
-    "GeminiVoice": "Aoede",
+    "GeminiVoice": "Kore",
     "IsActive": true,
     "IsPremium": true,
     "Order": 39
@@ -78,7 +78,7 @@
     "Gender": "male",
     "Accent": "متعدد اللهجات",
     "DemoAudio": "voice_demos/بهجات.mp3",
-    "GeminiVoice": "Fenrir",
+    "GeminiVoice": "Enceladus",
     "IsActive": true,
     "IsPremium": true,
     "Order": 30
@@ -90,7 +90,7 @@
     "Gender": "female",
     "Accent": "متعددة اللهجات",
     "DemoAudio": "voice_demos/دعاء.mp3",
-    "GeminiVoice": "Aoede",
+    "GeminiVoice": "Autonoe",
     "IsActive": true,
     "IsPremium": false,
     "Order": 12
@@ -102,7 +102,7 @@
     "Gender": "male",
     "Accent": "متعدد اللهجات",
     "DemoAudio": "",
-    "GeminiVoice": "Charon",
+    "GeminiVoice": "Iapetus",
     "IsActive": false,
     "IsPremium": false,
     "Order": 32
@@ -114,7 +114,7 @@
     "Gender": "male",
     "Accent": "سعودي",
     "DemoAudio": "voice_demos/عبدالعزيز.mp3",
-    "GeminiVoice": "Fenrir",
+    "GeminiVoice": "Rasalgethi",
     "IsActive": true,
     "IsPremium": true,
     "Order": 14
@@ -126,7 +126,7 @@
     "Gender": "male",
     "Accent": "متعدد اللهجات",
     "DemoAudio": "voice_demos/صقر.mp3",
-    "GeminiVoice": "Puck",
+    "GeminiVoice": "Achernar",
     "IsActive": true,
     "IsPremium": true,
     "Order": 15
@@ -138,7 +138,7 @@
     "Gender": "male",
     "Accent": "الخليجية",
     "DemoAudio": "voice_demos/نايف.mp3",
-    "GeminiVoice": "Charon",
+    "GeminiVoice": "Alnilam",
     "IsActive": true,
     "IsPremium": true,
     "Order": 16
@@ -150,7 +150,7 @@
     "Gender": "male",
     "Accent": "متعدد اللهجات",
     "DemoAudio": "voice_demos/عثمان.mp3",
-    "GeminiVoice": "Fenrir",
+    "GeminiVoice": "Schedar",
     "IsActive": true,
     "IsPremium": true,
     "Order": 17
@@ -162,7 +162,7 @@
     "Gender": "male",
     "Accent": "مغربي",
     "DemoAudio": "voice_demos/امير.mp3",
-    "GeminiVoice": "Puck",
+    "GeminiVoice": "Gacrux",
     "IsActive": true,
     "IsPremium": false,
     "Order": 19
@@ -174,7 +174,7 @@
     "Gender": "female",
     "Accent": "متعددة اللهجات",
     "DemoAudio": "voice_demos/عبير1.mp3",
-    "GeminiVoice": "Kore",
+    "GeminiVoice": "Leda",
     "IsActive": true,
     "IsPremium": true,
     "Order": 41
@@ -186,7 +186,7 @@
     "Gender": "female",
     "Accent": "مغربية",
     "DemoAudio": "voice_demos/رحمة.mp3",
-    "GeminiVoice": "Aoede",
+    "GeminiVoice": "Umbriel",
     "IsActive": true,
     "IsPremium": true,
     "Order": 13
@@ -198,7 +198,7 @@
     "Gender": "male",
     "Accent": "سعودي",
     "DemoAudio": "voice_demos/عصام.mp3",
-    "GeminiVoice": "Puck",
+    "GeminiVoice": "Achird",
     "IsActive": true,
     "IsPremium": true,
     "Order": 21
@@ -210,7 +210,7 @@
     "Gender": "female",
     "Accent": "الخليجية",
     "DemoAudio": "voice_demos/مروه.mp3",
-    "GeminiVoice": "Aoede",
+    "GeminiVoice": "Despina",
     "IsActive": true,
     "IsPremium": true,
     "Order": 18
@@ -222,7 +222,7 @@
     "Gender": "male",
     "Accent": "مغربية",
     "DemoAudio": "voice_demos/انيس.mp3",
-    "GeminiVoice": "Fenrir",
+    "GeminiVoice": "Algieba",
     "IsActive": true,
     "IsPremium": true,
     "Order": 34
@@ -234,7 +234,7 @@
     "Gender": "female",
     "Accent": "الخليجية",
     "DemoAudio": "voice_demos/عائشه.mp3",
-    "GeminiVoice": "Aoede",
+    "GeminiVoice": "Erinome",
     "IsActive": true,
     "IsPremium": true,
     "Order": 20
@@ -246,7 +246,7 @@
     "Gender": "female",
     "Accent": "متعددة اللهجات",
     "DemoAudio": "voice_demos/نجله.mp3",
-    "GeminiVoice": "Kore",
+    "GeminiVoice": "Laomedeia",
     "IsActive": true,
     "IsPremium": true,
     "Order": 27
@@ -258,7 +258,7 @@
     "Gender": "male",
     "Accent": "سعودي",
     "DemoAudio": "voice_demos/عزيز.mp3",
-    "GeminiVoice": "Fenrir",
+    "GeminiVoice": "Algenib",
     "IsActive": true,
     "IsPremium": true,
     "Order": 36
@@ -270,7 +270,7 @@
     "Gender": "male",
     "Accent": "سعودي",
     "DemoAudio": "voice_demos/طفشان.mp3",
-    "GeminiVoice": "Puck",
+    "GeminiVoice": "Rasalgethi",
     "IsActive": true,
     "IsPremium": true,
     "Order": 37
@@ -294,7 +294,7 @@
     "Gender": "female",
     "Accent": "متعددة اللهجات",
     "DemoAudio": "voice_demos/هاله.mp3",
-    "GeminiVoice": "Kore",
+    "GeminiVoice": "Pulcherrima",
     "IsActive": true,
     "IsPremium": true,
     "Order": 29
@@ -306,7 +306,7 @@
     "Gender": "female",
     "Accent": "متعددة اللهجات",
     "DemoAudio": "voice_demos/سدره.mp3",
-    "GeminiVoice": "Aoede",
+    "GeminiVoice": "Callirrhoe",
     "IsActive": true,
     "IsPremium": true,
     "Order": 45
@@ -318,7 +318,7 @@
     "Gender": "male",
     "Accent": "متعدد اللهجات",
     "DemoAudio": "voice_demos/يزن.mp3",
-    "GeminiVoice": "Charon",
+    "GeminiVoice": "Achernar",
     "IsActive": true,
     "IsPremium": true,
     "Order": 38
@@ -330,7 +330,7 @@
     "Gender": "male",
     "Accent": "متعدد اللهجات",
     "DemoAudio": "voice_demos/اسماعيل.mp3",
-    "GeminiVoice": "Fenrir",
+    "GeminiVoice": "Alnilam",
     "IsActive": true,
     "IsPremium": true,
     "Order": 40
@@ -342,7 +342,7 @@
     "Gender": "female",
     "Accent": "متعددة اللهجات",
     "DemoAudio": "voice_demos/نرمين1.mp3",
-    "GeminiVoice": "Kore",
+    "GeminiVoice": "Zubenelgenubi",
     "IsActive": true,
     "IsPremium": true,
     "Order": 31
@@ -354,7 +354,7 @@
     "Gender": "male",
     "Accent": "متعدد اللهجات",
     "DemoAudio": "voice_demos/سبيد.mp3",
-    "GeminiVoice": "Charon",
+    "GeminiVoice": "Schedar",
     "IsActive": true,
     "IsPremium": true,
     "Order": 42
@@ -366,7 +366,7 @@
     "Gender": "male",
     "Accent": "متعدد اللهجات",
     "DemoAudio": "",
-    "GeminiVoice": "Fenrir",
+    "GeminiVoice": "Gacrux",
     "IsActive": false,
     "IsPremium": true,
     "Order": 44
@@ -378,7 +378,7 @@
     "Gender": "male",
     "Accent": "متعدد اللهجات",
     "DemoAudio": "voice_demos/مهند.mp3",
-    "GeminiVoice": "Puck",
+    "GeminiVoice": "Achird",
     "IsActive": true,
     "IsPremium": true,
     "Order": 46
@@ -390,7 +390,7 @@
     "Gender": "female",
     "Accent": "متعددة اللهجات",
     "DemoAudio": "voice_demos/ساره.mp3",
-    "GeminiVoice": "Kore",
+    "GeminiVoice": "Zephyr",
     "IsActive": true,
     "IsPremium": true,
     "Order": 5
@@ -402,7 +402,7 @@
     "Gender": "male",
     "Accent": "متعدد اللهجات",
     "DemoAudio": "voice_demos/عماد.mp3",
-    "GeminiVoice": "Fenrir",
+    "GeminiVoice": "Charon",
     "IsActive": true,
     "IsPremium": false,
     "Order": 1
@@ -414,7 +414,7 @@
     "Gender": "male",
     "Accent": "سعودي",
     "DemoAudio": "voice_demos/جواد.mp3",
-    "GeminiVoice": "Puck",
+    "GeminiVoice": "Sadachbia",
     "IsActive": true,
     "IsPremium": true,
     "Order": 22
@@ -426,7 +426,7 @@
     "Gender": "female",
     "Accent": "متعددة اللهجات",
     "DemoAudio": "voice_demos/مريم_1.mp3",
-    "GeminiVoice": "Aoede",
+    "GeminiVoice": "Kore",
     "IsActive": true,
     "IsPremium": true,
     "Order": 8
@@ -438,7 +438,7 @@
     "Gender": "female",
     "Accent": "متعددة اللهجات",
     "DemoAudio": "voice_demos/اريام.mp3",
-    "GeminiVoice": "Kore",
+    "GeminiVoice": "Vindemiatrix",
     "IsActive": true,
     "IsPremium": true,
     "Order": 33
@@ -450,7 +450,7 @@
     "Gender": "male",
     "Accent": "سعودي",
     "DemoAudio": "voice_demos/فيصل_1.mp3",
-    "GeminiVoice": "Puck",
+    "GeminiVoice": "Sadaltager",
     "IsActive": true,
     "IsPremium": true,
     "Order": 23
@@ -462,7 +462,7 @@
     "Gender": "male",
     "Accent": "متعدد اللهجات",
     "DemoAudio": "voice_demos/نائل.mp3",
-    "GeminiVoice": "Charon",
+    "GeminiVoice": "Sulafat",
     "IsActive": true,
     "IsPremium": true,
     "Order": 24
@@ -474,7 +474,7 @@
     "Gender": "male",
     "Accent": "متعدد اللهجات",
     "DemoAudio": "voice_demos/فاتح.mp3",
-    "GeminiVoice": "Fenrir",
+    "GeminiVoice": "Charon",
     "IsActive": true,
     "IsPremium": true,
     "Order": 25
@@ -486,7 +486,7 @@
     "Gender": "male",
     "Accent": "متعدد اللهجات",
     "DemoAudio": "voice_demos/بهاء.mp3",
-    "GeminiVoice": "Puck",
+    "GeminiVoice": "Fenrir",
     "IsActive": true,
     "IsPremium": true,
     "Order": 26
@@ -498,7 +498,7 @@
     "Gender": "male",
     "Accent": "متعدد اللهجات",
     "DemoAudio": "voice_demos/ماهر.mp3",
-    "GeminiVoice": "Charon",
+    "GeminiVoice": "Orus",
     "IsActive": true,
     "IsPremium": true,
     "Order": 28
@@ -510,7 +510,7 @@
     "Gender": "male",
     "Accent": "سعودي",
     "DemoAudio": "voice_demos/شريف.mp3",
-    "GeminiVoice": "Fenrir",
+    "GeminiVoice": "Charon",
     "IsActive": true,
     "IsPremium": false,
     "Order": 0
@@ -522,7 +522,7 @@
     "Gender": "male",
     "Accent": "متعدد اللهجات",
     "DemoAudio": "voice_demos/ادريس_B5H6hxV.mp3",
-    "GeminiVoice": "Puck",
+    "GeminiVoice": "Fenrir",
     "IsActive": true,
     "IsPremium": true,
     "Order": 2
@@ -534,7 +534,7 @@
     "Gender": "male",
     "Accent": "سعودية",
     "DemoAudio": "voice_demos/سعود.mp3",
-    "GeminiVoice": "Charon",
+    "GeminiVoice": "Enceladus",
     "IsActive": true,
     "IsPremium": true,
     "Order": 3
@@ -546,7 +546,7 @@
     "Gender": "male",
     "Accent": "مغربي",
     "DemoAudio": "voice_demos/جابر.mp3",
-    "GeminiVoice": "Fenrir",
+    "GeminiVoice": "Iapetus",
     "IsActive": true,
     "IsPremium": false,
     "Order": 4
@@ -558,7 +558,7 @@
     "Gender": "male",
     "Accent": "متعدد اللهجات",
     "DemoAudio": "voice_demos/نوح.mp3",
-    "GeminiVoice": "Puck",
+    "GeminiVoice": "Algieba",
     "IsActive": true,
     "IsPremium": true,
     "Order": 6
