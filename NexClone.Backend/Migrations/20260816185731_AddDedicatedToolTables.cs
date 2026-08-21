@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,6 +12,22 @@ namespace NexClone.Backend.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "TextToVoiceSettings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    MaxTextLength = table.Column<int>(type: "integer", nullable: false),
+                    MaxConcurrentOperations = table.Column<int>(type: "integer", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TextToVoiceSettings", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "AvatarToVideoModelPricings",
                 columns: table => new
@@ -244,6 +260,8 @@ namespace NexClone.Backend.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(name: "TextToVoiceSettings");
+
             migrationBuilder.DropTable(
                 name: "AvatarToVideoModelPricings");
 
