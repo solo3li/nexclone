@@ -27,7 +27,7 @@ jobs:
           context: ./NexClone.Backend
           file: ./NexClone.Backend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/nexclone-backend:staging
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/nexclone-backend:${{ github.sha }}
           cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-backend:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-backend:buildcache,mode=max
 
@@ -37,7 +37,7 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/nexclone-frontend:staging
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/nexclone-frontend:${{ github.sha }}
           cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-frontend:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-frontend:buildcache,mode=max
           build-args: |
@@ -72,8 +72,8 @@ jobs:
               --namespace nexclone-staging \
               --set backend.image.repository=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-backend \
               --set frontend.image.repository=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-frontend \
-              --set backend.image.tag=staging \
-              --set frontend.image.tag=staging \
+              --set backend.image.tag=${{ github.sha }} \
+              --set frontend.image.tag=${{ github.sha }} \
               --set ingress.hosts.frontend=staging.${{ secrets.VPS_HOST }}.nip.io \
               --set ingress.hosts.backend=api.staging.${{ secrets.VPS_HOST }}.nip.io \
               --set postgresql.enabled=true \
