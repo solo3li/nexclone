@@ -705,6 +705,11 @@ function AdvancedLipSyncPage() {
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   <span>{isRtl ? "جاري المزامنة..." : "Processing Lip Sync..."}</span>
                 </>
+              ) : !hasSufficientCredits ? (
+                <>
+                  <AlertCircle className="w-4 h-4 text-red-400" />
+                  <span className="text-red-400">{isRtl ? "رصيد غير كافٍ" : "Insufficient Balance"}</span>
+                </>
               ) : (
                 <>
                   <Zap className="w-4 h-4 text-amber-300" />
@@ -787,33 +792,7 @@ function AdvancedLipSyncPage() {
                 </div>
               )}
             </div>
-
-            {/* 5. Live Summary & Wallet Widget */}
-            <div className="pt-2 border-t border-white/5 space-y-2.5">
-              <div className="bg-[#06010f] border border-white/5 rounded-xl p-3.5 space-y-2">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-white/50">{isRtl ? "تكلفة العملية:" : "Operation Cost:"}</span>
-                  <span className="font-bold text-amber-300 font-mono">{estimatedCost} Cr</span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-white/50">{isRtl ? "الرصيد المتاح:" : "Your Balance:"}</span>
-                  <span className="font-bold text-white font-mono">{totalUserCredits.toLocaleString()} Cr</span>
-                </div>
-                <div className="flex justify-between items-center text-xs pt-1.5 border-t border-white/5">
-                  <span className="text-white/50">{isRtl ? "الرصيد المتبقي:" : "Remaining:"}</span>
-                  <span className={`font-bold font-mono ${hasSufficientCredits ? "text-emerald-400" : "text-red-400"}`}>
-                    {(totalUserCredits - estimatedCost).toLocaleString()} Cr
-                  </span>
-                </div>
-              </div>
-
-              {!hasSufficientCredits && (
-                <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
-                  <span>{isRtl ? "رصيدك غير كافٍ. يرجى شحن الرصيد." : "Insufficient credits. Please top up."}</span>
-                </div>
-              )}
-            </div>
+            {/* Live Summary & Wallet Widget removed */}
 
           </div>
         </div>

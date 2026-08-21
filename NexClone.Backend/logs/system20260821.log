@@ -106,3 +106,33 @@
 2026-08-21 00:15:39.779 +02:00 [INF] [Email Task] Email sent to m83448421@gmail.com successfully.
 2026-08-21 02:00:11.950 +02:00 [INF] [AffiliateCommissionHoldJob] Running daily hold period check...
 2026-08-21 02:00:14.753 +02:00 [INF] [AffiliateCommissionHoldJob] Completed.
+2026-08-21 06:48:20.357 +02:00 [INF] Removed 1 outdated record(s) from 'aggregatedcounter' table.
+2026-08-21 06:48:23.952 +02:00 [INF] Removed 1 outdated record(s) from 'job' table.
+2026-08-21 13:15:30.388 +02:00 [INF] Start installing Hangfire SQL objects...
+2026-08-21 13:15:33.881 +02:00 [INF] Hangfire SQL objects installed.
+2026-08-21 13:15:35.453 +02:00 [INF] Media Cleanup Background Service started.
+2026-08-21 13:15:35.453 +02:00 [INF] SubscriptionStatusService is starting.
+2026-08-21 13:15:35.464 +02:00 [INF] Searching for processed media older than 08/07/2026 11:15:35...
+2026-08-21 13:15:35.502 +02:00 [WRN] The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased.
+2026-08-21 13:15:35.670 +02:00 [INF] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: tramway.proxy.rlwy.net, DB: railway, Schema: hangfire'
+2026-08-21 13:15:35.671 +02:00 [INF] Using the following options for PostgreSQL job storage:
+2026-08-21 13:15:35.671 +02:00 [INF]     Queue poll interval: 00:00:15.
+2026-08-21 13:15:35.671 +02:00 [INF]     Invisibility timeout: 00:30:00.
+2026-08-21 13:15:35.671 +02:00 [INF]     Use sliding invisibility timeout: False.
+2026-08-21 13:15:35.675 +02:00 [INF] Using the following options for Hangfire Server:
+    Worker count: 20
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-21 13:15:35.718 +02:00 [INF] Successfully cleaned up 0 media files in total.
+2026-08-21 13:15:36.835 +02:00 [INF] Server vmi3518782:371102:6a0c0716 successfully announced in 1128.771 ms
+2026-08-21 13:15:36.844 +02:00 [INF] Server vmi3518782:371102:6a0c0716 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-21 13:15:36.904 +02:00 [INF] Server vmi3518782:371102:6a0c0716 all the dispatchers started
+2026-08-21 13:15:37.013 +02:00 [INF] 1 servers were removed due to timeout
+2026-08-21 13:15:37.848 +02:00 [INF] Removed 2 outdated record(s) from 'aggregatedcounter' table.
+2026-08-21 13:15:41.471 +02:00 [INF] Removed 7 outdated record(s) from 'job' table.
+2026-08-21 13:20:42.186 +02:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-21 13:20:55.114 +02:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-21 13:30:45.756 +02:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-21 13:30:56.314 +02:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-21 13:31:05.305 +02:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
