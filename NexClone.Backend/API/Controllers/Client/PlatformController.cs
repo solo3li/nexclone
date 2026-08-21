@@ -13,11 +13,13 @@ namespace NexClone.Backend.API.Controllers.Client
     {
         private readonly ApplicationDbContext _context;
         private readonly NexClone.Backend.Core.Interfaces.IMediaService _mediaService;
+        private readonly NexClone.Backend.Core.Interfaces.ITtsCatalogService _ttsCatalog;
 
-        public PlatformController(ApplicationDbContext context, NexClone.Backend.Core.Interfaces.IMediaService mediaService)
+        public PlatformController(ApplicationDbContext context, NexClone.Backend.Core.Interfaces.IMediaService mediaService, NexClone.Backend.Core.Interfaces.ITtsCatalogService ttsCatalog)
         {
             _context = context;
             _mediaService = mediaService;
+            _ttsCatalog = ttsCatalog;
         }
 
         [HttpGet("stats")]
@@ -65,10 +67,9 @@ namespace NexClone.Backend.API.Controllers.Client
         [HttpGet("voices")]
         public async Task<IActionResult> GetVoices()
         {
-            var voices = await _context.Voices
-                .Where(v => v.IsActive)
+            var voices = _ttsCatalog.GetAllVoices(includeInactive: false)
                 .OrderBy(v => v.Order)
-                .ToListAsync();
+                .ToList();
 
             var mappedVoices = new List<object>();
             foreach(var v in voices)
@@ -79,12 +80,12 @@ namespace NexClone.Backend.API.Controllers.Client
                     demoUrl = await _mediaService.GetFileUrlAsync(v.DemoAudio);
                 }
                 mappedVoices.Add(new {
-                    v.Id,
-                    v.Name,
-                    v.VoiceName,
-                    v.Accent,
-                    v.Gender,
-                    v.IsPremium,
+                    Id = v.Id,
+                    Name = v.Name,
+                    VoiceName = v.VoiceName,
+                    Accent = v.Accent,
+                    Gender = v.Gender,
+                    IsPremium = v.IsPremium,
                     DemoAudio = demoUrl
                 });
             }
@@ -93,35 +94,32 @@ namespace NexClone.Backend.API.Controllers.Client
         }
 
         [HttpGet("dialects")]
-        public async Task<IActionResult> GetDialects()
+        public IActionResult GetDialects()
         {
-            var dialects = await _context.Dialects
-                .Where(d => d.IsActive)
+            var dialects = _ttsCatalog.GetAllDialects(includeInactive: false)
                 .OrderBy(d => d.Order)
-                .Select(d => new { d.Id, d.Name, d.Value, d.IsPremium })
-                .ToListAsync();
+                .Select(d => new { Id = d.Id, Name = d.Name, Value = d.Value, IsPremium = d.IsPremium })
+                .ToList();
             return Ok(dialects);
         }
 
         [HttpGet("emotions")]
-        public async Task<IActionResult> GetEmotions()
+        public IActionResult GetEmotions()
         {
-            var emotions = await _context.Emotions
-                .Where(e => e.IsActive)
+            var emotions = _ttsCatalog.GetAllEmotions(includeInactive: false)
                 .OrderBy(e => e.Order)
-                .Select(e => new { e.Id, e.Name, e.Value, e.IsPremium })
-                .ToListAsync();
+                .Select(e => new { Id = e.Id, Name = e.Name, Value = e.Value, IsPremium = e.IsPremium })
+                .ToList();
             return Ok(emotions);
         }
 
         [HttpGet("styles")]
-        public async Task<IActionResult> GetStyles()
+        public IActionResult GetStyles()
         {
-            var styles = await _context.Styles
-                .Where(s => s.IsActive)
+            var styles = _ttsCatalog.GetAllStyles(includeInactive: false)
                 .OrderBy(s => s.Order)
-                .Select(s => new { s.Id, s.Name, s.Value, s.IsPremium })
-                .ToListAsync();
+                .Select(s => new { Id = s.Id, Name = s.Name, Value = s.Value, IsPremium = s.IsPremium })
+                .ToList();
             return Ok(styles);
         }
 

@@ -13,10 +13,12 @@ namespace NexClone.Backend.API.Controllers.Admin
     public class PlansAdminController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly NexClone.Backend.Core.Interfaces.ITtsCatalogService _ttsCatalog;
 
-        public PlansAdminController(ApplicationDbContext context)
+        public PlansAdminController(ApplicationDbContext context, NexClone.Backend.Core.Interfaces.ITtsCatalogService ttsCatalog)
         {
             _context = context;
+            _ttsCatalog = ttsCatalog;
         }
 
         public async Task<IActionResult> Index()
@@ -71,10 +73,10 @@ namespace NexClone.Backend.API.Controllers.Admin
             return Ok("Seeded 4 test plans successfully with advanced affiliate settings.");
         }
 
-        public async Task<IActionResult> Create()
+        public IActionResult Create()
         {
             ViewData["Title"] = "Create Plan";
-            ViewBag.AllVoices = await _context.Voices.Where(v => v.IsActive).ToListAsync();
+            ViewBag.AllVoices = _ttsCatalog.GetAllVoices(includeInactive: false).ToList();
             return View(new Plan());
         }
 
@@ -116,7 +118,7 @@ namespace NexClone.Backend.API.Controllers.Admin
             if (plan == null) return NotFound();
 
             ViewData["Title"] = $"Edit Plan - {plan.Name}";
-            ViewBag.AllVoices = await _context.Voices.Where(v => v.IsActive).ToListAsync();
+            ViewBag.AllVoices = _ttsCatalog.GetAllVoices(includeInactive: false).ToList();
             return View(plan);
         }
 

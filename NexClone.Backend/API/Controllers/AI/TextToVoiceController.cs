@@ -24,13 +24,15 @@ namespace NexClone.Backend.API.Controllers.AI
         private readonly ApplicationDbContext _dbContext;
         private readonly UsagePolicyService _usagePolicy;
         private readonly IBackgroundJobClient _backgroundJobClient;
+        private readonly NexClone.Backend.Core.Interfaces.ITtsCatalogService _ttsCatalog;
 
-        public TextToVoiceController(ITtsService ttsService, ApplicationDbContext dbContext, UsagePolicyService usagePolicy, IBackgroundJobClient backgroundJobClient)
+        public TextToVoiceController(ITtsService ttsService, ApplicationDbContext dbContext, UsagePolicyService usagePolicy, IBackgroundJobClient backgroundJobClient, NexClone.Backend.Core.Interfaces.ITtsCatalogService ttsCatalog)
         {
             _ttsService = ttsService;
             _dbContext = dbContext;
             _usagePolicy = usagePolicy;
             _backgroundJobClient = backgroundJobClient;
+            _ttsCatalog = ttsCatalog;
         }
 
         [HttpPost("generate")]
@@ -47,6 +49,11 @@ namespace NexClone.Backend.API.Controllers.AI
             if (request.Text.Length > maxLen)
             {
                 return BadRequest(new { error = $"Text length ({request.Text.Length} chars) exceeds the maximum allowed limit of {maxLen} characters." });
+            }
+
+            if (!string.IsNullOrEmpty(request.VoiceName) && !_ttsCatalog.IsValidVoice(request.VoiceName))
+            {
+                return BadRequest(new { error = $"The selected voice '{request.VoiceName}' is invalid or inactive." });
             }
 
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);

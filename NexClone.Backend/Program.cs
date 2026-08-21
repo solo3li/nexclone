@@ -148,6 +148,8 @@ builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.ITtsService, NexClon
 builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.ISttService, NexClone.Backend.Infrastructure.ExternalServices.AI.SttService>();
 builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IVideoService, NexClone.Backend.Infrastructure.ExternalServices.AI.VideoService>();
 
+// Register TTS Catalog Service
+builder.Services.AddSingleton<NexClone.Backend.Core.Interfaces.ITtsCatalogService, NexClone.Backend.Application.Services.TtsCatalogService>();
 
 // Register Media Service
 builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IMediaService, NexClone.Backend.Infrastructure.ExternalServices.S3MediaService>();
@@ -403,7 +405,6 @@ using (var scope = app.Services.CreateScope())
     
     // Seed new dedicated tool settings & models
     await NexClone.Backend.DbSeeder.SeedToolTablesAsync(app.Services);
-    await NexClone.Backend.DbSeeder.SeedTtsDataAsync(app.Services);
 }
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

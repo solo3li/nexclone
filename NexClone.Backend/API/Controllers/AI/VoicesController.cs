@@ -8,29 +8,17 @@ namespace NexClone.Backend.API.Controllers.AI
     [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Admin")]
     public class VoicesController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly NexClone.Backend.Core.Interfaces.ITtsCatalogService _ttsCatalog;
 
-        public VoicesController(ApplicationDbContext context)
+        public VoicesController(NexClone.Backend.Core.Interfaces.ITtsCatalogService ttsCatalog)
         {
-            _context = context;
+            _ttsCatalog = ttsCatalog;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var voices = await _context.Voices.OrderBy(v => v.Id).ToListAsync();
+            var voices = _ttsCatalog.GetAllVoices(includeInactive: true).OrderBy(v => v.Order).ToList();
             return View(voices);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Delete(long id)
-        {
-            var voice = await _context.Voices.FindAsync(id);
-            if (voice != null)
-            {
-                _context.Voices.Remove(voice);
-                await _context.SaveChangesAsync();
-            }
-            return RedirectToAction(nameof(Index));
         }
     }
 }

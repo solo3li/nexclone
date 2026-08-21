@@ -1,14 +1,14 @@
-@model IEnumerable<NexClone.Backend.Core.Entities.Voice>
+@model IEnumerable<NexClone.Backend.Core.Catalogs.VoiceCatalogItem>
 @inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 
 @{
-    ViewData["Title"] = "AI Voices Management";
+    ViewData["Title"] = "AI Voices Management (Read-Only)";
 }
 
 <div class="bx--data-table-container">
     <div class="bx--data-table-header">
         <h4 class="bx--data-table-header__title">@Localizer["Manage AI Voices"]</h4>
-        <p class="bx--data-table-header__description">@Localizer["View and manage all available AI voice characters imported from the legacy system."]</p>
+        <p class="bx--data-table-header__description">@Localizer["View all available AI voices from the active JSON catalog. (Editing is disabled)"]</p>
     </div>
 
     <table class="bx--data-table bx--data-table--sort">
@@ -38,11 +38,7 @@
                     </td>
                     <td>@item.GeminiVoice</td>
                     <td>
-                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" style="display:inline;" data-confirm="Are you sure you want to delete this voice?">
-                            <button type="submit" class="bx--btn bx--btn--danger bx--btn--sm" style="padding: 5px 10px; font-size: 12px; height: auto; min-height: unset;">
-                                @Localizer["Delete"]
-                            </button>
-                        </form>
+                        <em>@Localizer["Read-Only"]</em>
                     </td>
                 </tr>
             }
