@@ -41,7 +41,7 @@ jobs:
           cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-frontend:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-frontend:buildcache,mode=max
           build-args: |
-            NEXT_PUBLIC_API_URL=https://api.staging.169.58.204.169.nip.io
+            NEXT_PUBLIC_API_URL=https://api.staging.${{ secrets.VPS_HOST }}.nip.io
 
   deploy-to-helm:
     needs: build-and-push
@@ -54,7 +54,7 @@ jobs:
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
-          key: ${{ secrets.VPS_SSH_KEY }}
+          password: ${{ secrets.VPS_PASSWORD }}
           envs: ENV_FILE_CONTENT
           script: |
             export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
@@ -72,8 +72,8 @@ jobs:
               --namespace nexclone-staging \
               --set backend.image.tag=staging \
               --set frontend.image.tag=staging \
-              --set ingress.hosts.frontend=staging.169.58.204.169.nip.io \
-              --set ingress.hosts.backend=api.staging.169.58.204.169.nip.io \
+              --set ingress.hosts.frontend=staging.${{ secrets.VPS_HOST }}.nip.io \
+              --set ingress.hosts.backend=api.staging.${{ secrets.VPS_HOST }}.nip.io \
               --set postgresql.enabled=true \
               --set redis.enabled=true \
               --set minio.enabled=true
