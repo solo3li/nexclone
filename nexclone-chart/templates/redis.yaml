@@ -19,7 +19,7 @@ spec:
       - name: redis
         image: redis:7-alpine
         imagePullPolicy: IfNotPresent
-        command: ["redis-server", "--requirepass", "devredis123!"]
+        command: ["redis-server", "--requirepass", "your_redis_password"]
         ports:
         - containerPort: 6379
           name: redis
