@@ -46,10 +46,7 @@ namespace NexClone.Backend.Infrastructure.Data
         public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
 
         // TTS Lookups
-        public DbSet<Voice> Voices { get; set; } = null!;
-        public DbSet<Dialect> Dialects { get; set; } = null!;
-        public DbSet<Emotion> Emotions { get; set; } = null!;
-        public DbSet<Style> Styles { get; set; } = null!;
+
 
         // Dedicated Tool Settings & Model Pricings
         public DbSet<AvatarToVideoSetting> AvatarToVideoSettings { get; set; } = null!;
