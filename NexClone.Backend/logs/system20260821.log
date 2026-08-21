@@ -1,0 +1,108 @@
+2026-08-21 00:00:29.867 +02:00 [INF] [TTS Task 950f049f-ebc1-4823-8ecf-3310377d8927] Started consumer.
+2026-08-21 00:00:31.465 +02:00 [INF] Start processing HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent
+2026-08-21 00:00:31.466 +02:00 [INF] Sending HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent
+2026-08-21 00:00:39.348 +02:00 [INF] Received HTTP response headers after 7882.2503ms - 200
+2026-08-21 00:00:39.349 +02:00 [INF] End processing HTTP request after 7884.6449ms - 200
+2026-08-21 00:01:08.297 +02:00 [INF] [TTS Task ced77d7d-9c74-4ad7-b0c8-1bc87b9dde1e] Started consumer.
+2026-08-21 00:01:09.532 +02:00 [INF] Start processing HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent
+2026-08-21 00:01:09.533 +02:00 [INF] Sending HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent
+2026-08-21 00:01:14.834 +02:00 [INF] Received HTTP response headers after 5292.3596ms - 200
+2026-08-21 00:01:14.835 +02:00 [INF] End processing HTTP request after 5302.7763ms - 200
+2026-08-21 00:01:40.500 +02:00 [INF] [TTS Task 4513edb9-4cc1-4e2a-8c8b-a3f34ac3f0ba] Started consumer.
+2026-08-21 00:01:41.654 +02:00 [INF] Start processing HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent
+2026-08-21 00:01:41.655 +02:00 [INF] Sending HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent
+2026-08-21 00:01:46.735 +02:00 [INF] Received HTTP response headers after 5079.9167ms - 200
+2026-08-21 00:01:46.739 +02:00 [INF] End processing HTTP request after 5085.9469ms - 200
+2026-08-21 00:02:02.347 +02:00 [INF] [TTS Task 8d12641a-396e-4867-9aeb-3a02d1bed190] Started consumer.
+2026-08-21 00:02:03.505 +02:00 [INF] Start processing HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-tts-preview:generateContent
+2026-08-21 00:02:03.506 +02:00 [INF] Sending HTTP request POST https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-tts-preview:generateContent
+2026-08-21 00:02:09.557 +02:00 [INF] Received HTTP response headers after 6036.8997ms - 200
+2026-08-21 00:02:09.558 +02:00 [INF] End processing HTTP request after 6053.1358ms - 200
+2026-08-21 00:02:33.702 +02:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-21 00:03:49.683 +02:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-21 00:04:05.596 +02:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-21 00:06:42.273 +02:00 [WRN] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-21 00:11:43.002 +02:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-21 00:11:43.003 +02:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-21 00:11:43.440 +02:00 [INF] Received HTTP response headers after 436.5749ms - 200
+2026-08-21 00:11:43.440 +02:00 [INF] End processing HTTP request after 437.4183ms - 200
+2026-08-21 00:11:53.604 +02:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:11:53.631 +02:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:11:53.813 +02:00 [INF] Received HTTP response headers after 181.7109ms - 200
+2026-08-21 00:11:53.813 +02:00 [INF] End processing HTTP request after 209.6133ms - 200
+2026-08-21 00:12:03.815 +02:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:12:03.816 +02:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:12:03.988 +02:00 [INF] Received HTTP response headers after 172.4078ms - 200
+2026-08-21 00:12:03.988 +02:00 [INF] End processing HTTP request after 173.2193ms - 200
+2026-08-21 00:12:13.988 +02:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:12:13.989 +02:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:12:14.149 +02:00 [INF] Received HTTP response headers after 159.87ms - 200
+2026-08-21 00:12:14.149 +02:00 [INF] End processing HTTP request after 161.0015ms - 200
+2026-08-21 00:12:24.150 +02:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:12:24.150 +02:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:12:24.309 +02:00 [INF] Received HTTP response headers after 158.633ms - 200
+2026-08-21 00:12:24.310 +02:00 [INF] End processing HTTP request after 159.4736ms - 200
+2026-08-21 00:12:34.312 +02:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:12:34.312 +02:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:12:34.472 +02:00 [INF] Received HTTP response headers after 159.4782ms - 200
+2026-08-21 00:12:34.472 +02:00 [INF] End processing HTTP request after 160.8489ms - 200
+2026-08-21 00:12:44.474 +02:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:12:44.474 +02:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:12:44.638 +02:00 [INF] Received HTTP response headers after 163.7419ms - 200
+2026-08-21 00:12:44.638 +02:00 [INF] End processing HTTP request after 164.587ms - 200
+2026-08-21 00:12:54.640 +02:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:12:54.641 +02:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:12:54.801 +02:00 [INF] Received HTTP response headers after 160.236ms - 200
+2026-08-21 00:12:54.802 +02:00 [INF] End processing HTTP request after 162.1573ms - 200
+2026-08-21 00:12:55.125 +02:00 [INF] [Email] Queuing video completion email to m83448421@gmail.com for task image-to-video Generation
+2026-08-21 00:12:58.409 +02:00 [INF] [Email Task] Sending email to m83448421@gmail.com
+2026-08-21 00:12:58.600 +02:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-21 00:12:58.600 +02:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-21 00:12:58.823 +02:00 [INF] Received HTTP response headers after 222.5438ms - 201
+2026-08-21 00:12:58.823 +02:00 [INF] End processing HTTP request after 223.8584ms - 201
+2026-08-21 00:12:58.824 +02:00 [INF] [Email Task] Email sent to m83448421@gmail.com successfully.
+2026-08-21 00:14:13.461 +02:00 [INF] Start processing HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-21 00:14:13.461 +02:00 [INF] Sending HTTP request POST https://api.crun.ai/api/v1/client/job/CreateTask
+2026-08-21 00:14:14.333 +02:00 [INF] Received HTTP response headers after 871.3529ms - 200
+2026-08-21 00:14:14.333 +02:00 [INF] End processing HTTP request after 872.7776ms - 200
+2026-08-21 00:14:24.495 +02:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:14:24.495 +02:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:14:24.671 +02:00 [INF] Received HTTP response headers after 175.6555ms - 200
+2026-08-21 00:14:24.671 +02:00 [INF] End processing HTTP request after 176.6587ms - 200
+2026-08-21 00:14:34.672 +02:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:14:34.672 +02:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:14:34.848 +02:00 [INF] Received HTTP response headers after 176.2316ms - 200
+2026-08-21 00:14:34.850 +02:00 [INF] End processing HTTP request after 177.9606ms - 200
+2026-08-21 00:14:44.850 +02:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:14:44.850 +02:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:14:45.019 +02:00 [INF] Received HTTP response headers after 168.0705ms - 200
+2026-08-21 00:14:45.019 +02:00 [INF] End processing HTTP request after 168.8984ms - 200
+2026-08-21 00:14:55.020 +02:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:14:55.021 +02:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:14:55.190 +02:00 [INF] Received HTTP response headers after 168.9012ms - 200
+2026-08-21 00:14:55.190 +02:00 [INF] End processing HTTP request after 169.8671ms - 200
+2026-08-21 00:15:05.193 +02:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:15:05.193 +02:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:15:05.367 +02:00 [INF] Received HTTP response headers after 173.0262ms - 200
+2026-08-21 00:15:05.374 +02:00 [INF] End processing HTTP request after 181.2703ms - 200
+2026-08-21 00:15:15.371 +02:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:15:15.372 +02:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:15:15.541 +02:00 [INF] Received HTTP response headers after 168.4868ms - 200
+2026-08-21 00:15:15.541 +02:00 [INF] End processing HTTP request after 169.7119ms - 200
+2026-08-21 00:15:25.540 +02:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:15:25.540 +02:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:15:25.712 +02:00 [INF] Received HTTP response headers after 171.1639ms - 200
+2026-08-21 00:15:25.712 +02:00 [INF] End processing HTTP request after 171.9948ms - 200
+2026-08-21 00:15:35.713 +02:00 [INF] Start processing HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:15:35.713 +02:00 [INF] Sending HTTP request GET https://api.crun.ai/api/v1/client/job/TaskInfo?*
+2026-08-21 00:15:35.888 +02:00 [INF] Received HTTP response headers after 175.046ms - 200
+2026-08-21 00:15:35.888 +02:00 [INF] End processing HTTP request after 175.7484ms - 200
+2026-08-21 00:15:36.208 +02:00 [INF] [Email] Queuing video completion email to m83448421@gmail.com for task image-to-video Generation
+2026-08-21 00:15:39.516 +02:00 [INF] [Email Task] Sending email to m83448421@gmail.com
+2026-08-21 00:15:39.679 +02:00 [INF] Start processing HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-21 00:15:39.679 +02:00 [INF] Sending HTTP request POST https://api.brevo.com/v3/smtp/email
+2026-08-21 00:15:39.778 +02:00 [INF] Received HTTP response headers after 98.2783ms - 201
+2026-08-21 00:15:39.778 +02:00 [INF] End processing HTTP request after 99.2231ms - 201
+2026-08-21 00:15:39.779 +02:00 [INF] [Email Task] Email sent to m83448421@gmail.com successfully.
+2026-08-21 02:00:11.950 +02:00 [INF] [AffiliateCommissionHoldJob] Running daily hold period check...
+2026-08-21 02:00:14.753 +02:00 [INF] [AffiliateCommissionHoldJob] Completed.
