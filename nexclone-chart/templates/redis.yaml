@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: nexclone-dev-redis-master
+  name: {{ .Release.Name }}-redis-master
   labels:
-    app: nexclone-dev-redis
+    app: {{ .Release.Name }}-redis
 spec:
-  serviceName: "nexclone-dev-redis-master"
+  serviceName: "{{ .Release.Name }}-redis-master"
   replicas: 1
   selector:
     matchLabels:
-      app: nexclone-dev-redis
+      app: {{ .Release.Name }}-redis
   template:
     metadata:
       labels:
-        app: nexclone-dev-redis
+        app: {{ .Release.Name }}-redis
     spec:
       containers:
       - name: redis
@@ -38,7 +38,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: nexclone-dev-redis-master
+  name: {{ .Release.Name }}-redis-master
 spec:
   type: ClusterIP
   ports:
@@ -46,4 +46,4 @@ spec:
     targetPort: 6379
     name: redis
   selector:
-    app: nexclone-dev-redis
+    app: {{ .Release.Name }}-redis

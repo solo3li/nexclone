@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: nexclone-dev-postgresql
+  name: {{ .Release.Name }}-postgresql
   labels:
-    app: nexclone-dev-postgresql
+    app: {{ .Release.Name }}-postgresql
 spec:
-  serviceName: "nexclone-dev-postgresql"
+  serviceName: "{{ .Release.Name }}-postgresql"
   replicas: 1
   selector:
     matchLabels:
-      app: nexclone-dev-postgresql
+      app: {{ .Release.Name }}-postgresql
   template:
     metadata:
       labels:
-        app: nexclone-dev-postgresql
+        app: {{ .Release.Name }}-postgresql
     spec:
       containers:
       - name: postgresql
@@ -44,7 +44,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: nexclone-dev-postgresql
+  name: {{ .Release.Name }}-postgresql
 spec:
   type: ClusterIP
   ports:
@@ -52,4 +52,4 @@ spec:
     targetPort: 5432
     name: postgresql
   selector:
-    app: nexclone-dev-postgresql
+    app: {{ .Release.Name }}-postgresql

@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: nexclone-dev-rabbitmq
+  name: {{ .Release.Name }}-rabbitmq
   labels:
-    app: nexclone-dev-rabbitmq
+    app: {{ .Release.Name }}-rabbitmq
 spec:
-  serviceName: "nexclone-dev-rabbitmq"
+  serviceName: "{{ .Release.Name }}-rabbitmq"
   replicas: 1
   selector:
     matchLabels:
-      app: nexclone-dev-rabbitmq
+      app: {{ .Release.Name }}-rabbitmq
   template:
     metadata:
       labels:
-        app: nexclone-dev-rabbitmq
+        app: {{ .Release.Name }}-rabbitmq
     spec:
       containers:
       - name: rabbitmq
@@ -44,7 +44,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: nexclone-dev-rabbitmq
+  name: {{ .Release.Name }}-rabbitmq
 spec:
   type: ClusterIP
   ports:
@@ -55,4 +55,4 @@ spec:
     targetPort: 15672
     name: management
   selector:
-    app: nexclone-dev-rabbitmq
+    app: {{ .Release.Name }}-rabbitmq
