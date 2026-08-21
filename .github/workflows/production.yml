@@ -70,6 +70,8 @@ jobs:
             
             helm upgrade --install nexclone-production . \
               --namespace nexclone-production \
+              --set backend.image.repository=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-backend \
+              --set frontend.image.repository=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-frontend \
               --set backend.image.tag=production \
               --set frontend.image.tag=production \
               --set ingress.hosts.frontend=${{ vars.PROD_FRONTEND_DOMAIN }} \

@@ -70,6 +70,8 @@ jobs:
             
             helm upgrade --install nexclone-staging . \
               --namespace nexclone-staging \
+              --set backend.image.repository=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-backend \
+              --set frontend.image.repository=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-frontend \
               --set backend.image.tag=staging \
               --set frontend.image.tag=staging \
               --set ingress.hosts.frontend=staging.${{ secrets.VPS_HOST }}.nip.io \
