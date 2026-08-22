@@ -340,6 +340,7 @@ app.MapStaticAssets();
 
 app.MapControllers();
 app.MapMetrics();
+app.UseHangfireDashboard();
 
 app.MapControllerRoute(
     name: "areas",
