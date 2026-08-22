@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.SignalR;
 using Xunit;
 using Moq;
 using NexClone.Backend.Application.Services;
+using NexClone.Backend.Application.Services.Pricing;
 using NexClone.Backend.Core.Entities;
 using NexClone.Backend.Core.Interfaces;
 using NexClone.Backend.Infrastructure.Data;
@@ -37,7 +38,19 @@ namespace NexClone.Tests
         {
             var mockHub = GetMockHubContext();
             var permService = permissionService ?? new SubscriptionPermissionService(context);
-            return new UsagePolicyService(context, mockHub.Object, permService);
+            var calculators = new List<IToolCostCalculator>
+            {
+                new TextToVoiceCalculator(context),
+                new VoiceToTextCalculator(context),
+                new LipSyncCalculator(context),
+                new MotionControlCalculator(context),
+                new TextToImageCalculator(context),
+                new AvatarToVideoCalculator(context),
+                new TextToVideoCalculator(context),
+                new ImageToVideoCalculator(context)
+            };
+            var factory = new ToolCostCalculatorFactory(calculators);
+            return new UsagePolicyService(context, mockHub.Object, permService, factory);
         }
 
         [Fact]

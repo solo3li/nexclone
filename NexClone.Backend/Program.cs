@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Hangfire;
 using Hangfire.PostgreSql;
 using NexClone.Backend.Infrastructure.Consumers;
+using Prometheus;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,8 +24,9 @@ Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
     .Enrich.FromLogContext()
-    .WriteTo.Console()
-    .WriteTo.File("logs/system.log", rollingInterval: RollingInterval.Day, shared: true)
+    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{CorrelationId}] {Message:lj}{NewLine}{Exception}")
+    .WriteTo.File("logs/system.log", rollingInterval: RollingInterval.Day, shared: true,
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [Corr:{CorrelationId}] {Message:lj}{NewLine}{Exception}")
     .CreateLogger();
 
 builder.Host.UseSerilog();
@@ -180,6 +182,17 @@ builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IPaymentService, Nex
 builder.Services.AddScoped<NexClone.Backend.Application.Services.WalletService>();
 builder.Services.AddScoped<NexClone.Backend.Application.Services.UsagePolicyService>();
 
+// Register Pricing Calculators (Strategy Pattern)
+builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IToolCostCalculator, NexClone.Backend.Application.Services.Pricing.AvatarToVideoCalculator>();
+builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IToolCostCalculator, NexClone.Backend.Application.Services.Pricing.TextToVideoCalculator>();
+builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IToolCostCalculator, NexClone.Backend.Application.Services.Pricing.ImageToVideoCalculator>();
+builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IToolCostCalculator, NexClone.Backend.Application.Services.Pricing.LipSyncCalculator>();
+builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IToolCostCalculator, NexClone.Backend.Application.Services.Pricing.TextToImageCalculator>();
+builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IToolCostCalculator, NexClone.Backend.Application.Services.Pricing.MotionControlCalculator>();
+builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IToolCostCalculator, NexClone.Backend.Application.Services.Pricing.VoiceToTextCalculator>();
+builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IToolCostCalculator, NexClone.Backend.Application.Services.Pricing.TextToVoiceCalculator>();
+builder.Services.AddScoped<NexClone.Backend.Application.Services.Pricing.ToolCostCalculatorFactory>();
+
 // Register Affiliate Service
 builder.Services.AddScoped<NexClone.Backend.Application.Services.AffiliateService>();
 builder.Services.AddScoped<NexClone.Backend.Application.BackgroundJobs.AffiliateCommissionHoldJob>();
@@ -247,7 +260,10 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 
-builder.Services.AddHealthChecks();
+builder.Services.AddHealthChecks()
+    .AddCheck<NexClone.Backend.Infrastructure.Health.PostgresHealthCheck>("postgresql", tags: new[] { "db", "postgres" });
+
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
@@ -260,10 +276,19 @@ var app = builder.Build();
 
 app.UseForwardedHeaders();
 
+app.UseMiddleware<NexClone.Backend.Middleware.CorrelationIdMiddleware>();
+app.UseMiddleware<NexClone.Backend.Middleware.RequestDurationMiddleware>();
+app.UseHttpMetrics();
+
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    dbContext.Database.Migrate();
+
+    var skipMigrations = builder.Configuration.GetValue<bool>("SkipMigrations");
+    if (!skipMigrations)
+    {
+        dbContext.Database.Migrate();
+    }
 
     // Only seed data on startup in development/staging, never in production.
     // In production, use the admin panel or a CLI command to seed data.
@@ -314,6 +339,7 @@ app.UseAuthorization();
 app.MapStaticAssets();
 
 app.MapControllers();
+app.MapMetrics();
 
 app.MapControllerRoute(
     name: "areas",

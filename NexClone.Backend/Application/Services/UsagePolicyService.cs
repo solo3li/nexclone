@@ -54,12 +54,14 @@ namespace NexClone.Backend.Application.Services
         private readonly ApplicationDbContext _context;
         private readonly IHubContext<NotificationHub> _hubContext;
         private readonly NexClone.Backend.Core.Interfaces.ISubscriptionPermissionService _permissionService;
+        private readonly Pricing.ToolCostCalculatorFactory _calculatorFactory;
 
-        public UsagePolicyService(ApplicationDbContext context, IHubContext<NotificationHub> hubContext, NexClone.Backend.Core.Interfaces.ISubscriptionPermissionService permissionService)
+        public UsagePolicyService(ApplicationDbContext context, IHubContext<NotificationHub> hubContext, NexClone.Backend.Core.Interfaces.ISubscriptionPermissionService permissionService, Pricing.ToolCostCalculatorFactory calculatorFactory)
         {
             _context = context;
             _hubContext = hubContext;
             _permissionService = permissionService;
+            _calculatorFactory = calculatorFactory;
         }
 
         public async Task<ToolPolicy> GetToolPolicyForUserAsync(Guid userId, string toolId, string quality = "Standard")
@@ -73,19 +75,50 @@ namespace NexClone.Backend.Application.Services
 
         private ToolPolicy GetToolPolicyFromPermissions(NexClone.Backend.Core.Interfaces.PlanPermissions perms, string toolId)
         {
-            var policy = new ToolPolicy();
-            if (toolId == "text-to-voice") policy.Enabled = perms.TtsEnabled;
-            else if (toolId == "voice-to-text") policy.Enabled = perms.SttEnabled;
-            else if (toolId == "kling_avatar_image2video" || toolId == "avatar-to-video") policy.Enabled = perms.AvatarVideoEnabled;
-            else if (toolId == "advanced-lip-sync" || toolId == "lipsync") policy.Enabled = perms.LipSyncEnabled;
-            else if (toolId == "kling_motion_control" || toolId == "motion-control") policy.Enabled = perms.MotionControlEnabled;
-            else if (toolId == "text-to-video") policy.Enabled = perms.TextToVideoEnabled;
-            else if (toolId == "image-to-video") policy.Enabled = perms.ImageToVideoEnabled;
-            else if (toolId == "image-to-image" || toolId == "reference-to-video") policy.Enabled = perms.ReferenceToVideoEnabled;
-            else if (toolId == "text-to-image") policy.Enabled = perms.TextToImageEnabled;
-            else policy.Enabled = true; // Unknown tools are allowed by default
+            var policy = new ToolPolicy { Enabled = true };
+            var toolType = AiToolTypeHelper.FromString(toolId);
+            if (toolType == null) return policy;
+            policy.Enabled = GetPermBool(perms, toolType.Value);
             return policy;
         }
+
+        public ToolPolicy GetToolPolicy(Plan plan, string toolId, string quality = "Standard")
+        {
+            var policy = new ToolPolicy();
+            if (plan == null) return policy;
+            var toolType = AiToolTypeHelper.FromString(toolId);
+            if (toolType == null) return policy;
+            policy.Enabled = GetPlanBool(plan, toolType.Value);
+            return policy;
+        }
+
+        private static bool GetPermBool(NexClone.Backend.Core.Interfaces.PlanPermissions p, AiToolType t) => t switch
+        {
+            AiToolType.TextToVoice => p.TtsEnabled,
+            AiToolType.VoiceToText => p.SttEnabled,
+            AiToolType.AvatarToVideo => p.AvatarVideoEnabled,
+            AiToolType.LipSync => p.LipSyncEnabled,
+            AiToolType.MotionControl => p.MotionControlEnabled,
+            AiToolType.TextToVideo => p.TextToVideoEnabled,
+            AiToolType.ImageToVideo => p.ImageToVideoEnabled,
+            AiToolType.ReferenceToVideo => p.ReferenceToVideoEnabled,
+            AiToolType.TextToImage => p.TextToImageEnabled,
+            _ => true
+        };
+
+        private static bool GetPlanBool(Plan p, AiToolType t) => t switch
+        {
+            AiToolType.TextToVoice => p.TtsEnabled,
+            AiToolType.VoiceToText => p.SttEnabled,
+            AiToolType.AvatarToVideo => p.AvatarVideoEnabled,
+            AiToolType.LipSync => p.LipSyncEnabled,
+            AiToolType.MotionControl => p.MotionControlEnabled,
+            AiToolType.TextToVideo => p.TextToVideoEnabled,
+            AiToolType.ImageToVideo => p.ImageToVideoEnabled,
+            AiToolType.ReferenceToVideo => p.ReferenceToVideoEnabled,
+            AiToolType.TextToImage => p.TextToImageEnabled,
+            _ => false
+        };
 
         public async Task<PolicyValidationResult> ValidateAndChargeAsync(Guid userId, string toolId, decimal usageAmountForLimits, decimal? usageAmountForCost = null, string quality = "Standard", int? subscriptionId = null)
         {
@@ -103,102 +136,33 @@ namespace NexClone.Backend.Application.Services
                 {
                     user.StandardCredits -= estimate.StandardCreditsCharged;
                     user.PremiumCredits -= estimate.PremiumCreditsCharged;
-                        
                     _context.Users.Update(user);
                     await _context.SaveChangesAsync();
-                    
-                    if (_hubContext != null) {
+                    if (_hubContext != null)
                         await _hubContext.Clients.User(userId.ToString()).SendAsync("ReceiveWalletUpdate");
-                    }
-                    
                     saved = true;
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     retries--;
                     if (retries == 0)
-                    {
                         return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "A system error occurred while processing your request. Please try again." };
-                    }
-                    
                     await _context.Entry(user).ReloadAsync();
-                    
                     decimal remainingCost = estimate.TotalCost;
                     decimal standardToCharge = 0;
                     decimal premiumToCharge = 0;
-
                     var toolConfig = await _context.ToolConfigurations.FirstOrDefaultAsync(t => t.ToolName == toolId);
                     bool allowStandard = toolConfig?.AllowStandardCredits ?? true;
                     bool allowPremium = toolConfig?.AllowPremiumCredits ?? false;
-
-                    if (allowStandard)
-                    {
-                        standardToCharge = Math.Min(user.StandardCredits, remainingCost);
-                        remainingCost -= standardToCharge;
-                    }
-
-                    if (allowPremium && remainingCost > 0)
-                    {
-                        premiumToCharge = Math.Min(user.PremiumCredits, remainingCost);
-                        remainingCost -= premiumToCharge;
-                    }
-
+                    if (allowStandard) { standardToCharge = Math.Min(user.StandardCredits, remainingCost); remainingCost -= standardToCharge; }
+                    if (allowPremium && remainingCost > 0) { premiumToCharge = Math.Min(user.PremiumCredits, remainingCost); remainingCost -= premiumToCharge; }
                     if (remainingCost > 0)
-                    {
                         return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Insufficient credits after state refresh. Please top up your wallet." };
-                    }
-                    
                     estimate.StandardCreditsCharged = standardToCharge;
                     estimate.PremiumCreditsCharged = premiumToCharge;
                 }
             }
-
             return estimate;
-        }
-
-        public ToolPolicy GetToolPolicy(Plan plan, string toolId, string quality = "Standard")
-        {
-            var policy = new ToolPolicy();
-            if (plan == null) return policy;
-
-            if (toolId == "text-to-voice")
-            {
-                policy.Enabled = plan.TtsEnabled;
-            }
-            else if (toolId == "voice-to-text")
-            {
-                policy.Enabled = plan.SttEnabled;
-            }
-            else if (toolId == "kling_avatar_image2video" || toolId == "avatar-to-video")
-            {
-                policy.Enabled = plan.AvatarVideoEnabled;
-            }
-            else if (toolId == "advanced-lip-sync" || toolId == "lipsync")
-            {
-                policy.Enabled = plan.LipSyncEnabled;
-            }
-            else if (toolId == "kling_motion_control" || toolId == "motion-control")
-            {
-                policy.Enabled = plan.MotionControlEnabled;
-            }
-            else if (toolId == "text-to-video")
-            {
-                policy.Enabled = plan.TextToVideoEnabled;
-            }
-            else if (toolId == "image-to-video")
-            {
-                policy.Enabled = plan.ImageToVideoEnabled;
-            }
-            else if (toolId == "reference-to-video")
-            {
-                policy.Enabled = plan.ReferenceToVideoEnabled;
-            }
-            else if (toolId == "text-to-image")
-            {
-                policy.Enabled = plan.TextToImageEnabled;
-            }
-
-            return policy;
         }
 
         public static string NormalizeModelKey(string? name)
@@ -277,266 +241,37 @@ namespace NexClone.Backend.Application.Services
                 amountForCost = amountForCost / toolPolicy.BlockSize;
             }
 
-            decimal totalCost = (toolPolicy.BaseCost ?? 0) + (amountForCost * costPerUnit);
-
             var parts = quality.Split('|');
             var modelName = parts[0];
             var resolution = parts.Length > 1 ? parts[1] : "default";
-            var normModel = NormalizeModelKey(modelName);
 
+            var pricingRequest = new NexClone.Backend.Core.Interfaces.PricingRequest
+            {
+                ToolId = toolId,
+                UsageAmountForCost = amountForCost,
+                UsageAmountForLimits = usageAmountForLimits,
+                ModelName = modelName,
+                Resolution = resolution
+            };
+
+            decimal totalCost;
             bool allowStandard = toolConfig?.AllowStandardCredits ?? true;
             bool allowPremium = toolConfig?.AllowPremiumCredits ?? false;
 
-            // 1. Check dedicated table: Avatar to Video
-            if (toolId == "kling_avatar_image2video" || toolId == "avatar-to-video")
+            var calculator = _calculatorFactory.GetCalculator(toolId);
+            if (calculator != null)
             {
-                var avatarSetting = await _context.AvatarToVideoSettings.FirstOrDefaultAsync();
-                if (avatarSetting != null && !avatarSetting.IsActive)
-                    return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Avatar to Video is currently disabled." };
-
-                var allPricings = await _context.AvatarToVideoModelPricings.Where(p => p.IsActive).ToListAsync();
-                var pricing = allPricings.FirstOrDefault(p => NormalizeModelKey(p.ModelName) == normModel || NormalizeModelKey(p.ModelName).Contains(normModel) || normModel.Contains(NormalizeModelKey(p.ModelName)));
-                if (pricing == null) pricing = allPricings.FirstOrDefault();
-
-                if (pricing != null)
-                {
-                    totalCost = pricing.BaseCost + (pricing.BillingType == "PerSecond" ? (amountForCost * pricing.UnitCost) : pricing.UnitCost);
-                    allowStandard = pricing.AllowedWallet.Equals("Standard", StringComparison.OrdinalIgnoreCase) || pricing.AllowedWallet.Equals("Both", StringComparison.OrdinalIgnoreCase);
-                    allowPremium = pricing.AllowedWallet.Equals("Premium", StringComparison.OrdinalIgnoreCase) || pricing.AllowedWallet.Equals("Both", StringComparison.OrdinalIgnoreCase);
-                }
+                var result = await calculator.CalculateAsync(pricingRequest);
+                if (!result.IsAllowed)
+                    return new PolicyValidationResult { IsAllowed = false, ErrorMessage = result.ErrorMessage };
+                totalCost = result.TotalCost;
+                allowStandard = result.AllowStandard;
+                allowPremium = result.AllowPremium;
             }
-            // 2. Check dedicated table: Text to Video
-            else if (toolId == "text-to-video")
+            else
             {
-                var t2vSetting = await _context.TextToVideoSettings.FirstOrDefaultAsync();
-                if (t2vSetting != null && !t2vSetting.IsActive)
-                    return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Text to Video is currently disabled." };
-
-                var allPricings = await _context.TextToVideoModelPricings.Where(p => p.IsActive).ToListAsync();
-                var pricing = allPricings.FirstOrDefault(p => NormalizeModelKey(p.ModelName) == normModel);
-                if (pricing == null) pricing = allPricings.FirstOrDefault(p => NormalizeModelKey(p.ModelName).Contains(normModel) || normModel.Contains(NormalizeModelKey(p.ModelName)));
-                if (pricing == null) pricing = allPricings.FirstOrDefault();
-
-                if (pricing != null)
-                {
-                    string res = resolution.ToLower();
-                    if (pricing.BillingType == "PerSecond")
-                    {
-                        decimal cps = res switch {
-                            "480p" => pricing.CostPerSecond_480p,
-                            "720p" => pricing.CostPerSecond_720p,
-                            "1080p" => pricing.CostPerSecond_1080p,
-                            "4k" => pricing.CostPerSecond_4k,
-                            _ => pricing.CostPerSecond_720p
-                        };
-                        totalCost = pricing.BaseCost + (amountForCost * cps);
-                    }
-                    else
-                    {
-                        decimal fc = res switch {
-                            "480p" => pricing.FixedCost_480p,
-                            "720p" => pricing.FixedCost_720p,
-                            "1080p" => pricing.FixedCost_1080p,
-                            "4k" => pricing.FixedCost_4k,
-                            _ => pricing.FixedCost_720p
-                        };
-                        totalCost = pricing.BaseCost + fc;
-                    }
-                    allowStandard = pricing.AllowedWallet.Equals("Standard", StringComparison.OrdinalIgnoreCase) || pricing.AllowedWallet.Equals("Both", StringComparison.OrdinalIgnoreCase);
-                    allowPremium = pricing.AllowedWallet.Equals("Premium", StringComparison.OrdinalIgnoreCase) || pricing.AllowedWallet.Equals("Both", StringComparison.OrdinalIgnoreCase);
-                }
-            }
-            // 3. Check dedicated table: Image to Video / Reference to Video
-            else if (toolId == "image-to-video" || toolId == "reference-to-video")
-            {
-                var i2vSetting = await _context.ImageToVideoSettings.FirstOrDefaultAsync();
-                if (i2vSetting != null && !i2vSetting.IsActive)
-                    return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Image to Video is currently disabled." };
-
-                var allPricings = await _context.ImageToVideoModelPricings.Where(p => p.IsActive).ToListAsync();
-                var pricing = allPricings.FirstOrDefault(p => NormalizeModelKey(p.ModelName) == normModel);
-                if (pricing == null) pricing = allPricings.FirstOrDefault(p => NormalizeModelKey(p.ModelName).Contains(normModel) || normModel.Contains(NormalizeModelKey(p.ModelName)));
-                if (pricing == null) pricing = allPricings.FirstOrDefault();
-
-                if (pricing != null)
-                {
-                    string res = resolution.ToLower();
-                    if (pricing.BillingType == "PerSecond")
-                    {
-                        decimal cps = res switch {
-                            "480p" => pricing.CostPerSecond_480p,
-                            "720p" => pricing.CostPerSecond_720p,
-                            "1080p" => pricing.CostPerSecond_1080p,
-                            "4k" => pricing.CostPerSecond_4k,
-                            _ => pricing.CostPerSecond_720p
-                        };
-                        totalCost = pricing.BaseCost + (amountForCost * cps);
-                    }
-                    else
-                    {
-                        decimal fc = res switch {
-                            "480p" => pricing.FixedCost_480p,
-                            "720p" => pricing.FixedCost_720p,
-                            "1080p" => pricing.FixedCost_1080p,
-                            "4k" => pricing.FixedCost_4k,
-                            _ => pricing.FixedCost_720p
-                        };
-                        totalCost = pricing.BaseCost + fc;
-                    }
-                    allowStandard = pricing.AllowedWallet.Equals("Standard", StringComparison.OrdinalIgnoreCase) || pricing.AllowedWallet.Equals("Both", StringComparison.OrdinalIgnoreCase);
-                    allowPremium = pricing.AllowedWallet.Equals("Premium", StringComparison.OrdinalIgnoreCase) || pricing.AllowedWallet.Equals("Both", StringComparison.OrdinalIgnoreCase);
-                }
-            }
-            // 4. Check dedicated table: LipSync
-            else if (toolId == "advanced-lip-sync" || toolId == "vidu_advanced_lip_sync" || toolId == "lipsync")
-            {
-                var lipSetting = await _context.LipSyncSettings.FirstOrDefaultAsync();
-                if (lipSetting != null && !lipSetting.IsActive)
-                    return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Lip-Sync is currently disabled." };
-
-                var allPricings = await _context.LipSyncModelPricings.Where(p => p.IsActive).ToListAsync();
-                var pricing = allPricings.FirstOrDefault(p => NormalizeModelKey(p.ModelName) == normModel || NormalizeModelKey(p.ModelName).Contains(normModel) || normModel.Contains(NormalizeModelKey(p.ModelName)));
-                if (pricing == null) pricing = allPricings.FirstOrDefault();
-
-                if (pricing != null)
-                {
-                    double dur = (double)amountForCost;
-                    if (pricing.BillingType != null && pricing.BillingType.Equals("PerSecond", StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (dur <= 0) dur = 1.0;
-                        totalCost = (decimal)Math.Ceiling(dur) * pricing.CostPerSecond;
-                    }
-                    else
-                    {
-                        if (dur <= 0) dur = 5.0;
-                        int blocks = (int)Math.Ceiling(dur / 5.0);
-                        decimal costPerBlock = pricing.BaseCost > 0 ? pricing.BaseCost : (pricing.CostPerSecond * 5.0m > 0 ? pricing.CostPerSecond * 5.0m : 12.0m);
-                        totalCost = blocks * costPerBlock;
-                    }
-
-                    allowStandard = pricing.AllowedWallet.Equals("Standard", StringComparison.OrdinalIgnoreCase) || pricing.AllowedWallet.Equals("Both", StringComparison.OrdinalIgnoreCase);
-                    allowPremium = pricing.AllowedWallet.Equals("Premium", StringComparison.OrdinalIgnoreCase) || pricing.AllowedWallet.Equals("Both", StringComparison.OrdinalIgnoreCase);
-                }
-            }
-            // 5. Check dedicated table: Text to Image
-            else if (toolId == "text-to-image")
-            {
-                var imgSetting = await _context.TextToImageSettings.FirstOrDefaultAsync();
-                if (imgSetting != null && !imgSetting.IsActive)
-                    return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Text to Image is currently disabled." };
-
-                var allPricings = await _context.TextToImageModelPricings.Where(p => p.IsActive).ToListAsync();
-                var pricing = allPricings.FirstOrDefault(p => NormalizeModelKey(p.ModelName) == normModel || NormalizeModelKey(p.ModelName).Contains(normModel) || normModel.Contains(NormalizeModelKey(p.ModelName)));
-                if (pricing == null) pricing = allPricings.FirstOrDefault();
-
-                if (pricing != null)
-                {
-                    totalCost = pricing.BaseCost + (amountForCost * pricing.CostPerImage);
-                    allowStandard = pricing.AllowedWallet.Equals("Standard", StringComparison.OrdinalIgnoreCase) || pricing.AllowedWallet.Equals("Both", StringComparison.OrdinalIgnoreCase);
-                    allowPremium = pricing.AllowedWallet.Equals("Premium", StringComparison.OrdinalIgnoreCase) || pricing.AllowedWallet.Equals("Both", StringComparison.OrdinalIgnoreCase);
-                }
-            }
-            // 6. Check dedicated table: Motion Control
-            else if (toolId == "motion-control" || toolId == "kling_motion_control")
-            {
-                var mcSetting = await _context.MotionControlSettings.FirstOrDefaultAsync();
-                if (mcSetting != null && !mcSetting.IsActive)
-                    return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Motion Control is currently disabled." };
-
-                var pricing = await _context.MotionControlModelPricings.FirstOrDefaultAsync(p => p.IsActive);
-                if (pricing != null)
-                {
-                    if (pricing.BillingType == "PerSecond")
-                    {
-                        decimal sec = amountForCost > 0 ? amountForCost : 5.0m;
-                        totalCost = pricing.BaseCost + (sec * pricing.CostPerSecond);
-                    }
-                    else
-                    {
-                        totalCost = pricing.BaseCost + pricing.CostPerGeneration;
-                    }
-                    allowStandard = pricing.AllowedWallet.Equals("Standard", StringComparison.OrdinalIgnoreCase) || pricing.AllowedWallet.Equals("Both", StringComparison.OrdinalIgnoreCase);
-                    allowPremium = pricing.AllowedWallet.Equals("Premium", StringComparison.OrdinalIgnoreCase) || pricing.AllowedWallet.Equals("Both", StringComparison.OrdinalIgnoreCase);
-                }
-            }
-            // 7. Check dedicated table: Voice to Text (STT)
-            else if (toolId == "voice-to-text" || toolId == "vtt" || toolId == "stt")
-            {
-                var vttSetting = await _context.VoiceToTextSettings.FirstOrDefaultAsync();
-                if (vttSetting != null && !vttSetting.IsActive)
-                    return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Voice to Text is currently disabled." };
-
-                var pricing = await _context.VoiceToTextModelPricings.FirstOrDefaultAsync(p => p.IsActive);
-                if (pricing != null)
-                {
-                    double val = (double)amountForCost;
-                    if (val <= 0) val = 1.0;
-                    // Always round up to the nearest minute as requested
-                    double minutes = val > 30 ? Math.Ceiling(val / 60.0) : Math.Ceiling(val);
-                    totalCost = pricing.BaseCost + ((decimal)minutes * pricing.CostPerMinute);
-                    if (totalCost < 0.1m) totalCost = 0.1m;
-                    allowStandard = pricing.AllowedWallet.Equals("Standard", StringComparison.OrdinalIgnoreCase) || pricing.AllowedWallet.Equals("Both", StringComparison.OrdinalIgnoreCase);
-                    allowPremium = pricing.AllowedWallet.Equals("Premium", StringComparison.OrdinalIgnoreCase) || pricing.AllowedWallet.Equals("Both", StringComparison.OrdinalIgnoreCase);
-                }
-            }
-            // 8. Check dedicated table: Text to Voice (TTS)
-            else if (toolId == "text-to-voice" || toolId == "tts")
-            {
-                var ttsSetting = await _context.TextToVoiceSettings.FirstOrDefaultAsync();
-                if (ttsSetting != null && !ttsSetting.IsActive)
-                    return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Text to Voice is currently disabled." };
-
-                string qTier = string.IsNullOrEmpty(modelName) || modelName.Equals("default", StringComparison.OrdinalIgnoreCase) ? (string.IsNullOrEmpty(resolution) ? "Standard" : resolution) : modelName;
-                var pricing = await _context.TextToVoiceModelPricings
-                    .FirstOrDefaultAsync(p => p.QualityLevel.ToLower() == qTier.ToLower() && p.IsActive)
-                    ?? await _context.TextToVoiceModelPricings.FirstOrDefaultAsync(p => p.IsActive);
-
-                if (pricing != null)
-                {
-                    decimal charCount = amountForCost > 0 ? amountForCost : usageAmountForLimits;
-                    if (charCount <= 0) charCount = 100;
-                    totalCost = pricing.BaseCost + (charCount * pricing.CostPerChar);
-                    if (totalCost < 0.001m) totalCost = 0.001m;
-                    allowStandard = pricing.AllowedWallet.Equals("Standard", StringComparison.OrdinalIgnoreCase) || pricing.AllowedWallet.Equals("Both", StringComparison.OrdinalIgnoreCase);
-                    allowPremium = pricing.AllowedWallet.Equals("Premium", StringComparison.OrdinalIgnoreCase) || pricing.AllowedWallet.Equals("Both", StringComparison.OrdinalIgnoreCase);
-                }
-            }
-            // Fallback for tools with JSON settings (including TTS/VTT or legacy)
-            else if (toolConfig != null && !string.IsNullOrEmpty(toolConfig.AdditionalSettings))
-            {
-                bool priceFound = false;
-                try
-                {
-                    using var doc = JsonDocument.Parse(toolConfig.AdditionalSettings);
-                    var modelNameLower = modelName.ToLower();
-                    
-                    JsonElement mConfigEl;
-                    bool hasConfig = doc.RootElement.TryGetProperty(modelNameLower, out mConfigEl);
-                    if (!hasConfig) hasConfig = doc.RootElement.TryGetProperty("default", out mConfigEl);
-                    
-                    if (hasConfig)
-                    {
-                        var mConfig = JsonSerializer.Deserialize<ModelPricingConfig>(mConfigEl.GetRawText(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                        if (mConfig != null)
-                        {
-                            string res = resolution.ToLower();
-                            if (mConfig.IsPerSecond)
-                            {
-                                decimal cps = mConfig.CostPerSecond.ContainsKey(res) ? mConfig.CostPerSecond[res] : 
-                                              (mConfig.CostPerSecond.ContainsKey("default") ? mConfig.CostPerSecond["default"] : 0);
-                                totalCost = mConfig.BaseCost + (amountForCost * cps);
-                            }
-                            else
-                            {
-                                decimal fc = mConfig.FixedCost.ContainsKey(res) ? mConfig.FixedCost[res] : 
-                                              (mConfig.FixedCost.ContainsKey("default") ? mConfig.FixedCost["default"] : 0);
-                                totalCost = mConfig.BaseCost + (amountForCost * fc);
-                            }
-                            priceFound = true;
-                        }
-                    }
-                }
-                catch { }
+                // Fallback for unknown tools
+                totalCost = (toolPolicy.BaseCost ?? 0) + (amountForCost * costPerUnit);
             }
 
             decimal remainingCost = totalCost;
