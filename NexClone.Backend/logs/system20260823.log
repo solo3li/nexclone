@@ -318,3 +318,23 @@ System.Threading.Tasks.TaskCanceledException: A task was canceled.
 2026-08-23 00:44:28.237 +02:00 [INF] [Corr:] Server vmi3518782:911487:9ad6d8bc All dispatchers stopped
 2026-08-23 00:44:28.258 +02:00 [INF] [Corr:] Server vmi3518782:911487:9ad6d8bc successfully reported itself as stopped in 12.0131 ms
 2026-08-23 00:44:28.259 +02:00 [INF] [Corr:] Server vmi3518782:911487:9ad6d8bc has been stopped in total 30.0257 ms
+2026-08-23 01:02:43.575 +02:00 [INF] [Corr:] Start installing Hangfire SQL objects...
+2026-08-23 01:02:43.675 +02:00 [INF] [Corr:] Hangfire SQL objects installed.
+2026-08-23 01:02:44.029 +02:00 [INF] [Corr:] SubscriptionStatusService is starting.
+2026-08-23 01:02:44.029 +02:00 [INF] [Corr:] Media Cleanup Background Service started.
+2026-08-23 01:02:44.034 +02:00 [INF] [Corr:] Searching for processed media older than 08/08/2026 23:02:44...
+2026-08-23 01:02:44.052 +02:00 [WRN] [Corr:] The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased.
+2026-08-23 01:02:44.077 +02:00 [INF] [Corr:] Successfully cleaned up 0 media files in total.
+2026-08-23 01:02:44.209 +02:00 [INF] [Corr:] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: 127.0.0.1, DB: nexclone_dev, Schema: hangfire'
+2026-08-23 01:02:44.210 +02:00 [INF] [Corr:] Using the following options for PostgreSQL job storage:
+2026-08-23 01:02:44.210 +02:00 [INF] [Corr:]     Queue poll interval: 00:00:15.
+2026-08-23 01:02:44.211 +02:00 [INF] [Corr:]     Invisibility timeout: 00:30:00.
+2026-08-23 01:02:44.211 +02:00 [INF] [Corr:]     Use sliding invisibility timeout: False.
+2026-08-23 01:02:44.211 +02:00 [INF] [Corr:] Using the following options for Hangfire Server:
+    Worker count: 20
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-23 01:02:44.256 +02:00 [INF] [Corr:] Server vmi3518782:913794:4be72be4 successfully announced in 18.0133 ms
+2026-08-23 01:02:44.262 +02:00 [INF] [Corr:] Server vmi3518782:913794:4be72be4 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-23 01:02:44.297 +02:00 [INF] [Corr:] Server vmi3518782:913794:4be72be4 all the dispatchers started
