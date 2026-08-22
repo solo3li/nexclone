@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NexClone.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bad77b4b3c94e1c66e70e23c51a66994eb0041f4")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+094e048d8797e0a071f9ed01ba4304adc5ac886a")]
 [assembly: System.Reflection.AssemblyProductAttribute("NexClone.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NexClone.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

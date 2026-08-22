@@ -18,7 +18,14 @@ namespace NexClone.Backend.Core.Entities
 
         [Required]
         [MaxLength(10)]
-        public string Status { get; set; } = "Active";
+        public string Status { get; set; } = SubscriptionStatus.Active.ToDbString();
+
+        [NotMapped]
+        public SubscriptionStatus StatusEnum
+        {
+            get => SubscriptionStatusHelper.FromString(Status);
+            set => Status = value.ToDbString();
+        }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

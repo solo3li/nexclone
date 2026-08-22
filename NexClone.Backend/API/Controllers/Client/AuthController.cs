@@ -30,6 +30,7 @@ namespace NexClone.Backend.API.Controllers.Client
         private readonly IEmailService _emailService;
         private readonly IEmailTemplateService _emailTemplateService;
         private readonly WalletService _walletService;
+        private readonly IHttpClientFactory _httpClientFactory;
 
         public AuthController(
             UserManager<ApplicationUser> userManager, 
@@ -38,7 +39,8 @@ namespace NexClone.Backend.API.Controllers.Client
             IMediaService mediaService, 
             IEmailService emailService, 
             IEmailTemplateService emailTemplateService,
-            WalletService walletService)
+            WalletService walletService,
+            IHttpClientFactory httpClientFactory)
         {
             _userManager = userManager;
             _configuration = configuration;
@@ -47,9 +49,8 @@ namespace NexClone.Backend.API.Controllers.Client
             _emailService = emailService;
             _emailTemplateService = emailTemplateService;
             _walletService = walletService;
+            _httpClientFactory = httpClientFactory;
         }
-
-        private static readonly HttpClient _httpClient = new HttpClient();
 
         [HttpPost("register")]
         [EnableRateLimiting("AuthPolicy")]
@@ -81,7 +82,8 @@ namespace NexClone.Backend.API.Controllers.Client
             {
                 try
                 {
-                    var response = await _httpClient.GetAsync($"https://open.kickbox.com/v1/disposable/{domain}");
+                    var httpClient = _httpClientFactory.CreateClient();
+                    var response = await httpClient.GetAsync($"https://open.kickbox.com/v1/disposable/{domain}");
                     if (response.IsSuccessStatusCode)
                     {
                         var content = await response.Content.ReadAsStringAsync();
@@ -165,7 +167,7 @@ namespace NexClone.Backend.API.Controllers.Client
             });
 
 
-            // Assign free trial plan if eligible
+            // Assign free trial plan if eligible (with fingerprint enforcement)
             if (!hasClaimedFreeTrial)
             {
                 var targetPlan = await _context.Plans.FirstOrDefaultAsync(p => p.IsDefaultRegistrationPlan)
@@ -173,15 +175,44 @@ namespace NexClone.Backend.API.Controllers.Client
 
                 if (targetPlan != null)
                 {
-                    _context.Subscriptions.Add(new Subscription
+                    bool canClaimFreePlan = true;
+                    var enableFingerprintCheckStr = await _context.AppSettings
+                        .Where(s => s.Key == "FreePlan.FingerprintCheck").Select(s => s.Value).FirstOrDefaultAsync();
+
+                    if (bool.TryParse(enableFingerprintCheckStr, out bool enableFingerprintCheck) 
+                        && enableFingerprintCheck && !string.IsNullOrEmpty(fingerprint))
                     {
-                        UserId = user.Id,
-                        PlanId = targetPlan.Id,
-                        StartDate = DateTime.UtcNow,
-                        EndDate = DateTime.UtcNow.AddDays(targetPlan.DurationDays),
-                        Status = "active"
-                    });
-                    freeTrialAssigned = true;
+                        var maxUsesStr = await _context.AppSettings
+                            .Where(s => s.Key == "FreePlan.MaxUsesPerDevice").Select(s => s.Value).FirstOrDefaultAsync();
+                        int maxUses = int.TryParse(maxUsesStr, out int m) ? m : 1;
+
+                        var usersWithThisFingerprint = await _context.DeviceFingerprints
+                            .Where(df => df.FingerprintHash == fingerprint)
+                            .Select(df => df.UserId)
+                            .Distinct()
+                            .ToListAsync();
+
+                        if (usersWithThisFingerprint.Any())
+                        {
+                            var timesClaimed = await _context.Subscriptions
+                                .CountAsync(s => s.PlanId == targetPlan.Id && usersWithThisFingerprint.Contains(s.UserId));
+                            if (timesClaimed >= maxUses)
+                                canClaimFreePlan = false;
+                        }
+                    }
+
+                    if (canClaimFreePlan)
+                    {
+                        _context.Subscriptions.Add(new Subscription
+                        {
+                            UserId = user.Id,
+                            PlanId = targetPlan.Id,
+                            StartDate = DateTime.UtcNow,
+                            EndDate = DateTime.UtcNow.AddDays(targetPlan.DurationDays),
+                            Status = "active"
+                        });
+                        freeTrialAssigned = true;
+                    }
                 }
             }
 

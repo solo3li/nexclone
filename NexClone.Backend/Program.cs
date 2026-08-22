@@ -44,20 +44,31 @@ builder.Services.AddSingleton<Microsoft.Extensions.Localization.IStringLocalizer
 builder.Services.AddLocalization();
 
 builder.Services.AddSignalR();
+builder.Services.AddSingleton<Microsoft.AspNetCore.SignalR.IUserIdProvider, NexClone.Backend.Hubs.NameIdentifierUserIdProvider>();
 
 // Persist DataProtection keys to DB so antiforgery tokens survive container restarts
 builder.Services.AddDataProtection()
     .PersistKeysToDbContext<ApplicationDbContext>();
 
-// Setup CORS for Next.js
+// Setup CORS for Next.js — origins loaded from DB at startup via AppSettings
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowNextjs", policyBuilder =>
     {
-        policyBuilder.SetIsOriginAllowed(origin => true)
-               .AllowAnyMethod()
-               .AllowAnyHeader()
-               .AllowCredentials();
+        var originsRaw = builder.Configuration["Cors:AllowedOrigins"]
+            ?? "http://localhost:3000,http://localhost:3001,https://nexclone.com";
+        var allowedOrigins = originsRaw
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        policyBuilder.SetIsOriginAllowed(origin =>
+        {
+            if (string.IsNullOrEmpty(origin)) return false;
+            return allowedOrigins.Contains(origin);
+        })
+        .AllowAnyMethod()
+        .AllowAnyHeader()
+        .AllowCredentials();
     });
 });
 
@@ -65,7 +76,6 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
-    options.ConfigureWarnings(warnings => warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
 });
 
 // Setup Identity
@@ -255,160 +265,16 @@ using (var scope = app.Services.CreateScope())
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     dbContext.Database.Migrate();
 
-    // Seed Default Settings
-    var defaultSettings = new List<AppSetting>
+    // Only seed data on startup in development/staging, never in production.
+    // In production, use the admin panel or a CLI command to seed data.
+    var seedOnStartup = builder.Configuration.GetValue<bool>("SeedOnStartup");
+    if (seedOnStartup || app.Environment.IsDevelopment() || app.Environment.IsStaging())
     {
-        new AppSetting { Key = "Site.MaintenanceMode", Value = "false", Description = "Global maintenance mode toggle (true/false)" },
-        new AppSetting { Key = "Site.MaintenanceEndDate", Value = "", Description = "Optional end date for maintenance (ISO 8601 string)" },
-        new AppSetting { Key = "Origin.AllowedOrigins", Value = "http://localhost:3000,http://localhost:3001,http://167.71.66.188:3000,http://178.62.192.74:3000,https://nexclone.com", Description = "Comma-separated list of allowed origins for CORS" },
-        new AppSetting { Key = "Affiliate.CreditRewardReferrer", Value = "50", Description = "Credits given to the referrer" },
-        new AppSetting { Key = "Affiliate.CreditRewardReferred", Value = "50", Description = "Credits given to the referred user" },
-        new AppSetting { Key = "Affiliate.CashCommissionPercentage", Value = "20", Description = "Percentage of cash commission for affiliates (0-100)" }
-    };
-
-    foreach (var setting in defaultSettings)
-    {
-        if (!dbContext.AppSettings.Any(s => s.Key == setting.Key))
-        {
-            dbContext.AppSettings.Add(setting);
-        }
+        await NexClone.Backend.DbSeeder.SeedAllAsync(app.Services);
     }
-
-    // Ensure AllowedOrigins always includes the current server IPs (upsert)
-    var originsKey = "Origin.AllowedOrigins";
-    var existingOrigins = dbContext.AppSettings.FirstOrDefault(s => s.Key == originsKey);
-    if (existingOrigins != null)
-    {
-        var requiredOrigins = new[]
-        {
-            "http://localhost:3000", "http://localhost:3001",
-            "http://167.71.66.188:3000", "http://178.62.192.74:3000",
-            "https://dev.169.58.204.169.nip.io",
-            "https://api.169.58.204.169.nip.io"
-        };
-        var currentList = existingOrigins.Value.Split(',').Select(o => o.Trim()).ToList();
-        bool changed = false;
-        foreach (var origin in requiredOrigins)
-        {
-            if (!currentList.Contains(origin))
-            {
-                currentList.Add(origin);
-                changed = true;
-            }
-        }
-        if (changed)
-        {
-            existingOrigins.Value = string.Join(",", currentList);
-        }
-    }
-
-    dbContext.SaveChanges();
-
-    // Seed API Configs
-    var defaultApiConfigs = new[] { "CrunAI" };
-    foreach (var provider in defaultApiConfigs)
-    {
-        if (!dbContext.ApiConfigurations.Any(c => c.ProviderName == provider))
-        {
-            dbContext.ApiConfigurations.Add(new NexClone.Backend.Core.Entities.ApiConfiguration
-            {
-                ProviderName = provider,
-                IsActive = true,
-                ApiKey = provider == "CrunAI" ? (builder.Configuration["ApiKeys:CrunAI"] ?? "") : "" // default
-            });
-        }
-    }
-    dbContext.SaveChanges();
-
-    // Seed Tools
-    var toolsToSeed = new[] { "kling_avatar_image2video", "vidu_advanced_lip_sync", "advanced-lip-sync", "lip-sync", "lipsync" };
-    foreach (var tool in toolsToSeed)
-    {
-        var existingConfig = dbContext.ToolConfigurations.Include(t => t.RoutingRules).FirstOrDefault(t => t.ToolName == tool);
-        if (existingConfig == null)
-        {
-            var config = new NexClone.Backend.Core.Entities.ToolConfiguration
-            {
-                ToolName = tool,
-                IsActive = true,
-                RoutingRules = new List<NexClone.Backend.Core.Entities.ToolRoutingRule>
-                {
-                    new NexClone.Backend.Core.Entities.ToolRoutingRule
-                    {
-                        ProviderName = (tool == "kling_avatar_image2video") ? "Picsart" : "CrunAI",
-                        ModelName = (tool == "kling_avatar_image2video") ? "kling-v1" : "vidu/lip-sync",
-                        QualityLevel = "Standard"
-                    }
-                }
-            };
-            dbContext.ToolConfigurations.Add(config);
-        }
-        else
-        {
-            if (!existingConfig.RoutingRules.Any())
-            {
-                existingConfig.RoutingRules.Add(new NexClone.Backend.Core.Entities.ToolRoutingRule
-                {
-                    ProviderName = (tool == "kling_avatar_image2video") ? "Picsart" : "CrunAI",
-                    ModelName = (tool == "kling_avatar_image2video") ? "kling-v1" : "vidu/lip-sync",
-                    QualityLevel = "Standard"
-                });
-            }
-            else if (tool != "kling_avatar_image2video")
-            {
-                foreach (var rule in existingConfig.RoutingRules)
-                {
-                    rule.ProviderName = "CrunAI";
-                    rule.ModelName = "vidu/lip-sync";
-                }
-            }
-        }
-    }
-    dbContext.SaveChanges();
-
-    // Fix for existing CometAPI configs
-    var existingKlingRules = dbContext.ToolRoutingRules.Include(r => r.ToolConfiguration).Where(r => r.ProviderName == "CometAPI" && (r.ToolConfiguration.ToolName == "kling_avatar_image2video" || r.ToolConfiguration.ToolName == "kling_advanced_lip_sync")).ToList();
-    foreach(var r in existingKlingRules)
-    {
-        r.ProviderName = "Picsart";
-    }
-    dbContext.SaveChanges();
-
-    // Seed New AI Tools
-    var newToolsToSeed = new[] { "text-to-video", "image-to-video", "reference-to-video", "text-to-image" };
-    var defaultJsonConfig = "{ \"grok\": { \"IsPerSecond\": true, \"BaseCost\": 0, \"CostPerSecond\": { \"default\": 2.0, \"480p\": 2.4, \"720p\": 4.5, \"1080p\": 8.0 } }, \"veo\": { \"IsPerSecond\": false, \"FixedCost\": { \"default\": 30, \"720p\": 30, \"1080p\": 37.5, \"4k\": 90 } } }";
-
-    foreach (var tool in newToolsToSeed)
-    {
-        if (!dbContext.ToolConfigurations.Any(t => t.ToolName == tool))
-        {
-            var config = new NexClone.Backend.Core.Entities.ToolConfiguration
-            {
-                ToolName = tool,
-                IsActive = true,
-                AllowPremiumCredits = true, // Use premium for video
-                AllowStandardCredits = true,
-                AdditionalSettings = defaultJsonConfig,
-                RoutingRules = new System.Collections.Generic.List<NexClone.Backend.Core.Entities.ToolRoutingRule>
-                {
-                    new NexClone.Backend.Core.Entities.ToolRoutingRule
-                    {
-                        ProviderName = "CrunAI",
-                        ModelName = "default",
-                        QualityLevel = "Standard"
-                    }
-                }
-            };
-            dbContext.ToolConfigurations.Add(config);
-        }
-    }
-    dbContext.SaveChanges();
-    
-    // Seed new dedicated tool settings & models
-    await NexClone.Backend.DbSeeder.SeedToolTablesAsync(app.Services);
 }
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if (!app.Environment.IsDevelopment() && !app.Environment.IsStaging())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();

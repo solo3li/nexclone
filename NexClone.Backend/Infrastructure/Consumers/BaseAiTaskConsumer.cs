@@ -52,10 +52,8 @@ namespace NexClone.Backend.Infrastructure.Consumers
 
         protected async Task<string> PollCometApiTask(HttpClient client, string taskId)
         {
-            string outputUrl = "";
-            for (int i = 0; i < 60; i++)
+            return await PollWithBackoffAsync(async () =>
             {
-                await Task.Delay(10000); // Poll every 10 seconds (max 10 mins)
                 var pollResponse = await client.GetAsync($"https://api.cometapi.com/v1/images/generations/{taskId}");
                 var pollString = await pollResponse.Content.ReadAsStringAsync();
 
@@ -70,8 +68,7 @@ namespace NexClone.Backend.Infrastructure.Consumers
                     {
                         if (pollData.TryGetProperty("task_result", out var resultEl) && resultEl.TryGetProperty("videos", out var videosEl) && videosEl.GetArrayLength() > 0)
                         {
-                            outputUrl = videosEl[0].GetProperty("url").GetString();
-                            break;
+                            return (true, videosEl[0].GetProperty("url").GetString());
                         }
                     }
                     else if (status == "failed" || status == "error")
@@ -80,27 +77,20 @@ namespace NexClone.Backend.Infrastructure.Consumers
                         throw new Exception($"Task failed: {errMsg}");
                     }
                 }
-            }
-
-            if (string.IsNullOrEmpty(outputUrl))
-                throw new Exception("Timed out waiting for task to complete.");
-
-            return outputUrl;
+                return (false, "");
+            }, "CometAPI");
         }
 
         protected async Task<string> PollPicsartApiTask(HttpClient client, string taskId)
         {
-            string outputUrl = "";
-            for (int i = 0; i < 60; i++)
+            return await PollWithBackoffAsync(async () =>
             {
-                await Task.Delay(10000); // Poll every 10 seconds (max 10 mins)
                 var pollResponse = await client.GetAsync($"https://genai-api.picsart.io/v1/video/{taskId}");
                 var pollString = await pollResponse.Content.ReadAsStringAsync();
 
                 using var pollDoc = JsonDocument.Parse(pollString);
                 var pollRoot = pollDoc.RootElement;
                 
-                // Picsart genai-api format: { "status": "DONE"|"success"|"processing"|"error", "data": { "url": "..." } }
                 if (pollRoot.TryGetProperty("status", out var statusEl))
                 {
                     var status = statusEl.GetString()?.ToUpper();
@@ -108,8 +98,7 @@ namespace NexClone.Backend.Infrastructure.Consumers
                     {
                         if (pollRoot.TryGetProperty("data", out var dataEl) && dataEl.TryGetProperty("url", out var urlEl))
                         {
-                            outputUrl = urlEl.GetString();
-                            break;
+                            return (true, urlEl.GetString());
                         }
                     }
                     else if (status == "FAILED" || status == "ERROR")
@@ -118,20 +107,14 @@ namespace NexClone.Backend.Infrastructure.Consumers
                         throw new Exception($"Picsart Task failed: {errorMsg}");
                     }
                 }
-            }
-
-            if (string.IsNullOrEmpty(outputUrl))
-                throw new Exception("Timed out waiting for Picsart task to complete.");
-
-            return outputUrl;
+                return (false, "");
+            }, "Picsart");
         }
 
         protected async Task<string> PollCrunApiTask(HttpClient client, string taskId)
         {
-            string outputUrl = "";
-            for (int i = 0; i < 60; i++)
+            return await PollWithBackoffAsync(async () =>
             {
-                await Task.Delay(10000); // Poll every 10 seconds (max 10 mins)
                 var pollResponse = await client.GetAsync($"https://api.crun.ai/api/v1/client/job/TaskInfo?task_id={taskId}");
                 var pollString = await pollResponse.Content.ReadAsStringAsync();
 
@@ -147,31 +130,13 @@ namespace NexClone.Backend.Infrastructure.Consumers
                         {
                             if (dataEl.TryGetProperty("result", out var resultEl))
                             {
-                                if (resultEl.TryGetProperty("url", out var urlEl))
-                                {
-                                    outputUrl = urlEl.GetString();
-                                    break;
-                                }
-                                else if (resultEl.TryGetProperty("image_url", out var imgUrlEl))
-                                {
-                                    outputUrl = imgUrlEl.GetString();
-                                    break;
-                                }
-                                else if (resultEl.TryGetProperty("video_url", out var videoUrlEl))
-                                {
-                                    outputUrl = videoUrlEl.GetString();
-                                    break;
-                                }
-                                else if (resultEl.TryGetProperty("images", out var imagesEl) && imagesEl.ValueKind == JsonValueKind.Array && imagesEl.GetArrayLength() > 0)
-                                {
-                                    outputUrl = imagesEl[0].GetString();
-                                    break;
-                                }
-                                else if (resultEl.TryGetProperty("media_urls", out var mediaUrlsEl) && mediaUrlsEl.ValueKind == JsonValueKind.Array && mediaUrlsEl.GetArrayLength() > 0)
-                                {
-                                    outputUrl = mediaUrlsEl[0].GetString();
-                                    break;
-                                }
+                                var url = resultEl.TryGetProperty("url", out var urlEl) ? urlEl.GetString()
+                                    : resultEl.TryGetProperty("image_url", out var imgUrlEl) ? imgUrlEl.GetString()
+                                    : resultEl.TryGetProperty("video_url", out var videoUrlEl) ? videoUrlEl.GetString()
+                                    : resultEl.TryGetProperty("images", out var imagesEl) && imagesEl.ValueKind == JsonValueKind.Array && imagesEl.GetArrayLength() > 0 ? imagesEl[0].GetString()
+                                    : resultEl.TryGetProperty("media_urls", out var mediaUrlsEl) && mediaUrlsEl.ValueKind == JsonValueKind.Array && mediaUrlsEl.GetArrayLength() > 0 ? mediaUrlsEl[0].GetString()
+                                    : null;
+                                if (url != null) return (true, url);
                             }
                         }
                         else if (status == "failed" || status == "error")
@@ -182,12 +147,38 @@ namespace NexClone.Backend.Infrastructure.Consumers
                         }
                     }
                 }
+                return (false, "");
+            }, "CrunAI");
+        }
+
+        private async Task<string> PollWithBackoffAsync(Func<Task<(bool IsComplete, string Result)>> pollFunc, string providerName)
+        {
+            int maxAttempts = 45;
+            int baseDelayMs = 5000;
+            int maxDelayMs = 30000;
+
+            for (int attempt = 0; attempt < maxAttempts; attempt++)
+            {
+                try
+                {
+                    var (isComplete, result) = await pollFunc();
+                    if (isComplete)
+                    {
+                        if (string.IsNullOrEmpty(result))
+                            throw new Exception($"Task completed but {providerName} returned empty result.");
+                        return result;
+                    }
+                }
+                catch (Exception ex) when (ex is not Exception || !ex.Message.Contains("Task failed") && !ex.Message.Contains("failed:"))
+                {
+                    _logger.LogWarning(ex, "[{Provider}] Poll attempt {Attempt} failed, retrying...", providerName, attempt + 1);
+                }
+
+                int delay = Math.Min(baseDelayMs * (int)Math.Pow(2, Math.Min(attempt, 4)), maxDelayMs);
+                await Task.Delay(delay);
             }
 
-            if (string.IsNullOrEmpty(outputUrl))
-                throw new Exception("Timed out waiting for Crun AI task to complete.");
-
-            return outputUrl;
+            throw new Exception($"Timed out waiting for {providerName} task to complete after {maxAttempts * 5 / 60} minutes.");
         }
 
         protected async Task<(string ApiKey, string ModelName)> GetToolConfigAsync(string toolName)

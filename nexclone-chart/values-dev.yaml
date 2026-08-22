@@ -21,6 +21,7 @@ backend:
     tag: latest
     pullPolicy: Never          # use local docker build only
   replicaCount: 1
+  aspnetEnvironment: Development
   resources:
     requests:
       cpu: "200m"
@@ -94,28 +95,6 @@ redis:
       limits:
         cpu: "200m"
         memory: "256Mi"
-
-# ── RabbitMQ — use official rabbitmq:3-management-alpine ─────────────────────
-rabbitmq:
-  enabled: false
-  image:
-    registry: docker.io
-    repository: library/rabbitmq
-    tag: "3-management-alpine"
-  auth:
-    username: devuser
-    password: devrabbit123!
-    erlangCookie: deverlangcookie123
-  persistence:
-    enabled: true
-    size: 512Mi
-  resources:
-    requests:
-      cpu: "100m"
-      memory: "128Mi"
-    limits:
-      cpu: "500m"
-      memory: "512Mi"
 
 # ── MinIO — use official minio/minio image ───────────────────────────────────
 minio:

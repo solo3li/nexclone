@@ -563,7 +563,7 @@ namespace NexClone.Backend.Application.Services
             if (isRecurring && settings.StopOnCancellation)
             {
                 var subscription = await _db.Subscriptions.FindAsync(payment.SubscriptionId.Value);
-                if (subscription != null && subscription.Status.ToLower() == "canceled")
+                if (subscription != null && subscription.Status == "canceled")
                 {
                     _logger.LogInformation("Skipping commission — subscription is cancelled for payment {PaymentId}", paymentId);
                     return;
@@ -786,7 +786,7 @@ namespace NexClone.Backend.Application.Services
 
             var activeSubscriptions = await _db.Subscriptions
                 .Where(s => _db.AffiliateReferrals.Any(r => r.AffiliateProfileId == affiliateProfileId && r.ReferredUserId == s.UserId)
-                            && s.Status.ToLower() == "active" 
+                            && s.Status == "active" 
                             && s.EndDate > DateTime.UtcNow)
                 .CountAsync();
 

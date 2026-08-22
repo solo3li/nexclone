@@ -8,36 +8,31 @@ export default async function middleware(request: NextRequest) {
   const refCode = request.nextUrl.searchParams.get('ref');
   
   if (refCode) {
+    const backendUrl = process.env.INTERNAL_API_URL || 'http://backend:8080';
+    const url = request.nextUrl.clone();
+    url.searchParams.delete('ref');
+
     try {
-      // Track the click on the backend via internal Docker network to avoid loopback issues
-      const backendUrl = process.env.INTERNAL_API_URL || 'http://backend:8080';
-      const res = await fetch(`${backendUrl}/api/affiliate-track/click?ref_code=${refCode}`, {
-        // Edge runtime fetch requires this or default caching
-        cache: 'no-store'
-      });
+      const trackPromise = fetch(`${backendUrl}/api/affiliate-track/click?ref_code=${refCode}`);
+      const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 2000));
       
-      if (res.ok) {
+      const res = await Promise.race([trackPromise, timeoutPromise]);
+      
+      if (res instanceof Response && res.ok) {
         const data = await res.json();
         if (data.tracked && data.sessionToken) {
-          // Remove ?ref from URL
-          const url = request.nextUrl.clone();
-          url.searchParams.delete('ref');
-          
-          // Redirect to the clean URL
           const response = NextResponse.redirect(url);
           
-          // Set the session token in a cookie
           response.cookies.set('aff_session', data.sessionToken, {
-            maxAge: 30 * 24 * 60 * 60, // 30 days
+            maxAge: 30 * 24 * 60 * 60,
             path: '/',
             sameSite: 'lax',
             secure: process.env.NODE_ENV === 'production',
             httpOnly: false
           });
           
-          // Save the human-readable code to autofill the UI
           response.cookies.set('aff_ref_code', refCode, {
-            maxAge: 30 * 24 * 60 * 60, // 30 days
+            maxAge: 30 * 24 * 60 * 60,
             path: '/',
             sameSite: 'lax',
             secure: process.env.NODE_ENV === 'production',
@@ -47,12 +42,14 @@ export default async function middleware(request: NextRequest) {
           return response;
         }
       }
-    } catch (err) {
-      console.error('[Affiliate] Tracking error in middleware:', err);
+    } catch {
+      // Non-blocking: continue regardless of tracking outcome
     }
+    
+    const response = NextResponse.redirect(url);
+    return response;
   }
 
-  // Continue to normal i18n routing
   return intlMiddleware(request);
 }
  

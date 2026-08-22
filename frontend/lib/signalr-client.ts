@@ -14,12 +14,6 @@ class SignalRService {
         this.connection = new signalR.HubConnectionBuilder()
             .withUrl(`${backendUrl}/hubs/notification`, {
                 withCredentials: true,
-                accessTokenFactory: () => {
-                    if (typeof window !== 'undefined') {
-                        return localStorage.getItem('accessToken') || '';
-                    }
-                    return '';
-                }
             })
             .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
             .configureLogging(signalR.LogLevel.Warning)
@@ -44,7 +38,6 @@ class SignalRService {
                 console.log('[SignalR] Notification Hub connected successfully');
             }
         } catch (err: any) {
-            // Ignore abort errors caused by React StrictMode unmounts
             if (err?.name !== 'AbortError' && !err?.message?.includes('stopped during negotiation')) {
                 console.warn('[SignalR] Connection notice:', err?.message || err);
             }
@@ -68,7 +61,6 @@ class SignalRService {
                     await this.connection.stop();
                 }
             } catch {
-                // Ignore stop errors on unmount
             } finally {
                 this.connection = null;
                 this.isStarting = false;

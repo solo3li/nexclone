@@ -21,7 +21,7 @@ namespace NexClone.Backend.Application.Services
         {
             var activeSubscriptions = await _context.Subscriptions
                 .Include(s => s.Plan)
-                .Where(s => s.UserId == userId && (s.Status.ToLower() == "active" || s.Status.ToLower() == "freeze") && s.EndDate > DateTime.UtcNow)
+                .Where(s => s.UserId == userId && (s.Status == "active" || s.Status == "freeze") && s.EndDate > DateTime.UtcNow)
                 .ToListAsync();
 
             var permissions = new PlanPermissions();

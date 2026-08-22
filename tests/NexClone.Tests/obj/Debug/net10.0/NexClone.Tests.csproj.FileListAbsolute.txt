@@ -217,3 +217,4 @@
 /root/nexmedia/nexclone/tests/NexClone.Tests/obj/Debug/net10.0/NexClone.Tests.pdb
 /root/nexmedia/nexclone/tests/NexClone.Tests/obj/Debug/net10.0/NexClone.Tests.genruntimeconfig.cache
 /root/nexmedia/nexclone/tests/NexClone.Tests/obj/Debug/net10.0/ref/NexClone.Tests.dll
+/root/nexmedia/nexclone/tests/NexClone.Tests/bin/Debug/net10.0/appsettings.Staging.json

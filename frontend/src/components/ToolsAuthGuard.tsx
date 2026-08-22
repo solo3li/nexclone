@@ -16,7 +16,6 @@ export default function ToolsAuthGuard({ children }: { children: React.ReactNode
   useEffect(() => {
     let isMounted = true;
 
-    // Safety timeout to prevent any infinite loading state
     const timeoutId = setTimeout(() => {
       if (isMounted && isChecking) {
         setIsChecking(false);
@@ -25,14 +24,7 @@ export default function ToolsAuthGuard({ children }: { children: React.ReactNode
 
     const checkAccess = async () => {
       try {
-        const token = localStorage.getItem('accessToken');
-        if (!token) {
-          throw new Error("No token");
-        }
-
-        const res = await api.get('/api/auth/me', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await api.get('/api/auth/me');
 
         if (!isMounted) return;
         setUser(res.data);
@@ -46,13 +38,10 @@ export default function ToolsAuthGuard({ children }: { children: React.ReactNode
       } catch (err: any) {
         if (!isMounted) return;
         
-        console.error("[ToolsAuthGuard] Token validation failed! Error:", err.message, err.response?.status, err.response?.data);
-        
-        // Clear user state since auth failed (token expired/invalid)
-        setUser(null);
-        localStorage.removeItem('accessToken');
+        console.error("[ToolsAuthGuard] Auth check failed:", err.message, err.response?.status);
 
-        // User not logged in -> redirect to login immediately for other tools
+        setUser(null);
+
         router.replace("/login");
       }
     };

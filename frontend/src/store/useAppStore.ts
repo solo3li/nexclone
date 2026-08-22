@@ -83,9 +83,6 @@ export const useAppStore = create<AppState>((set, get) => ({
   updateUser: (data) => set((state) => ({ user: state.user ? { ...state.user, ...data } : null })),
   setInitializing: (isInit) => set({ isInitializing: isInit }),
   logout: () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('accessToken');
-    }
     set({ user: null, isAuthenticated: false, hasPhoneNumber: false, isInitializing: false });
   },
   logoutAll: async () => {

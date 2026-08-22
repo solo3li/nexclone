@@ -219,7 +219,7 @@ namespace NexClone.Backend.Application.Services
         public async Task<PolicyValidationResult> EstimateCostAsync(Guid userId, string toolId, decimal usageAmountForLimits, decimal? usageAmountForCost = null, string quality = "Standard", int? subscriptionId = null)
         {
             var user = await _context.Users
-                .Include(u => u.Subscriptions.Where(s => s.Status.ToLower() == "active" || s.Status.ToLower() == "freeze"))
+                .Include(u => u.Subscriptions.Where(s => s.Status == "active" || s.Status == "freeze"))
                     .ThenInclude(s => s.Plan)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(u => u.Id == userId);
@@ -233,8 +233,8 @@ namespace NexClone.Backend.Application.Services
                 return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "This tool is currently disabled." };
             }
 
-            var hasFrozenSubscription = user.Subscriptions.Any(s => s.Status.ToLower() == "freeze");
-            var hasActiveSubscription = user.Subscriptions.Any(s => s.Status.ToLower() == "active" && s.EndDate > DateTime.UtcNow);
+            var hasFrozenSubscription = user.Subscriptions.Any(s => s.Status == "freeze");
+            var hasActiveSubscription = user.Subscriptions.Any(s => s.Status == "active" && s.EndDate > DateTime.UtcNow);
 
             if (hasFrozenSubscription && !hasActiveSubscription)
             {

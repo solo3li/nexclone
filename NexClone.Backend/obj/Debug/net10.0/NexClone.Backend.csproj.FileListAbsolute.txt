@@ -862,3 +862,4 @@ C:/Users/solo/Desktop/nexcole/nexclone/NexClone.Backend/obj/Debug/net10.0/ref/Ne
 /root/nexmedia/nexclone/NexClone.Backend/bin/Debug/net10.0/Data/Catalogs/tts_emotions.json
 /root/nexmedia/nexclone/NexClone.Backend/bin/Debug/net10.0/Data/Catalogs/tts_styles.json
 /root/nexmedia/nexclone/NexClone.Backend/bin/Debug/net10.0/Data/Catalogs/tts_voices.json
+/root/nexmedia/nexclone/NexClone.Backend/bin/Debug/net10.0/appsettings.Staging.json

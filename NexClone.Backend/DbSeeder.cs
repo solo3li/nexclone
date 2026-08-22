@@ -3,17 +3,130 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NexClone.Backend.Core.Entities;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace NexClone.Backend
 {
     public static class DbSeeder
     {
-        public static async Task SeedTtsDataAsync(IServiceProvider serviceProvider)
+        public static async Task SeedAllAsync(IServiceProvider serviceProvider)
         {
             using var scope = serviceProvider.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var configuration = scope.ServiceProvider.GetRequiredService<Microsoft.Extensions.Configuration.IConfiguration>();
 
-            await context.SaveChangesAsync();
+            await SeedAppSettingsAsync(dbContext);
+            await SeedApiConfigsAsync(dbContext, configuration);
+            await SeedToolConfigsAsync(dbContext);
+            await SeedToolTablesAsync(serviceProvider);
+        }
+
+        private static async Task SeedAppSettingsAsync(ApplicationDbContext dbContext)
+        {
+            var defaultSettings = new List<AppSetting>
+            {
+                new AppSetting { Key = "Site.MaintenanceMode", Value = "false", Description = "Global maintenance mode toggle (true/false)" },
+                new AppSetting { Key = "Site.MaintenanceEndDate", Value = "", Description = "Optional end date for maintenance (ISO 8601 string)" },
+                new AppSetting { Key = "Origin.AllowedOrigins", Value = "http://localhost:3000,http://localhost:3001,http://167.71.66.188:3000,http://178.62.192.74:3000,https://nexclone.com", Description = "Comma-separated list of allowed origins for CORS" },
+                new AppSetting { Key = "Affiliate.CreditRewardReferrer", Value = "50", Description = "Credits given to the referrer" },
+                new AppSetting { Key = "Affiliate.CreditRewardReferred", Value = "50", Description = "Credits given to the referred user" },
+                new AppSetting { Key = "Affiliate.CashCommissionPercentage", Value = "20", Description = "Percentage of cash commission for affiliates (0-100)" }
+            };
+
+            foreach (var setting in defaultSettings)
+            {
+                if (!await dbContext.AppSettings.AnyAsync(s => s.Key == setting.Key))
+                {
+                    dbContext.AppSettings.Add(setting);
+                }
+            }
+
+            await dbContext.SaveChangesAsync();
+        }
+
+        private static async Task SeedApiConfigsAsync(ApplicationDbContext dbContext, Microsoft.Extensions.Configuration.IConfiguration configuration)
+        {
+            var defaultApiConfigs = new[] { "CrunAI" };
+            foreach (var provider in defaultApiConfigs)
+            {
+                if (!await dbContext.ApiConfigurations.AnyAsync(c => c.ProviderName == provider))
+                {
+                    dbContext.ApiConfigurations.Add(new ApiConfiguration
+                    {
+                        ProviderName = provider,
+                        IsActive = true,
+                        ApiKey = provider == "CrunAI" ? (configuration["ApiKeys:CrunAI"] ?? "") : ""
+                    });
+                }
+            }
+            await dbContext.SaveChangesAsync();
+        }
+
+        private static async Task SeedToolConfigsAsync(ApplicationDbContext dbContext)
+        {
+            var toolsToSeed = new[] { "kling_avatar_image2video", "vidu_advanced_lip_sync", "advanced-lip-sync", "lip-sync", "lipsync" };
+            foreach (var tool in toolsToSeed)
+            {
+                var existingConfig = await dbContext.ToolConfigurations.Include(t => t.RoutingRules).FirstOrDefaultAsync(t => t.ToolName == tool);
+                if (existingConfig == null)
+                {
+                    var config = new ToolConfiguration
+                    {
+                        ToolName = tool,
+                        IsActive = true,
+                        RoutingRules = new List<ToolRoutingRule>
+                        {
+                            new ToolRoutingRule
+                            {
+                                ProviderName = (tool == "kling_avatar_image2video") ? "Picsart" : "CrunAI",
+                                ModelName = (tool == "kling_avatar_image2video") ? "kling-v1" : "vidu/lip-sync",
+                                QualityLevel = "Standard"
+                            }
+                        }
+                    };
+                    dbContext.ToolConfigurations.Add(config);
+                }
+                else if (!existingConfig.RoutingRules.Any())
+                {
+                    existingConfig.RoutingRules.Add(new ToolRoutingRule
+                    {
+                        ProviderName = (tool == "kling_avatar_image2video") ? "Picsart" : "CrunAI",
+                        ModelName = (tool == "kling_avatar_image2video") ? "kling-v1" : "vidu/lip-sync",
+                        QualityLevel = "Standard"
+                    });
+                }
+            }
+            await dbContext.SaveChangesAsync();
+
+            var newToolsToSeed = new[] { "text-to-video", "image-to-video", "reference-to-video", "text-to-image" };
+            var defaultJsonConfig = "{ \"grok\": { \"IsPerSecond\": true, \"BaseCost\": 0, \"CostPerSecond\": { \"default\": 2.0, \"480p\": 2.4, \"720p\": 4.5, \"1080p\": 8.0 } }, \"veo\": { \"IsPerSecond\": false, \"FixedCost\": { \"default\": 30, \"720p\": 30, \"1080p\": 37.5, \"4k\": 90 } } }";
+
+            foreach (var tool in newToolsToSeed)
+            {
+                if (!await dbContext.ToolConfigurations.AnyAsync(t => t.ToolName == tool))
+                {
+                    var config = new ToolConfiguration
+                    {
+                        ToolName = tool,
+                        IsActive = true,
+                        AllowPremiumCredits = true,
+                        AllowStandardCredits = true,
+                        AdditionalSettings = defaultJsonConfig,
+                        RoutingRules = new List<ToolRoutingRule>
+                        {
+                            new ToolRoutingRule
+                            {
+                                ProviderName = "CrunAI",
+                                ModelName = "default",
+                                QualityLevel = "Standard"
+                            }
+                        }
+                    };
+                    dbContext.ToolConfigurations.Add(config);
+                }
+            }
+            await dbContext.SaveChangesAsync();
         }
 
         public static async Task SeedToolTablesAsync(IServiceProvider serviceProvider)
@@ -30,7 +143,6 @@ namespace NexClone.Backend
                     ""MaxConcurrentOperations"" integer NOT NULL,
                     ""UpdatedAt"" timestamp with time zone NOT NULL
                 );
-
                 CREATE TABLE IF NOT EXISTS ""VoiceToTextModelPricings"" (
                     ""Id"" integer GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
                     ""ModelName"" character varying(100) NOT NULL,
@@ -42,7 +154,6 @@ namespace NexClone.Backend
                     ""AllowedWallet"" character varying(50) NULL,
                     ""IsActive"" boolean NOT NULL
                 );
-
                 CREATE TABLE IF NOT EXISTS ""TextToVoiceSettings"" (
                     ""Id"" integer NOT NULL PRIMARY KEY,
                     ""IsActive"" boolean NOT NULL,
@@ -50,7 +161,6 @@ namespace NexClone.Backend
                     ""MaxConcurrentOperations"" integer NOT NULL,
                     ""UpdatedAt"" timestamp with time zone NOT NULL
                 );
-
                 CREATE TABLE IF NOT EXISTS ""TextToVoiceModelPricings"" (
                     ""Id"" integer GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
                     ""QualityLevel"" character varying(50) NOT NULL,
@@ -62,7 +172,6 @@ namespace NexClone.Backend
                     ""AllowedWallet"" character varying(50) NULL,
                     ""IsActive"" boolean NOT NULL
                 );
-
                 CREATE TABLE IF NOT EXISTS ""MotionControlSettings"" (
                     ""Id"" integer NOT NULL PRIMARY KEY,
                     ""IsActive"" boolean NOT NULL,
@@ -72,7 +181,6 @@ namespace NexClone.Backend
                     ""MaxConcurrentOperations"" integer NOT NULL,
                     ""UpdatedAt"" timestamp with time zone NOT NULL
                 );
-
                 CREATE TABLE IF NOT EXISTS ""MotionControlModelPricings"" (
                     ""Id"" integer GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
                     ""ModelName"" character varying(100) NOT NULL,
@@ -84,329 +192,62 @@ namespace NexClone.Backend
                     ""AllowedWallet"" character varying(50) NULL,
                     ""IsActive"" boolean NOT NULL
                 );
-
                 ALTER TABLE ""MotionControlModelPricings"" ADD COLUMN IF NOT EXISTS ""CostPerGeneration"" numeric NOT NULL DEFAULT 20.0;
             ");
 
-            // 1. Avatar to Video
             if (!await context.AvatarToVideoSettings.AnyAsync())
-            {
-                context.AvatarToVideoSettings.Add(new AvatarToVideoSetting
-                {
-                    Id = 1,
-                    IsActive = true,
-                    MaxImageFileSizeMb = 15,
-                    MaxAudioFileSizeMb = 15,
-                    MaxPromptLength = 500,
-                    MaxConcurrentOperations = 10
-                });
-            }
-
+                context.AvatarToVideoSettings.Add(new AvatarToVideoSetting { Id = 1, IsActive = true, MaxImageFileSizeMb = 15, MaxAudioFileSizeMb = 15, MaxPromptLength = 500, MaxConcurrentOperations = 10 });
             if (!await context.AvatarToVideoModelPricings.AnyAsync())
-            {
-                context.AvatarToVideoModelPricings.Add(new AvatarToVideoModelPricing
-                {
-                    ModelName = "kling_avatar_image2video",
-                    ProviderName = "Picsart",
-                    BillingType = "PerRequest",
-                    UnitCost = 10.0m,
-                    BaseCost = 0m,
-                    AllowedWallet = "Standard",
-                    IsActive = true
-                });
-            }
+                context.AvatarToVideoModelPricings.Add(new AvatarToVideoModelPricing { ModelName = "kling_avatar_image2video", ProviderName = "Picsart", BillingType = "PerRequest", UnitCost = 10.0m, BaseCost = 0m, AllowedWallet = "Standard", IsActive = true });
 
-            // 2. Text to Video
             if (!await context.TextToVideoSettings.AnyAsync())
-            {
-                context.TextToVideoSettings.Add(new TextToVideoSetting
-                {
-                    Id = 1,
-                    IsActive = true,
-                    MaxPromptLength = 5000,
-                    MaxDurationSeconds = 20,
-                    DefaultResolution = "720p",
-                    MaxConcurrentOperations = 10
-                });
-            }
-
+                context.TextToVideoSettings.Add(new TextToVideoSetting { Id = 1, IsActive = true, MaxPromptLength = 5000, MaxDurationSeconds = 20, DefaultResolution = "720p", MaxConcurrentOperations = 10 });
             if (!await context.TextToVideoModelPricings.AnyAsync())
-            {
                 context.TextToVideoModelPricings.AddRange(
-                    new TextToVideoModelPricing
-                    {
-                        ModelName = "veo 3.1 Fast",
-                        ProviderName = "CrunAI",
-                        BillingType = "PerRequest",
-                        FixedCost_720p = 30.0m,
-                        FixedCost_1080p = 37.5m,
-                        FixedCost_4k = 90.0m,
-                        AllowedWallet = "Standard",
-                        IsActive = true
-                    },
-                    new TextToVideoModelPricing
-                    {
-                        ModelName = "veo 3.1 Lite",
-                        ProviderName = "CrunAI",
-                        BillingType = "PerRequest",
-                        FixedCost_720p = 15.0m,
-                        FixedCost_1080p = 22.5m,
-                        FixedCost_4k = 75.0m,
-                        AllowedWallet = "Standard",
-                        IsActive = true
-                    },
-                    new TextToVideoModelPricing
-                    {
-                        ModelName = "veo 3.1 Quality",
-                        ProviderName = "CrunAI",
-                        BillingType = "PerRequest",
-                        FixedCost_720p = 225.0m,
-                        FixedCost_1080p = 232.5m,
-                        FixedCost_4k = 285.0m,
-                        AllowedWallet = "Standard",
-                        IsActive = true
-                    },
-                    new TextToVideoModelPricing
-                    {
-                        ModelName = "grok-imagine",
-                        ProviderName = "CrunAI",
-                        BillingType = "PerSecond",
-                        CostPerSecond_480p = 2.4m,
-                        CostPerSecond_720p = 4.5m,
-                        CostPerSecond_1080p = 8.0m,
-                        AllowedWallet = "Standard",
-                        IsActive = true
-                    }
+                    new TextToVideoModelPricing { ModelName = "veo 3.1 Fast", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 30.0m, FixedCost_1080p = 37.5m, FixedCost_4k = 90.0m, AllowedWallet = "Standard", IsActive = true },
+                    new TextToVideoModelPricing { ModelName = "veo 3.1 Lite", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 15.0m, FixedCost_1080p = 22.5m, FixedCost_4k = 75.0m, AllowedWallet = "Standard", IsActive = true },
+                    new TextToVideoModelPricing { ModelName = "veo 3.1 Quality", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 225.0m, FixedCost_1080p = 232.5m, FixedCost_4k = 285.0m, AllowedWallet = "Standard", IsActive = true },
+                    new TextToVideoModelPricing { ModelName = "grok-imagine", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 2.4m, CostPerSecond_720p = 4.5m, CostPerSecond_1080p = 8.0m, AllowedWallet = "Standard", IsActive = true }
                 );
-            }
 
-            // 3. Image to Video / Reference to Video
             if (!await context.ImageToVideoSettings.AnyAsync())
-            {
-                context.ImageToVideoSettings.Add(new ImageToVideoSetting
-                {
-                    Id = 1,
-                    IsActive = true,
-                    MaxImageFileSizeMb = 25,
-                    MaxDurationSeconds = 20,
-                    MaxPromptLength = 5000,
-                    MaxConcurrentOperations = 10
-                });
-            }
-
+                context.ImageToVideoSettings.Add(new ImageToVideoSetting { Id = 1, IsActive = true, MaxImageFileSizeMb = 25, MaxDurationSeconds = 20, MaxPromptLength = 5000, MaxConcurrentOperations = 10 });
             if (!await context.ImageToVideoModelPricings.AnyAsync())
-            {
                 context.ImageToVideoModelPricings.AddRange(
-                    new ImageToVideoModelPricing
-                    {
-                        ModelName = "veo 3.1 Fast",
-                        ProviderName = "CrunAI",
-                        BillingType = "PerRequest",
-                        FixedCost_720p = 30.0m,
-                        FixedCost_1080p = 37.5m,
-                        FixedCost_4k = 90.0m,
-                        AllowedWallet = "Standard",
-                        IsActive = true
-                    },
-                    new ImageToVideoModelPricing
-                    {
-                        ModelName = "veo 3.1 Lite",
-                        ProviderName = "CrunAI",
-                        BillingType = "PerRequest",
-                        FixedCost_720p = 15.0m,
-                        FixedCost_1080p = 22.5m,
-                        FixedCost_4k = 75.0m,
-                        AllowedWallet = "Standard",
-                        IsActive = true
-                    },
-                    new ImageToVideoModelPricing
-                    {
-                        ModelName = "veo 3.1 Quality",
-                        ProviderName = "CrunAI",
-                        BillingType = "PerRequest",
-                        FixedCost_720p = 225.0m,
-                        FixedCost_1080p = 232.5m,
-                        FixedCost_4k = 285.0m,
-                        AllowedWallet = "Standard",
-                        IsActive = true
-                    },
-                    new ImageToVideoModelPricing
-                    {
-                        ModelName = "grok-imagine",
-                        ProviderName = "CrunAI",
-                        BillingType = "PerSecond",
-                        CostPerSecond_480p = 2.4m,
-                        CostPerSecond_720p = 4.5m,
-                        CostPerSecond_1080p = 8.0m,
-                        AllowedWallet = "Standard",
-                        IsActive = true
-                    }
+                    new ImageToVideoModelPricing { ModelName = "veo 3.1 Fast", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 30.0m, FixedCost_1080p = 37.5m, FixedCost_4k = 90.0m, AllowedWallet = "Standard", IsActive = true },
+                    new ImageToVideoModelPricing { ModelName = "veo 3.1 Lite", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 15.0m, FixedCost_1080p = 22.5m, FixedCost_4k = 75.0m, AllowedWallet = "Standard", IsActive = true },
+                    new ImageToVideoModelPricing { ModelName = "veo 3.1 Quality", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 225.0m, FixedCost_1080p = 232.5m, FixedCost_4k = 285.0m, AllowedWallet = "Standard", IsActive = true },
+                    new ImageToVideoModelPricing { ModelName = "grok-imagine", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 2.4m, CostPerSecond_720p = 4.5m, CostPerSecond_1080p = 8.0m, AllowedWallet = "Standard", IsActive = true }
                 );
-            }
 
-            // 4. LipSync
             if (!await context.LipSyncSettings.AnyAsync())
-            {
-                context.LipSyncSettings.Add(new LipSyncSetting
-                {
-                    Id = 1,
-                    IsActive = true,
-                    MaxVideoFileSizeMb = 100,
-                    MaxAudioFileSizeMb = 25,
-                    MaxAudioDurationSeconds = 120,
-                    MaxConcurrentOperations = 10
-                });
-            }
-
+                context.LipSyncSettings.Add(new LipSyncSetting { Id = 1, IsActive = true, MaxVideoFileSizeMb = 100, MaxAudioFileSizeMb = 25, MaxAudioDurationSeconds = 120, MaxConcurrentOperations = 10 });
             if (!await context.LipSyncModelPricings.AnyAsync())
-            {
-                context.LipSyncModelPricings.Add(
-                    new LipSyncModelPricing
-                    {
-                        ModelName = "vidu-lipsync-audio",
-                        ProviderName = "CrunAI",
-                        BillingType = "Per5Seconds",
-                        BaseCost = 12.0m,
-                        CostPerSecond = 2.4m,
-                        AllowedWallet = "Standard",
-                        IsActive = true
-                    }
-                );
-            }
+                context.LipSyncModelPricings.Add(new LipSyncModelPricing { ModelName = "vidu-lipsync-audio", ProviderName = "CrunAI", BillingType = "Per5Seconds", BaseCost = 12.0m, CostPerSecond = 2.4m, AllowedWallet = "Standard", IsActive = true });
 
-            // 5. Text to Image
             if (!await context.TextToImageSettings.AnyAsync())
-            {
-                context.TextToImageSettings.Add(new TextToImageSetting
-                {
-                    Id = 1,
-                    IsActive = true,
-                    MaxPromptLength = 5000,
-                    MaxConcurrentOperations = 10
-                });
-            }
-
+                context.TextToImageSettings.Add(new TextToImageSetting { Id = 1, IsActive = true, MaxPromptLength = 5000, MaxConcurrentOperations = 10 });
             if (!await context.TextToImageModelPricings.AnyAsync())
-            {
-                context.TextToImageModelPricings.Add(new TextToImageModelPricing
-                {
-                    ModelName = "grok-imagine",
-                    ProviderName = "CrunAI",
-                    BillingType = "PerRequest",
-                    CostPerImage = 4.0m,
-                    BaseCost = 0m,
-                    AllowedWallet = "Standard",
-                    IsActive = true
-                });
-            }
+                context.TextToImageModelPricings.Add(new TextToImageModelPricing { ModelName = "grok-imagine", ProviderName = "CrunAI", BillingType = "PerRequest", CostPerImage = 4.0m, BaseCost = 0m, AllowedWallet = "Standard", IsActive = true });
 
-            // 6. Motion Control
             if (!await context.MotionControlSettings.AnyAsync())
-            {
-                context.MotionControlSettings.Add(new MotionControlSetting
-                {
-                    Id = 1,
-                    IsActive = true,
-                    MaxVideoFileSizeMb = 100,
-                    MaxImageFileSizeMb = 25,
-                    MaxDurationSeconds = 30,
-                    MaxConcurrentOperations = 10
-                });
-            }
-
+                context.MotionControlSettings.Add(new MotionControlSetting { Id = 1, IsActive = true, MaxVideoFileSizeMb = 100, MaxImageFileSizeMb = 25, MaxDurationSeconds = 30, MaxConcurrentOperations = 10 });
             if (!await context.MotionControlModelPricings.AnyAsync())
-            {
-                context.MotionControlModelPricings.Add(new MotionControlModelPricing
-                {
-                    ModelName = "kling-motion-control",
-                    ProviderName = "KlingAI",
-                    BillingType = "FlatRate",
-                    CostPerGeneration = 20.0m,
-                    CostPerSecond = 2.0m,
-                    BaseCost = 0m,
-                    AllowedWallet = "Standard",
-                    IsActive = true
-                });
-            }
+                context.MotionControlModelPricings.Add(new MotionControlModelPricing { ModelName = "kling-motion-control", ProviderName = "KlingAI", BillingType = "FlatRate", CostPerGeneration = 20.0m, CostPerSecond = 2.0m, BaseCost = 0m, AllowedWallet = "Standard", IsActive = true });
 
-            // 7. Voice to Text (STT)
             if (!await context.VoiceToTextSettings.AnyAsync())
-            {
-                context.VoiceToTextSettings.Add(new VoiceToTextSetting
-                {
-                    Id = 1,
-                    IsActive = true,
-                    MaxAudioFileSizeMb = 25,
-                    MaxAudioDurationMinutes = 10,
-                    MaxConcurrentOperations = 10
-                });
-            }
-
+                context.VoiceToTextSettings.Add(new VoiceToTextSetting { Id = 1, IsActive = true, MaxAudioFileSizeMb = 25, MaxAudioDurationMinutes = 10, MaxConcurrentOperations = 10 });
             if (!await context.VoiceToTextModelPricings.AnyAsync())
-            {
-                context.VoiceToTextModelPricings.Add(new VoiceToTextModelPricing
-                {
-                    ModelName = "gpt-4o-mini-transcribe",
-                    ProviderName = "OpenAI",
-                    BillingType = "PerMinute",
-                    CostPerMinute = 1.0m,
-                    CostPerSecond = 0.0167m,
-                    BaseCost = 0m,
-                    AllowedWallet = "Standard",
-                    IsActive = true
-                });
-            }
+                context.VoiceToTextModelPricings.Add(new VoiceToTextModelPricing { ModelName = "gpt-4o-mini-transcribe", ProviderName = "OpenAI", BillingType = "PerMinute", CostPerMinute = 1.0m, CostPerSecond = 0.0167m, BaseCost = 0m, AllowedWallet = "Standard", IsActive = true });
 
-            // 8. Text to Voice (TTS)
             if (!await context.TextToVoiceSettings.AnyAsync())
-            {
-                context.TextToVoiceSettings.Add(new TextToVoiceSetting
-                {
-                    Id = 1,
-                    IsActive = true,
-                    MaxTextLength = 5000,
-                    MaxConcurrentOperations = 10
-                });
-            }
-
+                context.TextToVoiceSettings.Add(new TextToVoiceSetting { Id = 1, IsActive = true, MaxTextLength = 5000, MaxConcurrentOperations = 10 });
             if (!await context.TextToVoiceModelPricings.AnyAsync())
-            {
                 context.TextToVoiceModelPricings.AddRange(
-                    new TextToVoiceModelPricing
-                    {
-                        QualityLevel = "Standard",
-                        ModelName = "gemini-2.5-flash-preview-tts",
-                        ProviderName = "Gemini",
-                        BillingType = "PerCharacter",
-                        CostPerChar = 0.001m,
-                        BaseCost = 0m,
-                        AllowedWallet = "Standard",
-                        IsActive = true
-                    },
-                    new TextToVoiceModelPricing
-                    {
-                        QualityLevel = "Medium",
-                        ModelName = "gemini-2.5-pro-preview-tts",
-                        ProviderName = "Gemini",
-                        BillingType = "PerCharacter",
-                        CostPerChar = 0.005m,
-                        BaseCost = 0m,
-                        AllowedWallet = "Standard",
-                        IsActive = true
-                    },
-                    new TextToVoiceModelPricing
-                    {
-                        QualityLevel = "High",
-                        ModelName = "gemini-3.1-flash-tts-preview",
-                        ProviderName = "Gemini",
-                        BillingType = "PerCharacter",
-                        CostPerChar = 0.010m,
-                        BaseCost = 0m,
-                        AllowedWallet = "Standard",
-                        IsActive = true
-                    }
+                    new TextToVoiceModelPricing { QualityLevel = "Standard", ModelName = "gemini-2.5-flash-preview-tts", ProviderName = "Gemini", BillingType = "PerCharacter", CostPerChar = 0.001m, BaseCost = 0m, AllowedWallet = "Standard", IsActive = true },
+                    new TextToVoiceModelPricing { QualityLevel = "Medium", ModelName = "gemini-2.5-pro-preview-tts", ProviderName = "Gemini", BillingType = "PerCharacter", CostPerChar = 0.005m, BaseCost = 0m, AllowedWallet = "Standard", IsActive = true },
+                    new TextToVoiceModelPricing { QualityLevel = "High", ModelName = "gemini-3.1-flash-tts-preview", ProviderName = "Gemini", BillingType = "PerCharacter", CostPerChar = 0.010m, BaseCost = 0m, AllowedWallet = "Standard", IsActive = true }
                 );
-            }
 
             await context.SaveChangesAsync();
         }
