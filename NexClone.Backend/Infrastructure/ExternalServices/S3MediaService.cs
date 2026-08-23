@@ -22,10 +22,12 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
         private string _region;
         private string _endpoint;
         private readonly ApplicationDbContext _context;
+        private readonly IConfiguration _configuration;
 
         public S3MediaService(ApplicationDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
             _defaultBucket = "nexmedia"; // Will be overridden if set in DB
         }
 
@@ -57,15 +59,15 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
             var dbRegion = appSettings.FirstOrDefault(s => s.Key == "S3.Region")?.Value;
             var dbBucketName = appSettings.FirstOrDefault(s => s.Key == "S3.BucketName")?.Value;
 
-            var envEndpoint = Environment.GetEnvironmentVariable("S3_ENDPOINT");
-            var envRegion = Environment.GetEnvironmentVariable("S3_REGION");
-            var envBucketName = Environment.GetEnvironmentVariable("S3_BUCKET_NAME");
+            var envEndpoint = _configuration["S3_ENDPOINT"] ?? _configuration["Minio:Endpoint"];
+            var envRegion = _configuration["S3_REGION"] ?? _configuration["Minio:Region"];
+            var envBucketName = _configuration["S3_BUCKET_NAME"] ?? _configuration["Minio:BucketName"];
 
             var endpoint = !string.IsNullOrWhiteSpace(envEndpoint) ? envEndpoint :
                            (!string.IsNullOrWhiteSpace(dbEndpoint) ? dbEndpoint : "s3.eu-north-1.amazonaws.com");
             
-            var envAccessKey = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID");
-            var envSecretKey = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY");
+            var envAccessKey = _configuration["AWS_ACCESS_KEY_ID"] ?? _configuration["Minio:AccessKey"];
+            var envSecretKey = _configuration["AWS_SECRET_ACCESS_KEY"] ?? _configuration["Minio:SecretKey"];
             
             var accessKey = !string.IsNullOrWhiteSpace(envAccessKey) ? envAccessKey : (!string.IsNullOrWhiteSpace(dbAccessKey) ? dbAccessKey : "YOUR_AWS_ACCESS_KEY");
             var secretKey = !string.IsNullOrWhiteSpace(envSecretKey) ? envSecretKey : (!string.IsNullOrWhiteSpace(dbSecretKey) ? dbSecretKey : "YOUR_AWS_SECRET_KEY");
@@ -78,7 +80,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
             _defaultBucket = !string.IsNullOrWhiteSpace(envBucketName) ? envBucketName :
                              (!string.IsNullOrWhiteSpace(dbBucketName) ? dbBucketName : "nexmedia-ai-files");
 
-            var useSslStr = Environment.GetEnvironmentVariable("S3_USE_SSL");
+            var useSslStr = _configuration["S3_USE_SSL"] ?? _configuration["Minio:UseSSL"];
             bool useSsl = string.IsNullOrWhiteSpace(useSslStr) || useSslStr.ToLower() == "true";
 
             _minioClient = new MinioClient()
@@ -88,14 +90,17 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
                 .WithSSL(useSsl)
                 .Build();
 
-            var publicEndpoint = Environment.GetEnvironmentVariable("MINIO_PUBLIC_ENDPOINT");
+            var publicEndpoint = _configuration["MINIO_PUBLIC_ENDPOINT"] ?? _configuration["Minio:PublicEndpoint"];
             if (!string.IsNullOrWhiteSpace(publicEndpoint))
             {
+                var publicUseSslStr = _configuration["Minio:PublicUseSSL"];
+                bool publicUseSsl = string.IsNullOrWhiteSpace(publicUseSslStr) ? useSsl : publicUseSslStr.ToLower() == "true";
+
                 _publicMinioClient = new MinioClient()
                     .WithEndpoint(publicEndpoint)
                     .WithCredentials(accessKey, secretKey)
                     .WithRegion(region)
-                    .WithSSL(useSsl)
+                    .WithSSL(publicUseSsl)
                     .Build();
             }
         }

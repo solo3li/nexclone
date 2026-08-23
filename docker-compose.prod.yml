@@ -50,6 +50,12 @@ services:
     volumes:
       - minio_data:/data
     restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.minio.rule=Host(`s3.${DOMAIN}`)"
+      - "traefik.http.routers.minio.entrypoints=websecure"
+      - "traefik.http.routers.minio.tls.certresolver=myresolver"
+      - "traefik.http.services.minio.loadbalancer.server.port=9000"
 
   backend:
     image: ${DOCKERHUB_USERNAME}/nexclone-backend:${IMAGE_TAG:-latest}
@@ -58,9 +64,12 @@ services:
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=${DB_NAME:-nexclone};Username=${DB_USER:-nexclone};Password=${DB_PASSWORD:-postgres}
       - Redis__ConnectionString=redis:6379,password=${REDIS_PASSWORD:-redis}
       - Minio__Endpoint=minio:9000
+      - Minio__PublicEndpoint=s3.${DOMAIN}
       - Minio__AccessKey=${MINIO_ROOT_USER:-admin}
       - Minio__SecretKey=${MINIO_ROOT_PASSWORD:-password123}
       - Minio__UseSSL=false
+      - Minio__PublicUseSSL=true
+      - MINIO_BROWSER_REDIRECT_URL=https://s3.${DOMAIN}
       - Jwt__Key=${JWT_KEY:-super_secret_key_change_me_in_production}
       - Jwt__Issuer=${JWT_ISSUER:-nexclone}
       - Jwt__Audience=${JWT_AUDIENCE:-nexclone_users}
