@@ -104,7 +104,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
                     paymentMethodsList.Add(walletIntegrationId);
             }
 
-            string frontendUrl = _configuration["AppSettings:DefaultFrontendUrl"] ?? "https://dev.169.58.204.169.nip.io";
+            string frontendUrl = _configuration["AppSettings:DefaultFrontendUrl"] ?? "https://www.nexmediaai.com";
             string redirectionUrl = $"{frontendUrl.TrimEnd('/')}/ar/payment/success?method=paymob";
 
             var payload = new

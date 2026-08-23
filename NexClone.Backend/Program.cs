@@ -58,7 +58,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowNextjs", policyBuilder =>
     {
         var originsRaw = builder.Configuration["Cors:AllowedOrigins"]
-            ?? "http://localhost:3000,http://localhost:3001,https://nexclone.com,https://uggu.space,https://staging.169.58.204.169.nip.io,https://api.staging.169.58.204.169.nip.io,https://api.prod.169.58.204.169.nip.io,https://prod.169.58.204.169.nip.io,https://uggu.space,https://www.uggu.space,http://uggu.space,http://www.uggu.space";
+            ?? "http://localhost:3000,http://localhost:3001,https://nexclone.com,https://nexmediaai.com,https://www.nexmediaai.com,http://nexmediaai.com,http://www.nexmediaai.com,https://api.nexmediaai.com";
         var allowedOrigins = originsRaw
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);

@@ -14,7 +14,7 @@ services:
       - "--entrypoints.web.http.redirections.entryPoint.permanent=true"
       - "--entrypoints.websecure.address=:443"
       - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
-      - "--certificatesresolvers.myresolver.acme.email=admin@uggu.space"
+      - "--certificatesresolvers.myresolver.acme.email=admin@nexmediaai.com"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
     ports:
       - "80:80"
@@ -81,10 +81,10 @@ services:
       - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER:-devminioadmin}
       - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-devminiosecret123!}
       - S3_USE_SSL=false
-      - MINIO_PUBLIC_ENDPOINT=uggu.space
+      - MINIO_PUBLIC_ENDPOINT=nexmediaai.com
       - Minio__PublicUseSSL=true
-      - AppSettings__DefaultFrontendUrl=https://uggu.space
-      - Cors__AllowedOrigins=https://uggu.space,https://www.uggu.space
+      - AppSettings__DefaultFrontendUrl=https://www.nexmediaai.com
+      - Cors__AllowedOrigins=https://nexmediaai.com,https://www.nexmediaai.com
     networks:
       - nexclone_network
     depends_on:
@@ -110,7 +110,7 @@ services:
       - backend
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`uggu.space`) || Host(`www.uggu.space`)"
+      - "traefik.http.routers.frontend.rule=Host(`nexmediaai.com`) || Host(`www.nexmediaai.com`)"
       - "traefik.http.routers.frontend.entrypoints=websecure"
       - "traefik.http.routers.frontend.tls.certresolver=myresolver"
       - "traefik.http.services.frontend.loadbalancer.server.port=3000"
