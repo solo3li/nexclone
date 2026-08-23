@@ -46,6 +46,18 @@ const nextConfig = {
     return {
       beforeFiles: [
         {
+          source: '/nexmedia-files-zyavomezs0/:path*',
+          destination: 'http://minio:9001/nexmedia-files-zyavomezs0/:path*',
+        },
+        {
+          source: '/nexmedia/:path*',
+          destination: 'http://minio:9001/nexmedia/:path*',
+        },
+        {
+          source: '/mediaoss/:path*',
+          destination: 'https://tempfile.mediaoss.bar/:path*',
+        },
+        {
           source: '/api/:path*',
           destination: 'http://backend:8080/api/:path*',
         },

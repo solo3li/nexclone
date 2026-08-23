@@ -317,7 +317,11 @@ export default function TextToImagePage() {
   // Safe Cross-Origin HD Download
   const handleDownloadImage = async (url: string, filename?: string) => {
     try {
-      const response = await fetch(url);
+      let fetchUrl = url;
+      if (url.includes("tempfile.mediaoss.bar")) {
+        fetchUrl = url.replace("https://tempfile.mediaoss.bar", "/mediaoss");
+      }
+      const response = await fetch(fetchUrl);
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
