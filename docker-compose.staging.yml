@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # Traefik Reverse Proxy (Handles HTTPS and Routing)
   traefik:
-    image: traefik:v2.10
+    image: traefik:v2.11
     command:
       - "--api.insecure=true"
       - "--providers.docker=true"
