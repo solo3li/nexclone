@@ -47,11 +47,11 @@ const nextConfig = {
       beforeFiles: [
         {
           source: '/api/:path*',
-          destination: 'http://127.0.0.1:5000/api/:path*',
+          destination: 'http://backend:8080/api/:path*',
         },
         {
-          source: '/nexmedia/:path*',
-          destination: 'http://127.0.0.1:9001/nexmedia/:path*',
+          source: '/nexmedia-ai-files/:path*',
+          destination: 'http://minio:9001/nexmedia-ai-files/:path*',
         },
       ],
     };

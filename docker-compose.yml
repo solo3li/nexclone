@@ -1,4 +1,30 @@
 services:
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    environment:
+      - DOCKER_API_VERSION=1.44
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entryPoint.permanent=true"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=admin@uggu.space"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "letsencrypt:/letsencrypt"
+    networks:
+      - nexclone_network
+
   postgres:
     image: postgres:15
     container_name: nexclone-postgres
@@ -39,6 +65,56 @@ services:
     volumes:
       - redisdata:/data
 
+  backend:
+    build:
+      context: ./NexClone.Backend
+      dockerfile: Dockerfile
+    container_name: nexclone-backend
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=${POSTGRES_DB:-nexclone_dev};Username=${POSTGRES_USER:-nexclone};Password=${POSTGRES_PASSWORD:-devpassword123!}
+      - Jwt__Key=${JWT_KEY:-CHANGE_ME_SET_VIA_ENVIRONMENT_64_CHAR_MINIMUM_SECURE_KEY_FOR_PROD}
+      - S3_ENDPOINT=minio:9001
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-devminioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-devminiosecret123!}
+      - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER:-devminioadmin}
+      - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-devminiosecret123!}
+      - S3_USE_SSL=false
+      - MINIO_PUBLIC_ENDPOINT=uggu.space
+      - Minio__PublicUseSSL=true
+      - AppSettings__DefaultFrontendUrl=https://uggu.space
+      - Cors__AllowedOrigins=https://uggu.space,https://www.uggu.space
+    networks:
+      - nexclone_network
+    depends_on:
+      - postgres
+      - redis
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`api.169.58.204.169.nip.io`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls.certresolver=myresolver"
+      - "traefik.http.services.backend.loadbalancer.server.port=8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: "https://api.169.58.204.169.nip.io"
+    container_name: nexclone-frontend
+    networks:
+      - nexclone_network
+    depends_on:
+      - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`uggu.space`) || Host(`www.uggu.space`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls.certresolver=myresolver"
+      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+
 networks:
   nexclone_network:
     driver: bridge
@@ -47,3 +123,4 @@ volumes:
   pgdata:
   miniodata:
   redisdata:
+  letsencrypt:
