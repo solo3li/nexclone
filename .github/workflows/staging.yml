@@ -47,6 +47,18 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Copy Helm Chart to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          source: "nexclone-chart"
+          target: "/tmp/nexclone-deployment"
+
       - name: Deploy to VPS with Helm
         uses: appleboy/ssh-action@v1.0.3
         env:
@@ -58,7 +70,7 @@ jobs:
           envs: ENV_FILE_CONTENT
           script: |
             export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-            cd /root/nexmedia/nexclone/nexclone-chart
+            cd /tmp/nexclone-deployment/nexclone-chart
             
             # Ensure namespace exists
             kubectl create namespace nexclone-staging --dry-run=client -o yaml | kubectl apply -f -
@@ -70,6 +82,7 @@ jobs:
             
             helm upgrade --install nexclone-staging . \
               --namespace nexclone-staging \
+              --wait --timeout 5m \
               --set backend.image.repository=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-backend \
               --set frontend.image.repository=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-frontend \
               --set backend.image.tag=${{ github.sha }} \
@@ -79,3 +92,7 @@ jobs:
               --set postgresql.enabled=true \
               --set redis.enabled=true \
               --set minio.enabled=true
+
+            # Cleanup
+            cd /
+            rm -rf /tmp/nexclone-deployment

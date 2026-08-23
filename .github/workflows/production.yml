@@ -27,7 +27,7 @@ jobs:
           context: ./NexClone.Backend
           file: ./NexClone.Backend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/nexclone-backend:production
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/nexclone-backend:${{ github.sha }}
           cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-backend:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-backend:buildcache,mode=max
 
@@ -37,7 +37,7 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/nexclone-frontend:production
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/nexclone-frontend:${{ github.sha }}
           cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-frontend:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-frontend:buildcache,mode=max
           build-args: |
@@ -47,6 +47,18 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Copy Helm Chart to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          source: "nexclone-chart"
+          target: "/tmp/nexclone-deployment"
+
       - name: Deploy to VPS with Helm
         uses: appleboy/ssh-action@v1.0.3
         env:
@@ -58,7 +70,7 @@ jobs:
           envs: ENV_FILE_CONTENT
           script: |
             export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-            cd /root/nexmedia/nexclone/nexclone-chart
+            cd /tmp/nexclone-deployment/nexclone-chart
             
             # Ensure namespace exists
             kubectl create namespace nexclone-production --dry-run=client -o yaml | kubectl apply -f -
@@ -70,12 +82,17 @@ jobs:
             
             helm upgrade --install nexclone-production . \
               --namespace nexclone-production \
+              --wait --timeout 5m \
               --set backend.image.repository=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-backend \
               --set frontend.image.repository=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-frontend \
-              --set backend.image.tag=production \
-              --set frontend.image.tag=production \
-              --set ingress.hosts.frontend=${{ vars.PROD_FRONTEND_DOMAIN }} \
+              --set backend.image.tag=${{ github.sha }} \
+              --set frontend.image.tag=${{ github.sha }} \
+              --set ingress.hosts.frontend=${{ secrets.PROD_FRONTEND_DOMAIN }} \
               --set ingress.hosts.backend=api.prod.${{ secrets.VPS_HOST }}.nip.io \
               --set postgresql.enabled=true \
               --set redis.enabled=true \
               --set minio.enabled=true
+
+            # Cleanup
+            cd /
+            rm -rf /tmp/nexclone-deployment
