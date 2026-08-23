@@ -619,26 +619,3 @@ http://127.0.0.1:9001 is invalid hostname.: Minio.Exceptions.InvalidEndpointExce
 2026-08-23 04:41:08.426 +03:00 [INF] [Corr:] Server desktop-rjppsk4:15660:5e257900 successfully announced in 23.4377 ms
 2026-08-23 04:41:08.429 +03:00 [INF] [Corr:] Server desktop-rjppsk4:15660:5e257900 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
 2026-08-23 04:41:08.484 +03:00 [INF] [Corr:] Server desktop-rjppsk4:15660:5e257900 all the dispatchers started
-2026-08-23 04:42:44.315 +03:00 [WRN] [Corr:15ff47b529fd] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
-2026-08-23 04:43:37.030 +03:00 [WRN] [Corr:be747598c93f] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
-2026-08-23 04:46:08.464 +03:00 [INF] [Corr:] 1 servers were removed due to timeout
-2026-08-23 04:52:24.550 +03:00 [INF] [Corr:] Start installing Hangfire SQL objects...
-2026-08-23 04:52:24.599 +03:00 [INF] [Corr:] Hangfire SQL objects installed.
-2026-08-23 04:52:24.828 +03:00 [INF] [Corr:] SubscriptionStatusService is starting.
-2026-08-23 04:52:24.828 +03:00 [INF] [Corr:] Media Cleanup Background Service started.
-2026-08-23 04:52:24.834 +03:00 [INF] [Corr:] Searching for processed media older than 8/9/2026 1:52:24 AM...
-2026-08-23 04:52:24.844 +03:00 [WRN] [Corr:] The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased.
-2026-08-23 04:52:24.861 +03:00 [INF] [Corr:] Successfully cleaned up 0 media files in total.
-2026-08-23 04:52:24.941 +03:00 [INF] [Corr:] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: 127.0.0.1, DB: nexclone_dev, Schema: hangfire'
-2026-08-23 04:52:24.941 +03:00 [INF] [Corr:] Using the following options for PostgreSQL job storage:
-2026-08-23 04:52:24.942 +03:00 [INF] [Corr:]     Queue poll interval: 00:00:15.
-2026-08-23 04:52:24.942 +03:00 [INF] [Corr:]     Invisibility timeout: 00:30:00.
-2026-08-23 04:52:24.942 +03:00 [INF] [Corr:]     Use sliding invisibility timeout: False.
-2026-08-23 04:52:24.942 +03:00 [INF] [Corr:] Using the following options for Hangfire Server:
-    Worker count: 40
-    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
-    Shutdown timeout: 00:00:15
-    Schedule polling interval: 00:00:15
-2026-08-23 04:52:24.965 +03:00 [INF] [Corr:] Server desktop-rjppsk4:21172:a1c39f33 successfully announced in 11.1068 ms
-2026-08-23 04:52:24.969 +03:00 [INF] [Corr:] Server desktop-rjppsk4:21172:a1c39f33 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
-2026-08-23 04:52:25.032 +03:00 [INF] [Corr:] Server desktop-rjppsk4:21172:a1c39f33 all the dispatchers started

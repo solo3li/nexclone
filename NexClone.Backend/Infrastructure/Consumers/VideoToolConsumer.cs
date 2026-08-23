@@ -12,11 +12,8 @@ using NexClone.Backend.Core.Interfaces;
 using NexClone.Backend.Core.Messages;
 using NexClone.Backend.Hubs;
 
-using Hangfire;
-
 namespace NexClone.Backend.Infrastructure.Consumers
 {
-    [Queue("video_queue")]
     public class VideoToolConsumer : BaseAiTaskConsumer
     {
         public VideoToolConsumer(
