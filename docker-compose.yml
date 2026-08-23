@@ -53,6 +53,12 @@ services:
       - nexclone_network
     volumes:
       - miniodata:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.minio.rule=Host(`minio.169.58.204.169.nip.io`)"
+      - "traefik.http.routers.minio.entrypoints=websecure"
+      - "traefik.http.routers.minio.tls.certresolver=myresolver"
+      - "traefik.http.services.minio.loadbalancer.server.port=9001"
 
   redis:
     image: redis:7
@@ -81,7 +87,7 @@ services:
       - AWS_ACCESS_KEY_ID=${MINIO_ROOT_USER:-devminioadmin}
       - AWS_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-devminiosecret123!}
       - S3_USE_SSL=false
-      - MINIO_PUBLIC_ENDPOINT=nexmediaai.com
+      - MINIO_PUBLIC_ENDPOINT=minio.169.58.204.169.nip.io
       - Minio__PublicUseSSL=true
       - AppSettings__DefaultFrontendUrl=https://www.nexmediaai.com
       - Cors__AllowedOrigins=https://nexmediaai.com,https://www.nexmediaai.com
