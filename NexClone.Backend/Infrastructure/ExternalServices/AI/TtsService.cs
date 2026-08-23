@@ -81,134 +81,17 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                 modelName = "gemini-2.5-pro-preview-tts";
             }
 
-            var isArabic = string.Equals(language, "arabic", StringComparison.OrdinalIgnoreCase);
-            var darijatConfig = await _dbContext.ApiConfigurations.FirstOrDefaultAsync(c => c.ProviderName == "Darijat" && c.IsActive);
             var geminiConfig = await _dbContext.ApiConfigurations.FirstOrDefaultAsync(c => c.ProviderName == "Gemini" && c.IsActive);
-            var openAiConfig = await _dbContext.ApiConfigurations.FirstOrDefaultAsync(c => c.ProviderName == "OpenAI" && c.IsActive);
-
-            // 1. If Arabic and Darijat configured, try Darijat
-            if (isArabic && darijatConfig != null && !string.IsNullOrWhiteSpace(darijatConfig.ApiKey))
-            {
-                try
-                {
-                    var (dStream, dType, dExt) = await GenerateDarijatAudioAsync(text, voiceName, styleInstruction, darijatConfig);
-                    return (dStream, dType, dExt, "Darijat", "darijat-voice");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[TTS] Darijat generation error: {ex.Message}. Falling back to Gemini...");
-                }
-            }
-
-            // 2. Gemini
-            if (geminiConfig != null && !string.IsNullOrWhiteSpace(geminiConfig.ApiKey))
-            {
-                try
-                {
-                    var (gStream, gType, gExt) = await GenerateGeminiAudioAsync(text, voiceName, styleInstruction, geminiConfig, modelName);
-                    return (gStream, gType, gExt, "Gemini", modelName);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[TTS] Gemini generation error: {ex.Message}. Falling back to OpenAI if available...");
-                    if (openAiConfig == null) throw;
-                }
-            }
-
-            // 3. OpenAI Fallback
-            if (openAiConfig != null && !string.IsNullOrWhiteSpace(openAiConfig.ApiKey))
-            {
-                var (oStream, oType, oExt) = await GenerateOpenAiAudioAsync(text, voiceName, openAiConfig, null);
-                return (oStream, oType, oExt, "OpenAI", "tts-1");
-            }
-
-            throw new Exception("No active TTS provider configured or all providers failed.");
-        }
-
-        private async Task<(Stream, string, string)> GenerateOpenAiAudioAsync(string text, string voiceName, ApiConfiguration config, string customModelName = null)
-        {
-            var client = _httpClientFactory.CreateClient();
-            client.Timeout = TimeSpan.FromSeconds(300);
-            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {config.ApiKey}");
-
-            var validOpenAiVoices = new[] { "alloy", "echo", "fable", "onyx", "nova", "shimmer" };
-            var safeVoiceName = string.IsNullOrWhiteSpace(voiceName) || !validOpenAiVoices.Contains(voiceName.ToLower()) ? "alloy" : voiceName.ToLower();
-
-            var payload = new
-            {
-                model = string.IsNullOrWhiteSpace(customModelName) ? "tts-1" : customModelName,
-                input = text,
-                voice = safeVoiceName,
-                response_format = "mp3"
-            };
-
-            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-            var response = await client.PostAsync("https://api.openai.com/v1/audio/speech", content);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = await response.Content.ReadAsStringAsync();
-                throw new Exception($"OpenAI API Error: {error}");
-            }
-
-            var stream = await response.Content.ReadAsStreamAsync();
-            return (stream, "audio/mpeg", "mp3");
-        }
-
-        private async Task<(Stream, string, string)> GenerateDarijatAudioAsync(string text, string voiceName, string styleInstruction, ApiConfiguration config)
-        {
-            var client = _httpClientFactory.CreateClient();
-            client.Timeout = TimeSpan.FromSeconds(300);
-            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {config.ApiKey}");
-            client.DefaultRequestHeaders.Add("Accept", "application/json");
-
-            var payload = new
-            {
-                text = text,
-                voice_name = voiceName,
-                human_simulation = true,
-                style_instruction = styleInstruction
-            };
-
-            var url = config.BaseUrl ?? "https://tts.darijat.com/api/v1/external/generate-audio";
-            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
             
-            var response = await client.PostAsync(url, content);
-
-            if (!response.IsSuccessStatusCode)
+            if (geminiConfig == null || string.IsNullOrWhiteSpace(geminiConfig.ApiKey))
             {
-                var error = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Darijat API Error: {error}");
+                throw new Exception("Gemini API is not configured or active.");
             }
 
-            // Darijat can return direct audio or JSON with audio_url
-            var contentType = response.Content.Headers.ContentType?.MediaType;
-
-            if (contentType != null && contentType.Contains("application/json"))
-            {
-                var jsonResponse = await response.Content.ReadAsStringAsync();
-                using var jsonDoc = JsonDocument.Parse(jsonResponse);
-                
-                string? audioUrl = null;
-                if (jsonDoc.RootElement.TryGetProperty("audio_url", out var urlElement))
-                    audioUrl = urlElement.GetString();
-                else if (jsonDoc.RootElement.TryGetProperty("url", out var urlProp))
-                    audioUrl = urlProp.GetString();
-
-                if (string.IsNullOrEmpty(audioUrl))
-                    throw new Exception("Darijat API returned JSON without audio URL.");
-
-                var audioResponse = await client.GetAsync(audioUrl);
-                audioResponse.EnsureSuccessStatusCode();
-                var stream = await audioResponse.Content.ReadAsStreamAsync();
-                return (stream, "audio/mpeg", "mp3");
-            }
-            else
-            {
-                var stream = await response.Content.ReadAsStreamAsync();
-                return (stream, "audio/mpeg", "mp3");
-            }
+            var (gStream, gType, gExt) = await GenerateGeminiAudioAsync(text, voiceName, styleInstruction, geminiConfig, modelName);
+            return (gStream, gType, gExt, "Gemini", modelName);
         }
+
 
         private async Task<(Stream, string, string)> GenerateGeminiAudioAsync(string text, string voiceName, string styleInstruction, ApiConfiguration config, string customModelName = null)
         {
