@@ -58,7 +58,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowNextjs", policyBuilder =>
     {
         var originsRaw = builder.Configuration["Cors:AllowedOrigins"]
-            ?? "http://localhost:3000,http://localhost:3001,https://nexclone.com,https://dev.169.58.204.169.nip.io";
+            ?? "http://localhost:3000,http://localhost:3001,https://nexclone.com,https://dev.169.58.204.169.nip.io,https://staging.169.58.204.169.nip.io,https://api.staging.169.58.204.169.nip.io,https://api.prod.169.58.204.169.nip.io,https://prod.169.58.204.169.nip.io";
         var allowedOrigins = originsRaw
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
