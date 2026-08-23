@@ -11,8 +11,11 @@ using NexClone.Backend.Core.Interfaces;
 using NexClone.Backend.Core.Messages;
 using NexClone.Backend.Hubs;
 
+using Hangfire;
+
 namespace NexClone.Backend.Infrastructure.Consumers
 {
+    [Queue("image_queue")]
     public class ImageToolConsumer : BaseAiTaskConsumer
     {
         public ImageToolConsumer(

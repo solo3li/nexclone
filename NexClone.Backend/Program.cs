@@ -214,7 +214,7 @@ builder.Services.AddHangfire(configuration => configuration
 // Add the processing server as IHostedService
 builder.Services.AddHangfireServer(options => {
     options.WorkerCount = Environment.ProcessorCount * 5;
-    options.Queues = new[] { "default", "avatar_video_queue", "lipsync_queue", "tts_queue", "vtt_queue", "motion_control_queue", "email_queue" };
+    options.Queues = new[] { "default", "avatar_video_queue", "lipsync_queue", "tts_queue", "vtt_queue", "motion_control_queue", "email_queue", "image_queue", "video_queue" };
 });
 
 // Register Consumers as Scoped services so Hangfire can instantiate them
