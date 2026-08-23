@@ -283,7 +283,11 @@ namespace NexClone.Backend
                         UserName = admin.Email,
                         Email = admin.Email,
                         EmailConfirmed = true,
-                        FullName = "Super Admin"
+                        FullName = "Super Admin",
+                        IsVerified = true,
+                        IsActive = true,
+                        IsSuperAdmin = true,
+                        IsStaff = true
                     };
                     var result = await userManager.CreateAsync(adminUser, admin.Password);
                     if (result.Succeeded)
@@ -293,9 +297,13 @@ namespace NexClone.Backend
                 }
                 else
                 {
-                    if (!adminUser.EmailConfirmed)
+                    if (!adminUser.EmailConfirmed || !adminUser.IsVerified || !adminUser.IsSuperAdmin || !adminUser.IsStaff || !adminUser.IsActive)
                     {
                         adminUser.EmailConfirmed = true;
+                        adminUser.IsVerified = true;
+                        adminUser.IsSuperAdmin = true;
+                        adminUser.IsStaff = true;
+                        adminUser.IsActive = true;
                         await userManager.UpdateAsync(adminUser);
                     }
 
