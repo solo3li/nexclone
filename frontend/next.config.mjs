@@ -12,7 +12,9 @@ const nextConfig = {
     '*.nip.io',
     'dev.169.58.204.169.nip.io',
     'api.169.58.204.169.nip.io',
-    'https://staging.69.58.204.169.nip.io/'
+    'https://staging.69.58.204.169.nip.io/',
+    'uggu.space',
+    'www.uggu.space'
   ],
   typescript: {
     ignoreBuildErrors: true,
