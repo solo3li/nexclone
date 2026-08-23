@@ -9,6 +9,9 @@
 | Database migration corrupted | See section below | ~5-15 min |
 | Secrets leaked | See section below | ~2 min |
 
+
+
+
 ---
 
 ## Backend Rollback
