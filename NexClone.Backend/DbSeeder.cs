@@ -20,6 +20,7 @@ namespace NexClone.Backend
             await SeedApiConfigsAsync(dbContext, configuration);
             await SeedToolConfigsAsync(dbContext);
             await SeedToolTablesAsync(serviceProvider);
+            await SeedAdminUserAsync(serviceProvider);
         }
 
         private static async Task SeedAppSettingsAsync(ApplicationDbContext dbContext)
@@ -249,6 +250,47 @@ namespace NexClone.Backend
                 );
 
             await context.SaveChangesAsync();
+        }
+
+        private static async Task SeedAdminUserAsync(IServiceProvider serviceProvider)
+        {
+            using var scope = serviceProvider.CreateScope();
+            var userManager = scope.ServiceProvider.GetRequiredService<Microsoft.AspNetCore.Identity.UserManager<ApplicationUser>>();
+            var roleManager = scope.ServiceProvider.GetRequiredService<Microsoft.AspNetCore.Identity.RoleManager<Microsoft.AspNetCore.Identity.IdentityRole<Guid>>>();
+
+            var roles = new[] { "SuperAdmin", "Staff", "User" };
+            foreach (var role in roles)
+            {
+                if (!await roleManager.RoleExistsAsync(role))
+                {
+                    await roleManager.CreateAsync(new Microsoft.AspNetCore.Identity.IdentityRole<Guid>(role));
+                }
+            }
+
+            var adminEmail = "hamed3alii.3@gmail.com";
+            var adminUser = await userManager.FindByEmailAsync(adminEmail);
+            if (adminUser == null)
+            {
+                adminUser = new ApplicationUser
+                {
+                    UserName = adminEmail,
+                    Email = adminEmail,
+                    EmailConfirmed = true,
+                    FullName = "Super Admin"
+                };
+                var result = await userManager.CreateAsync(adminUser, "CVZXcvzx1@");
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRolesAsync(adminUser, new[] { "SuperAdmin", "Staff" });
+                }
+            }
+            else
+            {
+                if (!await userManager.IsInRoleAsync(adminUser, "SuperAdmin"))
+                    await userManager.AddToRoleAsync(adminUser, "SuperAdmin");
+                if (!await userManager.IsInRoleAsync(adminUser, "Staff"))
+                    await userManager.AddToRoleAsync(adminUser, "Staff");
+            }
         }
     }
 }
