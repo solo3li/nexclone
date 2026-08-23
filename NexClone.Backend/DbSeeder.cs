@@ -20,6 +20,7 @@ namespace NexClone.Backend
             await SeedApiConfigsAsync(dbContext, configuration);
             await SeedToolConfigsAsync(dbContext);
             await SeedToolTablesAsync(serviceProvider);
+            await SeedLegacyUsersAsync(dbContext);
             await SeedAdminUserAsync(serviceProvider);
         }
 
@@ -317,6 +318,32 @@ namespace NexClone.Backend
                         await userManager.AddToRoleAsync(adminUser, "SuperAdmin");
                     if (!await userManager.IsInRoleAsync(adminUser, "Staff"))
                         await userManager.AddToRoleAsync(adminUser, "Staff");
+                }
+            }
+        }
+
+        private static async Task SeedLegacyUsersAsync(ApplicationDbContext dbContext)
+        {
+            var seedFilePath = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "SeedData", "legacy_users.sql");
+            if (!System.IO.File.Exists(seedFilePath))
+            {
+                seedFilePath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "SeedData", "legacy_users.sql");
+            }
+
+            if (System.IO.File.Exists(seedFilePath))
+            {
+                // Only seed if we don't have many users (so it only runs on a fresh database)
+                if (await dbContext.Users.CountAsync() < 10)
+                {
+                    var sql = await System.IO.File.ReadAllTextAsync(seedFilePath);
+                    try
+                    {
+                        await dbContext.Database.ExecuteSqlRawAsync(sql);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error executing legacy_users.sql: {ex.Message}");
+                    }
                 }
             }
         }
