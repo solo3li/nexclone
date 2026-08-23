@@ -98,7 +98,7 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`${PROD_FRONTEND_DOMAIN:-$DOMAIN}`) || Host(`www.${PROD_FRONTEND_DOMAIN:-$DOMAIN}`)"
+      - "traefik.http.routers.frontend.rule=Host(`uggu.space`) || Host(`www.uggu.space`) || Host(`${PROD_FRONTEND_DOMAIN:-$DOMAIN}`) || Host(`www.${PROD_FRONTEND_DOMAIN:-$DOMAIN}`)"
       - "traefik.http.routers.frontend.entrypoints=websecure"
       - "traefik.http.routers.frontend.tls.certresolver=myresolver"
       - "traefik.http.services.frontend.loadbalancer.server.port=3000"
