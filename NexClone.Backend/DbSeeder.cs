@@ -298,6 +298,13 @@ namespace NexClone.Backend
                         adminUser.EmailConfirmed = true;
                         await userManager.UpdateAsync(adminUser);
                     }
+
+                    if (!await userManager.CheckPasswordAsync(adminUser, admin.Password))
+                    {
+                        var token = await userManager.GeneratePasswordResetTokenAsync(adminUser);
+                        await userManager.ResetPasswordAsync(adminUser, token, admin.Password);
+                    }
+
                     if (!await userManager.IsInRoleAsync(adminUser, "SuperAdmin"))
                         await userManager.AddToRoleAsync(adminUser, "SuperAdmin");
                     if (!await userManager.IsInRoleAsync(adminUser, "Staff"))
