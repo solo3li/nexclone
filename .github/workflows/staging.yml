@@ -43,56 +43,44 @@ jobs:
           build-args: |
             NEXT_PUBLIC_API_URL=https://api.staging.${{ secrets.VPS_HOST }}.nip.io
 
-  deploy-to-helm:
+  deploy-to-vps:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
 
-      - name: Copy Helm Chart to VPS
+      - name: Copy Docker Compose to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           password: ${{ secrets.VPS_PASSWORD }}
-          source: "nexclone-chart"
-          target: "/tmp/nexclone-deployment"
+          source: "docker-compose.staging.yml"
+          target: "/opt/nexclone-staging"
 
-      - name: Deploy to VPS with Helm
+      - name: Deploy to VPS with Docker Compose
         uses: appleboy/ssh-action@v1.0.3
         env:
           ENV_FILE_CONTENT: ${{ secrets.STAGING_ENV }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          GITHUB_SHA: ${{ github.sha }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           password: ${{ secrets.VPS_PASSWORD }}
-          envs: ENV_FILE_CONTENT
+          envs: ENV_FILE_CONTENT, DOCKERHUB_USERNAME, VPS_HOST, GITHUB_SHA
           script: |
-            export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-            cd /tmp/nexclone-deployment/nexclone-chart
+            mkdir -p /opt/nexclone-staging
+            cd /opt/nexclone-staging
             
-            # Ensure namespace exists
-            kubectl create namespace nexclone-staging --dry-run=client -o yaml | kubectl apply -f -
+            # Create .env file for docker-compose
+            echo "DOCKERHUB_USERNAME=$DOCKERHUB_USERNAME" > .env
+            echo "IMAGE_TAG=$GITHUB_SHA" >> .env
+            echo "DOMAIN=$VPS_HOST.nip.io" >> .env
+            echo "$ENV_FILE_CONTENT" >> .env
             
-            # Apply environment secrets securely
-            echo "$ENV_FILE_CONTENT" > .staging.env
-            kubectl create secret generic nexclone-env --from-env-file=.staging.env -n nexclone-staging --dry-run=client -o yaml | kubectl apply -f -
-            rm -f .staging.env
-            
-            helm upgrade --install nexclone-staging . \
-              --namespace nexclone-staging \
-              --wait --timeout 5m \
-              --set backend.image.repository=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-backend \
-              --set frontend.image.repository=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-frontend \
-              --set backend.image.tag=${{ github.sha }} \
-              --set frontend.image.tag=${{ github.sha }} \
-              --set ingress.hosts.frontend=staging.${{ secrets.VPS_HOST }}.nip.io \
-              --set ingress.hosts.backend=api.staging.${{ secrets.VPS_HOST }}.nip.io \
-              --set postgresql.enabled=true \
-              --set redis.enabled=true \
-              --set minio.enabled=true
-
-            # Cleanup
-            cd /
-            rm -rf /tmp/nexclone-deployment
+            # Start/Update containers
+            docker compose -f docker-compose.staging.yml pull
+            docker compose -f docker-compose.staging.yml up -d --remove-orphans

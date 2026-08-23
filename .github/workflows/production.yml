@@ -43,56 +43,46 @@ jobs:
           build-args: |
             NEXT_PUBLIC_API_URL=https://api.prod.${{ secrets.VPS_HOST }}.nip.io
 
-  deploy-to-helm:
+  deploy-to-vps:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
 
-      - name: Copy Helm Chart to VPS
+      - name: Copy Docker Compose to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           password: ${{ secrets.VPS_PASSWORD }}
-          source: "nexclone-chart"
-          target: "/tmp/nexclone-deployment"
+          source: "docker-compose.prod.yml"
+          target: "/opt/nexclone-prod"
 
-      - name: Deploy to VPS with Helm
+      - name: Deploy to VPS with Docker Compose
         uses: appleboy/ssh-action@v1.0.3
         env:
           ENV_FILE_CONTENT: ${{ secrets.PRODUCTION_ENV }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          PROD_FRONTEND_DOMAIN: ${{ secrets.PROD_FRONTEND_DOMAIN }}
+          GITHUB_SHA: ${{ github.sha }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           password: ${{ secrets.VPS_PASSWORD }}
-          envs: ENV_FILE_CONTENT
+          envs: ENV_FILE_CONTENT, DOCKERHUB_USERNAME, VPS_HOST, PROD_FRONTEND_DOMAIN, GITHUB_SHA
           script: |
-            export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-            cd /tmp/nexclone-deployment/nexclone-chart
+            mkdir -p /opt/nexclone-prod
+            cd /opt/nexclone-prod
             
-            # Ensure namespace exists
-            kubectl create namespace nexclone-production --dry-run=client -o yaml | kubectl apply -f -
+            # Create .env file for docker-compose
+            echo "DOCKERHUB_USERNAME=$DOCKERHUB_USERNAME" > .env
+            echo "IMAGE_TAG=$GITHUB_SHA" >> .env
+            echo "DOMAIN=$VPS_HOST.nip.io" >> .env
+            echo "PROD_FRONTEND_DOMAIN=$PROD_FRONTEND_DOMAIN" >> .env
+            echo "$ENV_FILE_CONTENT" >> .env
             
-            # Apply environment secrets securely
-            echo "$ENV_FILE_CONTENT" > .prod.env
-            kubectl create secret generic nexclone-env --from-env-file=.prod.env -n nexclone-production --dry-run=client -o yaml | kubectl apply -f -
-            rm -f .prod.env
-            
-            helm upgrade --install nexclone-production . \
-              --namespace nexclone-production \
-              --wait --timeout 5m \
-              --set backend.image.repository=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-backend \
-              --set frontend.image.repository=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-frontend \
-              --set backend.image.tag=${{ github.sha }} \
-              --set frontend.image.tag=${{ github.sha }} \
-              --set ingress.hosts.frontend=${{ secrets.PROD_FRONTEND_DOMAIN }} \
-              --set ingress.hosts.backend=api.prod.${{ secrets.VPS_HOST }}.nip.io \
-              --set postgresql.enabled=true \
-              --set redis.enabled=true \
-              --set minio.enabled=true
-
-            # Cleanup
-            cd /
-            rm -rf /tmp/nexclone-deployment
+            # Start/Update containers
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
