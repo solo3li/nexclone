@@ -13,6 +13,8 @@ export interface Plan {
   priceEgp: number;
   durationDays: number;
   monthlyCredits: number;
+  standardCredits: number;
+  premiumCredits: number;
   ttsEnabled: boolean;
   ttsMaxCharsPerRequest: number;
   ttsCostPerChar: number;

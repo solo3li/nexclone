@@ -188,9 +188,32 @@ export default function PricingPage() {
                         </span>
                         {price > 0 && <span className="text-gray-400 font-medium">{isRtl ? '/شهر' : '/mo'}</span>}
                       </div>
-                      <p className="text-gray-400 mt-4 font-medium">
-                        {plan.monthlyCredits.toLocaleString()} {isRtl ? 'رصيد مضمن' : 'Credits included'}
-                      </p>
+                      <div className="mt-4">
+                        {(plan.standardCredits > 0 || plan.premiumCredits > 0) ? (
+                          <div className="flex flex-col gap-2">
+                            {plan.standardCredits > 0 && (
+                              <div className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                                <span className="text-gray-300 font-medium">
+                                  {plan.standardCredits.toLocaleString()} {isRtl ? 'رصيد عادي' : 'Standard Credits'}
+                                </span>
+                              </div>
+                            )}
+                            {plan.premiumCredits > 0 && (
+                              <div className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-fuchsia-400"></span>
+                                <span className="text-gray-300 font-medium">
+                                  {plan.premiumCredits.toLocaleString()} {isRtl ? 'رصيد مميز' : 'Premium Credits'}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="text-gray-400 font-medium">
+                            {plan.monthlyCredits.toLocaleString()} {isRtl ? 'رصيد مضمن' : 'Credits included'}
+                          </p>
+                        )}
+                      </div>
                     </div>
 
                     <div className="space-y-4 flex-grow">
