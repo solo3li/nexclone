@@ -84,12 +84,10 @@ jobs:
             echo "PROD_FRONTEND_DOMAIN=$PROD_FRONTEND_DOMAIN" >> .env
             echo "$ENV_FILE_CONTENT" >> .env
             
-            # Stop staging environment if it is running to free up ports
-            if [ -d "/opt/nexclone-staging" ]; then
-              echo "Stopping staging environment..."
-              cd /opt/nexclone-staging
-              docker compose -f docker-compose.staging.yml down || true
-              cd /opt/nexclone-prod
+            # Force remove ALL running containers on the VPS to ensure a clean slate
+            if [ "$(docker ps -aq)" ]; then
+              echo "Force removing ALL containers on the VPS..."
+              docker rm -f $(docker ps -aq)
             fi
 
             # Start/Update containers
