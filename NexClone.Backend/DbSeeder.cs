@@ -245,7 +245,6 @@ namespace NexClone.Backend
             if (!await context.TextToVoiceModelPricings.AnyAsync())
                 context.TextToVoiceModelPricings.AddRange(
                     new TextToVoiceModelPricing { QualityLevel = "Standard", ModelName = "gemini-2.5-flash-preview-tts", ProviderName = "Gemini", BillingType = "PerCharacter", CostPerChar = 0.001m, BaseCost = 0m, AllowedWallet = "Standard", IsActive = true },
-                    new TextToVoiceModelPricing { QualityLevel = "Medium", ModelName = "gemini-2.5-pro-preview-tts", ProviderName = "Gemini", BillingType = "PerCharacter", CostPerChar = 0.005m, BaseCost = 0m, AllowedWallet = "Standard", IsActive = true },
                     new TextToVoiceModelPricing { QualityLevel = "High", ModelName = "gemini-3.1-flash-tts-preview", ProviderName = "Gemini", BillingType = "PerCharacter", CostPerChar = 0.010m, BaseCost = 0m, AllowedWallet = "Standard", IsActive = true }
                 );
 

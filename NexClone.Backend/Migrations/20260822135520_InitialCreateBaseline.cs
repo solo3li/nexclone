@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -1224,14 +1224,6 @@ DO $EF$
 BEGIN
     IF NOT EXISTS(SELECT 1 FROM ""__EFMigrationsHistory"" WHERE ""MigrationId"" = '20260822135520_InitialCreateBaseline') THEN
     CREATE INDEX ""IX_ToolRoutingRules_ToolConfigurationId"" ON ""ToolRoutingRules"" (""ToolConfigurationId"");
-    END IF;
-END $EF$;
-
-DO $EF$
-BEGIN
-    IF NOT EXISTS(SELECT 1 FROM ""__EFMigrationsHistory"" WHERE ""MigrationId"" = '20260822135520_InitialCreateBaseline') THEN
-    INSERT INTO ""__EFMigrationsHistory"" (""MigrationId"", ""ProductVersion"")
-    VALUES ('20260822135520_InitialCreateBaseline', '10.0.9');
     END IF;
 END $EF$;
 ");

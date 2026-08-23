@@ -5,16 +5,16 @@
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": false,
-      "applicationUrl": "http://0.0.0.0:8080",
+      "applicationUrl": "http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "S3_ENDPOINT": "t3.storageapi.dev",
-        "AWS_ACCESS_KEY_ID": "tid_iQGfEXCfaCZBBfVfGuzuwMDuF_I_GUiLSXaSRtTRJTHQIB_dJz",
-        "AWS_SECRET_ACCESS_KEY": "tsec_vjmDM-BldwbOkYJstEGWMYZypqTyGe-KEXCk7o5g676Zn1DXFsGl6b5t+JutrhcNtxkD7h",
+        "S3_ENDPOINT": "127.0.0.1:9001",
+        "AWS_ACCESS_KEY_ID": "devminioadmin",
+        "AWS_SECRET_ACCESS_KEY": "devminiosecret123!",
         "S3_REGION": "auto",
-        "S3_BUCKET_NAME": "embedded-pod-9ywbmx4sr0-x",
-        "S3_USE_SSL": "true",
-        "MINIO_PUBLIC_ENDPOINT": "t3.storageapi.dev"
+        "S3_BUCKET_NAME": "nexclone-local",
+        "S3_USE_SSL": "false",
+        "MINIO_PUBLIC_ENDPOINT": "127.0.0.1:9001"
       }
     }
   }

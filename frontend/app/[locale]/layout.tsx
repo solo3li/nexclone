@@ -66,7 +66,9 @@ async function getPublicSettings() {
   try {
     // Determine internal URL for API fetch
     const apiUrl = (process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL) || 'http://localhost:8080';
+    console.log("Fetching public settings from:", apiUrl);
     const res = await fetch(`${apiUrl}/api/settings/public`, { next: { revalidate: 60 } });
+    console.log("Fetch public settings response status:", res.status);
     if (!res.ok) return null;
     return await res.json();
   } catch (error) {

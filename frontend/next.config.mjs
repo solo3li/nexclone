@@ -45,7 +45,7 @@ const nextConfig = {
       beforeFiles: [
         {
           source: '/api/:path*',
-          destination: 'http://127.0.0.1:8080/api/:path*',
+          destination: 'http://127.0.0.1:5000/api/:path*',
         },
         {
           source: '/nexmedia/:path*',

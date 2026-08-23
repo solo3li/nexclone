@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from 'next/server';
 const intlMiddleware = createMiddleware(routing);
 
 export default async function proxy(request: NextRequest) {
+  console.log("Proxy middleware hit for URL:", request.nextUrl.pathname);
   const refCode = request.nextUrl.searchParams.get('ref');
   
   if (refCode) {

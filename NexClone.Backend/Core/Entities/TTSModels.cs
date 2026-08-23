@@ -31,7 +31,7 @@ namespace NexClone.Backend.Core.Entities
 
         [Required]
         [MaxLength(50)]
-        public string QualityLevel { get; set; } = "Standard"; // "Standard", "Medium", "High"
+        public string QualityLevel { get; set; } = "Standard"; // "Standard", "High"
 
         [Required]
         [MaxLength(100)]

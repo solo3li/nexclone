@@ -172,7 +172,6 @@ namespace NexClone.Backend.API.Controllers.Client
                 qualitiesToReturn = new[]
                 {
                     new { qualityLevel = "Standard", modelName = "gemini-2.5-flash-preview-tts", costPerChar = 0.001m, allowedWallet = "Standard" },
-                    new { qualityLevel = "Medium", modelName = "gemini-2.5-pro-preview-tts", costPerChar = 0.005m, allowedWallet = "Both" },
                     new { qualityLevel = "High", modelName = "gemini-3.1-flash-tts-preview", costPerChar = 0.010m, allowedWallet = "Premium" }
                 };
             }

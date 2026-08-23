@@ -371,3 +371,251 @@ System.Threading.Tasks.TaskCanceledException: A task was canceled.
 2026-08-23 01:46:25.247 +02:00 [INF] [Corr:] [Email Task] Email sent to hamed3alii.3@gmail.com successfully.
 2026-08-23 02:00:12.348 +02:00 [INF] [Corr:] [AffiliateCommissionHoldJob] Running daily hold period check...
 2026-08-23 02:00:12.520 +02:00 [INF] [Corr:] [AffiliateCommissionHoldJob] Completed.
+2026-08-23 03:56:28.193 +03:00 [ERR] [Corr:] Failed executing DbCommand (58ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-08-23 03:56:33.176 +03:00 [ERR] [Corr:] Failed executing DbCommand (114ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20260822135520_InitialCreateBaseline', '10.0.9');
+2026-08-23 03:57:04.186 +03:00 [ERR] [Corr:] Failed executing DbCommand (127ms) [Parameters=[@setting_Key='?'], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "AppSettings" AS a
+    WHERE a."Key" = @setting_Key)
+2026-08-23 03:57:04.334 +03:00 [ERR] [Corr:] An exception occurred while iterating over the results of a query for context type 'NexClone.Backend.Infrastructure.Data.ApplicationDbContext'.
+Npgsql.PostgresException (0x80004005): 42P01: relation "AppSettings" does not exist
+
+POSITION: 41
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42P01
+    MessageText: relation "AppSettings" does not exist
+    Position: 41
+    File: parse_relation.c
+    Line: 1392
+    Routine: parserOpenTable
+Npgsql.PostgresException (0x80004005): 42P01: relation "AppSettings" does not exist
+
+POSITION: 41
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.InitializeReaderAsync(AsyncEnumerator enumerator, CancellationToken cancellationToken)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.NpgsqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
+  Exception data:
+    Severity: ERROR
+    SqlState: 42P01
+    MessageText: relation "AppSettings" does not exist
+    Position: 41
+    File: parse_relation.c
+    Line: 1392
+    Routine: parserOpenTable
+2026-08-23 03:58:18.034 +03:00 [ERR] [Corr:] Failed executing DbCommand (56ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-08-23 03:58:20.133 +03:00 [ERR] [Corr:] Failed executing DbCommand (45ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20260822135520_InitialCreateBaseline', '10.0.9');
+2026-08-23 03:59:24.972 +03:00 [ERR] [Corr:] Failed executing DbCommand (44ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+VALUES ('20260822135520_InitialCreateBaseline', '10.0.9');
+2026-08-23 04:01:20.820 +03:00 [ERR] [Corr:] Failed executing DbCommand (54ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT "MigrationId", "ProductVersion"
+FROM "__EFMigrationsHistory"
+ORDER BY "MigrationId";
+2026-08-23 04:01:28.255 +03:00 [INF] [Corr:] Start installing Hangfire SQL objects...
+2026-08-23 04:01:29.596 +03:00 [INF] [Corr:] Hangfire SQL objects installed.
+2026-08-23 04:01:30.291 +03:00 [WRN] [Corr:] No XML encryptor configured. Key {113df71f-1105-4cd0-b8d5-54fa16955ee1} may be persisted to storage in unencrypted form.
+2026-08-23 04:01:30.369 +03:00 [INF] [Corr:] SubscriptionStatusService is starting.
+2026-08-23 04:01:30.383 +03:00 [INF] [Corr:] Media Cleanup Background Service started.
+2026-08-23 04:01:30.387 +03:00 [INF] [Corr:] Searching for processed media older than 8/9/2026 1:01:30 AM...
+2026-08-23 04:01:30.397 +03:00 [WRN] [Corr:] The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased.
+2026-08-23 04:01:30.444 +03:00 [INF] [Corr:] Successfully cleaned up 0 media files in total.
+2026-08-23 04:01:30.774 +03:00 [INF] [Corr:] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: 127.0.0.1, DB: nexclone_dev, Schema: hangfire'
+2026-08-23 04:01:30.775 +03:00 [INF] [Corr:] Using the following options for PostgreSQL job storage:
+2026-08-23 04:01:30.775 +03:00 [INF] [Corr:]     Queue poll interval: 00:00:15.
+2026-08-23 04:01:30.775 +03:00 [INF] [Corr:]     Invisibility timeout: 00:30:00.
+2026-08-23 04:01:30.775 +03:00 [INF] [Corr:]     Use sliding invisibility timeout: False.
+2026-08-23 04:01:30.776 +03:00 [INF] [Corr:] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-23 04:01:30.899 +03:00 [INF] [Corr:] Server desktop-rjppsk4:11608:aed59545 successfully announced in 27.2342 ms
+2026-08-23 04:01:30.908 +03:00 [INF] [Corr:] Server desktop-rjppsk4:11608:aed59545 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-23 04:01:31.469 +03:00 [INF] [Corr:] Server desktop-rjppsk4:11608:aed59545 all the dispatchers started
+2026-08-23 04:18:58.745 +03:00 [INF] [Corr:27fc75dd062d] Start processing HTTP request GET https://open.kickbox.com/v1/disposable/gmail.com
+2026-08-23 04:18:58.767 +03:00 [INF] [Corr:27fc75dd062d] Sending HTTP request GET https://open.kickbox.com/v1/disposable/gmail.com
+2026-08-23 04:18:59.676 +03:00 [INF] [Corr:27fc75dd062d] Received HTTP response headers after 900.2364ms - 200
+2026-08-23 04:18:59.680 +03:00 [INF] [Corr:27fc75dd062d] End processing HTTP request after 950.5007ms - 200
+2026-08-23 04:19:01.688 +03:00 [INF] [Corr:] [Email Task] Sending email to hamed3alii.3@gmail.com
+2026-08-23 04:19:01.726 +03:00 [ERR] [Corr:] Brevo API configuration is missing or inactive.
+2026-08-23 04:19:01.728 +03:00 [INF] [Corr:] [Email Task] Email sent to hamed3alii.3@gmail.com successfully.
+2026-08-23 04:27:17.160 +03:00 [WRN] [Corr:ce8be5c0b740] Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2026-08-23 04:27:41.851 +03:00 [WRN] [Corr:8e88000128ce] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-23 04:27:58.478 +03:00 [WRN] [Corr:2ad99ee2666f] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-23 04:27:58.547 +03:00 [ERR] [Corr:4bf190fe8562] An unhandled exception has occurred while executing the request.
+http://127.0.0.1:9001 is invalid hostname.: Minio.Exceptions.InvalidEndpointException: MinIO API responded with message=endpoint
+   at Minio.MinioClientExtensions.GetBaseUrl(String endpoint)
+   at Minio.MinioClientExtensions.WithEndpoint(IMinioClient minioClient, String endpoint)
+   at NexClone.Backend.Infrastructure.ExternalServices.S3MediaService.EnsureClientInitializedAsync() in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\ExternalServices\S3MediaService.cs:line 94
+   at NexClone.Backend.Infrastructure.ExternalServices.S3MediaService.GetFileUrlAsync(String objectName, String bucketName) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\ExternalServices\S3MediaService.cs:line 175
+   at NexClone.Backend.API.Controllers.Client.PlatformController.GetVoices() in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\API\Controllers\Client\PlatformController.cs:line 80
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeInnerFilterAsync>g__Awaited|13_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Localization.RequestLocalizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+2026-08-23 04:27:58.607 +03:00 [ERR] [Corr:d6a7dcb41e5a] An unhandled exception has occurred while executing the request.
+http://127.0.0.1:9001 is invalid hostname.: Minio.Exceptions.InvalidEndpointException: MinIO API responded with message=endpoint
+   at Minio.MinioClientExtensions.GetBaseUrl(String endpoint)
+   at Minio.MinioClientExtensions.WithEndpoint(IMinioClient minioClient, String endpoint)
+   at NexClone.Backend.Infrastructure.ExternalServices.S3MediaService.EnsureClientInitializedAsync() in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\ExternalServices\S3MediaService.cs:line 94
+   at NexClone.Backend.Infrastructure.ExternalServices.S3MediaService.GetFileUrlAsync(String objectName, String bucketName) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\ExternalServices\S3MediaService.cs:line 175
+   at NexClone.Backend.API.Controllers.Client.PlatformController.GetVoices() in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\API\Controllers\Client\PlatformController.cs:line 80
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeFilterPipelineAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Localization.RequestLocalizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+2026-08-23 04:28:35.504 +03:00 [WRN] [Corr:6b0bf7e964fa] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-23 04:28:45.734 +03:00 [WRN] [Corr:d054c50e54ee] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-23 04:28:54.259 +03:00 [WRN] [Corr:8d386875adea] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-23 04:28:56.828 +03:00 [WRN] [Corr:9906124d9295] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-23 04:29:00.737 +03:00 [ERR] [Corr:217490d001f8] An unhandled exception has occurred while executing the request.
+http://127.0.0.1:9001 is invalid hostname.: Minio.Exceptions.InvalidEndpointException: MinIO API responded with message=endpoint
+   at Minio.MinioClientExtensions.GetBaseUrl(String endpoint)
+   at Minio.MinioClientExtensions.WithEndpoint(IMinioClient minioClient, String endpoint)
+   at NexClone.Backend.Infrastructure.ExternalServices.S3MediaService.EnsureClientInitializedAsync() in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\ExternalServices\S3MediaService.cs:line 94
+   at NexClone.Backend.Infrastructure.ExternalServices.S3MediaService.GetFileUrlAsync(String objectName, String bucketName) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\ExternalServices\S3MediaService.cs:line 175
+   at NexClone.Backend.API.Controllers.Client.PlatformController.GetVoices() in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\API\Controllers\Client\PlatformController.cs:line 80
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeFilterPipelineAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Localization.RequestLocalizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+2026-08-23 04:29:00.758 +03:00 [ERR] [Corr:f343a306a122] An unhandled exception has occurred while executing the request.
+http://127.0.0.1:9001 is invalid hostname.: Minio.Exceptions.InvalidEndpointException: MinIO API responded with message=endpoint
+   at Minio.MinioClientExtensions.GetBaseUrl(String endpoint)
+   at Minio.MinioClientExtensions.WithEndpoint(IMinioClient minioClient, String endpoint)
+   at NexClone.Backend.Infrastructure.ExternalServices.S3MediaService.EnsureClientInitializedAsync() in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\ExternalServices\S3MediaService.cs:line 94
+   at NexClone.Backend.Infrastructure.ExternalServices.S3MediaService.GetFileUrlAsync(String objectName, String bucketName) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\ExternalServices\S3MediaService.cs:line 175
+   at NexClone.Backend.API.Controllers.Client.PlatformController.GetVoices() in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\API\Controllers\Client\PlatformController.cs:line 80
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeFilterPipelineAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Localization.RequestLocalizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+2026-08-23 04:31:43.263 +03:00 [ERR] [Corr:f054739ef751] An unhandled exception has occurred while executing the request.
+http://127.0.0.1:9001 is invalid hostname.: Minio.Exceptions.InvalidEndpointException: MinIO API responded with message=endpoint
+   at Minio.MinioClientExtensions.GetBaseUrl(String endpoint)
+   at Minio.MinioClientExtensions.WithEndpoint(IMinioClient minioClient, String endpoint)
+   at NexClone.Backend.Infrastructure.ExternalServices.S3MediaService.EnsureClientInitializedAsync() in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\ExternalServices\S3MediaService.cs:line 94
+   at NexClone.Backend.Infrastructure.ExternalServices.S3MediaService.GetFileUrlAsync(String objectName, String bucketName) in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\Infrastructure\ExternalServices\S3MediaService.cs:line 175
+   at NexClone.Backend.API.Controllers.Client.PlatformController.GetVoices() in C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\API\Controllers\Client\PlatformController.cs:line 80
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ActionMethodExecutor.TaskOfIActionResultExecutor.Execute(ActionContext actionContext, IActionResultTypeMapper mapper, ObjectMethodExecutor executor, Object controller, Object[] arguments)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeActionMethodAsync>g__Awaited|12_0(ControllerActionInvoker invoker, ValueTask`1 actionResultValueTask)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.<InvokeNextActionFilterAsync>g__Awaited|10_0(ControllerActionInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Rethrow(ActionExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeFilterPipelineAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Localization.RequestLocalizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+2026-08-23 04:41:07.732 +03:00 [INF] [Corr:] Start installing Hangfire SQL objects...
+2026-08-23 04:41:07.826 +03:00 [INF] [Corr:] Hangfire SQL objects installed.
+2026-08-23 04:41:08.236 +03:00 [INF] [Corr:] SubscriptionStatusService is starting.
+2026-08-23 04:41:08.236 +03:00 [INF] [Corr:] Media Cleanup Background Service started.
+2026-08-23 04:41:08.244 +03:00 [INF] [Corr:] Searching for processed media older than 8/9/2026 1:41:08 AM...
+2026-08-23 04:41:08.255 +03:00 [WRN] [Corr:] The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased.
+2026-08-23 04:41:08.278 +03:00 [INF] [Corr:] Successfully cleaned up 0 media files in total.
+2026-08-23 04:41:08.383 +03:00 [INF] [Corr:] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: 127.0.0.1, DB: nexclone_dev, Schema: hangfire'
+2026-08-23 04:41:08.384 +03:00 [INF] [Corr:] Using the following options for PostgreSQL job storage:
+2026-08-23 04:41:08.384 +03:00 [INF] [Corr:]     Queue poll interval: 00:00:15.
+2026-08-23 04:41:08.384 +03:00 [INF] [Corr:]     Invisibility timeout: 00:30:00.
+2026-08-23 04:41:08.384 +03:00 [INF] [Corr:]     Use sliding invisibility timeout: False.
+2026-08-23 04:41:08.384 +03:00 [INF] [Corr:] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-23 04:41:08.426 +03:00 [INF] [Corr:] Server desktop-rjppsk4:15660:5e257900 successfully announced in 23.4377 ms
+2026-08-23 04:41:08.429 +03:00 [INF] [Corr:] Server desktop-rjppsk4:15660:5e257900 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-23 04:41:08.484 +03:00 [INF] [Corr:] Server desktop-rjppsk4:15660:5e257900 all the dispatchers started

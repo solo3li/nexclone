@@ -7,7 +7,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USER:-nexclone}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-devpassword123!}
     ports:
-      - "127.0.0.1:5432:5432"
+      - "127.0.0.1:5433:5432"
     networks:
       - nexclone_network
     volumes:
@@ -39,29 +39,6 @@ services:
     volumes:
       - redisdata:/data
 
-  traefik:
-    image: traefik:v2.10
-    container_name: nexclone-traefik
-    command:
-      - "--providers.file.directory=/etc/traefik/dynamic"
-      - "--providers.file.watch=true"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
-      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.myresolver.acme.email=${ACME_EMAIL:-admin@nexclone.com}"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-    ports:
-      - "80:80"
-      - "443:443"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    networks:
-      - nexclone_network
-    volumes:
-      - ./traefik-dynamic.yml:/etc/traefik/dynamic/traefik-dynamic.yml:ro
-      - traefik-certs:/letsencrypt
-
 networks:
   nexclone_network:
     driver: bridge
@@ -70,4 +47,3 @@ volumes:
   pgdata:
   miniodata:
   redisdata:
-  traefik-certs:

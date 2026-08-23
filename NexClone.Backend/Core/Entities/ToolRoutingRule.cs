@@ -15,7 +15,7 @@ namespace NexClone.Backend.Core.Entities
         public ToolConfiguration ToolConfiguration { get; set; }
 
         // Priority is no longer used for fallback ordering, but rather it could be kept for ordering in UI
-        // We add QualityLevel to map "Standard", "Medium", "High"
+        // We add QualityLevel to map "Standard", "High"
         [StringLength(50)]
         public string QualityLevel { get; set; } = "Standard";
 
