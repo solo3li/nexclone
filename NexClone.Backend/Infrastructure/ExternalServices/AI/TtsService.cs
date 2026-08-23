@@ -108,8 +108,8 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
             }
 
             var prompt = string.IsNullOrWhiteSpace(styleInstruction) ? 
-                "Read the following text aloud:\n\n{text}" : 
-                "Read the following text aloud in this style: {styleInstruction}\n\n{text}";
+                $"Read the following text aloud:\n\n{text}" : 
+                $"Read the following text aloud in this style: {styleInstruction}\n\n{text}";
 
             var client = _httpClientFactory.CreateClient();
             client.Timeout = TimeSpan.FromSeconds(300);
@@ -117,7 +117,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
 
             string modelName = string.IsNullOrWhiteSpace(customModelName) ? "gemini-3.1-flash-tts-preview" : customModelName.Split(',')[0].Trim();
 
-            var url = "https://generativelanguage.googleapis.com/v1beta/models/{modelName}:generateContent";
+            var url = $"https://generativelanguage.googleapis.com/v1beta/models/{modelName}:generateContent";
             
             var payload = new
             {
@@ -144,7 +144,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
             if (!response.IsSuccessStatusCode)
             {
                 var error = await response.Content.ReadAsStringAsync();
-                throw new Exception("Gemini API Error ({modelName}): {error}");
+                throw new Exception($"Gemini API Error ({modelName}): {error}");
             }
 
             var jsonResponse = await response.Content.ReadAsStringAsync();
@@ -158,7 +158,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.AI
                 {
                     if (finishReason.GetString() == "OTHER" && !candidate.TryGetProperty("content", out _))
                     {
-                        throw new Exception("Gemini model '{modelName}' finished with OTHER (no audio produced).");
+                        throw new Exception($"Gemini model '{modelName}' finished with OTHER (no audio produced).");
                     }
                 }
 
