@@ -297,7 +297,7 @@ function TextToVoicePage() {
 
   const downloadAudio = () => {
     if (!audioUrl) return;
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5208';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.169.58.204.169.nip.io';
     const proxyUrl = `${apiUrl}/api/video/download-proxy?url=${encodeURIComponent(audioUrl)}&type=audio`;
     
     const element = document.createElement("a");

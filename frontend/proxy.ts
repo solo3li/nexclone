@@ -4,11 +4,11 @@ import { NextRequest, NextResponse } from 'next/server';
  
 const intlMiddleware = createMiddleware(routing);
 
-export default async function middleware(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   const refCode = request.nextUrl.searchParams.get('ref');
   
   if (refCode) {
-    const backendUrl = process.env.INTERNAL_API_URL || 'http://backend:8080';
+    const backendUrl = process.env.INTERNAL_API_URL || 'http://127.0.0.1:8080';
     const url = request.nextUrl.clone();
     url.searchParams.delete('ref');
 
@@ -43,7 +43,6 @@ export default async function middleware(request: NextRequest) {
         }
       }
     } catch {
-      // Non-blocking: continue regardless of tracking outcome
     }
     
     const response = NextResponse.redirect(url);

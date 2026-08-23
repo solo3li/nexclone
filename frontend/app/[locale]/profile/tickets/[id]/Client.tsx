@@ -32,7 +32,7 @@ export default function TicketChat({ params }: { params: Promise<{ id: string }>
 
   useEffect(() => {
     if (ticket && !connection) {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.169.58.204.169.nip.io";
       const newConnection = new signalR.HubConnectionBuilder()
         .withUrl(`${apiUrl}/hubs/ticket`)
         .withAutomaticReconnect()

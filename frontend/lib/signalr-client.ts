@@ -9,7 +9,7 @@ class SignalRService {
     public async startConnection() {
         if (this.connection || this.isStarting) return;
 
-        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.169.58.204.169.nip.io';
         
         this.connection = new signalR.HubConnectionBuilder()
             .withUrl(`${backendUrl}/hubs/notification`, {
