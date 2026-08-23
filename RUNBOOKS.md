@@ -8,6 +8,9 @@
 - Access to container registry
 - Database migration approved by DBA (if schema change)
 
+
+
+
 ### Backend Deployment
 ```bash
 # 1. Build & push
