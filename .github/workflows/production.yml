@@ -41,7 +41,8 @@ jobs:
           cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-frontend:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/nexclone-frontend:buildcache,mode=max
           build-args: |
-            NEXT_PUBLIC_API_URL=https://api.prod.${{ secrets.VPS_HOST }}.nip.io
+            NEXT_PUBLIC_API_URL=https://api.${{ secrets.VPS_HOST }}.nip.io/api
+            NEXT_PUBLIC_SIGNALR_URL=https://api.${{ secrets.VPS_HOST }}.nip.io
 
   deploy-to-vps:
     needs: build-and-push
