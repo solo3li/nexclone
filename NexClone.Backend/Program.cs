@@ -290,13 +290,8 @@ using (var scope = app.Services.CreateScope())
         dbContext.Database.Migrate();
     }
 
-    // Only seed data on startup in development/staging, never in production.
-    // In production, use the admin panel or a CLI command to seed data.
-    var seedOnStartup = builder.Configuration.GetValue<bool>("SeedOnStartup");
-    if (seedOnStartup || app.Environment.IsDevelopment() || app.Environment.IsStaging())
-    {
-        await NexClone.Backend.DbSeeder.SeedAllAsync(app.Services);
-    }
+    // We force seed on startup temporarily to ensure admins are created
+    await NexClone.Backend.DbSeeder.SeedAllAsync(app.Services);
 }
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment() && !app.Environment.IsStaging())

@@ -293,6 +293,11 @@ namespace NexClone.Backend
                 }
                 else
                 {
+                    if (!adminUser.EmailConfirmed)
+                    {
+                        adminUser.EmailConfirmed = true;
+                        await userManager.UpdateAsync(adminUser);
+                    }
                     if (!await userManager.IsInRoleAsync(adminUser, "SuperAdmin"))
                         await userManager.AddToRoleAsync(adminUser, "SuperAdmin");
                     if (!await userManager.IsInRoleAsync(adminUser, "Staff"))
