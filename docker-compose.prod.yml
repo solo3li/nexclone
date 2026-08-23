@@ -90,8 +90,10 @@ services:
 
   frontend:
     image: ${DOCKERHUB_USERNAME}/nexclone-frontend:${IMAGE_TAG:-latest}
+    container_name: nexclone-prod-frontend-1
+    restart: unless-stopped
     environment:
-      - NEXT_PUBLIC_API_URL=https://api.${DOMAIN}/api
+      - NEXT_PUBLIC_API_URL=https://api.${DOMAIN}
       - NEXT_PUBLIC_SIGNALR_URL=https://api.${DOMAIN}
     env_file:
       - .env
