@@ -6,6 +6,7 @@ import { useLocale } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
 import { useAppStore } from "@/store/useAppStore";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useAffiliateStore } from "@/store/useAffiliateStore";
 import { DollarSign, Link as LinkIcon, ArrowRight, ArrowLeft, BarChart3, Users } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -19,6 +20,7 @@ export default function AffiliateProgramClient() {
 
   const { user, isAuthenticated, isInitializing } = useAppStore();
   const { fetchMe } = useAuthStore();
+  const { profile, fetchProfile } = useAffiliateStore();
 
   const isJoined = !!user?.isAffiliate;
 
@@ -28,6 +30,28 @@ export default function AffiliateProgramClient() {
       router.replace('/affiliate');
     }
   }, [isInitializing, isAuthenticated, isJoined, router]);
+
+  // Stale-flag guard: if the session flag says "not joined" but a live profile exists
+  // (e.g. legacy affiliate with an old bootstrap), refresh the session and go to dashboard.
+  useEffect(() => {
+    if (isInitializing || !isAuthenticated || isJoined) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        await fetchProfile();
+        if (!cancelled) {
+          const live = useAffiliateStore.getState().profile;
+          if (live) {
+            const data = await fetchMe();
+            if (data && !cancelled) useAppStore.getState().setUser(data);
+            router.replace('/affiliate');
+          }
+        }
+      } catch { /* not onboarded — stay on the join page */ }
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isInitializing, isAuthenticated, isJoined]);
 
   const handleJoined = async () => {
     const data = await fetchMe();          // refreshes auth store...

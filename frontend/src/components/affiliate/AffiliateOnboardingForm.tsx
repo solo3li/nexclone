@@ -34,6 +34,12 @@ export default function AffiliateOnboardingForm({ onSuccess }: { onSuccess?: () 
     });
 
     if (!res.success) {
+      // Already a member (e.g. legacy affiliate logging in fresh) — treat as success.
+      if (res.error && res.error.toLowerCase().includes('already an affiliate')) {
+        setIsSubmitting(false);
+        onSuccess?.();
+        return;
+      }
       setError(res.error || (isRtl ? 'حدث خطأ أثناء الانضمام' : 'Error occurred while onboarding.'));
       setIsSubmitting(false);
       return;
