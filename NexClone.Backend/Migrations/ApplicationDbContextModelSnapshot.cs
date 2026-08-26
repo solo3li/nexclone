@@ -370,19 +370,19 @@ namespace NexClone.Backend.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AffiliateProfileId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("AccumulatedPackageDays")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime?>("FirstEligiblePaymentAt")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<int>("AffiliateProfileId")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("AttributionExpiresAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("ClickedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("FirstEligiblePaymentAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("HasConverted")
@@ -1535,6 +1535,99 @@ namespace NexClone.Backend.Migrations
                     b.HasIndex("PlanId");
 
                     b.ToTable("PlanPaymentGateways");
+                });
+
+            modelBuilder.Entity("NexClone.Backend.Core.Entities.ReferenceToVideoModelPricing", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AllowedWallet")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<decimal>("BaseCost")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("BillingType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<decimal>("CostPerSecond_1080p")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("CostPerSecond_480p")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("CostPerSecond_4k")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("CostPerSecond_720p")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("FixedCost_1080p")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("FixedCost_480p")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("FixedCost_4k")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("FixedCost_720p")
+                        .HasColumnType("numeric");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ModelName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("ProviderName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ReferenceToVideoModelPricings");
+                });
+
+            modelBuilder.Entity("NexClone.Backend.Core.Entities.ReferenceToVideoSetting", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("DefaultResolution")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("MaxConcurrentOperations")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MaxDurationSeconds")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MaxPromptLength")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ReferenceToVideoSettings");
                 });
 
             modelBuilder.Entity("NexClone.Backend.Core.Entities.RefreshToken", b =>
