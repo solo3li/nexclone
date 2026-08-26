@@ -1031,6 +1031,7 @@ export default function ReferenceToVideoPage() {
                       </button>
                     );
                   })}
+                  </div>
               )}
             </div>
 
