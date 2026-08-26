@@ -5,32 +5,35 @@ import { motion } from "framer-motion";
 import { useLocale } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
 import { useAppStore } from "@/store/useAppStore";
-import { useAffiliateStore } from "@/store/useAffiliateStore";
-import { DollarSign, Link as LinkIcon, Gift, ArrowRight, ArrowLeft, BarChart3, Users } from "lucide-react";
+import { useAuthStore } from "@/store/useAuthStore";
+import { DollarSign, Link as LinkIcon, ArrowRight, ArrowLeft, BarChart3, Users } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import AffiliateOnboardingForm from "@/components/affiliate/AffiliateOnboardingForm";
 
 export default function AffiliateProgramClient() {
   const locale = useLocale();
   const isRtl = locale === 'ar';
   const Arrow = isRtl ? ArrowLeft : ArrowRight;
   const router = useRouter();
-  
-  const { isAuthenticated, isInitializing } = useAppStore();
-  const { profile, fetchProfile, error } = useAffiliateStore();
+
+  const { user, isAuthenticated, isInitializing } = useAppStore();
+  const { fetchMe } = useAuthStore();
+
+  const isJoined = !!user?.isAffiliate;
 
   useEffect(() => {
-    if (isAuthenticated && !isInitializing) {
-      fetchProfile();
+    // Joined users never see the marketing page — straight to their earnings dashboard.
+    if (!isInitializing && isAuthenticated && isJoined) {
+      router.replace('/affiliate');
     }
-  }, [isAuthenticated, isInitializing, fetchProfile]);
+  }, [isInitializing, isAuthenticated, isJoined, router]);
 
-  useEffect(() => {
-    // If the user has an active profile and it loaded without error, redirect them to the dashboard directly
-    if (profile && !error) {
-      router.push('/affiliate');
-    }
-  }, [profile, error, router]);
+  const handleJoined = async () => {
+    const data = await fetchMe();          // refreshes auth store...
+    if (data) useAppStore.getState().setUser(data);  // ...and mirror into app store so navbar flips instantly
+    router.replace('/affiliate');
+  };
 
   return (
     <div className="min-h-screen bg-[#0a0015] flex flex-col font-sans overflow-hidden">
@@ -84,13 +87,23 @@ export default function AffiliateProgramClient() {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="flex flex-col sm:flex-row items-center justify-center gap-4"
             >
-              <Link
-                href="/affiliate"
-                className="group w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold text-lg hover:shadow-[0_0_40px_rgba(139,92,246,0.4)] transition-all duration-300 hover:-translate-y-1"
-              >
-                {isRtl ? 'انضم الآن مجاناً' : 'Join Now for Free'}
-                <Arrow className={`w-5 h-5 transition-transform duration-300 ${isRtl ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
-              </Link>
+              {!isInitializing && isAuthenticated ? (
+                <a
+                  href="#join"
+                  className="group w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold text-lg hover:shadow-[0_0_40px_rgba(139,92,246,0.4)] transition-all duration-300 hover:-translate-y-1"
+                >
+                  {isRtl ? 'انضم الآن مجاناً' : 'Join Now for Free'}
+                  <Arrow className={`w-5 h-5 transition-transform duration-300 ${isRtl ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
+                </a>
+              ) : (
+                <Link
+                  href="/register"
+                  className="group w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-bold text-lg hover:shadow-[0_0_40px_rgba(139,92,246,0.4)] transition-all duration-300 hover:-translate-y-1"
+                >
+                  {isRtl ? 'أنشئ حساباً وابدأ الربح' : 'Create an Account & Start Earning'}
+                  <Arrow className={`w-5 h-5 transition-transform duration-300 ${isRtl ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
+                </Link>
+              )}
             </motion.div>
           </div>
         </section>
@@ -119,7 +132,7 @@ export default function AffiliateProgramClient() {
                 {
                   icon: BarChart3,
                   title: isRtl ? 'لوحة تحكم احترافية' : 'Professional Dashboard',
-                  desc: isRtl ? 'تتبع نقراتك، تسجيلاتك، وعمولاتك بشكل لحظي عبر لوحة تحكم مخصصة وشفافة.' : 'Track your clicks, sign-ups, and commissions in real-time with our transparent dashboard.'
+                  desc: isRtl ? 'تابع إحالاتك وأرباحك بشكل لحظي عبر لوحة تحكم مخصصة وشفافة.' : 'Track your referrals and earnings in real-time with our transparent dashboard.'
                 }
               ].map((feature, i) => {
                 const Icon = feature.icon;
@@ -141,6 +154,37 @@ export default function AffiliateProgramClient() {
                 );
               })}
             </div>
+          </div>
+        </section>
+
+        {/* Join Section — embedded onboarding for logged-in, not-yet-joined users */}
+        <section id="join" className="py-16 scroll-mt-24">
+          <div className="max-w-4xl mx-auto px-4">
+            {isInitializing ? (
+              <div className="flex justify-center py-10">
+                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-violet-500" />
+              </div>
+            ) : isAuthenticated ? (
+              <AffiliateOnboardingForm onSuccess={handleJoined} />
+            ) : (
+              <div className="max-w-2xl mx-auto p-8 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-md text-center">
+                <Users className="w-12 h-12 mx-auto text-violet-400 mb-4" />
+                <h3 className="text-2xl font-bold text-white mb-3">
+                  {isRtl ? 'سجّل الدخول للانضمام' : 'Log in to join'}
+                </h3>
+                <p className="text-white/50 mb-6">
+                  {isRtl ? 'سجّل الدخول أو أنشئ حساباً مجانياً لتبدأ بالتسويق وكسب العمولات.' : 'Log in or create a free account to start promoting and earning commissions.'}
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Link href="/login" className="px-8 py-3 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold transition-colors">
+                    {isRtl ? 'تسجيل الدخول' : 'Log In'}
+                  </Link>
+                  <Link href="/register" className="px-8 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-semibold hover:opacity-90 transition-opacity">
+                    {isRtl ? 'حساب جديد' : 'Sign Up'}
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
         </section>
 

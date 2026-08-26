@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { useLocale } from 'next-intl';
 import { useAffiliateStore } from '@/store/useAffiliateStore';
 
-export default function AffiliateOnboardingForm() {
+export default function AffiliateOnboardingForm({ onSuccess }: { onSuccess?: () => void }) {
   const locale = useLocale();
   const isRtl = locale === 'ar';
   
@@ -36,7 +36,11 @@ export default function AffiliateOnboardingForm() {
     if (!res.success) {
       setError(res.error || (isRtl ? 'حدث خطأ أثناء الانضمام' : 'Error occurred while onboarding.'));
       setIsSubmitting(false);
+      return;
     }
+
+    setIsSubmitting(false);
+    onSuccess?.();
   };
 
   return (
@@ -71,7 +75,7 @@ export default function AffiliateOnboardingForm() {
         
         <div className="flex flex-col gap-2 text-left rtl:text-right">
           <label htmlFor="whatsapp" className="text-sm text-white/80 font-medium">
-            {isRtl ? 'Ø±Ù‚Ù… Ø§Ù„ÙˆØ§ØªØ³Ø§Ø¨ Ù„Ù„ØªÙˆØ§ØµÙ„' : 'WhatsApp Number for Contact'}
+            {isRtl ? 'رقم الواتساب للتواصل' : 'WhatsApp Number for Contact'}
           </label>
           <input
             type="text"

@@ -1,46 +1,29 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect } from 'react';
 import { useLocale } from 'next-intl';
+import { useRouter } from '@/i18n/routing';
 import { useAppStore } from '@/store/useAppStore';
 import { useAffiliateStore } from '@/store/useAffiliateStore';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import MobileBottomNav from '@/components/MobileBottomNav';
-import AffiliateOverview from '@/components/affiliate/AffiliateOverview';
-import AffiliateReferralLink from '@/components/affiliate/AffiliateReferralLink';
-import AffiliateStatsGrid from '@/components/affiliate/AffiliateStatsGrid';
-import AffiliateReferralsTable from '@/components/affiliate/AffiliateReferralsTable';
-import AffiliateCommissionsTable from '@/components/affiliate/AffiliateCommissionsTable';
-import AffiliateWithdrawalForm from '@/components/affiliate/AffiliateWithdrawalForm';
-import AffiliatePayoutsTable from '@/components/affiliate/AffiliatePayoutsTable';
-import AffiliateOnboardingForm from '@/components/affiliate/AffiliateOnboardingForm';
-
-const TABS = [
-  { id: 'overview',     labelEn: 'Overview',      labelAr: 'نظرة عامة' },
-  { id: 'link',         labelEn: 'Referral Link',  labelAr: 'رابط الإحالة' },
-  { id: 'referrals',   labelEn: 'Referrals',      labelAr: 'الإحالات' },
-  { id: 'earnings',    labelEn: 'Earnings',       labelAr: 'الأرباح' },
-  { id: 'withdrawals', labelEn: 'Withdrawals',    labelAr: 'السحب' },
-];
+import AffiliateDashboard from '@/components/affiliate/AffiliateDashboard';
 
 export default function AffiliatePage() {
   const locale = useLocale();
   const isRtl = locale === 'ar';
-  const [activeTab, setActiveTab] = useState('overview');
+  const router = useRouter();
 
-  // Use useAppStore — the single source of truth for auth state in this app
-  const { isAuthenticated, isInitializing } = useAppStore();
-
+  // useAppStore — the single source of truth for auth state in this app
+  const { user, isAuthenticated, isInitializing } = useAppStore();
   const {
-    profile, stats, balances, referrals, commissions, payouts,
     fetchProfile, fetchStats, fetchBalances, fetchReferrals, fetchCommissions, fetchPayouts,
-    isLoading, error
+    isLoading,
   } = useAffiliateStore();
 
   useEffect(() => {
-    if (!isInitializing && isAuthenticated) {
+    if (!isInitializing && isAuthenticated && user?.isAffiliate) {
       fetchProfile();
       fetchStats();
       fetchBalances();
@@ -48,9 +31,14 @@ export default function AffiliatePage() {
       fetchCommissions();
       fetchPayouts();
     }
-  }, [isAuthenticated, isInitializing]);
+  }, [isAuthenticated, isInitializing, user?.isAffiliate]);
 
-  const needsOnboarding = error?.includes('onboard') || (!profile && !isLoading && !isInitializing && isAuthenticated);
+  useEffect(() => {
+    // Not-joined (or stale-flagged) users belong on the marketing/join page.
+    if (!isInitializing && isAuthenticated && !user?.isAffiliate) {
+      router.replace('/affiliate-program');
+    }
+  }, [isAuthenticated, isInitializing, user?.isAffiliate, router]);
 
   return (
     <div className="relative min-h-screen bg-[#0a0a0a] text-white overflow-hidden" dir={isRtl ? 'rtl' : 'ltr'}>
@@ -60,93 +48,17 @@ export default function AffiliatePage() {
 
       <Navbar />
 
-      {isInitializing || isLoading ? (
+      {isInitializing || (isLoading && !user?.isAffiliate) ? (
         <div className="min-h-screen flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-violet-500" />
         </div>
       ) : !isAuthenticated ? (
         <div className="min-h-screen flex items-center justify-center text-white/60">
-          {isRtl ? 'يرجى تسجيل الدخول للوصول إلى لوحة الإحالة.' : 'Please log in to access your affiliate dashboard.'}
+          {isRtl ? 'يرجى تسجيل الدخول للوصول إلى لوحة الأرباح.' : 'Please log in to access your earnings dashboard.'}
         </div>
-      ) : needsOnboarding ? (
-        <div className="relative z-10 pt-36 md:pt-40 pb-24 px-4">
-          <AffiliateOnboardingForm />
-        </div>
-      ) : (
-
-      <div className="max-w-6xl mx-auto relative z-10 pt-36 md:pt-40 pb-24 px-4">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-10"
-        >
-          <h1 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">
-            {isRtl ? '🤝 اربح معنا' : '🤝 Earn With Us'}
-          </h1>
-
-          {profile && (
-            <p className="text-white/40 mt-2 text-sm">
-              {isRtl ? 'معرفك:' : 'Your ID:'} <span className="text-violet-400 font-mono">{profile.affiliateDisplayId}</span>
-            </p>
-          )}
-        </motion.div>
-
-        {/* Tab Navigation */}
-        <div className="flex gap-1 mb-8 bg-white/5 rounded-2xl p-1 overflow-x-auto border border-white/10 w-fit">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 whitespace-nowrap ${
-                activeTab === tab.id
-                  ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/30'
-                  : 'text-white/50 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              {isRtl ? tab.labelAr : tab.labelEn}
-            </button>
-          ))}
-        </div>
-
-        {/* Tab Content */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-          >
-            {activeTab === 'overview' && (
-              <div className="space-y-6">
-                <AffiliateOverview balances={balances} isRtl={isRtl} />
-                {stats && <AffiliateStatsGrid stats={stats} isRtl={isRtl} />}
-              </div>
-            )}
-
-            {activeTab === 'link' && profile && (
-              <AffiliateReferralLink profile={profile} isRtl={isRtl} />
-            )}
-
-            {activeTab === 'referrals' && (
-              <AffiliateReferralsTable referrals={referrals} isRtl={isRtl} />
-            )}
-
-            {activeTab === 'earnings' && (
-              <AffiliateCommissionsTable commissions={commissions} isRtl={isRtl} />
-            )}
-
-            {activeTab === 'withdrawals' && (
-              <div className="space-y-8">
-                <AffiliateWithdrawalForm balances={balances} isRtl={isRtl} />
-                <AffiliatePayoutsTable payouts={payouts} isRtl={isRtl} />
-              </div>
-            )}
-          </motion.div>
-        </AnimatePresence>
-      </div>
-      )}
+      ) : user?.isAffiliate ? (
+        <AffiliateDashboard />
+      ) : null}
 
       <Footer />
       <MobileBottomNav />

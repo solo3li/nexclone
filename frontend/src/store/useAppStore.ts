@@ -10,6 +10,7 @@ export interface AppState {
     isVerified: boolean;
     hasPhoneNumber: boolean;
     isStaff: boolean;
+    isAffiliate?: boolean;
     standardCredits: number;
     premiumCredits: number;
     activePlan: {

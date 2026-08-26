@@ -282,10 +282,10 @@ export default function Navbar() {
                   </div>
                 </Link>
                 <Link
-                  href="/affiliate-program"
+                  href={user?.isAffiliate ? "/affiliate" : "/affiliate-program"}
                   className="px-4 py-2 rounded-xl text-sm font-semibold text-white/80 hover:text-white hover:bg-white/5 transition-colors border border-transparent hover:border-white/10"
                 >
-                  {locale === 'ar' ? 'اربح معنا' : 'Earn With Us'}
+                  {user?.isAffiliate ? (locale === 'ar' ? 'أرباحي' : 'My Earnings') : (locale === 'ar' ? 'اربح معنا' : 'Earn With Us')}
                 </Link>
                 <Link
                   href="/profile"
@@ -306,6 +306,12 @@ export default function Navbar() {
               </div>
             ) : (
               <>
+                <Link
+                  href="/affiliate-program"
+                  className="text-white/80 hover:text-white text-sm font-medium transition-colors px-4 py-2"
+                >
+                  {locale === 'ar' ? 'اربح معنا' : 'Earn With Us'}
+                </Link>
                 <Link
                   href="/login"
                   className="text-white/80 hover:text-white text-sm font-medium transition-colors px-4 py-2"
@@ -415,6 +421,13 @@ export default function Navbar() {
               {isAuthenticated ? (
                 <>
                   <Link
+                    href={user?.isAffiliate ? "/affiliate" : "/affiliate-program"}
+                    onClick={() => setMenuOpen(false)}
+                    className="text-white/80 hover:text-white text-base font-medium py-2 border-b border-white/5 transition-colors"
+                  >
+                    {user?.isAffiliate ? (locale === 'ar' ? 'أرباحي' : 'My Earnings') : (locale === 'ar' ? 'اربح معنا' : 'Earn With Us')}
+                  </Link>
+                  <Link
                     href="/profile"
                     onClick={() => setMenuOpen(false)}
                     className="mt-2 w-full text-center py-3 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 text-white font-semibold"
@@ -432,13 +445,22 @@ export default function Navbar() {
                   </button>
                 </>
               ) : (
-                <Link
-                  href="/register"
-                  onClick={() => setMenuOpen(false)}
-                  className="mt-2 w-full text-center py-3 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 text-white font-semibold"
-                >
-                  {t('startNow')}
-                </Link>
+                <>
+                  <Link
+                    href="/affiliate-program"
+                    onClick={() => setMenuOpen(false)}
+                    className="w-full text-center py-3 rounded-xl bg-white/5 border border-white/10 text-white font-semibold"
+                  >
+                    {locale === 'ar' ? 'اربح معنا' : 'Earn With Us'}
+                  </Link>
+                  <Link
+                    href="/register"
+                    onClick={() => setMenuOpen(false)}
+                    className="mt-2 w-full text-center py-3 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 text-white font-semibold"
+                  >
+                    {t('startNow')}
+                  </Link>
+                </>
               )}
             </div>
           </motion.div>

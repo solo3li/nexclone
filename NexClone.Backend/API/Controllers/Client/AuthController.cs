@@ -674,7 +674,8 @@ namespace NexClone.Backend.API.Controllers.Client
                     IsFreeTrial = activeSub.Plan.IsFreeTrial,
                     IsDefaultRegistrationPlan = activeSub.Plan.IsDefaultRegistrationPlan
                 } : null,
-                ActiveSubscriptions = activeSubscriptionsResponse
+                ActiveSubscriptions = activeSubscriptionsResponse,
+                IsAffiliate = await _context.AffiliateProfiles.AnyAsync(p => p.UserId == user.Id && p.IsActive)
             });
         }
     }

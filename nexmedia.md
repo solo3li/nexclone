@@ -342,6 +342,8 @@ docker run -d --name nexclone-local-api -p 127.0.0.1:5050:8080 `
 Seeded super-admin: `hamed3alii.3@gmail.com` / see `DbSeeder.SeedAdminUserAsync`.
 
 ### Affiliate system (post-clicks-removal)
+**Navigation/pages (2026-08-26):** `/api/auth/me` now returns **`isAffiliate`** (active AffiliateProfiles check). Navbar (desktop + mobile drawer) shows "Earn With Us"/"اربح معنا" → `/affiliate-program` for logged-out & not-joined users, and "My Earnings"/"أرباحي" → `/affiliate` once joined. `/affiliate` is a thin switcher (login gate; not-joined → redirect to program page; else `<AffiliateDashboard/>` extracted component). `/affiliate-program` = marketing + embedded `AffiliateOnboardingForm` (#join anchor); joined users are auto-redirected to `/affiliate`; successful join calls fetchMe (+appStore mirror) so the navbar flips instantly without reload.
+
 Flow: onboard (`POST api/affiliate/onboard` → AF-id + referralCode) → visitor hits `/api/affiliate-track/click?ref_code=X` → session token (+`aff_session` cookie set by frontend proxy) → referred signup links via refCode or cookie → payment (webhook / PayPal capture / admin AssignPlan) → **FIRST_PURCHASE commission PENDING** → daily job releases after hold → payout request → admin APPROVED→…→PAID. Fraud toggles: `Affiliate.PreventIpFraud` / `PreventFingerprintFraud` block same-IP/fingerprint self-referrals at linking time.
 
 Commission/payout enums are stored **UPPERCASE strings** in Postgres (`'FIRST_PURCHASE'`, `'PENDING'`, …) — match exactly in raw SQL.
