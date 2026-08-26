@@ -5,6 +5,6 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Invoicing
 {
     public interface IInvoiceGeneratorService
     {
-        Task<byte[]> GenerateInvoicePdfAsync(Invoice invoice, string verifyUrlBase);
+        Task<byte[]> GenerateInvoicePdfAsync(Invoice invoice);
     }
 }

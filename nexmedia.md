@@ -54,7 +54,7 @@ Legend: **JWT** = `[Authorize]` default scheme; **Admin** = cookie scheme + Role
 ### 3.1 Root-level
 | Controller | Route | Notes |
 |---|---|---|
-| `InvoicesController` | `api/Invoices` | `GET verify/{token}` Anon (400 empty/404 invalid), `GET my-invoices` JWT, `GET generate-retro` Admin |
+| `InvoicesController` | `api/Invoices` | `GET verify/{token}` Anon — **stub returning 404** (verification feature removed 2026-08-26), `GET my-invoices` JWT, `GET generate-retro` Admin |
 | `WebhooksController` | `api/webhooks` | Anon + signature checks: Paymob HMAC-SHA512 constant-time verified; PayPal PAYMENT.CAPTURE.COMPLETED (**signature NOT verified — TODO**); unauth `mock-payment` seeder. Idempotent activation, refunds/reversals |
 
 ### 3.2 Client JSON API (`API\Controllers\Client\`)
@@ -91,7 +91,7 @@ validate → `UsagePolicyService.ValidateAndChargeAsync` (optimistic-concurrency
 | Controller | Route | Key operations |
 |---|---|---|
 | `AdminAuthController` | `/AdminAuth` | Login POST (IsStaff gate; claims Role=Admin; 7-day persistent), Logout, AccessDenied, SwitchLang (culture cookie) |
-| `UsersController` | `/Users` | Index search/paginate; Details (devices/affiliate/payments/lockout); Create (auto default plan + receipt email); **AssignPlan** (same plan → extend + cancel any other stacked subs; different plan → cancel ALL other active/frozen subs then create new — no more duplicate subscriptions; then credits, Payment record, affiliate commission, invoice PDF, receipt email); AdjustCredits; ExtendSubscription; ChangePassword; UnlockUser; Edit/Delete/BulkDelete; AddCreditAmount; UpdateSubscriptionDates; UpdateAffiliateTrackingDates |
+| `UsersController` | `/Users` | Index search/paginate; Details (devices/affiliate/payments/lockout); Create (auto default plan + receipt email); **AssignPlan** (same plan → extend + cancel any other stacked subs; different plan → cancel ALL other active/frozen subs then create new — no more duplicate subscriptions; then credits, Payment record, affiliate commission, invoice PDF, receipt email); AdjustCredits; ExtendSubscription; ChangePassword; UnlockUser; Edit/Delete/BulkDelete (**all-or-nothing**: DB transaction + per-user pre-cleanup of blog comments/ticket messages; first blocking record → rollback everything + HTTP 409 `{message}` naming affiliate/commission-ledger cause; view alerts the server message); AddCreditAmount; UpdateSubscriptionDates; UpdateAffiliateTrackingDates |
 | `SubscriptionsController` | `/Subscriptions` | Index filters; Details; UpdateEndDate (recalc freeze/expired, wallet reset on expiry, grace/expired email); Delete; BulkDelete |
 | `PlansAdminController` | `/PlansAdmin` | Plan CRUD (USD/EGP, tax vs fixed-fee mutual exclusion, single-default enforcement); soft delete; ManageGateways/AddGateway (clears other defaults per currency)/RemoveGateway/ToggleGateway; **seed endpoint is [AllowAnonymous] at bare action route `GET /seed-test-plans`** (not /PlansAdmin/SeedTestPlans) — publicly seeds paid plans |
 | `PaymentsAdminController` | `/PaymentsAdmin` | Paginated payments; Details w/ linked invoice + PDF URL |
@@ -229,7 +229,7 @@ Shared base `BaseAiTaskConsumer`: polling w/ exponential backoff (5s base, max 3
 |---|---|
 | **AI** | Google **Gemini** TTS (`gemini-3.1-flash-tts-preview` / 2.5 fallbacks; quota-based primary→fallback routing; PCM→WAV), **OpenAI** STT/translation (`gpt-4o-mini-transcribe`, whisper-1 fallback), **CrunAI** gateway (video/image/lipsync: Veo3.1, Grok, Vidu models), **CometAPI** (legacy Kling avatar path), **Picsart** (avatar video + motion control workflows) |
 | **Payments** | **Paymob Intention API** (EGP; cents; card+wallet integrations; unified checkout redirect; HMAC-SHA512 webhook), **PayPal Orders v2** (USD; OAuth2 client credentials; capture flow; webhook signature TODO). Paymob service routes USD → PayPal |
-| **Invoicing** | QuestPDF A4 tax invoices + QRCoder QR linking to `/verify-invoice/{token}` + "paid" stamp asset |
+| **Invoicing** | QuestPDF A4 tax invoices + "paid" stamp asset. *(Invoice verification — QR code, `QRCoder`, verify endpoint, `/verify-invoice/[token]` page, `verifyUrlBase` plumbing — fully removed 2026-08-26; `Invoice.VerificationToken` column retained but dead)* |
 | **Email** | **Brevo API** (`BrevoEmailService` direct) behind `QueueEmailService` decorator that enqueues EmailConsumer via Hangfire; RTL Arabic templates by `EmailTemplateService` (receipt/grace/expired/verification/reset/completed) |
 | **Storage** | MinIO/S3 via Minio SDK; config precedence env vars → DB AppSettings (5-min cache) → hardcoded defaults |
 | **Misc** | kickbox.com disposable-email screening at registration; Google ID-token validation (`Google.Apis.Auth`); TagLibSharp media duration; FingerprintJS (frontend) |
@@ -285,6 +285,8 @@ Health: PostgresHealthCheck SELECT 1 at `/health`.
 **Fixed (2026-08-26):**
 - ✅ AssignPlan duplicate subscriptions — now cancels competing active/frozen subs (§3.4)
 - ✅ Video estimate≠charge traps — frontend price-guessing removed; `"veo"` alias no longer resolves to Quality model (§5)
+- ✅ Users/BulkDelete 500 on affiliate users — all-or-nothing DB transaction, graceful 409 with explanatory message instead of raw 500 (§3.4)
+- ✅ Invoice verification feature removed end-to-end — QR code + QRCoder dependency gone from PDFs; `verify/{token}` endpoint is a 404 stub; `/verify-invoice/[token]` frontend page deleted; `verifyUrlBase` plumbing removed from all 6 call sites (§7)
 
 **Open:**
 1. **No Contacts API** exists (see §2) — contact flows ride the ticket system + CMS pages

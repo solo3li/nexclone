@@ -350,7 +350,11 @@ function closeAddBalanceModal() {
                 if (response.ok) {
                     window.location.reload();
                 } else {
-                    alert('@Localizer["Failed to delete selected users."]');
+                    return response.json().then(data => {
+                        alert(data.message || '@Localizer["Failed to delete selected users."]');
+                    }).catch(() => {
+                        alert('@Localizer["Failed to delete selected users."]');
+                    });
                 }
             })
             .catch(error => {

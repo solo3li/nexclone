@@ -20,41 +20,11 @@ namespace NexClone.Backend.API.Controllers
 
         [HttpGet("verify/{token}")]
         [AllowAnonymous]
-        public async Task<IActionResult> VerifyInvoice(string token, [FromServices] NexClone.Backend.Core.Interfaces.IMediaService mediaService)
+        public async Task<IActionResult> VerifyInvoice(string token)
         {
-            if (string.IsNullOrWhiteSpace(token))
-                return BadRequest(new { message = "Token is required" });
-
-            var invoice = await _context.Invoices
-                .Include(i => i.User)
-                .Include(i => i.Subscription)
-                .ThenInclude(s => s.Plan)
-                .FirstOrDefaultAsync(i => i.VerificationToken == token);
-
-            if (invoice == null)
-            {
-                return NotFound(new { message = "Invoice not found or invalid token." });
-            }
-
-            var pdfUrl = string.IsNullOrWhiteSpace(invoice.MinioPdfUrl) ? null : await mediaService.GetFileUrlAsync(invoice.MinioPdfUrl, "invoices");
-
-            var result = new
-            {
-                invoice.InvoiceNumber,
-                Date = invoice.CreatedAt,
-                CustomerName = invoice.User?.FullName ?? invoice.User?.Email,
-                PlanName = invoice.Subscription?.Plan?.Name ?? "Custom Plan",
-                invoice.PaymentGateway,
-                invoice.PaymentMethod,
-                invoice.TransactionId,
-                invoice.SubTotal,
-                invoice.TaxAmount,
-                invoice.TotalAmount,
-                invoice.Currency,
-                MinioPdfUrl = pdfUrl
-            };
-
-            return Ok(new { success = true, invoice = result });
+            // Invoice verification feature was removed; kept as a stub so old QR/bookmarked
+            // links degrade gracefully instead of 404ing at the API level.
+            return NotFound(new { message = "Invoice verification is no longer available." });
         }
 
         [HttpGet("my-invoices")]
@@ -106,10 +76,6 @@ namespace NexClone.Backend.API.Controllers
             {
                 if (sub.Plan == null || sub.User == null) continue;
 
-                string verifyUrlBase = Environment.GetEnvironmentVariable("NEXT_PUBLIC_SITE_URL") 
-                                       ?? Environment.GetEnvironmentVariable("NEXT_PUBLIC_API_URL")?.Replace("/api", "")
-                                       ?? "https://nexmediaai.com";
-                
                 var payment = await _context.Payments.FirstOrDefaultAsync(p => p.SubscriptionId == sub.Id);
                 string currency = payment?.Currency ?? "EGP";
 
@@ -154,7 +120,7 @@ namespace NexClone.Backend.API.Controllers
 
                 try
                 {
-                    byte[] pdfBytes = await invoiceService.GenerateInvoicePdfAsync(invoice, verifyUrlBase);
+                    byte[] pdfBytes = await invoiceService.GenerateInvoicePdfAsync(invoice);
                     using var ms = new System.IO.MemoryStream(pdfBytes);
                     string minioUrl = await mediaService.UploadFileAsync(ms, $"invoices/{invoice.InvoiceNumber}.pdf", "application/pdf", "invoices");
                     

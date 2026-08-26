@@ -347,8 +347,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Payments
                     _context.Invoices.Add(invoice);
                     await _context.SaveChangesAsync();
 
-                    string verifyUrlBase = Environment.GetEnvironmentVariable("NEXT_PUBLIC_SITE_URL") ?? "https://nexmediaai.com";
-                    byte[] pdfBytes = await _invoiceService.GenerateInvoicePdfAsync(invoice, verifyUrlBase);
+                    byte[] pdfBytes = await _invoiceService.GenerateInvoicePdfAsync(invoice);
                     using var ms = new System.IO.MemoryStream(pdfBytes);
                     var minioUrl = await _mediaService.UploadFileAsync(ms, $"invoices/{invoice.InvoiceNumber}.pdf", "application/pdf", "invoices");
                     invoice.MinioPdfUrl = minioUrl;

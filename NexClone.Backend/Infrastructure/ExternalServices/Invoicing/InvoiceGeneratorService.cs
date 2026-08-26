@@ -4,7 +4,6 @@ using NexClone.Backend.Core.Entities;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-using QRCoder;
 using System;
 
 namespace NexClone.Backend.Infrastructure.ExternalServices.Invoicing
@@ -17,7 +16,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Invoicing
             QuestPDF.Settings.License = LicenseType.Community;
         }
 
-        public async Task<byte[]> GenerateInvoicePdfAsync(Invoice invoice, string verifyUrlBase)
+        public async Task<byte[]> GenerateInvoicePdfAsync(Invoice invoice)
         {
             var document = Document.Create(container =>
             {
@@ -29,7 +28,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Invoicing
                     page.DefaultTextStyle(x => x.FontSize(12).FontFamily(Fonts.Arial));
 
                     page.Header().Element(c => ComposeHeader(c, invoice));
-                    page.Content().Element(c => ComposeContent(c, invoice, verifyUrlBase));
+                    page.Content().Element(c => ComposeContent(c, invoice));
                     page.Footer().Element(c => ComposeFooter(c));
                 });
             });
@@ -61,7 +60,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Invoicing
             });
         }
 
-        private void ComposeContent(IContainer container, Invoice invoice, string verifyUrlBase)
+        private void ComposeContent(IContainer container, Invoice invoice)
         {
             container.PaddingVertical(1, Unit.Centimetre).Column(column =>
             {
@@ -137,29 +136,12 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Invoicing
                     c.Item().Text($"Total: {invoice.TotalAmount} {invoice.Currency}").SemiBold().FontSize(14);
                 });
 
-                // QR Code & Stamp
-                column.Item().PaddingTop(40).Row(row =>
+                // Paid Stamp
+                string stampPath = Path.Combine(Directory.GetCurrentDirectory(), "Assets", "nexmedia_paid_stamp.png");
+                if (File.Exists(stampPath))
                 {
-                    // QR Code
-                    string verifyUrl = $"{verifyUrlBase}/verify-invoice/{invoice.VerificationToken}";
-                    byte[] qrCodeBytes = GenerateQrCode(verifyUrl);
-
-                    row.RelativeItem().Column(c =>
-                    {
-                        c.Item().Text("Scan to verify authenticity:").FontSize(10).FontColor(Colors.Grey.Medium);
-                        if (qrCodeBytes != null)
-                        {
-                            c.Item().Width(80).Height(80).Image(qrCodeBytes);
-                        }
-                    });
-
-                    // Stamp
-                    string stampPath = Path.Combine(Directory.GetCurrentDirectory(), "Assets", "nexmedia_paid_stamp.png");
-                    if (File.Exists(stampPath))
-                    {
-                        row.ConstantItem(120).Height(120).Image(stampPath);
-                    }
-                });
+                    column.Item().PaddingTop(40).AlignRight().Height(120).Width(120).Image(stampPath);
+                }
             });
         }
 
@@ -172,21 +154,6 @@ namespace NexClone.Backend.Infrastructure.ExternalServices.Invoicing
                 x.Span(" of ");
                 x.TotalPages();
             });
-        }
-
-        private byte[] GenerateQrCode(string url)
-        {
-            try
-            {
-                using var qrGenerator = new QRCodeGenerator();
-                using var qrCodeData = qrGenerator.CreateQrCode(url, QRCodeGenerator.ECCLevel.Q);
-                using var qrCode = new PngByteQRCode(qrCodeData);
-                return qrCode.GetGraphic(20);
-            }
-            catch
-            {
-                return null;
-            }
         }
     }
 }

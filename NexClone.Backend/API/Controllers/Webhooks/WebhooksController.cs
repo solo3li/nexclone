@@ -373,10 +373,6 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                     }
 
                     // Generate Invoice
-                    string verifyUrlBase = Environment.GetEnvironmentVariable("NEXT_PUBLIC_SITE_URL") 
-                                           ?? Environment.GetEnvironmentVariable("NEXT_PUBLIC_API_URL")?.Replace("/api", "")
-                                           ?? "https://nexmediaai.com";
-                    
                     decimal fixedFee = plan.FixedFeeEgp;
                     decimal taxAmt = (plan.PriceEgp + fixedFee) * (plan.TaxPercentageEgp / 100m);
                     decimal subTotal = amountEgp - taxAmt - fixedFee;
@@ -404,7 +400,7 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                     string minioUrl = "";
                     try
                     {
-                        byte[] pdfBytes = await _invoiceService.GenerateInvoicePdfAsync(invoice, verifyUrlBase);
+                        byte[] pdfBytes = await _invoiceService.GenerateInvoicePdfAsync(invoice);
                         using var ms = new System.IO.MemoryStream(pdfBytes);
                         minioUrl = await _mediaService.UploadFileAsync(ms, $"invoices/{invoice.InvoiceNumber}.pdf", "application/pdf", "invoices");
                         
@@ -760,10 +756,6 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                 }
 
                 // 9. Generate Invoice
-                string verifyUrlBase = Environment.GetEnvironmentVariable("NEXT_PUBLIC_SITE_URL") 
-                                       ?? Environment.GetEnvironmentVariable("NEXT_PUBLIC_API_URL")?.Replace("/api", "")
-                                       ?? "https://nexmediaai.com";
-                
                 decimal fixedFeeUsd = plan.FixedFeeUsd;
                 decimal taxAmtUsd = (plan.PriceUsd + fixedFeeUsd) * (plan.TaxPercentageUsd / 100m);
                 decimal subTotalUsd = amountUsd - taxAmtUsd - fixedFeeUsd;
@@ -791,7 +783,7 @@ namespace NexClone.Backend.API.Controllers.Webhooks
                 string minioUrl = "";
                 try
                 {
-                    byte[] pdfBytes = await _invoiceService.GenerateInvoicePdfAsync(invoice, verifyUrlBase);
+                    byte[] pdfBytes = await _invoiceService.GenerateInvoicePdfAsync(invoice);
                     using var ms = new System.IO.MemoryStream(pdfBytes);
                     minioUrl = await _mediaService.UploadFileAsync(ms, $"invoices/{invoice.InvoiceNumber}.pdf", "application/pdf", "invoices");
                     

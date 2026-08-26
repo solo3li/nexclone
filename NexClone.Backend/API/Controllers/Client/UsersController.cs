@@ -310,9 +310,6 @@ namespace NexClone.Backend.API.Controllers.Client
 
 
             // Generate Invoice
-            string verifyUrlBase = Environment.GetEnvironmentVariable("NEXT_PUBLIC_SITE_URL")
-                                   ?? Environment.GetEnvironmentVariable("NEXT_PUBLIC_API_URL")?.Replace("/api", "")
-                                   ?? "https://nexmediaai.com";
             decimal amountEgp = plan.PriceEgp;
             decimal fixedFee = plan.FixedFeeEgp;
             decimal taxAmt = (amountEgp + fixedFee) * (plan.TaxPercentageEgp / 100m);
@@ -339,7 +336,7 @@ namespace NexClone.Backend.API.Controllers.Client
 
             try
             {
-                byte[] pdfBytes = await invoiceService.GenerateInvoicePdfAsync(invoice, verifyUrlBase);
+                    byte[] pdfBytes = await invoiceService.GenerateInvoicePdfAsync(invoice);
                 using var ms = new System.IO.MemoryStream(pdfBytes);
                 string minioUrl = await mediaService.UploadFileAsync(ms, $"invoices/{invoice.InvoiceNumber}.pdf", "application/pdf", "invoices");
 
@@ -580,29 +577,43 @@ namespace NexClone.Backend.API.Controllers.Client
             }
 
             var users = await _context.Users.Where(u => ids.Contains(u.Id)).ToListAsync();
-            
+
             if (users.Any())
             {
-                var userIds = users.Select(u => u.Id).ToList();
-
-                var blogComments = await _context.BlogComments.Where(b => b.UserId.HasValue && userIds.Contains(b.UserId.Value)).ToListAsync();
-                if (blogComments.Any()) _context.BlogComments.RemoveRange(blogComments);
-
-                var ticketMessages = await _context.TicketMessages.Where(m => m.SenderId.HasValue && userIds.Contains(m.SenderId.Value)).ToListAsync();
-                if (ticketMessages.Any()) _context.TicketMessages.RemoveRange(ticketMessages);
-
-                _context.Users.RemoveRange(users);
+                await using var transaction = await _context.Database.BeginTransactionAsync();
                 try
                 {
-                    await _context.SaveChangesAsync();
+                    foreach (var user in users)
+                    {
+                        // Pre-cleanup rows that would otherwise block the delete.
+                        var blogComments = await _context.BlogComments
+                            .Where(b => b.UserId == user.Id)
+                            .ToListAsync();
+                        if (blogComments.Any()) _context.BlogComments.RemoveRange(blogComments);
+
+                        var ticketMessages = await _context.TicketMessages
+                            .Where(m => m.SenderId == user.Id)
+                            .ToListAsync();
+                        if (ticketMessages.Any()) _context.TicketMessages.RemoveRange(ticketMessages);
+
+                        _context.Users.Remove(user);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    await transaction.CommitAsync();
+                    return Ok(new { deleted = users.Count });
                 }
-                catch
+                catch (DbUpdateException)
                 {
-                    return StatusCode(500, "Could not delete some users because of associated records.");
+                    await transaction.RollbackAsync();
+                    return StatusCode(409, new
+                    {
+                        message = "Bulk delete cancelled: one or more selected users have records that prevent deletion (e.g. affiliate or commission ledger entries). No users were deleted."
+                    });
                 }
             }
 
-            return Ok();
+            return Ok(new { deleted = 0 });
         }
 
         [HttpPost]
