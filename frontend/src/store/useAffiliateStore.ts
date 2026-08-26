@@ -9,7 +9,6 @@ export interface AffiliateProfile {
   referralCode: string;
   referralLink: string;
   isActive: boolean;
-  totalClicks: number;
   createdAt: string;
 }
 
@@ -20,7 +19,6 @@ export interface AffiliateCurrencyBalance {
 }
 
 export interface AffiliateStats {
-  totalClicks: number;
   totalSignups: number;
   paidCustomers: number;
   activeSubscriptions: number;
@@ -31,7 +29,7 @@ export interface AffiliateStats {
 export interface AffiliateReferral {
   referralId: number;
   referredUser: { name: string | null; email: string | null } | null;
-  clickedAt: string;
+  joinedAt: string;
   hasConverted: boolean;
   activeSubscription: { planName: string; status: string } | null;
 }

@@ -78,7 +78,6 @@ namespace NexClone.Backend.API.Controllers.Client
                 referralCode = profile.ReferralCode,
                 referralLink = $"{siteUrl}/register?ref={profile.ReferralCode}",
                 isActive = profile.IsActive,
-                totalClicks = profile.TotalClicks,
                 createdAt = profile.CreatedAt
             });
         }
@@ -106,7 +105,6 @@ namespace NexClone.Backend.API.Controllers.Client
                 referralCode = profile.ReferralCode,
                 referralLink = $"{siteUrl}/register?ref={profile.ReferralCode}",
                 isActive = profile.IsActive,
-                totalClicks = profile.TotalClicks,
                 createdAt = profile.CreatedAt
             });
         }
@@ -181,7 +179,7 @@ namespace NexClone.Backend.API.Controllers.Client
             {
                 referralId = r.referralId,
                 referredUser = r.referredUser != null ? new { name = r.referredUser.FullName, email = MaskEmail(r.referredUser.Email) } : null,
-                clickedAt = r.clickedAt,
+                joinedAt = r.clickedAt,
                 hasConverted = r.hasConverted,
                 activeSubscription = r.activeSubscription
             }).ToList();

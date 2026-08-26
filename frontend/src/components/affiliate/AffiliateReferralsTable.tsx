@@ -29,7 +29,7 @@ export default function AffiliateReferralsTable({ referrals, isRtl }: Props) {
             <thead>
               <tr className="border-b border-white/10 bg-white/5">
                 <th className="px-6 py-4 text-left text-white/50 font-medium">{isRtl ? 'المستخدم' : 'User'}</th>
-                <th className="px-6 py-4 text-left text-white/50 font-medium">{isRtl ? 'تاريخ النقر' : 'Clicked'}</th>
+                <th className="px-6 py-4 text-left text-white/50 font-medium">{isRtl ? 'تاريخ الانضمام' : 'Joined'}</th>
                 <th className="px-6 py-4 text-center text-white/50 font-medium">{isRtl ? 'الاشتراك النشط' : 'Active Plan'}</th>
                 <th className="px-6 py-4 text-center text-white/50 font-medium">{isRtl ? 'الحالة' : 'Status'}</th>
               </tr>
@@ -46,7 +46,7 @@ export default function AffiliateReferralsTable({ referrals, isRtl }: Props) {
                     )}
                   </td>
                   <td className="px-6 py-4 text-white/50 text-xs">
-                    {new Date(r.clickedAt).toLocaleDateString()}
+                    {new Date(r.joinedAt).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 text-center">
                     {r.activeSubscription ? (

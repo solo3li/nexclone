@@ -36,10 +36,11 @@ services:
       - MINIO_ROOT_PASSWORD=devminiosecret123!
     command: server /data --address ":9001" --console-address ":9002"
     ports:
-      # S3 API (matches S3_ENDPOINT / MINIO_PUBLIC_ENDPOINT = 127.0.0.1:9001)
-      - "127.0.0.1:9001:9001"
+      # S3 API (matches S3_ENDPOINT / MINIO_PUBLIC_ENDPOINT = 127.0.0.1:9101)
+      # Host ports differ from container ports to avoid clashes with other projects.
+      - "127.0.0.1:9101:9001"
       # Web console
-      - "127.0.0.1:9002:9002"
+      - "127.0.0.1:9102:9002"
     volumes:
       - miniodata_local:/data
     healthcheck:

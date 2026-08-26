@@ -141,8 +141,7 @@ namespace NexClone.Backend.API.Controllers.Admin
                 var paidCustomers = myCommissions.Where(c => c.Type == CommissionType.FirstPurchase).Select(c => c.CustomerId).Distinct().Count();
                 var activeSubs = allActiveSubs.Count(uid => myReferredUserIds.Contains(uid));
                 var signups = p.Referrals.Count(r => r.ReferredUserId.HasValue);
-                var clicks = p.TotalClicks;
-                var conversionRate = clicks > 0 ? Math.Round((decimal)paidCustomers / clicks * 100, 1) : 0;
+                var conversionRate = signups > 0 ? Math.Round((decimal)paidCustomers / signups * 100, 1) : 0;
 
                 return new
                 {

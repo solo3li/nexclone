@@ -36,7 +36,6 @@ namespace NexClone.Backend.Application.Services
 
     public class AffiliateStatsDto
     {
-        public int TotalClicks { get; set; }
         public int TotalSignups { get; set; }
         public int PaidCustomers { get; set; }
         public int ActiveSubscriptions { get; set; }
@@ -202,11 +201,8 @@ namespace NexClone.Backend.Application.Services
 
             _db.AffiliateReferrals.Add(referral);
             await _db.SaveChangesAsync();
-            
-            // Atomic update to prevent lost updates on concurrent clicks
-            await _db.AffiliateProfiles
-                .Where(p => p.Id == profile.Id)
-                .ExecuteUpdateAsync(s => s.SetProperty(p => p.TotalClicks, p => p.TotalClicks + 1));
+
+            // Click counting removed; the referral row itself remains the attribution record.
 
             return sessionToken;
         }
@@ -307,11 +303,8 @@ namespace NexClone.Backend.Application.Services
 
             _db.AffiliateReferrals.Add(referral);
             await _db.SaveChangesAsync();
-            
-            // Atomic update to prevent lost updates
-            await _db.AffiliateProfiles
-                .Where(p => p.Id == profile.Id)
-                .ExecuteUpdateAsync(s => s.SetProperty(p => p.TotalClicks, p => p.TotalClicks + 1));
+
+            // Click counting removed; the referral row itself remains the attribution record.
 
             _logger.LogInformation("Manually linked user {UserId} to profile {ProfileId} via code {Code}", newUserId, profile.Id, referralCode);
         }
@@ -793,15 +786,13 @@ namespace NexClone.Backend.Application.Services
             var balances = await GetBalancesAsync(affiliateProfileId);
 
             int signups = profile.Referrals.Count(r => r.ReferredUserId.HasValue);
-            int clicks = profile.TotalClicks;
 
             return new AffiliateStatsDto
             {
-                TotalClicks = clicks,
                 TotalSignups = signups,
                 PaidCustomers = paidCustomers,
                 ActiveSubscriptions = activeSubscriptions,
-                ConversionRate = clicks > 0 ? Math.Round((decimal)paidCustomers / clicks * 100, 1) : 0,
+                ConversionRate = signups > 0 ? Math.Round((decimal)paidCustomers / signups * 100, 1) : 0,
                 Balances = balances
             };
         }

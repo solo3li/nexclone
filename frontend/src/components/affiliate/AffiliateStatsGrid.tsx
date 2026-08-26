@@ -9,7 +9,6 @@ interface Props {
 
 export default function AffiliateStatsGrid({ stats, isRtl }: Props) {
   const items = [
-    { icon: '👆', labelEn: 'Total Clicks',         labelAr: 'إجمالي النقرات',       value: stats.totalClicks.toLocaleString(),       color: 'text-blue-400' },
     { icon: '👤', labelEn: 'Signups',               labelAr: 'التسجيلات',             value: stats.totalSignups.toLocaleString(),      color: 'text-violet-400' },
     { icon: '💳', labelEn: 'Paid Customers',        labelAr: 'عملاء مدفوعون',         value: stats.paidCustomers.toLocaleString(),     color: 'text-emerald-400' },
     { icon: '📦', labelEn: 'Active Subscriptions',  labelAr: 'اشتراكات نشطة',        value: stats.activeSubscriptions.toLocaleString(), color: 'text-fuchsia-400' },

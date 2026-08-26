@@ -82,8 +82,10 @@ export default function AffiliateReferralLink({ profile, isRtl }: Props) {
       {/* Stats quick view */}
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-white/5 border border-white/10 rounded-xl p-4 text-center">
-          <div className="text-3xl font-black text-violet-400">{profile.totalClicks.toLocaleString()}</div>
-          <div className="text-xs text-white/40 mt-1">{isRtl ? 'إجمالي النقرات' : 'Total Clicks'}</div>
+          <div className="text-3xl font-black text-violet-400">
+            {new Date(profile.createdAt).getFullYear()}
+          </div>
+          <div className="text-xs text-white/40 mt-1">{isRtl ? 'عضو منذ' : 'Member Since'}</div>
         </div>
         <div className="bg-white/5 border border-white/10 rounded-xl p-4 text-center">
           <div className="text-3xl font-black text-fuchsia-400">
