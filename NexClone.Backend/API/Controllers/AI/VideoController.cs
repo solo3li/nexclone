@@ -363,7 +363,7 @@ namespace NexClone.Backend.API.Controllers.AI
         }
 
         [HttpGet("estimate-tool/{toolType}")]
-        public async Task<IActionResult> EstimateTool(string toolType, [FromQuery] string model = "veo", [FromQuery] string resolution = "1080p", [FromQuery] int duration = 0, [FromQuery] int? subscriptionId = null)
+        public async Task<IActionResult> EstimateTool(string toolType, [FromQuery] string model = "veo", [FromQuery] string resolution = "1080p", [FromQuery] int duration = 0, [FromQuery] int inputDuration = 0, [FromQuery] int? subscriptionId = null)
         {
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
@@ -372,7 +372,13 @@ namespace NexClone.Backend.API.Controllers.AI
                 return BadRequest(new { error = "Invalid tool type." });
 
             string qualityFormat = $"{model}|{resolution}";
-            decimal usageUnits = (model.ToLower().Contains("grok") && duration > 0) ? duration : 1;
+            decimal usageUnits = 1;
+            if (model.ToLower().Contains("grok") && duration > 0) usageUnits = duration;
+            else if (model.ToLower().Contains("seedance"))
+            {
+                usageUnits = duration > 0 ? duration : 5;
+                if (toolType == "reference-to-video") usageUnits += inputDuration;
+            }
 
             var policyResult = await _usagePolicy.EstimateCostAsync(userId, toolType, usageUnits, usageUnits, qualityFormat, subscriptionId, enforceWallet: false);
             if (!policyResult.IsAllowed) return BadRequest(new { error = policyResult.ErrorMessage });
@@ -563,8 +569,42 @@ namespace NexClone.Backend.API.Controllers.AI
             if (toolType == "reference-to-video" && fileList.Count == 0)
                 return BadRequest(new { error = "At least one reference image is required." });
 
+            bool audioEnabled = true; // default
+            if (Request.HasFormContentType && Request.Form.TryGetValue("audio", out var formAudio) && bool.TryParse(formAudio, out var au))
+            {
+                audioEnabled = au;
+            }
+            if (audioEnabled) mode = "audio_on"; else mode = "audio_off";
+
             string qualityFormat = $"{model}|{resolution}";
-            decimal usageUnits = (model.ToLower().Contains("grok") && duration > 0) ? duration : 1;
+            decimal usageUnits = 1;
+            if (model.ToLower().Contains("grok") && duration > 0) usageUnits = duration;
+            else if (model.ToLower().Contains("seedance"))
+            {
+                usageUnits = duration > 0 ? duration : 5;
+                if (toolType == "reference-to-video")
+                {
+                    double inputDuration = 0;
+                    foreach (var file in fileList)
+                    {
+                        if (file.ContentType.StartsWith("video/"))
+                        {
+                            try
+                            {
+                                var extension = System.IO.Path.GetExtension(file.FileName);
+                                if (string.IsNullOrEmpty(extension)) extension = ".mp4";
+                                var tempFile = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Guid.NewGuid().ToString() + extension);
+                                using (var ms = new MemoryStream()) { await file.CopyToAsync(ms); System.IO.File.WriteAllBytes(tempFile, ms.ToArray()); }
+                                using (var tfile = TagLib.File.Create(tempFile)) { inputDuration = tfile.Properties.Duration.TotalSeconds; }
+                                System.IO.File.Delete(tempFile);
+                                break; // Only count first video for input duration
+                            }
+                            catch { /* ignore fallback */ }
+                        }
+                    }
+                    usageUnits += (decimal)inputDuration;
+                }
+            }
 
             var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, toolType, usageUnits, usageUnits, qualityFormat, subscriptionId);
             if (!policyResult.IsAllowed)

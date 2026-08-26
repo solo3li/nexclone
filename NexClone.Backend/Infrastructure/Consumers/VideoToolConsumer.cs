@@ -75,6 +75,19 @@ namespace NexClone.Backend.Infrastructure.Consumers
                             }
                         };
                     }
+                    else if (crunModel.Contains("seedance"))
+                    {
+                        payload = new {
+                            model = crunModel,
+                            input = new {
+                                prompt = message.Prompt,
+                                resolution = message.Resolution,
+                                aspect_ratio = normalizedAspect,
+                                duration = message.Duration > 0 ? message.Duration : 5,
+                                audio = message.Mode?.Contains("audio_on") == true
+                            }
+                        };
+                    }
                     else
                     {
                         payload = new {
@@ -148,6 +161,20 @@ namespace NexClone.Backend.Infrastructure.Consumers
                             }
                         };
                     }
+                    else if (crunModel.Contains("seedance"))
+                    {
+                        payload = new {
+                            model = crunModel,
+                            input = new {
+                                img_urls = imgUrlsList,
+                                prompt = promptText,
+                                resolution = message.Resolution,
+                                aspect_ratio = normalizedAspect,
+                                duration = message.Duration > 0 ? message.Duration : 5,
+                                audio = message.Mode?.Contains("audio_on") == true
+                            }
+                        };
+                    }
                     else
                     {
                         payload = new {
@@ -194,15 +221,32 @@ namespace NexClone.Backend.Infrastructure.Consumers
 
                     string promptText = !string.IsNullOrWhiteSpace(message.Prompt) ? message.Prompt : "Cinematic smooth transition and character continuity";
 
-                    payload = new {
-                        model = crunModel,
-                        input = new {
-                            img_urls = images,
-                            prompt = promptText,
-                            resolution = message.Resolution,
-                            aspect_ratio = normalizedAspect
-                        }
-                    };
+                    if (crunModel.Contains("seedance"))
+                    {
+                        payload = new {
+                            model = crunModel,
+                            input = new {
+                                img_urls = images,
+                                prompt = promptText,
+                                resolution = message.Resolution,
+                                aspect_ratio = normalizedAspect,
+                                duration = message.Duration > 0 ? message.Duration : 5,
+                                audio = message.Mode?.Contains("audio_on") == true
+                            }
+                        };
+                    }
+                    else
+                    {
+                        payload = new {
+                            model = crunModel,
+                            input = new {
+                                img_urls = images,
+                                prompt = promptText,
+                                resolution = message.Resolution,
+                                aspect_ratio = normalizedAspect
+                            }
+                        };
+                    }
                 }
 
                 var jsonContent = new StringContent(JsonSerializer.Serialize(payload, new JsonSerializerOptions { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull }), Encoding.UTF8, "application/json");
@@ -266,6 +310,12 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 return toolType == "image-to-video" ? "google/veo3-1-lite-i2v" : "google/veo3-1-lite-t2v";
             if (m == "grok" || m == "grok-imagine" || m == "grok-imagine/t2v")
                 return toolType == "image-to-video" ? "grok-imagine/i2v" : "grok-imagine/t2v";
+            if (m.Contains("seedance") || m.Contains("bytedance"))
+            {
+                if (toolType == "reference-to-video") return "bytedance/seedance2-0-mini-r2v";
+                if (toolType == "image-to-video") return "bytedance/seedance2-0-mini-i2v";
+                return "bytedance/seedance2-0-mini-t2v";
+            }
             return model;
         }
     }

@@ -25,6 +25,8 @@ namespace NexClone.Backend.Infrastructure.Data
         public DbSet<VoiceToTextModelPricing> VoiceToTextModelPricings { get; set; } = null!;
         public DbSet<TextToVoiceSetting> TextToVoiceSettings { get; set; } = null!;
         public DbSet<TextToVoiceModelPricing> TextToVoiceModelPricings { get; set; } = null!;
+        public DbSet<ReferenceToVideoSetting> ReferenceToVideoSettings { get; set; } = null!;
+        public DbSet<ReferenceToVideoModelPricing> ReferenceToVideoModelPricings { get; set; } = null!;
 
         private void ConfigureAiTools(ModelBuilder builder)
         {

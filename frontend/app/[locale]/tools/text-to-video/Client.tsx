@@ -34,7 +34,7 @@ import { signalRNotificationService } from "../../../../lib/signalr-client";
 
 interface ModelOption {
   id: string;
-  family: "veo" | "grok";
+  family: string;
   name: string;
   nameAr: string;
   badge: string;
@@ -99,6 +99,20 @@ const MODELS: ModelOption[] = [
     isPerSecond: true,
     supportedResolutions: ["480p", "720p", "1080p"],
     prices: { "480p": 2.4, "720p": 4.5, "1080p": 8.0 }
+  },
+  {
+    id: "seedance-2.0-mini",
+    family: "seedance",
+    name: "Seedance 2.0 Mini",
+    nameAr: "سيدانس 2.0 ميني",
+    badge: "Dynamic Motion",
+    badgeAr: "حركة ديناميكية",
+    desc: "Advanced video generation with dynamic pricing and duration control",
+    descAr: "توليد فيديو متقدم مع تسعير ديناميكي وتحكم في المدة",
+    discount: "Flexible",
+    isPerSecond: true,
+    supportedResolutions: ["720p", "1080p", "4k"],
+    prices: { "720p": 5, "1080p": 10, "4k": 15 }
   }
 ];
 
@@ -395,7 +409,7 @@ export default function TextToVideoPage() {
       formData.append("resolution", resolution);
       formData.append("aspectRatio", aspectRatio);
 
-      if (currentModel.family === "grok") {
+      if (currentModel.family === "grok" || currentModel.family === "seedance") {
         formData.append("duration", duration.toString());
         formData.append("mode", mode);
       } else {

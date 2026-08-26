@@ -68,7 +68,6 @@ C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\Micros
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\Microsoft.IdentityModel.Tokens.dll
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\Microsoft.OpenApi.dll
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\Microsoft.VisualStudio.SolutionPersistence.dll
-C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\Microsoft.Win32.SystemEvents.dll
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\Minio.dll
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\Mono.TextTemplating.dll
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\Newtonsoft.Json.dll
@@ -76,7 +75,6 @@ C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\Npgsql
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\Prometheus.NetStandard.dll
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\Prometheus.AspNetCore.dll
-C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\QRCoder.dll
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\QuestPDF.dll
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\Scalar.AspNetCore.dll
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\Serilog.dll
@@ -94,7 +92,6 @@ C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\System
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\System.Composition.Hosting.dll
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\System.Composition.Runtime.dll
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\System.Composition.TypedParts.dll
-C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\System.Drawing.Common.dll
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\System.IdentityModel.Tokens.Jwt.dll
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\System.IO.Hashing.dll
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\System.Management.dll
@@ -180,7 +177,6 @@ C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\ru\Mic
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\tr\Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.MSBuild.resources.dll
-C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\runtimes\win\lib\net6.0\Microsoft.Win32.SystemEvents.dll
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\runtimes\linux-arm64\native\libQuestPdfSkia.so
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\runtimes\linux-arm64\native\libqpdf.so
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\runtimes\linux-musl-x64\native\libQuestPdfSkia.so
@@ -197,8 +193,6 @@ C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\runtim
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\runtimes\win-x64\native\qpdf.dll
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\runtimes\win-x86\native\QuestPdfSkia.dll
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\runtimes\win-x86\native\qpdf.dll
-C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\runtimes\unix\lib\net6.0\System.Drawing.Common.dll
-C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\runtimes\win\lib\net6.0\System.Drawing.Common.dll
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\bin\Debug\net10.0\runtimes\win\lib\net7.0\System.Management.dll
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\obj\Debug\net10.0\NexClone.Backend.csproj.AssemblyReference.cache
 C:\Users\solo\Desktop\nexcole\nexclone\NexClone.Backend\obj\Debug\net10.0\rpswa.dswa.cache.json

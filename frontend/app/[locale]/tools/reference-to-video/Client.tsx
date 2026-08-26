@@ -80,6 +80,18 @@ const MODELS: ModelOption[] = [
     discount: "-84%",
     supportedResolutions: ["720p", "1080p", "4k"],
     prices: { "720p": 15, "1080p": 22.5, "4k": 75 }
+  },
+  {
+    id: "seedance-2.0-mini",
+    name: "Seedance 2.0 Mini",
+    nameAr: "سيدانس 2.0 ميني",
+    badge: "Dynamic Motion",
+    badgeAr: "حركة ديناميكية",
+    desc: "Advanced video generation with dynamic pricing and duration control",
+    descAr: "توليد فيديو متقدم مع تسعير ديناميكي وتحكم في المدة",
+    discount: "Flexible",
+    supportedResolutions: ["720p", "1080p", "4k"],
+    prices: { "720p": 5, "1080p": 10, "4k": 15 }
   }
 ];
 
@@ -399,7 +411,13 @@ export default function ReferenceToVideoPage() {
       formData.append("model", currentModel.id);
       formData.append("resolution", resolution);
       formData.append("aspectRatio", aspectRatio);
-      formData.append("duration", "8"); // Veo 8s standard
+      
+      if (currentModel.id.includes("seedance")) {
+        formData.append("duration", "5"); // Default to 5s if not using UI slider
+        formData.append("audio", "false"); // Default to audio off if not using UI toggle
+      } else {
+        formData.append("duration", "8"); // Veo 8s standard
+      }
 
       const res = await api.post("/api/video/start-tool/reference-to-video", formData, {
         headers: { "Content-Type": "multipart/form-data" }
