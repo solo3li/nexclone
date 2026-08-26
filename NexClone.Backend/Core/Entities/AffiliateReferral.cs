@@ -32,6 +32,18 @@ namespace NexClone.Backend.Core.Entities
         /// <summary>True when the referred visitor has registered AND made a qualifying payment.</summary>
         public bool HasConverted { get; set; } = false;
 
+        /// <summary>
+        /// Anchors the recurring-commission Time Window: set once, at the customer's first
+        /// commission-attempted payment. Null until then.
+        /// </summary>
+        public DateTime? FirstEligiblePaymentAt { get; set; }
+
+        /// <summary>
+        /// Cumulative plan duration (days) of all packages that actually earned a commission.
+        /// Capped by the global Affiliate.MaxPackageDurationDays setting.
+        /// </summary>
+        public int AccumulatedPackageDays { get; set; } = 0;
+
         // Navigation
         [ForeignKey(nameof(AffiliateProfileId))]
         public AffiliateProfile AffiliateProfile { get; set; } = null!;

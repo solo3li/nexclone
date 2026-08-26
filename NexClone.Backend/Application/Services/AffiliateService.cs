@@ -21,7 +21,8 @@ namespace NexClone.Backend.Application.Services
         public bool StopOnCancellation { get; set; }
         public decimal MinPayoutUsd { get; set; }
         public decimal MinPayoutEgp { get; set; }
-        public int MaxRecurringMonths { get; set; }
+        public int TimeWindowDays { get; set; }
+        public int MaxPackageDurationDays { get; set; }
         public int MaxInactivityDays { get; set; }
         public bool PreventFingerprintFraud { get; set; }
         public bool PreventIpFraud { get; set; }
@@ -59,8 +60,9 @@ namespace NexClone.Backend.Application.Services
         private const string KEY_STOP_ON_CANCEL = "Affiliate.StopOnCancellation";
         private const string KEY_MIN_USD = "Affiliate.MinPayoutUsd";
         private const string KEY_MIN_EGP = "Affiliate.MinPayoutEgp";
-        private const string KEY_MAX_MONTHS = "Affiliate.MaxRecurringMonths";
         private const string KEY_MAX_INACTIVITY = "Affiliate.MaxInactivityDays";
+        private const string KEY_TIME_WINDOW = "Affiliate.TimeWindowDays";
+        private const string KEY_MAX_PKG_DAYS = "Affiliate.MaxPackageDurationDays";
         private const string KEY_PREVENT_FINGERPRINT = "Affiliate.PreventFingerprintFraud";
         private const string KEY_PREVENT_IP = "Affiliate.PreventIpFraud";
 
@@ -78,7 +80,7 @@ namespace NexClone.Backend.Application.Services
             {
                 KEY_ENABLED, KEY_HOLD, KEY_ATTRIBUTION,
                 KEY_RECURRING, KEY_STOP_ON_CANCEL, KEY_MIN_USD, KEY_MIN_EGP,
-                KEY_MAX_MONTHS, KEY_MAX_INACTIVITY, KEY_PREVENT_FINGERPRINT, KEY_PREVENT_IP
+                KEY_MAX_INACTIVITY, KEY_TIME_WINDOW, KEY_MAX_PKG_DAYS, KEY_PREVENT_FINGERPRINT, KEY_PREVENT_IP
             };
             var settings = await _db.AppSettings
                 .Where(s => keys.Contains(s.Key))
@@ -93,8 +95,9 @@ namespace NexClone.Backend.Application.Services
                 StopOnCancellation  = GetBool(settings, KEY_STOP_ON_CANCEL, true),
                 MinPayoutUsd        = GetDecimal(settings, KEY_MIN_USD, 50),
                 MinPayoutEgp        = GetDecimal(settings, KEY_MIN_EGP, 500),
-                MaxRecurringMonths  = GetInt(settings, KEY_MAX_MONTHS, 0),
                 MaxInactivityDays   = GetInt(settings, KEY_MAX_INACTIVITY, 0),
+                TimeWindowDays      = GetInt(settings, KEY_TIME_WINDOW, 0),
+                MaxPackageDurationDays = GetInt(settings, KEY_MAX_PKG_DAYS, 0),
                 PreventFingerprintFraud = GetBool(settings, KEY_PREVENT_FINGERPRINT, false),
                 PreventIpFraud      = GetBool(settings, KEY_PREVENT_IP, false),
             };
@@ -109,8 +112,9 @@ namespace NexClone.Backend.Application.Services
             await UpsertSettingAsync(KEY_STOP_ON_CANCEL, dto.StopOnCancellation.ToString().ToLower(), "Stop recurring commissions when subscription is cancelled");
             await UpsertSettingAsync(KEY_MIN_USD, dto.MinPayoutUsd.ToString("F2", System.Globalization.CultureInfo.InvariantCulture), "Minimum payout amount in USD");
             await UpsertSettingAsync(KEY_MIN_EGP, dto.MinPayoutEgp.ToString("F2", System.Globalization.CultureInfo.InvariantCulture), "Minimum payout amount in EGP");
-            await UpsertSettingAsync(KEY_MAX_MONTHS, dto.MaxRecurringMonths.ToString(), "Max months for recurring commissions (0 for unlimited)");
             await UpsertSettingAsync(KEY_MAX_INACTIVITY, dto.MaxInactivityDays.ToString(), "Max days of inactivity before referral link drops (0 for unlimited)");
+            await UpsertSettingAsync(KEY_TIME_WINDOW, dto.TimeWindowDays.ToString(), "Recurring-commission real-time window in days from the customer's first eligible payment (0 for unlimited)");
+            await UpsertSettingAsync(KEY_MAX_PKG_DAYS, dto.MaxPackageDurationDays.ToString(), "Max cumulative subscription duration (days) that earns recurring commissions (0 for unlimited)");
             await UpsertSettingAsync(KEY_PREVENT_FINGERPRINT, dto.PreventFingerprintFraud.ToString().ToLower(), "Prevent self-referral if device fingerprint matches affiliate");
             await UpsertSettingAsync(KEY_PREVENT_IP, dto.PreventIpFraud.ToString().ToLower(), "Prevent self-referral if IP address matches affiliate");
             await _db.SaveChangesAsync();
@@ -312,6 +316,49 @@ namespace NexClone.Backend.Application.Services
         // ─── Commission Creation ──────────────────────────────────────────────
 
         /// <summary>
+        /// Applies the two recurring-commission day limits:
+        ///   1) Time Window Days      — real days since the customer's FIRST commission-attempted payment.
+        ///   2) Max Package Duration  — cumulative plan-days of packages that already earned a commission.
+        /// Anchors FirstEligiblePaymentAt on first attempt. Returns false when this payment must be skipped.
+        /// When it returns true the caller grants a commission and must persist AccumulatedPackageDays
+        /// (incremented here) along with the commission row.
+        /// Cap/overshoot checks apply to RECURRING commissions only; the first purchase always earns
+        /// and anchors the window, but its duration still counts toward the cumulative cap.
+        /// </summary>
+        private bool TryApplyCommissionDayLimits(AffiliateReferral referral, Plan plan, AffiliateSettingsDto s, bool isRecurring, out string skipReason)
+        {
+            // Anchor the real-time window on first attempt (first purchase or first renewal).
+            referral.FirstEligiblePaymentAt ??= DateTime.UtcNow;
+
+            // Limit 1: real-time window
+            if (isRecurring && s.TimeWindowDays > 0 &&
+                DateTime.UtcNow > referral.FirstEligiblePaymentAt.Value.AddDays(s.TimeWindowDays))
+            {
+                skipReason = $"time window of {s.TimeWindowDays} days has expired";
+                return false;
+            }
+
+            // Limit 2: cumulative commissionable package duration
+            if (isRecurring && s.MaxPackageDurationDays > 0)
+            {
+                if (referral.AccumulatedPackageDays >= s.MaxPackageDurationDays)
+                {
+                    skipReason = $"commissionable package cap of {s.MaxPackageDurationDays} days already reached";
+                    return false;
+                }
+                // Skip whole package when it would overshoot the cap
+                if (referral.AccumulatedPackageDays + plan.DurationDays > s.MaxPackageDurationDays)
+                {
+                    skipReason = $"package duration {plan.DurationDays}d would exceed the {s.MaxPackageDurationDays}-day cap";
+                    return false;
+                }
+            }
+
+            skipReason = string.Empty;
+            return true;
+        }
+
+        /// <summary>
         /// Convenience method for Admin-triggered plan assignment.
         /// Accepts optional rate overrides to bypass the plan's default commission percentages.
         /// Pass null to use the plan's configured rates.
@@ -363,6 +410,15 @@ namespace NexClone.Backend.Application.Services
             if (isRecurring && !settings.RecurringEnabled) 
             {
                 _logger.LogWarning("[DEBUG] Recurring commissions are disabled in settings.");
+                return;
+            }
+
+            // Day limits: real-time window + cumulative commissionable package duration
+            if (!TryApplyCommissionDayLimits(referral, plan, settings, isRecurring, out var limitReason))
+            {
+                _logger.LogInformation(
+                    "[Affiliate] Commission skipped for Payment {PaymentId} (referral {ReferralId}): {Reason}.",
+                    paymentId, referral.Id, limitReason);
                 return;
             }
 
@@ -443,6 +499,9 @@ namespace NexClone.Backend.Application.Services
             if (!isRecurring)
                 referral.HasConverted = true;
 
+            // Count this package toward the cumulative commissionable-duration cap.
+            referral.AccumulatedPackageDays += plan.DurationDays;
+
             _db.AffiliateCommissions.Add(commission);
             await _db.SaveChangesAsync();
 
@@ -507,19 +566,14 @@ namespace NexClone.Backend.Application.Services
                 }
             }
 
-            // Enforcement: Max Recurring Months
-            if (isRecurring && settings.MaxRecurringMonths > 0)
+            // Enforcement: day limits (real-time window + cumulative package duration).
+            // Replaces the retired Max-Recurring-Months limit.
+            if (!TryApplyCommissionDayLimits(referral, plan, settings, isRecurring, out var dayLimitReason))
             {
-                var firstCommission = await _db.AffiliateCommissions
-                    .Where(c => c.AffiliateReferralId == referral.Id)
-                    .OrderBy(c => c.CreatedAt)
-                    .FirstOrDefaultAsync();
-
-                if (firstCommission != null && firstCommission.CreatedAt.AddMonths(settings.MaxRecurringMonths) < DateTime.UtcNow)
-                {
-                    _logger.LogInformation("Skipping commission — max recurring months ({MaxMonths}) exceeded for referral {ReferralId}", settings.MaxRecurringMonths, referral.Id);
-                    return; // Just skip
-                }
+                _logger.LogInformation(
+                    "[Affiliate] Commission skipped for Payment {PaymentId} (referral {ReferralId}): {Reason}.",
+                    paymentId, referral.Id, dayLimitReason);
+                return; // Just skip
             }
 
             decimal commissionAmount = 0;
@@ -583,6 +637,9 @@ namespace NexClone.Backend.Application.Services
             // Mark referral as converted on first purchase
             if (!isRecurring)
                 referral.HasConverted = true;
+
+            // Count this package toward the cumulative commissionable-duration cap.
+            referral.AccumulatedPackageDays += plan.DurationDays;
 
             _db.AffiliateCommissions.Add(commission);
             await _db.SaveChangesAsync();

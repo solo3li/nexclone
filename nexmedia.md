@@ -348,6 +348,11 @@ Seeded super-admin: `hamed3alii.3@gmail.com` / see `DbSeeder.SeedAdminUserAsync`
 
 Flow: onboard (`POST api/affiliate/onboard` → AF-id + referralCode) → visitor hits `/api/affiliate-track/click?ref_code=X` → session token (+`aff_session` cookie set by frontend proxy) → referred signup links via refCode or cookie → payment (webhook / PayPal capture / admin AssignPlan) → **FIRST_PURCHASE commission PENDING** → daily job releases after hold → payout request → admin APPROVED→…→PAID. Fraud toggles: `Affiliate.PreventIpFraud` / `PreventFingerprintFraud` block same-IP/fingerprint self-referrals at linking time.
 
+**Recurring day-limits (2026-08-26):** two global settings replace the retired Max-Recurring-Months:
+- **`Affiliate.TimeWindowDays`** (0 = unlimited) — real days since the customer's **first commission-attempted payment** (anchors `AffiliateReferrals.FirstEligiblePaymentAt`); recurring commissions stop once expired.
+- **`Affiliate.MaxPackageDurationDays`** (0 = unlimited) — cumulative plan-days of packages that actually earned a commission (`AffiliateReferrals.AccumulatedPackageDays`); recurring stops at cap.
+Whichever hits first permanently stops recurring earnings for that customer. Cap/overshoot applies to RECURRING only: a package that would overshoot is **skipped whole**; first purchase always earns & anchors but its duration counts toward the cap; refunds do **not** decrement. Enforced by shared `TryApplyCommissionDayLimits` in BOTH commission paths (`ProcessPaymentCommissionAsync` + legacy `CreateCommissionAsync`). Columns added via DbSeeder raw-SQL guard + baseline snapshot updated. Admin: Affiliate Settings page has both fields ("0 for unlimited").
+
 Commission/payout enums are stored **UPPERCASE strings** in Postgres (`'FIRST_PURCHASE'`, `'PENDING'`, …) — match exactly in raw SQL.
 
 ### E2E test suite — 27 checks, all green (2026-08-26)

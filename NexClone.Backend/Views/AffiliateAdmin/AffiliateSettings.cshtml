@@ -75,11 +75,20 @@
         <!-- Limits -->
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.5rem;">
             <div class="bx--form-item">
-                <label for="MaxRecurringMonths" class="bx--label">Max Recurring Months (0 for unlimited)</label>
+                <label for="TimeWindowDays" class="bx--label">Time Window Days (0 for unlimited)</label>
                 <div class="bx--text-input__field-wrapper">
-                    <input id="MaxRecurringMonths" type="number" min="0" max="120" class="bx--text-input"
-                           name="MaxRecurringMonths" value="@Model.MaxRecurringMonths" />
+                    <input id="TimeWindowDays" type="number" min="0" max="36500" class="bx--text-input"
+                           name="TimeWindowDays" value="@Model.TimeWindowDays" />
                 </div>
+                <p class="bx--form__helper-text">Recurring commissions stop once this many real days pass since the customer's first eligible payment.</p>
+            </div>
+            <div class="bx--form-item">
+                <label for="MaxPackageDurationDays" class="bx--label">Max Commissionable Package Duration Days (0 for unlimited)</label>
+                <div class="bx--text-input__field-wrapper">
+                    <input id="MaxPackageDurationDays" type="number" min="0" max="36500" class="bx--text-input"
+                           name="MaxPackageDurationDays" value="@Model.MaxPackageDurationDays" />
+                </div>
+                <p class="bx--form__helper-text">Stops recurring commissions once purchased packages total this many days, even if bought within a month.</p>
             </div>
             <div class="bx--form-item">
                 <label for="MaxInactivityDays" class="bx--label">Max Inactivity Days (0 for unlimited)</label>

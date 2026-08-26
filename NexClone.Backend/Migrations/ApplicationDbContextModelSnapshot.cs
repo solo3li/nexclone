@@ -373,6 +373,12 @@ namespace NexClone.Backend.Migrations
                     b.Property<int>("AffiliateProfileId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("AccumulatedPackageDays")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("FirstEligiblePaymentAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime>("AttributionExpiresAt")
                         .HasColumnType("timestamp with time zone");
 

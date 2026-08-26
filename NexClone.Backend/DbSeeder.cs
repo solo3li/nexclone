@@ -195,6 +195,8 @@ namespace NexClone.Backend
                     ""IsActive"" boolean NOT NULL
                 );
                 ALTER TABLE ""MotionControlModelPricings"" ADD COLUMN IF NOT EXISTS ""CostPerGeneration"" numeric NOT NULL DEFAULT 20.0;
+                ALTER TABLE ""AffiliateReferrals"" ADD COLUMN IF NOT EXISTS ""FirstEligiblePaymentAt"" timestamp with time zone NULL;
+                ALTER TABLE ""AffiliateReferrals"" ADD COLUMN IF NOT EXISTS ""AccumulatedPackageDays"" integer NOT NULL DEFAULT 0;
             ");
 
             if (!await context.AvatarToVideoSettings.AnyAsync())
