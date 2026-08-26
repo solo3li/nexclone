@@ -90,12 +90,13 @@ const MODELS: ModelOption[] = [
     desc: "Advanced video generation with dynamic pricing and duration control",
     descAr: "توليد فيديو متقدم مع تسعير ديناميكي وتحكم في المدة",
     discount: "Flexible",
-    supportedResolutions: ["720p", "1080p", "4k"],
-    prices: { "720p": 5, "1080p": 10, "4k": 15 }
+    supportedResolutions: ["480p", "720p"],
+    prices: { "480p": 3, "720p": 5 }
   }
 ];
 
 const RESOLUTIONS = [
+  { id: "480p", label: "480p (SD)", desc: "Standard Definition", descAr: "دقة قياسية SD" },
   { id: "720p", label: "720p (HD)", desc: "High Definition", descAr: "عالي الدقة HD" },
   { id: "1080p", label: "1080p (FHD)", desc: "Full High Definition", descAr: "دقة كاملة Full HD" },
   { id: "4k", label: "4K (UHD)", desc: "Ultra High Definition", descAr: "دقة سينمائية فائقة 4K" }
@@ -137,11 +138,14 @@ export default function ReferenceToVideoPage() {
   const [selectedModelId, setSelectedModelId] = useState<string>("veo-3.1-fast");
   const [resolution, setResolution] = useState<string>("1080p");
   const [aspectRatio, setAspectRatio] = useState<string>("16:9");
+  const [duration, setDuration] = useState<number>(6); // For Seedance (6-15s)
+  const [mode, setMode] = useState<string>("normal"); // For Mode/Audio
   const [prompt, setPrompt] = useState<string>("");
 
   // Reference Images Slots (Up to 3 distinct frames)
   const [slotFiles, setSlotFiles] = useState<{ [key: number]: File | null }>({ 0: null, 1: null, 2: null });
   const [slotPreviews, setSlotPreviews] = useState<{ [key: number]: string | null }>({ 0: null, 1: null, 2: null });
+  const [dragActiveSlot, setDragActiveSlot] = useState<number | null>(null);
 
   // Dropdown UI Open States
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
@@ -351,6 +355,24 @@ export default function ReferenceToVideoPage() {
     if (fileInputs[index].current) fileInputs[index].current!.value = '';
   };
 
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    setDragActiveSlot(index);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragActiveSlot(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    setDragActiveSlot(null);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleSlotImageChange(index, e.dataTransfer.files[0]);
+    }
+  };
+
   const totalUploadedImagesCount = Object.values(slotFiles).filter(Boolean).length;
 
 
@@ -413,8 +435,9 @@ export default function ReferenceToVideoPage() {
       formData.append("aspectRatio", aspectRatio);
       
       if (currentModel.id.includes("seedance")) {
-        formData.append("duration", "5"); // Default to 5s if not using UI slider
-        formData.append("audio", "false"); // Default to audio off if not using UI toggle
+        formData.append("duration", duration.toString());
+        formData.append("audio", mode.includes("audio_on") ? "true" : "false");
+        formData.append("mode", mode);
       } else {
         formData.append("duration", "8"); // Veo 8s standard
       }
@@ -480,7 +503,7 @@ export default function ReferenceToVideoPage() {
                     <input
                       ref={inputRef}
                       type="file"
-                      accept="image/png, image/jpeg, image/webp"
+                      accept="image/*,video/*,audio/*"
                       onChange={(e) => handleSlotImageChange(slot.key, e.target.files?.[0] || null)}
                       className="hidden"
                     />
@@ -501,9 +524,12 @@ export default function ReferenceToVideoPage() {
                     {!preview ? (
                       <div
                         onClick={() => inputRef.current?.click()}
-                        className="border-2 border-dashed border-white/15 hover:border-emerald-500/50 bg-[#06010f]/80 hover:bg-[#06010f] rounded-xl p-4 aspect-[4/3] flex flex-col items-center justify-center gap-2 cursor-pointer transition-all group text-center"
+                        onDragOver={(e) => handleDragOver(e, slot.key)}
+                        onDragLeave={handleDragLeave}
+                        onDrop={(e) => handleDrop(e, slot.key)}
+                        className={`border-2 border-dashed ${dragActiveSlot === slot.key ? 'border-emerald-400 bg-emerald-500/10' : 'border-white/15 bg-[#06010f]/80 hover:border-emerald-500/50 hover:bg-[#06010f]'} rounded-xl p-4 aspect-[4/3] flex flex-col items-center justify-center gap-2 cursor-pointer transition-all group text-center`}
                       >
-                        <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <div className={`w-9 h-9 rounded-xl ${dragActiveSlot === slot.key ? 'bg-emerald-400/20 scale-110' : 'bg-emerald-500/10 group-hover:scale-110'} border border-emerald-500/20 flex items-center justify-center transition-transform`}>
                           <Upload className="w-4 h-4 text-emerald-400" />
                         </div>
                         <span className="text-[10px] text-white/50 group-hover:text-white transition-colors">
@@ -512,11 +538,23 @@ export default function ReferenceToVideoPage() {
                       </div>
                     ) : (
                       <div className="relative rounded-xl overflow-hidden border border-white/10 bg-black aspect-[4/3] group">
-                        <img
-                          src={preview}
-                          alt={`Slot ${slot.key}`}
-                          className="w-full h-full object-cover"
-                        />
+                        {slotFiles[slot.key]?.type.startsWith('video/') ? (
+                          <video
+                            src={preview}
+                            className="w-full h-full object-cover"
+                            controls
+                          />
+                        ) : slotFiles[slot.key]?.type.startsWith('audio/') ? (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-900">
+                            <audio src={preview} controls className="w-11/12" />
+                          </div>
+                        ) : (
+                          <img
+                            src={preview}
+                            alt={`Slot ${slot.key}`}
+                            className="w-full h-full object-cover"
+                          />
+                        )}
                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <button
                             type="button"
@@ -533,6 +571,7 @@ export default function ReferenceToVideoPage() {
                 );
               })}
             </div>
+
           </div>
 
           {/* Optional Prompt Box */}
@@ -992,9 +1031,61 @@ export default function ReferenceToVideoPage() {
                       </button>
                     );
                   })}
-                </div>
               )}
             </div>
+
+            {/* 4. Duration Slider for Seedance */}
+            {currentModel.id.includes("seedance") && (
+              <div className="space-y-3 pt-2 border-t border-white/5">
+                <div className="space-y-1.5">
+                  <span className="font-bold text-white/80 text-xs flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    <span>{isRtl ? "إعدادات الصوت (Audio Settings):" : "Audio Settings:"}</span>
+                  </span>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {[
+                      { id: "audio_off", labelAr: "بدون صوت", labelEn: "Audio Off" },
+                      { id: "audio_on", labelAr: "مع الصوت", labelEn: "Audio On" }
+                    ].map((m) => (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => setMode(m.id)}
+                        className={`py-1.5 px-2 rounded-lg text-xs font-bold transition-all ${
+                          mode === m.id
+                            ? "bg-violet-600 text-white shadow-md shadow-violet-900/40"
+                            : "bg-white/5 hover:bg-white/10 text-white/60 hover:text-white"
+                        }`}
+                      >
+                        {isRtl ? m.labelAr : m.labelEn}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="font-bold text-white/80 flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-pink-400" />
+                      <span>{isRtl ? "مدة الفيديو:" : "Duration:"}</span>
+                    </span>
+                    <span className="font-bold text-amber-400 font-mono text-sm">{duration} {isRtl ? "ثواني" : "seconds"}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="6"
+                    max="15"
+                    value={duration}
+                    onChange={(e) => setDuration(parseInt(e.target.value))}
+                    className="w-full accent-violet-500 cursor-pointer bg-white/10 rounded-lg h-2"
+                  />
+                  <div className="flex justify-between text-[10px] text-white/40 font-mono">
+                    <span>6s</span>
+                    <span>15s</span>
+                  </div>
+                </div>
+              </div>
+            )}
             {/* Live Summary & Wallet Widget removed */}
 
           </div>

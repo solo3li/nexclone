@@ -111,13 +111,13 @@ const MODELS: ModelOption[] = [
     descAr: "توليد فيديو متقدم مع تسعير ديناميكي وتحكم في المدة",
     discount: "Flexible",
     isPerSecond: true,
-    supportedResolutions: ["720p", "1080p", "4k"],
-    prices: { "720p": 5, "1080p": 10, "4k": 15 }
+    supportedResolutions: ["480p", "720p"],
+    prices: { "480p": 3, "720p": 5 }
   }
 ];
 
 const RESOLUTIONS = [
-  { id: "480p", label: "480p (SD)", desc: "Standard Definition", descAr: "دقة قياسية خفيفة" },
+  { id: "480p", label: "480p (SD)", desc: "Standard Definition", descAr: "دقة قياسية SD" },
   { id: "720p", label: "720p (HD)", desc: "High Definition", descAr: "عالي الدقة HD" },
   { id: "1080p", label: "1080p (FHD)", desc: "Full High Definition", descAr: "دقة كاملة Full HD" },
   { id: "4k", label: "4K (UHD)", desc: "Ultra High Definition", descAr: "دقة سينمائية فائقة 4K" }
@@ -946,7 +946,7 @@ export default function TextToVideoPage() {
                   <input
                     type="range"
                     min="6"
-                    max="30"
+                    max={currentModel.id === "seedance-2.0-mini" ? "15" : "30"}
                     value={duration}
                     onChange={(e) => setDuration(parseInt(e.target.value))}
                     className="w-full accent-violet-500 cursor-pointer bg-white/10 rounded-lg h-2"
@@ -954,7 +954,7 @@ export default function TextToVideoPage() {
                   <div className="flex justify-between text-[10px] text-white/40 font-mono">
                     <span>6s</span>
                     <span>15s</span>
-                    <span>30s</span>
+                    {currentModel.id !== "seedance-2.0-mini" && <span>30s</span>}
                   </div>
                 </div>
               </div>

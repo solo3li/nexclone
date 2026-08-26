@@ -191,25 +191,26 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 }
                 else if (message.ToolType == "reference-to-video")
                 {
-                    var images = new System.Collections.Generic.List<string>();
-                    if (message.Image1Bytes != null) 
-                    { 
-                        using var ms = new System.IO.MemoryStream(message.Image1Bytes); 
-                        string key = await _mediaService.UploadFileAsync(ms, $"ref_{Guid.NewGuid()}.jpg", message.Image1ContentType); 
-                        images.Add(await _mediaService.GetFileUrlAsync(key)); 
+                    var imgUrls = new System.Collections.Generic.List<string>();
+                    string videoUrl = null;
+                    string audioUrl = null;
+
+                    async Task ProcessMedia(byte[] bytes, string contentType)
+                    {
+                        if (bytes == null) return;
+                        using var ms = new System.IO.MemoryStream(bytes);
+                        string ext = contentType.StartsWith("video/") ? ".mp4" : contentType.StartsWith("audio/") ? ".mp3" : ".jpg";
+                        string key = await _mediaService.UploadFileAsync(ms, $"ref_{Guid.NewGuid()}{ext}", contentType);
+                        string url = await _mediaService.GetFileUrlAsync(key);
+                        
+                        if (contentType.StartsWith("video/")) videoUrl = url;
+                        else if (contentType.StartsWith("audio/")) audioUrl = url;
+                        else imgUrls.Add(url);
                     }
-                    if (message.Image2Bytes != null) 
-                    { 
-                        using var ms = new System.IO.MemoryStream(message.Image2Bytes); 
-                        string key = await _mediaService.UploadFileAsync(ms, $"ref_{Guid.NewGuid()}.jpg", message.Image2ContentType); 
-                        images.Add(await _mediaService.GetFileUrlAsync(key)); 
-                    }
-                    if (message.Image3Bytes != null) 
-                    { 
-                        using var ms = new System.IO.MemoryStream(message.Image3Bytes); 
-                        string key = await _mediaService.UploadFileAsync(ms, $"ref_{Guid.NewGuid()}.jpg", message.Image3ContentType); 
-                        images.Add(await _mediaService.GetFileUrlAsync(key)); 
-                    }
+
+                    await ProcessMedia(message.Image1Bytes, message.Image1ContentType);
+                    await ProcessMedia(message.Image2Bytes, message.Image2ContentType);
+                    await ProcessMedia(message.Image3Bytes, message.Image3ContentType);
                     
                     string normalizedAspect = message.AspectRatio switch {
                         "9:16" => "9:16",
@@ -223,15 +224,17 @@ namespace NexClone.Backend.Infrastructure.Consumers
 
                     if (crunModel.Contains("seedance"))
                     {
+                        object audioVal = audioUrl != null ? (object)audioUrl : (object)(message.Mode?.Contains("audio_on") == true);
                         payload = new {
                             model = crunModel,
                             input = new {
-                                img_urls = images,
+                                img_urls = imgUrls.Count > 0 ? imgUrls : null,
+                                video = videoUrl,
+                                audio = audioVal,
                                 prompt = promptText,
                                 resolution = message.Resolution,
                                 aspect_ratio = normalizedAspect,
-                                duration = message.Duration > 0 ? message.Duration : 5,
-                                audio = message.Mode?.Contains("audio_on") == true
+                                duration = message.Duration > 0 ? message.Duration : 6
                             }
                         };
                     }
@@ -240,7 +243,7 @@ namespace NexClone.Backend.Infrastructure.Consumers
                         payload = new {
                             model = crunModel,
                             input = new {
-                                img_urls = images,
+                                img_urls = imgUrls,
                                 prompt = promptText,
                                 resolution = message.Resolution,
                                 aspect_ratio = normalizedAspect

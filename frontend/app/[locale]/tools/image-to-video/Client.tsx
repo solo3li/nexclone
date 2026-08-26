@@ -113,13 +113,13 @@ const MODELS: ModelOption[] = [
     descAr: "توليد فيديو متقدم مع تسعير ديناميكي وتحكم في المدة",
     discount: "Flexible",
     isPerSecond: true,
-    supportedResolutions: ["720p", "1080p", "4k"],
-    prices: { "720p": 5, "1080p": 10, "4k": 15 }
+    supportedResolutions: ["480p", "720p"],
+    prices: { "480p": 3, "720p": 5 }
   }
 ];
 
 const RESOLUTIONS = [
-  { id: "480p", label: "480p (SD)", desc: "Standard Definition", descAr: "دقة قياسية خفيفة" },
+  { id: "480p", label: "480p (SD)", desc: "Standard Definition", descAr: "دقة قياسية SD" },
   { id: "720p", label: "720p (HD)", desc: "High Definition", descAr: "عالي الدقة HD" },
   { id: "1080p", label: "1080p (FHD)", desc: "Full High Definition", descAr: "دقة كاملة Full HD" },
   { id: "4k", label: "4K (UHD)", desc: "Ultra High Definition", descAr: "دقة سينمائية فائقة 4K" }
@@ -158,8 +158,9 @@ export default function ImageToVideoPage() {
   const [duration, setDuration] = useState<number>(6); // For Grok (1-30s)
   const [mode, setMode] = useState<string>("normal"); // For Grok (normal, fun, spicy)
   const [prompt, setPrompt] = useState<string>("");
+  const [isDragging, setIsDragging] = useState(false);
 
-  // Source Image
+  // Single Image State
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -383,6 +384,24 @@ export default function ImageToVideoPage() {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+  
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+  
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleImageChange({ target: { files: e.dataTransfer.files } } as any);
+    }
+  };
+
 
   const handleCopyPrompt = () => {
     if (prompt.trim()) {
@@ -510,9 +529,12 @@ export default function ImageToVideoPage() {
             {!imagePreview ? (
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-white/15 hover:border-violet-500/50 bg-[#06010f]/80 hover:bg-[#06010f] rounded-xl p-8 md:p-10 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-3 group"
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`border-2 border-dashed ${isDragging ? 'border-violet-400 bg-violet-500/10' : 'border-white/15 bg-[#06010f]/80 hover:border-violet-500/50 hover:bg-[#06010f]'} rounded-xl p-8 md:p-10 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-3 group`}
               >
-                <div className="w-14 h-14 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <div className={`w-14 h-14 rounded-2xl ${isDragging ? 'bg-violet-400/20 scale-110' : 'bg-violet-500/10 group-hover:scale-110'} border border-violet-500/20 flex items-center justify-center transition-transform`}>
                   <Upload className="w-6 h-6 text-violet-400" />
                 </div>
                 <div className="space-y-1">
@@ -1049,7 +1071,7 @@ export default function ImageToVideoPage() {
                   <input
                     type="range"
                     min="6"
-                    max="30"
+                    max={currentModel.id === "seedance-2.0-mini" ? "15" : "30"}
                     value={duration}
                     onChange={(e) => setDuration(parseInt(e.target.value))}
                     className="w-full accent-violet-500 cursor-pointer bg-white/10 rounded-lg h-2"
@@ -1057,7 +1079,7 @@ export default function ImageToVideoPage() {
                   <div className="flex justify-between text-[10px] text-white/40 font-mono">
                     <span>6s</span>
                     <span>15s</span>
-                    <span>30s</span>
+                    {currentModel.id !== "seedance-2.0-mini" && <span>30s</span>}
                   </div>
                 </div>
               </div>
