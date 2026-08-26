@@ -46,7 +46,7 @@ namespace NexClone.Backend.API.Controllers.AI
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
-            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "kling_avatar_image2video", 1, null, renderingSpeed, subscriptionId);
+            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "kling_avatar_image2video", 1, null, renderingSpeed, subscriptionId, enforceWallet: false);
             if (!policyResult.IsAllowed) return BadRequest(new { error = policyResult.ErrorMessage });
 
             return Ok(new { 
@@ -68,7 +68,7 @@ namespace NexClone.Backend.API.Controllers.AI
                 usageUnits = (decimal)durationSeconds.Value;
             }
 
-            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "advanced-lip-sync", usageUnits, usageUnits, "vidu-lipsync-std", subscriptionId);
+            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "advanced-lip-sync", usageUnits, usageUnits, "vidu-lipsync-std", subscriptionId, enforceWallet: false);
             if (!policyResult.IsAllowed) return BadRequest(new { error = policyResult.ErrorMessage });
 
             var pricing = await _dbContext.LipSyncModelPricings.FirstOrDefaultAsync(p => p.IsActive);
@@ -353,7 +353,7 @@ namespace NexClone.Backend.API.Controllers.AI
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!Guid.TryParse(userIdStr, out var userId)) return Unauthorized();
 
-            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "kling_motion_control", 1, null, renderingSpeed, subscriptionId);
+            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "kling_motion_control", 1, null, renderingSpeed, subscriptionId, enforceWallet: false);
             if (!policyResult.IsAllowed) return BadRequest(new { error = policyResult.ErrorMessage });
 
             return Ok(new { 
@@ -374,7 +374,7 @@ namespace NexClone.Backend.API.Controllers.AI
             string qualityFormat = $"{model}|{resolution}";
             decimal usageUnits = (model.ToLower().Contains("grok") && duration > 0) ? duration : 1;
 
-            var policyResult = await _usagePolicy.EstimateCostAsync(userId, toolType, usageUnits, usageUnits, qualityFormat, subscriptionId);
+            var policyResult = await _usagePolicy.EstimateCostAsync(userId, toolType, usageUnits, usageUnits, qualityFormat, subscriptionId, enforceWallet: false);
             if (!policyResult.IsAllowed) return BadRequest(new { error = policyResult.ErrorMessage });
 
             return Ok(new { estimatedCost = policyResult.TotalCost });

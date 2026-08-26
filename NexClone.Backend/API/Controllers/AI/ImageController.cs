@@ -46,7 +46,7 @@ namespace NexClone.Backend.API.Controllers.AI
             string qualityFormat = $"{model}|{aspectRatio}";
             decimal usageUnits = 1;
 
-            var policyResult = await _usagePolicy.EstimateCostAsync(userId, toolType, usageUnits, usageUnits, qualityFormat, subscriptionId);
+            var policyResult = await _usagePolicy.EstimateCostAsync(userId, toolType, usageUnits, usageUnits, qualityFormat, subscriptionId, enforceWallet: false);
             if (!policyResult.IsAllowed) return BadRequest(new { error = policyResult.ErrorMessage });
 
             return Ok(new { estimatedCost = policyResult.TotalCost });

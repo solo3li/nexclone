@@ -140,7 +140,7 @@ namespace NexClone.Backend.API.Controllers.AI
                 return Unauthorized();
             }
 
-            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "text-to-voice", request.Text.Length, null, request.Quality, request.SubscriptionId);
+            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "text-to-voice", request.Text.Length, null, request.Quality, request.SubscriptionId, enforceWallet: false);
             if (!policyResult.IsAllowed)
             {
                 Console.WriteLine($"[ESTIMATE] Policy Denied: {policyResult.ErrorMessage}");

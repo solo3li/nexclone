@@ -180,7 +180,7 @@ namespace NexClone.Backend.Application.Services
             return 1m;
         }
 
-        public async Task<PolicyValidationResult> EstimateCostAsync(Guid userId, string toolId, decimal usageAmountForLimits, decimal? usageAmountForCost = null, string quality = "Standard", int? subscriptionId = null)
+        public async Task<PolicyValidationResult> EstimateCostAsync(Guid userId, string toolId, decimal usageAmountForLimits, decimal? usageAmountForCost = null, string quality = "Standard", int? subscriptionId = null, bool enforceWallet = true)
         {
             var user = await _context.Users
                 .Include(u => u.Subscriptions.Where(s => s.Status == "active" || s.Status == "freeze"))
@@ -277,6 +277,19 @@ namespace NexClone.Backend.Application.Services
             decimal remainingCost = totalCost;
             decimal standardToCharge = 0;
             decimal premiumToCharge = 0;
+
+            // Pure quotation mode (estimate endpoints): report the price without wallet checks —
+            // affordability is surfaced by the UI / enforced at charge time.
+            if (!enforceWallet)
+            {
+                return new PolicyValidationResult
+                {
+                    IsAllowed = true,
+                    TotalCost = totalCost,
+                    StandardCreditsCharged = 0,
+                    PremiumCreditsCharged = 0
+                };
+            }
 
             if (allowStandard && !allowPremium)
             {

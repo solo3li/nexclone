@@ -165,7 +165,7 @@ namespace NexClone.Backend.API.Controllers.AI
 
             double duration = request.DurationMinutes <= 0 ? 0.01 : request.DurationMinutes;
 
-            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "voice-to-text", request.FileSizeBytes, (decimal)duration, "Standard", request.SubscriptionId);
+            var policyResult = await _usagePolicy.EstimateCostAsync(userId, "voice-to-text", request.FileSizeBytes, (decimal)duration, "Standard", request.SubscriptionId, enforceWallet: false);
             if (!policyResult.IsAllowed)
                 return BadRequest(new { error = policyResult.ErrorMessage });
 
