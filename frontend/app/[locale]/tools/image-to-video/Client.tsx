@@ -89,20 +89,6 @@ const MODELS: ModelOption[] = [
     prices: { "720p": 15, "1080p": 22.5, "4k": 75 }
   },
   {
-    id: "veo-3.1-quality",
-    family: "veo",
-    name: "Google Veo 3.1 Quality",
-    nameAr: "جوجل فيو 3.1 كواليتي (سينمائي)",
-    badge: "Studio Cinema Grade",
-    badgeAr: "أعلى جودة سينمائية",
-    desc: "Maximum fidelity, preserving facial details and photo realism",
-    descAr: "أقصى دقة للملامح وثبات واقعي لتفاصيل الصورة الأصلية",
-    discount: "-69%",
-    isPerSecond: false,
-    supportedResolutions: ["720p", "1080p", "4k"],
-    prices: { "720p": 225, "1080p": 232.5, "4k": 285 }
-  },
-  {
     id: "grok-imagine",
     family: "grok",
     name: "xAI Grok Imagine",
@@ -216,6 +202,7 @@ export default function ImageToVideoPage() {
                 return {
                   ...m,
                   prices: {
+                    ...m.prices,
                     "480p": found.costPerSecond_480p ?? m.prices["480p"],
                     "720p": found.costPerSecond_720p ?? m.prices["720p"],
                     "1080p": found.costPerSecond_1080p ?? m.prices["1080p"],
@@ -225,6 +212,7 @@ export default function ImageToVideoPage() {
                 return {
                   ...m,
                   prices: {
+                    ...m.prices,
                     "720p": found.fixedCost_720p ?? m.prices["720p"],
                     "1080p": found.fixedCost_1080p ?? m.prices["1080p"],
                     "4k": found.fixedCost_4k ?? m.prices["4k"],
@@ -275,7 +263,7 @@ export default function ImageToVideoPage() {
   };
 
   // Calculate live estimated cost dynamically from backend
-  const [estimatedCost, setEstimatedCost] = useState<number>(37.5);
+  const [estimatedCost, setEstimatedCost] = useState<number | null>(null);
   useEffect(() => {
     let active = true;
     const fetchCost = async () => {
@@ -283,8 +271,12 @@ export default function ImageToVideoPage() {
         const res = await api.get(`/api/video/estimate-tool/image-to-video?model=${currentModel.id}&resolution=${resolution}&duration=${duration}`);
         if (active && res.data?.estimatedCost !== undefined) {
           setEstimatedCost(res.data.estimatedCost);
+        } else if (active) {
+          setEstimatedCost(null);
         }
-      } catch (err) {}
+      } catch (err) {
+        if (active) setEstimatedCost(null);
+      }
     };
     fetchCost();
     return () => { active = false; };
@@ -359,7 +351,7 @@ export default function ImageToVideoPage() {
 
   // Total balance & check sufficiency
   const totalUserCredits = (user?.standardCredits || 0) + (user?.premiumCredits || 0);
-  const hasSufficientCredits = totalUserCredits >= estimatedCost;
+  const hasSufficientCredits = estimatedCost === null || totalUserCredits >= estimatedCost;
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -627,7 +619,7 @@ export default function ImageToVideoPage() {
               </div>
               <div className="flex items-center justify-center sm:justify-start gap-2">
                 <span className="text-xs text-white/50">{isRtl ? "التكلفة:" : "Cost:"}</span>
-                <span className="text-xl font-black text-amber-300 font-mono">{estimatedCost}</span>
+                <span className="text-xl font-black text-amber-300 font-mono">{estimatedCost ?? "—"}</span>
                 <span className="text-xs text-amber-300/70 font-semibold">
                   {currentModel.isPerSecond ? (isRtl ? `نقطة (${duration} ثواني)` : `Credits (${duration}s)`) : (isRtl ? "نقطة / فيديو" : "Credits / Video")}
                 </span>
@@ -657,7 +649,7 @@ export default function ImageToVideoPage() {
               ) : (
                 <>
                   <Zap className="w-4 h-4 text-amber-300" />
-                  <span>{isRtl ? `توليد الفيديو (${estimatedCost} نقطة)` : `Generate Video (${estimatedCost} Credits)`}</span>
+                  <span>{isRtl ? `توليد الفيديو (${estimatedCost ?? "—"} نقطة)` : `Generate Video (${estimatedCost ?? "—"} Credits)`}</span>
                 </>
               )}
             </button>

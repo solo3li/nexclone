@@ -222,7 +222,6 @@
 
     var veoFast = t2vPricings.FirstOrDefault(p => p.ModelName == "veo 3.1 Fast") ?? new NexClone.Backend.Core.Entities.TextToVideoModelPricing { FixedCost_720p = 30.0m, FixedCost_1080p = 37.5m, FixedCost_4k = 90.0m };
     var veoLite = t2vPricings.FirstOrDefault(p => p.ModelName == "veo 3.1 Lite") ?? new NexClone.Backend.Core.Entities.TextToVideoModelPricing { FixedCost_720p = 15.0m, FixedCost_1080p = 22.5m, FixedCost_4k = 75.0m };
-    var veoQuality = t2vPricings.FirstOrDefault(p => p.ModelName == "veo 3.1 Quality") ?? new NexClone.Backend.Core.Entities.TextToVideoModelPricing { FixedCost_720p = 225.0m, FixedCost_1080p = 232.5m, FixedCost_4k = 285.0m };
     var grokVideo = t2vPricings.FirstOrDefault(p => p.ModelName.ToLower().Contains("grok")) ?? new NexClone.Backend.Core.Entities.TextToVideoModelPricing { CostPerSecond_480p = 2.4m, CostPerSecond_720p = 4.5m, CostPerSecond_1080p = 8.0m };
 
     <!-- General Operational Limits Card -->
@@ -298,28 +297,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Veo Quality -->
-            <div style="background: #fbfbfb; border: 1px solid #e8e8e8; border-radius: 6px; padding: 1.25rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                    <span style="font-weight: 700; font-size: 1rem; color: #0f62fe;">Veo 3.1 Quality</span>
-                    <span style="font-size: 0.8rem; color: #6f6f6f;">Durations: 4s, 6s, 8s</span>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
-                    <div>
-                        <label class="bx--label" style="font-size: 0.8rem;">720p Cost (Credits)</label>
-                        <input type="number" step="0.1" min="0" name="ModelCosts[veo 3.1 Quality|720p]" class="bx--text-input" value="@veoQuality.FixedCost_720p" />
-                    </div>
-                    <div>
-                        <label class="bx--label" style="font-size: 0.8rem;">1080p Cost (Credits)</label>
-                        <input type="number" step="0.1" min="0" name="ModelCosts[veo 3.1 Quality|1080p]" class="bx--text-input" value="@veoQuality.FixedCost_1080p" />
-                    </div>
-                    <div>
-                        <label class="bx--label" style="font-size: 0.8rem;">4k Cost (Credits)</label>
-                        <input type="number" step="0.1" min="0" name="ModelCosts[veo 3.1 Quality|4k]" class="bx--text-input" value="@veoQuality.FixedCost_4k" />
-                    </div>
-                </div>
-            </div>
         </div>
 
         <div style="background: #f4f4f4; padding: 1rem 1.25rem; border-radius: 4px; border-left: 4px solid #0f62fe;">
@@ -384,7 +361,6 @@
 
     var veoFast = i2vPricings.FirstOrDefault(p => p.ModelName == "veo 3.1 Fast") ?? new NexClone.Backend.Core.Entities.ImageToVideoModelPricing { FixedCost_720p = 30.0m, FixedCost_1080p = 37.5m, FixedCost_4k = 90.0m };
     var veoLite = i2vPricings.FirstOrDefault(p => p.ModelName == "veo 3.1 Lite") ?? new NexClone.Backend.Core.Entities.ImageToVideoModelPricing { FixedCost_720p = 15.0m, FixedCost_1080p = 22.5m, FixedCost_4k = 75.0m };
-    var veoQuality = i2vPricings.FirstOrDefault(p => p.ModelName == "veo 3.1 Quality") ?? new NexClone.Backend.Core.Entities.ImageToVideoModelPricing { FixedCost_720p = 225.0m, FixedCost_1080p = 232.5m, FixedCost_4k = 285.0m };
 
     <!-- General Operational Limits Card -->
     <div style="background: #ffffff; padding: 1.75rem; border: 1px solid #e0e0e0; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); margin-bottom: 2rem;">
@@ -464,28 +440,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Veo Quality -->
-            <div style="background: #fbfbfb; border: 1px solid #e8e8e8; border-radius: 6px; padding: 1.25rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                    <span style="font-weight: 700; font-size: 1rem; color: #0f62fe;">Veo 3.1 Quality (r2v)</span>
-                    <span style="font-size: 0.8rem; color: #6f6f6f;">Duration: 8s | Up to 3 Reference Images</span>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
-                    <div>
-                        <label class="bx--label" style="font-size: 0.8rem;">720p Cost (Credits)</label>
-                        <input type="number" step="0.1" min="0" name="ModelCosts[veo 3.1 Quality|720p]" class="bx--text-input" value="@veoQuality.FixedCost_720p" />
-                    </div>
-                    <div>
-                        <label class="bx--label" style="font-size: 0.8rem;">1080p Cost (Credits)</label>
-                        <input type="number" step="0.1" min="0" name="ModelCosts[veo 3.1 Quality|1080p]" class="bx--text-input" value="@veoQuality.FixedCost_1080p" />
-                    </div>
-                    <div>
-                        <label class="bx--label" style="font-size: 0.8rem;">4k Cost (Credits)</label>
-                        <input type="number" step="0.1" min="0" name="ModelCosts[veo 3.1 Quality|4k]" class="bx--text-input" value="@veoQuality.FixedCost_4k" />
-                    </div>
-                </div>
-            </div>
         </div>
 
         <div style="background: #f4f4f4; padding: 1rem 1.25rem; border-radius: 4px; border-left: 4px solid #0f62fe;">
@@ -509,7 +463,6 @@
 
     var veoFast = i2vPricings.FirstOrDefault(p => p.ModelName == "veo 3.1 Fast") ?? new NexClone.Backend.Core.Entities.ImageToVideoModelPricing { FixedCost_720p = 30.0m, FixedCost_1080p = 37.5m, FixedCost_4k = 90.0m };
     var veoLite = i2vPricings.FirstOrDefault(p => p.ModelName == "veo 3.1 Lite") ?? new NexClone.Backend.Core.Entities.ImageToVideoModelPricing { FixedCost_720p = 15.0m, FixedCost_1080p = 22.5m, FixedCost_4k = 75.0m };
-    var veoQuality = i2vPricings.FirstOrDefault(p => p.ModelName == "veo 3.1 Quality") ?? new NexClone.Backend.Core.Entities.ImageToVideoModelPricing { FixedCost_720p = 225.0m, FixedCost_1080p = 232.5m, FixedCost_4k = 285.0m };
     var grokVideo = i2vPricings.FirstOrDefault(p => p.ModelName.ToLower().Contains("grok")) ?? new NexClone.Backend.Core.Entities.ImageToVideoModelPricing { CostPerSecond_480p = 2.4m, CostPerSecond_720p = 4.5m, CostPerSecond_1080p = 8.0m };
 
     <!-- General Operational Limits Card -->
@@ -587,28 +540,6 @@
                     <div>
                         <label class="bx--label" style="font-size: 0.8rem;">4k Cost (Credits)</label>
                         <input type="number" step="0.1" min="0" name="ModelCosts[veo 3.1 Lite|4k]" class="bx--text-input" value="@veoLite.FixedCost_4k" />
-                    </div>
-                </div>
-            </div>
-
-            <!-- Veo Quality -->
-            <div style="background: #fbfbfb; border: 1px solid #e8e8e8; border-radius: 6px; padding: 1.25rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                    <span style="font-weight: 700; font-size: 1rem; color: #0f62fe;">Veo 3.1 Quality (i2v)</span>
-                    <span style="font-size: 0.8rem; color: #6f6f6f;">Durations: 4s, 6s, 8s | Start + End Frame Support</span>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
-                    <div>
-                        <label class="bx--label" style="font-size: 0.8rem;">720p Cost (Credits)</label>
-                        <input type="number" step="0.1" min="0" name="ModelCosts[veo 3.1 Quality|720p]" class="bx--text-input" value="@veoQuality.FixedCost_720p" />
-                    </div>
-                    <div>
-                        <label class="bx--label" style="font-size: 0.8rem;">1080p Cost (Credits)</label>
-                        <input type="number" step="0.1" min="0" name="ModelCosts[veo 3.1 Quality|1080p]" class="bx--text-input" value="@veoQuality.FixedCost_1080p" />
-                    </div>
-                    <div>
-                        <label class="bx--label" style="font-size: 0.8rem;">4k Cost (Credits)</label>
-                        <input type="number" step="0.1" min="0" name="ModelCosts[veo 3.1 Quality|4k]" class="bx--text-input" value="@veoQuality.FixedCost_4k" />
                     </div>
                 </div>
             </div>

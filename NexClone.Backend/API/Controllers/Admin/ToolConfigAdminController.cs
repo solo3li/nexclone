@@ -93,7 +93,6 @@ namespace NexClone.Backend.API.Controllers.Admin
                     {
                         new Core.Entities.TextToVideoModelPricing { ModelName = "veo 3.1 Fast", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 30.0m, FixedCost_1080p = 37.5m, FixedCost_4k = 90.0m, AllowedWallet = "Standard", IsActive = true },
                         new Core.Entities.TextToVideoModelPricing { ModelName = "veo 3.1 Lite", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 15.0m, FixedCost_1080p = 22.5m, FixedCost_4k = 75.0m, AllowedWallet = "Standard", IsActive = true },
-                        new Core.Entities.TextToVideoModelPricing { ModelName = "veo 3.1 Quality", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 225.0m, FixedCost_1080p = 232.5m, FixedCost_4k = 285.0m, AllowedWallet = "Standard", IsActive = true },
                         new Core.Entities.TextToVideoModelPricing { ModelName = "grok-imagine", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 2.4m, CostPerSecond_720p = 4.5m, CostPerSecond_1080p = 8.0m, AllowedWallet = "Standard", IsActive = true }
                     };
                     _context.TextToVideoModelPricings.AddRange(t2vPricings);
@@ -120,7 +119,6 @@ namespace NexClone.Backend.API.Controllers.Admin
                     {
                         new Core.Entities.ImageToVideoModelPricing { ModelName = "veo 3.1 Fast", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 30.0m, FixedCost_1080p = 37.5m, FixedCost_4k = 90.0m, AllowedWallet = "Standard", IsActive = true },
                         new Core.Entities.ImageToVideoModelPricing { ModelName = "veo 3.1 Lite", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 15.0m, FixedCost_1080p = 22.5m, FixedCost_4k = 75.0m, AllowedWallet = "Standard", IsActive = true },
-                        new Core.Entities.ImageToVideoModelPricing { ModelName = "veo 3.1 Quality", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 225.0m, FixedCost_1080p = 232.5m, FixedCost_4k = 285.0m, AllowedWallet = "Standard", IsActive = true },
                         new Core.Entities.ImageToVideoModelPricing { ModelName = "grok-imagine", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 2.4m, CostPerSecond_720p = 4.5m, CostPerSecond_1080p = 8.0m, AllowedWallet = "Standard", IsActive = true }
                     };
                     _context.ImageToVideoModelPricings.AddRange(i2vPricings);
@@ -528,14 +526,7 @@ namespace NexClone.Backend.API.Controllers.Admin
                     if (ModelCosts.ContainsKey("veo 3.1 Lite|1080p")) veoLite.FixedCost_1080p = ModelCosts["veo 3.1 Lite|1080p"];
                     if (ModelCosts.ContainsKey("veo 3.1 Lite|4k")) veoLite.FixedCost_4k = ModelCosts["veo 3.1 Lite|4k"];
 
-                    // Veo Quality
-                    var veoQuality = await _context.TextToVideoModelPricings.FirstOrDefaultAsync(p => p.ModelName == "veo 3.1 Quality");
-                    if (veoQuality == null) { veoQuality = new Core.Entities.TextToVideoModelPricing { ModelName = "veo 3.1 Quality", ProviderName = "CrunAI", BillingType = "PerRequest" }; _context.TextToVideoModelPricings.Add(veoQuality); }
-                    veoQuality.IsActive = config.IsActive;
-                    veoQuality.AllowedWallet = defaultWallet;
-                    if (ModelCosts.ContainsKey("veo 3.1 Quality|720p")) veoQuality.FixedCost_720p = ModelCosts["veo 3.1 Quality|720p"];
-                    if (ModelCosts.ContainsKey("veo 3.1 Quality|1080p")) veoQuality.FixedCost_1080p = ModelCosts["veo 3.1 Quality|1080p"];
-                    if (ModelCosts.ContainsKey("veo 3.1 Quality|4k")) veoQuality.FixedCost_4k = ModelCosts["veo 3.1 Quality|4k"];
+                    // Veo Quality removed from the product.
 
                     // Grok Imagine Video
                     var grokPricing = await _context.TextToVideoModelPricings.FirstOrDefaultAsync(p => p.ModelName.ToLower().Contains("grok"));
@@ -584,14 +575,7 @@ namespace NexClone.Backend.API.Controllers.Admin
                     if (ModelCosts.ContainsKey("veo 3.1 Lite|1080p")) veoLite.FixedCost_1080p = ModelCosts["veo 3.1 Lite|1080p"];
                     if (ModelCosts.ContainsKey("veo 3.1 Lite|4k")) veoLite.FixedCost_4k = ModelCosts["veo 3.1 Lite|4k"];
 
-                    // Veo Quality
-                    var veoQuality = await _context.ImageToVideoModelPricings.FirstOrDefaultAsync(p => p.ModelName == "veo 3.1 Quality");
-                    if (veoQuality == null) { veoQuality = new Core.Entities.ImageToVideoModelPricing { ModelName = "veo 3.1 Quality", ProviderName = "CrunAI", BillingType = "PerRequest" }; _context.ImageToVideoModelPricings.Add(veoQuality); }
-                    veoQuality.IsActive = config.IsActive;
-                    veoQuality.AllowedWallet = defaultWallet;
-                    if (ModelCosts.ContainsKey("veo 3.1 Quality|720p")) veoQuality.FixedCost_720p = ModelCosts["veo 3.1 Quality|720p"];
-                    if (ModelCosts.ContainsKey("veo 3.1 Quality|1080p")) veoQuality.FixedCost_1080p = ModelCosts["veo 3.1 Quality|1080p"];
-                    if (ModelCosts.ContainsKey("veo 3.1 Quality|4k")) veoQuality.FixedCost_4k = ModelCosts["veo 3.1 Quality|4k"];
+                    // Veo Quality removed from the product.
 
                     // Grok Imagine Video
                     var grokPricing = await _context.ImageToVideoModelPricings.FirstOrDefaultAsync(p => p.ModelName.ToLower().Contains("grok"));

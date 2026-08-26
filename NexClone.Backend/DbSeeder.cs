@@ -208,9 +208,14 @@ namespace NexClone.Backend
                 context.TextToVideoModelPricings.AddRange(
                     new TextToVideoModelPricing { ModelName = "veo 3.1 Fast", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 30.0m, FixedCost_1080p = 37.5m, FixedCost_4k = 90.0m, AllowedWallet = "Standard", IsActive = true },
                     new TextToVideoModelPricing { ModelName = "veo 3.1 Lite", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 15.0m, FixedCost_1080p = 22.5m, FixedCost_4k = 75.0m, AllowedWallet = "Standard", IsActive = true },
-                    new TextToVideoModelPricing { ModelName = "veo 3.1 Quality", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 225.0m, FixedCost_1080p = 232.5m, FixedCost_4k = 285.0m, AllowedWallet = "Standard", IsActive = true },
                     new TextToVideoModelPricing { ModelName = "grok-imagine", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 2.4m, CostPerSecond_720p = 4.5m, CostPerSecond_1080p = 8.0m, AllowedWallet = "Standard", IsActive = true }
                 );
+            // Retire the removed "Veo 3.1 Quality" model on existing databases.
+            var t2vQualityRows = await context.TextToVideoModelPricings.Where(p => p.ModelName == "veo 3.1 Quality").ToListAsync();
+            if (t2vQualityRows.Count > 0)
+            {
+                context.TextToVideoModelPricings.RemoveRange(t2vQualityRows);
+            }
 
             if (!await context.ImageToVideoSettings.AnyAsync())
                 context.ImageToVideoSettings.Add(new ImageToVideoSetting { Id = 1, IsActive = true, MaxImageFileSizeMb = 25, MaxDurationSeconds = 20, MaxPromptLength = 5000, MaxConcurrentOperations = 10 });
@@ -218,9 +223,14 @@ namespace NexClone.Backend
                 context.ImageToVideoModelPricings.AddRange(
                     new ImageToVideoModelPricing { ModelName = "veo 3.1 Fast", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 30.0m, FixedCost_1080p = 37.5m, FixedCost_4k = 90.0m, AllowedWallet = "Standard", IsActive = true },
                     new ImageToVideoModelPricing { ModelName = "veo 3.1 Lite", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 15.0m, FixedCost_1080p = 22.5m, FixedCost_4k = 75.0m, AllowedWallet = "Standard", IsActive = true },
-                    new ImageToVideoModelPricing { ModelName = "veo 3.1 Quality", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 225.0m, FixedCost_1080p = 232.5m, FixedCost_4k = 285.0m, AllowedWallet = "Standard", IsActive = true },
                     new ImageToVideoModelPricing { ModelName = "grok-imagine", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 2.4m, CostPerSecond_720p = 4.5m, CostPerSecond_1080p = 8.0m, AllowedWallet = "Standard", IsActive = true }
                 );
+            // Retire the removed "Veo 3.1 Quality" model on existing databases.
+            var i2vQualityRows = await context.ImageToVideoModelPricings.Where(p => p.ModelName == "veo 3.1 Quality").ToListAsync();
+            if (i2vQualityRows.Count > 0)
+            {
+                context.ImageToVideoModelPricings.RemoveRange(i2vQualityRows);
+            }
 
             if (!await context.LipSyncSettings.AnyAsync())
                 context.LipSyncSettings.Add(new LipSyncSetting { Id = 1, IsActive = true, MaxVideoFileSizeMb = 100, MaxAudioFileSizeMb = 25, MaxAudioDurationSeconds = 120, MaxConcurrentOperations = 10 });

@@ -254,19 +254,16 @@ namespace NexClone.Backend.Infrastructure.Consumers
 
             if (toolType == "reference-to-video")
             {
-                if (m == "veo-3.1-fast" || m == "veo-fast" || m == "google/veo3-1-fast-t2v" || m == "google/veo3-1-fast-r2v")
+                // "Veo 3.1 Quality" was removed; generic "veo" aliases now resolve to Fast.
+                if (m == "veo-3.1-fast" || m == "veo-fast" || m == "veo-3.1" || m == "veo" || m == "google/veo3-1-fast-t2v" || m == "google/veo3-1-fast-r2v")
                     return "google/veo3-1-fast-r2v";
                 if (m == "veo-3.1-lite" || m == "veo-lite" || m == "google/veo3-1-lite-t2v" || m == "google/veo3-1-lite-r2v")
                     return "google/veo3-1-lite-r2v";
-                if (m == "veo-3.1-quality" || m == "veo-3.1" || m == "veo" || m == "veo-quality" || m == "google/veo3-1-t2v" || m == "google/veo3-1-r2v")
-                    return "google/veo3-1-r2v";
             }
-            if (m == "veo-3.1-fast" || m == "veo-fast" || m == "google/veo3-1-fast-t2v")
+            if (m == "veo-3.1-fast" || m == "veo-fast" || m == "veo-3.1" || m == "veo" || m == "google/veo3-1-fast-t2v")
                 return toolType == "image-to-video" ? "google/veo3-1-fast-i2v" : "google/veo3-1-fast-t2v";
             if (m == "veo-3.1-lite" || m == "veo-lite" || m == "google/veo3-1-lite-t2v")
                 return toolType == "image-to-video" ? "google/veo3-1-lite-i2v" : "google/veo3-1-lite-t2v";
-            if (m == "veo-3.1-quality" || m == "veo-3.1" || m == "veo" || m == "veo-quality" || m == "google/veo3-1-t2v")
-                return toolType == "image-to-video" ? "google/veo3-1-i2v" : "google/veo3-1-t2v";
             if (m == "grok" || m == "grok-imagine" || m == "grok-imagine/t2v")
                 return toolType == "image-to-video" ? "grok-imagine/i2v" : "grok-imagine/t2v";
             return model;

@@ -1,0 +1,68 @@
+# Local development infrastructure only.
+# Backend and frontend run natively on the host machine:
+#   Backend : cd NexClone.Backend && dotnet run            -> http://localhost:5000
+#   Frontend: cd frontend && npm install && npm run dev    -> http://localhost:3000
+#
+# Start/stop:
+#   docker compose -f docker-compose.local.yml up -d
+#   docker compose -f docker-compose.local.yml down
+#
+# Credentials match NexClone.Backend/appsettings.Development.json,
+# NexClone.Backend/Properties/launchSettings.json and frontend/.env.local.
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: nexclone-local-postgres
+    environment:
+      - POSTGRES_DB=nexclone_dev
+      - POSTGRES_USER=nexclone
+      - POSTGRES_PASSWORD=devpassword123!
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - pgdata_local:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexclone -d nexclone_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: nexclone-local-minio
+    environment:
+      - MINIO_ROOT_USER=devminioadmin
+      - MINIO_ROOT_PASSWORD=devminiosecret123!
+    command: server /data --address ":9001" --console-address ":9002"
+    ports:
+      # S3 API (matches S3_ENDPOINT / MINIO_PUBLIC_ENDPOINT = 127.0.0.1:9001)
+      - "127.0.0.1:9001:9001"
+      # Web console
+      - "127.0.0.1:9002:9002"
+    volumes:
+      - miniodata_local:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: nexclone-local-redis
+    command: redis-server --requirepass "devredis123!"
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redisdata_local:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "devredis123!", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata_local:
+  miniodata_local:
+  redisdata_local:

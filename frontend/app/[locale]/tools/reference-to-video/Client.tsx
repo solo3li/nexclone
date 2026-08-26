@@ -80,18 +80,6 @@ const MODELS: ModelOption[] = [
     discount: "-84%",
     supportedResolutions: ["720p", "1080p", "4k"],
     prices: { "720p": 15, "1080p": 22.5, "4k": 75 }
-  },
-  {
-    id: "veo-3.1-quality",
-    name: "Google Veo 3.1 Quality",
-    nameAr: "جوجل فيو 3.1 كواليتي (سينمائي)",
-    badge: "Studio Cinema Grade",
-    badgeAr: "أعلى جودة سينمائية",
-    desc: "Maximum visual fidelity and seamless transition blending",
-    descAr: "أعلى دقة تفاصيل ونقاء بصري مع اندماج سلس بين الصور",
-    discount: "-69%",
-    supportedResolutions: ["720p", "1080p", "4k"],
-    prices: { "720p": 225, "1080p": 232.5, "4k": 285 }
   }
 ];
 
@@ -195,6 +183,7 @@ export default function ReferenceToVideoPage() {
               return {
                 ...m,
                 prices: {
+                  ...m.prices,
                   "720p": found.fixedCost_720p ?? m.prices["720p"],
                   "1080p": found.fixedCost_1080p ?? m.prices["1080p"],
                   "4k": found.fixedCost_4k ?? m.prices["4k"],
@@ -244,7 +233,7 @@ export default function ReferenceToVideoPage() {
   };
 
   // Calculate live estimated cost dynamically from backend
-  const [estimatedCost, setEstimatedCost] = useState<number>(37.5);
+  const [estimatedCost, setEstimatedCost] = useState<number | null>(null);
   useEffect(() => {
     let active = true;
     const fetchCost = async () => {
@@ -252,8 +241,12 @@ export default function ReferenceToVideoPage() {
         const res = await api.get(`/api/video/estimate-tool/reference-to-video?model=${currentModel.id}&resolution=${resolution}&duration=8`);
         if (active && res.data?.estimatedCost !== undefined) {
           setEstimatedCost(res.data.estimatedCost);
+        } else if (active) {
+          setEstimatedCost(null);
         }
-      } catch (err) {}
+      } catch (err) {
+        if (active) setEstimatedCost(null);
+      }
     };
     fetchCost();
     return () => { active = false; };
@@ -328,7 +321,7 @@ export default function ReferenceToVideoPage() {
 
   // Total balance & check sufficiency
   const totalUserCredits = (user?.standardCredits || 0) + (user?.premiumCredits || 0);
-  const hasSufficientCredits = totalUserCredits >= estimatedCost;
+  const hasSufficientCredits = estimatedCost === null || totalUserCredits >= estimatedCost;
 
   // Image Upload handler for specific slot
   const handleSlotImageChange = (index: number, file: File | null) => {
@@ -612,7 +605,7 @@ export default function ReferenceToVideoPage() {
               </div>
               <div className="flex items-center justify-center sm:justify-start gap-2">
                 <span className="text-xs text-white/50">{isRtl ? "التكلفة:" : "Cost:"}</span>
-                <span className="text-xl font-black text-amber-300 font-mono">{estimatedCost}</span>
+                <span className="text-xl font-black text-amber-300 font-mono">{estimatedCost ?? "—"}</span>
                 <span className="text-xs text-amber-300/70 font-semibold">{isRtl ? "نقطة / فيديو" : "Credits / Video"}</span>
               </div>
             </div>
@@ -640,7 +633,7 @@ export default function ReferenceToVideoPage() {
               ) : (
                 <>
                   <Zap className="w-4 h-4 text-amber-300" />
-                  <span>{isRtl ? `توليد الفيديو (${estimatedCost} نقطة)` : `Generate Video (${estimatedCost} Credits)`}</span>
+                  <span>{isRtl ? `توليد الفيديو (${estimatedCost ?? "—"} نقطة)` : `Generate Video (${estimatedCost ?? "—"} Credits)`}</span>
                 </>
               )}
             </button>

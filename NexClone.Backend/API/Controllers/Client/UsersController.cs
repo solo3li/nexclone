@@ -228,6 +228,15 @@ namespace NexClone.Backend.API.Controllers.Client
                 existingSub.EndDate = (existingSub.EndDate > DateTime.UtcNow ? existingSub.EndDate : DateTime.UtcNow).AddDays(plan.DurationDays);
                 existingSub.Status = "active";
                 newSub = existingSub;
+
+                // Cancel any other stacked active/frozen subscriptions (different plans) so only this one remains.
+                var otherStackedSubs = await _context.Subscriptions
+                    .Where(s => s.UserId == userId && s.Id != existingSub.Id && (s.Status == "active" || s.Status == "freeze"))
+                    .ToListAsync();
+                foreach (var sub in otherStackedSubs)
+                {
+                    sub.Status = "canceled";
+                }
             }
             else
             {
@@ -246,6 +255,14 @@ namespace NexClone.Backend.API.Controllers.Client
                     }
                 }
 
+                // Cancel all other active/frozen subscriptions so the user ends up with exactly one plan.
+                var competingSubs = await _context.Subscriptions
+                    .Where(s => s.UserId == userId && (s.Status == "active" || s.Status == "freeze"))
+                    .ToListAsync();
+                foreach (var sub in competingSubs)
+                {
+                    sub.Status = "canceled";
+                }
 
                 newSub = new Subscription
                 {

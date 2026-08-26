@@ -102,7 +102,7 @@ function AdvancedLipSyncPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Cost Estimation
-  const [estimatedCost, setEstimatedCost] = useState<number>(user?.activePlan?.lipSyncCostPerGeneration || 1);
+  const [estimatedCost, setEstimatedCost] = useState<number | null>(null);
   const [isPerSecond, setIsPerSecond] = useState<boolean>(false);
   const [isEstimating, setIsEstimating] = useState(false);
 
@@ -145,7 +145,7 @@ function AdvancedLipSyncPage() {
   // Dynamic cost calculation based on audio / video duration
   useEffect(() => {
     if (!isAuthenticated || !user) {
-      setEstimatedCost(1);
+      setEstimatedCost(null);
       return;
     }
     const effectiveDuration = audioDuration ?? videoDuration ?? 5; // Default to 5 seconds (1 block)
@@ -156,7 +156,10 @@ function AdvancedLipSyncPage() {
       .then(res => {
         if (res.data) {
           if (res.data.estimatedCost !== undefined || res.data.totalCost !== undefined) {
-            setEstimatedCost(res.data.estimatedCost ?? res.data.totalCost);
+            const cost = res.data.estimatedCost ?? res.data.totalCost;
+            setEstimatedCost(typeof cost === "number" ? cost : null);
+          } else {
+            setEstimatedCost(null);
           }
           if (res.data.isPerSecond !== undefined) {
             setIsPerSecond(res.data.isPerSecond);
@@ -164,9 +167,8 @@ function AdvancedLipSyncPage() {
         }
       })
       .catch(() => {
-        // Fallback
-        const blocks = Math.max(1, Math.ceil(effectiveDuration / 5));
-        setEstimatedCost(blocks);
+        // Never guess the price client-side; show unknown until backend responds.
+        setEstimatedCost(null);
         setIsPerSecond(false);
       })
       .finally(() => setIsEstimating(false));
@@ -270,7 +272,7 @@ function AdvancedLipSyncPage() {
   }, [selectedModelId]);
 
   const totalUserCredits = (user?.standardCredits || 0) + (user?.premiumCredits || 0);
-  const hasSufficientCredits = totalUserCredits >= estimatedCost;
+  const hasSufficientCredits = estimatedCost === null || totalUserCredits >= estimatedCost;
 
   // Submit Handler
   const handleStartLipSync = async () => {
@@ -678,7 +680,7 @@ function AdvancedLipSyncPage() {
               </div>
               <div className="flex items-center justify-center sm:justify-start gap-2">
                 <span className="text-xs text-white/50">{isRtl ? "التكلفة التقديرية:" : "Estimated Cost:"}</span>
-                <span className="text-xl font-black text-amber-300 font-mono">{estimatedCost}</span>
+                <span className="text-xl font-black text-amber-300 font-mono">{estimatedCost ?? "—"}</span>
                 <span className="text-xs text-amber-300/70 font-semibold">{isRtl ? "نقطة" : "Credits"}</span>
                 {(audioDuration || videoDuration) && (
                   <span className="text-[10px] text-white/40 font-mono">
@@ -713,7 +715,7 @@ function AdvancedLipSyncPage() {
               ) : (
                 <>
                   <Zap className="w-4 h-4 text-amber-300" />
-                  <span>{isRtl ? `بدء مزامنة الشفاه (${estimatedCost} نقطة)` : `Start Lip Sync (${estimatedCost} Credits)`}</span>
+                  <span>{isRtl ? `بدء مزامنة الشفاه (${estimatedCost ?? "—"} نقطة)` : `Start Lip Sync (${estimatedCost ?? "—"} Credits)`}</span>
                 </>
               )}
             </button>

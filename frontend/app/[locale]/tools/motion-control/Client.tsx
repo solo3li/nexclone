@@ -90,7 +90,7 @@ function MotionControlPage() {
   const [copied, setCopied] = useState(false);
 
   // Cost Estimation
-  const [estimatedCost, setEstimatedCost] = useState<number>(user?.activePlan?.avatarVideoCostPerGeneration || 5);
+  const [estimatedCost, setEstimatedCost] = useState<number | null>(null);
   const [isEstimating, setIsEstimating] = useState(false);
 
   // Refs
@@ -122,11 +122,14 @@ function MotionControlPage() {
       estimateMotionControl(qs)
         .then((data: any) => {
           if (data && (data.estimatedCost !== undefined || data.totalCost !== undefined)) {
-            if (isMounted) setEstimatedCost(data.estimatedCost || data.totalCost || 5);
+            const cost = data.estimatedCost ?? data.totalCost;
+            if (isMounted) setEstimatedCost(typeof cost === "number" ? cost : null);
+          } else if (isMounted) {
+            setEstimatedCost(null);
           }
         })
         .catch(() => {
-          if (isMounted) setEstimatedCost(renderingSpeed === "pro" ? 5 : 3);
+          if (isMounted) setEstimatedCost(null);
         })
         .finally(() => {
           if (isMounted) setIsEstimating(false);
@@ -212,7 +215,7 @@ function MotionControlPage() {
   };
 
   const totalUserCredits = (user?.standardCredits || 0) + (user?.premiumCredits || 0);
-  const hasSufficientCredits = totalUserCredits >= estimatedCost;
+  const hasSufficientCredits = estimatedCost === null || totalUserCredits >= estimatedCost;
 
 
   const handleCopyPrompt = () => {
@@ -606,7 +609,7 @@ function MotionControlPage() {
               </div>
               <div className="flex items-center justify-center sm:justify-start gap-2">
                 <span className="text-xs text-white/50">{isRtl ? "التكلفة:" : "Cost:"}</span>
-                <span className="text-xl font-black text-cyan-300 font-mono">{estimatedCost}</span>
+                <span className="text-xl font-black text-cyan-300 font-mono">{estimatedCost ?? "—"}</span>
                 <span className="text-xs text-cyan-300/70 font-semibold">{isRtl ? "نقطة" : "Credits"}</span>
               </div>
             </div>
@@ -634,7 +637,7 @@ function MotionControlPage() {
               ) : (
                 <>
                   <Zap className="w-4 h-4 text-cyan-300" />
-                  <span>{isRtl ? `بدء نسخ الحركة (${estimatedCost} نقطة)` : `Start Motion Transfer (${estimatedCost} Credits)`}</span>
+                  <span>{isRtl ? `بدء نسخ الحركة (${estimatedCost ?? "—"} نقطة)` : `Start Motion Transfer (${estimatedCost ?? "—"} Credits)`}</span>
                 </>
               )}
             </button>
