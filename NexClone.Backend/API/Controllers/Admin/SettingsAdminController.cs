@@ -47,7 +47,17 @@ namespace NexClone.Backend.API.Controllers.Admin
                 { "Concurrency_motion_control", ("10", "Motion transfer concurrent processing limit") },
                 { "Concurrency_email", ("10", "System emails concurrent processing limit") },
                 { "FreePlan.FingerprintCheck", ("true", "Enable fingerprint check for free trial") },
-                { "FreePlan.MaxUsesPerDevice", ("1", "Max free trial claims per device") }
+                { "FreePlan.MaxUsesPerDevice", ("1", "Max free trial claims per device") },
+                // S3 / Storage provider — managed from Admin Panel
+                { "S3.Provider",        ("", "Storage provider label (e.g. MinIO, Railway, AWS S3)") },
+                { "S3.Endpoint",        ("", "S3-compatible endpoint without protocol (e.g. bucket.railway.app or s3.amazonaws.com)") },
+                { "S3.AccessKey",       ("", "S3 Access Key ID") },
+                { "S3.SecretKey",       ("", "S3 Secret Access Key") },
+                { "S3.BucketName",      ("", "Bucket name to store uploaded files") },
+                { "S3.Region",          ("", "Bucket region (e.g. us-east-1, eu-north-1)") },
+                { "S3.UseSSL",          ("true", "Use HTTPS/SSL when connecting to S3 endpoint (true/false)") },
+                { "S3.PublicEndpoint",  ("", "Public-facing URL base for generating download links (leave blank to use main endpoint)") },
+                { "S3.PublicUseSSL",    ("true", "Use HTTPS for public presigned URLs (true/false)") }
             };
 
             bool changesMade = false;

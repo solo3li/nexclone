@@ -350,4 +350,133 @@
             <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Trial Settings"]</button>
         </div>
     </form>
+
+    <!-- 6. S3 / STORAGE PROVIDER -->
+    <form action="@Url.Action("SaveSettings", "SettingsAdmin")" method="post" style="background: #ffffff; padding: 2rem; border: 1px solid #e0e0e0; margin-bottom: 2rem; border-top: 4px solid #198038; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        @Html.AntiForgeryToken()
+
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; border-bottom: 1px solid #e0e0e0; padding-bottom: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 1.25rem;">🪣</span>
+                <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">@Localizer["File Storage Provider (S3 / MinIO)"]</h3>
+            </div>
+            <span class="bx--tag bx--tag--green">Storage</span>
+        </div>
+
+        <p style="color: #525252; margin-bottom: 0.75rem; font-size: 0.875rem;">
+            @Localizer["Configure where uploaded files (images, videos, audio) are stored. Supports any S3-compatible provider: self-hosted MinIO, Railway Object Storage, AWS S3, Cloudflare R2, DigitalOcean Spaces, etc."]
+        </p>
+
+        <!-- Priority note -->
+        <div style="background: #defbe6; border-left: 4px solid #198038; padding: 0.75rem 1rem; margin-bottom: 1.25rem; font-size: 0.8125rem; color: #0e6027;">
+            ✅ <strong>@Localizer["Admin Panel Priority:"]</strong>
+            @Localizer["Settings here override environment variables. Changes apply within ~1 minute without restarting the server."]
+        </div>
+
+        <!-- Security note -->
+        <div style="background: #fdf4e3; border-left: 4px solid #f1c21b; padding: 0.75rem 1rem; margin-bottom: 1.5rem; font-size: 0.8125rem; color: #5d4037;">
+            ⚠️ <strong>@Localizer["Security Notice:"]</strong>
+            @Localizer["Access Key and Secret Key are stored in the database. Ensure your database and server are properly secured before entering production credentials here."]
+        </div>
+
+        <!-- Provider label -->
+        <div class="bx--form-item" style="margin-bottom: 1.25rem;">
+            <label for="S3_Provider" class="bx--label">@Localizer["Provider Name / Label"]</label>
+            <input id="S3_Provider" type="text" class="bx--text-input" name="settings[S3.Provider]"
+                   value="@GetVal("S3.Provider")" placeholder="e.g. MinIO Local, Railway, AWS S3, Cloudflare R2">
+            <div class="bx--form__helper-text">@Localizer["For your reference only — helps you identify which provider is active."]</div>
+        </div>
+
+        <!-- Endpoint + Region -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+            <div class="bx--form-item">
+                <label for="S3_Endpoint" class="bx--label">@Localizer["S3 Endpoint (without protocol)"]</label>
+                <input id="S3_Endpoint" type="text" class="bx--text-input" name="settings[S3.Endpoint]"
+                       value="@GetVal("S3.Endpoint")" placeholder="e.g. bucket.railway.app or s3.amazonaws.com">
+                <div class="bx--form__helper-text">@Localizer["Do NOT include http:// or https:// — just the hostname."]</div>
+            </div>
+            <div class="bx--form-item">
+                <label for="S3_Region" class="bx--label">@Localizer["Region"]</label>
+                <input id="S3_Region" type="text" class="bx--text-input" name="settings[S3.Region]"
+                       value="@GetVal("S3.Region")" placeholder="e.g. us-east-1">
+                <div class="bx--form__helper-text">@Localizer["Use 'auto' for Cloudflare R2."]</div>
+            </div>
+        </div>
+
+        <!-- Bucket -->
+        <div class="bx--form-item" style="margin-bottom: 1.25rem;">
+            <label for="S3_BucketName" class="bx--label">@Localizer["Bucket Name"]</label>
+            <input id="S3_BucketName" type="text" class="bx--text-input" name="settings[S3.BucketName]"
+                   value="@GetVal("S3.BucketName")" placeholder="e.g. nexmedia-files">
+        </div>
+
+        <!-- Access Key + Secret Key -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+            <div class="bx--form-item">
+                <label for="S3_AccessKey" class="bx--label">@Localizer["Access Key ID"]</label>
+                <input id="S3_AccessKey" type="text" class="bx--text-input" name="settings[S3.AccessKey]"
+                       value="@GetVal("S3.AccessKey")" placeholder="Your Access Key ID" autocomplete="off">
+            </div>
+            <div class="bx--form-item">
+                <label for="S3_SecretKey" class="bx--label">@Localizer["Secret Access Key"]</label>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <input id="S3_SecretKey" type="password" class="bx--text-input" name="settings[S3.SecretKey]"
+                           value="@GetVal("S3.SecretKey")" placeholder="Your Secret Key" autocomplete="new-password" style="flex: 1;">
+                    <button type="button" onclick="var f=document.getElementById('S3_SecretKey'); f.type=f.type==='password'?'text':'password';"
+                            class="bx--btn bx--btn--ghost bx--btn--sm" title="Show/Hide" style="padding: 0.5rem;">👁</button>
+                </div>
+                <div class="bx--form__helper-text">@Localizer["Click the eye icon to reveal."]</div>
+            </div>
+        </div>
+
+        <!-- UseSSL -->
+        <h4 style="font-size: 0.875rem; font-weight: 600; color: #525252; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px;">
+            @Localizer["SSL / HTTPS Settings"]
+        </h4>
+
+        @{
+            bool s3UseSSL = GetVal("S3.UseSSL", "true") == "true";
+            bool s3PublicUseSSL = GetVal("S3.PublicUseSSL", "true") == "true";
+        }
+
+        <div class="bx--form-item bx--checkbox-wrapper" style="margin-bottom: 1rem;">
+            <input type="hidden" name="settings[S3.UseSSL]" value="false" id="hidden_S3_UseSSL" />
+            <input id="S3_UseSSL" class="bx--checkbox" type="checkbox" value="true" name="settings[S3.UseSSL]"
+                   @(s3UseSSL ? "checked" : "") onchange="document.getElementById('hidden_S3_UseSSL').disabled = this.checked;">
+            <label for="S3_UseSSL" class="bx--checkbox-label">
+                <span class="bx--checkbox-label-text">@Localizer["Use SSL/HTTPS for the main S3 connection"] <em style="color:#525252; font-weight:400;">(disable for local MinIO on HTTP)</em></span>
+            </label>
+            <script>document.getElementById('hidden_S3_UseSSL').disabled = document.getElementById('S3_UseSSL').checked;</script>
+        </div>
+
+        <!-- Public endpoint section -->
+        <h4 style="font-size: 0.875rem; font-weight: 600; color: #525252; margin-top: 1.5rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px;">
+            @Localizer["Public URL Endpoint (for Presigned Links)"]
+        </h4>
+        <p style="font-size: 0.8125rem; color: #6f6f6f; margin-bottom: 1rem;">
+            @Localizer["If your S3 internal connection endpoint is different from the publicly accessible URL (e.g. MinIO inside Docker), set the public hostname here. Crun AI and other external services will use this URL to download your uploaded files."]
+        </p>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem; align-items: start;">
+            <div class="bx--form-item">
+                <label for="S3_PublicEndpoint" class="bx--label">@Localizer["Public Endpoint (without protocol)"]</label>
+                <input id="S3_PublicEndpoint" type="text" class="bx--text-input" name="settings[S3.PublicEndpoint]"
+                       value="@GetVal("S3.PublicEndpoint")" placeholder="e.g. 127.0.0.1:9101 or files.yourdomain.com">
+                <div class="bx--form__helper-text">@Localizer["Leave blank to use the main endpoint for public links too."]</div>
+            </div>
+            <div class="bx--form-item bx--checkbox-wrapper" style="padding-top: 1.75rem;">
+                <input type="hidden" name="settings[S3.PublicUseSSL]" value="false" id="hidden_S3_PublicUseSSL" />
+                <input id="S3_PublicUseSSL" class="bx--checkbox" type="checkbox" value="true" name="settings[S3.PublicUseSSL]"
+                       @(s3PublicUseSSL ? "checked" : "") onchange="document.getElementById('hidden_S3_PublicUseSSL').disabled = this.checked;">
+                <label for="S3_PublicUseSSL" class="bx--checkbox-label">
+                    <span class="bx--checkbox-label-text">@Localizer["Use HTTPS for public links"]</span>
+                </label>
+                <script>document.getElementById('hidden_S3_PublicUseSSL').disabled = document.getElementById('S3_PublicUseSSL').checked;</script>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 1.5rem;">
+            <button type="submit" class="bx--btn bx--btn--primary">@Localizer["Save Storage Settings"]</button>
+        </div>
+    </form>
 </div>

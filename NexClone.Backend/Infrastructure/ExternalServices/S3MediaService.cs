@@ -15,6 +15,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
         private static DateTime _lastFetched = DateTime.MinValue;
         private static System.Collections.Generic.List<NexClone.Backend.Core.Entities.AppSetting> _cachedSettings;
         private static readonly System.Threading.SemaphoreSlim _semaphore = new System.Threading.SemaphoreSlim(1, 1);
+        private static readonly TimeSpan _cacheTtl = TimeSpan.FromMinutes(1); // 1 min so admin panel changes apply quickly
 
         private IMinioClient _minioClient;
         private IMinioClient _publicMinioClient;
@@ -33,18 +34,23 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
 
         private async Task EnsureClientInitializedAsync()
         {
-            if (_minioClient != null) return;
+            // Re-initialize when cache expires so admin panel changes take effect
+            bool cacheExpired = DateTime.UtcNow - _lastFetched > _cacheTtl;
+            if (_minioClient != null && !cacheExpired) return;
 
             System.Collections.Generic.List<NexClone.Backend.Core.Entities.AppSetting> appSettings;
-            if (DateTime.UtcNow - _lastFetched > TimeSpan.FromMinutes(5))
+            if (cacheExpired)
             {
                 await _semaphore.WaitAsync();
                 try
                 {
-                    if (DateTime.UtcNow - _lastFetched > TimeSpan.FromMinutes(5))
+                    if (DateTime.UtcNow - _lastFetched > _cacheTtl)
                     {
                         _cachedSettings = await _context.AppSettings.AsNoTracking().ToListAsync();
                         _lastFetched = DateTime.UtcNow;
+                        // Force client rebuild so new settings are applied
+                        _minioClient = null;
+                        _publicMinioClient = null;
                     }
                 }
                 finally
@@ -52,36 +58,59 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
                     _semaphore.Release();
                 }
             }
-            appSettings = _cachedSettings;
-            var dbEndpoint = appSettings.FirstOrDefault(s => s.Key == "S3.Endpoint")?.Value;
-            var dbAccessKey = appSettings.FirstOrDefault(s => s.Key == "S3.AccessKey")?.Value;
-            var dbSecretKey = appSettings.FirstOrDefault(s => s.Key == "S3.SecretKey")?.Value;
-            var dbRegion = appSettings.FirstOrDefault(s => s.Key == "S3.Region")?.Value;
-            var dbBucketName = appSettings.FirstOrDefault(s => s.Key == "S3.BucketName")?.Value;
 
-            var envEndpoint = _configuration["S3_ENDPOINT"] ?? _configuration["Minio:Endpoint"];
-            var envRegion = _configuration["S3_REGION"] ?? _configuration["Minio:Region"];
-            var envBucketName = _configuration["S3_BUCKET_NAME"] ?? _configuration["Minio:BucketName"];
+            if (_minioClient != null) return; // Already rebuilt by another thread
 
-            var endpoint = !string.IsNullOrWhiteSpace(envEndpoint) ? envEndpoint :
-                           (!string.IsNullOrWhiteSpace(dbEndpoint) ? dbEndpoint : "s3.eu-north-1.amazonaws.com");
-            
-            var envAccessKey = _configuration["AWS_ACCESS_KEY_ID"] ?? _configuration["Minio:AccessKey"];
+            appSettings = _cachedSettings ?? new System.Collections.Generic.List<NexClone.Backend.Core.Entities.AppSetting>();
+
+            // -----------------------------------------------------------------------
+            // Priority: DB AppSettings (Admin Panel) > Environment Variables > Default
+            // -----------------------------------------------------------------------
+            var dbEndpoint      = appSettings.FirstOrDefault(s => s.Key == "S3.Endpoint")?.Value;
+            var dbAccessKey     = appSettings.FirstOrDefault(s => s.Key == "S3.AccessKey")?.Value;
+            var dbSecretKey     = appSettings.FirstOrDefault(s => s.Key == "S3.SecretKey")?.Value;
+            var dbRegion        = appSettings.FirstOrDefault(s => s.Key == "S3.Region")?.Value;
+            var dbBucketName    = appSettings.FirstOrDefault(s => s.Key == "S3.BucketName")?.Value;
+            var dbUseSSL        = appSettings.FirstOrDefault(s => s.Key == "S3.UseSSL")?.Value;
+            var dbPublicEndpoint = appSettings.FirstOrDefault(s => s.Key == "S3.PublicEndpoint")?.Value;
+            var dbPublicUseSSL  = appSettings.FirstOrDefault(s => s.Key == "S3.PublicUseSSL")?.Value;
+
+            var envEndpoint  = _configuration["S3_ENDPOINT"]         ?? _configuration["Minio:Endpoint"];
+            var envRegion    = _configuration["S3_REGION"]            ?? _configuration["Minio:Region"];
+            var envBucketName = _configuration["S3_BUCKET_NAME"]     ?? _configuration["Minio:BucketName"];
+            var envAccessKey = _configuration["AWS_ACCESS_KEY_ID"]    ?? _configuration["Minio:AccessKey"];
             var envSecretKey = _configuration["AWS_SECRET_ACCESS_KEY"] ?? _configuration["Minio:SecretKey"];
-            
-            var accessKey = !string.IsNullOrWhiteSpace(envAccessKey) ? envAccessKey : (!string.IsNullOrWhiteSpace(dbAccessKey) ? dbAccessKey : "YOUR_AWS_ACCESS_KEY");
-            var secretKey = !string.IsNullOrWhiteSpace(envSecretKey) ? envSecretKey : (!string.IsNullOrWhiteSpace(dbSecretKey) ? dbSecretKey : "YOUR_AWS_SECRET_KEY");
-            
-            var region = !string.IsNullOrWhiteSpace(envRegion) ? envRegion :
-                         (!string.IsNullOrWhiteSpace(dbRegion) ? dbRegion : "eu-north-1");
-            _region = region;
-            _endpoint = endpoint;
-            
-            _defaultBucket = !string.IsNullOrWhiteSpace(envBucketName) ? envBucketName :
-                             (!string.IsNullOrWhiteSpace(dbBucketName) ? dbBucketName : "nexmedia-ai-files");
+            var envUseSsl    = _configuration["S3_USE_SSL"]            ?? _configuration["Minio:UseSSL"];
+            var envPublicEndpoint = _configuration["MINIO_PUBLIC_ENDPOINT"] ?? _configuration["Minio:PublicEndpoint"];
+            var envPublicUseSSL   = _configuration["Minio:PublicUseSSL"];
 
-            var useSslStr = _configuration["S3_USE_SSL"] ?? _configuration["Minio:UseSSL"];
-            bool useSsl = string.IsNullOrWhiteSpace(useSslStr) || useSslStr.ToLower() == "true";
+            // DB wins if set; fall back to env; fall back to hard-coded default
+            var endpoint  = !string.IsNullOrWhiteSpace(dbEndpoint)   ? dbEndpoint
+                          : !string.IsNullOrWhiteSpace(envEndpoint)   ? envEndpoint
+                          : "s3.eu-north-1.amazonaws.com";
+
+            var accessKey = !string.IsNullOrWhiteSpace(dbAccessKey)  ? dbAccessKey
+                          : !string.IsNullOrWhiteSpace(envAccessKey)  ? envAccessKey
+                          : "YOUR_AWS_ACCESS_KEY";
+
+            var secretKey = !string.IsNullOrWhiteSpace(dbSecretKey)  ? dbSecretKey
+                          : !string.IsNullOrWhiteSpace(envSecretKey)  ? envSecretKey
+                          : "YOUR_AWS_SECRET_KEY";
+
+            var region    = !string.IsNullOrWhiteSpace(dbRegion)     ? dbRegion
+                          : !string.IsNullOrWhiteSpace(envRegion)     ? envRegion
+                          : "eu-north-1";
+
+            _region   = region;
+            _endpoint = endpoint;
+
+            _defaultBucket = !string.IsNullOrWhiteSpace(dbBucketName)  ? dbBucketName
+                           : !string.IsNullOrWhiteSpace(envBucketName)  ? envBucketName
+                           : "nexmedia-ai-files";
+
+            // UseSSL: DB > env > default true
+            var useSslRaw = !string.IsNullOrWhiteSpace(dbUseSSL) ? dbUseSSL : envUseSsl;
+            bool useSsl   = string.IsNullOrWhiteSpace(useSslRaw) || useSslRaw.ToLower() == "true";
 
             _minioClient = new MinioClient()
                 .WithEndpoint(endpoint)
@@ -90,11 +119,12 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
                 .WithSSL(useSsl)
                 .Build();
 
-            var publicEndpoint = _configuration["MINIO_PUBLIC_ENDPOINT"] ?? _configuration["Minio:PublicEndpoint"];
+            // Public endpoint for presigned URL generation (DB > env)
+            var publicEndpoint = !string.IsNullOrWhiteSpace(dbPublicEndpoint) ? dbPublicEndpoint : envPublicEndpoint;
             if (!string.IsNullOrWhiteSpace(publicEndpoint))
             {
-                var publicUseSslStr = _configuration["Minio:PublicUseSSL"];
-                bool publicUseSsl = string.IsNullOrWhiteSpace(publicUseSslStr) ? useSsl : publicUseSslStr.ToLower() == "true";
+                var publicUseSslRaw = !string.IsNullOrWhiteSpace(dbPublicUseSSL) ? dbPublicUseSSL : envPublicUseSSL;
+                bool publicUseSsl   = string.IsNullOrWhiteSpace(publicUseSslRaw) ? useSsl : publicUseSslRaw.ToLower() == "true";
 
                 _publicMinioClient = new MinioClient()
                     .WithEndpoint(publicEndpoint)
@@ -102,6 +132,10 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
                     .WithRegion(region)
                     .WithSSL(publicUseSsl)
                     .Build();
+            }
+            else
+            {
+                _publicMinioClient = null;
             }
         }
 
