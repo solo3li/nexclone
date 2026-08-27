@@ -21,3 +21,742 @@
 2026-08-26 19:22:47.128 +03:00 [INF] [Corr:] Server desktop-rjppsk4:17532:8fad56c5 all the dispatchers started
 2026-08-26 19:25:54.101 +03:00 [WRN] [Corr:26aa733aa0ce] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
 2026-08-26 19:26:50.761 +03:00 [WRN] [Corr:eb3e1e544af4] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-26 20:08:05.953 +03:00 [INF] [Corr:] Start installing Hangfire SQL objects...
+2026-08-26 20:08:06.158 +03:00 [INF] [Corr:] Hangfire SQL objects installed.
+2026-08-26 20:08:06.753 +03:00 [INF] [Corr:] Media Cleanup Background Service started.
+2026-08-26 20:08:06.753 +03:00 [INF] [Corr:] SubscriptionStatusService is starting.
+2026-08-26 20:08:06.765 +03:00 [INF] [Corr:] Searching for processed media older than 8/12/2026 5:08:06 PM...
+2026-08-26 20:08:06.782 +03:00 [WRN] [Corr:] The query uses a row limiting operator ('Skip'/'Take') without an 'OrderBy' operator. This may lead to unpredictable results. If the 'Distinct' operator is used after 'OrderBy', then make sure to use the 'OrderBy' operator after 'Distinct' as the ordering would otherwise get erased.
+2026-08-26 20:08:06.804 +03:00 [INF] [Corr:] Successfully cleaned up 0 media files in total.
+2026-08-26 20:08:06.979 +03:00 [INF] [Corr:] Starting Hangfire Server using job storage: 'PostgreSQL Server: Host: 127.0.0.1, DB: nexclone_dev, Schema: hangfire'
+2026-08-26 20:08:06.980 +03:00 [INF] [Corr:] Using the following options for PostgreSQL job storage:
+2026-08-26 20:08:06.980 +03:00 [INF] [Corr:]     Queue poll interval: 00:00:15.
+2026-08-26 20:08:06.981 +03:00 [INF] [Corr:]     Invisibility timeout: 00:30:00.
+2026-08-26 20:08:06.981 +03:00 [INF] [Corr:]     Use sliding invisibility timeout: False.
+2026-08-26 20:08:06.981 +03:00 [INF] [Corr:] Using the following options for Hangfire Server:
+    Worker count: 40
+    Listening queues: 'default', 'avatar_video_queue', 'lipsync_queue', 'tts_queue', 'vtt_queue', 'motion_control_queue', 'email_queue'
+    Shutdown timeout: 00:00:15
+    Schedule polling interval: 00:00:15
+2026-08-26 20:08:07.043 +03:00 [INF] [Corr:] Server desktop-rjppsk4:6856:5a4d91e4 successfully announced in 33.9476 ms
+2026-08-26 20:08:07.052 +03:00 [INF] [Corr:] Server desktop-rjppsk4:6856:5a4d91e4 is starting the registered dispatchers: ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler...
+2026-08-26 20:08:07.069 +03:00 [INF] [Corr:] 1 servers were removed due to timeout
+2026-08-26 20:08:07.179 +03:00 [INF] [Corr:] Server desktop-rjppsk4:6856:5a4d91e4 all the dispatchers started
+2026-08-26 20:09:45.211 +03:00 [WRN] [Corr:850332159b29] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-26 20:10:09.800 +03:00 [WRN] [Corr:735ab9f49d21] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-26 20:11:48.961 +03:00 [WRN] [Corr:dea135c99260] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-26 20:11:54.329 +03:00 [WRN] [Corr:401bde044041] The query uses the 'First'/'FirstOrDefault' operator without 'OrderBy' and filter operators. This may lead to unpredictable results.
+2026-08-26 22:55:55.777 +03:00 [WRN] [Corr:] hangfire:recurring-jobs:lock: Failed to remove lock
+Npgsql.NpgsqlException (0x80004005): Exception while reading from stream
+ ---> System.IO.IOException: Unable to read data from the transport connection: An established connection was aborted by the software in your host machine..
+ ---> System.Net.Sockets.SocketException (10053): An established connection was aborted by the software in your host machine.
+   at System.Net.Sockets.NetworkStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   --- End of inner exception stack trace ---
+   at System.Net.Sockets.NetworkStream.Read(Byte[] buffer, Int32 offset, Int32 count)
+   at Npgsql.Internal.NpgsqlReadBuffer.<Ensure>g__EnsureLong|54_0(NpgsqlReadBuffer buffer, Int32 count, Boolean async, Boolean readingNotifications)
+   at Npgsql.Internal.NpgsqlReadBuffer.<Ensure>g__EnsureLong|54_0(NpgsqlReadBuffer buffer, Int32 count, Boolean async, Boolean readingNotifications)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.Internal.NpgsqlConnector.ReadMessageLong(Boolean async, DataRowLoadingMode dataRowLoadingMode, Boolean readingNotifications, Boolean isReadingPrependedMessage)
+   at System.Runtime.CompilerServices.PoolingAsyncValueTaskMethodBuilder`1.StateMachineBox`1.System.Threading.Tasks.Sources.IValueTaskSource<TResult>.GetResult(Int16 token)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult(Boolean async, Boolean isConsuming, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlDataReader.NextResult()
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteReader(Boolean async, CommandBehavior behavior, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlCommand.ExecuteNonQuery(Boolean async, CancellationToken cancellationToken)
+   at Dapper.SqlMapper.ExecuteImpl(IDbConnection cnn, CommandDefinition& command) in /_/Dapper/SqlMapper.cs:line 528
+   at Hangfire.PostgreSql.PostgreSqlDistributedLock.LockHandler.TryRemoveLock(String resource, IDbConnection connection, PostgreSqlStorageOptions options, Boolean onlyExpired)
+2026-08-26 22:55:55.930 +03:00 [WRN] [Corr:] hangfire:recurring-jobs:lock: Failed to acquire lock
+System.InvalidOperationException: Connection is not open
+   at Npgsql.ThrowHelper.ThrowInvalidOperationException(String message)
+   at Npgsql.NpgsqlConnection.CheckReady()
+   at Npgsql.NpgsqlConnection.BeginTransaction(Boolean async, IsolationLevel level, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlDistributedLock.TransactionLockHandler.TryLock(IDbConnection connection, String schemaName, String resource)
+   at Hangfire.PostgreSql.PostgreSqlDistributedLock.LockHandler.Lock(String resource, TimeSpan timeout, IDbConnection connection, PostgreSqlStorageOptions options)
+2026-08-26 22:56:17.987 +03:00 [ERR] [Corr:] Execution DelayedJobScheduler is in the Failed state now due to an exception, execution will be retried in no more than 00:00:16
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlConnection.AcquireLock(String resource, TimeSpan timeout)
+   at Hangfire.Server.DelayedJobScheduler.UseConnectionDistributedLock[T](JobStorage storage, Func`2 action) in C:\projects\hangfire-525\src\Hangfire.Core\Server\DelayedJobScheduler.cs:line 407
+   at Hangfire.Server.DelayedJobScheduler.Execute(BackgroundProcessContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\DelayedJobScheduler.cs:line 148
+   at Hangfire.Server.BackgroundProcessDispatcherBuilder.ExecuteProcess(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessDispatcherBuilder.cs:line 82
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 22:56:19.114 +03:00 [ERR] [Corr:] Execution RecurringJobScheduler is in the Failed state now due to an exception, execution will be retried in no more than 00:00:16
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlConnection.AcquireLock(String resource, TimeSpan timeout)
+   at Hangfire.Server.RecurringJobScheduler.UseConnectionDistributedLock[T](JobStorage storage, Func`2 action)
+   at Hangfire.Server.RecurringJobScheduler.Execute(BackgroundProcessContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\RecurringJobScheduler.cs:line 176
+   at Hangfire.Server.BackgroundProcessDispatcherBuilder.ExecuteProcess(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessDispatcherBuilder.cs:line 82
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 22:56:19.721 +03:00 [WRN] [Corr:] Server desktop-rjppsk4:6856:5a4d91e4 encountered an exception while sending heartbeat
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.Heartbeat(String serverId)
+   at Hangfire.Server.ServerHeartbeatProcess.Execute(BackgroundProcessContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\ServerHeartbeatProcess.cs:line 42
+2026-08-26 22:56:23.153 +03:00 [ERR] [Corr:] Execution Worker is in the Failed state now due to an exception, execution will be retried in no more than 00:05:00
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlJobQueue.<>c__DisplayClass13_0.<Dequeue_Transaction>b__0()
+   at Hangfire.PostgreSql.Utils.Utils.TryExecute[T](Func`1 func, T& result, Func`2 swallowException, Nullable`1 tryCount)
+   at Hangfire.PostgreSql.PostgreSqlJobQueue.Dequeue_Transaction(String[] queues, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlJobQueue.Dequeue(String[] queues, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlConnection.FetchNextJob(String[] queues, CancellationToken cancellationToken)
+   at Hangfire.Server.Worker.Execute(BackgroundProcessContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\Worker.cs:line 107
+   at Hangfire.Server.BackgroundProcessDispatcherBuilder.ExecuteProcess(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessDispatcherBuilder.cs:line 82
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 22:56:51.761 +03:00 [WRN] [Corr:] Server desktop-rjppsk4:6856:5a4d91e4 encountered an exception while sending heartbeat
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.Heartbeat(String serverId)
+   at Hangfire.Server.ServerHeartbeatProcess.Execute(BackgroundProcessContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\ServerHeartbeatProcess.cs:line 42
+2026-08-26 22:57:23.828 +03:00 [WRN] [Corr:] Server desktop-rjppsk4:6856:5a4d91e4 encountered an exception while sending heartbeat
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.Heartbeat(String serverId)
+   at Hangfire.Server.ServerHeartbeatProcess.Execute(BackgroundProcessContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\ServerHeartbeatProcess.cs:line 42
+2026-08-26 22:57:55.891 +03:00 [WRN] [Corr:] Server desktop-rjppsk4:6856:5a4d91e4 encountered an exception while sending heartbeat
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.Heartbeat(String serverId)
+   at Hangfire.Server.ServerHeartbeatProcess.Execute(BackgroundProcessContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\ServerHeartbeatProcess.cs:line 42
+2026-08-26 22:58:03.965 +03:00 [ERR] [Corr:] Execution ServerWatchdog is in the Failed state now due to an exception, execution will be retried in no more than 00:00:16
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.RemoveTimedOutServers(TimeSpan timeOut)
+   at Hangfire.Server.ServerWatchdog.Execute(BackgroundProcessContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\ServerWatchdog.cs:line 44
+   at Hangfire.Server.BackgroundProcessDispatcherBuilder.ExecuteProcess(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessDispatcherBuilder.cs:line 82
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 22:58:04.230 +03:00 [ERR] [Corr:] Execution CountersAggregator is in the Failed state now due to an exception, execution will be retried in no more than 00:00:16
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection(DbConnection dedicatedConnection, Action`1 action)
+   at Hangfire.PostgreSql.CountersAggregator.Execute(CancellationToken cancellationToken)
+   at Hangfire.Server.ServerProcessDispatcherBuilder.ExecuteComponent(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\ServerProcessDispatcherBuilder.cs:line 65
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 22:58:27.969 +03:00 [WRN] [Corr:] Server desktop-rjppsk4:6856:5a4d91e4 encountered an exception while sending heartbeat
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.Heartbeat(String serverId)
+   at Hangfire.Server.ServerHeartbeatProcess.Execute(BackgroundProcessContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\ServerHeartbeatProcess.cs:line 42
+2026-08-26 22:59:00.026 +03:00 [WRN] [Corr:] Server desktop-rjppsk4:6856:5a4d91e4 encountered an exception while sending heartbeat
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.Heartbeat(String serverId)
+   at Hangfire.Server.ServerHeartbeatProcess.Execute(BackgroundProcessContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\ServerHeartbeatProcess.cs:line 42
+2026-08-26 22:59:32.096 +03:00 [WRN] [Corr:] Server desktop-rjppsk4:6856:5a4d91e4 encountered an exception while sending heartbeat
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.Heartbeat(String serverId)
+   at Hangfire.Server.ServerHeartbeatProcess.Execute(BackgroundProcessContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\ServerHeartbeatProcess.cs:line 42
+2026-08-26 23:00:04.181 +03:00 [WRN] [Corr:] Server desktop-rjppsk4:6856:5a4d91e4 encountered an exception while sending heartbeat
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.Heartbeat(String serverId)
+   at Hangfire.Server.ServerHeartbeatProcess.Execute(BackgroundProcessContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\ServerHeartbeatProcess.cs:line 42
+2026-08-26 23:00:36.233 +03:00 [WRN] [Corr:] Server desktop-rjppsk4:6856:5a4d91e4 encountered an exception while sending heartbeat
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.Heartbeat(String serverId)
+   at Hangfire.Server.ServerHeartbeatProcess.Execute(BackgroundProcessContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\ServerHeartbeatProcess.cs:line 42
+2026-08-26 23:01:08.297 +03:00 [WRN] [Corr:] Server desktop-rjppsk4:6856:5a4d91e4 encountered an exception while sending heartbeat
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.Heartbeat(String serverId)
+   at Hangfire.Server.ServerHeartbeatProcess.Execute(BackgroundProcessContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\ServerHeartbeatProcess.cs:line 42
+2026-08-26 23:01:40.340 +03:00 [WRN] [Corr:] Server desktop-rjppsk4:6856:5a4d91e4 encountered an exception while sending heartbeat
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.Heartbeat(String serverId)
+   at Hangfire.Server.ServerHeartbeatProcess.Execute(BackgroundProcessContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\ServerHeartbeatProcess.cs:line 42
+2026-08-26 23:01:40.373 +03:00 [ERR] [Corr:] Server desktop-rjppsk4:6856:5a4d91e4 will be restarted due to server time out
+2026-08-26 23:01:40.376 +03:00 [INF] [Corr:] Server desktop-rjppsk4:6856:5a4d91e4 caught restart signal...
+2026-08-26 23:01:40.391 +03:00 [WRN] [Corr:] Server desktop-rjppsk4:6856:5a4d91e4 stopped non-gracefully due to ServerWatchdog, ServerJobCancellationWatcher, ExpirationManager, CountersAggregator, Worker, DelayedJobScheduler, RecurringJobScheduler. Outstanding work on those dispatchers could be aborted, and there can be delays in background processing. This server instance will be incorrectly shown as active for a while. To avoid non-graceful shutdowns, investigate what prevents from stopping gracefully and add CancellationToken support for those methods.
+2026-08-26 23:01:42.459 +03:00 [WRN] [Corr:] Server desktop-rjppsk4:6856:5a4d91e4 there was an exception, server may not be removed
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.RemoveServer(String serverId)
+   at Hangfire.Server.BackgroundServerProcess.ServerDelete(BackgroundServerContext context, Stopwatch stoppedAt) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 229
+2026-08-26 23:01:44.495 +03:00 [ERR] [Corr:] Execution BackgroundServerProcess is in the Failed state now due to an exception, execution will be retried in no more than 00:00:15
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.AnnounceServer(String serverId, ServerContext context)
+   at Hangfire.Server.BackgroundServerProcess.CreateServer(BackgroundServerContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 209
+   at Hangfire.Server.BackgroundServerProcess.Execute(Guid executionId, BackgroundExecution execution, CancellationToken stoppingToken, CancellationToken stoppedToken, CancellationToken shutdownToken) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 101
+   at Hangfire.Server.BackgroundProcessingServer.RunServer(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessingServer.cs:line 249
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 23:02:01.593 +03:00 [ERR] [Corr:] Execution BackgroundServerProcess is still in the Failed state for 00:00:17.0591997 due to an exception, will be retried in no more than 00:00:15
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.AnnounceServer(String serverId, ServerContext context)
+   at Hangfire.Server.BackgroundServerProcess.CreateServer(BackgroundServerContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 209
+   at Hangfire.Server.BackgroundServerProcess.Execute(Guid executionId, BackgroundExecution execution, CancellationToken stoppingToken, CancellationToken stoppedToken, CancellationToken shutdownToken) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 101
+   at Hangfire.Server.BackgroundProcessingServer.RunServer(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessingServer.cs:line 249
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 23:02:18.641 +03:00 [ERR] [Corr:] Execution BackgroundServerProcess is still in the Failed state for 00:00:34.1297624 due to an exception, will be retried in no more than 00:00:15
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.AnnounceServer(String serverId, ServerContext context)
+   at Hangfire.Server.BackgroundServerProcess.CreateServer(BackgroundServerContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 209
+   at Hangfire.Server.BackgroundServerProcess.Execute(Guid executionId, BackgroundExecution execution, CancellationToken stoppingToken, CancellationToken stoppedToken, CancellationToken shutdownToken) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 101
+   at Hangfire.Server.BackgroundProcessingServer.RunServer(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessingServer.cs:line 249
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 23:02:35.692 +03:00 [ERR] [Corr:] Execution BackgroundServerProcess is still in the Failed state for 00:00:51.1802396 due to an exception, will be retried in no more than 00:00:15
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.AnnounceServer(String serverId, ServerContext context)
+   at Hangfire.Server.BackgroundServerProcess.CreateServer(BackgroundServerContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 209
+   at Hangfire.Server.BackgroundServerProcess.Execute(Guid executionId, BackgroundExecution execution, CancellationToken stoppingToken, CancellationToken stoppedToken, CancellationToken shutdownToken) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 101
+   at Hangfire.Server.BackgroundProcessingServer.RunServer(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessingServer.cs:line 249
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 23:02:52.740 +03:00 [ERR] [Corr:] Execution BackgroundServerProcess is still in the Failed state for 00:01:08.2287769 due to an exception, will be retried in no more than 00:00:15
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.AnnounceServer(String serverId, ServerContext context)
+   at Hangfire.Server.BackgroundServerProcess.CreateServer(BackgroundServerContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 209
+   at Hangfire.Server.BackgroundServerProcess.Execute(Guid executionId, BackgroundExecution execution, CancellationToken stoppingToken, CancellationToken stoppedToken, CancellationToken shutdownToken) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 101
+   at Hangfire.Server.BackgroundProcessingServer.RunServer(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessingServer.cs:line 249
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 23:03:09.805 +03:00 [ERR] [Corr:] Execution BackgroundServerProcess is still in the Failed state for 00:01:25.2941076 due to an exception, will be retried in no more than 00:00:15
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.AnnounceServer(String serverId, ServerContext context)
+   at Hangfire.Server.BackgroundServerProcess.CreateServer(BackgroundServerContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 209
+   at Hangfire.Server.BackgroundServerProcess.Execute(Guid executionId, BackgroundExecution execution, CancellationToken stoppingToken, CancellationToken stoppedToken, CancellationToken shutdownToken) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 101
+   at Hangfire.Server.BackgroundProcessingServer.RunServer(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessingServer.cs:line 249
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 23:03:26.855 +03:00 [ERR] [Corr:] Execution BackgroundServerProcess is still in the Failed state for 00:01:42.3439539 due to an exception, will be retried in no more than 00:00:15
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.AnnounceServer(String serverId, ServerContext context)
+   at Hangfire.Server.BackgroundServerProcess.CreateServer(BackgroundServerContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 209
+   at Hangfire.Server.BackgroundServerProcess.Execute(Guid executionId, BackgroundExecution execution, CancellationToken stoppingToken, CancellationToken stoppedToken, CancellationToken shutdownToken) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 101
+   at Hangfire.Server.BackgroundProcessingServer.RunServer(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessingServer.cs:line 249
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 23:03:43.925 +03:00 [ERR] [Corr:] Execution BackgroundServerProcess is still in the Failed state for 00:01:59.4131419 due to an exception, will be retried in no more than 00:00:15
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.AnnounceServer(String serverId, ServerContext context)
+   at Hangfire.Server.BackgroundServerProcess.CreateServer(BackgroundServerContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 209
+   at Hangfire.Server.BackgroundServerProcess.Execute(Guid executionId, BackgroundExecution execution, CancellationToken stoppingToken, CancellationToken stoppedToken, CancellationToken shutdownToken) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 101
+   at Hangfire.Server.BackgroundProcessingServer.RunServer(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessingServer.cs:line 249
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 23:04:00.971 +03:00 [ERR] [Corr:] Execution BackgroundServerProcess is still in the Failed state for 00:02:16.4591436 due to an exception, will be retried in no more than 00:00:15
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.AnnounceServer(String serverId, ServerContext context)
+   at Hangfire.Server.BackgroundServerProcess.CreateServer(BackgroundServerContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 209
+   at Hangfire.Server.BackgroundServerProcess.Execute(Guid executionId, BackgroundExecution execution, CancellationToken stoppingToken, CancellationToken stoppedToken, CancellationToken shutdownToken) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 101
+   at Hangfire.Server.BackgroundProcessingServer.RunServer(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessingServer.cs:line 249
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 23:04:18.039 +03:00 [ERR] [Corr:] Execution BackgroundServerProcess is still in the Failed state for 00:02:33.5272991 due to an exception, will be retried in no more than 00:00:15
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.AnnounceServer(String serverId, ServerContext context)
+   at Hangfire.Server.BackgroundServerProcess.CreateServer(BackgroundServerContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 209
+   at Hangfire.Server.BackgroundServerProcess.Execute(Guid executionId, BackgroundExecution execution, CancellationToken stoppingToken, CancellationToken stoppedToken, CancellationToken shutdownToken) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 101
+   at Hangfire.Server.BackgroundProcessingServer.RunServer(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessingServer.cs:line 249
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 23:04:35.081 +03:00 [ERR] [Corr:] Execution BackgroundServerProcess is still in the Failed state for 00:02:50.5697795 due to an exception, will be retried in no more than 00:00:15
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.AnnounceServer(String serverId, ServerContext context)
+   at Hangfire.Server.BackgroundServerProcess.CreateServer(BackgroundServerContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 209
+   at Hangfire.Server.BackgroundServerProcess.Execute(Guid executionId, BackgroundExecution execution, CancellationToken stoppingToken, CancellationToken stoppedToken, CancellationToken shutdownToken) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 101
+   at Hangfire.Server.BackgroundProcessingServer.RunServer(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessingServer.cs:line 249
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 23:04:52.130 +03:00 [ERR] [Corr:] Execution BackgroundServerProcess is still in the Failed state for 00:03:07.6188610 due to an exception, will be retried in no more than 00:00:15
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.AnnounceServer(String serverId, ServerContext context)
+   at Hangfire.Server.BackgroundServerProcess.CreateServer(BackgroundServerContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 209
+   at Hangfire.Server.BackgroundServerProcess.Execute(Guid executionId, BackgroundExecution execution, CancellationToken stoppingToken, CancellationToken stoppedToken, CancellationToken shutdownToken) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 101
+   at Hangfire.Server.BackgroundProcessingServer.RunServer(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessingServer.cs:line 249
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 23:05:09.184 +03:00 [ERR] [Corr:] Execution BackgroundServerProcess is still in the Failed state for 00:03:24.6728222 due to an exception, will be retried in no more than 00:00:15
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.AnnounceServer(String serverId, ServerContext context)
+   at Hangfire.Server.BackgroundServerProcess.CreateServer(BackgroundServerContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 209
+   at Hangfire.Server.BackgroundServerProcess.Execute(Guid executionId, BackgroundExecution execution, CancellationToken stoppingToken, CancellationToken stoppedToken, CancellationToken shutdownToken) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 101
+   at Hangfire.Server.BackgroundProcessingServer.RunServer(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessingServer.cs:line 249
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 23:05:26.231 +03:00 [ERR] [Corr:] Execution BackgroundServerProcess is still in the Failed state for 00:03:41.7193730 due to an exception, will be retried in no more than 00:00:15
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.AnnounceServer(String serverId, ServerContext context)
+   at Hangfire.Server.BackgroundServerProcess.CreateServer(BackgroundServerContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 209
+   at Hangfire.Server.BackgroundServerProcess.Execute(Guid executionId, BackgroundExecution execution, CancellationToken stoppingToken, CancellationToken stoppedToken, CancellationToken shutdownToken) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 101
+   at Hangfire.Server.BackgroundProcessingServer.RunServer(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessingServer.cs:line 249
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 23:05:43.272 +03:00 [ERR] [Corr:] Execution BackgroundServerProcess is still in the Failed state for 00:03:58.7602209 due to an exception, will be retried in no more than 00:00:15
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.AnnounceServer(String serverId, ServerContext context)
+   at Hangfire.Server.BackgroundServerProcess.CreateServer(BackgroundServerContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 209
+   at Hangfire.Server.BackgroundServerProcess.Execute(Guid executionId, BackgroundExecution execution, CancellationToken stoppingToken, CancellationToken stoppedToken, CancellationToken shutdownToken) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 101
+   at Hangfire.Server.BackgroundProcessingServer.RunServer(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessingServer.cs:line 249
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 23:06:00.312 +03:00 [ERR] [Corr:] Execution BackgroundServerProcess is still in the Failed state for 00:04:15.8009478 due to an exception, will be retried in no more than 00:00:15
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.AnnounceServer(String serverId, ServerContext context)
+   at Hangfire.Server.BackgroundServerProcess.CreateServer(BackgroundServerContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 209
+   at Hangfire.Server.BackgroundServerProcess.Execute(Guid executionId, BackgroundExecution execution, CancellationToken stoppingToken, CancellationToken stoppedToken, CancellationToken shutdownToken) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 101
+   at Hangfire.Server.BackgroundProcessingServer.RunServer(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessingServer.cs:line 249
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 23:06:17.373 +03:00 [ERR] [Corr:] Execution BackgroundServerProcess is still in the Failed state for 00:04:32.8613396 due to an exception, will be retried in no more than 00:00:15
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.AnnounceServer(String serverId, ServerContext context)
+   at Hangfire.Server.BackgroundServerProcess.CreateServer(BackgroundServerContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 209
+   at Hangfire.Server.BackgroundServerProcess.Execute(Guid executionId, BackgroundExecution execution, CancellationToken stoppingToken, CancellationToken stoppedToken, CancellationToken shutdownToken) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 101
+   at Hangfire.Server.BackgroundProcessingServer.RunServer(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessingServer.cs:line 249
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 23:06:34.427 +03:00 [ERR] [Corr:] Execution BackgroundServerProcess is still in the Failed state for 00:04:49.9154364 due to an exception, will be retried in no more than 00:00:15
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.AnnounceServer(String serverId, ServerContext context)
+   at Hangfire.Server.BackgroundServerProcess.CreateServer(BackgroundServerContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 209
+   at Hangfire.Server.BackgroundServerProcess.Execute(Guid executionId, BackgroundExecution execution, CancellationToken stoppingToken, CancellationToken stoppedToken, CancellationToken shutdownToken) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 101
+   at Hangfire.Server.BackgroundProcessingServer.RunServer(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessingServer.cs:line 249
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 23:06:51.495 +03:00 [ERR] [Corr:] Execution BackgroundServerProcess is still in the Failed state for 00:05:06.9831776 due to an exception, will be retried in no more than 00:00:15
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.AnnounceServer(String serverId, ServerContext context)
+   at Hangfire.Server.BackgroundServerProcess.CreateServer(BackgroundServerContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 209
+   at Hangfire.Server.BackgroundServerProcess.Execute(Guid executionId, BackgroundExecution execution, CancellationToken stoppingToken, CancellationToken stoppedToken, CancellationToken shutdownToken) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 101
+   at Hangfire.Server.BackgroundProcessingServer.RunServer(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessingServer.cs:line 249
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 23:07:08.566 +03:00 [ERR] [Corr:] Execution BackgroundServerProcess is still in the Failed state for 00:05:24.0549196 due to an exception, will be retried in no more than 00:00:15
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.AnnounceServer(String serverId, ServerContext context)
+   at Hangfire.Server.BackgroundServerProcess.CreateServer(BackgroundServerContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 209
+   at Hangfire.Server.BackgroundServerProcess.Execute(Guid executionId, BackgroundExecution execution, CancellationToken stoppingToken, CancellationToken stoppedToken, CancellationToken shutdownToken) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 101
+   at Hangfire.Server.BackgroundProcessingServer.RunServer(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessingServer.cs:line 249
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 23:07:25.638 +03:00 [ERR] [Corr:] Execution BackgroundServerProcess is still in the Failed state for 00:05:41.1267725 due to an exception, will be retried in no more than 00:00:15
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.AnnounceServer(String serverId, ServerContext context)
+   at Hangfire.Server.BackgroundServerProcess.CreateServer(BackgroundServerContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 209
+   at Hangfire.Server.BackgroundServerProcess.Execute(Guid executionId, BackgroundExecution execution, CancellationToken stoppingToken, CancellationToken stoppedToken, CancellationToken shutdownToken) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 101
+   at Hangfire.Server.BackgroundProcessingServer.RunServer(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessingServer.cs:line 249
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 23:07:42.700 +03:00 [ERR] [Corr:] Execution BackgroundServerProcess is still in the Failed state for 00:05:58.1885219 due to an exception, will be retried in no more than 00:00:15
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.AnnounceServer(String serverId, ServerContext context)
+   at Hangfire.Server.BackgroundServerProcess.CreateServer(BackgroundServerContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 209
+   at Hangfire.Server.BackgroundServerProcess.Execute(Guid executionId, BackgroundExecution execution, CancellationToken stoppingToken, CancellationToken stoppedToken, CancellationToken shutdownToken) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 101
+   at Hangfire.Server.BackgroundProcessingServer.RunServer(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessingServer.cs:line 249
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118
+2026-08-26 23:07:59.793 +03:00 [ERR] [Corr:] Execution BackgroundServerProcess is still in the Failed state for 00:06:15.2817641 due to an exception, will be retried in no more than 00:00:15
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 127.0.0.1:5433
+ ---> System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|209_0(NpgsqlConnector conn, String username, SslMode sslMode, GssEncryptionMode gssEncMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Hangfire.PostgreSql.PostgreSqlStorage.CreateAndOpenConnection()
+   at Hangfire.PostgreSql.PostgreSqlStorage.UseConnection[T](DbConnection dedicatedConnection, Func`2 func)
+   at Hangfire.PostgreSql.PostgreSqlConnection.AnnounceServer(String serverId, ServerContext context)
+   at Hangfire.Server.BackgroundServerProcess.CreateServer(BackgroundServerContext context) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 209
+   at Hangfire.Server.BackgroundServerProcess.Execute(Guid executionId, BackgroundExecution execution, CancellationToken stoppingToken, CancellationToken stoppedToken, CancellationToken shutdownToken) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundServerProcess.cs:line 101
+   at Hangfire.Server.BackgroundProcessingServer.RunServer(Guid executionId, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Server\BackgroundProcessingServer.cs:line 249
+   at Hangfire.Processing.BackgroundExecution.Run(Action`2 callback, Object state) in C:\projects\hangfire-525\src\Hangfire.Core\Processing\BackgroundExecution.cs:line 118

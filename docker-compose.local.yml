@@ -44,7 +44,7 @@ services:
     volumes:
       - miniodata_local:/data
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      test: ["CMD", "curl", "-f", "http://localhost:9001/minio/health/live"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -62,6 +62,43 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  backend:
+    build:
+      context: ./NexClone.Backend
+    container_name: nexclone-local-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=nexclone_dev;Username=nexclone;Password=devpassword123!
+      - Jwt__Key=development_secret_key_that_is_at_least_64_bytes_long_for_hmac_sha256_1234567890
+      - S3_ENDPOINT=minio:9001
+      - AWS_ACCESS_KEY_ID=devminioadmin
+      - AWS_SECRET_ACCESS_KEY=devminiosecret123!
+      - S3_USE_SSL=false
+      - S3_BUCKET_NAME=nexclone-local
+      - S3_REGION=auto
+      - MINIO_PUBLIC_ENDPOINT=http://127.0.0.1:9101
+      - Redis__ConnectionString=redis:6379,password=devredis123!,abortConnect=false
+    ports:
+      - "127.0.0.1:5050:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: http://127.0.0.1:5050
+    container_name: nexclone-local-frontend
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      - backend
 
 volumes:
   pgdata_local:
