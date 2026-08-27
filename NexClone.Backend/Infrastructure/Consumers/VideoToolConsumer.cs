@@ -224,13 +224,13 @@ namespace NexClone.Backend.Infrastructure.Consumers
 
                     if (crunModel.Contains("seedance"))
                     {
-                        object audioVal = audioUrl != null ? (object)audioUrl : (object)(message.Mode?.Contains("audio_on") == true);
                         payload = new {
                             model = crunModel,
                             input = new {
-                                img_urls = imgUrls.Count > 0 ? imgUrls : null,
-                                video = videoUrl,
-                                audio = audioVal,
+                                reference_images = imgUrls.Count > 0 ? imgUrls : null,
+                                reference_videos = videoUrl != null ? new[] { videoUrl } : null,
+                                reference_audios = audioUrl != null ? new[] { audioUrl } : null,
+                                audio = message.Mode?.Contains("audio_on") == true,
                                 prompt = promptText,
                                 resolution = message.Resolution,
                                 aspect_ratio = normalizedAspect,
