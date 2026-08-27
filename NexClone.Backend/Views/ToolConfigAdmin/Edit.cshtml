@@ -1,4 +1,4 @@
-@model NexClone.Backend.Core.Entities.ToolConfiguration
+﻿@model NexClone.Backend.Core.Entities.ToolConfiguration
 @inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 
 @{
@@ -223,6 +223,7 @@
     var veoFast = t2vPricings.FirstOrDefault(p => p.ModelName == "veo 3.1 Fast") ?? new NexClone.Backend.Core.Entities.TextToVideoModelPricing { FixedCost_720p = 30.0m, FixedCost_1080p = 37.5m, FixedCost_4k = 90.0m };
     var veoLite = t2vPricings.FirstOrDefault(p => p.ModelName == "veo 3.1 Lite") ?? new NexClone.Backend.Core.Entities.TextToVideoModelPricing { FixedCost_720p = 15.0m, FixedCost_1080p = 22.5m, FixedCost_4k = 75.0m };
     var grokVideo = t2vPricings.FirstOrDefault(p => p.ModelName.ToLower().Contains("grok")) ?? new NexClone.Backend.Core.Entities.TextToVideoModelPricing { CostPerSecond_480p = 2.4m, CostPerSecond_720p = 4.5m, CostPerSecond_1080p = 8.0m };
+    var seedanceVideo = t2vPricings.FirstOrDefault(p => p.ModelName.ToLower().Contains("seedance")) ?? new NexClone.Backend.Core.Entities.TextToVideoModelPricing { CostPerSecond_480p = 0.0143m, CostPerSecond_720p = 0.0286m };
 
     <!-- General Operational Limits Card -->
     <div style="background: #ffffff; padding: 1.75rem; border: 1px solid #e0e0e0; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); margin-bottom: 2rem;">
@@ -361,6 +362,7 @@
 
     var veoFast = i2vPricings.FirstOrDefault(p => p.ModelName == "veo 3.1 Fast") ?? new NexClone.Backend.Core.Entities.ImageToVideoModelPricing { FixedCost_720p = 30.0m, FixedCost_1080p = 37.5m, FixedCost_4k = 90.0m };
     var veoLite = i2vPricings.FirstOrDefault(p => p.ModelName == "veo 3.1 Lite") ?? new NexClone.Backend.Core.Entities.ImageToVideoModelPricing { FixedCost_720p = 15.0m, FixedCost_1080p = 22.5m, FixedCost_4k = 75.0m };
+    var seedanceVideo = i2vPricings.FirstOrDefault(p => p.ModelName.ToLower().Contains("seedance")) ?? new NexClone.Backend.Core.Entities.ImageToVideoModelPricing { CostPerSecond_480p = 0.0143m, CostPerSecond_720p = 0.0286m };
 
     <!-- General Operational Limits Card -->
     <div style="background: #ffffff; padding: 1.75rem; border: 1px solid #e0e0e0; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); margin-bottom: 2rem;">
@@ -463,6 +465,7 @@
 
     var veoFast = i2vPricings.FirstOrDefault(p => p.ModelName == "veo 3.1 Fast") ?? new NexClone.Backend.Core.Entities.ImageToVideoModelPricing { FixedCost_720p = 30.0m, FixedCost_1080p = 37.5m, FixedCost_4k = 90.0m };
     var veoLite = i2vPricings.FirstOrDefault(p => p.ModelName == "veo 3.1 Lite") ?? new NexClone.Backend.Core.Entities.ImageToVideoModelPricing { FixedCost_720p = 15.0m, FixedCost_1080p = 22.5m, FixedCost_4k = 75.0m };
+    var seedanceVideo = i2vPricings.FirstOrDefault(p => p.ModelName.ToLower().Contains("seedance")) ?? new NexClone.Backend.Core.Entities.ImageToVideoModelPricing { CostPerSecond_480p = 0.0143m, CostPerSecond_720p = 0.0286m };
     var grokVideo = i2vPricings.FirstOrDefault(p => p.ModelName.ToLower().Contains("grok")) ?? new NexClone.Backend.Core.Entities.ImageToVideoModelPricing { CostPerSecond_480p = 2.4m, CostPerSecond_720p = 4.5m, CostPerSecond_1080p = 8.0m };
 
     <!-- General Operational Limits Card -->

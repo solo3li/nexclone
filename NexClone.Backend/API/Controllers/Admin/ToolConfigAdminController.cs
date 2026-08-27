@@ -98,6 +98,13 @@ namespace NexClone.Backend.API.Controllers.Admin
                     _context.TextToVideoModelPricings.AddRange(t2vPricings);
                     await _context.SaveChangesAsync();
                 }
+                else if (!t2vPricings.Any(p => p.ModelName.ToLower().Contains("seedance")))
+                {
+                    var seedancePricing = new Core.Entities.TextToVideoModelPricing { ModelName = "bytedance/seedance2-0-mini-t2v", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 0.0143m, CostPerSecond_720p = 0.0286m, CostPerSecond_1080p = 0.0286m, CostPerSecond_4k = 0.0286m, AllowedWallet = "Standard", IsActive = true };
+                    _context.TextToVideoModelPricings.Add(seedancePricing);
+                    await _context.SaveChangesAsync();
+                    t2vPricings.Add(seedancePricing);
+                }
                 ViewBag.TextToVideoPricings = t2vPricings;
             }
 
@@ -130,6 +137,13 @@ namespace NexClone.Backend.API.Controllers.Admin
                     _context.ImageToVideoModelPricings.Add(grokPricing);
                     await _context.SaveChangesAsync();
                     i2vPricings.Add(grokPricing);
+                }
+                if (!i2vPricings.Any(p => p.ModelName.ToLower().Contains("seedance")))
+                {
+                    var seedancePricing = new Core.Entities.ImageToVideoModelPricing { ModelName = "bytedance/seedance2-0-mini-i2v", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 0.0143m, CostPerSecond_720p = 0.0286m, CostPerSecond_1080p = 0.0286m, CostPerSecond_4k = 0.0286m, AllowedWallet = "Standard", IsActive = true };
+                    _context.ImageToVideoModelPricings.Add(seedancePricing);
+                    await _context.SaveChangesAsync();
+                    i2vPricings.Add(seedancePricing);
                 }
                 ViewBag.ImageToVideoPricings = i2vPricings;
             }
@@ -536,6 +550,14 @@ namespace NexClone.Backend.API.Controllers.Admin
                     if (ModelCosts.ContainsKey("grok-imagine|480p")) grokPricing.CostPerSecond_480p = ModelCosts["grok-imagine|480p"];
                     if (ModelCosts.ContainsKey("grok-imagine|720p")) grokPricing.CostPerSecond_720p = ModelCosts["grok-imagine|720p"];
                     if (ModelCosts.ContainsKey("grok-imagine|1080p")) grokPricing.CostPerSecond_1080p = ModelCosts["grok-imagine|1080p"];
+
+                    // Seedance 2.0 Mini Video
+                    var seedancePricing = await _context.TextToVideoModelPricings.FirstOrDefaultAsync(p => p.ModelName.ToLower().Contains("seedance"));
+                    if (seedancePricing == null) { seedancePricing = new Core.Entities.TextToVideoModelPricing { ModelName = "bytedance/seedance2-0-mini-t2v", ProviderName = "CrunAI", BillingType = "PerSecond" }; _context.TextToVideoModelPricings.Add(seedancePricing); }
+                    seedancePricing.IsActive = config.IsActive;
+                    seedancePricing.AllowedWallet = defaultWallet;
+                    if (ModelCosts.ContainsKey("seedance|480p")) seedancePricing.CostPerSecond_480p = ModelCosts["seedance|480p"];
+                    if (ModelCosts.ContainsKey("seedance|720p")) seedancePricing.CostPerSecond_720p = ModelCosts["seedance|720p"];
                 }
                 else if (config.ToolName == "image-to-video" || config.ToolName == "reference-to-video")
                 {
@@ -585,6 +607,14 @@ namespace NexClone.Backend.API.Controllers.Admin
                     if (ModelCosts.ContainsKey("grok-imagine|480p")) grokPricing.CostPerSecond_480p = ModelCosts["grok-imagine|480p"];
                     if (ModelCosts.ContainsKey("grok-imagine|720p")) grokPricing.CostPerSecond_720p = ModelCosts["grok-imagine|720p"];
                     if (ModelCosts.ContainsKey("grok-imagine|1080p")) grokPricing.CostPerSecond_1080p = ModelCosts["grok-imagine|1080p"];
+
+                    // Seedance 2.0 Mini Video
+                    var seedancePricing = await _context.ImageToVideoModelPricings.FirstOrDefaultAsync(p => p.ModelName.ToLower().Contains("seedance"));
+                    if (seedancePricing == null) { seedancePricing = new Core.Entities.ImageToVideoModelPricing { ModelName = "bytedance/seedance2-0-mini-i2v", ProviderName = "CrunAI", BillingType = "PerSecond" }; _context.ImageToVideoModelPricings.Add(seedancePricing); }
+                    seedancePricing.IsActive = config.IsActive;
+                    seedancePricing.AllowedWallet = defaultWallet;
+                    if (ModelCosts.ContainsKey("seedance|480p")) seedancePricing.CostPerSecond_480p = ModelCosts["seedance|480p"];
+                    if (ModelCosts.ContainsKey("seedance|720p")) seedancePricing.CostPerSecond_720p = ModelCosts["seedance|720p"];
                 }
                 else if (config.ToolName == "advanced-lip-sync" || config.ToolName == "vidu_advanced_lip_sync" || config.ToolName == "lipsync")
                 {
