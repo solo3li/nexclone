@@ -379,11 +379,23 @@
             @Localizer["Access Key and Secret Key are stored in the database. Ensure your database and server are properly secured before entering production credentials here."]
         </div>
 
-        <!-- Provider label -->
+        <!-- Provider dropdown -->
         <div class="bx--form-item" style="margin-bottom: 1.25rem;">
-            <label for="S3_Provider" class="bx--label">@Localizer["Provider Name / Label"]</label>
-            <input id="S3_Provider" type="text" class="bx--text-input" name="settings[S3.Provider]"
-                   value="@GetVal("S3.Provider")" placeholder="e.g. MinIO Local, Railway, AWS S3, Cloudflare R2">
+            <label for="S3_Provider" class="bx--label">@Localizer["Storage Provider"]</label>
+            @{
+                var currentProvider = GetVal("S3.Provider");
+            }
+            <select id="S3_Provider" name="settings[S3.Provider]" class="bx--select-input" style="max-width: 380px;">
+                <option value=""              selected="@(currentProvider == "")">-- @Localizer["Select a provider"] --</option>
+                <option value="MinIO"         selected="@(currentProvider == "MinIO")">🖥️  MinIO (Self-hosted / Local)</option>
+                <option value="Railway"       selected="@(currentProvider == "Railway")">🚂  Railway Object Storage</option>
+                <option value="AWS S3"        selected="@(currentProvider == "AWS S3")">☁️  AWS S3</option>
+                <option value="Cloudflare R2" selected="@(currentProvider == "Cloudflare R2")">🟠  Cloudflare R2</option>
+                <option value="DigitalOcean"  selected="@(currentProvider == "DigitalOcean")">🌊  DigitalOcean Spaces</option>
+                <option value="Backblaze B2"  selected="@(currentProvider == "Backblaze B2")">🔥  Backblaze B2</option>
+                <option value="Wasabi"        selected="@(currentProvider == "Wasabi")">🌿  Wasabi</option>
+                <option value="Other"         selected="@(currentProvider == "Other")">⚙️  Other S3-compatible</option>
+            </select>
             <div class="bx--form__helper-text">@Localizer["For your reference only — helps you identify which provider is active."]</div>
         </div>
 
