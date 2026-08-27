@@ -210,10 +210,7 @@ namespace NexClone.Backend.Application.Services
             // If at least one Paid subscription is active, they are unlocked.
             var perms = await _permissionService.GetEffectivePermissionsAsync(userId);
 
-            if (perms.HasActiveSubscription && perms.IsFrozenDueToFreePlanOnly)
-            {
-                return new PolicyValidationResult { IsAllowed = false, ErrorMessage = "Your credits are frozen while on the Free plan. Please upgrade your plan to continue using the services." };
-            }
+            // (Removed strict freeze for Free Plans so users can consume their provided credits normally)
 
             var toolPolicy = perms.HasActiveSubscription ? GetToolPolicyFromPermissions(perms, toolId) : new ToolPolicy { Enabled = true };
 
