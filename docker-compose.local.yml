@@ -77,7 +77,7 @@ services:
       - S3_USE_SSL=false
       - S3_BUCKET_NAME=nexclone-local
       - S3_REGION=auto
-      - MINIO_PUBLIC_ENDPOINT=http://127.0.0.1:9101
+      - MINIO_PUBLIC_ENDPOINT=127.0.0.1:9101
       - Redis__ConnectionString=redis:6379,password=devredis123!,abortConnect=false
     ports:
       - "127.0.0.1:5050:8080"
