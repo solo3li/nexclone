@@ -548,6 +548,13 @@ namespace NexClone.Backend.Application.Services
             var plan = await _db.Plans.FindAsync(payment.PlanId.Value);
             if (plan == null) return;
 
+            // Do not record commissions for free/default packages
+            if (plan.IsDefaultRegistrationPlan || plan.IsFreeTrial || (plan.PriceUsd == 0 && plan.PriceEgp == 0))
+            {
+                _logger.LogInformation("Skipping commission generation for payment {PaymentId} because the plan '{PlanName}' is a free/default package.", paymentId, plan.Name);
+                return;
+            }
+
             // Enforcement: Max Inactivity Days
             if (settings.MaxInactivityDays > 0)
             {
@@ -837,7 +844,9 @@ namespace NexClone.Backend.Application.Services
             var activeSubscriptions = await _db.Subscriptions
                 .Where(s => _db.AffiliateReferrals.Any(r => r.AffiliateProfileId == affiliateProfileId && r.ReferredUserId == s.UserId)
                             && s.Status == "active" 
-                            && s.EndDate > DateTime.UtcNow)
+                            && s.EndDate > DateTime.UtcNow
+                            && !s.Plan.IsDefaultRegistrationPlan 
+                            && !s.Plan.IsFreeTrial)
                 .CountAsync();
 
             var balances = await GetBalancesAsync(affiliateProfileId);
