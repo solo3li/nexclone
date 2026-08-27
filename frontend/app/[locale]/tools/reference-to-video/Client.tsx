@@ -244,6 +244,32 @@ export default function ReferenceToVideoPage() {
       if (!model.supportedResolutions.includes(resolution)) {
         setResolution(model.supportedResolutions.includes("1080p") ? "1080p" : model.supportedResolutions[0]);
       }
+      
+      const isNewModelSeedance = modelId.includes("seedance");
+      if (!isNewModelSeedance) {
+        let cleared = false;
+        setSlotFiles(prevFiles => {
+          const newSlotFiles = { ...prevFiles };
+          setSlotPreviews(prevPreviews => {
+            const newSlotPreviews = { ...prevPreviews };
+            Object.keys(newSlotFiles).forEach((key) => {
+              const k = Number(key);
+              const file = newSlotFiles[k];
+              if (file && !file.type.startsWith("image/")) {
+                 newSlotFiles[k] = null;
+                 newSlotPreviews[k] = null;
+                 if (fileInputs[k]?.current) fileInputs[k].current!.value = '';
+                 cleared = true;
+              }
+            });
+            if (cleared) {
+              setError(isRtl ? "تمت إزالة الملفات غير المدعومة لأن الموديل المختار يدعم الصور فقط" : "Unsupported files were removed because the selected model only supports images");
+            }
+            return newSlotPreviews;
+          });
+          return newSlotFiles;
+        });
+      }
     }
     setIsModelDropdownOpen(false);
   };
@@ -339,9 +365,17 @@ export default function ReferenceToVideoPage() {
   const totalUserCredits = (user?.standardCredits || 0) + (user?.premiumCredits || 0);
   const hasSufficientCredits = estimatedCost === null || totalUserCredits >= estimatedCost;
 
+  const isSeedance = currentModel.id.includes("seedance");
+  const acceptedFileTypes = isSeedance ? "image/*,video/*,audio/*" : "image/*";
+
   // Image Upload handler for specific slot
   const handleSlotImageChange = (index: number, file: File | null) => {
     if (file) {
+      if (!isSeedance && !file.type.startsWith("image/")) {
+        setError(isRtl ? "هذا الموديل يدعم رفع الصور فقط" : "This model only supports image uploads");
+        if (fileInputs[index].current) fileInputs[index].current!.value = '';
+        return;
+      }
       setSlotFiles(prev => ({ ...prev, [index]: file }));
       const url = URL.createObjectURL(file);
       setSlotPreviews(prev => ({ ...prev, [index]: url }));
@@ -503,7 +537,7 @@ export default function ReferenceToVideoPage() {
                     <input
                       ref={inputRef}
                       type="file"
-                      accept="image/*,video/*,audio/*"
+                      accept={acceptedFileTypes}
                       onChange={(e) => handleSlotImageChange(slot.key, e.target.files?.[0] || null)}
                       className="hidden"
                     />
