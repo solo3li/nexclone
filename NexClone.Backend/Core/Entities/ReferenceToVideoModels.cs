@@ -44,6 +44,9 @@ namespace NexClone.Backend.Core.Entities
         public decimal CostPerSecond_1080p { get; set; } = 8.0m;
         public decimal CostPerSecond_4k { get; set; } = 15.0m;
 
+        public decimal CostPerSecond_480p_WithVideo { get; set; } = 0m;
+        public decimal CostPerSecond_720p_WithVideo { get; set; } = 0m;
+
         public decimal FixedCost_480p { get; set; } = 20.0m;
         public decimal FixedCost_720p { get; set; } = 30.0m;
         public decimal FixedCost_1080p { get; set; } = 37.5m;
