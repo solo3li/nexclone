@@ -121,7 +121,13 @@ namespace NexClone.Backend.API.Controllers.Client
             var affiliateService = HttpContext.RequestServices.GetService<NexClone.Backend.Application.Services.AffiliateService>();
             if (affiliateService != null)
             {
-                if (!string.IsNullOrEmpty(refCodePayload))
+                bool isSessionToken = !string.IsNullOrEmpty(refCodePayload) && Guid.TryParseExact(refCodePayload, "N", out _);
+
+                if (isSessionToken)
+                {
+                    await affiliateService.LinkReferralToUserAsync(refCodePayload, user.Id, ipAddress, fingerprint);
+                }
+                else if (!string.IsNullOrEmpty(refCodePayload))
                 {
                     await affiliateService.LinkManualReferralAsync(refCodePayload, user.Id, ipAddress, fingerprint);
                 }
@@ -374,7 +380,13 @@ namespace NexClone.Backend.API.Controllers.Client
                 var affiliateService = HttpContext.RequestServices.GetService<NexClone.Backend.Application.Services.AffiliateService>();
                 if (affiliateService != null)
                 {
-                    if (!string.IsNullOrEmpty(refCodePayload))
+                    bool isSessionToken = !string.IsNullOrEmpty(refCodePayload) && Guid.TryParseExact(refCodePayload, "N", out _);
+
+                    if (isSessionToken)
+                    {
+                        await affiliateService.LinkReferralToUserAsync(refCodePayload, user.Id, ipAddress, fingerprint);
+                    }
+                    else if (!string.IsNullOrEmpty(refCodePayload))
                     {
                         await affiliateService.LinkManualReferralAsync(refCodePayload, user.Id, ipAddress, fingerprint);
                     }
