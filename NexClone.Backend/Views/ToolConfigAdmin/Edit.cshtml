@@ -1,4 +1,4 @@
-﻿@model NexClone.Backend.Core.Entities.ToolConfiguration
+@model NexClone.Backend.Core.Entities.ToolConfiguration
 @inject Microsoft.Extensions.Localization.IStringLocalizer<NexClone.Backend.Localization.SharedResource> Localizer
 
 @{
@@ -589,6 +589,37 @@
                 <label class="bx--label" style="font-weight: 600;">@Localizer["1080p Cost (Credits / Sec)"]</label>
                 <input type="number" step="0.1" min="0" name="ModelCosts[grok-imagine|1080p]" class="bx--text-input" value="@grokVideo.CostPerSecond_1080p" style="font-size: 1.05rem; font-weight: bold;" />
                 <div class="bx--form__helper-text">Cost per second (Default: 8.0)</div>
+            </div>
+        </div>
+
+        <div style="background: #f4f4f4; padding: 1rem 1.25rem; border-radius: 4px; border-left: 4px solid #0f62fe;">
+            <label class="bx--label" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">@Localizer["Supported Modes & Specifications"]</label>
+            <div style="font-size: 0.85rem; color: #161616; margin-bottom: 0.25rem;">Upload: <strong>Up to 7 Images</strong> | Modes: <strong>Fun, Normal, Spicy</strong> | Duration: <strong>6s to 20s</strong></div>
+        </div>
+    </div>
+
+    <!-- 3. Seedance 2.0 Mini Video Card (Image to Video) -->
+    <div style="background: #ffffff; padding: 1.75rem; border: 1px solid #e0e0e0; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #f4f4f4; padding-bottom: 1rem; margin-bottom: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span style="background: #0f62fe; color: white; font-weight: bold; font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; letter-spacing: 0.5px;">CRUN AI</span>
+                <h3 class="bx--type-productive-heading-03" style="margin: 0; color: #161616;">Seedance 2.0 Mini (ByteDance)</h3>
+            </div>
+            <span style="background: #e8f8f0; color: #198038; font-weight: 600; font-size: 0.8rem; padding: 4px 12px; border-radius: 4px; border: 1px solid #a7f0ba;">
+                ● @Localizer["Cost Per Second (6s - 20s)"]
+            </span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+            <div class="bx--form-item">
+                <label class="bx--label" style="font-weight: 600;">@Localizer["480p Cost (Credits / Sec)"]</label>
+                <input type="number" step="0.0001" min="0" name="ModelCosts[seedance|480p]" class="bx--text-input" value="@seedanceVideo.CostPerSecond_480p" style="font-size: 1.05rem; font-weight: bold;" />
+                <div class="bx--form__helper-text">Cost per second (Default: 0.0143)</div>
+            </div>
+            <div class="bx--form-item">
+                <label class="bx--label" style="font-weight: 600;">@Localizer["720p Cost (Credits / Sec)"]</label>
+                <input type="number" step="0.0001" min="0" name="ModelCosts[seedance|720p]" class="bx--text-input" value="@seedanceVideo.CostPerSecond_720p" style="font-size: 1.05rem; font-weight: bold;" />
+                <div class="bx--form__helper-text">Cost per second (Default: 0.0286)</div>
             </div>
         </div>
 
