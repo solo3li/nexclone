@@ -7,6 +7,24 @@ interface Props {
   isRtl: boolean;
 }
 
+const maskUserEmail = (email?: string, name?: string) => {
+  const target = email || name || '';
+  if (!target) return '—';
+  
+  if (!target.includes('@')) {
+    return '*'.repeat(target.length > 1 ? target.length - 1 : 0) + target.slice(-1);
+  }
+  
+  const [local, domain] = target.split('@');
+  if (local.length === 0) return '******';
+  
+  const lastChar = local[local.length - 1];
+  const maskedLocal = '*'.repeat(local.length > 1 ? local.length - 1 : 0) + lastChar;
+  const maskedDomain = '*'.repeat(domain.length);
+  
+  return `${maskedLocal}@${maskedDomain}`;
+};
+
 export default function AffiliateReferralsTable({ referrals, isRtl }: Props) {
   if (referrals.length === 0) {
     return (
@@ -38,12 +56,9 @@ export default function AffiliateReferralsTable({ referrals, isRtl }: Props) {
               {referrals.map((r) => (
                 <tr key={r.referralId} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                   <td className="px-6 py-4">
-                    <div className="font-semibold text-white">
-                      {r.referredUser?.name || r.referredUser?.email || '—'}
+                    <div className="font-semibold text-white font-mono tracking-wider">
+                      {maskUserEmail(r.referredUser?.email, r.referredUser?.name)}
                     </div>
-                    {r.referredUser?.email && r.referredUser?.name && (
-                      <div className="text-xs text-white/30">{r.referredUser.email}</div>
-                    )}
                   </td>
                   <td className="px-6 py-4 text-white/50 text-xs">
                     {new Date(r.joinedAt).toLocaleDateString()}
