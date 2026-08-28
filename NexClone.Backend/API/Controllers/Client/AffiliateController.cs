@@ -42,15 +42,21 @@ namespace NexClone.Backend.API.Controllers.Client
         {
             if (string.IsNullOrWhiteSpace(email)) return string.Empty;
             var parts = email.Split('@');
-            if (parts.Length != 2) return email;
+            if (parts.Length != 2)
+            {
+                if (email.Length <= 1) return email;
+                return new string('*', email.Length - 1) + email[^1];
+            }
             
-            var name = parts[0];
+            var local = parts[0];
             var domain = parts[1];
             
-            if (name.Length <= 2)
-                return $"{name[0]}***@{domain}";
-                
-            return $"{name[0]}***{name[^1]}@{domain}";
+            if (local.Length == 0) return "******";
+            
+            string maskedLocal = new string('*', Math.Max(0, local.Length - 1)) + local[^1];
+            string maskedDomain = new string('*', domain.Length);
+            
+            return $"{maskedLocal}@{maskedDomain}";
         }
 
         // ─────────────────────────────────────────────
@@ -178,7 +184,7 @@ namespace NexClone.Backend.API.Controllers.Client
             var referrals = referralsData.Select(r => new
             {
                 referralId = r.referralId,
-                referredUser = r.referredUser != null ? new { name = r.referredUser.FullName, email = MaskEmail(r.referredUser.Email) } : null,
+                referredUser = r.referredUser != null ? new { name = string.Empty, email = MaskEmail(r.referredUser.Email) } : null,
                 joinedAt = r.clickedAt,
                 hasConverted = r.hasConverted,
                 activeSubscription = r.activeSubscription
@@ -237,7 +243,7 @@ namespace NexClone.Backend.API.Controllers.Client
                 availableAt = c.AvailableAt,
                 paidAt = c.PaidAt,
                 plan = new { name = c.PlanName, nameAr = c.PlanNameAr },
-                customerName = c.CustomerName ?? MaskEmail(c.CustomerEmail)
+                customerName = MaskEmail(c.CustomerEmail)
             }).ToList();
 
             return Ok(commissions);
