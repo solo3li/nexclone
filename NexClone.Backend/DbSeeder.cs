@@ -273,8 +273,16 @@ namespace NexClone.Backend
 
             if (!await context.ReferenceToVideoSettings.AnyAsync())
                 context.ReferenceToVideoSettings.Add(new ReferenceToVideoSetting { Id = 1, IsActive = true, MaxPromptLength = 5000, MaxDurationSeconds = 20, DefaultResolution = "720p", MaxConcurrentOperations = 10 });
-            if (!await context.ReferenceToVideoModelPricings.AnyAsync(x => x.ModelName == "bytedance/seedance2-0-mini-r2v"))
-                context.ReferenceToVideoModelPricings.Add(new ReferenceToVideoModelPricing { ModelName = "bytedance/seedance2-0-mini-r2v", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 0.0089m, CostPerSecond_720p = 0.0179m, CostPerSecond_1080p = 0.0179m, CostPerSecond_4k = 0.0179m, AllowedWallet = "Standard", IsActive = true });
+            var r2vModels = new[] {
+                new ReferenceToVideoModelPricing { ModelName = "veo 3.1 Fast", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 30.0m, FixedCost_1080p = 37.5m, FixedCost_4k = 90.0m, AllowedWallet = "Standard", IsActive = true },
+                new ReferenceToVideoModelPricing { ModelName = "veo 3.1 Lite", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 15.0m, FixedCost_1080p = 22.5m, FixedCost_4k = 75.0m, AllowedWallet = "Standard", IsActive = true },
+                new ReferenceToVideoModelPricing { ModelName = "bytedance/seedance2-0-mini-r2v", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 0.0089m, CostPerSecond_720p = 0.0179m, CostPerSecond_1080p = 0.0179m, CostPerSecond_4k = 0.0179m, AllowedWallet = "Standard", IsActive = true }
+            };
+            foreach (var m in r2vModels)
+            {
+                if (!await context.ReferenceToVideoModelPricings.AnyAsync(x => x.ModelName == m.ModelName))
+                    context.ReferenceToVideoModelPricings.Add(m);
+            }
 
             if (!await context.LipSyncSettings.AnyAsync())
                 context.LipSyncSettings.Add(new LipSyncSetting { Id = 1, IsActive = true, MaxVideoFileSizeMb = 100, MaxAudioFileSizeMb = 25, MaxAudioDurationSeconds = 120, MaxConcurrentOperations = 10 });
