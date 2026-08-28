@@ -22,9 +22,6 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
         private string _defaultBucket;
         private string _region;
         private string _endpoint;
-        private string _publicEndpoint;
-        private bool _useSsl;
-        private bool _publicUseSsl;
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
 
@@ -114,7 +111,6 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
             // UseSSL: DB > env > default true
             var useSslRaw = !string.IsNullOrWhiteSpace(dbUseSSL) ? dbUseSSL : envUseSsl;
             bool useSsl   = string.IsNullOrWhiteSpace(useSslRaw) || useSslRaw.ToLower() == "true";
-            _useSsl = useSsl;
 
             _minioClient = new MinioClient()
                 .WithEndpoint(endpoint)
@@ -123,14 +119,12 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
                 .WithSSL(useSsl)
                 .Build();
 
-            // Public endpoint for direct URL generation (DB > env)
+            // Public endpoint for presigned URL generation (DB > env)
             var publicEndpoint = !string.IsNullOrWhiteSpace(dbPublicEndpoint) ? dbPublicEndpoint : envPublicEndpoint;
             if (!string.IsNullOrWhiteSpace(publicEndpoint))
             {
                 var publicUseSslRaw = !string.IsNullOrWhiteSpace(dbPublicUseSSL) ? dbPublicUseSSL : envPublicUseSSL;
                 bool publicUseSsl   = string.IsNullOrWhiteSpace(publicUseSslRaw) ? useSsl : publicUseSslRaw.ToLower() == "true";
-                _publicEndpoint = publicEndpoint;
-                _publicUseSsl   = publicUseSsl;
 
                 _publicMinioClient = new MinioClient()
                     .WithEndpoint(publicEndpoint)
@@ -141,36 +135,7 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
             }
             else
             {
-                _publicEndpoint    = null;
                 _publicMinioClient = null;
-            }
-        }
-
-        // Sets a public-read bucket policy so objects can be fetched by external services (e.g. Crun AI) without auth.
-        private async Task EnsureBucketPublicReadAsync()
-        {
-            try
-            {
-                var policyJson = $@"{{
-    ""Version"": ""2012-10-17"",
-    ""Statement"": [
-        {{
-            ""Effect"": ""Allow"",
-            ""Principal"": {{""AWS"": [""*\""]}},
-            ""Action"": [""s3:GetBucketLocation"", ""s3:GetObject""],
-            ""Resource"": [""arn:aws:s3:::{_defaultBucket}/*""]
-        }}
-    ]
-}}";
-                var setPolicyArgs = new SetPolicyArgs()
-                    .WithBucket(_defaultBucket)
-                    .WithPolicy(policyJson);
-                await _minioClient.SetPolicyAsync(setPolicyArgs).ConfigureAwait(false);
-                Console.WriteLine($"[S3MediaService] Bucket '{_defaultBucket}' set to public-read.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[S3MediaService] Could not set public-read policy on bucket '{_defaultBucket}': {ex.Message}");
             }
         }
 
@@ -201,13 +166,6 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
                 {
                     var makeBucketArgs = new MakeBucketArgs().WithBucket(_defaultBucket).WithLocation(_region);
                     await _minioClient.MakeBucketAsync(makeBucketArgs).ConfigureAwait(false);
-                    // Make bucket public-read immediately so external services can access files
-                    await EnsureBucketPublicReadAsync().ConfigureAwait(false);
-                }
-                else
-                {
-                    // Ensure policy is applied even on existing buckets (idempotent)
-                    await EnsureBucketPublicReadAsync().ConfigureAwait(false);
                 }
 
                 var putObjectArgs = new PutObjectArgs()
@@ -255,28 +213,6 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
 
             await EnsureClientInitializedAsync();
 
-            // If a public endpoint is configured, return a direct public URL.
-            // This avoids HMAC signature host-mismatch issues (e.g. when using ngrok)
-            // and ensures external services like Crun AI can access files without auth.
-            if (_publicMinioClient != null && !string.IsNullOrWhiteSpace(_publicEndpoint))
-            {
-                var scheme = _publicUseSsl ? "https" : "http";
-                return $"{scheme}://{_publicEndpoint}/{_defaultBucket}/{objectName}";
-            }
-
-            // For cloud S3-compatible providers (Railway, AWS, R2 etc.) — return direct URL
-            // because bucket is set to public-read
-            if (!_endpoint.Contains("127.0.0.1") && !_endpoint.Contains("localhost") && !_endpoint.Contains("minio"))
-            {
-                var scheme = _useSsl ? "https" : "http";
-                // AWS style: bucket.s3.region.amazonaws.com
-                if (_endpoint.Contains("amazonaws.com"))
-                    return $"{scheme}://{_defaultBucket}.s3.{_region}.amazonaws.com/{objectName}";
-                // Path style (Railway, R2, etc.)
-                return $"{scheme}://{_endpoint}/{_defaultBucket}/{objectName}";
-            }
-
-            // Fallback: presigned URL (for local MinIO without a public endpoint configured)
             try
             {
                 var presignedGetObjectArgs = new PresignedGetObjectArgs()
@@ -284,12 +220,30 @@ namespace NexClone.Backend.Infrastructure.ExternalServices
                     .WithObject(objectName)
                     .WithExpiry(60 * 60 * 24 * 7); // 7 days expiry
 
-                return await _minioClient.PresignedGetObjectAsync(presignedGetObjectArgs).ConfigureAwait(false);
+                string url;
+                if (_publicMinioClient != null)
+                {
+                    url = await _publicMinioClient.PresignedGetObjectAsync(presignedGetObjectArgs).ConfigureAwait(false);
+                }
+                else
+                {
+                    url = await _minioClient.PresignedGetObjectAsync(presignedGetObjectArgs).ConfigureAwait(false);
+                }
+                
+                return url;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"[S3MediaService] Error generating presigned URL for {objectName}: {ex.Message}");
-                return $"http://{_endpoint}/{_defaultBucket}/{objectName}";
+                if (_endpoint.Contains("amazonaws.com"))
+                {
+                    var publicEndpoint = $"{_defaultBucket}.s3.{_region}.amazonaws.com";
+                    return $"https://{publicEndpoint}/{objectName}";
+                }
+                else
+                {
+                    return $"https://{_endpoint}/{_defaultBucket}/{objectName}";
+                }
             }
         }
 
