@@ -253,7 +253,7 @@ namespace NexClone.Backend.API.Controllers.Admin
         [HttpGet]
         public IActionResult ExportSitemap()
         {
-            var baseUrl = _context.AppSettings.FirstOrDefault(a => a.Key == "DefaultFrontendUrl")?.Value ?? "https://nexmedia.ai";
+            var baseUrl = _context.AppSettings.FirstOrDefault(a => a.Key == "DefaultFrontendUrl")?.Value ?? "https://nexmediaai.com";
             var routes = new[] {
                 "",
                 "/pricing",
