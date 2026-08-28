@@ -249,5 +249,46 @@ namespace NexClone.Backend.API.Controllers.Admin
             
             return File(System.Text.Encoding.UTF8.GetBytes(sb.ToString()), "application/sql", $"database_dump_{System.DateTime.UtcNow:yyyyMMdd_HHmmss}.sql");
         }
+
+        [HttpGet]
+        public IActionResult ExportSitemap()
+        {
+            var baseUrl = _context.AppSettings.FirstOrDefault(a => a.Key == "DefaultFrontendUrl")?.Value ?? "https://nexmedia.ai";
+            var routes = new[] {
+                "",
+                "/pricing",
+                "/blog",
+                "/tools/text-to-voice",
+                "/tools/voice-to-text",
+                "/tools/image-to-video",
+                "/tools/advanced-lip-sync",
+                "/tools/motion-control",
+                "/tools/text-to-video",
+                "/tools/text-to-image",
+                "/tools/reference-to-video"
+            };
+
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+            sb.AppendLine("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">");
+
+            var lastModified = System.DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:sszzz");
+
+            foreach (var route in routes)
+            {
+                sb.AppendLine("  <url>");
+                sb.AppendLine($"    <loc>{baseUrl}/ar{route}</loc>");
+                sb.AppendLine($"    <lastmod>{lastModified}</lastmod>");
+                sb.AppendLine($"    <changefreq>weekly</changefreq>");
+                sb.AppendLine($"    <priority>{(route == "" ? "1.0" : "0.8")}</priority>");
+                sb.AppendLine($"    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"{baseUrl}/en{route}\" />");
+                sb.AppendLine($"    <xhtml:link rel=\"alternate\" hreflang=\"ar\" href=\"{baseUrl}/ar{route}\" />");
+                sb.AppendLine("  </url>");
+            }
+
+            sb.AppendLine("</urlset>");
+
+            return File(System.Text.Encoding.UTF8.GetBytes(sb.ToString()), "application/xml", "sitemap.xml");
+        }
     }
 }

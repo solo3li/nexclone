@@ -17,7 +17,11 @@
                     @Localizer["Manage system-wide configuration, security policies, maintenance mode, and background processing."]
                 </p>
             </div>
-            <div>
+            <div style="display: flex; gap: 1rem;">
+                <a href="@Url.Action("ExportSitemap", "SettingsAdmin")" class="bx--btn bx--btn--tertiary">
+                    @Localizer["Export Sitemap (XML)"]
+                    <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="16" height="16" viewBox="0 0 32 32" aria-hidden="true" class="bx--btn__icon"><path d="M26 24v4H6v-4H4v4a2 2 0 002 2h20a2 2 0 002-2v-4zm0-10l-1.41-1.41L17 20.17V2h-2v18.17l-7.59-7.58L6 14l10 10 10-10z"></path></svg>
+                </a>
                 <a href="@Url.Action("ExportDatabaseSql", "SettingsAdmin")" class="bx--btn bx--btn--tertiary">
                     @Localizer["Export Database (SQL)"]
                     <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="16" height="16" viewBox="0 0 32 32" aria-hidden="true" class="bx--btn__icon"><path d="M26 24v4H6v-4H4v4a2 2 0 002 2h20a2 2 0 002-2v-4zm0-10l-1.41-1.41L17 20.17V2h-2v18.17l-7.59-7.58L6 14l10 10 10-10z"></path></svg>

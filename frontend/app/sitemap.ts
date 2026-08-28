@@ -11,7 +11,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/tools/voice-to-text',
     '/tools/image-to-video',
     '/tools/advanced-lip-sync',
-    '/tools/motion-control'
+    '/tools/motion-control',
+    '/tools/text-to-video',
+    '/tools/text-to-image',
+    '/tools/reference-to-video'
   ];
 
   const sitemapEntries = routes.map((route) => ({
