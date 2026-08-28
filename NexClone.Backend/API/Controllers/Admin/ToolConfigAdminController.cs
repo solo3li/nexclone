@@ -674,6 +674,24 @@ namespace NexClone.Backend.API.Controllers.Admin
                     if (ModelCosts.ContainsKey("seedance|720p")) seedancePricing.CostPerSecond_720p = ModelCosts["seedance|720p"];
                     if (ModelCosts.ContainsKey("seedance|480p_video")) seedancePricing.CostPerSecond_480p_WithVideo = ModelCosts["seedance|480p_video"];
                     if (ModelCosts.ContainsKey("seedance|720p_video")) seedancePricing.CostPerSecond_720p_WithVideo = ModelCosts["seedance|720p_video"];
+
+                    // Google Veo 3.1 Fast
+                    var veoFast = await _context.ReferenceToVideoModelPricings.FirstOrDefaultAsync(p => p.ModelName == "veo 3.1 Fast");
+                    if (veoFast == null) { veoFast = new Core.Entities.ReferenceToVideoModelPricing { ModelName = "veo 3.1 Fast", ProviderName = "CrunAI", BillingType = "PerRequest" }; _context.ReferenceToVideoModelPricings.Add(veoFast); }
+                    veoFast.IsActive = config.IsActive;
+                    veoFast.AllowedWallet = defaultWallet;
+                    if (ModelCosts.ContainsKey("veo 3.1 Fast|720p")) veoFast.FixedCost_720p = ModelCosts["veo 3.1 Fast|720p"];
+                    if (ModelCosts.ContainsKey("veo 3.1 Fast|1080p")) veoFast.FixedCost_1080p = ModelCosts["veo 3.1 Fast|1080p"];
+                    if (ModelCosts.ContainsKey("veo 3.1 Fast|4k")) veoFast.FixedCost_4k = ModelCosts["veo 3.1 Fast|4k"];
+
+                    // Google Veo 3.1 Lite
+                    var veoLite = await _context.ReferenceToVideoModelPricings.FirstOrDefaultAsync(p => p.ModelName == "veo 3.1 Lite");
+                    if (veoLite == null) { veoLite = new Core.Entities.ReferenceToVideoModelPricing { ModelName = "veo 3.1 Lite", ProviderName = "CrunAI", BillingType = "PerRequest" }; _context.ReferenceToVideoModelPricings.Add(veoLite); }
+                    veoLite.IsActive = config.IsActive;
+                    veoLite.AllowedWallet = defaultWallet;
+                    if (ModelCosts.ContainsKey("veo 3.1 Lite|720p")) veoLite.FixedCost_720p = ModelCosts["veo 3.1 Lite|720p"];
+                    if (ModelCosts.ContainsKey("veo 3.1 Lite|1080p")) veoLite.FixedCost_1080p = ModelCosts["veo 3.1 Lite|1080p"];
+                    if (ModelCosts.ContainsKey("veo 3.1 Lite|4k")) veoLite.FixedCost_4k = ModelCosts["veo 3.1 Lite|4k"];
                 }
                 else if (config.ToolName == "advanced-lip-sync" || config.ToolName == "vidu_advanced_lip_sync" || config.ToolName == "lipsync")
                 {
