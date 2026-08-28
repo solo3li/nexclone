@@ -396,10 +396,16 @@ namespace NexClone.Backend.API.Controllers.AI
                 var pricings = await _dbContext.TextToVideoModelPricings.Where(p => p.IsActive).ToListAsync();
                 return Ok(new { isActive = setting?.IsActive ?? true, maxPrompt = setting?.MaxPromptLength ?? 5000, pricings });
             }
-            else if (toolType == "image-to-video" || toolType == "reference-to-video")
+            else if (toolType == "image-to-video")
             {
                 var setting = await _dbContext.ImageToVideoSettings.FirstOrDefaultAsync();
                 var pricings = await _dbContext.ImageToVideoModelPricings.Where(p => p.IsActive).ToListAsync();
+                return Ok(new { isActive = setting?.IsActive ?? true, maxPrompt = setting?.MaxPromptLength ?? 5000, pricings });
+            }
+            else if (toolType == "reference-to-video")
+            {
+                var setting = await _dbContext.ReferenceToVideoSettings.FirstOrDefaultAsync();
+                var pricings = await _dbContext.ReferenceToVideoModelPricings.Where(p => p.IsActive).ToListAsync();
                 return Ok(new { isActive = setting?.IsActive ?? true, maxPrompt = setting?.MaxPromptLength ?? 5000, pricings });
             }
             else if (toolType == "advanced-lip-sync" || toolType == "lipsync")

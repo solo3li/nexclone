@@ -280,7 +280,8 @@ export default function ReferenceToVideoPage() {
     let active = true;
     const fetchCost = async () => {
       try {
-        const res = await api.get(`/api/video/estimate-tool/reference-to-video?model=${currentModel.id}&resolution=${resolution}&duration=8`);
+        const estDuration = currentModel.id.includes("veo") ? 8 : duration;
+        const res = await api.get(`/api/video/estimate-tool/reference-to-video?model=${currentModel.id}&resolution=${resolution}&duration=${estDuration}`);
         if (active && res.data?.estimatedCost !== undefined) {
           setEstimatedCost(res.data.estimatedCost);
         } else if (active) {
@@ -292,7 +293,7 @@ export default function ReferenceToVideoPage() {
     };
     fetchCost();
     return () => { active = false; };
-  }, [currentModel, resolution]);
+  }, [currentModel, resolution, duration]);
 
   // Polling for generation status
   useEffect(() => {
