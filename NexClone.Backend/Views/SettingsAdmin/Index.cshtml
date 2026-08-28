@@ -10,11 +10,19 @@
 
 <div class="bx--grid" style="padding-left: 0; max-width: 900px; margin-left: 0;">
     <div class="bx--row" style="margin-bottom: 2rem;">
-        <div class="bx--col">
-            <h2 style="margin: 0; font-weight: 400; font-size: 1.75rem;">@Localizer["Global System Settings"]</h2>
-            <p style="color: #525252; margin-top: 0.5rem; font-size: 0.95rem;">
-                @Localizer["Manage system-wide configuration, security policies, maintenance mode, and background processing."]
-            </p>
+        <div class="bx--col" style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <h2 style="margin: 0; font-weight: 400; font-size: 1.75rem;">@Localizer["Global System Settings"]</h2>
+                <p style="color: #525252; margin-top: 0.5rem; font-size: 0.95rem;">
+                    @Localizer["Manage system-wide configuration, security policies, maintenance mode, and background processing."]
+                </p>
+            </div>
+            <div>
+                <a href="@Url.Action("ExportDatabaseSql", "SettingsAdmin")" class="bx--btn bx--btn--tertiary">
+                    @Localizer["Export Database (SQL)"]
+                    <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="16" height="16" viewBox="0 0 32 32" aria-hidden="true" class="bx--btn__icon"><path d="M26 24v4H6v-4H4v4a2 2 0 002 2h20a2 2 0 002-2v-4zm0-10l-1.41-1.41L17 20.17V2h-2v18.17l-7.59-7.58L6 14l10 10 10-10z"></path></svg>
+                </a>
+            </div>
         </div>
     </div>
 

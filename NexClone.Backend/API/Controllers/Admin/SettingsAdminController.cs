@@ -153,5 +153,101 @@ namespace NexClone.Backend.API.Controllers.Admin
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+        [HttpGet]
+        public async Task<IActionResult> ExportDatabaseSql()
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("-- Full Database Dump (PostgreSQL compatible)");
+            sb.AppendLine($"-- Generated at {System.DateTime.UtcNow:O}");
+            sb.AppendLine();
+
+            var conn = _context.Database.GetDbConnection();
+            bool wasClosed = conn.State == System.Data.ConnectionState.Closed;
+            if (wasClosed) await conn.OpenAsync();
+
+            try
+            {
+                foreach (var entityType in _context.Model.GetEntityTypes())
+                {
+                    var tableName = entityType.GetTableName();
+                    if (string.IsNullOrEmpty(tableName)) continue;
+
+                    var schema = entityType.GetSchema();
+                    var fullTableName = string.IsNullOrEmpty(schema) ? $"\"{tableName}\"" : $"\"{schema}\".\"{tableName}\"";
+                    
+                    sb.AppendLine($"-- Table: {fullTableName}");
+
+                    using (var cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = $"SELECT * FROM {fullTableName}";
+                        using (var reader = await cmd.ExecuteReaderAsync())
+                        {
+                            var colCount = reader.FieldCount;
+                            var cols = new System.Collections.Generic.List<string>();
+                            for (int i = 0; i < colCount; i++) cols.Add($"\"{reader.GetName(i)}\"");
+                            var columnsString = string.Join(", ", cols);
+
+                            while (await reader.ReadAsync())
+                            {
+                                var values = new System.Collections.Generic.List<string>();
+                                for (int i = 0; i < colCount; i++)
+                                {
+                                    if (reader.IsDBNull(i))
+                                    {
+                                        values.Add("NULL");
+                                    }
+                                    else
+                                    {
+                                        var val = reader.GetValue(i);
+                                        if (val is string s)
+                                        {
+                                            values.Add($"'{s.Replace("'", "''")}'");
+                                        }
+                                        else if (val is System.DateTime dt)
+                                        {
+                                            values.Add($"'{dt:yyyy-MM-dd HH:mm:ss.fff}'");
+                                        }
+                                        else if (val is System.DateTimeOffset dto)
+                                        {
+                                            values.Add($"'{dto:yyyy-MM-dd HH:mm:ss.fff zzz}'");
+                                        }
+                                        else if (val is bool b)
+                                        {
+                                            values.Add(b ? "true" : "false");
+                                        }
+                                        else if (val is System.Guid g)
+                                        {
+                                            values.Add($"'{g}'");
+                                        }
+                                        else if (val is byte[] bytes)
+                                        {
+                                            values.Add($"'\\x{System.BitConverter.ToString(bytes).Replace("-", "")}'");
+                                        }
+                                        else
+                                        {
+                                            var numStr = val.ToString().Replace("'", "''");
+                                            // Handle potential comma in decimal if locale is different
+                                            if (val is decimal || val is double || val is float)
+                                            {
+                                                numStr = numStr.Replace(",", ".");
+                                            }
+                                            values.Add($"'{numStr}'");
+                                        }
+                                    }
+                                }
+                                sb.AppendLine($"INSERT INTO {fullTableName} ({columnsString}) VALUES ({string.Join(", ", values)});");
+                            }
+                        }
+                    }
+                    sb.AppendLine();
+                }
+            }
+            finally
+            {
+                if (wasClosed) await conn.CloseAsync();
+            }
+            
+            return File(System.Text.Encoding.UTF8.GetBytes(sb.ToString()), "application/sql", $"database_dump_{System.DateTime.UtcNow:yyyyMMdd_HHmmss}.sql");
+        }
     }
 }
