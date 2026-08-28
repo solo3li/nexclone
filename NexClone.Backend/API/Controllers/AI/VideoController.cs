@@ -377,7 +377,10 @@ namespace NexClone.Backend.API.Controllers.AI
             else if (model.ToLower().Contains("seedance"))
             {
                 usageUnits = duration > 0 ? duration : 5;
-                if (toolType == "reference-to-video") usageUnits += inputDuration;
+                if (toolType == "reference-to-video" && inputDuration > 0)
+                {
+                    qualityFormat += "|WithVideo";
+                }
             }
 
             var policyResult = await _usagePolicy.EstimateCostAsync(userId, toolType, usageUnits, usageUnits, qualityFormat, subscriptionId, enforceWallet: false);
@@ -608,7 +611,10 @@ namespace NexClone.Backend.API.Controllers.AI
                             catch { /* ignore fallback */ }
                         }
                     }
-                    usageUnits += (decimal)inputDuration;
+                    if (inputDuration > 0)
+                    {
+                        qualityFormat += "|WithVideo";
+                    }
                 }
             }
 

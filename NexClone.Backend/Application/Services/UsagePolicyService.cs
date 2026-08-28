@@ -241,6 +241,7 @@ namespace NexClone.Backend.Application.Services
             var parts = quality.Split('|');
             var modelName = parts[0];
             var resolution = parts.Length > 1 ? parts[1] : "default";
+            var hasVideo = parts.Length > 2 && parts[2] == "WithVideo";
 
             var pricingRequest = new NexClone.Backend.Core.Interfaces.PricingRequest
             {
@@ -248,7 +249,8 @@ namespace NexClone.Backend.Application.Services
                 UsageAmountForCost = amountForCost,
                 UsageAmountForLimits = usageAmountForLimits,
                 ModelName = modelName,
-                Resolution = resolution
+                Resolution = resolution,
+                HasVideoInput = hasVideo
             };
 
             decimal totalCost;

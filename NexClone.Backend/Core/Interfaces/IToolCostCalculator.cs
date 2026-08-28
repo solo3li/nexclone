@@ -7,6 +7,7 @@ namespace NexClone.Backend.Core.Interfaces
         public decimal UsageAmountForLimits { get; set; }
         public string ModelName { get; set; } = "default";
         public string Resolution { get; set; } = "default";
+        public bool HasVideoInput { get; set; } = false;
     }
 
     public class PricingResult
