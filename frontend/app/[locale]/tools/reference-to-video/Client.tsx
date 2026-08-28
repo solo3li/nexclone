@@ -196,15 +196,28 @@ export default function ReferenceToVideoPage() {
               });
             }
             if (found) {
-              return {
-                ...m,
-                prices: {
-                  ...m.prices,
-                  "720p": found.billingType === "PerSecond" ? m.prices["720p"] : (found.fixedCost_720p || m.prices["720p"]),
-                  "1080p": found.billingType === "PerSecond" ? m.prices["1080p"] : (found.fixedCost_1080p || m.prices["1080p"]),
-                  "4k": found.billingType === "PerSecond" ? m.prices["4k"] : (found.fixedCost_4k || m.prices["4k"]),
-                }
-              };
+              if (found.billingType === 'PerSecond') {
+                return {
+                  ...m,
+                  prices: {
+                    ...m.prices,
+                    "480p": found.costPerSecond_480p ?? m.prices["480p"],
+                    "720p": found.costPerSecond_720p ?? m.prices["720p"],
+                    "1080p": found.costPerSecond_1080p ?? m.prices["1080p"],
+                    "4k": found.costPerSecond_4k ?? m.prices["4k"],
+                  }
+                };
+              } else {
+                return {
+                  ...m,
+                  prices: {
+                    ...m.prices,
+                    "720p": found.fixedCost_720p ?? m.prices["720p"],
+                    "1080p": found.fixedCost_1080p ?? m.prices["1080p"],
+                    "4k": found.fixedCost_4k ?? m.prices["4k"],
+                  }
+                };
+              }
             }
             return m;
           }));
