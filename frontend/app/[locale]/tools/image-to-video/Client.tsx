@@ -207,9 +207,12 @@ export default function ImageToVideoPage() {
               return normP === normM;
             });
             if (!found) {
+              // Fallback: partial match only when both keys are long enough to be unambiguous (≥6 chars)
               found = pricings.find((p: any) => {
                 const normP = (p.modelName || '').toLowerCase().replace(/[-_ .]/g, '');
-                return normP.includes(normM) || normM.includes(normP);
+                const shorter = normP.length <= normM.length ? normP : normM;
+                const longer = normP.length <= normM.length ? normM : normP;
+                return shorter.length >= 6 && longer.includes(shorter);
               });
             }
             if (found) {
