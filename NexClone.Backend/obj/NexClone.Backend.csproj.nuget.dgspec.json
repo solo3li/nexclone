@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/src/NexClone.Backend/NexClone.Backend.csproj": {}
+    "C:\\Users\\solo\\Desktop\\nexcole\\nexclone\\NexClone.Backend\\NexClone.Backend.csproj": {}
   },
   "projects": {
-    "/src/NexClone.Backend/NexClone.Backend.csproj": {
+    "C:\\Users\\solo\\Desktop\\nexcole\\nexclone\\NexClone.Backend\\NexClone.Backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/src/NexClone.Backend/NexClone.Backend.csproj",
+        "projectUniqueName": "C:\\Users\\solo\\Desktop\\nexcole\\nexclone\\NexClone.Backend\\NexClone.Backend.csproj",
         "projectName": "NexClone.Backend",
-        "projectPath": "/src/NexClone.Backend/NexClone.Backend.csproj",
-        "packagesPath": "/root/.nuget/packages/",
-        "outputPath": "/src/NexClone.Backend/obj/",
+        "projectPath": "C:\\Users\\solo\\Desktop\\nexcole\\nexclone\\NexClone.Backend\\NexClone.Backend.csproj",
+        "packagesPath": "C:\\Users\\solo\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\solo\\Desktop\\nexcole\\nexclone\\NexClone.Backend\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/root/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\solo\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
@@ -46,6 +46,10 @@
           "framework": "net10.0",
           "targetAlias": "net10.0",
           "dependencies": {
+            "ClosedXML": {
+              "target": "Package",
+              "version": "[0.105.1, )"
+            },
             "Google.Apis.Auth": {
               "target": "Package",
               "version": "[1.68.0, )"
@@ -136,7 +140,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/10.0.400/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.400/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

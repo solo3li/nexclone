@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -7,6 +8,8 @@ using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
+using ClosedXML.Excel;
+using System.Text;
 
 namespace NexClone.Backend.API.Controllers.Client
 {
@@ -229,7 +232,6 @@ namespace NexClone.Backend.API.Controllers.Client
                 existingSub.Status = "active";
                 newSub = existingSub;
 
-                // Cancel any other stacked active/frozen subscriptions (different plans) so only this one remains.
                 var otherStackedSubs = await _context.Subscriptions
                     .Where(s => s.UserId == userId && s.Id != existingSub.Id && (s.Status == "active" || s.Status == "freeze"))
                     .ToListAsync();
@@ -255,7 +257,6 @@ namespace NexClone.Backend.API.Controllers.Client
                     }
                 }
 
-                // Cancel all other active/frozen subscriptions so the user ends up with exactly one plan.
                 var competingSubs = await _context.Subscriptions
                     .Where(s => s.UserId == userId && (s.Status == "active" || s.Status == "freeze"))
                     .ToListAsync();
@@ -279,7 +280,6 @@ namespace NexClone.Backend.API.Controllers.Client
             await _context.SaveChangesAsync();
             await _walletService.DistributePlanCreditsAsync(user.Id, plan.Id, resetToZero: shouldReset, subscriptionId: newSub.Id);
 
-            // Record Payment for Admin assignment
             string resolvedCurrency = !string.IsNullOrWhiteSpace(currency) ? currency.ToUpper() : "EGP";
             decimal paymentAmount = resolvedCurrency == "USD" ? plan.PriceUsd : plan.PriceEgp;
             var payment = new Payment
@@ -297,7 +297,6 @@ namespace NexClone.Backend.API.Controllers.Client
             _context.Payments.Add(payment);
             await _context.SaveChangesAsync();
 
-            // Trigger with plan defaults
             try
             {
                 var affiliateService = HttpContext.RequestServices.GetRequiredService<NexClone.Backend.Application.Services.AffiliateService>();
@@ -309,7 +308,6 @@ namespace NexClone.Backend.API.Controllers.Client
             }
 
 
-            // Generate Invoice
             decimal amountEgp = plan.PriceEgp;
             decimal fixedFee = plan.FixedFeeEgp;
             decimal taxAmt = (amountEgp + fixedFee) * (plan.TaxPercentageEgp / 100m);
@@ -336,7 +334,7 @@ namespace NexClone.Backend.API.Controllers.Client
 
             try
             {
-                    byte[] pdfBytes = await invoiceService.GenerateInvoicePdfAsync(invoice);
+                byte[] pdfBytes = await invoiceService.GenerateInvoicePdfAsync(invoice);
                 using var ms = new System.IO.MemoryStream(pdfBytes);
                 string minioUrl = await mediaService.UploadFileAsync(ms, $"invoices/{invoice.InvoiceNumber}.pdf", "application/pdf", "invoices");
 
@@ -349,7 +347,6 @@ namespace NexClone.Backend.API.Controllers.Client
                 Console.WriteLine("Failed to generate/upload admin invoice PDF: " + ex.Message);
             }
 
-            // Send Email Receipt
             try
             {
                 if (!string.IsNullOrEmpty(user.Email))
@@ -447,7 +444,6 @@ namespace NexClone.Backend.API.Controllers.Client
                 return RedirectToAction(nameof(Details), new { id = userId });
             }
 
-            // Remove existing password if any
             if (await userManager.HasPasswordAsync(user))
             {
                 var removeResult = await userManager.RemovePasswordAsync(user);
@@ -458,7 +454,6 @@ namespace NexClone.Backend.API.Controllers.Client
                 }
             }
 
-            // Add new password
             var addResult = await userManager.AddPasswordAsync(user, newPassword);
             if (!addResult.Succeeded)
             {
@@ -466,7 +461,6 @@ namespace NexClone.Backend.API.Controllers.Client
                 return RedirectToAction(nameof(Details), new { id = userId });
             }
 
-            // Unlock user, reset failed attempts & update security stamp
             await userManager.SetLockoutEndDateAsync(user, null);
             await userManager.ResetAccessFailedCountAsync(user);
             await userManager.UpdateSecurityStampAsync(user);
@@ -509,14 +503,11 @@ namespace NexClone.Backend.API.Controllers.Client
 
             user.FullName = updatedUser.FullName;
             user.Email = updatedUser.Email;
-            user.UserName = updatedUser.Email; // Keep UserName sync
+            user.UserName = updatedUser.Email;
             user.PhoneNumber = updatedUser.PhoneNumber;
             user.Country = updatedUser.Country;
             user.IsStaff = updatedUser.IsStaff;
             user.IsSuperAdmin = updatedUser.IsSuperAdmin;
-            user.IsVerified = updatedUser.IsVerified;
-            user.StandardCredits = updatedUser.StandardCredits;
-            user.PremiumCredits = updatedUser.PremiumCredits;
             user.IsVerified = updatedUser.IsVerified;
             user.StandardCredits = updatedUser.StandardCredits;
             user.PremiumCredits = updatedUser.PremiumCredits;
@@ -585,7 +576,6 @@ namespace NexClone.Backend.API.Controllers.Client
                 {
                     foreach (var user in users)
                     {
-                        // Pre-cleanup rows that would otherwise block the delete.
                         var blogComments = await _context.BlogComments
                             .Where(b => b.UserId == user.Id)
                             .ToListAsync();
@@ -665,6 +655,163 @@ namespace NexClone.Backend.API.Controllers.Client
 
             TempData["Success"] = "Affiliate tracking dates updated successfully.";
             return RedirectToAction(nameof(Details), new { id = referral.ReferredUserId });
+        }
+
+        private async Task<System.Collections.Generic.List<NexClone.Backend.Core.Entities.ApplicationUser>> GetFilteredUsersAsync(string searchString, int? planId)
+        {
+            var query = _context.Users
+                .Include(u => u.Subscriptions.Where(s => s.Status == "active" && s.Plan.PriceUsd > 0 && !s.Plan.IsDefaultRegistrationPlan))
+                    .ThenInclude(s => s.Plan)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                searchString = searchString.ToLower();
+                query = query.Where(u => 
+                    u.Email.ToLower().Contains(searchString) || 
+                    (u.PhoneNumber != null && u.PhoneNumber.Contains(searchString)) || 
+                    u.Id.ToString().Contains(searchString));
+            }
+
+            if (planId.HasValue)
+            {
+                query = query.Where(u => u.Subscriptions.Any(s => s.Status == "active" && s.PlanId == planId.Value && s.Plan.PriceUsd > 0 && !s.Plan.IsDefaultRegistrationPlan));
+            }
+
+            return await query.ToListAsync();
+        }
+
+        private string EscapeCsv(string str)
+        {
+            if (string.IsNullOrEmpty(str)) return "";
+            str = str.Replace("\"", "\"\"");
+            if (str.Contains(",") || str.Contains("\"") || str.Contains("\n") || str.Contains("\r"))
+            {
+                return $"\"{str}\"";
+            }
+            return str;
+        }
+
+        private string EscapeSql(string str)
+        {
+            if (string.IsNullOrEmpty(str)) return "";
+            return str.Replace("'", "''");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ExportCsv(string searchString, int? planId)
+        {
+            var users = await GetFilteredUsersAsync(searchString, planId);
+            var sb = new StringBuilder();
+            sb.AppendLine("ID,Email,Phone,EmailConfirmed,IsVerified,TwoFactorEnabled,Country,TotalCredits,Role,JoinedDate,CurrentPlan");
+
+            foreach (var u in users)
+            {
+                var currentSub = u.Subscriptions?.FirstOrDefault(s => s.Status == "active");
+                var currentPlan = currentSub?.Plan?.Name ?? "No Active Paid Plan";
+                var role = u.IsSuperAdmin ? "SuperAdmin" : (u.IsStaff ? "Staff" : "User");
+                var totalCredits = u.StandardCredits + u.PremiumCredits;
+                
+                sb.AppendLine($"{u.Id},{EscapeCsv(u.Email)},{EscapeCsv(u.PhoneNumber)},{u.EmailConfirmed},{u.IsVerified},{u.TwoFactorEnabled},{EscapeCsv(u.Country)},{totalCredits},{EscapeCsv(role)},{u.CreatedAt:yyyy-MM-dd HH:mm:ss},{EscapeCsv(currentPlan)}");
+            }
+
+            return File(Encoding.UTF8.GetBytes(sb.ToString()), "text/csv", "users_export.csv");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ExportExcel(string searchString, int? planId)
+        {
+            var users = await GetFilteredUsersAsync(searchString, planId);
+
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("Users");
+                
+                worksheet.Cell(1, 1).Value = "ID";
+                worksheet.Cell(1, 2).Value = "Email";
+                worksheet.Cell(1, 3).Value = "Phone";
+                worksheet.Cell(1, 4).Value = "Email Confirmed";
+                worksheet.Cell(1, 5).Value = "Is Verified";
+                worksheet.Cell(1, 6).Value = "Two Factor Enabled";
+                worksheet.Cell(1, 7).Value = "Country";
+                worksheet.Cell(1, 8).Value = "Total Credits";
+                worksheet.Cell(1, 9).Value = "Role";
+                worksheet.Cell(1, 10).Value = "Joined Date";
+                worksheet.Cell(1, 11).Value = "Current Plan";
+
+                var headerRow = worksheet.Row(1);
+                headerRow.Style.Font.Bold = true;
+
+                for (int i = 0; i < users.Count; i++)
+                {
+                    var u = users[i];
+                    var currentSub = u.Subscriptions?.FirstOrDefault(s => s.Status == "active");
+                    var currentPlan = currentSub?.Plan?.Name ?? "No Active Paid Plan";
+                    var role = u.IsSuperAdmin ? "SuperAdmin" : (u.IsStaff ? "Staff" : "User");
+                    var totalCredits = u.StandardCredits + u.PremiumCredits;
+
+                    int row = i + 2;
+                    worksheet.Cell(row, 1).Value = u.Id.ToString();
+                    worksheet.Cell(row, 2).Value = u.Email;
+                    worksheet.Cell(row, 3).Value = u.PhoneNumber;
+                    worksheet.Cell(row, 4).Value = u.EmailConfirmed;
+                    worksheet.Cell(row, 5).Value = u.IsVerified;
+                    worksheet.Cell(row, 6).Value = u.TwoFactorEnabled;
+                    worksheet.Cell(row, 7).Value = u.Country;
+                    worksheet.Cell(row, 8).Value = totalCredits;
+                    worksheet.Cell(row, 9).Value = role;
+                    worksheet.Cell(row, 10).Value = u.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss");
+                    worksheet.Cell(row, 11).Value = currentPlan;
+                }
+
+                worksheet.Columns().AdjustToContents();
+
+                using (var stream = new System.IO.MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "users_export.xlsx");
+                }
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ExportSql(string searchString, int? planId)
+        {
+            var users = await GetFilteredUsersAsync(searchString, planId);
+            var sb = new StringBuilder();
+            sb.AppendLine("-- Users Export SQL");
+            sb.AppendLine("CREATE TABLE IF NOT EXISTS UsersExport (");
+            sb.AppendLine("    Id VARCHAR(255),");
+            sb.AppendLine("    Email VARCHAR(255),");
+            sb.AppendLine("    Phone VARCHAR(255),");
+            sb.AppendLine("    EmailConfirmed BOOLEAN,");
+            sb.AppendLine("    IsVerified BOOLEAN,");
+            sb.AppendLine("    TwoFactorEnabled BOOLEAN,");
+            sb.AppendLine("    Country VARCHAR(255),");
+            sb.AppendLine("    TotalCredits DECIMAL(18,2),");
+            sb.AppendLine("    Role VARCHAR(255),");
+            sb.AppendLine("    JoinedDate TIMESTAMP,");
+            sb.AppendLine("    CurrentPlan VARCHAR(255)");
+            sb.AppendLine(");");
+            sb.AppendLine();
+
+            foreach (var u in users)
+            {
+                var currentSub = u.Subscriptions?.FirstOrDefault(s => s.Status == "active");
+                var currentPlan = currentSub?.Plan?.Name ?? "No Active Paid Plan";
+                var userRole = u.IsSuperAdmin ? "SuperAdmin" : (u.IsStaff ? "Staff" : "User");
+                var totalCredits = u.StandardCredits + u.PremiumCredits;
+                
+                var email = EscapeSql(u.Email);
+                var phone = EscapeSql(u.PhoneNumber);
+                var country = EscapeSql(u.Country);
+                var role = EscapeSql(userRole);
+                var plan = EscapeSql(currentPlan);
+
+                sb.AppendLine($"INSERT INTO UsersExport (Id, Email, Phone, EmailConfirmed, IsVerified, TwoFactorEnabled, Country, TotalCredits, Role, JoinedDate, CurrentPlan) VALUES ('{u.Id}', '{email}', '{phone}', {(u.EmailConfirmed ? "true" : "false")}, {(u.IsVerified ? "true" : "false")}, {(u.TwoFactorEnabled ? "true" : "false")}, '{country}', {totalCredits}, '{role}', '{u.CreatedAt:yyyy-MM-dd HH:mm:ss}', '{plan}');");
+            }
+
+            return File(Encoding.UTF8.GetBytes(sb.ToString()), "application/sql", "users_export.sql");
         }
     }
 }

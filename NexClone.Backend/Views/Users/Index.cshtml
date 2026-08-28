@@ -10,11 +10,20 @@
         <div class="bx--col" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
             <h1 class="bx--type-productive-heading-05">@Localizer["Users Management"]</h1>
             <div style="display: flex; gap: 1rem;">
+                <a href="@Url.Action("ExportExcel", new { searchString = ViewBag.CurrentSearch, planId = ViewBag.CurrentPlanId })" class="bx--btn bx--btn--tertiary">
+                    @Localizer["Export Excel"]
+                </a>
+                <a href="@Url.Action("ExportCsv", new { searchString = ViewBag.CurrentSearch, planId = ViewBag.CurrentPlanId })" class="bx--btn bx--btn--tertiary">
+                    @Localizer["Export CSV"]
+                </a>
+                <a href="@Url.Action("ExportSql", new { searchString = ViewBag.CurrentSearch, planId = ViewBag.CurrentPlanId })" class="bx--btn bx--btn--tertiary">
+                    @Localizer["Export SQL"]
+                </a>
                 <button id="bulkDeleteBtn" class="bx--btn bx--btn--danger" onclick="bulkDelete()" disabled>
                     @Localizer["Delete Selected"]
                 </button>
                 <a href="@Url.Action("Create")" class="bx--btn bx--btn--primary">
-                    Create User
+                    @Localizer["Create User"]
                     <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="16" height="16" viewBox="0 0 32 32" aria-hidden="true" class="bx--btn__icon"><path d="M17 15L17 8 15 8 15 15 8 15 8 17 15 17 15 24 17 24 17 17 24 17 24 15z"></path></svg>
                 </a>
             </div>
