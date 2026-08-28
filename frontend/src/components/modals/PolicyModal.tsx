@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocale } from 'next-intl';
 import { X } from 'lucide-react';
-import { api } from '@/lib/axios'; // Adjust path if needed
+import api from '@/utils/api';
 
 interface PolicyModalProps {
   isOpen: boolean;
