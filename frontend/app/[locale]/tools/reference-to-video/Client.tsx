@@ -200,9 +200,9 @@ export default function ReferenceToVideoPage() {
                 ...m,
                 prices: {
                   ...m.prices,
-                  "720p": found.fixedCost_720p ?? m.prices["720p"],
-                  "1080p": found.fixedCost_1080p ?? m.prices["1080p"],
-                  "4k": found.fixedCost_4k ?? m.prices["4k"],
+                  "720p": found.billingType === "PerSecond" ? m.prices["720p"] : (found.fixedCost_720p || m.prices["720p"]),
+                  "1080p": found.billingType === "PerSecond" ? m.prices["1080p"] : (found.fixedCost_1080p || m.prices["1080p"]),
+                  "4k": found.billingType === "PerSecond" ? m.prices["4k"] : (found.fixedCost_4k || m.prices["4k"]),
                 }
               };
             }
