@@ -234,15 +234,31 @@ namespace NexClone.Backend
             if (!await context.TextToVideoSettings.AnyAsync())
                 context.TextToVideoSettings.Add(new TextToVideoSetting { Id = 1, IsActive = true, MaxPromptLength = 5000, MaxDurationSeconds = 20, DefaultResolution = "720p", MaxConcurrentOperations = 10 });
             var t2vModels = new[] {
-                new TextToVideoModelPricing { ModelName = "veo 3.1 Fast", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 30.0m, FixedCost_1080p = 37.5m, FixedCost_4k = 90.0m, AllowedWallet = "Standard", IsActive = true },
-                new TextToVideoModelPricing { ModelName = "veo 3.1 Lite", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 15.0m, FixedCost_1080p = 22.5m, FixedCost_4k = 75.0m, AllowedWallet = "Standard", IsActive = true },
-                new TextToVideoModelPricing { ModelName = "grok-imagine", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 2.4m, CostPerSecond_720p = 4.5m, CostPerSecond_1080p = 8.0m, AllowedWallet = "Standard", IsActive = true },
-                new TextToVideoModelPricing { ModelName = "bytedance/seedance2-0-mini-t2v", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 0.0143m, CostPerSecond_720p = 0.0286m, CostPerSecond_1080p = 0.0286m, CostPerSecond_4k = 0.0286m, AllowedWallet = "Standard", IsActive = true }
+                new TextToVideoModelPricing { ModelName = "veo 3.1 Fast", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 35.0m, FixedCost_1080p = 45.0m, FixedCost_4k = 105.0m, AllowedWallet = "Standard", IsActive = true },
+                new TextToVideoModelPricing { ModelName = "veo 3.1 Lite", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 15.0m, FixedCost_1080p = 20.0m, FixedCost_4k = 40.0m, AllowedWallet = "Standard", IsActive = true },
+                new TextToVideoModelPricing { ModelName = "grok-imagine", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 5.0m, CostPerSecond_720p = 10.0m, CostPerSecond_1080p = 8.0m, AllowedWallet = "Standard", IsActive = true },
+                new TextToVideoModelPricing { ModelName = "bytedance/seedance2-0-mini-t2v", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 22.0m, CostPerSecond_720p = 22.0m, CostPerSecond_1080p = 22.0m, CostPerSecond_4k = 22.0m, AllowedWallet = "Standard", IsActive = true }
             };
             foreach (var m in t2vModels)
             {
-                if (!await context.TextToVideoModelPricings.AnyAsync(x => x.ModelName == m.ModelName))
+                var existing = await context.TextToVideoModelPricings.FirstOrDefaultAsync(x => x.ModelName == m.ModelName);
+                if (existing == null)
+                {
                     context.TextToVideoModelPricings.Add(m);
+                }
+                else
+                {
+                    existing.BillingType = m.BillingType;
+                    existing.FixedCost_720p = m.FixedCost_720p;
+                    existing.FixedCost_1080p = m.FixedCost_1080p;
+                    existing.FixedCost_4k = m.FixedCost_4k;
+                    existing.CostPerSecond_480p = m.CostPerSecond_480p;
+                    existing.CostPerSecond_720p = m.CostPerSecond_720p;
+                    existing.CostPerSecond_1080p = m.CostPerSecond_1080p;
+                    existing.CostPerSecond_4k = m.CostPerSecond_4k;
+                    existing.AllowedWallet = m.AllowedWallet;
+                    existing.IsActive = m.IsActive;
+                }
             }
             // Retire the removed "Veo 3.1 Quality" model on existing databases.
             var t2vQualityRows = await context.TextToVideoModelPricings.Where(p => p.ModelName == "veo 3.1 Quality").ToListAsync();
@@ -254,15 +270,31 @@ namespace NexClone.Backend
             if (!await context.ImageToVideoSettings.AnyAsync())
                 context.ImageToVideoSettings.Add(new ImageToVideoSetting { Id = 1, IsActive = true, MaxImageFileSizeMb = 25, MaxDurationSeconds = 20, MaxPromptLength = 5000, MaxConcurrentOperations = 10 });
             var i2vModels = new[] {
-                new ImageToVideoModelPricing { ModelName = "veo 3.1 Fast", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 30.0m, FixedCost_1080p = 37.5m, FixedCost_4k = 90.0m, AllowedWallet = "Standard", IsActive = true },
-                new ImageToVideoModelPricing { ModelName = "veo 3.1 Lite", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 15.0m, FixedCost_1080p = 22.5m, FixedCost_4k = 75.0m, AllowedWallet = "Standard", IsActive = true },
+                new ImageToVideoModelPricing { ModelName = "veo 3.1 Fast", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 35.0m, FixedCost_1080p = 45.0m, FixedCost_4k = 105.0m, AllowedWallet = "Standard", IsActive = true },
+                new ImageToVideoModelPricing { ModelName = "veo 3.1 Lite", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 15.0m, FixedCost_1080p = 20.0m, FixedCost_4k = 40.0m, AllowedWallet = "Standard", IsActive = true },
                 new ImageToVideoModelPricing { ModelName = "grok-imagine", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 2.4m, CostPerSecond_720p = 4.5m, CostPerSecond_1080p = 8.0m, AllowedWallet = "Standard", IsActive = true },
-                new ImageToVideoModelPricing { ModelName = "bytedance/seedance2-0-mini-i2v", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 0.0143m, CostPerSecond_720p = 0.0286m, CostPerSecond_1080p = 0.0286m, CostPerSecond_4k = 0.0286m, AllowedWallet = "Standard", IsActive = true }
+                new ImageToVideoModelPricing { ModelName = "bytedance/seedance2-0-mini-i2v", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 10.0m, CostPerSecond_720p = 20.0m, CostPerSecond_1080p = 20.0m, CostPerSecond_4k = 20.0m, AllowedWallet = "Standard", IsActive = true }
             };
             foreach (var m in i2vModels)
             {
-                if (!await context.ImageToVideoModelPricings.AnyAsync(x => x.ModelName == m.ModelName))
+                var existing = await context.ImageToVideoModelPricings.FirstOrDefaultAsync(x => x.ModelName == m.ModelName);
+                if (existing == null)
+                {
                     context.ImageToVideoModelPricings.Add(m);
+                }
+                else
+                {
+                    existing.BillingType = m.BillingType;
+                    existing.FixedCost_720p = m.FixedCost_720p;
+                    existing.FixedCost_1080p = m.FixedCost_1080p;
+                    existing.FixedCost_4k = m.FixedCost_4k;
+                    existing.CostPerSecond_480p = m.CostPerSecond_480p;
+                    existing.CostPerSecond_720p = m.CostPerSecond_720p;
+                    existing.CostPerSecond_1080p = m.CostPerSecond_1080p;
+                    existing.CostPerSecond_4k = m.CostPerSecond_4k;
+                    existing.AllowedWallet = m.AllowedWallet;
+                    existing.IsActive = m.IsActive;
+                }
             }
             // Retire the removed "Veo 3.1 Quality" model on existing databases.
             var i2vQualityRows = await context.ImageToVideoModelPricings.Where(p => p.ModelName == "veo 3.1 Quality").ToListAsync();
@@ -274,14 +306,30 @@ namespace NexClone.Backend
             if (!await context.ReferenceToVideoSettings.AnyAsync())
                 context.ReferenceToVideoSettings.Add(new ReferenceToVideoSetting { Id = 1, IsActive = true, MaxPromptLength = 5000, MaxDurationSeconds = 20, DefaultResolution = "720p", MaxConcurrentOperations = 10 });
             var r2vModels = new[] {
-                new ReferenceToVideoModelPricing { ModelName = "veo 3.1 Fast", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 30.0m, FixedCost_1080p = 37.5m, FixedCost_4k = 90.0m, AllowedWallet = "Standard", IsActive = true },
-                new ReferenceToVideoModelPricing { ModelName = "veo 3.1 Lite", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 15.0m, FixedCost_1080p = 22.5m, FixedCost_4k = 75.0m, AllowedWallet = "Standard", IsActive = true },
-                new ReferenceToVideoModelPricing { ModelName = "bytedance/seedance2-0-mini-r2v", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 0.0089m, CostPerSecond_720p = 0.0179m, CostPerSecond_1080p = 0.0179m, CostPerSecond_4k = 0.0179m, AllowedWallet = "Standard", IsActive = true }
+                new ReferenceToVideoModelPricing { ModelName = "veo 3.1 Fast", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 35.0m, FixedCost_1080p = 45.0m, FixedCost_4k = 105.0m, AllowedWallet = "Standard", IsActive = true },
+                new ReferenceToVideoModelPricing { ModelName = "veo 3.1 Lite", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 15.0m, FixedCost_1080p = 20.0m, FixedCost_4k = 40.0m, AllowedWallet = "Standard", IsActive = true },
+                new ReferenceToVideoModelPricing { ModelName = "bytedance/seedance2-0-mini-r2v", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 20.0m, CostPerSecond_720p = 40.0m, CostPerSecond_1080p = 40.0m, CostPerSecond_4k = 40.0m, AllowedWallet = "Standard", IsActive = true }
             };
             foreach (var m in r2vModels)
             {
-                if (!await context.ReferenceToVideoModelPricings.AnyAsync(x => x.ModelName == m.ModelName))
+                var existing = await context.ReferenceToVideoModelPricings.FirstOrDefaultAsync(x => x.ModelName == m.ModelName);
+                if (existing == null)
+                {
                     context.ReferenceToVideoModelPricings.Add(m);
+                }
+                else
+                {
+                    existing.BillingType = m.BillingType;
+                    existing.FixedCost_720p = m.FixedCost_720p;
+                    existing.FixedCost_1080p = m.FixedCost_1080p;
+                    existing.FixedCost_4k = m.FixedCost_4k;
+                    existing.CostPerSecond_480p = m.CostPerSecond_480p;
+                    existing.CostPerSecond_720p = m.CostPerSecond_720p;
+                    existing.CostPerSecond_1080p = m.CostPerSecond_1080p;
+                    existing.CostPerSecond_4k = m.CostPerSecond_4k;
+                    existing.AllowedWallet = m.AllowedWallet;
+                    existing.IsActive = m.IsActive;
+                }
             }
 
             if (!await context.LipSyncSettings.AnyAsync())
