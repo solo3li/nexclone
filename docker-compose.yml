@@ -110,6 +110,8 @@ services:
       args:
         NEXT_PUBLIC_API_URL: "https://api.169.58.204.169.nip.io"
     container_name: nexclone-frontend
+    environment:
+      - INTERNAL_API_URL=http://nexclone-backend:8080
     networks:
       - nexclone_network
     depends_on:
