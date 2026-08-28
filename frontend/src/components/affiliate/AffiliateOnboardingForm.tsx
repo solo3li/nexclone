@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import { useLocale } from 'next-intl';
 import { useAffiliateStore } from '@/store/useAffiliateStore';
 
+import PolicyModal from '@/components/modals/PolicyModal';
+
 export default function AffiliateOnboardingForm({ onSuccess }: { onSuccess?: () => void }) {
   const locale = useLocale();
   const isRtl = locale === 'ar';
@@ -15,6 +17,7 @@ export default function AffiliateOnboardingForm({ onSuccess }: { onSuccess?: () 
   const [whatsappNumber, setWhatsappNumber] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPolicyModalOpen, setIsPolicyModalOpen] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,10 +106,19 @@ export default function AffiliateOnboardingForm({ onSuccess }: { onSuccess?: () 
             onChange={(e) => setPolicyAccepted(e.target.checked)}
             className="mt-1 w-5 h-5 rounded border-white/10 bg-black/40 text-violet-500 focus:ring-violet-500 focus:ring-offset-0 shrink-0"
           />
-          <label htmlFor="policy" className="text-sm text-white/80 cursor-pointer select-none leading-tight">
-            {isRtl 
-              ? 'أوافق على سياسة التسويق بالعمولة والشروط والأحكام الخاصة بالمنصة للبدء في جني الأرباح.' 
-              : 'I agree to the affiliate marketing policy and the platform terms and conditions to start earning.'}
+          <label htmlFor="policy" className="text-sm text-white/80 select-none leading-tight">
+            {isRtl ? 'أوافق على ' : 'I agree to the '}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                setIsPolicyModalOpen(true);
+              }}
+              className="text-violet-400 hover:text-violet-300 underline font-medium"
+            >
+              {isRtl ? 'سياسة التسويق بالعمولة' : 'affiliate marketing policy'}
+            </button>
+            {isRtl ? ' والشروط والأحكام الخاصة بالمنصة للبدء في جني الأرباح.' : ' and the platform terms and conditions to start earning.'}
           </label>
         </div>
 
@@ -120,6 +132,12 @@ export default function AffiliateOnboardingForm({ onSuccess }: { onSuccess?: () 
             : (isRtl ? 'انضم الآن وابدأ الربح' : 'Join Now and Start Earning')}
         </button>
       </form>
+
+      <PolicyModal 
+        isOpen={isPolicyModalOpen} 
+        onClose={() => setIsPolicyModalOpen(false)} 
+        slug="affiliate-policy" 
+      />
     </motion.div>
   );
 }

@@ -157,7 +157,7 @@ export default function RegisterPage() {
       password: validatePassword(password),
     });
     if (!acceptedPolicy) {
-      setError(isRtl ? "يجب الموافقة على سياسة الخصوصية أولاً" : "You must agree to the privacy policy first");
+      setError(isRtl ? "يجب الموافقة على شروط الخدمة وسياسة الخصوصية أولاً" : "You must agree to the Terms of Service and Privacy Policy first");
       return;
     }
     if (!isFormValid) return;
@@ -464,7 +464,11 @@ export default function RegisterPage() {
                     />
                     <label htmlFor="privacy" className="text-sm text-white/70 leading-relaxed cursor-pointer">
                       {isRtl ? "لقد قرأت وأوافق على " : "I have read and agree to the "}
-                      <Link href="/privacy" target="_blank" className="text-pink-400 hover:text-pink-300 underline font-medium">
+                      <Link href="/pages/terms" target="_blank" className="text-pink-400 hover:text-pink-300 underline font-medium">
+                        {isRtl ? "شروط الخدمة" : "Terms of Service"}
+                      </Link>
+                      {isRtl ? " و " : " and "}
+                      <Link href="/pages/privacy-policy" target="_blank" className="text-pink-400 hover:text-pink-300 underline font-medium">
                         {isRtl ? "سياسة الخصوصية" : "Privacy Policy"}
                       </Link>
                     </label>
