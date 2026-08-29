@@ -25,7 +25,7 @@ export default function BlogIndex() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/client/blog')
+    fetch('/api/Blog')
       .then(res => res.json())
       .then(data => {
         setPosts(data);

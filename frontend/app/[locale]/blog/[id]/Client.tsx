@@ -16,7 +16,7 @@ export default function BlogPost({ params }: { params: Promise<{ id: string }> }
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/client/blog/${id}`)
+    fetch(`/api/Blog/${id}`)
       .then(res => {
         if (!res.ok) throw new Error('Not found');
         return res.json();

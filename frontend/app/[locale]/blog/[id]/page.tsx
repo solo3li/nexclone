@@ -9,7 +9,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   let post = null;
   
   try {
-    const res = await fetch(`${apiUrl}/api/client/blog/${id}`);
+    const res = await fetch(`${apiUrl}/api/Blog/${id}`);
     if (res.ok) {
       post = await res.json();
     }
