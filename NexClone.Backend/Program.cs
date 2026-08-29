@@ -186,6 +186,7 @@ builder.Services.AddScoped<NexClone.Backend.Application.Services.UsagePolicyServ
 builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IToolCostCalculator, NexClone.Backend.Application.Services.Pricing.AvatarToVideoCalculator>();
 builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IToolCostCalculator, NexClone.Backend.Application.Services.Pricing.TextToVideoCalculator>();
 builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IToolCostCalculator, NexClone.Backend.Application.Services.Pricing.ImageToVideoCalculator>();
+builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IToolCostCalculator, NexClone.Backend.Application.Services.Pricing.ReferenceToVideoCalculator>();
 builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IToolCostCalculator, NexClone.Backend.Application.Services.Pricing.LipSyncCalculator>();
 builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IToolCostCalculator, NexClone.Backend.Application.Services.Pricing.TextToImageCalculator>();
 builder.Services.AddScoped<NexClone.Backend.Core.Interfaces.IToolCostCalculator, NexClone.Backend.Application.Services.Pricing.MotionControlCalculator>();
