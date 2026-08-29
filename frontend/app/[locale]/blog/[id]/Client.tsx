@@ -2,9 +2,8 @@
 
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { use } from "react";
+import { use, useState, useEffect } from "react";
 import { useLocale } from "next-intl";
-import { blogArticles } from "@/data/blogData";
 import { ArrowLeft, ArrowRight, Calendar } from "lucide-react";
 import { Link } from "@/i18n/routing";
 
@@ -13,8 +12,34 @@ export default function BlogPost({ params }: { params: Promise<{ id: string }> }
   const locale = useLocale();
   const isRtl = locale === 'ar';
   
-  const post = blogArticles.find(p => p.slug === id);
+  const [post, setPost] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`/api/client/blog/${id}`)
+      .then(res => {
+        if (!res.ok) throw new Error('Not found');
+        return res.json();
+      })
+      .then(data => {
+        setPost(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to fetch post', err);
+        setLoading(false);
+      });
+  }, [id]);
+
   const ArrowIcon = isRtl ? ArrowRight : ArrowLeft;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0a0015] flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-500"></div>
+      </div>
+    );
+  }
 
   if (!post) {
     return (
@@ -42,7 +67,7 @@ export default function BlogPost({ params }: { params: Promise<{ id: string }> }
         
         <article className="prose prose-invert prose-violet max-w-none">
           <div className="flex items-center gap-4 text-white/50 text-sm mb-6 font-medium">
-            <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4"/> {new Date(post.date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}</span>
+            <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4"/> {new Date(post.createdAt).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}</span>
             <span className="px-2.5 py-1 rounded-full bg-violet-500/10 text-violet-400 border border-violet-500/20">{post.category}</span>
           </div>
           

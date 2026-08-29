@@ -1,16 +1,41 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Link } from "@/i18n/routing";
 import { useLocale } from "next-intl";
-import { blogArticles } from "@/data/blogData";
+
+interface BlogPost {
+  id: number;
+  slug: string;
+  category: string;
+  titleEn: string;
+  titleAr: string;
+  contentEn: string;
+  contentAr: string;
+  createdAt: string;
+}
 
 export default function BlogIndex() {
   const locale = useLocale();
   const isRtl = locale === 'ar';
   
-  const posts = blogArticles;
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/client/blog')
+      .then(res => res.json())
+      .then(data => {
+        setPosts(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to fetch posts', err);
+        setLoading(false);
+      });
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#0a0015] flex flex-col font-sans">
@@ -25,7 +50,11 @@ export default function BlogIndex() {
             : 'Discover how AI can transform your content creation through our latest articles.'}
         </p>
         
-        {posts.length === 0 ? (
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-500"></div>
+          </div>
+        ) : posts.length === 0 ? (
           <p className="text-center text-white/50 py-12">
             {isRtl ? 'لا توجد مقالات حالياً.' : 'No posts available right now.'}
           </p>
@@ -43,7 +72,7 @@ export default function BlogIndex() {
                   
                   <div className="p-6 flex-1 flex flex-col">
                     <div className="flex items-center justify-between text-xs text-white/40 mb-3">
-                      <span>{new Date(post.date).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}</span>
+                      <span>{new Date(post.createdAt).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US')}</span>
                       <span className="px-2 py-1 rounded bg-white/5 text-fuchsia-400/80">{post.category}</span>
                     </div>
                     <h2 className="text-xl font-bold text-white mb-3 group-hover:text-violet-400 transition-colors leading-snug">

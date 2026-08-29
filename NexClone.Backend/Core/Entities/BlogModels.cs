@@ -11,10 +11,22 @@ namespace NexClone.Backend.Core.Entities
         public int Id { get; set; }
         
         [Required]
-        public string Title { get; set; } = string.Empty;
+        public string Slug { get; set; } = string.Empty;
+
+        [Required]
+        public string Category { get; set; } = "General";
+
+        [Required]
+        public string TitleEn { get; set; } = string.Empty;
         
         [Required]
-        public string Content { get; set; } = string.Empty;
+        public string TitleAr { get; set; } = string.Empty;
+        
+        [Required]
+        public string ContentEn { get; set; } = string.Empty;
+        
+        [Required]
+        public string ContentAr { get; set; } = string.Empty;
 
         public string MediaUrl { get; set; } = string.Empty;
         public string MediaType { get; set; } = string.Empty; // "image", "video", ""

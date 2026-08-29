@@ -479,6 +479,15 @@
                 </li>
                 }
 
+                @if (isSuperAdmin || visibleSections.Contains("/BlogAdmin")) {
+                    <li class="sidebar-menu-item">
+                    <a href="/BlogAdmin">
+                        <i class='bx bx-news'></i>
+                        @Localizer["Blog"]
+                    </a>
+                </li>
+                }
+
 
                 @if (isSuperAdmin || visibleSections.Contains("/TicketsAdmin")) {
                     <li class="sidebar-menu-item">

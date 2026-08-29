@@ -8,14 +8,37 @@
                 <form method="post" action="/BlogAdmin/Create" enctype="multipart/form-data">
                     @Html.AntiForgeryToken()
                     
-                    <div class="bx--form-item" style="margin-bottom: 1.5rem;">
-                        <label class="bx--label" style="font-weight: 600;">@Localizer["Title"]</label>
-                        <input type="text" class="bx--text-input" name="Title" required style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;" />
+                    <div class="bx--row" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                        <div class="bx--col" style="flex: 1;">
+                            <label class="bx--label" style="font-weight: 600;">@Localizer["Slug (URL)"]</label>
+                            <input type="text" class="bx--text-input" name="Slug" required style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;" />
+                        </div>
+                        <div class="bx--col" style="flex: 1;">
+                            <label class="bx--label" style="font-weight: 600;">@Localizer["Category"]</label>
+                            <input type="text" class="bx--text-input" name="Category" required style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;" />
+                        </div>
                     </div>
 
-                    <div class="bx--form-item" style="margin-bottom: 1.5rem;">
-                        <label class="bx--label" style="font-weight: 600;">@Localizer["Content (HTML/Markdown)"]</label>
-                        <textarea class="bx--text-area" name="Content" rows="15" required style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;"></textarea>
+                    <div class="bx--row" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                        <div class="bx--col" style="flex: 1;">
+                            <label class="bx--label" style="font-weight: 600;">@Localizer["Title (English)"]</label>
+                            <input type="text" class="bx--text-input" name="TitleEn" required style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;" />
+                        </div>
+                        <div class="bx--col" style="flex: 1;" dir="rtl">
+                            <label class="bx--label" style="font-weight: 600;">@Localizer["Title (Arabic)"]</label>
+                            <input type="text" class="bx--text-input" name="TitleAr" required style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;" />
+                        </div>
+                    </div>
+
+                    <div class="bx--row" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                        <div class="bx--col" style="flex: 1;">
+                            <label class="bx--label" style="font-weight: 600;">@Localizer["Content (English)"]</label>
+                            <textarea class="bx--text-area" name="ContentEn" rows="15" required style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;"></textarea>
+                        </div>
+                        <div class="bx--col" style="flex: 1;" dir="rtl">
+                            <label class="bx--label" style="font-weight: 600;">@Localizer["Content (Arabic)"]</label>
+                            <textarea class="bx--text-area" name="ContentAr" rows="15" required style="width: 100%; padding: 0.75rem; border: 1px solid #8d8d8d; border-radius: 4px;"></textarea>
+                        </div>
                     </div>
 
                     <div class="bx--form-item" style="margin-bottom: 0.5rem;">

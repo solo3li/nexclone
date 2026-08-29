@@ -43,15 +43,16 @@ namespace NexClone.Backend.API.Controllers.Client
             return Ok(posts);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetPost(int id)
+        [HttpGet("{slugOrId}")]
+        public async Task<IActionResult> GetPost(string slugOrId)
         {
+            var isNumeric = int.TryParse(slugOrId, out int id);
             var post = await _context.BlogPosts
                 .Include(p => p.Comments)
                 .ThenInclude(c => c.User)
-                .FirstOrDefaultAsync(p => p.Id == id && p.IsPublished);
+                .FirstOrDefaultAsync(p => (isNumeric && p.Id == id) || p.Slug == slugOrId);
 
-            if (post == null) return NotFound();
+            if (post == null || !post.IsPublished) return NotFound();
 
             if (!string.IsNullOrEmpty(post.MediaUrl) && !post.MediaUrl.StartsWith("http"))
             {
@@ -72,8 +73,12 @@ namespace NexClone.Backend.API.Controllers.Client
 
             return Ok(new {
                 Id = post.Id,
-                Title = post.Title,
-                Content = post.Content,
+                Slug = post.Slug,
+                Category = post.Category,
+                TitleEn = post.TitleEn,
+                TitleAr = post.TitleAr,
+                ContentEn = post.ContentEn,
+                ContentAr = post.ContentAr,
 
                 MediaUrl = post.MediaUrl,
                 MediaType = post.MediaType,

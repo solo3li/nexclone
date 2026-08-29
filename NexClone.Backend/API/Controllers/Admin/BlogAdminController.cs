@@ -100,8 +100,12 @@ namespace NexClone.Backend.API.Controllers.Admin
                 var existing = await _context.BlogPosts.FindAsync(id);
                 if (existing == null) return NotFound();
 
-                existing.Title = post.Title;
-                existing.Content = post.Content;
+                existing.TitleAr = post.TitleAr;
+                existing.TitleEn = post.TitleEn;
+                existing.ContentAr = post.ContentAr;
+                existing.ContentEn = post.ContentEn;
+                existing.Slug = post.Slug;
+                existing.Category = post.Category;
                 existing.IsPublished = post.IsPublished;
 
                 if (MediaFile != null && MediaFile.Length > 0)
@@ -150,7 +154,7 @@ namespace NexClone.Backend.API.Controllers.Admin
                 
             if (post == null) return NotFound();
 
-            ViewData["Title"] = $"Comments for: {post.Title}";
+            ViewData["Title"] = $"Comments for: {post.TitleEn}";
             return View(post);
         }
 

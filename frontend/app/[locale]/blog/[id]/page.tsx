@@ -1,12 +1,20 @@
 import Client from './Client';
-import { blogArticles } from "@/data/blogData";
 import { Metadata } from 'next';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string, locale: string }> }): Promise<Metadata> {
   const { id, locale } = await params;
   const isRtl = locale === 'ar';
   
-  const post = blogArticles.find(p => p.slug === id);
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+  let post = null;
+  
+  try {
+    const res = await fetch(`${apiUrl}/api/client/blog/${id}`);
+    if (res.ok) {
+      post = await res.json();
+    }
+  } catch(e) {}
+
   if (!post) {
     return { title: "Post Not Found" };
   }
@@ -14,7 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const title = isRtl ? post.titleAr : post.titleEn;
   // Extract a brief description from the HTML content
   const content = isRtl ? post.contentAr : post.contentEn;
-  const description = content.replace(/<[^>]*>?/gm, '').substring(0, 160) + '...';
+  const description = content ? content.replace(/<[^>]*>?/gm, '').substring(0, 160) + '...' : '';
 
   return {
     title: `${title} | NexMedia Blog`,
@@ -23,7 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       title,
       description,
       type: 'article',
-      publishedTime: post.date,
+      publishedTime: post.createdAt,
       authors: ['NexMedia AI'],
     },
     alternates: {

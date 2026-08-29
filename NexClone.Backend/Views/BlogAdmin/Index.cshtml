@@ -24,7 +24,7 @@
                         @foreach (var item in Model)
                         {
                             <tr style="border-bottom: 1px solid #e0e0e0;">
-                                <td style="padding: 1rem;">@item.Title</td>
+                                <td style="padding: 1rem;">@item.TitleEn</td>
                                 <td style="padding: 1rem;">@(item.IsPublished ? "Published" : "Draft")</td>
                                 <td style="padding: 1rem;">@item.CreatedAt.ToLocalTime().ToString("g")</td>
                                 <td style="padding: 1rem; display: flex; gap: 0.5rem;">
