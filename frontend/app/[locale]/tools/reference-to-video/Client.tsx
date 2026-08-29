@@ -12,14 +12,12 @@ import {
   Monitor, 
   Smartphone, 
   Square, 
-  Coins, 
   Clock,
   Check, 
   Layers, 
   Copy, 
   CheckCheck, 
   Trash2, 
-  Flame,
   CheckCircle2,
   AlertCircle,
   Upload,
@@ -108,21 +106,6 @@ const ASPECT_RATIOS = [
   { id: "9:16", label: "9:16", desc: "TikTok / Reels / Shorts", descAr: "طولي (تيك توك وريلز)", icon: Smartphone },
   { id: "1:1", label: "1:1", desc: "Instagram / Square", descAr: "مربع (انستغرام وبوستات)", icon: Square }
 ];
-
-const SAMPLE_REFERENCE_PROMPTS = {
-  ar: [
-    { title: "تحول زمني من النهار لليل", text: "تحول سينمائي سلس وتدريجي من مشهد النهار المشمس في الصورة الأولى إلى لقطة المساء المضاءة بالنيون والنجوم، مع حركة كاميرا بطيئة وتأثيرات إضاءة غنية." },
-    { title: "تطور حركة الشخصية", text: "حركة انسيابية ديناميكية تحافظ على ملامح الشخصية المرجعية بدقة متناهية، مع انتقال سلس بين الإطار الابتدائي والنهائي وإضاءة سينمائية محيطية." },
-    { title: "تحول طبيعي سحري", text: "تلاشي وانتقال مورفينغ سحري فائق النعومة بين البيئتين، تمايل أوراق الشجر وانعكاسات ضوئية مائية واقعية مع ثبات هوية العناصر المرجعية." },
-    { title: "حركة كاميرا سينمائية مقربة", text: "لقطة كاميرا زوم سلسة تقترب ببطء من العنصر المرجعي مع الحفاظ على كل التفاصيل الدقيقة للأقمشة والملامح والألوان بدقة 4K." }
-  ],
-  en: [
-    { title: "Day to Night Morph", text: "Seamless cinematic time-lapse transition from the sunny daytime reference to the neon-lit twilight scene, volumetric lighting and smooth camera dolly." },
-    { title: "Character Motion Continuity", text: "Fluid character animation perfectly preserving the identity, clothing, and facial features across frames with realistic physics and natural motion blur." },
-    { title: "Magical Landscape Transition", text: "Ultra-smooth morphing transition bridging the first and final environments with soft atmospheric particles and cinematic color harmony." },
-    { title: "Cinematic Zoom & Pan", text: "Smooth camera push-in focusing closely on the reference character with hyper-realistic textures, accurate depth of field, and 4k clarity." }
-  ]
-};
 
 const FRAME_SLOTS = [
   { key: 0, titleAr: "إطار البداية (Start Frame)", titleEn: "Start Frame", descAr: "اللقطة التي يبدأ منها الفيديو", descEn: "Starting visual shot" },
@@ -822,6 +805,15 @@ export default function ReferenceToVideoPage() {
               </div>
             </div>
           )}
+          {successMessage && (
+            <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-sm flex items-start gap-3 backdrop-blur-md">
+              <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5 text-emerald-400" />
+              <div className="space-y-0.5">
+                <p className="font-bold">{isRtl ? "نجاح" : "Success"}</p>
+                <p className="text-xs text-emerald-300/80">{successMessage}</p>
+              </div>
+            </div>
+          )}
 
           {/* Action Bar & Submit CTA */}
           <div className="bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 shadow-xl backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -1068,7 +1060,7 @@ export default function ReferenceToVideoPage() {
                   {modelOptions.map((m) => {
                     const isSelected = selectedModelId === m.id;
                     return (
-                      <button key={m.id} type="button" onClick={() => handleModelSelect(m.id)}
+                      <button key={m.id} type="button" onClick={() => handleModelSelectWithClear(m.id)}
                         className={`w-full text-start p-2.5 rounded-lg transition-all flex items-center justify-between gap-2 ${
                           isSelected ? "bg-emerald-600/25 text-white border border-emerald-500/40" : "hover:bg-white/5 text-white/70 hover:text-white"
                         }`}>
@@ -1091,7 +1083,7 @@ export default function ReferenceToVideoPage() {
                 {modelOptions.map((m) => {
                   const isSelected = selectedModelId === m.id;
                   return (
-                    <button key={m.id} type="button" onClick={() => handleModelSelect(m.id)}
+                    <button key={m.id} type="button" onClick={() => handleModelSelectWithClear(m.id)}
                       className={`w-full text-start p-3 rounded-xl transition-all flex items-center justify-between gap-2 ${
                         isSelected ? "bg-emerald-600/25 text-white border border-emerald-500/40" : "hover:bg-white/5 text-white/70 hover:text-white"
                       }`}>
