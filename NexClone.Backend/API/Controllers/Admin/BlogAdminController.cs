@@ -71,6 +71,9 @@ namespace NexClone.Backend.API.Controllers.Admin
                     post.MediaType = string.IsNullOrWhiteSpace(MediaType) ? "image" : MediaType;
                 }
                 
+                
+                post.MediaUrl ??= string.Empty;
+                post.MediaType ??= string.Empty;
                 post.CreatedAt = DateTime.UtcNow;
                 post.Comments = new List<BlogComment>();
                 _context.BlogPosts.Add(post);
