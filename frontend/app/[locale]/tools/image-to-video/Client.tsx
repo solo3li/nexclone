@@ -33,6 +33,7 @@ import {
 import api from "../../../../src/utils/api";
 import { useAppStore } from "../../../../src/store/useAppStore";
 import { signalRNotificationService } from "../../../../lib/signalr-client";
+import { BottomSheetSelect } from "../../../../components/ui/BottomSheetSelect";
 
 interface ModelOption {
   id: string;
@@ -886,28 +887,20 @@ export default function ImageToVideoPage() {
                 <ChevronDown className={`w-4 h-4 text-white/50 transition-transform duration-200 shrink-0 ${isModelDropdownOpen ? "rotate-180 text-violet-400" : ""}`} />
               </button>
 
-              {/* Model Dropdown Menu */}
+              {/* Model Dropdown Menu — Desktop only */}
               {isModelDropdownOpen && (
-                <div className="absolute z-50 top-full mt-1.5 w-full bg-[#0d041c] border border-violet-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="hidden lg:block absolute z-50 top-full mt-1.5 w-full bg-[#0d041c] border border-violet-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
                   {modelOptions.map((m) => {
                     const isSelected = selectedModelId === m.id;
                     return (
-                      <button
-                        key={m.id}
-                        type="button"
-                        onClick={() => handleModelSelect(m.id)}
+                      <button key={m.id} type="button" onClick={() => handleModelSelect(m.id)}
                         className={`w-full text-start p-2.5 rounded-lg transition-all flex items-center justify-between gap-2 ${
-                          isSelected 
-                            ? "bg-violet-600/25 text-white border border-violet-500/40" 
-                            : "hover:bg-white/5 text-white/70 hover:text-white"
-                        }`}
-                      >
+                          isSelected ? "bg-violet-600/25 text-white border border-violet-500/40" : "hover:bg-white/5 text-white/70 hover:text-white"
+                        }`}>
                         <div className="space-y-0.5">
                           <div className="flex items-center gap-1.5">
                             <span className="font-bold text-xs text-white">{isRtl ? m.nameAr : m.name}</span>
-                            {m.discount && (
-                              <span className="text-[9px] text-emerald-400 bg-emerald-500/10 px-1 rounded">{m.discount}</span>
-                            )}
+                            {m.discount && <span className="text-[9px] text-emerald-400 bg-emerald-500/10 px-1 rounded">{m.discount}</span>}
                           </div>
                           <p className="text-[10px] text-white/40">{isRtl ? m.badgeAr : m.badge}</p>
                         </div>
@@ -917,6 +910,28 @@ export default function ImageToVideoPage() {
                   })}
                 </div>
               )}
+
+              {/* Model Dropdown — Mobile Bottom Sheet */}
+              <BottomSheetSelect isOpen={isModelDropdownOpen} onClose={() => setIsModelDropdownOpen(false)} title={isRtl ? "محرك الذكاء الاصطناعي" : "AI Animation Model"}>
+                {modelOptions.map((m) => {
+                  const isSelected = selectedModelId === m.id;
+                  return (
+                    <button key={m.id} type="button" onClick={() => handleModelSelect(m.id)}
+                      className={`w-full text-start p-3 rounded-xl transition-all flex items-center justify-between gap-2 ${
+                        isSelected ? "bg-violet-600/25 text-white border border-violet-500/40" : "hover:bg-white/5 text-white/70 hover:text-white"
+                      }`}>
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-bold text-sm text-white">{isRtl ? m.nameAr : m.name}</span>
+                          {m.discount && <span className="text-[9px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">{m.discount}</span>}
+                        </div>
+                        <p className="text-xs text-white/40">{isRtl ? m.descAr : m.desc}</p>
+                      </div>
+                      {isSelected && <Check className="w-4 h-4 text-violet-400 shrink-0" />}
+                    </button>
+                  );
+                })}
+              </BottomSheetSelect>
             </div>
 
             {/* 2. Resolution Dropdown Select */}
@@ -942,22 +957,16 @@ export default function ImageToVideoPage() {
                 <ChevronDown className={`w-4 h-4 text-white/50 transition-transform duration-200 ${isResDropdownOpen ? "rotate-180 text-indigo-400" : ""}`} />
               </button>
 
-              {/* Resolution Dropdown Menu */}
+              {/* Resolution Dropdown Menu — Desktop only */}
               {isResDropdownOpen && (
-                <div className="absolute z-40 top-full mt-1.5 w-full bg-[#0d041c] border border-indigo-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="hidden lg:block absolute z-40 top-full mt-1.5 w-full bg-[#0d041c] border border-indigo-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
                   {RESOLUTIONS.filter(r => currentModel.supportedResolutions.includes(r.id)).map((r) => {
                     const isSelected = resolution === r.id;
                     return (
-                      <button
-                        key={r.id}
-                        type="button"
-                        onClick={() => { setResolution(r.id); setIsResDropdownOpen(false); }}
+                      <button key={r.id} type="button" onClick={() => { setResolution(r.id); setIsResDropdownOpen(false); }}
                         className={`w-full text-start p-2 rounded-lg transition-all flex items-center justify-between gap-2 ${
-                          isSelected 
-                            ? "bg-indigo-600/25 text-white border border-indigo-500/40" 
-                            : "hover:bg-white/5 text-white/70 hover:text-white"
-                        }`}
-                      >
+                          isSelected ? "bg-indigo-600/25 text-white border border-indigo-500/40" : "hover:bg-white/5 text-white/70 hover:text-white"
+                        }`}>
                         <div>
                           <span className="font-bold text-xs text-white block">{r.label}</span>
                           <span className="text-[10px] text-white/40">{isRtl ? r.descAr : r.desc}</span>
@@ -968,6 +977,25 @@ export default function ImageToVideoPage() {
                   })}
                 </div>
               )}
+
+              {/* Resolution — Mobile Bottom Sheet */}
+              <BottomSheetSelect isOpen={isResDropdownOpen} onClose={() => setIsResDropdownOpen(false)} title={isRtl ? "دقة الفيديو" : "Video Resolution"}>
+                {RESOLUTIONS.filter(r => currentModel.supportedResolutions.includes(r.id)).map((r) => {
+                  const isSelected = resolution === r.id;
+                  return (
+                    <button key={r.id} type="button" onClick={() => { setResolution(r.id); setIsResDropdownOpen(false); }}
+                      className={`w-full text-start p-3 rounded-xl transition-all flex items-center justify-between gap-2 ${
+                        isSelected ? "bg-indigo-600/25 text-white border border-indigo-500/40" : "hover:bg-white/5 text-white/70 hover:text-white"
+                      }`}>
+                      <div>
+                        <span className="font-bold text-sm text-white block">{r.label}</span>
+                        <span className="text-xs text-white/40">{isRtl ? r.descAr : r.desc}</span>
+                      </div>
+                      {isSelected && <Check className="w-4 h-4 text-indigo-400 shrink-0" />}
+                    </button>
+                  );
+                })}
+              </BottomSheetSelect>
             </div>
 
             {/* 3. Aspect Ratio Dropdown Select */}
@@ -1001,23 +1029,17 @@ export default function ImageToVideoPage() {
                 <ChevronDown className={`w-4 h-4 text-white/50 transition-transform duration-200 ${isAspectDropdownOpen ? "rotate-180 text-amber-400" : ""}`} />
               </button>
 
-              {/* Aspect Ratio Dropdown Menu */}
+              {/* Aspect Ratio Dropdown Menu — Desktop only */}
               {isAspectDropdownOpen && (
-                <div className="absolute z-30 top-full mt-1.5 w-full bg-[#0d041c] border border-amber-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="hidden lg:block absolute z-30 top-full mt-1.5 w-full bg-[#0d041c] border border-amber-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
                   {ASPECT_RATIOS.map((a) => {
                     const isSelected = aspectRatio === a.id;
                     const IconComp = a.icon;
                     return (
-                      <button
-                        key={a.id}
-                        type="button"
-                        onClick={() => { setAspectRatio(a.id); setIsAspectDropdownOpen(false); }}
+                      <button key={a.id} type="button" onClick={() => { setAspectRatio(a.id); setIsAspectDropdownOpen(false); }}
                         className={`w-full text-start p-2 rounded-lg transition-all flex items-center justify-between gap-2 ${
-                          isSelected 
-                            ? "bg-amber-500/20 text-white border border-amber-500/40" 
-                            : "hover:bg-white/5 text-white/70 hover:text-white"
-                        }`}
-                      >
+                          isSelected ? "bg-amber-500/20 text-white border border-amber-500/40" : "hover:bg-white/5 text-white/70 hover:text-white"
+                        }`}>
                         <div className="flex items-center gap-2.5">
                           <IconComp className="w-4 h-4 text-amber-400" />
                           <div>
@@ -1031,6 +1053,29 @@ export default function ImageToVideoPage() {
                   })}
                 </div>
               )}
+
+              {/* Aspect Ratio — Mobile Bottom Sheet */}
+              <BottomSheetSelect isOpen={isAspectDropdownOpen} onClose={() => setIsAspectDropdownOpen(false)} title={isRtl ? "أبعاد الفيديو" : "Aspect Ratio"}>
+                {ASPECT_RATIOS.map((a) => {
+                  const isSelected = aspectRatio === a.id;
+                  const IconComp = a.icon;
+                  return (
+                    <button key={a.id} type="button" onClick={() => { setAspectRatio(a.id); setIsAspectDropdownOpen(false); }}
+                      className={`w-full text-start p-3 rounded-xl transition-all flex items-center justify-between gap-2 ${
+                        isSelected ? "bg-amber-500/20 text-white border border-amber-500/40" : "hover:bg-white/5 text-white/70 hover:text-white"
+                      }`}>
+                      <div className="flex items-center gap-3">
+                        <IconComp className="w-5 h-5 text-amber-400" />
+                        <div>
+                          <span className="font-bold text-sm text-white block">{a.label}</span>
+                          <span className="text-xs text-white/40">{isRtl ? a.descAr : a.desc}</span>
+                        </div>
+                      </div>
+                      {isSelected && <Check className="w-4 h-4 text-amber-400 shrink-0" />}
+                    </button>
+                  );
+                })}
+              </BottomSheetSelect>
             </div>
 
             {/* 4. Duration Slider for Grok only */}
