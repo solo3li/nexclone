@@ -8,6 +8,7 @@
                 <form method="post" action="/BlogAdmin/Edit/@Model.Id" enctype="multipart/form-data">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="Id" value="@Model.Id" />
+                    <div asp-validation-summary="All" class="text-danger" style="color: #da1e28; margin-bottom: 1rem;"></div>
                     
                     <div class="bx--row" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
                         <div class="bx--col" style="flex: 1;">
@@ -54,6 +55,7 @@
                     <div class="bx--form-item" style="margin-bottom: 1.5rem;">
                         <label class="bx--checkbox-wrapper">
                             <input type="checkbox" name="IsPublished" value="true" @(Model.IsPublished ? "checked" : "") class="bx--checkbox" />
+                            <input type="hidden" name="IsPublished" value="false" />
                             <span class="bx--checkbox-label">@Localizer["Published"]</span>
                         </label>
                     </div>

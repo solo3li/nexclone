@@ -38,8 +38,12 @@ namespace NexClone.Backend.API.Controllers.Admin
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(BlogPost post, IFormFile? MediaFile, string? MediaUrl, string? MediaType)
         {
-            // Remove navigation properties from validation
+            // Remove navigation and non-form properties from validation
             ModelState.Remove("Comments");
+            ModelState.Remove("CreatedAt");
+            ModelState.Remove("Id");
+            ModelState.Remove("MediaUrl");
+            ModelState.Remove("MediaType");
             
             if (ModelState.IsValid)
             {
@@ -92,8 +96,11 @@ namespace NexClone.Backend.API.Controllers.Admin
         {
             if (id != post.Id) return NotFound();
 
-            // Remove navigation properties from validation
+            // Remove navigation and non-form properties from validation
             ModelState.Remove("Comments");
+            ModelState.Remove("CreatedAt");
+            ModelState.Remove("MediaUrl");
+            ModelState.Remove("MediaType");
 
             if (ModelState.IsValid)
             {
