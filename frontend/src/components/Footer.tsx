@@ -9,10 +9,15 @@ export default function Footer() {
   const t = useTranslations("Footer");
   const locale = useLocale();
   const [socialLinks, setSocialLinks] = useState<{ [key: string]: string }>({});
+  const [customPages, setCustomPages] = useState<{ slug: string, titleEn: string, titleAr: string }[]>([]);
 
   useEffect(() => {
     api.get('/api/platform/social-links')
       .then(res => setSocialLinks(res.data))
+      .catch(console.error);
+
+    api.get('/api/platform/custom-pages')
+      .then(res => setCustomPages(res.data))
       .catch(console.error);
   }, []);
 
@@ -26,9 +31,14 @@ export default function Footer() {
       { label: t.raw('company.links')[1], href: "/blog" },
       { label: t.raw('company.links')[2], href: "/pages/contact-us" }
     ],
-    [t('legal.title')]: [
-      { label: t.raw('legal.links')[0], href: "/pages/privacy-policy" }
-    ],
+    [t('legal.title')]: customPages.length > 0
+      ? customPages.map(page => ({
+          label: locale === 'ar' ? page.titleAr : page.titleEn,
+          href: `/pages/${page.slug}`
+        }))
+      : [
+          { label: t.raw('legal.links')[0], href: "/pages/privacy-policy" }
+        ],
   };
 
   const getSocialIcon = (name: string) => {

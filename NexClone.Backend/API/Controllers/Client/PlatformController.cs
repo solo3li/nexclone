@@ -228,6 +228,15 @@ namespace NexClone.Backend.API.Controllers.Client
             return Ok(links);
         }
 
+        [HttpGet("custom-pages")]
+        public async Task<IActionResult> GetCustomPages()
+        {
+            var pages = await _context.CustomPages
+                .Select(p => new { p.Slug, p.TitleEn, p.TitleAr })
+                .ToListAsync();
+            return Ok(pages);
+        }
+
         [HttpGet("custom-page/{slug}")]
         public async Task<IActionResult> GetCustomPage(string slug)
         {
