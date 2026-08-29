@@ -670,10 +670,14 @@ namespace NexClone.Backend.API.Controllers.Admin
                     if (seedancePricing == null) { seedancePricing = new Core.Entities.ReferenceToVideoModelPricing { ModelName = "bytedance/seedance2-0-mini-r2v", ProviderName = "CrunAI", BillingType = "PerSecond" }; _context.ReferenceToVideoModelPricings.Add(seedancePricing); }
                     seedancePricing.IsActive = config.IsActive;
                     seedancePricing.AllowedWallet = defaultWallet;
-                    if (ModelCosts.ContainsKey("seedance|480p")) seedancePricing.CostPerSecond_480p = ModelCosts["seedance|480p"];
-                    if (ModelCosts.ContainsKey("seedance|720p")) seedancePricing.CostPerSecond_720p = ModelCosts["seedance|720p"];
-                    if (ModelCosts.ContainsKey("seedance|480p_video")) seedancePricing.CostPerSecond_480p_WithVideo = ModelCosts["seedance|480p_video"];
-                    if (ModelCosts.ContainsKey("seedance|720p_video")) seedancePricing.CostPerSecond_720p_WithVideo = ModelCosts["seedance|720p_video"];
+                    if (ModelCosts.ContainsKey("seedance|480p")) {
+                        seedancePricing.CostPerSecond_480p = ModelCosts["seedance|480p"];
+                        seedancePricing.CostPerSecond_480p_WithVideo = ModelCosts["seedance|480p"]; // unified
+                    }
+                    if (ModelCosts.ContainsKey("seedance|720p")) {
+                        seedancePricing.CostPerSecond_720p = ModelCosts["seedance|720p"];
+                        seedancePricing.CostPerSecond_720p_WithVideo = ModelCosts["seedance|720p"]; // unified
+                    }
 
                     // Google Veo 3.1 Fast
                     var veoFast = await _context.ReferenceToVideoModelPricings.FirstOrDefaultAsync(p => p.ModelName == "veo 3.1 Fast");

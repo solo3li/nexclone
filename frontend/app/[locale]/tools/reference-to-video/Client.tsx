@@ -143,10 +143,17 @@ export default function ReferenceToVideoPage() {
   const [mode, setMode] = useState<string>("normal"); // For Mode/Audio
   const [prompt, setPrompt] = useState<string>("");
 
-  // Reference Images Slots (Up to 3 distinct frames)
+  // Reference Images Slots (Up to 3 distinct frames) — Veo mode
   const [slotFiles, setSlotFiles] = useState<{ [key: number]: File | null }>({ 0: null, 1: null, 2: null });
   const [slotPreviews, setSlotPreviews] = useState<{ [key: number]: string | null }>({ 0: null, 1: null, 2: null });
   const [dragActiveSlot, setDragActiveSlot] = useState<number | null>(null);
+
+  // Seedance-specific media slots (image / video / audio)
+  const [sdImageFile, setSdImageFile] = useState<File | null>(null);
+  const [sdImagePreview, setSdImagePreview] = useState<string | null>(null);
+  const [sdVideoFile, setSdVideoFile] = useState<File | null>(null);
+  const [sdVideoPreview, setSdVideoPreview] = useState<string | null>(null);
+  const [sdAudioFile, setSdAudioFile] = useState<File | null>(null);
 
   // Dropdown UI Open States
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
@@ -173,6 +180,10 @@ export default function ReferenceToVideoPage() {
   const aspectRef = useRef<HTMLDivElement>(null);
   const resultCanvasRef = useRef<HTMLDivElement>(null);
   const fileInputs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)];
+  // Seedance-specific file input refs
+  const sdImageInputRef = useRef<HTMLInputElement>(null);
+  const sdVideoInputRef = useRef<HTMLInputElement>(null);
+  const sdAudioInputRef = useRef<HTMLInputElement>(null);
 
   // Dynamic model pricing state loaded from backend
   const [modelOptions, setModelOptions] = useState<ModelOption[]>(MODELS);
@@ -384,48 +395,56 @@ export default function ReferenceToVideoPage() {
   const hasSufficientCredits = estimatedCost === null || totalUserCredits >= estimatedCost;
 
   const isSeedance = currentModel.id.includes("seedance");
-  const acceptedFileTypes = isSeedance ? "image/*,video/*,audio/*" : "image/*";
+  const acceptedFileTypes = "image/*"; // Veo: images only
 
-  // Image Upload handler for specific slot
-  const handleSlotImageChange = (index: number, file: File | null) => {
-    if (file) {
-      if (!isSeedance && !file.type.startsWith("image/")) {
-        setError(isRtl ? "هذا الموديل يدعم رفع الصور فقط" : "This model only supports image uploads");
-        if (fileInputs[index].current) fileInputs[index].current!.value = '';
-        return;
-      }
-      setSlotFiles(prev => ({ ...prev, [index]: file }));
-      const url = URL.createObjectURL(file);
-      setSlotPreviews(prev => ({ ...prev, [index]: url }));
-      setError(null);
+  // Seedance file handlers
+  const handleSdImageChange = (file: File | null) => {
+    if (file && !file.type.startsWith("image/")) {
+      setError(isRtl ? "يرجى رفع صورة فقط في هذا الحقل" : "Please upload an image file here");
+      return;
     }
+    setSdImageFile(file);
+    setSdImagePreview(file ? URL.createObjectURL(file) : null);
+    setError(null);
   };
-
-  const handleRemoveSlot = (index: number) => {
-    setSlotFiles(prev => ({ ...prev, [index]: null }));
-    setSlotPreviews(prev => ({ ...prev, [index]: null }));
-    if (fileInputs[index].current) fileInputs[index].current!.value = '';
-  };
-
-  const handleDragOver = (e: React.DragEvent, index: number) => {
-    e.preventDefault();
-    setDragActiveSlot(index);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDragActiveSlot(null);
-  };
-
-  const handleDrop = (e: React.DragEvent, index: number) => {
-    e.preventDefault();
-    setDragActiveSlot(null);
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleSlotImageChange(index, e.dataTransfer.files[0]);
+  const handleSdVideoChange = (file: File | null) => {
+    if (file && !file.type.startsWith("video/")) {
+      setError(isRtl ? "يرجى رفع ملف فيديو فقط في هذا الحقل" : "Please upload a video file here");
+      return;
     }
+    setSdVideoFile(file);
+    setSdVideoPreview(file ? URL.createObjectURL(file) : null);
+    setError(null);
+  };
+  const handleSdAudioChange = (file: File | null) => {
+    if (file && !file.type.startsWith("audio/")) {
+      setError(isRtl ? "يرجى رفع ملف صوتي فقط في هذا الحقل" : "Please upload an audio file here");
+      return;
+    }
+    setSdAudioFile(file);
+    setError(null);
   };
 
-  const totalUploadedImagesCount = Object.values(slotFiles).filter(Boolean).length;
+  // When switching to Veo — clear Seedance slots
+  const handleModelSelectWithClear = (modelId: string) => {
+    const wasSD = selectedModelId.includes("seedance");
+    const willBeVeo = !modelId.includes("seedance");
+    if (wasSD && willBeVeo) {
+      setSdImageFile(null); setSdImagePreview(null);
+      setSdVideoFile(null); setSdVideoPreview(null);
+      setSdAudioFile(null);
+    }
+    if (!wasSD && modelId.includes("seedance")) {
+      setSlotFiles({ 0: null, 1: null, 2: null });
+      setSlotPreviews({ 0: null, 1: null, 2: null });
+    }
+    handleModelSelect(modelId);
+  };
+
+  // Effective upload count for form validation
+  const totalUploadedImagesCount = isSeedance
+    ? (sdImageFile ? 1 : 0)
+    : Object.values(slotFiles).filter(Boolean).length;
 
 
   const handleCopyPrompt = () => {
@@ -461,7 +480,10 @@ export default function ReferenceToVideoPage() {
   // Submission handler
   const handleGenerate = async () => {
     if (totalUploadedImagesCount === 0) {
-      setError(isRtl ? "يرجى رفع صورة مرجعية واحدة على الأقل في الستوري بورد" : "Please upload at least one reference frame");
+      setError(isRtl
+        ? (isSeedance ? "يرجى رفع صورة مرجعية للبدء" : "يرجى رفع صورة مرجعية واحدة على الأقل في الستوري بورد")
+        : (isSeedance ? "Please upload a reference image to start" : "Please upload at least one reference frame")
+      );
       return;
     }
 
@@ -471,28 +493,28 @@ export default function ReferenceToVideoPage() {
 
     try {
       const formData = new FormData();
-      
-      // Append valid slot files in sequence under both keys
-      [0, 1, 2].forEach(idx => {
-        const file = slotFiles[idx];
-        if (file) {
-          formData.append("images", file);
-          formData.append("image", file);
-        }
-      });
+
+      if (isSeedance) {
+        // Seedance: image (required) + optional video + optional audio
+        if (sdImageFile) { formData.append("images", sdImageFile); formData.append("image", sdImageFile); }
+        if (sdVideoFile) { formData.append("images", sdVideoFile); }
+        if (sdAudioFile) { formData.append("images", sdAudioFile); }
+        formData.append("duration", duration.toString());
+        formData.append("audio", sdAudioFile ? "true" : "false");
+        formData.append("mode", sdAudioFile ? "audio_on" : "normal");
+      } else {
+        // Veo: up to 3 image frames
+        [0, 1, 2].forEach(idx => {
+          const file = slotFiles[idx];
+          if (file) { formData.append("images", file); formData.append("image", file); }
+        });
+        formData.append("duration", "8"); // Veo 8s standard
+      }
 
       if (prompt.trim()) formData.append("prompt", prompt.trim());
       formData.append("model", currentModel.id);
       formData.append("resolution", resolution);
       formData.append("aspectRatio", aspectRatio);
-      
-      if (currentModel.id.includes("seedance")) {
-        formData.append("duration", duration.toString());
-        formData.append("audio", mode.includes("audio_on") ? "true" : "false");
-        formData.append("mode", mode);
-      } else {
-        formData.append("duration", "8"); // Veo 8s standard
-      }
 
       const res = await api.post("/api/video/start-tool/reference-to-video", formData, {
         headers: { "Content-Type": "multipart/form-data" }
@@ -501,8 +523,8 @@ export default function ReferenceToVideoPage() {
       if (res.data?.taskId) {
         setActiveTaskId(res.data.taskId);
         setSuccessMessage(
-          isRtl 
-            ? "⚡ جاري معالجة وتوليد الفيديو المرجعي عبر محرك الذكاء الاصطناعي..." 
+          isRtl
+            ? "⚡ جاري معالجة وتوليد الفيديو المرجعي عبر محرك الذكاء الاصطناعي..."
             : "⚡ Generating reference video with AI engine..."
         );
       }
@@ -522,109 +544,209 @@ export default function ReferenceToVideoPage() {
         {/* ========================================================================= */}
         <div className="order-2 lg:order-1 lg:col-span-8 space-y-5">
           
-          {/* Storyboard Reference Frames Grid */}
-          <div className="bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 md:p-6 shadow-xl space-y-4 backdrop-blur-md">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                  <Layers className="w-3.5 h-3.5 text-emerald-400" />
+          {/* ═══ Veo: 3-Frame Storyboard ═══ */}
+          {!isSeedance && (
+            <div className="bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 md:p-6 shadow-xl space-y-4 backdrop-blur-md">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                    <Layers className="w-3.5 h-3.5 text-emerald-400" />
+                  </div>
+                  <div>
+                    <label className="text-sm font-bold text-white block">
+                      {isRtl ? "الستوري بورد المرجعي (Multi-Frame Storyboard)" : "Reference Storyboard Slots"}
+                    </label>
+                    <span className="text-[11px] text-white/40 block">
+                      {isRtl ? "ارفع حتى 3 صور لتوجيه بداية المشهد ونهايته وأسلوب الشخصية" : "Upload up to 3 frames to interpolate sequence and style"}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <label className="text-sm font-bold text-white block">
-                    {isRtl ? "الستوري بورد المرجعي (Multi-Frame Storyboard)" : "Reference Storyboard Slots"}
-                  </label>
-                  <span className="text-[11px] text-white/40 block">
-                    {isRtl ? "ارفع حتى 3 صور لتوجيه بداية المشهد ونهايته وأسلوب الشخصية" : "Upload up to 3 frames to interpolate sequence and style"}
-                  </span>
-                </div>
+                <span className="text-xs font-mono px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-emerald-400">
+                  {totalUploadedImagesCount} / 3 {isRtl ? "صور" : "frames"}
+                </span>
               </div>
-
-              <span className="text-xs font-mono px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-emerald-400">
-                {totalUploadedImagesCount} / 3 {isRtl ? "صور" : "frames"}
-              </span>
-            </div>
-
-            {/* 3 Storyboard Slots Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-              {FRAME_SLOTS.map((slot) => {
-                const preview = slotPreviews[slot.key];
-                const inputRef = fileInputs[slot.key];
-
-                return (
-                  <div key={slot.key} className="space-y-1.5">
-                    <input
-                      ref={inputRef}
-                      type="file"
-                      accept={acceptedFileTypes}
-                      onChange={(e) => handleSlotImageChange(slot.key, e.target.files?.[0] || null)}
-                      className="hidden"
-                    />
-
-                    <div className="flex justify-between items-center text-[11px] px-1">
-                      <span className="font-bold text-white/80">{isRtl ? slot.titleAr : slot.titleEn}</span>
-                      {preview && (
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveSlot(slot.key)}
-                          className="text-red-400 hover:text-red-300 transition-colors"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                {FRAME_SLOTS.map((slot) => {
+                  const preview = slotPreviews[slot.key];
+                  const inputRef = fileInputs[slot.key];
+                  const handleChange = (file: File | null) => {
+                    if (file) {
+                      if (!file.type.startsWith("image/")) {
+                        setError(isRtl ? "هذا الموديل يدعم الصور فقط" : "Veo supports images only");
+                        if (inputRef.current) inputRef.current.value = '';
+                        return;
+                      }
+                      setSlotFiles(prev => ({ ...prev, [slot.key]: file }));
+                      setSlotPreviews(prev => ({ ...prev, [slot.key]: URL.createObjectURL(file) }));
+                      setError(null);
+                    }
+                  };
+                  return (
+                    <div key={slot.key} className="space-y-1.5">
+                      <input ref={inputRef} type="file" accept="image/*" onChange={(e) => handleChange(e.target.files?.[0] || null)} className="hidden" />
+                      <div className="flex justify-between items-center text-[11px] px-1">
+                        <span className="font-bold text-white/80">{isRtl ? slot.titleAr : slot.titleEn}</span>
+                        {preview && (
+                          <button type="button" onClick={() => { setSlotFiles(p => ({...p, [slot.key]: null})); setSlotPreviews(p => ({...p, [slot.key]: null})); if (inputRef.current) inputRef.current.value=''; }} className="text-red-400 hover:text-red-300 transition-colors"><Trash2 className="w-3 h-3" /></button>
+                        )}
+                      </div>
+                      {!preview ? (
+                        <div onClick={() => inputRef.current?.click()}
+                          className="border-2 border-dashed border-white/15 bg-[#06010f]/80 hover:border-emerald-500/50 hover:bg-[#06010f] rounded-xl p-4 aspect-[4/3] flex flex-col items-center justify-center gap-2 cursor-pointer transition-all group text-center">
+                          <div className="w-9 h-9 rounded-xl bg-emerald-500/10 group-hover:scale-110 border border-emerald-500/20 flex items-center justify-center transition-transform">
+                            <Upload className="w-4 h-4 text-emerald-400" />
+                          </div>
+                          <span className="text-[10px] text-white/50 group-hover:text-white transition-colors">{isRtl ? slot.descAr : slot.descEn}</span>
+                        </div>
+                      ) : (
+                        <div className="relative rounded-xl overflow-hidden border border-white/10 bg-black aspect-[4/3] group">
+                          <img src={preview} alt={`Slot ${slot.key}`} className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <button type="button" onClick={() => inputRef.current?.click()} className="px-2.5 py-1 rounded-lg bg-white/20 hover:bg-white/30 text-white text-[10px] font-bold backdrop-blur-md transition-all flex items-center gap-1">
+                              <Upload className="w-3 h-3" /><span>{isRtl ? "تغيير" : "Change"}</span>
+                            </button>
+                          </div>
+                        </div>
                       )}
                     </div>
-
-                    {!preview ? (
-                      <div
-                        onClick={() => inputRef.current?.click()}
-                        onDragOver={(e) => handleDragOver(e, slot.key)}
-                        onDragLeave={handleDragLeave}
-                        onDrop={(e) => handleDrop(e, slot.key)}
-                        className={`border-2 border-dashed ${dragActiveSlot === slot.key ? 'border-emerald-400 bg-emerald-500/10' : 'border-white/15 bg-[#06010f]/80 hover:border-emerald-500/50 hover:bg-[#06010f]'} rounded-xl p-4 aspect-[4/3] flex flex-col items-center justify-center gap-2 cursor-pointer transition-all group text-center`}
-                      >
-                        <div className={`w-9 h-9 rounded-xl ${dragActiveSlot === slot.key ? 'bg-emerald-400/20 scale-110' : 'bg-emerald-500/10 group-hover:scale-110'} border border-emerald-500/20 flex items-center justify-center transition-transform`}>
-                          <Upload className="w-4 h-4 text-emerald-400" />
-                        </div>
-                        <span className="text-[10px] text-white/50 group-hover:text-white transition-colors">
-                          {isRtl ? slot.descAr : slot.descEn}
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="relative rounded-xl overflow-hidden border border-white/10 bg-black aspect-[4/3] group">
-                        {slotFiles[slot.key]?.type.startsWith('video/') ? (
-                          <video
-                            src={preview}
-                            className="w-full h-full object-cover"
-                            controls
-                          />
-                        ) : slotFiles[slot.key]?.type.startsWith('audio/') ? (
-                          <div className="w-full h-full flex items-center justify-center bg-gray-900">
-                            <audio src={preview} controls className="w-11/12" />
-                          </div>
-                        ) : (
-                          <img
-                            src={preview}
-                            alt={`Slot ${slot.key}`}
-                            className="w-full h-full object-cover"
-                          />
-                        )}
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <button
-                            type="button"
-                            onClick={() => inputRef.current?.click()}
-                            className="px-2.5 py-1 rounded-lg bg-white/20 hover:bg-white/30 text-white text-[10px] font-bold backdrop-blur-md transition-all flex items-center gap-1"
-                          >
-                            <Upload className="w-3 h-3" />
-                            <span>{isRtl ? "تغيير" : "Change"}</span>
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
+          )}
 
-          </div>
+          {/* ═══ Seedance: 3 Dedicated Media Sections ═══ */}
+          {isSeedance && (
+            <div className="space-y-3">
+              {/* --- Section 1: Reference Image (Required) --- */}
+              <div className="bg-[#0b0416]/95 border border-emerald-500/20 rounded-2xl p-5 shadow-xl backdrop-blur-md">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                      <Layers className="w-3.5 h-3.5 text-emerald-400" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <label className="text-sm font-bold text-white">{isRtl ? "الصورة المرجعية" : "Reference Image"}</label>
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">{isRtl ? "مطلوب" : "REQUIRED"}</span>
+                      </div>
+                      <span className="text-[11px] text-white/40">{isRtl ? "الصورة المرجعية التي ينطلق منها توليد الفيديو" : "The starting reference frame for video generation"}</span>
+                    </div>
+                  </div>
+                  {sdImageFile && (
+                    <button type="button" onClick={() => { setSdImageFile(null); setSdImagePreview(null); if (sdImageInputRef.current) sdImageInputRef.current.value=''; }} className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
+                  )}
+                </div>
+                <input ref={sdImageInputRef} type="file" accept="image/*" onChange={(e) => handleSdImageChange(e.target.files?.[0] || null)} className="hidden" />
+                {!sdImagePreview ? (
+                  <div onClick={() => sdImageInputRef.current?.click()}
+                    className="border-2 border-dashed border-emerald-500/25 bg-[#06010f]/80 hover:border-emerald-500/60 hover:bg-emerald-500/5 rounded-xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all group">
+                    <div className="w-12 h-12 rounded-xl bg-emerald-500/10 group-hover:scale-110 border border-emerald-500/20 flex items-center justify-center transition-transform">
+                      <Upload className="w-5 h-5 text-emerald-400" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm font-semibold text-white/70 group-hover:text-white transition-colors">{isRtl ? "اضغط لرفع الصورة" : "Click to upload image"}</p>
+                      <p className="text-[10px] text-white/30">PNG, JPG, WEBP</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="relative rounded-xl overflow-hidden border border-emerald-500/30 bg-black aspect-video group max-h-52">
+                    <img src={sdImagePreview} alt="Reference" className="w-full h-full object-cover" />
+                    <div className="absolute top-2 end-2"><span className="text-[9px] font-bold px-2 py-1 rounded bg-emerald-500/80 text-white">{isRtl ? "مرجعي" : "REF"}</span></div>
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <button type="button" onClick={() => sdImageInputRef.current?.click()} className="px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 text-white text-xs font-bold backdrop-blur-md transition-all flex items-center gap-1.5">
+                        <Upload className="w-3.5 h-3.5" /><span>{isRtl ? "تغيير" : "Change"}</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* --- Section 2: Motion Reference Video (Optional) --- */}
+              <div className="bg-[#0b0416]/95 border border-blue-500/20 rounded-2xl p-5 shadow-xl backdrop-blur-md">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                      <Play className="w-3.5 h-3.5 text-blue-400" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <label className="text-sm font-bold text-white">{isRtl ? "فيديو الحركة المرجعي" : "Motion Reference Video"}</label>
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">{isRtl ? "اختياري" : "OPTIONAL"}</span>
+                      </div>
+                      <span className="text-[11px] text-white/40">{isRtl ? "فيديو يوجّه أسلوب الحركة والديناميكية" : "Guides the motion style and dynamics of generated video"}</span>
+                    </div>
+                  </div>
+                  {sdVideoFile && (
+                    <button type="button" onClick={() => { setSdVideoFile(null); setSdVideoPreview(null); if (sdVideoInputRef.current) sdVideoInputRef.current.value=''; }} className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
+                  )}
+                </div>
+                <input ref={sdVideoInputRef} type="file" accept="video/*" onChange={(e) => handleSdVideoChange(e.target.files?.[0] || null)} className="hidden" />
+                {!sdVideoPreview ? (
+                  <div onClick={() => sdVideoInputRef.current?.click()}
+                    className="border-2 border-dashed border-blue-500/25 bg-[#06010f]/80 hover:border-blue-500/60 hover:bg-blue-500/5 rounded-xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all group">
+                    <div className="w-12 h-12 rounded-xl bg-blue-500/10 group-hover:scale-110 border border-blue-500/20 flex items-center justify-center transition-transform">
+                      <Play className="w-5 h-5 text-blue-400" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm font-semibold text-white/70 group-hover:text-white transition-colors">{isRtl ? "اضغط لرفع فيديو مرجعي (اختياري)" : "Click to upload reference video (optional)"}</p>
+                      <p className="text-[10px] text-white/30">MP4, MOV, WEBM</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="relative rounded-xl overflow-hidden border border-blue-500/30 bg-black aspect-video group max-h-52">
+                    <video src={sdVideoPreview} className="w-full h-full object-cover" controls />
+                    <div className="absolute top-2 end-2"><span className="text-[9px] font-bold px-2 py-1 rounded bg-blue-500/80 text-white">{isRtl ? "حركة" : "MOTION"}</span></div>
+                  </div>
+                )}
+              </div>
+
+              {/* --- Section 3: Reference Audio (Optional) --- */}
+              <div className="bg-[#0b0416]/95 border border-amber-500/20 rounded-2xl p-5 shadow-xl backdrop-blur-md">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                      <Zap className="w-3.5 h-3.5 text-amber-400" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <label className="text-sm font-bold text-white">{isRtl ? "الصوت المرجعي" : "Reference Audio"}</label>
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">{isRtl ? "اختياري" : "OPTIONAL"}</span>
+                      </div>
+                      <span className="text-[11px] text-white/40">{isRtl ? "صوت يوجّه إيقاع الفيديو وتوقيته" : "Audio that guides video rhythm and soundtrack"}</span>
+                    </div>
+                  </div>
+                  {sdAudioFile && (
+                    <button type="button" onClick={() => { setSdAudioFile(null); if (sdAudioInputRef.current) sdAudioInputRef.current.value=''; }} className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
+                  )}
+                </div>
+                <input ref={sdAudioInputRef} type="file" accept="audio/*" onChange={(e) => handleSdAudioChange(e.target.files?.[0] || null)} className="hidden" />
+                {!sdAudioFile ? (
+                  <div onClick={() => sdAudioInputRef.current?.click()}
+                    className="border-2 border-dashed border-amber-500/25 bg-[#06010f]/80 hover:border-amber-500/60 hover:bg-amber-500/5 rounded-xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all group">
+                    <div className="w-12 h-12 rounded-xl bg-amber-500/10 group-hover:scale-110 border border-amber-500/20 flex items-center justify-center transition-transform">
+                      <Zap className="w-5 h-5 text-amber-400" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm font-semibold text-white/70 group-hover:text-white transition-colors">{isRtl ? "اضغط لرفع صوت (اختياري)" : "Click to upload audio (optional)"}</p>
+                      <p className="text-[10px] text-white/30">MP3, WAV, AAC</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">
+                      <Zap className="w-4 h-4 text-amber-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-white truncate">{sdAudioFile.name}</p>
+                      <p className="text-[10px] text-white/40">{(sdAudioFile.size / (1024*1024)).toFixed(1)} MB</p>
+                    </div>
+                    <span className="text-[9px] font-bold px-2 py-1 rounded bg-amber-500/30 text-amber-300 shrink-0">{isRtl ? "جاهز" : "READY"}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Optional Prompt Box */}
           <div className="bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 md:p-6 shadow-xl space-y-4 backdrop-blur-md relative overflow-hidden group focus-within:border-emerald-500/50 transition-all">

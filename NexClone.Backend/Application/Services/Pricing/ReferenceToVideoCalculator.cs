@@ -31,15 +31,14 @@ namespace NexClone.Backend.Application.Services.Pricing
             decimal totalCost;
             if (pricing.BillingType == "PerSecond")
             {
-                decimal cps;
-                if (request.HasVideoInput)
+                decimal cps = res switch
                 {
-                    cps = res switch { "480p" => pricing.CostPerSecond_480p_WithVideo, "720p" => pricing.CostPerSecond_720p_WithVideo, _ => pricing.CostPerSecond_720p_WithVideo };
-                }
-                else
-                {
-                    cps = res switch { "480p" => pricing.CostPerSecond_480p, "720p" => pricing.CostPerSecond_720p, "1080p" => pricing.CostPerSecond_1080p, "4k" => pricing.CostPerSecond_4k, _ => pricing.CostPerSecond_720p };
-                }
+                    "480p" => pricing.CostPerSecond_480p,
+                    "720p" => pricing.CostPerSecond_720p,
+                    "1080p" => pricing.CostPerSecond_1080p,
+                    "4k" => pricing.CostPerSecond_4k,
+                    _ => pricing.CostPerSecond_720p
+                };
                 totalCost = pricing.BaseCost + (amount * cps);
             }
             else

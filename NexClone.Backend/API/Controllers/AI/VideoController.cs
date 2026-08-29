@@ -377,10 +377,6 @@ namespace NexClone.Backend.API.Controllers.AI
             else if (model.ToLower().Contains("seedance"))
             {
                 usageUnits = duration > 0 ? duration : 5;
-                if (toolType == "reference-to-video" && inputDuration > 0)
-                {
-                    qualityFormat += "|WithVideo";
-                }
             }
 
             var policyResult = await _usagePolicy.EstimateCostAsync(userId, toolType, usageUnits, usageUnits, qualityFormat, subscriptionId, enforceWallet: false);
@@ -591,31 +587,6 @@ namespace NexClone.Backend.API.Controllers.AI
             else if (model.ToLower().Contains("seedance"))
             {
                 usageUnits = duration > 0 ? duration : 5;
-                if (toolType == "reference-to-video")
-                {
-                    double inputDuration = 0;
-                    foreach (var file in fileList)
-                    {
-                        if (file.ContentType.StartsWith("video/"))
-                        {
-                            try
-                            {
-                                var extension = System.IO.Path.GetExtension(file.FileName);
-                                if (string.IsNullOrEmpty(extension)) extension = ".mp4";
-                                var tempFile = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Guid.NewGuid().ToString() + extension);
-                                using (var ms = new MemoryStream()) { await file.CopyToAsync(ms); System.IO.File.WriteAllBytes(tempFile, ms.ToArray()); }
-                                using (var tfile = TagLib.File.Create(tempFile)) { inputDuration = tfile.Properties.Duration.TotalSeconds; }
-                                System.IO.File.Delete(tempFile);
-                                break; // Only count first video for input duration
-                            }
-                            catch { /* ignore fallback */ }
-                        }
-                    }
-                    if (inputDuration > 0)
-                    {
-                        qualityFormat += "|WithVideo";
-                    }
-                }
             }
 
             var policyResult = await _usagePolicy.ValidateAndChargeAsync(userId, toolType, usageUnits, usageUnits, qualityFormat, subscriptionId);
