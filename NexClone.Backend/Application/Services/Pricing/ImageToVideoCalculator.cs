@@ -7,7 +7,7 @@ namespace NexClone.Backend.Application.Services.Pricing
     public class ImageToVideoCalculator : IToolCostCalculator
     {
         private readonly ApplicationDbContext _context;
-        public string[] ToolIds => new[] { "image-to-video", "reference-to-video" };
+        public string[] ToolIds => new[] { "image-to-video" };
 
         public ImageToVideoCalculator(ApplicationDbContext context) => _context = context;
 
