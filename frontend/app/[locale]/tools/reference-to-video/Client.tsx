@@ -90,7 +90,9 @@ const MODELS: ModelOption[] = [
     descAr: "توليد فيديو متقدم مع تسعير ديناميكي وتحكم في المدة",
     discount: "Flexible",
     supportedResolutions: ["480p", "720p"],
-    prices: { "480p": 3, "720p": 5 }
+    // Per-second credit costs — fallback values matching admin panel defaults.
+    // The displayed total cost always comes from the estimate-tool API (duration × cost/sec).
+    prices: { "480p": 0.0143, "720p": 0.0286 }
   }
 ];
 

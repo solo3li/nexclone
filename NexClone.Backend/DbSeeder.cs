@@ -306,9 +306,9 @@ namespace NexClone.Backend
             if (!await context.ReferenceToVideoSettings.AnyAsync())
                 context.ReferenceToVideoSettings.Add(new ReferenceToVideoSetting { Id = 1, IsActive = true, MaxPromptLength = 5000, MaxDurationSeconds = 20, DefaultResolution = "720p", MaxConcurrentOperations = 10 });
             var r2vModels = new[] {
-                new ReferenceToVideoModelPricing { ModelName = "veo 3.1 Fast", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 35.0m, FixedCost_1080p = 45.0m, FixedCost_4k = 105.0m, AllowedWallet = "Standard", IsActive = true },
-                new ReferenceToVideoModelPricing { ModelName = "veo 3.1 Lite", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 15.0m, FixedCost_1080p = 20.0m, FixedCost_4k = 40.0m, AllowedWallet = "Standard", IsActive = true },
-                new ReferenceToVideoModelPricing { ModelName = "bytedance/seedance2-0-mini-r2v", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 20.0m, CostPerSecond_720p = 40.0m, CostPerSecond_1080p = 40.0m, CostPerSecond_4k = 40.0m, AllowedWallet = "Standard", IsActive = true }
+                new ReferenceToVideoModelPricing { ModelName = "veo 3.1 Fast", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 30.0m, FixedCost_1080p = 37.5m, FixedCost_4k = 90.0m, AllowedWallet = "Standard", IsActive = true },
+                new ReferenceToVideoModelPricing { ModelName = "veo 3.1 Lite", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 15.0m, FixedCost_1080p = 22.5m, FixedCost_4k = 75.0m, AllowedWallet = "Standard", IsActive = true },
+                new ReferenceToVideoModelPricing { ModelName = "bytedance/seedance2-0-mini-r2v", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 0.0143m, CostPerSecond_720p = 0.0286m, CostPerSecond_480p_WithVideo = 0.0143m, CostPerSecond_720p_WithVideo = 0.0286m, AllowedWallet = "Standard", IsActive = true }
             };
             foreach (var m in r2vModels)
             {
@@ -317,20 +317,28 @@ namespace NexClone.Backend
                 {
                     context.ReferenceToVideoModelPricings.Add(m);
                 }
-                else
-                {
-                    existing.BillingType = m.BillingType;
-                    existing.FixedCost_720p = m.FixedCost_720p;
-                    existing.FixedCost_1080p = m.FixedCost_1080p;
-                    existing.FixedCost_4k = m.FixedCost_4k;
-                    existing.CostPerSecond_480p = m.CostPerSecond_480p;
-                    existing.CostPerSecond_720p = m.CostPerSecond_720p;
-                    existing.CostPerSecond_1080p = m.CostPerSecond_1080p;
-                    existing.CostPerSecond_4k = m.CostPerSecond_4k;
-                    existing.AllowedWallet = m.AllowedWallet;
-                    existing.IsActive = m.IsActive;
-                }
+                // Do NOT overwrite existing rows — admin panel changes must be preserved across restarts.
             }
+
+            // ── One-time repair: fix corrupted Seedance r2v pricing that was seeded with wrong values (20.0/sec) ──
+            // Only corrects rows that still hold the old bad seed value; leaves any admin-configured values alone.
+            var seedanceR2vFix = await context.ReferenceToVideoModelPricings
+                .FirstOrDefaultAsync(p => p.ModelName.ToLower().Contains("seedance") && p.ModelName.ToLower().Contains("r2v"));
+            if (seedanceR2vFix != null && seedanceR2vFix.CostPerSecond_480p >= 10.0m)
+            {
+                seedanceR2vFix.BillingType = "PerSecond";
+                seedanceR2vFix.CostPerSecond_480p = 0.0143m;
+                seedanceR2vFix.CostPerSecond_720p = 0.0286m;
+                seedanceR2vFix.CostPerSecond_480p_WithVideo = 0.0143m;
+                seedanceR2vFix.CostPerSecond_720p_WithVideo = 0.0286m;
+            }
+
+            // ── One-time repair: ensure Veo r2v models have correct BillingType ──
+            var veoFastFix = await context.ReferenceToVideoModelPricings.FirstOrDefaultAsync(p => p.ModelName == "veo 3.1 Fast");
+            if (veoFastFix != null && veoFastFix.BillingType != "PerRequest") veoFastFix.BillingType = "PerRequest";
+            var veoLiteFix = await context.ReferenceToVideoModelPricings.FirstOrDefaultAsync(p => p.ModelName == "veo 3.1 Lite");
+            if (veoLiteFix != null && veoLiteFix.BillingType != "PerRequest") veoLiteFix.BillingType = "PerRequest";
+
 
             if (!await context.LipSyncSettings.AnyAsync())
                 context.LipSyncSettings.Add(new LipSyncSetting { Id = 1, IsActive = true, MaxVideoFileSizeMb = 100, MaxAudioFileSizeMb = 25, MaxAudioDurationSeconds = 120, MaxConcurrentOperations = 10 });
