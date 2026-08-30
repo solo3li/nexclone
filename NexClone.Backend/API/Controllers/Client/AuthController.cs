@@ -189,6 +189,8 @@ namespace NexClone.Backend.API.Controllers.Client
                             Status = "active"
                         });
                         freeTrialAssigned = true;
+                        
+                        await _walletService.DistributePlanCreditsAsync(user.Id, targetPlan.Id, resetToZero: true);
                     }
                 }
             }
@@ -455,6 +457,8 @@ namespace NexClone.Backend.API.Controllers.Client
                                 Status = "active"
                             };
                             _context.Subscriptions.Add(sub);
+                            
+                            await _walletService.DistributePlanCreditsAsync(user.Id, targetPlan.Id, resetToZero: true);
                         }
                     }
                 }
