@@ -236,8 +236,8 @@ namespace NexClone.Backend
             var t2vModels = new[] {
                 new TextToVideoModelPricing { ModelName = "veo 3.1 Fast", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 35.0m, FixedCost_1080p = 45.0m, FixedCost_4k = 105.0m, AllowedWallet = "Standard", IsActive = true },
                 new TextToVideoModelPricing { ModelName = "veo 3.1 Lite", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 15.0m, FixedCost_1080p = 20.0m, FixedCost_4k = 40.0m, AllowedWallet = "Standard", IsActive = true },
-                new TextToVideoModelPricing { ModelName = "grok-imagine", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 5.0m, CostPerSecond_720p = 10.0m, CostPerSecond_1080p = 8.0m, AllowedWallet = "Standard", IsActive = true },
-                new TextToVideoModelPricing { ModelName = "bytedance/seedance2-0-mini-t2v", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 22.0m, CostPerSecond_720p = 22.0m, CostPerSecond_1080p = 22.0m, CostPerSecond_4k = 22.0m, AllowedWallet = "Standard", IsActive = true }
+                new TextToVideoModelPricing { ModelName = "grok-imagine", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 2.4m, CostPerSecond_720p = 4.5m, CostPerSecond_1080p = 8.0m, AllowedWallet = "Standard", IsActive = true },
+                new TextToVideoModelPricing { ModelName = "bytedance/seedance2-0-mini-t2v", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 0.0143m, CostPerSecond_720p = 0.0286m, CostPerSecond_1080p = 0.0286m, CostPerSecond_4k = 0.0286m, AllowedWallet = "Standard", IsActive = true }
             };
             foreach (var m in t2vModels)
             {
@@ -246,8 +246,9 @@ namespace NexClone.Backend
                 {
                     context.TextToVideoModelPricings.Add(m);
                 }
-                else
+                else if (m.ModelName != "bytedance/seedance2-0-mini-t2v")
                 {
+                    // Only overwrite non-Seedance models — admin panel changes to Seedance must be preserved.
                     existing.BillingType = m.BillingType;
                     existing.FixedCost_720p = m.FixedCost_720p;
                     existing.FixedCost_1080p = m.FixedCost_1080p;
@@ -259,6 +260,18 @@ namespace NexClone.Backend
                     existing.AllowedWallet = m.AllowedWallet;
                     existing.IsActive = m.IsActive;
                 }
+            }
+
+            // ── One-time repair: fix corrupted Seedance T2V pricing seeded with wrong values (22.0/sec) ──
+            var seedanceT2vFix = await context.TextToVideoModelPricings
+                .FirstOrDefaultAsync(p => p.ModelName.ToLower().Contains("seedance") && p.ModelName.ToLower().Contains("t2v"));
+            if (seedanceT2vFix != null && seedanceT2vFix.CostPerSecond_480p >= 10.0m)
+            {
+                seedanceT2vFix.BillingType = "PerSecond";
+                seedanceT2vFix.CostPerSecond_480p = 0.0143m;
+                seedanceT2vFix.CostPerSecond_720p = 0.0286m;
+                seedanceT2vFix.CostPerSecond_1080p = 0.0286m;
+                seedanceT2vFix.CostPerSecond_4k = 0.0286m;
             }
             // Retire the removed "Veo 3.1 Quality" model on existing databases.
             var t2vQualityRows = await context.TextToVideoModelPricings.Where(p => p.ModelName == "veo 3.1 Quality").ToListAsync();
@@ -273,7 +286,7 @@ namespace NexClone.Backend
                 new ImageToVideoModelPricing { ModelName = "veo 3.1 Fast", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 35.0m, FixedCost_1080p = 45.0m, FixedCost_4k = 105.0m, AllowedWallet = "Standard", IsActive = true },
                 new ImageToVideoModelPricing { ModelName = "veo 3.1 Lite", ProviderName = "CrunAI", BillingType = "PerRequest", FixedCost_720p = 15.0m, FixedCost_1080p = 20.0m, FixedCost_4k = 40.0m, AllowedWallet = "Standard", IsActive = true },
                 new ImageToVideoModelPricing { ModelName = "grok-imagine", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 2.4m, CostPerSecond_720p = 4.5m, CostPerSecond_1080p = 8.0m, AllowedWallet = "Standard", IsActive = true },
-                new ImageToVideoModelPricing { ModelName = "bytedance/seedance2-0-mini-i2v", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 10.0m, CostPerSecond_720p = 20.0m, CostPerSecond_1080p = 20.0m, CostPerSecond_4k = 20.0m, AllowedWallet = "Standard", IsActive = true }
+                new ImageToVideoModelPricing { ModelName = "bytedance/seedance2-0-mini-i2v", ProviderName = "CrunAI", BillingType = "PerSecond", CostPerSecond_480p = 0.0143m, CostPerSecond_720p = 0.0286m, CostPerSecond_1080p = 0.0286m, CostPerSecond_4k = 0.0286m, AllowedWallet = "Standard", IsActive = true }
             };
             foreach (var m in i2vModels)
             {
@@ -282,8 +295,9 @@ namespace NexClone.Backend
                 {
                     context.ImageToVideoModelPricings.Add(m);
                 }
-                else
+                else if (m.ModelName != "bytedance/seedance2-0-mini-i2v")
                 {
+                    // Only overwrite non-Seedance models — admin panel changes to Seedance must be preserved.
                     existing.BillingType = m.BillingType;
                     existing.FixedCost_720p = m.FixedCost_720p;
                     existing.FixedCost_1080p = m.FixedCost_1080p;
@@ -296,6 +310,19 @@ namespace NexClone.Backend
                     existing.IsActive = m.IsActive;
                 }
             }
+
+            // ── One-time repair: fix corrupted Seedance I2V pricing seeded with wrong values (10.0/sec) ──
+            var seedanceI2vFix = await context.ImageToVideoModelPricings
+                .FirstOrDefaultAsync(p => p.ModelName.ToLower().Contains("seedance") && p.ModelName.ToLower().Contains("i2v"));
+            if (seedanceI2vFix != null && seedanceI2vFix.CostPerSecond_480p >= 5.0m)
+            {
+                seedanceI2vFix.BillingType = "PerSecond";
+                seedanceI2vFix.CostPerSecond_480p = 0.0143m;
+                seedanceI2vFix.CostPerSecond_720p = 0.0286m;
+                seedanceI2vFix.CostPerSecond_1080p = 0.0286m;
+                seedanceI2vFix.CostPerSecond_4k = 0.0286m;
+            }
+
             // Retire the removed "Veo 3.1 Quality" model on existing databases.
             var i2vQualityRows = await context.ImageToVideoModelPricings.Where(p => p.ModelName == "veo 3.1 Quality").ToListAsync();
             if (i2vQualityRows.Count > 0)

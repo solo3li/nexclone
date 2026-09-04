@@ -338,7 +338,13 @@ namespace NexClone.Backend.API.Controllers.Admin
                 if (key.StartsWith("ModelCosts["))
                 {
                     var mKey = key.Substring(11, key.Length - 12);
-                    if (decimal.TryParse(Request.Form[key].ToString(), out decimal val))
+                    // Use InvariantCulture to ensure dot (.) is always the decimal separator
+                    // regardless of the server OS locale (e.g. Arabic/Egyptian uses comma).
+                    if (decimal.TryParse(
+                            Request.Form[key].ToString(),
+                            System.Globalization.NumberStyles.Any,
+                            System.Globalization.CultureInfo.InvariantCulture,
+                            out decimal val))
                     {
                         ModelCosts[mKey] = val;
                     }
