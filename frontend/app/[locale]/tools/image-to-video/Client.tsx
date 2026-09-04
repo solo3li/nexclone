@@ -202,29 +202,34 @@ export default function ImageToVideoPage() {
         if (active && res.data?.pricings) {
           const pricings = res.data.pricings;
           setModelOptions(prev => prev.map(m => {
-            const normM = m.id.toLowerCase().replace(/[-_ .]/g, '');
+            const normM = m.id.toLowerCase().replace(/[-_ ./]/g, '');
+            // .NET returns PascalCase — match ModelName (PascalCase) and also check camelCase fallback
             let found = pricings.find((p: any) => {
-              const normP = (p.modelName || '').toLowerCase().replace(/[-_ .]/g, '');
+              const name = p.ModelName || p.modelName || '';
+              const normP = name.toLowerCase().replace(/[-_ ./]/g, '');
               return normP === normM;
             });
             if (!found) {
               // Fallback: partial match only when both keys are long enough to be unambiguous (≥6 chars)
               found = pricings.find((p: any) => {
-                const normP = (p.modelName || '').toLowerCase().replace(/[-_ .]/g, '');
+                const name = p.ModelName || p.modelName || '';
+                const normP = name.toLowerCase().replace(/[-_ ./]/g, '');
                 const shorter = normP.length <= normM.length ? normP : normM;
                 const longer = normP.length <= normM.length ? normM : normP;
                 return shorter.length >= 6 && longer.includes(shorter);
               });
             }
             if (found) {
-              if (found.billingType === 'PerSecond') {
+              // .NET returns PascalCase field names — support both casings for safety
+              const billingType = found.BillingType || found.billingType || '';
+              if (billingType === 'PerSecond') {
                 return {
                   ...m,
                   prices: {
                     ...m.prices,
-                    "480p": found.costPerSecond_480p ?? m.prices["480p"],
-                    "720p": found.costPerSecond_720p ?? m.prices["720p"],
-                    "1080p": found.costPerSecond_1080p ?? m.prices["1080p"],
+                    "480p": found.CostPerSecond_480p ?? found.costPerSecond_480p ?? m.prices["480p"],
+                    "720p": found.CostPerSecond_720p ?? found.costPerSecond_720p ?? m.prices["720p"],
+                    "1080p": found.CostPerSecond_1080p ?? found.costPerSecond_1080p ?? m.prices["1080p"],
                   }
                 };
               } else {
@@ -232,9 +237,9 @@ export default function ImageToVideoPage() {
                   ...m,
                   prices: {
                     ...m.prices,
-                    "720p": found.fixedCost_720p ?? m.prices["720p"],
-                    "1080p": found.fixedCost_1080p ?? m.prices["1080p"],
-                    "4k": found.fixedCost_4k ?? m.prices["4k"],
+                    "720p": found.FixedCost_720p ?? found.fixedCost_720p ?? m.prices["720p"],
+                    "1080p": found.FixedCost_1080p ?? found.fixedCost_1080p ?? m.prices["1080p"],
+                    "4k": found.FixedCost_4k ?? found.fixedCost_4k ?? m.prices["4k"],
                   }
                 };
               }
