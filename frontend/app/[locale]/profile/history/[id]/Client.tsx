@@ -9,9 +9,11 @@ import Footer from "../../../../../src/components/Footer";
 import {
   ArrowLeft, ArrowRight, Volume2, Mic, FileText, Image as ImageIcon,
   Clock, Globe, User, Zap, Loader2, Download, Copy, Play, Pause,
-  XCircle, CheckCircle2, AlertTriangle, FileAudio, AlignLeft
+  XCircle, CheckCircle2, AlertTriangle, FileAudio, AlignLeft,
+  Sliders, Layers, ExternalLink, Film, Music, Sparkles
 } from "lucide-react";
 import { useHistoryStore } from "../../../../../src/store/useHistoryStore";
+import { ModelBrandIcon } from "../../../../../src/components/BrandLogos";
 
 interface HistoryDetail {
   id: string;
@@ -26,6 +28,7 @@ interface HistoryDetail {
   resultText: string;
   inputText: string;
   creditsUsed: number;
+  metadataJson?: string;
 }
 
 /* ─── helpers ─── */
@@ -35,6 +38,27 @@ function absoluteUrl(path: string) {
   if (!path) return "";
   if (path.startsWith("http")) return path;
   return `${BACKEND}${path}`;
+}
+
+function parseMetadata(json?: string) {
+  if (!json) return null;
+  try {
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
+function formatModelName(model?: string): { name: string; brand: string } {
+  if (!model) return { name: "", brand: "" };
+  const m = model.toLowerCase();
+  if (m.includes("veo-3.1")) return { name: "Google Veo 3.1", brand: "Google DeepMind" };
+  if (m.includes("veo-3.0") || m === "veo") return { name: "Google Veo 3.0", brand: "Google DeepMind" };
+  if (m.includes("seedance-2.0") || m === "seedance") return { name: "ByteDance Seedance 2.0", brand: "ByteDance AI" };
+  if (m.includes("seedance-1.5")) return { name: "ByteDance Seedance 1.5", brand: "ByteDance AI" };
+  if (m.includes("seedance-1.0")) return { name: "ByteDance Seedance 1.0", brand: "ByteDance AI" };
+  if (m.includes("grok")) return { name: "xAI Grok Imagine", brand: "xAI" };
+  return { name: model.toUpperCase(), brand: "AI Model" };
 }
 
 function detectMediaType(url: string, type?: string): "audio" | "video" | "image" | "none" {
@@ -164,6 +188,7 @@ export default function HistoryDetailPage() {
   const [loading,  setLoading]  = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [copied,   setCopied]   = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const { fetchHistoryItem } = useHistoryStore();
 
@@ -232,13 +257,18 @@ export default function HistoryDetailPage() {
     }
   };
 
-  const meta       = TOOL_META[record.type] ?? { icon: Zap, label_ar: record.type, label_en: record.type, gradient: "from-violet-600 to-fuchsia-600" };
-  const Icon       = meta.icon;
-  const toolLabel  = isRtl ? meta.label_ar : meta.label_en;
+  const metaTool   = TOOL_META[record.type] ?? { icon: Zap, label_ar: record.type, label_en: record.type, gradient: "from-violet-600 to-fuchsia-600" };
+  const Icon       = metaTool.icon;
+  const toolLabel  = isRtl ? metaTool.label_ar : metaTool.label_en;
   const mediaType  = detectMediaType(record.fileUrl, record.type);
   const mediaSrc   = absoluteUrl(record.fileUrl);
   const isCompleted = record.status === "completed" || record.status === "succeeded";
   const isFailed = record.status === "failed" || record.status === "error";
+
+  const meta = parseMetadata(record.metadataJson);
+  const modelInfo = formatModelName(meta?.model);
+  const hasSpecs = meta && (meta.model || meta.resolution || meta.aspectRatio || meta.duration || meta.mode || meta.audioEnabled !== undefined || meta.orientation || meta.renderingSpeed);
+  const hasReferenceMedia = meta && ((meta.imageUrls && meta.imageUrls.length > 0) || (meta.videoUrls && meta.videoUrls.length > 0) || (meta.audioUrls && meta.audioUrls.length > 0));
 
   return (
     <div className="relative min-h-screen bg-[#0a0015] flex flex-col">
@@ -268,14 +298,22 @@ export default function HistoryDetailPage() {
           dir={isRtl ? "rtl" : "ltr"}
         >
           <div className="flex items-center gap-4">
-            <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${meta.gradient} flex items-center justify-center shrink-0 shadow-lg`}>
+            <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${metaTool.gradient} flex items-center justify-center shrink-0 shadow-lg`}>
               <Icon className="w-7 h-7 text-white" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap mb-2">
-                <span className={`text-xs font-bold px-2.5 py-1 rounded-full bg-gradient-to-r ${meta.gradient} text-white`}>
+                <span className={`text-xs font-bold px-2.5 py-1 rounded-full bg-gradient-to-r ${metaTool.gradient} text-white`}>
                   {toolLabel}
                 </span>
+
+                {modelInfo.name && (
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white font-medium text-xs shadow-sm">
+                    <ModelBrandIcon modelId={meta?.model} className="w-3.5 h-3.5 shrink-0" />
+                    <span>{modelInfo.name}</span>
+                  </div>
+                )}
+
                 <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border ${
                   isCompleted
                     ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
@@ -291,7 +329,7 @@ export default function HistoryDetailPage() {
                 </span>
               </div>
               <h1 className="text-lg font-extrabold text-white leading-snug truncate" title={record.title}>
-                {record.title.split('/').pop()}
+                {record.title ? record.title.split('/').pop() : ''}
               </h1>
               <p className="text-xs text-white/40 mt-1">{record.date}</p>
             </div>
@@ -317,12 +355,136 @@ export default function HistoryDetailPage() {
           ))}
         </motion.div>
 
+        {/* ── Technical Specifications ── */}
+        {hasSpecs && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.10 }}
+            className="mb-5 bg-white/5 border border-white/10 rounded-2xl p-5"
+            dir={isRtl ? "rtl" : "ltr"}
+          >
+            <div className="flex items-center gap-2 mb-4 px-1">
+              <Sliders className="w-4 h-4 text-violet-400" />
+              <span className="text-xs font-semibold text-white/70">
+                {isRtl ? "المواصفات الفنية للعملية" : "Technical Specifications"}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {meta?.model && (
+                <div className="bg-white/[0.03] border border-white/10 rounded-xl p-3 flex flex-col gap-1">
+                  <span className="text-[11px] text-white/40">{isRtl ? "النموذج الذكي" : "AI Model"}</span>
+                  <div className="flex items-center gap-1.5">
+                    <ModelBrandIcon modelId={meta.model} className="w-3.5 h-3.5 shrink-0" />
+                    <span className="text-xs font-semibold text-white truncate">{modelInfo.name}</span>
+                  </div>
+                </div>
+              )}
+
+              {meta?.resolution && (
+                <div className="bg-white/[0.03] border border-white/10 rounded-xl p-3 flex flex-col gap-1">
+                  <span className="text-[11px] text-white/40">{isRtl ? "الدقة" : "Resolution"}</span>
+                  <span className="text-xs font-mono font-bold text-cyan-300">{meta.resolution}</span>
+                </div>
+              )}
+
+              {meta?.aspectRatio && (
+                <div className="bg-white/[0.03] border border-white/10 rounded-xl p-3 flex flex-col gap-1">
+                  <span className="text-[11px] text-white/40">{isRtl ? "الأبعاد" : "Aspect Ratio"}</span>
+                  <span className="text-xs font-mono font-bold text-amber-300">{meta.aspectRatio}</span>
+                </div>
+              )}
+
+              {meta?.duration > 0 && (
+                <div className="bg-white/[0.03] border border-white/10 rounded-xl p-3 flex flex-col gap-1">
+                  <span className="text-[11px] text-white/40">{isRtl ? "المدة" : "Duration"}</span>
+                  <span className="text-xs font-mono font-bold text-purple-300">{meta.duration}s</span>
+                </div>
+              )}
+
+              {meta?.mode && (
+                <div className="bg-white/[0.03] border border-white/10 rounded-xl p-3 flex flex-col gap-1">
+                  <span className="text-[11px] text-white/40">{isRtl ? "النمط" : "Mode"}</span>
+                  <span className="text-xs font-medium text-emerald-300 uppercase">{meta.mode}</span>
+                </div>
+              )}
+
+              {meta?.audioEnabled !== undefined && (
+                <div className="bg-white/[0.03] border border-white/10 rounded-xl p-3 flex flex-col gap-1">
+                  <span className="text-[11px] text-white/40">{isRtl ? "الصوت" : "Audio"}</span>
+                  <span className={`text-xs font-medium ${meta.audioEnabled ? "text-emerald-400" : "text-white/40"}`}>
+                    {meta.audioEnabled ? (isRtl ? "مُفعّل" : "Enabled") : (isRtl ? "مكتوم" : "Muted")}
+                  </span>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {/* ── Input Reference Media Gallery ── */}
+        {hasReferenceMedia && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}
+            className="mb-5 bg-white/5 border border-white/10 rounded-2xl p-5 space-y-4"
+            dir={isRtl ? "rtl" : "ltr"}
+          >
+            <div className="flex items-center gap-2 px-1">
+              <Layers className="w-4 h-4 text-fuchsia-400" />
+              <span className="text-xs font-semibold text-white/70">
+                {isRtl ? "الوسائط المرجعية المدخلة" : "Input Reference Media"}
+              </span>
+            </div>
+
+            {meta?.imageUrls && meta.imageUrls.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {meta.imageUrls.map((url: string, idx: number) => (
+                  <div
+                    key={idx}
+                    onClick={() => setPreviewImage(url)}
+                    className="group relative aspect-square rounded-xl overflow-hidden border border-white/10 bg-black/40 cursor-pointer hover:border-violet-500/50 transition-all shadow"
+                  >
+                    <img src={url} alt={`Reference ${idx + 1}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
+                    <div className="absolute top-1.5 left-1.5 bg-black/70 text-white text-[10px] font-bold px-1.5 py-0.5 rounded border border-white/10">
+                      {isRtl ? `إطار ${idx + 1}` : `Frame ${idx + 1}`}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {meta?.videoUrls && meta.videoUrls.length > 0 && (
+              <div className="space-y-3">
+                {meta.videoUrls.map((url: string, idx: number) => (
+                  <div key={idx} className="rounded-xl overflow-hidden border border-white/10 bg-black/40 p-2">
+                    <span className="text-[11px] text-white/50 block mb-1 px-1">
+                      {isRtl ? `فيديو مرجعي ${idx + 1}` : `Reference Video ${idx + 1}`}
+                    </span>
+                    <video controls className="w-full rounded-lg max-h-48" src={url} />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {meta?.audioUrls && meta.audioUrls.length > 0 && (
+              <div className="space-y-2">
+                {meta.audioUrls.map((url: string, idx: number) => (
+                  <div key={idx} className="rounded-xl border border-white/10 bg-black/40 p-3">
+                    <span className="text-[11px] text-white/50 block mb-1">
+                      {isRtl ? `صوت مرجعي ${idx + 1}` : `Reference Audio ${idx + 1}`}
+                    </span>
+                    <audio controls className="w-full" src={url} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+
         {/* ─────────────────────────────────── */}
         {/* ── SECTION: INPUT TEXT (if any) ── */}
         {/* ─────────────────────────────────── */}
         {record.inputText && (
           <motion.div
-            initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}
+            initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14 }}
             className="mb-5"
             dir={isRtl ? "rtl" : "ltr"}
           >
@@ -393,7 +555,6 @@ export default function HistoryDetailPage() {
               </button>
             </div>
             <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden flex items-center justify-center p-2">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={mediaSrc}
                 alt={record.title}
@@ -483,6 +644,35 @@ export default function HistoryDetailPage() {
             </p>
           </motion.div>
         )}
+
+        {/* Lightbox Modal */}
+        <AnimatePresence>
+          {previewImage && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setPreviewImage(null)}
+              className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer"
+            >
+              <motion.div
+                initial={{ scale: 0.9 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0.9 }}
+                className="relative max-w-4xl max-h-[85vh] rounded-3xl overflow-hidden border border-white/20 bg-black/90 p-2"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <img src={previewImage} alt="Preview" className="max-h-[80vh] w-auto rounded-2xl object-contain" />
+                <button
+                  onClick={() => setPreviewImage(null)}
+                  className="absolute top-4 right-4 bg-black/60 text-white rounded-full p-2 hover:bg-white/20 transition-colors"
+                >
+                  <XCircle className="w-6 h-6" />
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
       </main>
 

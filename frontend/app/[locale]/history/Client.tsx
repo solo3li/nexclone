@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useHistoryStore } from "../../../src/store/useHistoryStore";
 import { signalRNotificationService } from "../../../lib/signalr-client";
+import { ModelBrandIcon } from "../../../src/components/BrandLogos";
 
 interface GenerationRecord {
   id: string;
@@ -27,6 +28,28 @@ interface GenerationRecord {
   voice: string;
   fileUrl: string;
   creditsUsed: number;
+  metadataJson?: string;
+}
+
+function parseMetadata(json?: string) {
+  if (!json) return null;
+  try {
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
+function formatModelName(model?: string): string {
+  if (!model) return "";
+  const m = model.toLowerCase();
+  if (m.includes("veo-3.1")) return "Veo 3.1";
+  if (m.includes("veo-3.0") || m === "veo") return "Veo 3.0";
+  if (m.includes("seedance-2.0") || m === "seedance") return "Seedance 2.0";
+  if (m.includes("seedance-1.5")) return "Seedance 1.5";
+  if (m.includes("seedance-1.0")) return "Seedance 1.0";
+  if (m.includes("grok")) return "Grok Imagine";
+  return model.toUpperCase();
 }
 
 const TOOL_ICONS: Record<string, any> = {
@@ -192,6 +215,8 @@ export default function HistoryPage() {
                 {filtered.map((record, i) => {
                   const Icon = TOOL_ICONS[record.type] || Zap;
                   const colorClass = TOOL_COLORS[record.type] || "from-white/10 to-white/5 border-white/10 text-white/50";
+                  const meta = parseMetadata(record.metadataJson);
+                  const modelName = formatModelName(meta?.model);
 
                   return (
                     <motion.div
@@ -211,14 +236,37 @@ export default function HistoryPage() {
 
                       {/* Info */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-white font-bold text-lg truncate" title={record.title}>
-                          {record.title.split('/').pop()}
-                        </p>
-                        <div className="flex items-center gap-4 mt-2 flex-wrap">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <p className="text-white font-bold text-lg truncate" title={record.title}>
+                            {record.title ? record.title.split('/').pop() : ''}
+                          </p>
+                          {meta?.model && (
+                            <span className="text-xs font-semibold text-white/90 bg-white/10 border border-white/15 px-2.5 py-1 rounded-full inline-flex items-center gap-1.5 shadow-sm">
+                              <ModelBrandIcon modelId={meta.model} className="w-3.5 h-3.5 shrink-0" />
+                              <span>{modelName}</span>
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 sm:gap-3 mt-2 flex-wrap">
                           <span className="text-xs text-white/50 flex items-center gap-1.5 bg-white/5 px-2.5 py-1 rounded-lg">
                             <Clock className="w-3.5 h-3.5" />
                             {record.date}
                           </span>
+                          {meta?.resolution && (
+                            <span className="text-xs text-cyan-300 font-mono bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-md">
+                              {meta.resolution}
+                            </span>
+                          )}
+                          {meta?.aspectRatio && (
+                            <span className="text-xs text-amber-300 font-mono bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-md">
+                              {meta.aspectRatio}
+                            </span>
+                          )}
+                          {meta?.duration > 0 && (
+                            <span className="text-xs text-purple-300 font-mono bg-purple-500/10 border border-purple-500/20 px-2 py-0.5 rounded-md">
+                              {meta.duration}s
+                            </span>
+                          )}
                           {record.lang && record.lang !== "-" && (
                             <span className="text-xs text-white/50 bg-white/5 px-2.5 py-1 rounded-lg">
                                 {record.lang}

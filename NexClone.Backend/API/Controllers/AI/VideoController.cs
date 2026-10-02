@@ -255,12 +255,13 @@ namespace NexClone.Backend.API.Controllers.AI
                 {
                     UserId = userId,
                     Type = "lip-sync",
-                    Title = "Lip Sync Generation",
+                    Title = "مزامنة الشفاه الصوتية",
                     InputText = "Video and Audio Upload",
                     Status = "processing",
                     ResultText = "initializing",
                     CreatedAt = DateTime.UtcNow,
-                    CreditsUsed = policyResult.TotalCost
+                    CreditsUsed = policyResult.TotalCost,
+                    MetadataJson = System.Text.Json.JsonSerializer.Serialize(new { model = model })
                 };
                 _dbContext.GenerationHistories.Add(history);
                 await _dbContext.SaveChangesAsync();
@@ -485,17 +486,28 @@ namespace NexClone.Backend.API.Controllers.AI
                 using (var ms = new MemoryStream()) { await video.CopyToAsync(ms); videoBytes = ms.ToArray(); }
                 string videoContentType = video.ContentType;
 
+                string cleanMotionTitle = !string.IsNullOrWhiteSpace(prompt)
+                    ? (prompt.Trim().Length > 80 ? prompt.Trim().Substring(0, 77) + "..." : prompt.Trim())
+                    : "نسخ ونقل الحركة";
+
                 // Save history as processing
                 var history = new GenerationHistory
                 {
                     UserId = userId,
                     Type = "motion-control",
-                    Title = "Motion Control Video Generation",
-                    InputText = "Image & Video Upload",
+                    Title = cleanMotionTitle,
+                    InputText = string.IsNullOrWhiteSpace(prompt) ? "Image & Video Upload" : prompt,
                     Status = "processing",
                     ResultText = "initializing",
                     CreatedAt = DateTime.UtcNow,
-                    CreditsUsed = policyResult.TotalCost
+                    CreditsUsed = policyResult.TotalCost,
+                    MetadataJson = System.Text.Json.JsonSerializer.Serialize(new
+                    {
+                        resolution = resolution,
+                        renderingSpeed = renderingSpeed,
+                        orientation = orientation,
+                        keepOriginalSound = keepOriginalSound
+                    })
                 };
                 _dbContext.GenerationHistories.Add(history);
                 await _dbContext.SaveChangesAsync();
@@ -628,11 +640,20 @@ namespace NexClone.Backend.API.Controllers.AI
 
             try
             {
+                string cleanTitle = !string.IsNullOrWhiteSpace(prompt)
+                    ? (prompt.Trim().Length > 80 ? prompt.Trim().Substring(0, 77) + "..." : prompt.Trim())
+                    : (toolType switch {
+                        "text-to-video" => "توليد فيديو من نص",
+                        "image-to-video" => "تحريك صورة إلى فيديو",
+                        "reference-to-video" => "توليد فيديو مرجعي",
+                        _ => $"{toolType} Generation"
+                    });
+
                 var history = new GenerationHistory
                 {
                     UserId = userId,
                     Type = toolType,
-                    Title = $"{toolType} Generation",
+                    Title = cleanTitle,
                     InputText = prompt,
                     Status = "processing",
                     ResultText = "initializing",
@@ -686,6 +707,22 @@ namespace NexClone.Backend.API.Controllers.AI
                     string url = await _mediaService.GetFileUrlAsync(key);
                     message.AudioUrls.Add(url);
                 }
+
+                // Attach rich metadata including model, specs, and reference media URLs
+                var videoMetadata = new
+                {
+                    model = model,
+                    resolution = resolution,
+                    aspectRatio = aspectRatio,
+                    duration = duration,
+                    mode = mode,
+                    audioEnabled = audioEnabled,
+                    imageUrls = message.ImageUrls,
+                    videoUrls = message.VideoUrls,
+                    audioUrls = message.AudioUrls
+                };
+                history.MetadataJson = System.Text.Json.JsonSerializer.Serialize(videoMetadata);
+                await _dbContext.SaveChangesAsync();
 
                 _backgroundJobClient.Enqueue<NexClone.Backend.Infrastructure.Consumers.VideoToolConsumer>(
                     c => c.Consume(message)

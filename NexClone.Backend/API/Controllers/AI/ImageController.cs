@@ -116,11 +116,15 @@ namespace NexClone.Backend.API.Controllers.AI
 
             try
             {
+                string cleanTitle = !string.IsNullOrWhiteSpace(prompt)
+                    ? (prompt.Trim().Length > 80 ? prompt.Trim().Substring(0, 77) + "..." : prompt.Trim())
+                    : "توليد صورة بالذكاء الاصطناعي";
+
                 var history = new GenerationHistory
                 {
                     UserId = userId,
                     Type = toolType,
-                    Title = $"{toolType} Generation",
+                    Title = cleanTitle,
                     InputText = prompt,
                     Status = "processing",
                     ResultText = "initializing",
@@ -150,6 +154,17 @@ namespace NexClone.Backend.API.Controllers.AI
                     string url = await _mediaService.GetFileUrlAsync(key);
                     message.ImageUrls.Add(url);
                 }
+
+                // Attach rich metadata for image history
+                var imageMetadata = new
+                {
+                    model = model,
+                    aspectRatio = aspectRatio,
+                    mode = string.IsNullOrWhiteSpace(mode) ? "standard" : mode,
+                    imageUrls = message.ImageUrls
+                };
+                history.MetadataJson = System.Text.Json.JsonSerializer.Serialize(imageMetadata);
+                await _dbContext.SaveChangesAsync();
 
                 _backgroundJobClient.Enqueue<NexClone.Backend.Infrastructure.Consumers.ImageToolConsumer>(
                     c => c.Consume(message)
@@ -188,7 +203,8 @@ namespace NexClone.Backend.API.Controllers.AI
                 title = history.Title,
                 prompt = history.InputText,
                 creditsUsed = history.CreditsUsed,
-                createdAt = history.CreatedAt
+                createdAt = history.CreatedAt,
+                metadataJson = history.MetadataJson
             });
         }
     }

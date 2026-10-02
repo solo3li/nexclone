@@ -48,6 +48,8 @@ namespace NexClone.Backend.Core.Entities
         [MaxLength(2000)]
         public string? ErrorMessage { get; set; }
 
+        public string? MetadataJson { get; set; }
+
         [ForeignKey("UserId")]
         public virtual ApplicationUser User { get; set; } = null!;
     }
