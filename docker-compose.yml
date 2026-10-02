@@ -101,6 +101,11 @@ services:
       - "traefik.http.routers.backend.rule=Host(`api.169.58.204.169.nip.io`)"
       - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.routers.backend.tls.certresolver=myresolver"
+      - "traefik.http.routers.mcp.rule=(Host(`nexmediaai.com`) || Host(`www.nexmediaai.com`)) && PathPrefix(`/api/mcp`)"
+      - "traefik.http.routers.mcp.entrypoints=websecure"
+      - "traefik.http.routers.mcp.tls.certresolver=myresolver"
+      - "traefik.http.routers.mcp.service=backend"
+      - "traefik.http.routers.mcp.priority=100"
       - "traefik.http.services.backend.loadbalancer.server.port=8080"
 
   frontend:

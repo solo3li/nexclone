@@ -558,7 +558,7 @@ export default function TextToVideoPage() {
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 rows={6}
-                maxLength={2000}
+                maxLength={5000}
                 placeholder={
                   isRtl 
                     ? "اكتب وصف المشهد بالتفصيل هنا... (مثال: لقطة سينمائية لغروب الشمس فوق بحيرة هادئة، انعكاسات ذهبية دافئة، حركة كاميرا درون بطيئة بدقة 4K)" 
@@ -567,7 +567,7 @@ export default function TextToVideoPage() {
                 className="w-full bg-[#06010f] border border-white/10 rounded-xl p-4 text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500/40 resize-none text-sm md:text-base leading-relaxed transition-all shadow-inner font-sans"
               />
               <div className="absolute bottom-3 end-3 text-[11px] text-white/40 font-mono bg-[#06010f]/90 px-2 py-0.5 rounded border border-white/5">
-                {prompt.length} / 2000
+                {prompt.length} / 5000
               </div>
             </div>
 

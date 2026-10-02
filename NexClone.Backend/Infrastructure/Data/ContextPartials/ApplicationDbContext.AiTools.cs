@@ -27,6 +27,7 @@ namespace NexClone.Backend.Infrastructure.Data
         public DbSet<TextToVoiceModelPricing> TextToVoiceModelPricings { get; set; } = null!;
         public DbSet<ReferenceToVideoSetting> ReferenceToVideoSettings { get; set; } = null!;
         public DbSet<ReferenceToVideoModelPricing> ReferenceToVideoModelPricings { get; set; } = null!;
+        public DbSet<NexClone.Backend.Core.Entities.UserApiKey> UserApiKeys { get; set; } = null!;
 
         private void ConfigureAiTools(ModelBuilder builder)
         {
@@ -34,6 +35,12 @@ namespace NexClone.Backend.Infrastructure.Data
                 .HasOne(h => h.User)
                 .WithMany()
                 .HasForeignKey(h => h.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<NexClone.Backend.Core.Entities.UserApiKey>()
+                .HasOne(k => k.User)
+                .WithMany()
+                .HasForeignKey(k => k.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

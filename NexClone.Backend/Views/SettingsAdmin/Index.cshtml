@@ -99,9 +99,23 @@
                 <label for="Social_LinkedIn" class="bx--label">LinkedIn</label>
                 <input id="Social_LinkedIn" type="url" class="bx--text-input" name="settings[Social.LinkedIn]" value="@GetVal("Social.LinkedIn")" placeholder="https://linkedin.com/company/yourcompany">
             </div>
-            <div class="bx--form-item" style="grid-column: span 2;">
+            <div class="bx--form-item">
                 <label for="Social_YouTube" class="bx--label">YouTube</label>
                 <input id="Social_YouTube" type="url" class="bx--text-input" name="settings[Social.YouTube]" value="@GetVal("Social.YouTube")" placeholder="https://youtube.com/@@yourchannel">
+            </div>
+            <div class="bx--form-item">
+                <label for="Social_WhatsApp" class="bx--label">WhatsApp Direct Link</label>
+                <input id="Social_WhatsApp" type="url" class="bx--text-input" name="settings[Social.WhatsApp]" value="@GetVal("Social.WhatsApp")" placeholder="https://wa.me/201xxxxxxxxx">
+            </div>
+            <div class="bx--form-item" style="grid-column: span 2; margin-top: 0.5rem; background: #f4f4f4; padding: 1rem; border-radius: 4px; border: 1px solid #e0e0e0;">
+                <label class="bx--label" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">@Localizer["Floating WhatsApp Chat Button"]</label>
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" name="settings[WhatsApp.Enabled]" value="true" @(GetVal("WhatsApp.Enabled") == "true" ? "checked" : "") style="width: 1.25rem; height: 1.25rem; cursor: pointer;" />
+                        <span style="font-size: 0.9rem; font-weight: 500;">@Localizer["Show floating WhatsApp icon on website"]</span>
+                    </label>
+                </div>
+                <div class="bx--form__helper-text" style="margin-top: 0.5rem;">@Localizer["When enabled and a valid WhatsApp link is provided above, a floating WhatsApp icon will be displayed across the website."]</div>
             </div>
         </div>
 

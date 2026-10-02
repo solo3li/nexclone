@@ -14,7 +14,7 @@ namespace NexClone.Backend.Application.Services
     {
         public bool Enabled { get; set; } = false;
         // -1 means unlimited
-        public int MaxCharsPerRequest { get; set; } = 150; 
+        public int MaxCharsPerRequest { get; set; } = 5000; 
         public long MaxFileSizeMb { get; set; } = 25;
         
         // Extended media limits

@@ -16,9 +16,11 @@ import ProfileSettings from "../../../src/components/profile/ProfileSettings";
 import ProfileSubscription from "../../../src/components/profile/ProfileSubscription";
 import ProfileHistory from "../../../src/components/profile/ProfileHistory";
 import ProfileSupport from "../../../src/components/profile/ProfileSupport";
+import ProfileMcp from "../../../src/components/profile/ProfileMcp";
 
 const TABS = [
   { id: 'overview',     labelEn: 'Overview',           labelAr: 'نظرة عامة' },
+  { id: 'mcp',          labelEn: 'AI & MCP Keys',      labelAr: 'ربط الذكاء الاصطناعي (MCP)' },
   { id: 'history',      labelEn: 'History',            labelAr: 'سجل العمليات' },
   { id: 'subscription', labelEn: 'Subscription',       labelAr: 'الاشتراكات' },
   { id: 'support',      labelEn: 'Support',            labelAr: 'الدعم' },
@@ -132,6 +134,10 @@ export default function ProfilePage() {
         >
           {activeTab === 'overview' && (
             <ProfileOverview user={user} historyCount={historyCount} isRtl={isRtl} />
+          )}
+
+          {activeTab === 'mcp' && (
+            <ProfileMcp user={user} isRtl={isRtl} />
           )}
 
           {activeTab === 'history' && (

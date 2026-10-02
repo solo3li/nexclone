@@ -569,7 +569,7 @@ function MotionControlPage() {
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 rows={4}
-                maxLength={2000}
+                maxLength={5000}
                 placeholder={
                   isRtl 
                     ? "اكتب وصفاً إضافياً للمشهد الحركي... (اختياري، مثلاً: نقل حركي انسيابي متطابق، إضاءة سينمائية دافئة، ثبات ملامح الوجه بدقة 1080p)" 
@@ -578,7 +578,7 @@ function MotionControlPage() {
                 className="w-full bg-[#06010f] border border-white/10 rounded-xl p-4 text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/40 resize-none text-sm md:text-base leading-relaxed transition-all shadow-inner font-sans"
               />
               <div className="absolute bottom-3 end-3 text-[11px] text-white/40 font-mono bg-[#06010f]/90 px-2 py-0.5 rounded border border-white/5">
-                {prompt.length} / 2000
+                {prompt.length} / 5000
               </div>
             </div>
 

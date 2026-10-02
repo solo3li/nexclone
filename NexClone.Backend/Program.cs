@@ -72,6 +72,13 @@ builder.Services.AddCors(options =>
         .AllowAnyHeader()
         .AllowCredentials();
     });
+
+    options.AddPolicy("AllowAllMcp", policyBuilder =>
+    {
+        policyBuilder.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
 });
 
 // Setup PostgreSQL Database (Identity)

@@ -40,6 +40,8 @@ namespace NexClone.Backend.API.Controllers.Admin
                 { "Social.LinkedIn", ("", "LinkedIn company page URL") },
                 { "Social.Instagram", ("", "Instagram profile URL") },
                 { "Social.YouTube", ("", "YouTube channel URL") },
+                { "Social.WhatsApp", ("", "Direct WhatsApp link (e.g. https://wa.me/201xxxxxxxxx)") },
+                { "WhatsApp.Enabled", ("false", "Show floating WhatsApp button on website (true/false)") },
                 { "Concurrency_tts", ("10", "TTS concurrent processing limit") },
                 { "Concurrency_vtt", ("10", "STT concurrent processing limit") },
                 { "Concurrency_avatar2video", ("10", "Avatar image-to-video concurrent processing limit") },

@@ -40,7 +40,7 @@ export default function HeroSection() {
   ];
 
   return (
-    <section className="relative min-h-[100dvh] md:min-h-screen w-full flex flex-col items-center justify-start md:justify-center bg-[#0a0015] pt-28 md:pt-20 pb-12 overflow-hidden">
+    <section className="relative min-h-[100dvh] md:min-h-screen w-full flex flex-col items-center justify-start md:justify-center bg-[#0a0015] pt-36 sm:pt-40 md:pt-44 pb-14 overflow-hidden">
       {/* Dynamic Background Elements */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-72 md:w-96 h-72 md:h-96 bg-violet-600/20 rounded-full blur-[100px] md:blur-[120px] mix-blend-screen animate-pulse" />
@@ -49,7 +49,7 @@ export default function HeroSection() {
         <div className="absolute inset-0 bg-[radial-gradient(#ffffff0a_1px,transparent_1px)] [background-size:16px_16px] opacity-40"></div>
       </div>
 
-      <div className="relative z-10 w-full max-w-5xl mx-auto px-4 text-center flex flex-col justify-center flex-grow">
+      <div className="relative z-10 w-full max-w-5xl mx-auto px-4 text-center flex flex-col justify-center flex-grow pt-4 sm:pt-6">
         
 
 

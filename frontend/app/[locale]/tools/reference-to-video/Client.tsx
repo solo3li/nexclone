@@ -1000,7 +1000,7 @@ export default function ReferenceToVideoPage() {
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 rows={4}
-                maxLength={2000}
+                maxLength={5000}
                 placeholder={
                   isRtl 
                     ? "صف قصة التحول بين الصور... (مثال: تحول سينمائي سلس من الإطار الأول إلى الأخير مع حركة كاميرا بطيئة وثبات للشخصية)" 
@@ -1009,7 +1009,7 @@ export default function ReferenceToVideoPage() {
                 className="w-full bg-[#06010f] border border-white/10 rounded-xl p-4 text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500/40 resize-none text-sm md:text-base leading-relaxed transition-all shadow-inner font-sans"
               />
               <div className="absolute bottom-3 end-3 text-[11px] text-white/40 font-mono bg-[#06010f]/90 px-2 py-0.5 rounded border border-white/5">
-                {prompt.length} / 2000
+                {prompt.length} / 5000
               </div>
             </div>
 

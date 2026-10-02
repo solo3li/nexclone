@@ -228,6 +228,23 @@ namespace NexClone.Backend.API.Controllers.Client
             return Ok(links);
         }
 
+        [HttpGet("public-settings")]
+        public async Task<IActionResult> GetPublicSettings()
+        {
+            var keys = new[] { "Social.WhatsApp", "WhatsApp.Enabled", "Company.Name", "Company.SupportEmail" };
+            var settings = await _context.AppSettings
+                .Where(s => keys.Contains(s.Key))
+                .ToDictionaryAsync(s => s.Key, s => s.Value);
+
+            return Ok(new
+            {
+                whatsAppLink = settings.TryGetValue("Social.WhatsApp", out var wa) ? wa : "",
+                whatsAppEnabled = settings.TryGetValue("WhatsApp.Enabled", out var we) && we?.ToLower() == "true",
+                companyName = settings.TryGetValue("Company.Name", out var cn) ? cn : "NexMedia AI",
+                supportEmail = settings.TryGetValue("Company.SupportEmail", out var se) ? se : "support@nexmediaai.com"
+            });
+        }
+
         [HttpGet("custom-pages")]
         public async Task<IActionResult> GetCustomPages()
         {

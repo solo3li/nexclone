@@ -19,6 +19,7 @@ const inter = Inter({
 });
 
 import { MaintenanceScreen } from "../../components/MaintenanceScreen";
+import FloatingWhatsApp from "../../src/components/FloatingWhatsApp";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -129,6 +130,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <NextIntlClientProvider messages={messages}>
           <AuthSessionProvider>
             <GTMRouteTracker />
+            <FloatingWhatsApp />
             <GoogleAuthProviderWrapper clientId={googleClientId}>
               {isMaintenanceMode ? (
                 <MaintenanceScreen endDate={maintenanceEndDate} />
