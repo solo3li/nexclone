@@ -17,18 +17,15 @@ import {
   Copy, 
   CheckCheck, 
   Trash2, 
-  Flame,
   CheckCircle2,
   AlertCircle,
   EyeOff,
-  Palette,
   Download,
   Maximize2,
   X,
-  RefreshCw,
   Loader2,
-  Share2,
-  Clock
+  Clock,
+  Upload
 } from "lucide-react";
 import api from "../../../../src/utils/api";
 import { useAppStore } from "../../../../src/store/useAppStore";
@@ -68,11 +65,11 @@ const MODELS: ModelOption[] = [
 ];
 
 const ASPECT_RATIOS = [
-  { id: "1:1", label: "1:1", desc: "Instagram & Square", descAr: "مربع (انستغرام وبوستات)", icon: Square },
-  { id: "16:9", label: "16:9", desc: "Landscape & Desktop", descAr: "عرضي (يوتيوب وكمبيوتر)", icon: Monitor },
-  { id: "9:16", label: "9:16", desc: "Reels & TikTok", descAr: "طولي (تيك توك وريلز)", icon: Smartphone },
-  { id: "4:3", label: "4:3", desc: "Classic Landscape", descAr: "كلاسيكي أفقي", icon: Monitor },
-  { id: "3:4", label: "3:4", desc: "Portrait Photo", descAr: "بورتريه عمودي", icon: Smartphone }
+  { id: "1:1", label: "1:1", desc: "Square (1:1)", descAr: "مربع (انستغرام وبوستات)", icon: Square },
+  { id: "16:9", label: "16:9", desc: "Landscape (16:9)", descAr: "عرضي (يوتيوب وكمبيوتر)", icon: Monitor },
+  { id: "9:16", label: "9:16", desc: "Portrait (9:16)", descAr: "طولي (تيك توك وستوري)", icon: Smartphone },
+  { id: "2:3", label: "2:3", desc: "Classic Portrait (2:3)", descAr: "بورتريه كلاسيكي (2:3)", icon: Smartphone },
+  { id: "3:2", label: "3:2", desc: "Classic Landscape (3:2)", descAr: "فوتوغرافي أفقي (3:2)", icon: Monitor }
 ];
 
 const STYLE_PRESETS = [
@@ -107,10 +104,15 @@ export default function TextToImagePage() {
   // Selected Options
   const [selectedModelId, setSelectedModelId] = useState<string>("grok");
   const [aspectRatio, setAspectRatio] = useState<string>("1:1");
+  const [mode, setMode] = useState<"standard" | "quality">("standard");
   const [prompt, setPrompt] = useState<string>("");
   const [negativePrompt, setNegativePrompt] = useState<string>("");
   const [showNegativePrompt, setShowNegativePrompt] = useState<boolean>(false);
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
+
+  // Reference images (Optional Grok i2i: up to 5 images)
+  const [referenceImages, setReferenceImages] = useState<{ file: File; preview: string }[]>([]);
+  const refImageInputRef = useRef<HTMLInputElement>(null);
 
   // Dropdowns UI Open States
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
@@ -336,6 +338,24 @@ export default function TextToImagePage() {
     }
   };
 
+  const handleRefImagesAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      const remaining = 5 - referenceImages.length;
+      const newItems = files.slice(0, remaining).map(file => ({
+        file,
+        preview: URL.createObjectURL(file)
+      }));
+      setReferenceImages(prev => [...prev, ...newItems]);
+      setError(null);
+    }
+    if (refImageInputRef.current) refImageInputRef.current.value = '';
+  };
+
+  const removeRefImage = (index: number) => {
+    setReferenceImages(prev => prev.filter((_, i) => i !== index));
+  };
+
   // Submission handler
   const handleGenerate = async () => {
     if (!prompt.trim()) {
@@ -357,6 +377,12 @@ export default function TextToImagePage() {
       formData.append("prompt", fullPrompt);
       formData.append("model", currentModel.id);
       formData.append("aspectRatio", aspectRatio);
+      formData.append("mode", mode);
+
+      referenceImages.forEach(img => {
+        formData.append("images", img.file);
+        formData.append("image", img.file);
+      });
 
       const res = await api.post("/api/image/start-tool/text-to-image", formData, {
         headers: { "Content-Type": "multipart/form-data" }
@@ -449,6 +475,32 @@ export default function TextToImagePage() {
             </div>
 
 
+            {/* Artistic Style Chips */}
+            <div className="space-y-1.5 pt-1">
+              <span className="text-[11px] text-white/50 block font-medium">
+                {isRtl ? "أنماط فنية سريعة (Style Presets):" : "Artistic Style Presets:"}
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {STYLE_PRESETS.map((st) => {
+                  const isSelected = selectedStyle === st.id;
+                  return (
+                    <button
+                      key={st.id}
+                      type="button"
+                      onClick={() => handleApplyStyle(st.id)}
+                      className={`text-xs px-2.5 py-1 rounded-lg font-medium transition-all ${
+                        isSelected
+                          ? "bg-orange-500/20 text-orange-300 border border-orange-500/50 shadow-sm"
+                          : "bg-white/5 hover:bg-white/10 text-white/60 hover:text-white border border-white/5"
+                      }`}
+                    >
+                      {isRtl ? st.labelAr : st.labelEn}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Negative Prompt Accordion (Optional) */}
             <div className="pt-2 border-t border-white/5">
               <button
@@ -476,6 +528,80 @@ export default function TextToImagePage() {
 
           </div>
 
+          {/* Optional Reference Images Dropzone (Grok Image-to-Image / Style Guide) */}
+          <div className="bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 shadow-xl space-y-3 backdrop-blur-md">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
+                  <ImageIcon className="w-3.5 h-3.5 text-orange-400" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm font-bold text-white">
+                      {isRtl ? "صور مرجعية لتوجيه الرسم (اختياري)" : "Reference Images (Optional)"}
+                    </label>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30">
+                      {referenceImages.length}/5
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-white/40">
+                    {isRtl ? "ارفع من 1 إلى 5 صور لتوجيه المشهد أو الشخصية بالذكاء الاصطناعي (i2i)" : "Upload 1-5 images to guide style or character identity (i2i)"}
+                  </span>
+                </div>
+              </div>
+              {referenceImages.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setReferenceImages([])}
+                  className="text-xs text-red-400 hover:text-red-300 transition-colors flex items-center gap-1"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>{isRtl ? "حذف الكل" : "Clear All"}</span>
+                </button>
+              )}
+            </div>
+
+            <input
+              ref={refImageInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleRefImagesAdd}
+              className="hidden"
+            />
+
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+              {referenceImages.map((img, idx) => (
+                <div key={idx} className="relative group rounded-xl overflow-hidden border border-orange-500/30 bg-black aspect-square">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={img.preview} alt={`Ref ${idx + 1}`} className="w-full h-full object-cover" />
+                  <div className="absolute top-1 start-1 bg-orange-600/90 text-white font-mono text-[9px] font-bold px-1.5 py-0.5 rounded backdrop-blur-sm">
+                    #{idx + 1}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeRefImage(idx)}
+                    className="absolute top-1 end-1 p-1 rounded-md bg-black/60 hover:bg-red-600 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                    title={isRtl ? "حذف" : "Remove"}
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+
+              {referenceImages.length < 5 && (
+                <button
+                  type="button"
+                  onClick={() => refImageInputRef.current?.click()}
+                  className="border-2 border-dashed border-orange-500/30 hover:border-orange-500/70 bg-[#06010f]/80 hover:bg-orange-500/5 rounded-xl aspect-square flex flex-col items-center justify-center gap-1.5 transition-all text-white/50 hover:text-orange-400"
+                >
+                  <Upload className="w-5 h-5" />
+                  <span className="text-[10px] font-bold">{isRtl ? "+ صورة مرجعية" : "+ Add Reference"}</span>
+                </button>
+              )}
+            </div>
+          </div>
+
           {/* Notifications: Error / Success */}
           {error && (
             <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm flex items-start gap-3 backdrop-blur-md">
@@ -483,6 +609,15 @@ export default function TextToImagePage() {
               <div className="space-y-0.5">
                 <p className="font-bold">{isRtl ? "خطأ في التوليد" : "Generation Error"}</p>
                 <p className="text-xs text-red-300/80">{error}</p>
+              </div>
+            </div>
+          )}
+          {successMessage && (
+            <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-sm flex items-start gap-3 backdrop-blur-md">
+              <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5 text-emerald-400" />
+              <div className="space-y-0.5">
+                <p className="font-bold">{isRtl ? "نجاح" : "Success"}</p>
+                <p className="text-xs text-emerald-300/80">{successMessage}</p>
               </div>
             </div>
           )}
@@ -832,7 +967,33 @@ export default function TextToImagePage() {
                 </div>
               )}
             </div>
-            {/* Live Summary & Wallet Widget removed */}
+
+            {/* 3. Rendering Quality Mode */}
+            <div className="space-y-1.5 pt-2 border-t border-white/5">
+              <label className="text-xs font-bold text-white/80 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-orange-400" />
+                <span>{isRtl ? "نمط وجودة التوليد" : "Rendering Quality"}</span>
+              </label>
+              <div className="grid grid-cols-2 gap-1.5">
+                {[
+                  { id: "standard", labelAr: "قياسي (أسرع)", labelEn: "Standard" },
+                  { id: "quality", labelAr: "فائق الجودة", labelEn: "Quality" }
+                ].map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => setMode(m.id as "standard" | "quality")}
+                    className={`py-2 px-2.5 rounded-xl text-xs font-bold transition-all ${
+                      mode === m.id
+                        ? "bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-md shadow-orange-950/40"
+                        : "bg-white/5 hover:bg-white/10 text-white/60 hover:text-white"
+                    }`}
+                  >
+                    {isRtl ? m.labelAr : m.labelEn}
+                  </button>
+                ))}
+              </div>
+            </div>
 
           </div>
         </div>

@@ -22,15 +22,18 @@ namespace NexClone.Backend.API.Controllers.AI
     {
         private readonly ApplicationDbContext _dbContext;
         private readonly UsagePolicyService _usagePolicy;
+        private readonly IMediaService _mediaService;
         private readonly IBackgroundJobClient _backgroundJobClient;
 
         public ImageController(
             ApplicationDbContext dbContext,
             UsagePolicyService usagePolicy,
+            IMediaService mediaService,
             IBackgroundJobClient backgroundJobClient)
         {
             _dbContext = dbContext;
             _usagePolicy = usagePolicy;
+            _mediaService = mediaService;
             _backgroundJobClient = backgroundJobClient;
         }
 
@@ -69,9 +72,11 @@ namespace NexClone.Backend.API.Controllers.AI
         [HttpPost("start-tool/{toolType}")]
         public async Task<IActionResult> StartImageTool(
             string toolType,
+            [FromForm] System.Collections.Generic.List<IFormFile>? images = null,
             [FromForm] string prompt = "",
             [FromForm] string model = "grok",
             [FromForm] string aspectRatio = "16:9",
+            [FromForm] string mode = "standard",
             [FromForm] int? subscriptionId = null)
         {
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -85,10 +90,22 @@ namespace NexClone.Backend.API.Controllers.AI
                 if (Request.Form.TryGetValue("prompt", out var formPrompt)) prompt = formPrompt.ToString();
                 if (Request.Form.TryGetValue("model", out var formModel)) model = formModel.ToString();
                 if (Request.Form.TryGetValue("aspectRatio", out var formAspect)) aspectRatio = formAspect.ToString();
+                if (Request.Form.TryGetValue("mode", out var formMode)) mode = formMode.ToString();
             }
 
             if (string.IsNullOrWhiteSpace(prompt))
                 return BadRequest(new { error = "يرجى كتابة وصف الصورة (Prompt) أولاً." });
+
+            var imageFiles = new System.Collections.Generic.List<IFormFile>();
+            if (images != null) imageFiles.AddRange(images.Where(f => f != null && f.Length > 0));
+            if (Request.HasFormContentType && Request.Form.Files.Count > 0)
+            {
+                foreach (var file in Request.Form.Files)
+                {
+                    if (file != null && file.Length > 0 && !imageFiles.Contains(file))
+                        imageFiles.Add(file);
+                }
+            }
 
             string qualityFormat = $"{model}|{aspectRatio}";
             decimal usageUnits = 1;
@@ -119,8 +136,20 @@ namespace NexClone.Backend.API.Controllers.AI
                     UserId = userId,
                     Prompt = prompt,
                     Model = model,
-                    AspectRatio = aspectRatio
+                    AspectRatio = aspectRatio,
+                    Mode = string.IsNullOrWhiteSpace(mode) ? "standard" : mode
                 };
+
+                // Upload any reference images to MinIO (enables grok-imagine/i2i up to 5 images)
+                foreach (var img in imageFiles.Take(5))
+                {
+                    using var stream = img.OpenReadStream();
+                    string ext = System.IO.Path.GetExtension(img.FileName);
+                    if (string.IsNullOrEmpty(ext)) ext = ".jpg";
+                    string key = await _mediaService.UploadFileAsync(stream, $"ai/images/{Guid.NewGuid()}{ext}", img.ContentType ?? "image/jpeg");
+                    string url = await _mediaService.GetFileUrlAsync(key);
+                    message.ImageUrls.Add(url);
+                }
 
                 _backgroundJobClient.Enqueue<NexClone.Backend.Infrastructure.Consumers.ImageToolConsumer>(
                     c => c.Consume(message)

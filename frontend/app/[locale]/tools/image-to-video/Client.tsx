@@ -12,14 +12,12 @@ import {
   Monitor, 
   Smartphone, 
   Square, 
-  Coins, 
   Clock, 
   Check, 
   Layers, 
   Copy, 
   CheckCheck, 
   Trash2, 
-  Flame,
   CheckCircle2,
   AlertCircle,
   Upload,
@@ -126,26 +124,15 @@ const RESOLUTIONS = [
   { id: "4k", label: "4K (UHD)", desc: "Ultra High Definition", descAr: "دقة سينمائية فائقة 4K" }
 ];
 
-const ASPECT_RATIOS = [
+const ALL_ASPECT_RATIOS = [
   { id: "16:9", label: "16:9", desc: "YouTube / Desktop", descAr: "عرضي (يوتيوب وكمبيوتر)", icon: Monitor },
   { id: "9:16", label: "9:16", desc: "TikTok / Reels / Shorts", descAr: "طولي (تيك توك وريلز)", icon: Smartphone },
-  { id: "1:1", label: "1:1", desc: "Instagram / Square", descAr: "مربع (انستغرام وبوستات)", icon: Square }
+  { id: "1:1", label: "1:1", desc: "Instagram / Square", descAr: "مربع (انستغرام وبوستات)", icon: Square },
+  { id: "2:3", label: "2:3", desc: "Vertical Portrait", descAr: "عمودي 2:3", icon: Smartphone },
+  { id: "3:2", label: "3:2", desc: "Landscape Photo", descAr: "أفقي 3:2", icon: Monitor }
 ];
 
-const SAMPLE_ANIMATION_PROMPTS = {
-  ar: [
-    { title: "حركة كاميرا زوم سينمائية", text: "حركة كاميرا سلسة تقترب ببطء نحو الشخصية مع هبوب نسيم خفيف يحرك الشعر والملابس وإضاءة سينمائية دافئة." },
-    { title: "تحريك الطبيعة والأمطار", text: "تحريك أمواج البحر والمياه بانسيابية واقعية، مع تمايل أوراق الشجر وانعكاسات ضوئية متحركة بدقة 4K." },
-    { title: "التفاف كاميرا مداري 360", text: "دوران كاميرا سلس وبطيء بزاوية سينمائية حول العنصر الرئيسي في الصورة مع الحفاظ على كل التفاصيل الأصلية." },
-    { title: "حركة إضاءة نيون ديناميكية", text: "توهج وتغير أضواء النيون مع تصاعد دخان ناعم في الخلفية وحركة كاميرا بطيئة تبرز أبعاد المشهد." }
-  ],
-  en: [
-    { title: "Cinematic Slow Zoom", text: "Smooth slow push-in camera movement towards the subject, gentle wind blowing hair and clothes, cinematic warm rim lighting." },
-    { title: "Flowing Water & Nature", text: "Realistic fluid motion of ocean waves and ripples, palms swaying gently in the breeze, vibrant reflective lighting in 4k." },
-    { title: "Orbital Camera Pan", text: "Smooth orbital 360 degree pan around the main subject with rich depth of field and consistent subject fidelity." },
-    { title: "Dynamic Neon Lighting", text: "Pulsating neon light reflections with rising volumetric smoke and atmospheric cinematic slow motion." }
-  ]
-};
+const ASPECT_RATIOS = ALL_ASPECT_RATIOS;
 
 export default function ImageToVideoPage() {
   const locale = useLocale();
@@ -156,15 +143,28 @@ export default function ImageToVideoPage() {
   const [selectedModelId, setSelectedModelId] = useState<string>("veo-3.1-fast");
   const [resolution, setResolution] = useState<string>("1080p");
   const [aspectRatio, setAspectRatio] = useState<string>("16:9");
-  const [duration, setDuration] = useState<number>(6); // For Grok (1-30s)
+  const [duration, setDuration] = useState<number>(6); // For Grok/Seedance
   const [mode, setMode] = useState<string>("normal"); // For Grok (normal, fun, spicy)
   const [prompt, setPrompt] = useState<string>("");
   const [isDragging, setIsDragging] = useState(false);
 
-  // Single Image State
+  // Single / Start Frame State (Veo & Seedance)
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Optional End Frame State (Veo & Seedance)
+  const [endFrameFile, setEndFrameFile] = useState<File | null>(null);
+  const [endFramePreview, setEndFramePreview] = useState<string | null>(null);
+  const endFrameInputRef = useRef<HTMLInputElement>(null);
+
+  // Multi-Image State for xAI Grok Imagine (up to 7 images)
+  const [grokFiles, setGrokFiles] = useState<File[]>([]);
+  const [grokPreviews, setGrokPreviews] = useState<string[]>([]);
+  const grokInputRef = useRef<HTMLInputElement>(null);
+
+  // Synchronized Audio Toggle (Seedance)
+  const [audioEnabled, setAudioEnabled] = useState<boolean>(true);
 
   // Dropdown UI Open States
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
@@ -377,6 +377,35 @@ export default function ImageToVideoPage() {
   const totalUserCredits = (user?.standardCredits || 0) + (user?.premiumCredits || 0);
   const hasSufficientCredits = estimatedCost === null || totalUserCredits >= estimatedCost;
 
+  // Dynamic Aspect Ratios per Model
+  const availableAspectRatios = useMemo(() => {
+    if (selectedModelId.startsWith("veo")) {
+      return ALL_ASPECT_RATIOS.filter(a => a.id === "16:9" || a.id === "9:16");
+    }
+    if (selectedModelId.includes("grok")) {
+      return ALL_ASPECT_RATIOS;
+    }
+    return ALL_ASPECT_RATIOS.filter(a => a.id === "16:9" || a.id === "9:16" || a.id === "1:1");
+  }, [selectedModelId]);
+
+  useEffect(() => {
+    if (selectedModelId.startsWith("veo") && aspectRatio === "1:1") {
+      setAspectRatio("16:9");
+    }
+  }, [selectedModelId, aspectRatio]);
+
+  // Adjust duration defaults
+  useEffect(() => {
+    if (selectedModelId.includes("seedance")) {
+      if (duration < 4 || duration > 15) setDuration(5);
+    } else if (selectedModelId.includes("grok")) {
+      if (duration < 6 || duration > 30) setDuration(6);
+    } else {
+      setDuration(8);
+    }
+  }, [selectedModelId]);
+
+  // Start Frame Handlers
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -393,6 +422,41 @@ export default function ImageToVideoPage() {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
+  // End Frame Handlers
+  const handleEndFrameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setEndFrameFile(file);
+      setEndFramePreview(URL.createObjectURL(file));
+      setError(null);
+    }
+  };
+
+  const removeEndFrame = () => {
+    setEndFrameFile(null);
+    setEndFramePreview(null);
+    if (endFrameInputRef.current) endFrameInputRef.current.value = '';
+  };
+
+  // Grok Multi-Image Handlers (up to 7 images)
+  const handleGrokImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      const remainingSlots = 7 - grokFiles.length;
+      const newFiles = files.slice(0, remainingSlots);
+      setGrokFiles(prev => [...prev, ...newFiles]);
+      const newPreviews = newFiles.map(f => URL.createObjectURL(f));
+      setGrokPreviews(prev => [...prev, ...newPreviews]);
+      setError(null);
+    }
+    if (grokInputRef.current) grokInputRef.current.value = '';
+  };
+
+  const removeGrokImage = (index: number) => {
+    setGrokFiles(prev => prev.filter((_, i) => i !== index));
+    setGrokPreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);
@@ -407,10 +471,13 @@ export default function ImageToVideoPage() {
     e.preventDefault();
     setIsDragging(false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleImageChange({ target: { files: e.dataTransfer.files } } as any);
+      if (currentModel.family === "grok") {
+        handleGrokImagesChange({ target: { files: e.dataTransfer.files } } as any);
+      } else {
+        handleImageChange({ target: { files: e.dataTransfer.files } } as any);
+      }
     }
   };
-
 
   const handleCopyPrompt = () => {
     if (prompt.trim()) {
@@ -442,11 +509,20 @@ export default function ImageToVideoPage() {
     }
   };
 
+  const isUploadValid = currentModel.family === "grok" ? grokFiles.length > 0 : !!imageFile;
+
   // Submission handler
   const handleGenerate = async () => {
-    if (!imageFile) {
-      setError(isRtl ? "يرجى رفع الصورة المراد تحريكها أولاً" : "Please upload an image to animate first");
-      return;
+    if (currentModel.family === "grok") {
+      if (grokFiles.length === 0) {
+        setError(isRtl ? "يرجى رفع صورة واحدة على الأقل لتحريكها" : "Please upload at least one image to animate");
+        return;
+      }
+    } else {
+      if (!imageFile) {
+        setError(isRtl ? "يرجى رفع إطار البداية (Start Frame) أولاً" : "Please upload a start frame image first");
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -455,20 +531,30 @@ export default function ImageToVideoPage() {
 
     try {
       const formData = new FormData();
-      // Append under multiple standard keys to guarantee binding
-      formData.append("images", imageFile);
-      formData.append("image", imageFile);
+      if (currentModel.family === "grok") {
+        grokFiles.forEach(f => formData.append("images", f));
+        formData.append("duration", duration.toString());
+        formData.append("mode", mode);
+      } else {
+        if (imageFile) {
+          formData.append("images", imageFile);
+          formData.append("image", imageFile);
+        }
+        if (endFrameFile) {
+          formData.append("images", endFrameFile);
+        }
+        if (currentModel.family === "seedance") {
+          formData.append("duration", duration.toString());
+          formData.append("audio", audioEnabled ? "true" : "false");
+        } else {
+          formData.append("duration", "8"); // Veo 8s standard
+        }
+      }
+
       if (prompt.trim()) formData.append("prompt", prompt.trim());
       formData.append("model", currentModel.id);
       formData.append("resolution", resolution);
       formData.append("aspectRatio", aspectRatio);
-
-      if (currentModel.family === "grok" || currentModel.family === "seedance") {
-        formData.append("duration", duration.toString());
-        formData.append("mode", mode);
-      } else {
-        formData.append("duration", "8"); // Veo 8s standard
-      }
 
       const res = await api.post("/api/video/start-tool/image-to-video", formData, {
         headers: { "Content-Type": "multipart/form-data" }
@@ -498,83 +584,210 @@ export default function ImageToVideoPage() {
         {/* ========================================================================= */}
         <div className="order-2 lg:order-1 lg:col-span-8 space-y-5">
           
-          {/* Image Upload Zone */}
-          <div className="bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 md:p-6 shadow-xl space-y-4 backdrop-blur-md">
-            <div className="flex items-center justify-between">
+          {/* Adaptive Image Upload Zone */}
+          {currentModel.family === 'grok' ? (
+            <div className="bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 md:p-6 shadow-xl space-y-4 backdrop-blur-md">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-pink-500/10 border border-pink-500/20 flex items-center justify-center">
+                    <Layers className="w-3.5 h-3.5 text-pink-400" />
+                  </div>
+                  <div>
+                    <label className="text-sm font-bold text-white block">
+                      {isRtl ? "صور القصة / المشهد (Story Frames - حتى 7 صور)" : "Scene Story Frames (Up to 7 Images)"}
+                    </label>
+                    <span className="text-[11px] text-white/40 block">
+                      {isRtl ? "ارفع من 1 إلى 7 صور متتابعة ليقوم Grok بربطها وتحريكها كفيديو متسلسل" : "Upload 1 to 7 sequential frames to weave into a continuous animated video"}
+                    </span>
+                  </div>
+                </div>
+                <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-violet-300">
+                  {grokFiles.length} / 7
+                </span>
+              </div>
+
+              <input
+                ref={grokInputRef}
+                type="file"
+                multiple
+                accept="image/png, image/jpeg, image/webp"
+                onChange={handleGrokImagesChange}
+                className="hidden"
+              />
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {grokPreviews.map((preview, idx) => (
+                  <div key={idx} className="relative aspect-video rounded-xl overflow-hidden border border-white/10 bg-black/60 group">
+                    <img src={preview} alt={`Frame ${idx + 1}`} className="w-full h-full object-cover" />
+                    <div className="absolute top-1.5 start-1.5 px-1.5 py-0.5 rounded bg-black/70 text-[10px] font-mono text-white/80 border border-white/10">
+                      #{idx + 1}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeGrokImage(idx)}
+                      className="absolute top-1.5 end-1.5 p-1 rounded-lg bg-red-500/80 hover:bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+
+                {grokFiles.length < 7 && (
+                  <div
+                    onClick={() => grokInputRef.current?.click()}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    className={`aspect-video rounded-xl border-2 border-dashed ${isDragging ? 'border-pink-400 bg-pink-500/10' : 'border-white/15 bg-white/[0.02] hover:border-pink-500/50 hover:bg-white/[0.04]'} flex flex-col items-center justify-center gap-1.5 cursor-pointer transition-all p-3 text-center`}
+                  >
+                    <Upload className="w-5 h-5 text-pink-400" />
+                    <span className="text-xs font-bold text-white/70">
+                      {isRtl ? "إضافة صور" : "Add Image"}
+                    </span>
+                    <span className="text-[10px] text-white/40">
+                      {isRtl ? `متبقي ${7 - grokFiles.length}` : `${7 - grokFiles.length} slots left`}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            /* Veo & Seedance: Start Frame & End Frame */
+            <div className="bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 md:p-6 shadow-xl space-y-5 backdrop-blur-md">
               <div className="flex items-center gap-2.5">
                 <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
                   <ImageIcon className="w-3.5 h-3.5 text-blue-400" />
                 </div>
                 <div>
                   <label className="text-sm font-bold text-white block">
-                    {isRtl ? "الصورة الأصلية (Source Image)" : "Source Image"}
+                    {isRtl ? "إطارات المشهد (Start & End Frames)" : "Animation Keyframes"}
                   </label>
                   <span className="text-[11px] text-white/40 block">
-                    {isRtl ? "ارفع صورة واضحة لتحويلها إلى فيديو متحرك" : "Upload an image to bring into life with cinematic motion"}
+                    {isRtl ? "إطار البداية إلزامي، ويمكنك تحديد إطار نهاية اختياري لضبط مسار التحريك" : "Start frame is required. End frame is optional to guide cinematic camera transition"}
                   </span>
                 </div>
               </div>
 
-              {imagePreview && (
-                <button
-                  type="button"
-                  onClick={removeImage}
-                  className="text-xs px-2.5 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 flex items-center gap-1 transition-all"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>{isRtl ? "حذف الصورة" : "Remove"}</span>
-                </button>
-              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* 1. Start Frame (Required) */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-violet-300 flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-violet-400 animate-pulse" />
+                      {isRtl ? "إطار البداية (إلزامي)" : "Start Frame (Required)"}
+                    </span>
+                    {imagePreview && (
+                      <button
+                        type="button"
+                        onClick={removeImage}
+                        className="text-red-400 hover:text-red-300 text-[11px] flex items-center gap-1"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        <span>{isRtl ? "حذف" : "Remove"}</span>
+                      </button>
+                    )}
+                  </div>
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/png, image/jpeg, image/webp"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+
+                  {!imagePreview ? (
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      className={`border-2 border-dashed ${isDragging ? 'border-violet-400 bg-violet-500/10' : 'border-white/15 bg-[#06010f]/80 hover:border-violet-500/50 hover:bg-[#06010f]'} rounded-xl p-6 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 group min-h-[170px]`}
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-violet-500/10 group-hover:scale-110 border border-violet-500/20 flex items-center justify-center transition-transform">
+                        <Upload className="w-5 h-5 text-violet-400" />
+                      </div>
+                      <p className="text-xs font-bold text-white group-hover:text-violet-300">
+                        {isRtl ? "رفع إطار البداية" : "Upload Start Frame"}
+                      </p>
+                      <p className="text-[10px] text-white/40">PNG, JPG, WEBP</p>
+                    </div>
+                  ) : (
+                    <div className="relative rounded-xl overflow-hidden border border-white/10 bg-black flex items-center justify-center h-[170px] group">
+                      <img src={imagePreview} alt="Start Frame" className="h-full w-full object-cover" />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="px-3 py-1.5 rounded-lg bg-white/20 text-white text-xs font-bold"
+                        >
+                          {isRtl ? "تغيير" : "Change"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 2. End Frame (Optional) */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-white/70 flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-white/30" />
+                      {isRtl ? "إطار النهاية (اختياري)" : "End Frame (Optional)"}
+                    </span>
+                    {endFramePreview && (
+                      <button
+                        type="button"
+                        onClick={removeEndFrame}
+                        className="text-red-400 hover:text-red-300 text-[11px] flex items-center gap-1"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        <span>{isRtl ? "حذف" : "Remove"}</span>
+                      </button>
+                    )}
+                  </div>
+
+                  <input
+                    ref={endFrameInputRef}
+                    type="file"
+                    accept="image/png, image/jpeg, image/webp"
+                    onChange={handleEndFrameChange}
+                    className="hidden"
+                  />
+
+                  {!endFramePreview ? (
+                    <div
+                      onClick={() => endFrameInputRef.current?.click()}
+                      className="border-2 border-dashed border-white/10 bg-[#06010f]/40 hover:border-white/30 hover:bg-[#06010f] rounded-xl p-6 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 group min-h-[170px]"
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-white/5 group-hover:scale-110 border border-white/10 flex items-center justify-center transition-transform">
+                        <Sparkles className="w-5 h-5 text-white/40 group-hover:text-white" />
+                      </div>
+                      <p className="text-xs font-bold text-white/60 group-hover:text-white">
+                        {isRtl ? "رفع إطار النهاية (اختياري)" : "Upload End Frame (Optional)"}
+                      </p>
+                      <p className="text-[10px] text-white/30">
+                        {isRtl ? "لإنهاء الحركة عند هذه اللقطة" : "Smooth transition destination"}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="relative rounded-xl overflow-hidden border border-white/10 bg-black flex items-center justify-center h-[170px] group">
+                      <img src={endFramePreview} alt="End Frame" className="h-full w-full object-cover" />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button
+                          type="button"
+                          onClick={() => endFrameInputRef.current?.click()}
+                          className="px-3 py-1.5 rounded-lg bg-white/20 text-white text-xs font-bold"
+                        >
+                          {isRtl ? "تغيير" : "Change"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/png, image/jpeg, image/webp"
-              onChange={handleImageChange}
-              className="hidden"
-            />
-
-            {!imagePreview ? (
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                className={`border-2 border-dashed ${isDragging ? 'border-violet-400 bg-violet-500/10' : 'border-white/15 bg-[#06010f]/80 hover:border-violet-500/50 hover:bg-[#06010f]'} rounded-xl p-8 md:p-10 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-3 group`}
-              >
-                <div className={`w-14 h-14 rounded-2xl ${isDragging ? 'bg-violet-400/20 scale-110' : 'bg-violet-500/10 group-hover:scale-110'} border border-violet-500/20 flex items-center justify-center transition-transform`}>
-                  <Upload className="w-6 h-6 text-violet-400" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-bold text-white group-hover:text-violet-300 transition-colors">
-                    {isRtl ? "اضغط لرفع الصورة أو اسحبها إلى هنا" : "Click to upload or drag & drop"}
-                  </p>
-                  <p className="text-xs text-white/40 font-mono">
-                    PNG, JPG, WEBP • Max 25MB
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="relative rounded-xl overflow-hidden border border-white/10 bg-black flex items-center justify-center max-h-[360px] group">
-                <img
-                  src={imagePreview}
-                  alt="Source Preview"
-                  className="max-h-[360px] w-full object-contain"
-                />
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="px-4 py-2 rounded-xl bg-white/20 hover:bg-white/30 text-white text-xs font-bold backdrop-blur-md transition-all flex items-center gap-1.5"
-                  >
-                    <Upload className="w-3.5 h-3.5" />
-                    <span>{isRtl ? "تغيير الصورة" : "Change Image"}</span>
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+          )}
 
           {/* Optional Motion Prompt Box */}
           <div className="bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 md:p-6 shadow-xl space-y-4 backdrop-blur-md relative overflow-hidden group focus-within:border-violet-500/50 transition-all">
@@ -650,6 +863,15 @@ export default function ImageToVideoPage() {
               </div>
             </div>
           )}
+          {successMessage && (
+            <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-sm flex items-start gap-3 backdrop-blur-md">
+              <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5 text-emerald-400" />
+              <div className="space-y-0.5">
+                <p className="font-bold">{isRtl ? "نجاح" : "Success"}</p>
+                <p className="text-xs text-emerald-300/80">{successMessage}</p>
+              </div>
+            </div>
+          )}
 
           {/* Action Bar & Submit CTA */}
           <div className="bg-[#0b0416]/95 border border-white/10 rounded-2xl p-5 shadow-xl backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -674,9 +896,9 @@ export default function ImageToVideoPage() {
             <button
               type="button"
               onClick={handleGenerate}
-              disabled={isLoading || !imageFile || !hasSufficientCredits}
+              disabled={isLoading || !isUploadValid || !hasSufficientCredits}
               className={`w-full sm:w-auto px-7 py-3.5 rounded-xl font-extrabold text-sm md:text-base flex items-center justify-center gap-2.5 transition-all shadow-lg ${
-                isLoading || !imageFile || !hasSufficientCredits
+                isLoading || !isUploadValid || !hasSufficientCredits
                   ? "bg-white/10 text-white/40 cursor-not-allowed border border-white/5"
                   : "bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 bg-[length:200%_auto] hover:bg-[position:right_center] text-white shadow-violet-900/40 hover:shadow-violet-800/70 active:scale-[0.98]"
               }`}
@@ -1037,7 +1259,7 @@ export default function ImageToVideoPage() {
               {/* Aspect Ratio Dropdown Menu — Desktop only */}
               {isAspectDropdownOpen && (
                 <div className="hidden lg:block absolute z-30 top-full mt-1.5 w-full bg-[#0d041c] border border-amber-500/30 rounded-xl shadow-2xl overflow-hidden backdrop-blur-2xl p-1.5 space-y-1 animate-in fade-in slide-in-from-top-2 duration-150">
-                  {ASPECT_RATIOS.map((a) => {
+                  {availableAspectRatios.map((a) => {
                     const isSelected = aspectRatio === a.id;
                     const IconComp = a.icon;
                     return (
@@ -1061,7 +1283,7 @@ export default function ImageToVideoPage() {
 
               {/* Aspect Ratio — Mobile Bottom Sheet */}
               <BottomSheetSelect isOpen={isAspectDropdownOpen} onClose={() => setIsAspectDropdownOpen(false)} title={isRtl ? "أبعاد الفيديو" : "Aspect Ratio"}>
-                {ASPECT_RATIOS.map((a) => {
+                {availableAspectRatios.map((a) => {
                   const isSelected = aspectRatio === a.id;
                   const IconComp = a.icon;
                   return (
@@ -1083,35 +1305,56 @@ export default function ImageToVideoPage() {
               </BottomSheetSelect>
             </div>
 
-            {/* 4. Duration Slider for Grok only */}
+            {/* 4. Duration Slider for Grok & Seedance */}
             {currentModel.isPerSecond && (
               <div className="space-y-3 pt-2 border-t border-white/5">
-                <div className="space-y-1.5">
-                  <span className="font-bold text-white/80 text-xs flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                    <span>{isRtl ? "نمط الحركة (Motion Mode):" : "Creative Mode:"}</span>
-                  </span>
-                  <div className="grid grid-cols-3 gap-1.5">
-                    {[
-                      { id: "normal", labelAr: "واقعي", labelEn: "Normal" },
-                      { id: "fun", labelAr: "مرح", labelEn: "Fun" },
-                      { id: "spicy", labelAr: "سينمائي", labelEn: "Spicy" }
-                    ].map((m) => (
-                      <button
-                        key={m.id}
-                        type="button"
-                        onClick={() => setMode(m.id)}
-                        className={`py-1.5 px-2 rounded-lg text-xs font-bold transition-all ${
-                          mode === m.id
-                            ? "bg-violet-600 text-white shadow-md shadow-violet-900/40"
-                            : "bg-white/5 hover:bg-white/10 text-white/60 hover:text-white"
-                        }`}
-                      >
-                        {isRtl ? m.labelAr : m.labelEn}
-                      </button>
-                    ))}
+                {currentModel.family === "grok" && (
+                  <div className="space-y-1.5">
+                    <span className="font-bold text-white/80 text-xs flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                      <span>{isRtl ? "نمط الحركة (Motion Mode):" : "Creative Mode:"}</span>
+                    </span>
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {[
+                        { id: "normal", labelAr: "واقعي", labelEn: "Normal" },
+                        { id: "fun", labelAr: "مرح", labelEn: "Fun" },
+                        { id: "spicy", labelAr: "سينمائي", labelEn: "Spicy" }
+                      ].map((m) => (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => setMode(m.id)}
+                          className={`py-1.5 px-2 rounded-lg text-xs font-bold transition-all ${
+                            mode === m.id
+                              ? "bg-violet-600 text-white shadow-md shadow-violet-900/40"
+                              : "bg-white/5 hover:bg-white/10 text-white/60 hover:text-white"
+                          }`}
+                        >
+                          {isRtl ? m.labelAr : m.labelEn}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {/* Seedance Synchronized Audio Toggle */}
+                {currentModel.id === "seedance-2.0-mini" && (
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+                      <span className="text-xs font-bold text-white">{isRtl ? "توليد صوت متزامن:" : "Generate Audio:"}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setAudioEnabled(!audioEnabled)}
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                        audioEnabled ? "bg-violet-600 text-white shadow-md shadow-violet-900/40" : "bg-white/10 text-white/50"
+                      }`}
+                    >
+                      {audioEnabled ? (isRtl ? "مفعل" : "Enabled") : (isRtl ? "معطل" : "Disabled")}
+                    </button>
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <div className="flex justify-between items-center text-xs">
@@ -1123,14 +1366,14 @@ export default function ImageToVideoPage() {
                   </div>
                   <input
                     type="range"
-                    min="6"
+                    min={currentModel.id === "seedance-2.0-mini" ? "4" : "6"}
                     max={currentModel.id === "seedance-2.0-mini" ? "15" : "30"}
                     value={duration}
                     onChange={(e) => setDuration(parseInt(e.target.value))}
                     className="w-full accent-violet-500 cursor-pointer bg-white/10 rounded-lg h-2"
                   />
                   <div className="flex justify-between text-[10px] text-white/40 font-mono">
-                    <span>6s</span>
+                    <span>{currentModel.id === "seedance-2.0-mini" ? "4s" : "6s"}</span>
                     <span>15s</span>
                     {currentModel.id !== "seedance-2.0-mini" && <span>30s</span>}
                   </div>

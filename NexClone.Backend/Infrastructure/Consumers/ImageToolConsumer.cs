@@ -55,13 +55,44 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 if (string.IsNullOrWhiteSpace(promptText))
                     throw new Exception("Prompt cannot be empty.");
 
-                var payload = new {
-                    model = crunModel,
-                    input = new {
-                        prompt = promptText,
-                        aspect_ratio = !string.IsNullOrEmpty(message.AspectRatio) ? message.AspectRatio : "1:1"
-                    }
+                string grokAspect = message.AspectRatio switch {
+                    "1:1" => "1:1",
+                    "2:3" => "2:3",
+                    "3:2" => "3:2",
+                    "16:9" => "16:9",
+                    "9:16" => "9:16",
+                    _ => "1:1"
                 };
+
+                string mode = (message.Mode?.ToLowerInvariant() == "quality") ? "quality" : "standard";
+
+                object payload;
+                if (message.ImageUrls != null && message.ImageUrls.Count > 0)
+                {
+                    // Image to Image mode with reference images
+                    payload = new {
+                        model = "grok-imagine/i2i",
+                        input = new {
+                            img_urls = message.ImageUrls.Take(5).ToList(),
+                            image_urls = message.ImageUrls.Take(5).ToList(),
+                            prompt = promptText,
+                            aspect_ratio = grokAspect,
+                            mode = mode
+                        }
+                    };
+                }
+                else
+                {
+                    // Text to Image mode
+                    payload = new {
+                        model = "grok-imagine/t2i",
+                        input = new {
+                            prompt = promptText,
+                            aspect_ratio = grokAspect,
+                            mode = mode
+                        }
+                    };
+                }
 
                 var jsonContent = new StringContent(JsonSerializer.Serialize(payload, new JsonSerializerOptions { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull }), Encoding.UTF8, "application/json");
                 

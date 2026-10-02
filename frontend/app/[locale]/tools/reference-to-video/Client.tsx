@@ -124,21 +124,18 @@ export default function ReferenceToVideoPage() {
   const [selectedModelId, setSelectedModelId] = useState<string>("veo-3.1-fast");
   const [resolution, setResolution] = useState<string>("1080p");
   const [aspectRatio, setAspectRatio] = useState<string>("16:9");
-  const [duration, setDuration] = useState<number>(6); // For Seedance (6-15s)
-  const [mode, setMode] = useState<string>("normal"); // For Mode/Audio
+  const [duration, setDuration] = useState<number>(6); // For Seedance (4-15s)
   const [prompt, setPrompt] = useState<string>("");
 
   // Reference Images Slots (Up to 3 distinct frames) — Veo mode
   const [slotFiles, setSlotFiles] = useState<{ [key: number]: File | null }>({ 0: null, 1: null, 2: null });
   const [slotPreviews, setSlotPreviews] = useState<{ [key: number]: string | null }>({ 0: null, 1: null, 2: null });
-  const [dragActiveSlot, setDragActiveSlot] = useState<number | null>(null);
 
-  // Seedance-specific media slots (image / video / audio)
-  const [sdImageFile, setSdImageFile] = useState<File | null>(null);
-  const [sdImagePreview, setSdImagePreview] = useState<string | null>(null);
-  const [sdVideoFile, setSdVideoFile] = useState<File | null>(null);
-  const [sdVideoPreview, setSdVideoPreview] = useState<string | null>(null);
-  const [sdAudioFile, setSdAudioFile] = useState<File | null>(null);
+  // Seedance-specific multi-media capacity (up to 9 images, 3 videos, 3 audios)
+  const [sdImages, setSdImages] = useState<{ file: File; preview: string }[]>([]);
+  const [sdVideos, setSdVideos] = useState<{ file: File; url: string; name: string }[]>([]);
+  const [sdAudios, setSdAudios] = useState<{ file: File; name: string; size: string }[]>([]);
+  const [audioEnabled, setAudioEnabled] = useState<boolean>(true);
 
   // Dropdown UI Open States
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
@@ -380,34 +377,62 @@ export default function ReferenceToVideoPage() {
   const hasSufficientCredits = estimatedCost === null || totalUserCredits >= estimatedCost;
 
   const isSeedance = currentModel.id.includes("seedance");
-  const acceptedFileTypes = "image/*"; // Veo: images only
 
-  // Seedance file handlers
-  const handleSdImageChange = (file: File | null) => {
-    if (file && !file.type.startsWith("image/")) {
-      setError(isRtl ? "يرجى رفع صورة فقط في هذا الحقل" : "Please upload an image file here");
-      return;
+  // Seedance multi-media handlers
+  const handleSdImagesAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      const remaining = 9 - sdImages.length;
+      const newItems = files.slice(0, remaining).map(file => ({
+        file,
+        preview: URL.createObjectURL(file)
+      }));
+      setSdImages(prev => [...prev, ...newItems]);
+      setError(null);
     }
-    setSdImageFile(file);
-    setSdImagePreview(file ? URL.createObjectURL(file) : null);
-    setError(null);
+    if (sdImageInputRef.current) sdImageInputRef.current.value = '';
   };
-  const handleSdVideoChange = (file: File | null) => {
-    if (file && !file.type.startsWith("video/")) {
-      setError(isRtl ? "يرجى رفع ملف فيديو فقط في هذا الحقل" : "Please upload a video file here");
-      return;
-    }
-    setSdVideoFile(file);
-    setSdVideoPreview(file ? URL.createObjectURL(file) : null);
-    setError(null);
+
+  const removeSdImage = (index: number) => {
+    setSdImages(prev => prev.filter((_, i) => i !== index));
   };
-  const handleSdAudioChange = (file: File | null) => {
-    if (file && !file.type.startsWith("audio/")) {
-      setError(isRtl ? "يرجى رفع ملف صوتي فقط في هذا الحقل" : "Please upload an audio file here");
-      return;
+
+  const handleSdVideosAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      const remaining = 3 - sdVideos.length;
+      const newItems = files.slice(0, remaining).map(file => ({
+        file,
+        url: URL.createObjectURL(file),
+        name: file.name
+      }));
+      setSdVideos(prev => [...prev, ...newItems]);
+      setError(null);
     }
-    setSdAudioFile(file);
-    setError(null);
+    if (sdVideoInputRef.current) sdVideoInputRef.current.value = '';
+  };
+
+  const removeSdVideo = (index: number) => {
+    setSdVideos(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSdAudiosAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      const remaining = 3 - sdAudios.length;
+      const newItems = files.slice(0, remaining).map(file => ({
+        file,
+        name: file.name,
+        size: (file.size / (1024 * 1024)).toFixed(1)
+      }));
+      setSdAudios(prev => [...prev, ...newItems]);
+      setError(null);
+    }
+    if (sdAudioInputRef.current) sdAudioInputRef.current.value = '';
+  };
+
+  const removeSdAudio = (index: number) => {
+    setSdAudios(prev => prev.filter((_, i) => i !== index));
   };
 
   // When switching to Veo — clear Seedance slots
@@ -415,9 +440,9 @@ export default function ReferenceToVideoPage() {
     const wasSD = selectedModelId.includes("seedance");
     const willBeVeo = !modelId.includes("seedance");
     if (wasSD && willBeVeo) {
-      setSdImageFile(null); setSdImagePreview(null);
-      setSdVideoFile(null); setSdVideoPreview(null);
-      setSdAudioFile(null);
+      setSdImages([]);
+      setSdVideos([]);
+      setSdAudios([]);
     }
     if (!wasSD && modelId.includes("seedance")) {
       setSlotFiles({ 0: null, 1: null, 2: null });
@@ -428,8 +453,12 @@ export default function ReferenceToVideoPage() {
 
   // Effective upload count for form validation
   const totalUploadedImagesCount = isSeedance
-    ? (sdImageFile ? 1 : 0)
+    ? (sdImages.length + sdVideos.length + sdAudios.length)
     : Object.values(slotFiles).filter(Boolean).length;
+
+  const hasMedia = isSeedance
+    ? (sdImages.length > 0 || sdVideos.length > 0 || sdAudios.length > 0)
+    : Object.values(slotFiles).some(Boolean);
 
 
   const handleCopyPrompt = () => {
@@ -442,6 +471,10 @@ export default function ReferenceToVideoPage() {
 
   const handleClearPrompt = () => {
     setPrompt("");
+  };
+
+  const insertTag = (tag: string) => {
+    setPrompt(prev => prev ? `${prev} ${tag}` : tag);
   };
 
   // Safe Cross-Origin HD Download
@@ -464,10 +497,10 @@ export default function ReferenceToVideoPage() {
 
   // Submission handler
   const handleGenerate = async () => {
-    if (totalUploadedImagesCount === 0) {
+    if (!hasMedia) {
       setError(isRtl
-        ? (isSeedance ? "يرجى رفع صورة مرجعية للبدء" : "يرجى رفع صورة مرجعية واحدة على الأقل في الستوري بورد")
-        : (isSeedance ? "Please upload a reference image to start" : "Please upload at least one reference frame")
+        ? (isSeedance ? "يرجى رفع وسيط مرجعي واحد على الأقل (صورة أو فيديو أو صوت)" : "يرجى رفع صورة مرجعية واحدة على الأقل في الستوري بورد")
+        : (isSeedance ? "Please upload at least one reference media item (image, video, or audio)" : "Please upload at least one reference frame")
       );
       return;
     }
@@ -480,13 +513,11 @@ export default function ReferenceToVideoPage() {
       const formData = new FormData();
 
       if (isSeedance) {
-        // Seedance: image (required) + optional video + optional audio
-        if (sdImageFile) { formData.append("images", sdImageFile); formData.append("image", sdImageFile); }
-        if (sdVideoFile) { formData.append("images", sdVideoFile); }
-        if (sdAudioFile) { formData.append("images", sdAudioFile); }
+        sdImages.forEach(item => formData.append("images", item.file));
+        sdVideos.forEach(item => formData.append("videos", item.file));
+        sdAudios.forEach(item => formData.append("audios", item.file));
         formData.append("duration", duration.toString());
-        formData.append("audio", sdAudioFile ? "true" : "false");
-        formData.append("mode", sdAudioFile ? "audio_on" : "normal");
+        formData.append("audio", audioEnabled ? "true" : "false");
       } else {
         // Veo: up to 3 image frames
         [0, 1, 2].forEach(idx => {
@@ -600,135 +631,229 @@ export default function ReferenceToVideoPage() {
             </div>
           )}
 
-          {/* ═══ Seedance: 3 Dedicated Media Sections ═══ */}
+          {/* ═══ Seedance: Multi-Media Capacity (Images, Videos, Audios) ═══ */}
           {isSeedance && (
-            <div className="space-y-3">
-              {/* --- Section 1: Reference Image (Required) --- */}
+            <div className="space-y-4">
+              {/* --- Section 1: Reference Images (Up to 9) --- */}
               <div className="bg-[#0b0416]/95 border border-emerald-500/20 rounded-2xl p-5 shadow-xl backdrop-blur-md">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2.5">
                     <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
                       <Layers className="w-3.5 h-3.5 text-emerald-400" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <label className="text-sm font-bold text-white">{isRtl ? "الصورة المرجعية" : "Reference Image"}</label>
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">{isRtl ? "مطلوب" : "REQUIRED"}</span>
+                        <label className="text-sm font-bold text-white">{isRtl ? "الصور المرجعية" : "Reference Images"}</label>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                          {sdImages.length}/9
+                        </span>
                       </div>
-                      <span className="text-[11px] text-white/40">{isRtl ? "الصورة المرجعية التي ينطلق منها توليد الفيديو" : "The starting reference frame for video generation"}</span>
+                      <span className="text-[11px] text-white/40">
+                        {isRtl ? "ارفع حتى 9 صور مرجعية لتوجيه الشخصيات أو المشاهد، وأشر إليها في الوصف عبر [Image1]، [Image2]" : "Upload up to 9 reference images. Refer to them in prompt as [Image1], [Image2]"}
+                      </span>
                     </div>
                   </div>
-                  {sdImageFile && (
-                    <button type="button" onClick={() => { setSdImageFile(null); setSdImagePreview(null); if (sdImageInputRef.current) sdImageInputRef.current.value=''; }} className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
+                  {sdImages.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setSdImages([])}
+                      className="text-xs text-red-400 hover:text-red-300 transition-colors flex items-center gap-1"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>{isRtl ? "حذف الكل" : "Clear All"}</span>
+                    </button>
                   )}
                 </div>
-                <input ref={sdImageInputRef} type="file" accept="image/*" onChange={(e) => handleSdImageChange(e.target.files?.[0] || null)} className="hidden" />
-                {!sdImagePreview ? (
-                  <div onClick={() => sdImageInputRef.current?.click()}
-                    className="border-2 border-dashed border-emerald-500/25 bg-[#06010f]/80 hover:border-emerald-500/60 hover:bg-emerald-500/5 rounded-xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all group">
-                    <div className="w-12 h-12 rounded-xl bg-emerald-500/10 group-hover:scale-110 border border-emerald-500/20 flex items-center justify-center transition-transform">
-                      <Upload className="w-5 h-5 text-emerald-400" />
-                    </div>
-                    <div className="text-center">
-                      <p className="text-sm font-semibold text-white/70 group-hover:text-white transition-colors">{isRtl ? "اضغط لرفع الصورة" : "Click to upload image"}</p>
-                      <p className="text-[10px] text-white/30">PNG, JPG, WEBP</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="relative rounded-xl overflow-hidden border border-emerald-500/30 bg-black aspect-video group max-h-52">
-                    <img src={sdImagePreview} alt="Reference" className="w-full h-full object-cover" />
-                    <div className="absolute top-2 end-2"><span className="text-[9px] font-bold px-2 py-1 rounded bg-emerald-500/80 text-white">{isRtl ? "مرجعي" : "REF"}</span></div>
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <button type="button" onClick={() => sdImageInputRef.current?.click()} className="px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 text-white text-xs font-bold backdrop-blur-md transition-all flex items-center gap-1.5">
-                        <Upload className="w-3.5 h-3.5" /><span>{isRtl ? "تغيير" : "Change"}</span>
+
+                <input
+                  ref={sdImageInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleSdImagesAdd}
+                  className="hidden"
+                />
+
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                  {sdImages.map((img, idx) => (
+                    <div key={idx} className="relative group rounded-xl overflow-hidden border border-emerald-500/30 bg-black aspect-square">
+                      <img src={img.preview} alt={`Ref ${idx + 1}`} className="w-full h-full object-cover" />
+                      <div className="absolute top-1 start-1 bg-emerald-600/90 text-white font-mono text-[9px] font-bold px-1.5 py-0.5 rounded backdrop-blur-sm">
+                        [Image{idx + 1}]
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeSdImage(idx)}
+                        className="absolute top-1 end-1 p-1 rounded-md bg-black/60 hover:bg-red-600 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                        title={isRtl ? "حذف" : "Remove"}
+                      >
+                        <X className="w-3 h-3" />
                       </button>
                     </div>
-                  </div>
-                )}
+                  ))}
+
+                  {sdImages.length < 9 && (
+                    <button
+                      type="button"
+                      onClick={() => sdImageInputRef.current?.click()}
+                      className="border-2 border-dashed border-emerald-500/30 hover:border-emerald-500/70 bg-[#06010f]/80 hover:bg-emerald-500/5 rounded-xl aspect-square flex flex-col items-center justify-center gap-1.5 transition-all text-white/50 hover:text-emerald-400"
+                    >
+                      <Upload className="w-5 h-5" />
+                      <span className="text-[10px] font-bold">{isRtl ? "+ صورة" : "+ Add Image"}</span>
+                    </button>
+                  )}
+                </div>
               </div>
 
-              {/* --- Section 2: Motion Reference Video (Optional) --- */}
+              {/* --- Section 2: Motion Reference Videos (Up to 3, Optional) --- */}
               <div className="bg-[#0b0416]/95 border border-blue-500/20 rounded-2xl p-5 shadow-xl backdrop-blur-md">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2.5">
                     <div className="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
                       <Play className="w-3.5 h-3.5 text-blue-400" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <label className="text-sm font-bold text-white">{isRtl ? "فيديو الحركة المرجعي" : "Motion Reference Video"}</label>
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">{isRtl ? "اختياري" : "OPTIONAL"}</span>
+                        <label className="text-sm font-bold text-white">{isRtl ? "فيديوهات الحركة المرجعية" : "Motion Reference Videos"}</label>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                          {sdVideos.length}/3 {isRtl ? "(اختياري)" : "(Optional)"}
+                        </span>
                       </div>
-                      <span className="text-[11px] text-white/40">{isRtl ? "فيديو يوجّه أسلوب الحركة والديناميكية" : "Guides the motion style and dynamics of generated video"}</span>
+                      <span className="text-[11px] text-white/40">
+                        {isRtl ? "ارفع حتى 3 مقاطع فيديو لتوجيه الحركة والأسلوب، وأشر إليها في الوصف عبر [Video1]، [Video2]" : "Upload up to 3 videos guiding motion dynamics. Refer in prompt as [Video1], [Video2]"}
+                      </span>
                     </div>
                   </div>
-                  {sdVideoFile && (
-                    <button type="button" onClick={() => { setSdVideoFile(null); setSdVideoPreview(null); if (sdVideoInputRef.current) sdVideoInputRef.current.value=''; }} className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
+                  {sdVideos.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setSdVideos([])}
+                      className="text-xs text-red-400 hover:text-red-300 transition-colors flex items-center gap-1"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>{isRtl ? "حذف الكل" : "Clear All"}</span>
+                    </button>
                   )}
                 </div>
-                <input ref={sdVideoInputRef} type="file" accept="video/*" onChange={(e) => handleSdVideoChange(e.target.files?.[0] || null)} className="hidden" />
-                {!sdVideoPreview ? (
-                  <div onClick={() => sdVideoInputRef.current?.click()}
-                    className="border-2 border-dashed border-blue-500/25 bg-[#06010f]/80 hover:border-blue-500/60 hover:bg-blue-500/5 rounded-xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all group">
-                    <div className="w-12 h-12 rounded-xl bg-blue-500/10 group-hover:scale-110 border border-blue-500/20 flex items-center justify-center transition-transform">
-                      <Play className="w-5 h-5 text-blue-400" />
+
+                <input
+                  ref={sdVideoInputRef}
+                  type="file"
+                  accept="video/*"
+                  multiple
+                  onChange={handleSdVideosAdd}
+                  className="hidden"
+                />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                  {sdVideos.map((vid, idx) => (
+                    <div key={idx} className="relative group rounded-xl overflow-hidden border border-blue-500/30 bg-black aspect-video flex flex-col justify-between p-2">
+                      <video src={vid.url} className="absolute inset-0 w-full h-full object-cover" muted playsInline />
+                      <div className="relative z-10 flex items-center justify-between">
+                        <span className="bg-blue-600/90 text-white font-mono text-[9px] font-bold px-1.5 py-0.5 rounded backdrop-blur-sm">
+                          [Video{idx + 1}]
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeSdVideo(idx)}
+                          className="p-1 rounded-md bg-black/60 hover:bg-red-600 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                      <div className="relative z-10 bg-black/60 backdrop-blur-sm rounded px-1.5 py-0.5 text-[9px] text-white/70 truncate">
+                        {vid.name}
+                      </div>
                     </div>
-                    <div className="text-center">
-                      <p className="text-sm font-semibold text-white/70 group-hover:text-white transition-colors">{isRtl ? "اضغط لرفع فيديو مرجعي (اختياري)" : "Click to upload reference video (optional)"}</p>
-                      <p className="text-[10px] text-white/30">MP4, MOV, WEBM</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="relative rounded-xl overflow-hidden border border-blue-500/30 bg-black aspect-video group max-h-52">
-                    <video src={sdVideoPreview} className="w-full h-full object-cover" controls />
-                    <div className="absolute top-2 end-2"><span className="text-[9px] font-bold px-2 py-1 rounded bg-blue-500/80 text-white">{isRtl ? "حركة" : "MOTION"}</span></div>
-                  </div>
-                )}
+                  ))}
+
+                  {sdVideos.length < 3 && (
+                    <button
+                      type="button"
+                      onClick={() => sdVideoInputRef.current?.click()}
+                      className="border-2 border-dashed border-blue-500/30 hover:border-blue-500/70 bg-[#06010f]/80 hover:bg-blue-500/5 rounded-xl aspect-video flex flex-col items-center justify-center gap-1.5 transition-all text-white/50 hover:text-blue-400"
+                    >
+                      <Play className="w-5 h-5" />
+                      <span className="text-[10px] font-bold">{isRtl ? "+ إضافة فيديو" : "+ Add Video"}</span>
+                    </button>
+                  )}
+                </div>
               </div>
 
-              {/* --- Section 3: Reference Audio (Optional) --- */}
+              {/* --- Section 3: Reference Audio (Up to 3, Optional) --- */}
               <div className="bg-[#0b0416]/95 border border-amber-500/20 rounded-2xl p-5 shadow-xl backdrop-blur-md">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2.5">
                     <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
                       <Zap className="w-3.5 h-3.5 text-amber-400" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <label className="text-sm font-bold text-white">{isRtl ? "الصوت المرجعي" : "Reference Audio"}</label>
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">{isRtl ? "اختياري" : "OPTIONAL"}</span>
+                        <label className="text-sm font-bold text-white">{isRtl ? "المقاطع الصوتية المرجعية" : "Reference Audio Clips"}</label>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                          {sdAudios.length}/3 {isRtl ? "(اختياري)" : "(Optional)"}
+                        </span>
                       </div>
-                      <span className="text-[11px] text-white/40">{isRtl ? "صوت يوجّه إيقاع الفيديو وتوقيته" : "Audio that guides video rhythm and soundtrack"}</span>
+                      <span className="text-[11px] text-white/40">
+                        {isRtl ? "ارفع حتى 3 ملفات صوتية لتوجيه الإيقاع والموسيقى، وأشر إليها في الوصف عبر [Audio1]، [Audio2]" : "Upload up to 3 audio files. Refer in prompt as [Audio1], [Audio2]"}
+                      </span>
                     </div>
                   </div>
-                  {sdAudioFile && (
-                    <button type="button" onClick={() => { setSdAudioFile(null); if (sdAudioInputRef.current) sdAudioInputRef.current.value=''; }} className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
+                  {sdAudios.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setSdAudios([])}
+                      className="text-xs text-red-400 hover:text-red-300 transition-colors flex items-center gap-1"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>{isRtl ? "حذف الكل" : "Clear All"}</span>
+                    </button>
                   )}
                 </div>
-                <input ref={sdAudioInputRef} type="file" accept="audio/*" onChange={(e) => handleSdAudioChange(e.target.files?.[0] || null)} className="hidden" />
-                {!sdAudioFile ? (
-                  <div onClick={() => sdAudioInputRef.current?.click()}
-                    className="border-2 border-dashed border-amber-500/25 bg-[#06010f]/80 hover:border-amber-500/60 hover:bg-amber-500/5 rounded-xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all group">
-                    <div className="w-12 h-12 rounded-xl bg-amber-500/10 group-hover:scale-110 border border-amber-500/20 flex items-center justify-center transition-transform">
-                      <Zap className="w-5 h-5 text-amber-400" />
+
+                <input
+                  ref={sdAudioInputRef}
+                  type="file"
+                  accept="audio/*"
+                  multiple
+                  onChange={handleSdAudiosAdd}
+                  className="hidden"
+                />
+
+                <div className="space-y-2">
+                  {sdAudios.map((aud, idx) => (
+                    <div key={idx} className="flex items-center justify-between gap-3 bg-amber-500/10 border border-amber-500/30 rounded-xl p-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-7 h-7 rounded-lg bg-amber-500/20 flex items-center justify-center shrink-0">
+                          <Zap className="w-3.5 h-3.5 text-amber-400" />
+                        </div>
+                        <span className="bg-amber-600/90 text-white font-mono text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0">
+                          [Audio{idx + 1}]
+                        </span>
+                        <span className="text-xs text-white font-medium truncate">{aud.name}</span>
+                        <span className="text-[10px] text-white/40 shrink-0 font-mono">({aud.size} MB)</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeSdAudio(idx)}
+                        className="text-red-400 hover:text-red-300 p-1"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
-                    <div className="text-center">
-                      <p className="text-sm font-semibold text-white/70 group-hover:text-white transition-colors">{isRtl ? "اضغط لرفع صوت (اختياري)" : "Click to upload audio (optional)"}</p>
-                      <p className="text-[10px] text-white/30">MP3, WAV, AAC</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
-                    <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">
-                      <Zap className="w-4 h-4 text-amber-400" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-white truncate">{sdAudioFile.name}</p>
-                      <p className="text-[10px] text-white/40">{(sdAudioFile.size / (1024*1024)).toFixed(1)} MB</p>
-                    </div>
-                    <span className="text-[9px] font-bold px-2 py-1 rounded bg-amber-500/30 text-amber-300 shrink-0">{isRtl ? "جاهز" : "READY"}</span>
-                  </div>
-                )}
+                  ))}
+
+                  {sdAudios.length < 3 && (
+                    <button
+                      type="button"
+                      onClick={() => sdAudioInputRef.current?.click()}
+                      className="w-full border-2 border-dashed border-amber-500/30 hover:border-amber-500/70 bg-[#06010f]/80 hover:bg-amber-500/5 rounded-xl p-3 flex items-center justify-center gap-2 transition-all text-white/50 hover:text-amber-400 text-xs font-bold"
+                    >
+                      <Zap className="w-4 h-4" />
+                      <span>{isRtl ? "+ إضافة ملف صوتي مرجعي" : "+ Add Reference Audio Clip"}</span>
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -775,6 +900,43 @@ export default function ReferenceToVideoPage() {
                 )}
               </div>
             </div>
+
+            {/* Quick Tag Insert for Seedance */}
+            {isSeedance && (sdImages.length > 0 || sdVideos.length > 0 || sdAudios.length > 0) && (
+              <div className="flex flex-wrap items-center gap-1.5 p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
+                <span className="text-[11px] text-white/50 font-medium me-1">{isRtl ? "إدراج وسائط في الوصف:" : "Insert in prompt:"}</span>
+                {sdImages.map((_, idx) => (
+                  <button
+                    key={`sd-img-tag-${idx}`}
+                    type="button"
+                    onClick={() => insertTag(`[Image${idx + 1}]`)}
+                    className="text-[10px] font-mono font-bold px-2 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 transition-all flex items-center gap-1"
+                  >
+                    <span>+ [Image{idx + 1}]</span>
+                  </button>
+                ))}
+                {sdVideos.map((_, idx) => (
+                  <button
+                    key={`sd-vid-tag-${idx}`}
+                    type="button"
+                    onClick={() => insertTag(`[Video${idx + 1}]`)}
+                    className="text-[10px] font-mono font-bold px-2 py-1 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 border border-blue-500/30 transition-all flex items-center gap-1"
+                  >
+                    <span>+ [Video{idx + 1}]</span>
+                  </button>
+                ))}
+                {sdAudios.map((_, idx) => (
+                  <button
+                    key={`sd-aud-tag-${idx}`}
+                    type="button"
+                    onClick={() => insertTag(`[Audio${idx + 1}]`)}
+                    className="text-[10px] font-mono font-bold px-2 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 transition-all flex items-center gap-1"
+                  >
+                    <span>+ [Audio{idx + 1}]</span>
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Prompt Textarea */}
             <div className="relative">
@@ -1257,15 +1419,15 @@ export default function ReferenceToVideoPage() {
                   </span>
                   <div className="grid grid-cols-2 gap-1.5">
                     {[
-                      { id: "audio_off", labelAr: "بدون صوت", labelEn: "Audio Off" },
-                      { id: "audio_on", labelAr: "مع الصوت", labelEn: "Audio On" }
+                      { val: false, labelAr: "بدون صوت", labelEn: "Audio Off" },
+                      { val: true, labelAr: "مع الصوت", labelEn: "Audio On" }
                     ].map((m) => (
                       <button
-                        key={m.id}
+                        key={m.labelEn}
                         type="button"
-                        onClick={() => setMode(m.id)}
+                        onClick={() => setAudioEnabled(m.val)}
                         className={`py-1.5 px-2 rounded-lg text-xs font-bold transition-all ${
-                          mode === m.id
+                          audioEnabled === m.val
                             ? "bg-violet-600 text-white shadow-md shadow-violet-900/40"
                             : "bg-white/5 hover:bg-white/10 text-white/60 hover:text-white"
                         }`}
@@ -1286,14 +1448,14 @@ export default function ReferenceToVideoPage() {
                   </div>
                   <input
                     type="range"
-                    min="6"
+                    min="4"
                     max="15"
                     value={duration}
                     onChange={(e) => setDuration(parseInt(e.target.value))}
                     className="w-full accent-violet-500 cursor-pointer bg-white/10 rounded-lg h-2"
                   />
                   <div className="flex justify-between text-[10px] text-white/40 font-mono">
-                    <span>6s</span>
+                    <span>4s</span>
                     <span>15s</span>
                   </div>
                 </div>

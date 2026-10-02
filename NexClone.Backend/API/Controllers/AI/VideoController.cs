@@ -533,13 +533,16 @@ namespace NexClone.Backend.API.Controllers.AI
         [HttpPost("start-tool/{toolType}")]
         public async Task<IActionResult> StartVideoTool(
             string toolType,
-            [FromForm] System.Collections.Generic.List<IFormFile> images,
+            [FromForm] System.Collections.Generic.List<IFormFile>? images = null,
+            [FromForm] System.Collections.Generic.List<IFormFile>? videos = null,
+            [FromForm] System.Collections.Generic.List<IFormFile>? audios = null,
             [FromForm] string prompt = "",
             [FromForm] string model = "veo",
             [FromForm] string resolution = "1080p",
             [FromForm] string mode = "",
             [FromForm] int duration = 0,
             [FromForm] string aspectRatio = "16:9",
+            [FromForm] bool? audio = null,
             [FromForm] int? subscriptionId = null)
         {
             var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -562,24 +565,54 @@ namespace NexClone.Backend.API.Controllers.AI
             if (toolType == "text-to-video" && string.IsNullOrWhiteSpace(prompt))
                 return BadRequest(new { error = "يرجى كتابة وصف المشهد (Prompt) أولاً." });
 
-            var fileList = images != null ? new List<IFormFile>(images) : new List<IFormFile>();
-            if (fileList.Count == 0 && Request.HasFormContentType && Request.Form.Files.Count > 0)
+            // Collect all uploaded media files by type
+            var imageFiles = new List<IFormFile>();
+            var videoFiles = new List<IFormFile>();
+            var audioFiles = new List<IFormFile>();
+
+            if (images != null) imageFiles.AddRange(images.Where(f => f != null && f.Length > 0));
+            if (videos != null) videoFiles.AddRange(videos.Where(f => f != null && f.Length > 0));
+            if (audios != null) audioFiles.AddRange(audios.Where(f => f != null && f.Length > 0));
+
+            // Also check Request.Form.Files for any files not captured by parameter binding
+            if (Request.HasFormContentType && Request.Form.Files.Count > 0)
             {
-                fileList = Request.Form.Files.ToList();
+                foreach (var file in Request.Form.Files)
+                {
+                    if (file == null || file.Length == 0) continue;
+                    string name = file.Name?.ToLowerInvariant() ?? "";
+                    string contentType = file.ContentType?.ToLowerInvariant() ?? "";
+
+                    if (name.Contains("video") || contentType.StartsWith("video/"))
+                    {
+                        if (!videoFiles.Contains(file)) videoFiles.Add(file);
+                    }
+                    else if (name.Contains("audio") || contentType.StartsWith("audio/"))
+                    {
+                        if (!audioFiles.Contains(file)) audioFiles.Add(file);
+                    }
+                    else
+                    {
+                        if (!imageFiles.Contains(file)) imageFiles.Add(file);
+                    }
+                }
             }
 
-            if (toolType == "image-to-video" && fileList.Count == 0)
+            if (toolType == "image-to-video" && imageFiles.Count == 0)
                 return BadRequest(new { error = "An image is required for this tool." });
 
-            if (toolType == "reference-to-video" && fileList.Count == 0)
-                return BadRequest(new { error = "At least one reference image is required." });
+            if (toolType == "reference-to-video" && imageFiles.Count == 0 && videoFiles.Count == 0 && audioFiles.Count == 0)
+                return BadRequest(new { error = "At least one reference image, video, or audio is required." });
 
             bool audioEnabled = true; // default
-            if (Request.HasFormContentType && Request.Form.TryGetValue("audio", out var formAudio) && bool.TryParse(formAudio, out var au))
+            if (audio.HasValue)
+            {
+                audioEnabled = audio.Value;
+            }
+            else if (Request.HasFormContentType && Request.Form.TryGetValue("audio", out var formAudio) && bool.TryParse(formAudio, out var au))
             {
                 audioEnabled = au;
             }
-            if (audioEnabled) mode = "audio_on"; else mode = "audio_off";
 
             string qualityFormat = $"{model}|{resolution}";
             decimal usageUnits = 1;
@@ -619,14 +652,39 @@ namespace NexClone.Backend.API.Controllers.AI
                     Resolution = resolution,
                     Mode = mode,
                     Duration = duration,
-                    AspectRatio = aspectRatio
+                    AspectRatio = aspectRatio,
+                    AudioEnabled = audioEnabled
                 };
 
-                if (fileList.Count > 0)
+                // Upload media directly to MinIO and pass lightweight S3 URLs in Hangfire message
+                foreach (var img in imageFiles)
                 {
-                    using (var ms = new MemoryStream()) { await fileList[0].CopyToAsync(ms); message.Image1Bytes = ms.ToArray(); message.Image1ContentType = fileList[0].ContentType; }
-                    if (fileList.Count > 1) { using (var ms = new MemoryStream()) { await fileList[1].CopyToAsync(ms); message.Image2Bytes = ms.ToArray(); message.Image2ContentType = fileList[1].ContentType; } }
-                    if (fileList.Count > 2) { using (var ms = new MemoryStream()) { await fileList[2].CopyToAsync(ms); message.Image3Bytes = ms.ToArray(); message.Image3ContentType = fileList[2].ContentType; } }
+                    using var stream = img.OpenReadStream();
+                    string ext = Path.GetExtension(img.FileName);
+                    if (string.IsNullOrEmpty(ext)) ext = ".jpg";
+                    string key = await _mediaService.UploadFileAsync(stream, $"ai/videos/{Guid.NewGuid()}{ext}", img.ContentType ?? "image/jpeg");
+                    string url = await _mediaService.GetFileUrlAsync(key);
+                    message.ImageUrls.Add(url);
+                }
+
+                foreach (var vid in videoFiles)
+                {
+                    using var stream = vid.OpenReadStream();
+                    string ext = Path.GetExtension(vid.FileName);
+                    if (string.IsNullOrEmpty(ext)) ext = ".mp4";
+                    string key = await _mediaService.UploadFileAsync(stream, $"ai/videos/{Guid.NewGuid()}{ext}", vid.ContentType ?? "video/mp4");
+                    string url = await _mediaService.GetFileUrlAsync(key);
+                    message.VideoUrls.Add(url);
+                }
+
+                foreach (var aud in audioFiles)
+                {
+                    using var stream = aud.OpenReadStream();
+                    string ext = Path.GetExtension(aud.FileName);
+                    if (string.IsNullOrEmpty(ext)) ext = ".mp3";
+                    string key = await _mediaService.UploadFileAsync(stream, $"ai/videos/{Guid.NewGuid()}{ext}", aud.ContentType ?? "audio/mpeg");
+                    string url = await _mediaService.GetFileUrlAsync(key);
+                    message.AudioUrls.Add(url);
                 }
 
                 _backgroundJobClient.Enqueue<NexClone.Backend.Infrastructure.Consumers.VideoToolConsumer>(

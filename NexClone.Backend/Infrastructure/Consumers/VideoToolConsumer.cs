@@ -103,27 +103,32 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 }
                 else if (message.ToolType == "image-to-video")
                 {
-                    string imageUrl = "";
-                    string endFrameUrl = null;
-                    if (message.Image1Bytes != null)
-                    {
-                        using var ms = new System.IO.MemoryStream(message.Image1Bytes);
-                        string key = await _mediaService.UploadFileAsync(ms, $"image2video_{Guid.NewGuid()}.jpg", message.Image1ContentType);
-                        imageUrl = await _mediaService.GetFileUrlAsync(key);
-                    }
-                    if (message.Image2Bytes != null)
-                    {
-                        using var ms = new System.IO.MemoryStream(message.Image2Bytes);
-                        string key = await _mediaService.UploadFileAsync(ms, $"image2video_end_{Guid.NewGuid()}.jpg", message.Image2ContentType);
-                        endFrameUrl = await _mediaService.GetFileUrlAsync(key);
-                    }
+                    var imgUrlsList = new System.Collections.Generic.List<string>();
 
-                    var imgUrlsList = new System.Collections.Generic.List<string> { imageUrl };
-                    if (!string.IsNullOrEmpty(endFrameUrl)) imgUrlsList.Add(endFrameUrl);
+                    if (message.ImageUrls != null && message.ImageUrls.Count > 0)
+                    {
+                        imgUrlsList.AddRange(message.ImageUrls);
+                    }
+                    else
+                    {
+                        if (message.Image1Bytes != null)
+                        {
+                            using var ms = new System.IO.MemoryStream(message.Image1Bytes);
+                            string key = await _mediaService.UploadFileAsync(ms, $"image2video_{Guid.NewGuid()}.jpg", message.Image1ContentType);
+                            imgUrlsList.Add(await _mediaService.GetFileUrlAsync(key));
+                        }
+                        if (message.Image2Bytes != null)
+                        {
+                            using var ms = new System.IO.MemoryStream(message.Image2Bytes);
+                            string key = await _mediaService.UploadFileAsync(ms, $"image2video_end_{Guid.NewGuid()}.jpg", message.Image2ContentType);
+                            imgUrlsList.Add(await _mediaService.GetFileUrlAsync(key));
+                        }
+                    }
 
                     string normalizedAspect = message.AspectRatio switch {
                         "9:16" => "9:16",
                         "16:9" => "16:9",
+                        "1:1" => "1:1",
                         "Auto" => "Auto",
                         "auto" => "Auto",
                         _ => "Auto"
@@ -151,8 +156,8 @@ namespace NexClone.Backend.Infrastructure.Consumers
                         payload = new {
                             model = crunModel,
                             input = new {
-                                img_urls = imgUrlsList,
-                                image_urls = imgUrlsList,
+                                img_urls = imgUrlsList.Take(7).ToList(),
+                                image_urls = imgUrlsList.Take(7).ToList(),
                                 duration = message.Duration > 0 ? message.Duration : 6,
                                 resolution = message.Resolution,
                                 aspect_ratio = grokAspect,
@@ -163,28 +168,33 @@ namespace NexClone.Backend.Infrastructure.Consumers
                     }
                     else if (crunModel.Contains("seedance"))
                     {
+                        bool isAudioOn = message.AudioEnabled ?? (message.Mode?.Contains("audio_on") == true);
                         payload = new {
                             model = crunModel,
                             input = new {
-                                img_urls = imgUrlsList,
+                                img_urls = imgUrlsList.Take(2).ToList(),
                                 prompt = promptText,
                                 resolution = message.Resolution,
                                 aspect_ratio = normalizedAspect,
-                                duration = message.Duration > 0 ? message.Duration : 5,
-                                audio = message.Mode?.Contains("audio_on") == true
+                                duration = message.Duration >= 4 ? message.Duration : 5,
+                                audio = isAudioOn
                             }
                         };
                     }
                     else
                     {
+                        // Veo: strictly supports 4, 6, 8 (default 8), 1-2 images, and aspect ratios: 16:9, 9:16, Auto (no 1:1)
+                        string veoAspect = (normalizedAspect == "1:1") ? "Auto" : normalizedAspect;
+                        int veoDuration = (message.Duration == 4 || message.Duration == 6 || message.Duration == 8) ? message.Duration : 8;
+
                         payload = new {
                             model = crunModel,
                             input = new {
-                                img_urls = imgUrlsList,
+                                img_urls = imgUrlsList.Take(2).ToList(),
                                 prompt = promptText,
                                 resolution = message.Resolution,
-                                aspect_ratio = normalizedAspect,
-                                duration = message.Duration > 0 ? message.Duration : (int?)null
+                                aspect_ratio = veoAspect,
+                                duration = veoDuration
                             }
                         };
                     }
@@ -192,29 +202,41 @@ namespace NexClone.Backend.Infrastructure.Consumers
                 else if (message.ToolType == "reference-to-video")
                 {
                     var imgUrls = new System.Collections.Generic.List<string>();
-                    string videoUrl = null;
-                    string audioUrl = null;
+                    var videoUrls = new System.Collections.Generic.List<string>();
+                    var audioUrls = new System.Collections.Generic.List<string>();
 
-                    async Task ProcessMedia(byte[] bytes, string contentType)
+                    if (message.ImageUrls != null && message.ImageUrls.Count > 0)
+                        imgUrls.AddRange(message.ImageUrls);
+                    if (message.VideoUrls != null && message.VideoUrls.Count > 0)
+                        videoUrls.AddRange(message.VideoUrls);
+                    if (message.AudioUrls != null && message.AudioUrls.Count > 0)
+                        audioUrls.AddRange(message.AudioUrls);
+
+                    // Legacy fallback
+                    if (imgUrls.Count == 0 && videoUrls.Count == 0 && audioUrls.Count == 0)
                     {
-                        if (bytes == null) return;
-                        using var ms = new System.IO.MemoryStream(bytes);
-                        string ext = contentType.StartsWith("video/") ? ".mp4" : contentType.StartsWith("audio/") ? ".mp3" : ".jpg";
-                        string key = await _mediaService.UploadFileAsync(ms, $"ref_{Guid.NewGuid()}{ext}", contentType);
-                        string url = await _mediaService.GetFileUrlAsync(key);
-                        
-                        if (contentType.StartsWith("video/")) videoUrl = url;
-                        else if (contentType.StartsWith("audio/")) audioUrl = url;
-                        else imgUrls.Add(url);
-                    }
+                        async Task ProcessMedia(byte[] bytes, string contentType)
+                        {
+                            if (bytes == null) return;
+                            using var ms = new System.IO.MemoryStream(bytes);
+                            string ext = contentType.StartsWith("video/") ? ".mp4" : contentType.StartsWith("audio/") ? ".mp3" : ".jpg";
+                            string key = await _mediaService.UploadFileAsync(ms, $"ref_{Guid.NewGuid()}{ext}", contentType);
+                            string url = await _mediaService.GetFileUrlAsync(key);
+                            
+                            if (contentType.StartsWith("video/")) videoUrls.Add(url);
+                            else if (contentType.StartsWith("audio/")) audioUrls.Add(url);
+                            else imgUrls.Add(url);
+                        }
 
-                    await ProcessMedia(message.Image1Bytes, message.Image1ContentType);
-                    await ProcessMedia(message.Image2Bytes, message.Image2ContentType);
-                    await ProcessMedia(message.Image3Bytes, message.Image3ContentType);
+                        await ProcessMedia(message.Image1Bytes, message.Image1ContentType);
+                        await ProcessMedia(message.Image2Bytes, message.Image2ContentType);
+                        await ProcessMedia(message.Image3Bytes, message.Image3ContentType);
+                    }
                     
                     string normalizedAspect = message.AspectRatio switch {
                         "9:16" => "9:16",
                         "16:9" => "16:9",
+                        "1:1" => "1:1",
                         "Auto" => "Auto",
                         "auto" => "Auto",
                         _ => "Auto"
@@ -224,29 +246,33 @@ namespace NexClone.Backend.Infrastructure.Consumers
 
                     if (crunModel.Contains("seedance"))
                     {
+                        bool isAudioOn = message.AudioEnabled ?? (message.Mode?.Contains("audio_on") == true);
                         payload = new {
                             model = crunModel,
                             input = new {
-                                reference_images = imgUrls.Count > 0 ? imgUrls : null,
-                                reference_videos = videoUrl != null ? new[] { videoUrl } : null,
-                                reference_audios = audioUrl != null ? new[] { audioUrl } : null,
-                                audio = message.Mode?.Contains("audio_on") == true,
+                                reference_images = imgUrls.Count > 0 ? imgUrls.Take(9).ToList() : null,
+                                reference_videos = videoUrls.Count > 0 ? videoUrls.Take(3).ToList() : null,
+                                reference_audios = audioUrls.Count > 0 ? audioUrls.Take(3).ToList() : null,
+                                audio = isAudioOn,
                                 prompt = promptText,
                                 resolution = message.Resolution,
                                 aspect_ratio = normalizedAspect,
-                                duration = message.Duration > 0 ? message.Duration : 6
+                                duration = message.Duration >= 4 ? message.Duration : 6
                             }
                         };
                     }
                     else
                     {
+                        // Google Veo: strictly supports 1-3 images only (no videos, no audios), duration strictly 8
+                        string veoAspect = (normalizedAspect == "1:1") ? "Auto" : normalizedAspect;
                         payload = new {
                             model = crunModel,
                             input = new {
-                                img_urls = imgUrls,
+                                img_urls = imgUrls.Take(3).ToList(),
                                 prompt = promptText,
                                 resolution = message.Resolution,
-                                aspect_ratio = normalizedAspect
+                                aspect_ratio = veoAspect,
+                                duration = 8
                             }
                         };
                     }
