@@ -26,12 +26,7 @@ export default function CTASection() {
       />
 
       <div className="relative max-w-4xl mx-auto px-4 text-center">
-        <AnimatedReveal>
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-violet-500/30 bg-violet-500/10 text-violet-300 text-sm font-medium mb-6">
-            <Sparkles className="w-3.5 h-3.5" />
-            {t('title')}
-          </span>
-        </AnimatedReveal>
+
 
         <AnimatedText
           text={t('title')}

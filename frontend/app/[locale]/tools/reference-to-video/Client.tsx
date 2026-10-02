@@ -31,6 +31,7 @@ import api from "../../../../src/utils/api";
 import { useAppStore } from "../../../../src/store/useAppStore";
 import { signalRNotificationService } from "../../../../lib/signalr-client";
 import { BottomSheetSelect } from "../../../../components/ui/BottomSheetSelect";
+import { ModelBrandIcon } from "../../../../src/components/BrandLogos";
 
 interface ModelOption {
   id: string;
@@ -1200,20 +1201,23 @@ export default function ReferenceToVideoPage() {
                 onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
                 className="w-full bg-[#06010f] border border-white/10 hover:border-emerald-500/40 rounded-xl p-3 text-start flex items-center justify-between gap-2.5 transition-all group"
               >
-                <div className="space-y-0.5 truncate">
-                  <div className="flex items-center gap-2 truncate">
-                    <span className="font-bold text-xs md:text-sm text-white truncate">
-                      {isRtl ? currentModel.nameAr : currentModel.name}
-                    </span>
-                    {currentModel.discount && (
-                      <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-1 py-0.5 rounded shrink-0">
-                        {currentModel.discount}
+                <div className="flex items-center gap-2.5 truncate flex-1 min-w-0">
+                  <ModelBrandIcon modelId={currentModel.id} className="w-5 h-5 shrink-0" />
+                  <div className="space-y-0.5 truncate flex-1 min-w-0">
+                    <div className="flex items-center gap-2 truncate">
+                      <span className="font-bold text-xs md:text-sm text-white truncate">
+                        {isRtl ? currentModel.nameAr : currentModel.name}
                       </span>
-                    )}
+                      {currentModel.discount && (
+                        <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-1 py-0.5 rounded shrink-0">
+                          {currentModel.discount}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-white/40 truncate">
+                      {isRtl ? currentModel.descAr : currentModel.desc}
+                    </p>
                   </div>
-                  <p className="text-[10px] text-white/40 truncate">
-                    {isRtl ? currentModel.descAr : currentModel.desc}
-                  </p>
                 </div>
                 <ChevronDown className={`w-4 h-4 text-white/50 transition-transform duration-200 shrink-0 ${isModelDropdownOpen ? "rotate-180 text-emerald-400" : ""}`} />
               </button>
@@ -1228,12 +1232,15 @@ export default function ReferenceToVideoPage() {
                         className={`w-full text-start p-2.5 rounded-lg transition-all flex items-center justify-between gap-2 ${
                           isSelected ? "bg-emerald-600/25 text-white border border-emerald-500/40" : "hover:bg-white/5 text-white/70 hover:text-white"
                         }`}>
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-xs text-white">{isRtl ? m.nameAr : m.name}</span>
-                            {m.discount && <span className="text-[9px] text-emerald-400 bg-emerald-500/10 px-1 rounded">{m.discount}</span>}
+                        <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                          <ModelBrandIcon modelId={m.id} className="w-4 h-4 shrink-0" />
+                          <div className="space-y-0.5 truncate">
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-bold text-xs text-white">{isRtl ? m.nameAr : m.name}</span>
+                              {m.discount && <span className="text-[9px] text-emerald-400 bg-emerald-500/10 px-1 rounded">{m.discount}</span>}
+                            </div>
+                            <p className="text-[10px] text-white/40">{isRtl ? m.badgeAr : m.badge}</p>
                           </div>
-                          <p className="text-[10px] text-white/40">{isRtl ? m.badgeAr : m.badge}</p>
                         </div>
                         {isSelected && <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />}
                       </button>
@@ -1251,12 +1258,15 @@ export default function ReferenceToVideoPage() {
                       className={`w-full text-start p-3 rounded-xl transition-all flex items-center justify-between gap-2 ${
                         isSelected ? "bg-emerald-600/25 text-white border border-emerald-500/40" : "hover:bg-white/5 text-white/70 hover:text-white"
                       }`}>
-                      <div className="space-y-0.5">
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-bold text-sm text-white">{isRtl ? m.nameAr : m.name}</span>
-                          {m.discount && <span className="text-[9px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">{m.discount}</span>}
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <ModelBrandIcon modelId={m.id} className="w-5 h-5 shrink-0" />
+                        <div className="space-y-0.5 truncate">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-sm text-white">{isRtl ? m.nameAr : m.name}</span>
+                            {m.discount && <span className="text-[9px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">{m.discount}</span>}
+                          </div>
+                          <p className="text-xs text-white/40">{isRtl ? m.descAr : m.desc}</p>
                         </div>
-                        <p className="text-xs text-white/40">{isRtl ? m.descAr : m.desc}</p>
                       </div>
                       {isSelected && <Check className="w-4 h-4 text-emerald-400 shrink-0" />}
                     </button>

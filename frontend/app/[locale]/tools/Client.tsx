@@ -10,13 +10,11 @@ import {
   Video, 
   Layers, 
   Smile, 
-  Sparkles, 
   Image as ImageIcon, 
   Volume2, 
   Mic, 
   ArrowLeft, 
-  ArrowRight,
-  Layers as StudioIcon
+  ArrowRight
 } from "lucide-react";
 import { useAppStore } from "../../../src/store/useAppStore";
 import { resolveToolStatus } from "../../../src/utils/toolStatus";
@@ -188,10 +186,6 @@ export default function ToolsPage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-violet-500/30 bg-violet-500/10 text-violet-300 text-sm font-medium mb-4">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>{isRtl ? 'استوديو الذكاء الاصطناعي الشامل' : 'Complete AI Creative Studio'}</span>
-          </div>
 
           <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-6 leading-tight">
             {isRtl ? 'مرحباً بك في ' : 'Welcome to '}
@@ -243,13 +237,11 @@ export default function ToolsPage() {
                 ? (isRtl ? 'تحت التحديث' : 'Maintenance')
                 : isComingSoon
                   ? (isRtl ? 'قريباً' : 'Coming Soon')
-                  : (isRtl ? tool.badgeAr : tool.badgeEn);
+                  : null;
 
               const displayBadgeColor = isMaintenance
                 ? "bg-orange-500/20 text-orange-300 border-orange-500/30"
-                : isComingSoon
-                  ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/30"
-                  : tool.badgeColor;
+                : "bg-cyan-500/20 text-cyan-300 border-cyan-500/30";
 
               const actionText = isMaintenance
                 ? (isRtl ? 'تحت التحديث' : 'Under Maintenance')
@@ -284,11 +276,13 @@ export default function ToolsPage() {
                       <div className="absolute inset-0 bg-gradient-to-t from-[#120822] via-transparent to-transparent opacity-80" />
                       
                       {/* Top Badge */}
-                      <div className="absolute top-3 right-3 z-10">
-                        <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border backdrop-blur-md ${displayBadgeColor}`}>
-                          {displayBadge}
-                        </span>
-                      </div>
+                      {displayBadge && (
+                        <div className="absolute top-3 right-3 z-10">
+                          <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border backdrop-blur-md ${displayBadgeColor}`}>
+                            {displayBadge}
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Tool Info */}

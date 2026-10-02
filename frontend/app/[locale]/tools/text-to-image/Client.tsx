@@ -30,6 +30,7 @@ import {
 import api from "../../../../src/utils/api";
 import { useAppStore } from "../../../../src/store/useAppStore";
 import { signalRNotificationService } from "../../../../lib/signalr-client";
+import { ModelBrandIcon } from "../../../../src/components/BrandLogos";
 
 interface ModelOption {
   id: string;
@@ -73,12 +74,12 @@ const ASPECT_RATIOS = [
 ];
 
 const STYLE_PRESETS = [
-  { id: "photo", labelAr: "📸 واقعي 8K", labelEn: "📸 Photorealistic", suffix: ", 8k resolution, photorealistic, professional photography, natural studio lighting, highly detailed textures, masterwork" },
-  { id: "anime", labelAr: "🎨 أنمي ياباني", labelEn: "🎨 Anime Studio", suffix: ", anime aesthetic, makoto shinkai style, vibrant colors, detailed lineart, studio ghibli lighting" },
-  { id: "3d", labelAr: "💎 ثلاثي الأبعاد 3D", labelEn: "💎 3D Render", suffix: ", 3d character render, unreal engine 5, octane render, volumetric lighting, raytracing, pixar style" },
-  { id: "cyberpunk", labelAr: "🌌 سايبربانك", labelEn: "🌌 Cyberpunk", suffix: ", cyberpunk aesthetic, futuristic neon glow, rainy reflective streets, volumetric fog, high tech" },
-  { id: "painting", labelAr: "🖌️ رسم زيتي فني", labelEn: "🖌️ Oil Painting", suffix: ", classical oil painting, textured brush strokes, dramatic chiaroscuro lighting, art gallery masterpiece" },
-  { id: "architecture", labelAr: "🏛️ معماري وديكور", labelEn: "🏛️ Architecture", suffix: ", architectural photography, modern luxury interior design, architectural digest style, clean ambient lighting" }
+  { id: "photo", labelAr: "واقعي سينمائي", labelEn: "Photorealistic", suffix: ", 8k resolution, photorealistic, professional photography, natural studio lighting, highly detailed textures, masterwork" },
+  { id: "anime", labelAr: "أنمي ياباني", labelEn: "Anime Studio", suffix: ", anime aesthetic, makoto shinkai style, vibrant colors, detailed lineart, studio ghibli lighting" },
+  { id: "3d", labelAr: "تصميم ثلاثي الأبعاد", labelEn: "3D Render", suffix: ", 3d character render, unreal engine 5, octane render, volumetric lighting, raytracing, pixar style" },
+  { id: "cyberpunk", labelAr: "سايبربانك مستقبلي", labelEn: "Cyberpunk", suffix: ", cyberpunk aesthetic, futuristic neon glow, rainy reflective streets, volumetric fog, high tech" },
+  { id: "painting", labelAr: "لوحة زيتية فنية", labelEn: "Oil Painting", suffix: ", classical oil painting, textured brush strokes, dramatic chiaroscuro lighting, art gallery masterpiece" },
+  { id: "architecture", labelAr: "معماري وديكور", labelEn: "Architecture", suffix: ", architectural photography, modern luxury interior design, architectural digest style, clean ambient lighting" }
 ];
 
 const SAMPLE_IMAGE_PROMPTS = {
@@ -858,18 +859,21 @@ export default function TextToImagePage() {
                 onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
                 className="w-full bg-[#06010f] border border-white/10 hover:border-orange-500/40 rounded-xl p-3 text-start flex items-center justify-between gap-2.5 transition-all group"
               >
-                <div className="space-y-0.5 truncate">
-                  <div className="flex items-center gap-2 truncate">
-                    <span className="font-bold text-xs md:text-sm text-white truncate">
-                      {isRtl ? currentModel.nameAr : currentModel.name}
-                    </span>
-                    <span className="text-[9px] font-bold text-amber-400 bg-amber-500/10 px-1 py-0.5 rounded shrink-0 font-mono">
-                      {currentModel.pricePerImage} Cr
-                    </span>
+                <div className="flex items-center gap-2.5 truncate flex-1 min-w-0">
+                  <ModelBrandIcon modelId={currentModel.id} className="w-5 h-5 shrink-0" />
+                  <div className="space-y-0.5 truncate flex-1 min-w-0">
+                    <div className="flex items-center gap-2 truncate">
+                      <span className="font-bold text-xs md:text-sm text-white truncate">
+                        {isRtl ? currentModel.nameAr : currentModel.name}
+                      </span>
+                      <span className="text-[9px] font-bold text-amber-400 bg-amber-500/10 px-1 py-0.5 rounded shrink-0 font-mono">
+                        {currentModel.pricePerImage} Cr
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-white/40 truncate">
+                      {isRtl ? currentModel.descAr : currentModel.desc}
+                    </p>
                   </div>
-                  <p className="text-[10px] text-white/40 truncate">
-                    {isRtl ? currentModel.descAr : currentModel.desc}
-                  </p>
                 </div>
                 <ChevronDown className={`w-4 h-4 text-white/50 transition-transform duration-200 shrink-0 ${isModelDropdownOpen ? "rotate-180 text-orange-400" : ""}`} />
               </button>
@@ -890,12 +894,15 @@ export default function TextToImagePage() {
                             : "hover:bg-white/5 text-white/70 hover:text-white"
                         }`}
                       >
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-xs text-white">{isRtl ? m.nameAr : m.name}</span>
-                            <span className="text-[9px] text-amber-400 bg-amber-500/10 px-1 rounded font-mono">{m.pricePerImage} Cr</span>
+                        <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                          <ModelBrandIcon modelId={m.id} className="w-4 h-4 shrink-0" />
+                          <div className="space-y-0.5 truncate">
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-bold text-xs text-white">{isRtl ? m.nameAr : m.name}</span>
+                              <span className="text-[9px] text-amber-400 bg-amber-500/10 px-1 rounded font-mono">{m.pricePerImage} Cr</span>
+                            </div>
+                            <p className="text-[10px] text-white/40">{isRtl ? m.badgeAr : m.badge}</p>
                           </div>
-                          <p className="text-[10px] text-white/40">{isRtl ? m.badgeAr : m.badge}</p>
                         </div>
                         {isSelected && <Check className="w-3.5 h-3.5 text-orange-400 shrink-0" />}
                       </button>

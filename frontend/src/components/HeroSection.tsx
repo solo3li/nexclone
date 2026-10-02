@@ -2,7 +2,8 @@
 
 import { motion } from 'framer-motion';
 import { useLocale } from 'next-intl';
-import { ArrowRight, ArrowLeft, Video, Mic, Film, Layers, Zap, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Mic, Layers } from 'lucide-react';
+import { GoogleLogo, ByteDanceLogo, XAILogo } from './BrandLogos';
 
 export default function HeroSection() {
   const locale = useLocale();
@@ -29,11 +30,11 @@ export default function HeroSection() {
   ];
 
   const modelsMarquee = [
-    { name: 'Google Veo 3.1', icon: Video },
-    { name: 'ByteDance Seedance 2.0', icon: Film },
-    { name: 'xAI Grok Imagine', icon: Zap },
-    { name: 'NexMedia Sync Pro', icon: Layers },
-    { name: 'NexMedia Voice Studio', icon: Mic }
+    { name: 'Google Veo 3.1', renderIcon: () => <GoogleLogo className="w-4 h-4 shrink-0" /> },
+    { name: 'ByteDance Seedance 2.0', renderIcon: () => <ByteDanceLogo className="w-4 h-4 shrink-0" /> },
+    { name: 'xAI Grok Imagine', renderIcon: () => <XAILogo className="w-4 h-4 shrink-0 text-white" /> },
+    { name: 'NexMedia Sync Pro', renderIcon: () => <Layers className="w-4 h-4 text-violet-400 shrink-0" /> },
+    { name: 'NexMedia Voice Studio', renderIcon: () => <Mic className="w-4 h-4 text-fuchsia-400 shrink-0" /> }
   ];
 
   return (
@@ -48,18 +49,7 @@ export default function HeroSection() {
 
       <div className="relative z-10 w-full max-w-5xl mx-auto px-4 text-center flex flex-col justify-center flex-grow">
         
-        {/* Top Badge */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mx-auto mb-4"
-        >
-          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md text-[11px] md:text-xs font-medium text-white/80 shadow-[0_0_15px_rgba(139,92,246,0.15)]">
-            <Layers className="w-3.5 h-3.5 text-violet-400" />
-            <span>{isRtl ? 'منصة الإنتاج الرقمي والوسائط التوليدية' : 'Digital Media & Generative Production Studio'}</span>
-          </span>
-        </motion.div>
+
 
         {/* Headline */}
         <motion.h1
@@ -109,16 +99,9 @@ export default function HeroSection() {
             <ArrowIcon className={`w-4 h-4 md:w-5 md:h-5 relative transition-transform duration-300 ${isRtl ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
           </a>
           
-          <div className="flex flex-wrap justify-center items-center gap-x-3 gap-y-2 text-[11px] md:text-xs font-medium text-white/60 w-full">
-            <span className="flex items-center gap-1.5 bg-white/5 px-3 py-1 rounded-full border border-white/5 backdrop-blur-sm">
-              <CheckCircle2 className="w-3.5 h-3.5 text-violet-400" />
-              <span>{isRtl ? '10 نقاط مجانية للبدء' : '10 Free Credits to Start'}</span>
-            </span>
-            <span className="flex items-center gap-1.5 bg-white/5 px-3 py-1 rounded-full border border-white/5 backdrop-blur-sm">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{isRtl ? 'بدون بطاقة ائتمان' : 'No Credit Card Required'}</span>
-            </span>
-          </div>
+          <p className="text-xs text-white/40 font-medium tracking-wide">
+            {isRtl ? '10 نقاط مجانية للبدء • بدون بطاقة ائتمان' : '10 Free Credits to Start • No Credit Card Required'}
+          </p>
         </motion.div>
 
         {/* Infinite Marquee Section */}
@@ -151,15 +134,12 @@ export default function HeroSection() {
               animate={{ x: ["-50%", "0%"] }}
               transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
             >
-              {[...modelsMarquee, ...modelsMarquee, ...modelsMarquee, ...modelsMarquee, ...modelsMarquee, ...modelsMarquee].map((item, i) => {
-                const IconComp = item.icon;
-                return (
-                  <div key={`model-${i}`} className="inline-flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 bg-gradient-to-r from-violet-900/30 to-fuchsia-900/30 border border-violet-500/20 rounded-xl text-violet-100 text-xs md:text-sm font-semibold backdrop-blur-md shadow-[0_0_15px_rgba(139,92,246,0.1)]">
-                    <IconComp className="w-3.5 h-3.5 text-violet-400" />
-                    <span>{item.name}</span>
-                  </div>
-                );
-              })}
+              {[...modelsMarquee, ...modelsMarquee, ...modelsMarquee, ...modelsMarquee, ...modelsMarquee, ...modelsMarquee].map((item, i) => (
+                <div key={`model-${i}`} className="inline-flex items-center gap-2.5 px-4 py-2 md:px-5 md:py-2.5 bg-white/[0.04] border border-white/10 hover:border-violet-500/30 rounded-xl text-white/90 text-xs md:text-sm font-medium backdrop-blur-md transition-colors">
+                  {item.renderIcon()}
+                  <span>{item.name}</span>
+                </div>
+              ))}
             </motion.div>
           </div>
         </motion.div>

@@ -109,12 +109,7 @@ export default function PricingSection() {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <AnimatedReveal>
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-violet-500/30 bg-violet-500/10 text-violet-300 text-sm font-medium mb-4">
-              <Crown className="w-3.5 h-3.5" />
-              {t('badge')}
-            </span>
-          </AnimatedReveal>
+
 
           <AnimatedText
             text={t('title')}

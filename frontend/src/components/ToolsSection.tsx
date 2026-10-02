@@ -6,7 +6,6 @@ import Image from "next/image";
 import {
   Mic,
   Volume2,
-  Scissors,
   PenTool,
   ArrowLeft,
   ArrowRight,
@@ -14,7 +13,6 @@ import {
   Smile,
   Film,
   Layers,
-  Sparkles,
   Image as ImageIcon
 } from "lucide-react";
 import { AnimatedText, AnimatedReveal } from "./AnimatedText";
@@ -53,13 +51,11 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
     ? (isRtl ? 'تحت التحديث' : 'Maintenance')
     : statusInfo.isComingSoon 
       ? (isRtl ? 'قريباً' : 'Coming Soon')
-      : tool.badge;
+      : null;
 
   const displayBadgeColor = statusInfo.isMaintenanceMode
     ? "bg-orange-500/20 text-orange-300 border-orange-500/30"
-    : statusInfo.isComingSoon
-      ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/30"
-      : tool.badgeColor;
+    : "bg-cyan-500/20 text-cyan-300 border-cyan-500/30";
 
   const ctaText = statusInfo.isMaintenanceMode
     ? (isRtl ? 'تحت التحديث' : 'Maintenance')
@@ -326,12 +322,7 @@ export default function ToolsSection() {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <AnimatedReveal>
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-violet-500/30 bg-violet-500/10 text-violet-300 text-sm font-medium mb-4">
-              <Scissors className="w-3.5 h-3.5" />
-              {t('badge')}
-            </span>
-          </AnimatedReveal>
+
 
           <AnimatedText
             text={t('title')}
