@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLocale } from 'next-intl';
-import { ArrowRight, ArrowLeft, Sparkles, Video, Mic, Image as ImageIcon, Play, Sparkle, Film, Fingerprint } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Video, Mic, Film, Layers, Zap, CheckCircle2, ShieldCheck } from 'lucide-react';
 
 export default function HeroSection() {
   const locale = useLocale();
@@ -30,7 +29,11 @@ export default function HeroSection() {
   ];
 
   const modelsMarquee = [
-    '🚀 Google Veo 3.1', '🔥 xAI Grok', '✨ NexMedia Sync Pro', '🎙️ NexMedia Voice', '🤖 NexMedia AI'
+    { name: 'Google Veo 3.1', icon: Video },
+    { name: 'ByteDance Seedance 2.0', icon: Film },
+    { name: 'xAI Grok Imagine', icon: Zap },
+    { name: 'NexMedia Sync Pro', icon: Layers },
+    { name: 'NexMedia Voice Studio', icon: Mic }
   ];
 
   return (
@@ -52,9 +55,9 @@ export default function HeroSection() {
           transition={{ duration: 0.6 }}
           className="mx-auto mb-4"
         >
-          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md text-[10px] md:text-xs font-medium text-white/80 shadow-[0_0_15px_rgba(217,70,239,0.15)]">
-            <Sparkles className="w-3 h-3 md:w-3.5 md:h-3.5 text-fuchsia-400 animate-pulse" />
-            {isRtl ? 'أحدث نماذج الذكاء الاصطناعي العالمية بين يديك' : 'The latest global AI models at your fingertips'}
+          <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md text-[11px] md:text-xs font-medium text-white/80 shadow-[0_0_15px_rgba(139,92,246,0.15)]">
+            <Layers className="w-3.5 h-3.5 text-violet-400" />
+            <span>{isRtl ? 'منصة الإنتاج الرقمي والوسائط التوليدية' : 'Digital Media & Generative Production Studio'}</span>
           </span>
         </motion.div>
 
@@ -67,11 +70,11 @@ export default function HeroSection() {
         >
           {isRtl ? (
             <>
-              قوة الذكاء الاصطناعي في <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">خدمتك</span>
+              ستوديو الإنتاج المرئي والمسموع <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">المتكامل</span>
             </>
           ) : (
             <>
-              The Power of AI at <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">Your Service</span>
+              Next-Gen Visual & Audio <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">Production Studio</span>
             </>
           )}
         </motion.h1>
@@ -84,8 +87,8 @@ export default function HeroSection() {
           className="text-sm sm:text-base text-white/60 max-w-xl mx-auto mb-6 md:mb-8 leading-relaxed font-medium px-2"
         >
           {isRtl 
-            ? 'حوّل أفكارك إلى واقع مذهل. منصة واحدة تمنحك أقوى أدوات الذكاء الاصطناعي عالمياً لإنشاء المحتوى المرئي والمسموع باحترافية.'
-            : 'Turn your ideas into stunning reality. A single platform giving you the world\'s most powerful AI tools for visual and audio content creation.'}
+            ? 'حوّل الرؤى البصرية إلى أعمال متكاملة. أدوات متقدمة لتحريك الصور، توليد المشاهد، ومزامنة الصوت والشفاه بدقة سينمائية استثنائية.'
+            : 'Transform visual concepts into high-end media. Advanced tools for video generation, image animation, and flawless audio sync.'}
         </motion.p>
 
         {/* CTA Section */}
@@ -98,20 +101,22 @@ export default function HeroSection() {
           <a
             href="#tools"
             onClick={handleStartForFree}
-            className="group relative flex items-center justify-center gap-2 px-6 sm:px-7 py-3 md:py-3.5 rounded-xl text-white font-bold text-base sm:text-lg overflow-hidden shadow-[0_0_30px_rgba(139,92,246,0.25)] hover:shadow-[0_0_50px_rgba(217,70,239,0.4)] transition-all duration-300 hover:-translate-y-0.5 w-full sm:w-auto"
+            className="group relative flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl text-white font-bold text-base sm:text-lg overflow-hidden shadow-[0_0_30px_rgba(139,92,246,0.25)] hover:shadow-[0_0_50px_rgba(217,70,239,0.4)] transition-all duration-300 hover:-translate-y-0.5 w-full sm:w-auto"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-fuchsia-600 group-hover:from-violet-500 group-hover:to-fuchsia-500 transition-all duration-300" />
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-white/10 transition-opacity duration-300" />
-            <span className="relative">{isRtl ? '🚀 ابدأ تجربتك المجانية الآن' : '🚀 Start Your Free Trial Now'}</span>
+            <span className="relative">{isRtl ? 'ابدأ التجربة المجانية' : 'Start Your Free Trial'}</span>
             <ArrowIcon className={`w-4 h-4 md:w-5 md:h-5 relative transition-transform duration-300 ${isRtl ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
           </a>
           
-          <div className="flex flex-wrap justify-center items-center gap-x-2 gap-y-2 text-[11px] md:text-xs font-medium text-white/50 w-full">
-            <span className="flex items-center gap-1.5 bg-white/5 px-2.5 md:px-3 py-1 rounded-full border border-white/5 backdrop-blur-sm">
-              <span className="text-fuchsia-400 text-xs md:text-sm">🎁</span> {isRtl ? 'رصيد 10 كريدت مجاني للتجربة' : '10 Free Credits for Trial'}
+          <div className="flex flex-wrap justify-center items-center gap-x-3 gap-y-2 text-[11px] md:text-xs font-medium text-white/60 w-full">
+            <span className="flex items-center gap-1.5 bg-white/5 px-3 py-1 rounded-full border border-white/5 backdrop-blur-sm">
+              <CheckCircle2 className="w-3.5 h-3.5 text-violet-400" />
+              <span>{isRtl ? '10 نقاط مجانية للبدء' : '10 Free Credits to Start'}</span>
             </span>
-            <span className="flex items-center gap-1.5 bg-white/5 px-2.5 md:px-3 py-1 rounded-full border border-white/5 backdrop-blur-sm">
-              <span className="text-emerald-400 text-xs md:text-sm">💳</span> {isRtl ? 'لا يتطلب بطاقة ائتمان' : 'No Credit Card Required'}
+            <span className="flex items-center gap-1.5 bg-white/5 px-3 py-1 rounded-full border border-white/5 backdrop-blur-sm">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span>{isRtl ? 'بدون بطاقة ائتمان' : 'No Credit Card Required'}</span>
             </span>
           </div>
         </motion.div>
@@ -146,11 +151,15 @@ export default function HeroSection() {
               animate={{ x: ["-50%", "0%"] }}
               transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
             >
-              {[...modelsMarquee, ...modelsMarquee, ...modelsMarquee, ...modelsMarquee, ...modelsMarquee, ...modelsMarquee].map((item, i) => (
-                <div key={`model-${i}`} className="px-4 py-2 md:px-5 md:py-2.5 bg-gradient-to-r from-violet-900/30 to-fuchsia-900/30 border border-violet-500/20 rounded-xl text-violet-100 text-xs md:text-sm font-semibold backdrop-blur-md shadow-[0_0_15px_rgba(139,92,246,0.1)]">
-                  {item}
-                </div>
-              ))}
+              {[...modelsMarquee, ...modelsMarquee, ...modelsMarquee, ...modelsMarquee, ...modelsMarquee, ...modelsMarquee].map((item, i) => {
+                const IconComp = item.icon;
+                return (
+                  <div key={`model-${i}`} className="inline-flex items-center gap-2 px-4 py-2 md:px-5 md:py-2.5 bg-gradient-to-r from-violet-900/30 to-fuchsia-900/30 border border-violet-500/20 rounded-xl text-violet-100 text-xs md:text-sm font-semibold backdrop-blur-md shadow-[0_0_15px_rgba(139,92,246,0.1)]">
+                    <IconComp className="w-3.5 h-3.5 text-violet-400" />
+                    <span>{item.name}</span>
+                  </div>
+                );
+              })}
             </motion.div>
           </div>
         </motion.div>
