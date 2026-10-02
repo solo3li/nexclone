@@ -22,9 +22,12 @@ import { MaintenanceScreen } from "../../components/MaintenanceScreen";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
+  const isAr = locale === "ar";
   return {
-    title: "NexMedia - AI Tools Platform",
-    description: "Advanced AI tools platform - Text to Voice, Voice to Text, and more powered by AI",
+    title: isAr ? "NexMedia - منصة أدوات الميديا التوليدية" : "NexMedia - Generative Media Tools Platform",
+    description: isAr 
+      ? "منصة أدوات الذكاء الاصطناعي التوليدي المتقدمة لإنشاء وتحريك الفيديو والصور والصوت" 
+      : "Advanced Generative AI tools platform - Video, Image, and Audio generation powered by AI",
     manifest: "/manifest.json",
     appleWebApp: {
       capable: true,
@@ -79,6 +82,7 @@ async function getPublicSettings() {
 
 import { GoogleAuthProviderWrapper } from "../../components/GoogleAuthProviderWrapper";
 import { AuthSessionProvider } from "../../src/components/AuthSessionProvider";
+import GTMRouteTracker from "../../src/components/GTMRouteTracker";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -124,6 +128,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </noscript>
         <NextIntlClientProvider messages={messages}>
           <AuthSessionProvider>
+            <GTMRouteTracker />
             <GoogleAuthProviderWrapper clientId={googleClientId}>
               {isMaintenanceMode ? (
                 <MaintenanceScreen endDate={maintenanceEndDate} />

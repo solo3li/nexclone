@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useAppStore } from "../../../src/store/useAppStore";
 import { resolveToolStatus } from "../../../src/utils/toolStatus";
+import { trackCtaClick } from "../../../src/utils/gtm";
 
 export default function ToolsPage() {
   const locale = useLocale();
@@ -261,6 +262,7 @@ export default function ToolsPage() {
                 >
                   <Link
                     href={tool.href}
+                    onClick={() => trackCtaClick('tools_catalog', tool.id)}
                     className={`flex flex-col h-full bg-[#120822]/80 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-2 ${tool.border} group shadow-xl hover:shadow-2xl ${tool.glow}`}
                     dir={isRtl ? 'rtl' : 'ltr'}
                   >

@@ -33,6 +33,15 @@ import { useAppStore } from "../../../../src/store/useAppStore";
 import { signalRNotificationService } from "../../../../lib/signalr-client";
 import { BottomSheetSelect } from "../../../../components/ui/BottomSheetSelect";
 import { ModelBrandIcon } from "../../../../src/components/BrandLogos";
+import { 
+  trackToolView, 
+  trackToolModelChange, 
+  trackToolGenerateStart, 
+  trackToolGenerateSuccess, 
+  trackToolGenerateError, 
+  trackToolDownload, 
+  trackInsufficientCredits 
+} from "../../../../src/utils/gtm";
 
 interface ModelOption {
   id: string;
@@ -138,6 +147,10 @@ const ASPECT_RATIOS = ALL_ASPECT_RATIOS;
 export default function ImageToVideoPage() {
   const locale = useLocale();
   const isRtl = locale === 'ar';
+
+  useEffect(() => {
+    trackToolView("image-to-video", isRtl ? "تحريك الصور إلى فيديو" : "Image to Video");
+  }, [isRtl]);
   const { user, setUser } = useAppStore();
 
   // Selected Options
@@ -280,6 +293,7 @@ export default function ImageToVideoPage() {
     const model = modelOptions.find(m => m.id === modelId);
     if (model) {
       setSelectedModelId(modelId);
+      trackToolModelChange("image-to-video", modelId, model.name);
       if (!model.supportedResolutions.includes(resolution)) {
         setResolution(model.supportedResolutions.includes("1080p") ? "1080p" : model.supportedResolutions[0]);
       }
@@ -339,6 +353,13 @@ export default function ImageToVideoPage() {
               setIsLoading(false);
               setSuccessMessage(isRtl ? "🎉 تم تحريك ورندر الفيديو بنجاح!" : "🎉 Image animated successfully!");
 
+              trackToolGenerateSuccess({
+                toolId: "image-to-video",
+                modelId: currentModel.id,
+                taskId: data.id || activeTaskId,
+                durationSeconds: elapsedSeconds,
+              });
+
               // Refresh user balance
               api.get("/api/auth/me").then(uRes => {
                 if (uRes.data) setUser(uRes.data);
@@ -351,6 +372,11 @@ export default function ImageToVideoPage() {
             }
           } else if (data && (data.status === "failed" || data.status === "error")) {
             setError(data.error || (isRtl ? "فشلت عملية تحريك الصورة" : "Animation generation failed"));
+            trackToolGenerateError({
+              toolId: "image-to-video",
+              modelId: currentModel.id,
+              errorMessage: data.error,
+            });
             setActiveTaskId(null);
             setIsLoading(false);
           }
@@ -494,6 +520,11 @@ export default function ImageToVideoPage() {
 
   // Safe Cross-Origin HD Download
   const handleDownloadVideo = async (url: string, filename?: string) => {
+    trackToolDownload({
+      toolId: "image-to-video",
+      format: "mp4",
+      resolution: resolution,
+    });
     try {
       const response = await fetch(url);
       const blob = await response.blob();
@@ -529,6 +560,23 @@ export default function ImageToVideoPage() {
     setIsLoading(true);
     setError(null);
     setSuccessMessage(null);
+
+    if (!hasSufficientCredits) {
+      trackInsufficientCredits({
+        toolId: "image-to-video",
+        requiredCredits: estimatedCost || 0,
+        currentBalance: totalUserCredits
+      });
+    }
+
+    trackToolGenerateStart({
+      toolId: "image-to-video",
+      modelId: currentModel.id,
+      resolution,
+      aspectRatio,
+      duration,
+      estimatedCredits: estimatedCost ?? undefined,
+    });
 
     try {
       const formData = new FormData();
@@ -570,7 +618,13 @@ export default function ImageToVideoPage() {
         );
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || (isRtl ? "حدث خطأ أثناء إرسال طلب التوليد" : "Error submitting animation task"));
+      const errMsg = err.response?.data?.error || (isRtl ? "حدث خطأ أثناء إرسال طلب التوليد" : "Error submitting animation task");
+      setError(errMsg);
+      trackToolGenerateError({
+        toolId: "image-to-video",
+        modelId: currentModel.id,
+        errorMessage: errMsg,
+      });
       setIsLoading(false);
     }
   };

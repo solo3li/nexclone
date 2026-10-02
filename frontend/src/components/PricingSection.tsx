@@ -6,15 +6,19 @@ import { AnimatedText, AnimatedReveal } from "./AnimatedText";
 import { useTranslations, useLocale } from "next-intl";
 import { usePlansStore } from "../store/usePlansStore";
 import { useEffect } from "react";
+import { useRouter } from "../i18n/routing";
+import { trackViewPricing, trackBeginCheckout } from "../utils/gtm";
 
 export default function PricingSection() {
   const [yearly, setYearly] = useState(false);
   const t = useTranslations("Pricing");
   const locale = useLocale();
+  const router = useRouter();
   const { plans: dbPlans, fetchPlans } = usePlansStore();
 
   useEffect(() => {
     fetchPlans();
+    trackViewPricing('home_section');
   }, [fetchPlans]);
 
   const ArrowIcon = locale === 'ar' ? ArrowLeft : ArrowRight;
@@ -234,6 +238,16 @@ export default function PricingSection() {
 
                     {/* Button */}
                     <button
+                      onClick={() => {
+                        trackBeginCheckout({
+                          planId: plan.name,
+                          planName: plan.name,
+                          price: parseFloat(yearly ? plan.price.yearly : plan.price.monthly) || 0,
+                          currency: plan.currency || "USD",
+                          billingCycle: yearly ? "yearly" : "monthly",
+                        });
+                        router.push('/pricing');
+                      }}
                       className={`w-full py-3.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center justify-center gap-2 ${plan.buttonStyle}`}
                     >
                       {plan.button}

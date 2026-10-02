@@ -31,6 +31,15 @@ import { useAppStore } from "../../../../src/store/useAppStore";
 import { signalRNotificationService } from "../../../../lib/signalr-client";
 import { BottomSheetSelect } from "../../../../components/ui/BottomSheetSelect";
 import { ModelBrandIcon } from "../../../../src/components/BrandLogos";
+import { 
+  trackToolView, 
+  trackToolModelChange, 
+  trackToolGenerateStart, 
+  trackToolGenerateSuccess, 
+  trackToolGenerateError, 
+  trackToolDownload, 
+  trackInsufficientCredits 
+} from "../../../../src/utils/gtm";
 
 interface ModelOption {
   id: string;
@@ -147,6 +156,11 @@ const SAMPLE_PROMPTS = {
 export default function TextToVideoPage() {
   const locale = useLocale();
   const isRtl = locale === 'ar';
+
+  useEffect(() => {
+    trackToolView("text-to-video", isRtl ? "توليد فيديو من نص" : "Text to Video");
+  }, [isRtl]);
+
   const { user, setUser } = useAppStore();
 
   // Selected Options
@@ -169,6 +183,7 @@ export default function TextToVideoPage() {
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Generated Outputs
   const [generatedVideo, setGeneratedVideo] = useState<GeneratedVideoItem | null>(null);
@@ -269,6 +284,7 @@ export default function TextToVideoPage() {
     const model = modelOptions.find(m => m.id === modelId);
     if (model) {
       setSelectedModelId(modelId);
+      trackToolModelChange("text-to-video", modelId, model.name);
       if (!model.supportedResolutions.includes(resolution)) {
         setResolution(model.supportedResolutions.includes("1080p") ? "1080p" : model.supportedResolutions[0]);
       }
@@ -328,6 +344,13 @@ export default function TextToVideoPage() {
               setIsLoading(false);
               setSuccessMessage(isRtl ? "🎉 تم رندر وتوليد الفيديو بنجاح!" : "🎉 Video rendered successfully!");
 
+              trackToolGenerateSuccess({
+                toolId: "text-to-video",
+                modelId: currentModel.id,
+                taskId: data.id || activeTaskId,
+                durationSeconds: elapsedSeconds,
+              });
+
               // Refresh user balance
               api.get("/api/auth/me").then(uRes => {
                 if (uRes.data) setUser(uRes.data);
@@ -340,6 +363,11 @@ export default function TextToVideoPage() {
             }
           } else if (data && (data.status === "failed" || data.status === "error")) {
             setError(data.error || (isRtl ? "فشلت عملية توليد الفيديو" : "Video generation failed"));
+            trackToolGenerateError({
+              toolId: "text-to-video",
+              modelId: currentModel.id,
+              errorMessage: data.error,
+            });
             setActiveTaskId(null);
             setIsLoading(false);
           }
@@ -382,6 +410,11 @@ export default function TextToVideoPage() {
 
   // Safe Cross-Origin HD Download
   const handleDownloadVideo = async (url: string, filename?: string) => {
+    trackToolDownload({
+      toolId: "text-to-video",
+      format: "mp4",
+      resolution: resolution,
+    });
     try {
       const response = await fetch(url);
       const blob = await response.blob();
@@ -408,6 +441,25 @@ export default function TextToVideoPage() {
     setIsLoading(true);
     setError(null);
     setSuccessMessage(null);
+
+    const totalUserCredits = (user?.standardCredits || 0) + (user?.premiumCredits || 0);
+    const hasSufficientCredits = estimatedCost === null || totalUserCredits >= estimatedCost;
+    if (!hasSufficientCredits) {
+      trackInsufficientCredits({
+        toolId: "text-to-video",
+        requiredCredits: estimatedCost || 0,
+        currentBalance: totalUserCredits
+      });
+    }
+
+    trackToolGenerateStart({
+      toolId: "text-to-video",
+      modelId: currentModel.id,
+      resolution,
+      aspectRatio,
+      duration: (currentModel.family === "grok" || currentModel.family === "seedance") ? duration : 8,
+      estimatedCredits: estimatedCost ?? undefined,
+    });
 
     try {
       const formData = new FormData();
@@ -436,7 +488,13 @@ export default function TextToVideoPage() {
         );
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || (isRtl ? "حدث خطأ أثناء إرسال طلب التوليد" : "Error submitting video task"));
+      const errMsg = err.response?.data?.error || (isRtl ? "حدث خطأ أثناء إرسال طلب التوليد" : "Error submitting video task");
+      setError(errMsg);
+      trackToolGenerateError({
+        toolId: "text-to-video",
+        modelId: currentModel.id,
+        errorMessage: errMsg,
+      });
       setIsLoading(false);
     }
   };
@@ -522,6 +580,16 @@ export default function TextToVideoPage() {
               <div className="space-y-0.5">
                 <p className="font-bold">{isRtl ? "خطأ في التوليد" : "Generation Error"}</p>
                 <p className="text-xs text-red-300/80">{error}</p>
+              </div>
+            </div>
+          )}
+
+          {successMessage && (
+            <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-sm flex items-start gap-3 backdrop-blur-md">
+              <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5 text-emerald-400" />
+              <div className="space-y-0.5">
+                <p className="font-bold">{isRtl ? "نجاح" : "Success"}</p>
+                <p className="text-xs text-emerald-300/80">{successMessage}</p>
               </div>
             </div>
           )}

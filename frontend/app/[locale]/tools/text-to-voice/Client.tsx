@@ -15,6 +15,15 @@ import { useToolsStore } from '../../../../src/store/useToolsStore';
 import { useRouter, Link } from "../../../../src/i18n/routing";
 import { ArrowLeft, ArrowRight, Wallet } from "lucide-react";
 import ToolInstructions from "../../../../components/ToolInstructions";
+import { 
+  trackToolView, 
+  trackToolModelChange, 
+  trackToolGenerateStart, 
+  trackToolGenerateSuccess, 
+  trackToolGenerateError, 
+  trackToolDownload, 
+  trackInsufficientCredits 
+} from "../../../../src/utils/gtm";
 
 interface VoiceProfile {
   id: number;
@@ -37,6 +46,11 @@ function TextToVoicePage() {
   const t = useTranslations("TextToVoice");
   const locale = useLocale();
   const isRtl = locale === 'ar';
+
+  useEffect(() => {
+    trackToolView("text-to-voice", isRtl ? "تحويل النص إلى صوت" : "Text to Voice");
+  }, [isRtl]);
+
   const { user, isAuthenticated, hasPhoneNumber, setUser, updateUser } = useAppStore();
   const router = useRouter();
   const ArrowIcon = locale === 'ar' ? ArrowRight : ArrowLeft;
@@ -148,13 +162,25 @@ function TextToVoicePage() {
             if (res.data) {
               if (res.data.status === 'completed') {
                 setAudioUrl(res.data.fileUrl);
+                trackToolGenerateSuccess({
+                  toolId: "text-to-voice",
+                  modelId: selectedVoice,
+                  taskId: currentTaskId,
+                  durationSeconds: elapsedSeconds,
+                });
                 setIsProcessing(false);
                 setCurrentTaskId(null);
                 api.get("/api/auth/me").then(userRes => {
                   if (userRes.data) setUser(userRes.data);
                 }).catch(err => console.error(err));
               } else if (res.data.status === 'failed') {
-                setError(res.data.errorMessage || 'Operation failed');
+                const errMsg = res.data.errorMessage || 'Operation failed';
+                setError(errMsg);
+                trackToolGenerateError({
+                  toolId: "text-to-voice",
+                  modelId: selectedVoice,
+                  errorMessage: errMsg,
+                });
                 setIsProcessing(false);
                 setCurrentTaskId(null);
               }
@@ -213,6 +239,11 @@ function TextToVoicePage() {
       const totalCredits = (user?.standardCredits || 0) + (user?.premiumCredits || 0);
 
       if (totalCredits < cost) {
+        trackInsufficientCredits({
+          toolId: "text-to-voice",
+          requiredCredits: cost,
+          currentBalance: totalCredits
+        });
         setError(getInsufficientCreditsMsg());
         return;
       }
@@ -254,6 +285,12 @@ function TextToVoicePage() {
     setError("");
     setAudioUrl(null);
 
+    trackToolGenerateStart({
+      toolId: "text-to-voice",
+      modelId: selectedVoice,
+      estimatedCredits: pendingCost || estimatedCost || undefined,
+    });
+
     let instruction = "";
     if (languageMode === 'other') {
       instruction += `Language: ${selectedOtherLanguage}. `;
@@ -281,13 +318,25 @@ function TextToVoicePage() {
         }).catch(err => console.error("Failed to update user profile", err));
       } else if (responseData && responseData.audioUrl) {
         setAudioUrl(responseData.audioUrl);
+        trackToolGenerateSuccess({
+          toolId: "text-to-voice",
+          modelId: selectedVoice,
+          taskId: responseData.id || undefined,
+          durationSeconds: elapsedSeconds,
+        });
         setIsProcessing(false);
       } else {
         throw new Error("No audio URL or task ID returned");
       }
     } catch (err: any) {
       console.error(err);
-      setError(err.response?.data?.error || t('error'));
+      const errMsg = err.response?.data?.error || t('error');
+      setError(errMsg);
+      trackToolGenerateError({
+        toolId: "text-to-voice",
+        modelId: selectedVoice,
+        errorMessage: errMsg,
+      });
       setIsProcessing(false);
       setCurrentTaskId(null);
     } finally {
@@ -297,6 +346,10 @@ function TextToVoicePage() {
 
   const downloadAudio = () => {
     if (!audioUrl) return;
+    trackToolDownload({
+      toolId: "text-to-voice",
+      format: "mp3",
+    });
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.169.58.204.169.nip.io';
     const proxyUrl = `${apiUrl}/api/video/download-proxy?url=${encodeURIComponent(audioUrl)}&type=audio`;
     

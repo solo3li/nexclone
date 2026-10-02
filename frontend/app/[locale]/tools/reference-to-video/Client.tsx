@@ -32,6 +32,15 @@ import { useAppStore } from "../../../../src/store/useAppStore";
 import { signalRNotificationService } from "../../../../lib/signalr-client";
 import { BottomSheetSelect } from "../../../../components/ui/BottomSheetSelect";
 import { ModelBrandIcon } from "../../../../src/components/BrandLogos";
+import { 
+  trackToolView, 
+  trackToolModelChange, 
+  trackToolGenerateStart, 
+  trackToolGenerateSuccess, 
+  trackToolGenerateError, 
+  trackToolDownload, 
+  trackInsufficientCredits 
+} from "../../../../src/utils/gtm";
 
 interface ModelOption {
   id: string;
@@ -119,6 +128,11 @@ const FRAME_SLOTS = [
 export default function ReferenceToVideoPage() {
   const locale = useLocale();
   const isRtl = locale === 'ar';
+
+  useEffect(() => {
+    trackToolView("reference-to-video", isRtl ? "توليد فيديو بالمرجعيات" : "Reference to Video");
+  }, [isRtl]);
+
   const { user, setUser } = useAppStore();
 
   // Selected Options (Google Veo 3.1 only)
@@ -252,6 +266,7 @@ export default function ReferenceToVideoPage() {
     const model = modelOptions.find(m => m.id === modelId);
     if (model) {
       setSelectedModelId(modelId);
+      trackToolModelChange("reference-to-video", modelId, model.name);
       if (!model.supportedResolutions.includes(resolution)) {
         setResolution(model.supportedResolutions.includes("1080p") ? "1080p" : model.supportedResolutions[0]);
       }
@@ -338,6 +353,13 @@ export default function ReferenceToVideoPage() {
               setIsLoading(false);
               setSuccessMessage(isRtl ? "🎉 تم رندر وتوليد الفيديو المرجعي بنجاح!" : "🎉 Reference video generated successfully!");
 
+              trackToolGenerateSuccess({
+                toolId: "reference-to-video",
+                modelId: currentModel.id,
+                taskId: data.id || activeTaskId,
+                durationSeconds: elapsedSeconds,
+              });
+
               // Refresh user balance
               api.get("/api/auth/me").then(uRes => {
                 if (uRes.data) setUser(uRes.data);
@@ -350,6 +372,11 @@ export default function ReferenceToVideoPage() {
             }
           } else if (data && (data.status === "failed" || data.status === "error")) {
             setError(data.error || (isRtl ? "فشلت عملية توليد الفيديو المرجعي" : "Reference video generation failed"));
+            trackToolGenerateError({
+              toolId: "reference-to-video",
+              modelId: currentModel.id,
+              errorMessage: data.error,
+            });
             setActiveTaskId(null);
             setIsLoading(false);
           }
@@ -480,6 +507,11 @@ export default function ReferenceToVideoPage() {
 
   // Safe Cross-Origin HD Download
   const handleDownloadVideo = async (url: string, filename?: string) => {
+    trackToolDownload({
+      toolId: "reference-to-video",
+      format: "mp4",
+      resolution: resolution,
+    });
     try {
       const response = await fetch(url);
       const blob = await response.blob();
@@ -509,6 +541,23 @@ export default function ReferenceToVideoPage() {
     setIsLoading(true);
     setError(null);
     setSuccessMessage(null);
+
+    if (!hasSufficientCredits) {
+      trackInsufficientCredits({
+        toolId: "reference-to-video",
+        requiredCredits: estimatedCost || 0,
+        currentBalance: totalUserCredits
+      });
+    }
+
+    trackToolGenerateStart({
+      toolId: "reference-to-video",
+      modelId: currentModel.id,
+      resolution,
+      aspectRatio,
+      duration: isSeedance ? duration : 8,
+      estimatedCredits: estimatedCost ?? undefined,
+    });
 
     try {
       const formData = new FormData();
@@ -546,7 +595,13 @@ export default function ReferenceToVideoPage() {
         );
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || (isRtl ? "حدث خطأ أثناء إرسال طلب التوليد" : "Error submitting reference video task"));
+      const errMsg = err.response?.data?.error || (isRtl ? "حدث خطأ أثناء إرسال طلب التوليد" : "Error submitting reference video task");
+      setError(errMsg);
+      trackToolGenerateError({
+        toolId: "reference-to-video",
+        modelId: currentModel.id,
+        errorMessage: errMsg,
+      });
       setIsLoading(false);
     }
   };

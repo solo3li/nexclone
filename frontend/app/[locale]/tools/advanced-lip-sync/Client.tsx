@@ -34,6 +34,15 @@ import { useAppStore } from "../../../../src/store/useAppStore";
 import { useToolsStore } from "../../../../src/store/useToolsStore";
 import api from "../../../../src/utils/api";
 import MediaTrimmer from "../../../../components/MediaTrimmer";
+import { 
+  trackToolView, 
+  trackToolModelChange, 
+  trackToolGenerateStart, 
+  trackToolGenerateSuccess, 
+  trackToolGenerateError, 
+  trackToolDownload, 
+  trackInsufficientCredits 
+} from "../../../../src/utils/gtm";
 
 interface LipSyncModel {
   id: string;
@@ -70,6 +79,11 @@ const EXPRESSION_OPTIONS = [
 function AdvancedLipSyncPage() {
   const locale = useLocale();
   const isRtl = locale === 'ar';
+
+  useEffect(() => {
+    trackToolView("advanced-lip-sync", isRtl ? "مزامنة الشفاه المتقدمة" : "Advanced Lip Sync");
+  }, [isRtl]);
+
   const { user, setUser, isAuthenticated } = useAppStore();
   const { startLipsync } = useToolsStore();
 
@@ -193,11 +207,23 @@ function AdvancedLipSyncPage() {
               setIsProcessing(false);
               setCurrentTaskId(null);
               setSuccessMessage(isRtl ? "🎉 تمت مزامنة الشفاه بنجاح! يمكنك الآن مشاهدة وتحميل الفيديو." : "🎉 Lip sync completed successfully!");
+              trackToolGenerateSuccess({
+                toolId: "advanced-lip-sync",
+                modelId: selectedModelId,
+                taskId: currentTaskId || data.id,
+                durationSeconds: elapsedSeconds,
+              });
               api.get("/api/auth/me").then(uRes => {
                 if (uRes.data) setUser(uRes.data);
               }).catch(() => {});
             } else if (data && data.status === "failed") {
-              setError(data.error || data.errorMessage || (isRtl ? "فشلت عملية مزامنة الشفاه" : "Lip sync operation failed"));
+              const errMsg = data.error || data.errorMessage || (isRtl ? "فشلت عملية مزامنة الشفاه" : "Lip sync operation failed");
+              setError(errMsg);
+              trackToolGenerateError({
+                toolId: "advanced-lip-sync",
+                modelId: selectedModelId,
+                errorMessage: errMsg,
+              });
               setIsProcessing(false);
               setCurrentTaskId(null);
             }
@@ -295,6 +321,21 @@ function AdvancedLipSyncPage() {
     setSuccessMessage(null);
     setOutputVideoUrl(null);
 
+    if (!hasSufficientCredits) {
+      trackInsufficientCredits({
+        toolId: "advanced-lip-sync",
+        requiredCredits: estimatedCost || 0,
+        currentBalance: totalUserCredits
+      });
+    }
+
+    trackToolGenerateStart({
+      toolId: "advanced-lip-sync",
+      modelId: selectedModelId,
+      duration: audioDuration ?? videoDuration ?? undefined,
+      estimatedCredits: estimatedCost ?? undefined,
+    });
+
     try {
       const formData = new FormData();
       formData.append("video", videoFile);
@@ -313,7 +354,13 @@ function AdvancedLipSyncPage() {
         throw new Error("No task ID returned");
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || (isRtl ? "حدث خطأ أثناء إرسال طلب المزامنة" : "Error starting lip sync"));
+      const errMsg = err.response?.data?.error || (isRtl ? "حدث خطأ أثناء إرسال طلب المزامنة" : "Error starting lip sync");
+      setError(errMsg);
+      trackToolGenerateError({
+        toolId: "advanced-lip-sync",
+        modelId: selectedModelId,
+        errorMessage: errMsg,
+      });
       setIsProcessing(false);
       setCurrentTaskId(null);
     }
@@ -327,6 +374,10 @@ function AdvancedLipSyncPage() {
 
   const downloadVideo = () => {
     if (!outputVideoUrl) return;
+    trackToolDownload({
+      toolId: "advanced-lip-sync",
+      format: "mp4",
+    });
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.169.58.204.169.nip.io';
     const proxyUrl = `${apiUrl}/api/video/download-proxy?url=${encodeURIComponent(outputVideoUrl)}`;
     
@@ -774,7 +825,11 @@ function AdvancedLipSyncPage() {
                       <button
                         key={m.id}
                         type="button"
-                        onClick={() => { setSelectedModelId(m.id); setIsModelDropdownOpen(false); }}
+                        onClick={() => { 
+                          setSelectedModelId(m.id); 
+                          trackToolModelChange("advanced-lip-sync", m.id, m.name);
+                          setIsModelDropdownOpen(false); 
+                        }}
                         className={`w-full text-start p-2.5 rounded-lg transition-all flex items-center justify-between gap-2 ${
                           isSelected 
                             ? "bg-fuchsia-600/25 text-white border border-fuchsia-500/40" 

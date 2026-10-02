@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
 import { AnimatedText, AnimatedReveal, GlowPulse } from "./AnimatedText";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "../i18n/routing";
+import { trackCtaClick } from "../utils/gtm";
 
 export default function CTASection() {
   const t = useTranslations("CTA");
@@ -44,7 +45,11 @@ export default function CTASection() {
 
         <AnimatedReveal delay={0.4}>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/pricing" className="group">
+            <Link 
+              href="/pricing" 
+              className="group"
+              onClick={() => trackCtaClick('cta_section', t('button'))}
+            >
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.97 }}

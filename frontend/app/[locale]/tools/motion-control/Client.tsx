@@ -35,6 +35,14 @@ import { useAppStore } from "../../../../src/store/useAppStore";
 import { useToolsStore } from "../../../../src/store/useToolsStore";
 import api from "../../../../src/utils/api";
 import MediaTrimmer from "../../../../components/MediaTrimmer";
+import { 
+  trackToolView, 
+  trackToolGenerateStart, 
+  trackToolGenerateSuccess, 
+  trackToolGenerateError, 
+  trackToolDownload, 
+  trackInsufficientCredits 
+} from "../../../../src/utils/gtm";
 
 const SAMPLE_MOTION_PROMPTS = {
   ar: [
@@ -54,6 +62,11 @@ const SAMPLE_MOTION_PROMPTS = {
 function MotionControlPage() {
   const locale = useLocale();
   const isRtl = locale === 'ar';
+
+  useEffect(() => {
+    trackToolView("motion-control", isRtl ? "التحكم بالحركة ونقلها" : "Motion Control");
+  }, [isRtl]);
+
   const { user, setUser, isAuthenticated } = useAppStore();
   const { startMotionControl, estimateMotionControl } = useToolsStore();
 
@@ -159,11 +172,21 @@ function MotionControlPage() {
                 setIsProcessing(false);
                 setCurrentTaskId(null);
                 setSuccessMessage(isRtl ? "🎉 اكتمل نقل الحركة بنجاح! يمكنك الآن مشاهدة وتحميل الفيديو." : "🎉 Motion transfer completed successfully!");
+                trackToolGenerateSuccess({
+                  toolId: "motion-control",
+                  taskId: currentTaskId || res.data.id,
+                  durationSeconds: elapsedSeconds,
+                });
                 api.get("/api/auth/me").then(uRes => {
                   if (uRes.data) setUser(uRes.data);
                 }).catch(() => {});
               } else if (res.data.status === 'failed') {
-                setError(res.data.errorMessage || (isRtl ? "فشلت عملية نقل الحركة" : "Operation failed"));
+                const errMsg = res.data.errorMessage || (isRtl ? "فشلت عملية نقل الحركة" : "Operation failed");
+                setError(errMsg);
+                trackToolGenerateError({
+                  toolId: "motion-control",
+                  errorMessage: errMsg,
+                });
                 setIsProcessing(false);
                 setCurrentTaskId(null);
               }
@@ -246,6 +269,22 @@ function MotionControlPage() {
     setSuccessMessage(null);
     setOutputVideoUrl(null);
 
+    const totalUserCredits = (user?.standardCredits || 0) + (user?.premiumCredits || 0);
+    const hasSufficientCredits = estimatedCost === null || totalUserCredits >= estimatedCost;
+    if (!hasSufficientCredits) {
+      trackInsufficientCredits({
+        toolId: "motion-control",
+        requiredCredits: estimatedCost || 0,
+        currentBalance: totalUserCredits
+      });
+    }
+
+    trackToolGenerateStart({
+      toolId: "motion-control",
+      resolution,
+      estimatedCredits: estimatedCost ?? undefined,
+    });
+
     try {
       const formData = new FormData();
       formData.append("image", imageFile);
@@ -267,7 +306,12 @@ function MotionControlPage() {
         throw new Error("No task ID returned");
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || (isRtl ? "حدث خطأ أثناء بدء عملية نسخ الحركة" : "Error starting motion transfer"));
+      const errMsg = err.response?.data?.error || (isRtl ? "حدث خطأ أثناء بدء عملية نسخ الحركة" : "Error starting motion transfer");
+      setError(errMsg);
+      trackToolGenerateError({
+        toolId: "motion-control",
+        errorMessage: errMsg,
+      });
       setIsProcessing(false);
       setCurrentTaskId(null);
     }
@@ -281,6 +325,11 @@ function MotionControlPage() {
 
   const downloadVideo = () => {
     if (!outputVideoUrl) return;
+    trackToolDownload({
+      toolId: "motion-control",
+      format: "mp4",
+      resolution,
+    });
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.169.58.204.169.nip.io';
     const proxyUrl = `${apiUrl}/api/video/download-proxy?url=${encodeURIComponent(outputVideoUrl)}`;
     
@@ -459,7 +508,7 @@ function MotionControlPage() {
                   file={videoFile}
                   type="video"
                   isRtl={isRtl}
-                  accentColor="cyan"
+                  accentColor="violet"
                   onTrimmed={(f) => {
                     setVideoFile(f);
                     setVideoPreview(URL.createObjectURL(f));

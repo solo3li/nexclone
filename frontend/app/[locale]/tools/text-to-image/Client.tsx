@@ -31,6 +31,15 @@ import api from "../../../../src/utils/api";
 import { useAppStore } from "../../../../src/store/useAppStore";
 import { signalRNotificationService } from "../../../../lib/signalr-client";
 import { ModelBrandIcon } from "../../../../src/components/BrandLogos";
+import { 
+  trackToolView, 
+  trackToolModelChange, 
+  trackToolGenerateStart, 
+  trackToolGenerateSuccess, 
+  trackToolGenerateError, 
+  trackToolDownload, 
+  trackInsufficientCredits 
+} from "../../../../src/utils/gtm";
 
 interface ModelOption {
   id: string;
@@ -100,6 +109,11 @@ const SAMPLE_IMAGE_PROMPTS = {
 export default function TextToImagePage() {
   const locale = useLocale();
   const isRtl = locale === 'ar';
+
+  useEffect(() => {
+    trackToolView("text-to-image", isRtl ? "توليد الصور بالذكاء الاصطناعي" : "Text to Image");
+  }, [isRtl]);
+
   const { user, setUser } = useAppStore();
 
   // Selected Options
@@ -215,6 +229,7 @@ export default function TextToImagePage() {
     const model = modelOptions.find(m => m.id === modelId);
     if (model) {
       setSelectedModelId(modelId);
+      trackToolModelChange("text-to-image", modelId, model.name);
     }
     setIsModelDropdownOpen(false);
   };
@@ -250,6 +265,13 @@ export default function TextToImagePage() {
               setIsLoading(false);
               setSuccessMessage(isRtl ? "🎉 تم توليد صورتك بنجاح!" : "🎉 Image rendered successfully!");
 
+              trackToolGenerateSuccess({
+                toolId: "text-to-image",
+                modelId: currentModel.id,
+                taskId: data.id || activeTaskId,
+                durationSeconds: elapsedSeconds,
+              });
+
               // Refresh user balance
               api.get("/api/auth/me").then(uRes => {
                 if (uRes.data) setUser(uRes.data);
@@ -262,6 +284,11 @@ export default function TextToImagePage() {
             }
           } else if (data && (data.status === "failed" || data.status === "error")) {
             setError(data.error || (isRtl ? "فشلت عملية توليد الصورة" : "Image generation failed"));
+            trackToolGenerateError({
+              toolId: "text-to-image",
+              modelId: currentModel.id,
+              errorMessage: data.error,
+            });
             setActiveTaskId(null);
             setIsLoading(false);
           }
@@ -319,6 +346,11 @@ export default function TextToImagePage() {
 
   // Safe Cross-Origin HD Download
   const handleDownloadImage = async (url: string, filename?: string) => {
+    trackToolDownload({
+      toolId: "text-to-image",
+      format: "png",
+      resolution: aspectRatio,
+    });
     try {
       let fetchUrl = url;
       if (url.includes("tempfile.mediaoss.bar")) {
@@ -368,6 +400,23 @@ export default function TextToImagePage() {
     setError(null);
     setSuccessMessage(null);
 
+    const totalUserCredits = (user?.standardCredits || 0) + (user?.premiumCredits || 0);
+    const requiredCredits = currentModel.pricePerImage || 2;
+    if (totalUserCredits < requiredCredits) {
+      trackInsufficientCredits({
+        toolId: "text-to-image",
+        requiredCredits,
+        currentBalance: totalUserCredits
+      });
+    }
+
+    trackToolGenerateStart({
+      toolId: "text-to-image",
+      modelId: currentModel.id,
+      aspectRatio,
+      estimatedCredits: requiredCredits,
+    });
+
     try {
       const formData = new FormData();
       let fullPrompt = prompt;
@@ -398,7 +447,13 @@ export default function TextToImagePage() {
         );
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || (isRtl ? "حدث خطأ أثناء إرسال طلب التوليد" : "Error submitting image task"));
+      const errMsg = err.response?.data?.error || (isRtl ? "حدث خطأ أثناء إرسال طلب التوليد" : "Error submitting image task");
+      setError(errMsg);
+      trackToolGenerateError({
+        toolId: "text-to-image",
+        modelId: currentModel.id,
+        errorMessage: errMsg,
+      });
       setIsLoading(false);
     }
   };

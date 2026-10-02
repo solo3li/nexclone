@@ -13,6 +13,7 @@ import Navbar from "../../../../src/components/Navbar";
 import Footer from "../../../../src/components/Footer";
 import MobileBottomNav from "../../../../src/components/MobileBottomNav";
 import CursorGlow from "../../../../src/components/CursorGlow";
+import { trackPurchase } from '../../../../src/utils/gtm';
 
 function SuccessContent() {
   const locale = useLocale();
@@ -47,6 +48,13 @@ function SuccessContent() {
         if (res.data) {
           useAppStore.getState().setUser(res.data);
           useAuthStore.getState().setUser(res.data);
+          trackPurchase({
+            transactionId: token || searchParams.get('txId') || undefined,
+            value: res.data.subscription?.price || 0,
+            currency: 'USD',
+            planName: res.data.subscription?.planName || 'Plan',
+            creditsAdded: res.data.standardCredits,
+          });
         }
       } catch (err) {
         console.warn('[PaymentSuccess] session refresh error:', err);

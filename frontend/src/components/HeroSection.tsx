@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useLocale } from 'next-intl';
 import { ArrowRight, ArrowLeft, Mic, Layers } from 'lucide-react';
 import { GoogleLogo, ByteDanceLogo, XAILogo } from './BrandLogos';
+import { trackCtaClick } from '../utils/gtm';
 
 export default function HeroSection() {
   const locale = useLocale();
@@ -13,6 +14,7 @@ export default function HeroSection() {
 
   const handleStartForFree = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
+    trackCtaClick('hero', isRtl ? 'ابدأ التجربة المجانية' : 'Start Your Free Trial');
     const target = document.querySelector('#tools');
     if (target) {
       const offset = 80;

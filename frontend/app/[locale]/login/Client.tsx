@@ -10,6 +10,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useAuthStore } from "../../../src/store/useAuthStore";
 import { GoogleLoginButton } from "../../../components/GoogleLoginButton";
 import { getCookie } from "../../../src/utils/getCookie";
+import { trackUserLogin } from "../../../src/utils/gtm";
 
 // ── Validation ──────────────────────────────────────────────────
 const validateEmail = (v: string) => {
@@ -154,7 +155,8 @@ export default function LoginPage() {
         console.warn("Fingerprint blocked or timed out, using fallback");
       }
 
-      await login({ email, password, deviceFingerprint: visitorId });
+      await login({ email, password, deviceFingerprint: visitorId } as any);
+      trackUserLogin(email, 'credentials');
       window.location.href = "/";
     } catch (err: any) {
       if (err.response?.data?.RequiresVerification) {

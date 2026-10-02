@@ -13,6 +13,7 @@ import { useRouter } from '@/i18n/routing';
 import { useAppStore } from '@/store/useAppStore';
 import CheckoutModal from '@/components/CheckoutModal';
 import { Plan } from '@/store/usePlansStore';
+import { trackViewPricing, trackBeginCheckout } from '../../../src/utils/gtm';
 
 export default function PricingPage() {
   const { plans, isLoading, error, fetchPlans } = usePlansStore();
@@ -25,7 +26,18 @@ export default function PricingPage() {
   const locale = useLocale();
   const isRtl = locale === 'ar';
 
+  useEffect(() => {
+    trackViewPricing('pricing_page');
+  }, []);
+
   const handleSelectPlan = (plan: Plan, curr: 'USD' | 'EGP') => {
+    trackBeginCheckout({
+      planId: String(plan.id),
+      planName: isRtl ? plan.nameAr : plan.name,
+      price: curr === 'USD' ? plan.priceUsd : plan.priceEgp,
+      currency: curr,
+      billingCycle: `${plan.durationDays} days`,
+    });
     if (!isAuthenticated && !user) {
       router.push(`/login?redirect=/pricing&planId=${plan.id}`);
       return;

@@ -11,6 +11,7 @@ import { useRouter } from "../../../src/i18n/routing";
 import { GoogleLoginButton } from "../../../components/GoogleLoginButton";
 import { useSearchParams } from "next/navigation";
 import { getCookie } from "../../../src/utils/getCookie";
+import { trackUserSignUp } from "../../../src/utils/gtm";
 
 // ── Validation helpers ──────────────────────────────────────────
 const validateName = (v: string) => {
@@ -191,7 +192,9 @@ export default function RegisterPage() {
         country: "Unknown",
         deviceFingerprint: visitorId,
         refCode: manualRefCode,
-      });
+      } as any);
+
+      trackUserSignUp(res.data?.user?.id || email, 'credentials');
 
       const freeTrialAssigned = res.data?.FreeTrialAssigned ?? false;
 

@@ -3,6 +3,7 @@
 import { GoogleLogin } from '@react-oauth/google';
 import { useRouter } from '../src/i18n/routing';
 import { useAuthStore } from '../src/store/useAuthStore';
+import { trackUserLogin } from '../src/utils/gtm';
 
 function GoogleLoginInner({ refCode }: { refCode?: string }) {
   const router = useRouter();
@@ -18,6 +19,7 @@ function GoogleLoginInner({ refCode }: { refCode?: string }) {
               token: credentialResponse.credential,
               refCode: refCode
             });
+            trackUserLogin('google_user', 'google');
             window.location.href = '/';
           } catch (error) {
             console.error("Login failed", error);

@@ -17,6 +17,14 @@ import { useRouter, Link } from "../../../../src/i18n/routing";
 import { ArrowLeft, ArrowRight, Wallet } from "lucide-react";
 import ToolInstructions from "../../../../components/ToolInstructions";
 import MediaTrimmer from "../../../../components/MediaTrimmer";
+import { 
+  trackToolView, 
+  trackToolGenerateStart, 
+  trackToolGenerateSuccess, 
+  trackToolGenerateError, 
+  trackToolDownload, 
+  trackInsufficientCredits 
+} from "../../../../src/utils/gtm";
 
 const LANGUAGES = [
   { code: 'auto', name: 'لغة الصوت الأصلية (Auto-Detect)' },
@@ -91,6 +99,11 @@ function VoiceToTextPage() {
   const t = useTranslations("VoiceToText");
   const locale = useLocale();
   const isRtl = locale === 'ar';
+
+  useEffect(() => {
+    trackToolView("voice-to-text", isRtl ? "تحويل الصوت إلى نص" : "Voice to Text");
+  }, [isRtl]);
+
   const { user, isAuthenticated, hasPhoneNumber, setUser, updateUser } = useAppStore();
   const router = useRouter();
   const ArrowIcon = locale === 'ar' ? ArrowRight : ArrowLeft;
@@ -166,13 +179,23 @@ function VoiceToTextPage() {
                 setResult(res.data.resultText || res.data.fileUrl || "");
                 setStage('done');
                 setCurrentTaskId(null);
+                trackToolGenerateSuccess({
+                  toolId: "voice-to-text",
+                  taskId: currentTaskId,
+                  durationSeconds: elapsedSeconds,
+                });
                 api.get("/api/auth/me").then(userRes => {
                   if (userRes.data) setUser(userRes.data);
                 }).catch(err => console.error(err));
               } else if (res.data.status === 'failed') {
-                setError(res.data.errorMessage || 'Operation failed');
+                const errMsg = res.data.errorMessage || 'Operation failed';
+                setError(errMsg);
                 setStage('error');
                 setCurrentTaskId(null);
+                trackToolGenerateError({
+                  toolId: "voice-to-text",
+                  errorMessage: errMsg,
+                });
               }
             }
           } catch(err) {
@@ -369,9 +392,20 @@ function VoiceToTextPage() {
       const totalCredits = (user?.standardCredits || 0) + (user?.premiumCredits || 0);
 
       if (totalCredits < cost) {
+        trackInsufficientCredits({
+          toolId: "voice-to-text",
+          requiredCredits: cost,
+          currentBalance: totalCredits
+        });
         setError(getInsufficientCreditsMsg());
         return;
       }
+
+      trackToolGenerateStart({
+        toolId: "voice-to-text",
+        duration: duration || undefined,
+        estimatedCredits: cost,
+      });
 
       // Stage 2: Upload
       let fileId = uploadedFileId;
@@ -405,16 +439,29 @@ function VoiceToTextPage() {
         // Fallback in case it's synchronous
         setResult(responseData.translated_text || responseData.original_text);
         setStage('done');
+        trackToolGenerateSuccess({
+          toolId: "voice-to-text",
+          durationSeconds: elapsedSeconds,
+        });
       }
-    } catch (err) {
-      setError(t('error'));
+    } catch (err: any) {
+      const errMsg = err?.response?.data?.error || t('error');
+      setError(errMsg);
       setStage('error');
+      trackToolGenerateError({
+        toolId: "voice-to-text",
+        errorMessage: errMsg,
+      });
     }
   };
 
   const copyText = () => navigator.clipboard.writeText(result);
 
   const downloadText = () => {
+    trackToolDownload({
+      toolId: "voice-to-text",
+      format: "txt",
+    });
     const element = document.createElement("a");
     const fileBlob = new Blob([result], { type: "text/plain" });
     element.href = URL.createObjectURL(fileBlob);
