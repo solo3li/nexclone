@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Key, Copy, Check, Eye, EyeOff, RefreshCw, Sparkles, Terminal,
-  Cpu, ShieldCheck, ExternalLink, HelpCircle, AlertTriangle, Layers, Video, Image as ImageIcon
+  Cpu, ShieldCheck, ExternalLink, HelpCircle, AlertTriangle, Layers, Video, Image as ImageIcon,
+  UploadCloud, Mic, Film, UserCheck, PlaySquare, Move
 } from "lucide-react";
 import api from "../../utils/api";
 
@@ -293,7 +294,7 @@ export default function ProfileMcp({ user, isRtl }: ProfileMcpProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 space-y-2">
             <div className="flex items-center gap-2 text-violet-400 font-semibold text-sm">
               <Video className="w-4 h-4" />
@@ -301,8 +302,32 @@ export default function ProfileMcp({ user, isRtl }: ProfileMcpProps) {
             </div>
             <p className="text-xs text-white/60 leading-relaxed">
               {isRtl
-                ? "توليد فيديوهات سينمائية بنماذج Google Veo 3.1 و ByteDance Seedance 2.0 و xAI Grok مع فحص الرصيد مسبقاً."
-                : "Generate cinematic videos with Veo 3.1, Seedance 2.0, or Grok with pre-flight credit check."}
+                ? "توليد فيديو سينمائي من نص بنماذج Google Veo و Seedance و Grok حتى 5000 حرف."
+                : "Generate cinematic videos with Veo, Seedance, or Grok up to 5000 chars."}
+            </p>
+          </div>
+
+          <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 space-y-2">
+            <div className="flex items-center gap-2 text-indigo-400 font-semibold text-sm">
+              <Film className="w-4 h-4" />
+              <span>image_to_video</span>
+            </div>
+            <p className="text-xs text-white/60 leading-relaxed">
+              {isRtl
+                ? "تحريك أي صورة إلى فيديو (يقبل رابط صورة مباشر أو Base64) مع تخصيص الحركة."
+                : "Animate image to video via direct URL or Base64 with custom motion."}
+            </p>
+          </div>
+
+          <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 space-y-2">
+            <div className="flex items-center gap-2 text-fuchsia-400 font-semibold text-sm">
+              <Layers className="w-4 h-4" />
+              <span>reference_to_video</span>
+            </div>
+            <p className="text-xs text-white/60 leading-relaxed">
+              {isRtl
+                ? "توليد فيديو مشروط بصور مرجعية متعددة (روابط أو Base64) للحفاظ على الشخصيات."
+                : "Generate videos conditioned on reference images for character consistency."}
             </p>
           </div>
 
@@ -313,8 +338,80 @@ export default function ProfileMcp({ user, isRtl }: ProfileMcpProps) {
             </div>
             <p className="text-xs text-white/60 leading-relaxed">
               {isRtl
-                ? "توليد صور بدقة فائقة بنموذج Grok Imagine مع فحص الرصيد وتحديد الأبعاد المناسبة."
-                : "Generate ultra high-res images with Grok Imagine with pre-flight credit checks."}
+                ? "توليد صور بدقة فائقة بنموذج Grok Imagine أو Flux Pro بمختلف المقاسات."
+                : "Generate ultra high-res images with Grok Imagine or Flux Pro."}
+            </p>
+          </div>
+
+          <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 space-y-2">
+            <div className="flex items-center gap-2 text-emerald-400 font-semibold text-sm">
+              <Mic className="w-4 h-4" />
+              <span>generate_voice</span>
+            </div>
+            <p className="text-xs text-white/60 leading-relaxed">
+              {isRtl
+                ? "تحويل النص إلى صوت بشري واقعي بمختلف اللهجات والتحكم بنبرة المشاعر."
+                : "Natural human Text-to-Speech (TTS) with emotion and style control."}
+            </p>
+          </div>
+
+          <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 space-y-2">
+            <div className="flex items-center gap-2 text-teal-400 font-semibold text-sm">
+              <Terminal className="w-4 h-4" />
+              <span>transcribe_audio</span>
+            </div>
+            <p className="text-xs text-white/60 leading-relaxed">
+              {isRtl
+                ? "تفريغ الصوت إلى نصوص (STT) بدقة عالية مع خيار الترجمة التلقائية."
+                : "Voice-to-Text transcription with optional multi-language translation."}
+            </p>
+          </div>
+
+          <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 space-y-2">
+            <div className="flex items-center gap-2 text-blue-400 font-semibold text-sm">
+              <UserCheck className="w-4 h-4" />
+              <span>avatar_to_video</span>
+            </div>
+            <p className="text-xs text-white/60 leading-relaxed">
+              {isRtl
+                ? "توليد أفاتار متكلم فوتوريلستيك من صورة شخصية وملف صوتي عبر Kling Avatar."
+                : "Generate speaking portrait avatars from image & audio via Kling Avatar."}
+            </p>
+          </div>
+
+          <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 space-y-2">
+            <div className="flex items-center gap-2 text-rose-400 font-semibold text-sm">
+              <PlaySquare className="w-4 h-4" />
+              <span>lip_sync</span>
+            </div>
+            <p className="text-xs text-white/60 leading-relaxed">
+              {isRtl
+                ? "مزامنة حركة الشفاه بين فيديو وملف صوتي خارجي عبر Vidu LipSync."
+                : "Advanced lip-sync synchronization between video and speech audio."}
+            </p>
+          </div>
+
+          <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 space-y-2">
+            <div className="flex items-center gap-2 text-orange-400 font-semibold text-sm">
+              <Move className="w-4 h-4" />
+              <span>motion_control</span>
+            </div>
+            <p className="text-xs text-white/60 leading-relaxed">
+              {isRtl
+                ? "نقل ومحاكاة الحركة من فيديو إلى شخصية جديدة عبر Kling Motion Control."
+                : "Transfer movement and dance from source video to a character image."}
+            </p>
+          </div>
+
+          <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 space-y-2">
+            <div className="flex items-center gap-2 text-yellow-400 font-semibold text-sm">
+              <UploadCloud className="w-4 h-4" />
+              <span>upload_media</span>
+            </div>
+            <p className="text-xs text-white/60 leading-relaxed">
+              {isRtl
+                ? "رفع أي ملف (صور، صوت، فيديو) بصيغة Base64 والحصول على رابط سحابي معتمد."
+                : "Upload any image, audio, or video via Base64 and get a cloud media_url."}
             </p>
           </div>
 
@@ -325,8 +422,8 @@ export default function ProfileMcp({ user, isRtl }: ProfileMcpProps) {
             </div>
             <p className="text-xs text-white/60 leading-relaxed">
               {isRtl
-                ? "استعلام مباشر عن رصيد الكريدت القياسي والمميز وتفاصيل خطة الاشتراك الحالية."
-                : "Real-time query for standard credits, premium credits, and active plan details."}
+                ? "استعلام مباشر عن رصيد الكريدت القياسي والمميز وتفاصيل خطة الاشتراك."
+                : "Real-time query for credits balance and active subscription plan."}
             </p>
           </div>
 
@@ -337,8 +434,8 @@ export default function ProfileMcp({ user, isRtl }: ProfileMcpProps) {
             </div>
             <p className="text-xs text-white/60 leading-relaxed">
               {isRtl
-                ? "متابعة تقدم المهمة برقم الـ Task ID وجلب رابط التحميل المباشر للنتيجة فور انتهائها."
-                : "Poll task progress via Task ID and fetch the direct downloadable result URL."}
+                ? "متابعة تقدم المهمة برقم الـ Task ID وجلب رابط التحميل المباشر للنتيجة."
+                : "Poll task progress via Task ID and fetch the direct result URL."}
             </p>
           </div>
         </div>
