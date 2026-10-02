@@ -165,6 +165,7 @@ namespace NexClone.Backend.API.Controllers.AI
         }
 
         [HttpGet("sse")]
+        [HttpGet("")]
         public async Task GetSse()
         {
             var userId = await AuthenticateApiKeyAsync();
@@ -195,8 +196,21 @@ namespace NexClone.Backend.API.Controllers.AI
 
             try
             {
-                // Send endpoint event as per MCP SSE specification
-                string endpointUrl = $"/api/mcp/messages?sessionId={sessionId}";
+                // Send endpoint event as per MCP SSE specification with absolute URL
+                string scheme = Request.Headers.TryGetValue("X-Forwarded-Proto", out var proto) && !string.IsNullOrWhiteSpace(proto)
+                    ? proto.ToString()
+                    : Request.Scheme;
+                string host = Request.Headers.TryGetValue("X-Forwarded-Host", out var fHost) && !string.IsNullOrWhiteSpace(fHost)
+                    ? fHost.ToString()
+                    : (Request.Headers.TryGetValue("Host", out var h) && !string.IsNullOrWhiteSpace(h) ? h.ToString() : Request.Host.ToString());
+
+                if (string.IsNullOrWhiteSpace(host) || host.Contains("localhost") || host.Contains("nexclone") || host.Contains("127.0.0.1"))
+                {
+                    host = "nexmediaai.com";
+                    scheme = "https";
+                }
+
+                string endpointUrl = $"{scheme}://{host}/api/mcp/messages?sessionId={sessionId}";
                 await session.SendEventAsync("endpoint", endpointUrl);
 
                 // Keep connection open
@@ -213,6 +227,20 @@ namespace NexClone.Backend.API.Controllers.AI
             {
                 _sessions.TryRemove(sessionId, out _);
             }
+        }
+
+        [HttpOptions("sse")]
+        [HttpOptions("messages")]
+        [HttpOptions("")]
+        public IActionResult HandleOptions()
+        {
+            return Ok();
+        }
+
+        [HttpGet("messages")]
+        public IActionResult GetMessagesPing()
+        {
+            return Ok(new { status = "active", server = "NexMedia AI MCP Server" });
         }
 
         [HttpPost("upload")]
@@ -248,11 +276,35 @@ namespace NexClone.Backend.API.Controllers.AI
         }
 
         [HttpPost("messages")]
-        public async Task<IActionResult> HandleMessage([FromQuery] string sessionId)
+        [HttpPost("sse")]
+        [HttpPost("")]
+        public async Task<IActionResult> HandleMessage([FromQuery] string? sessionId)
         {
-            if (string.IsNullOrEmpty(sessionId) || !_sessions.TryGetValue(sessionId, out var session))
+            McpSession? session = null;
+            Guid? userId = null;
+
+            // 1. Try finding session if sessionId provided in query or header
+            sessionId ??= Request.Headers["mcp-session-id"].FirstOrDefault()
+                       ?? Request.Headers["Mcp-Session-Id"].FirstOrDefault();
+
+            if (!string.IsNullOrEmpty(sessionId) && _sessions.TryGetValue(sessionId, out session))
             {
-                return NotFound(new { error = "Session not found or expired" });
+                userId = session.UserId;
+            }
+
+            // 2. Fallback to API Key authentication (stateless HTTP MCP / Streamable HTTP)
+            if (!userId.HasValue)
+            {
+                userId = await AuthenticateApiKeyAsync();
+            }
+
+            if (!userId.HasValue)
+            {
+                return Unauthorized(new
+                {
+                    jsonrpc = "2.0",
+                    error = new { code = -32001, message = "Unauthorized: Invalid or missing API Key" }
+                });
             }
 
             using var reader = new StreamReader(Request.Body);
@@ -262,10 +314,18 @@ namespace NexClone.Backend.API.Controllers.AI
             using var doc = JsonDocument.Parse(requestBody);
             var root = doc.RootElement;
 
-            string? id = null;
+            object? id = null;
             if (root.TryGetProperty("id", out var idProp))
             {
-                id = idProp.ToString();
+                if (idProp.ValueKind == JsonValueKind.Number)
+                {
+                    if (idProp.TryGetInt64(out var idInt)) id = idInt;
+                    else if (idProp.TryGetDouble(out var idDbl)) id = idDbl;
+                }
+                else if (idProp.ValueKind == JsonValueKind.String)
+                {
+                    id = idProp.GetString();
+                }
             }
 
             string method = root.TryGetProperty("method", out var mProp) ? mProp.GetString() ?? "" : "";
@@ -293,7 +353,7 @@ namespace NexClone.Backend.API.Controllers.AI
                     break;
 
                 case "notifications/initialized":
-                    return Accepted();
+                    return Ok();
 
                 case "ping":
                     responseResult = new { };
@@ -541,7 +601,7 @@ namespace NexClone.Backend.API.Controllers.AI
                     break;
 
                 case "tools/call":
-                    var (res, err) = await HandleToolCallAsync(session.UserId, paramsElem);
+                    var (res, err) = await HandleToolCallAsync(userId.Value, paramsElem);
                     responseResult = res;
                     responseError = err;
                     break;
@@ -561,8 +621,15 @@ namespace NexClone.Backend.API.Controllers.AI
 
             string responseJson = JsonSerializer.Serialize(rpcResponse, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
 
-            // Send via SSE
-            await session.SendEventAsync("message", responseJson);
+            // Send via SSE if connected
+            if (session != null)
+            {
+                try
+                {
+                    await session.SendEventAsync("message", responseJson);
+                }
+                catch { }
+            }
 
             // Also return in HTTP POST body
             return Content(responseJson, "application/json");
